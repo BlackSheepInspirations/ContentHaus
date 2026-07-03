@@ -1,0 +1,26 @@
+{% comment %}
+  The AI Creator's Prompt Haus — main tool section.
+  Access control (customer.tags gate) lands in Section 6 Step 6 of the build
+  order — intentionally not wired yet so Character Mode can be reviewed on
+  its own first.
+{% endcomment %}
+
+<div id="prompt-haus-app" data-section-id="{{ section.id }}"></div>
+
+{{ 'prompt-builder.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'prompt-builder-styledna.js' | asset_url }}" defer="defer"></script>
+<script src="{{ 'prompt-builder-engine.js' | asset_url }}" defer="defer"></script>
+<script src="{{ 'prompt-builder-character.js' | asset_url }}" defer="defer"></script>
+<script src="{{ 'prompt-builder-ui.js' | asset_url }}" defer="defer"></script>
+
+{% schema %}
+{
+  "name": "Prompt Haus Builder",
+  "settings": [],
+  "presets": [
+    {
+      "name": "Prompt Haus Builder"
+    }
+  ]
+}
+{% endschema %}

@@ -15,11 +15,17 @@
 
   // Field logic (Section 4): if includeInPrompt, use customValue when
   // non-empty, else the dropdown value; otherwise exclude entirely.
+  // "none" is a sentinel several option lists use as their neutral default
+  // (Section 7: defaults are "Select..." / "None," never pre-picked values)
+  // so it resolves to empty exactly like an unselected field — it should
+  // never appear as a literal word in the assembled prompt.
   function resolveFieldValue(field) {
     if (!field || field.includeInPrompt === false) return "";
     var custom = (field.customValue || "").trim();
     if (custom) return custom;
-    return (field.value || "").trim();
+    var value = (field.value || "").trim();
+    if (value.toLowerCase() === "none") return "";
+    return value;
   }
 
   // entries: [{ label, field }] -> [{ label, value }], empties dropped

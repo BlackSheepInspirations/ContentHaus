@@ -1,0 +1,445 @@
+/**
+ * The AI Creator's Prompt Haus — Character Mode
+ * Depends on prompt-builder-styledna.js and prompt-builder-engine.js.
+ *
+ * Base Type toggle (Human / Animal-Mascot) swaps which Identity field set
+ * is active; Appearance/Styling/Presentation/Extras are shared regardless
+ * of base type. Companion is a separate opt-in sub-panel.
+ */
+(function () {
+  "use strict";
+
+  window.PromptHaus = window.PromptHaus || {};
+  var PromptHaus = window.PromptHaus;
+  var makeField = PromptHaus.util.makeField;
+
+  // ---------------------------------------------------------------------
+  // Option lists (verbatim from the build plan, Section 3)
+  // ---------------------------------------------------------------------
+  var CARTOON_TYPE_OPTIONS = [
+    "signature exaggerated chibi", "cartoon style illustration", "glossy 3d chibi",
+    "ultra airbrushed urban", "luxury crochet amigurumi", "hyper-real cartoon",
+    "soft spiritual glow", "18k digital illustration", "gouache mixed with watercolor",
+    "cgi caricature", "hyper realistic illustration", "bratz-inspired",
+    "hyper realistic bratz doll", "chibi mixed with bratz", "semi realism 4k bratz style",
+    "hand-drawn cartoon", "high gloss chibi", "glossy 3d chibi illustration",
+    "anime style illustration", "pixar 3d render", "retro vintage cartoon",
+    "comic book style", "luxury glam chibi", "pixel art",
+  ];
+  var ART_FINISH_OPTIONS = [
+    "high gloss illustration", "soft airbrushed shine", "cell-shaded gloss",
+    "ultra polished digital paint", "candy-coated finish", "silky poster finish", "glossy",
+  ];
+
+  var ETHNICITY_OPTIONS = [
+    "black", "east asian", "south asian", "southeast asian", "latino", "middle eastern",
+    "white", "mixed heritage", "afro-latina", "mexican", "mixed ethnicity",
+  ];
+  var SKIN_TONE_OPTIONS = [
+    "caramel", "porcelain", "fair", "warm ivory", "olive", "golden beige",
+    "honey brown", "deep brown", "rich espresso",
+  ];
+  var HUMAN_AGE_GROUP_OPTIONS = ["baby", "child", "teen", "young adult", "middle aged", "mature"];
+  var HUMAN_GENDER_OPTIONS = ["female", "male"];
+  var HEIGHT_OPTIONS = ["short", "average height", "tall", "super tall"];
+  var HUMAN_BODY_TYPE_OPTIONS = [
+    "slim", "athletic", "curvy", "plus-size", "muscular", "petite", "tall and lean",
+    "toned", "chubby", "small and cute", "tiny", "short and stocky", "lanky", "round and soft",
+  ];
+  var OCCUPATION_NICHE_OPTIONS = [
+    "none", "nurse", "teacher", "firefighter", "police officer", "doctor", "military/veteran",
+    "pastor/clergy", "first responder/EMT", "small business owner", "chef", "artist/creative",
+    "realtor", "veterinarian", "coach",
+  ];
+
+  var SPECIES_OPTIONS = [
+    "sheep", "lion", "tiger", "bear", "wolf", "eagle", "hawk", "falcon", "panther",
+    "jaguar", "bulldog", "husky", "fox", "owl", "raven", "ram", "bull", "shark",
+    "dolphin", "dragon (mythical)", "phoenix (mythical)", "unicorn (mythical)",
+    "panda", "koala", "rabbit/bunny",
+  ];
+  var FUR_FEATHER_SCALE_TEXTURE_OPTIONS = [
+    "soft charcoal wool", "fluffy cream fur", "sleek short fur", "curly wool", "silky feathers",
+    "glossy scales", "plush teddy texture", "shaggy fur", "velvet-soft fur",
+  ];
+  var ANIMAL_AGE_GROUP_OPTIONS = ["baby", "young", "adult", "elder"];
+  var ANIMAL_GENDER_OPTIONS = ["female", "male", "gender-neutral"];
+  var ANIMAL_BODY_TYPE_OPTIONS = [
+    "small fluffy rounded body", "slim", "chubby", "petite", "sturdy", "round and soft",
+  ];
+
+  var HAIR_COLOR_OPTIONS = [
+    "glossy jet black", "dark brown", "brunette", "honey blonde", "platinum blonde",
+    "ginger", "red", "silver", "rich auburn", "pink/purple streaks", "pink ombre",
+    "rose pink", "silver lavender", "peach ombre", "icy blue", "mint teal",
+  ];
+  var HAIR_STYLE_OPTIONS = [
+    "long straight", "curly", "loose wave", "body wave", "messy bun", "side ponytail",
+    "cornrows", "knotless braids", "blunt bob", "bald", "space buns", "pixie cut",
+    "half up half down", "voluminous curls", "high ponytail", "tight curls", "big afro",
+    "side ponytail with baby hairs", "messy bun with baby hairs", "braided ponytail",
+    "senegalese twists", "sleek high bun with baby hairs", "90s finger waves", "mohawk",
+    "bantu knots", "short dramatic curls", "braided updo", "middle-part curly puff buns",
+    "deep side-part flipped bob", "straight-back feed-in stitch braids", "rope twist bob locs",
+    "long boho braids", "velcro roller blowout set", "caesar haircut", "buzzcut",
+    "low cut with deep waves", "hightop fade", "360 waves", "man bun", "gumby high top",
+  ];
+  var EYE_COLOR_OPTIONS = ["brown eyes", "blue eyes", "green eyes", "hazel eyes", "gray eyes", "amber eyes"];
+  var EXPRESSION_OPTIONS = ["none", "smiling", "confident", "curious", "playful", "serious", "surprised"];
+  var FACIAL_FEATURES_OPTIONS = [
+    "none", "freckles", "dimples", "beauty mark", "glasses", "full lips", "high cheekbones",
+    "button nose", "sharp jawline", "vitiligo", "burn mark", "ultra defined brows",
+  ];
+  var EYE_SIZE_SHAPE_OPTIONS = [
+    "large expressive", "huge exaggerated", "signature", "almond shaped", "soft rounded",
+    "narrow fierce", "natural proportion",
+  ];
+  var LASH_INTENSITY_OPTIONS = [
+    "natural lashes", "long defined", "dramatic volume", "extra-long glam",
+    "ultra-dramatic doll lashes", "extra long fluffy lashes",
+  ];
+  var LIP_STYLE_OPTIONS = [
+    "natural matte", "soft gloss", "plump glossy", "overlined glam", "extra-full high-gloss",
+    "bold red lip", "ombre lip",
+  ];
+  var EXTRA_GLAM_DETAILS_OPTIONS = [
+    "face gems", "under-eye sparkle", "metallic eyeliner", "rhinestone accents", "body glitter",
+  ];
+
+  var OUTFIT_OPTIONS = [
+    "glam streetwear", "hoodie and sweatpants", "designer top with denim jeans",
+    "sparkly mini dress", "tracksuit", "business attire", "oversized cozy sweater with leggings",
+    "leather jacket with ripped jeans", "t-shirt with dark jeans", "crop top with cargo pants",
+    "satin pajama set", "bomber jacket with joggers", "tuxedo", "baseball jersey",
+    "basketball jersey", "puffer coat with jeans", "tank top with baggy jeans", "cute onesie",
+    "colorful romper", "overalls with t-shirt", "tutu dress", "superhero costume",
+    "princess dress", "denim jacket with shorts", "striped shirt with leggings",
+    "dinosaur pajamas", "rainbow hoodie", "animal print dress", "dungarees",
+    "sequined cocktail dress", "velvet bodycon dress", "silk slip dress with blazer",
+    "distressed boyfriend jeans with graphic tee", "linen button-up with chino shorts",
+    "oversized denim jacket with sundress",
+  ];
+  var SHOES_OPTIONS = [
+    "nike sneakers", "fuzzy slippers", "stiletto heels", "timberland boots", "rain boots",
+    "lace up sneakers", "high top sneakers", "air max sneakers", "jordan sneakers",
+    "dressy shoes", "open toe sandals", "blinged heels", "ugg boots", "just socks",
+    "barefoot", "light-up sneakers", "velcro strap shoes", "mary jane shoes",
+    "cowboy boots", "platform sneakers",
+  ];
+  var MAKEUP_OPTIONS = [
+    "natural", "glam bold lips", "smokey eye", "glittery eyeshadow", "winged eyeliner",
+    "no makeup", "cut crease", "graphic liner", "glossy dewy skin", "matte full coverage",
+    "soft pink blush", "contoured cheekbones", "dramatic cat eye", "nude lips with highlight",
+    "bold colored eyeliner", "glitter lip gloss", "bronzed sun-kissed glow", "faux freckles",
+    "tiny beauty mark near the mouth", "dramatic black eyeliner", "glowing highlighted cheeks",
+    "sculpted nose highlight",
+  ];
+  var NAILS_OPTIONS = [
+    "short length natural", "long length coffin", "medium length french tip", "stiletto",
+    "almond", "french tip", "chrome glam", "rhinestone luxury",
+  ];
+  var BEARD_OPTIONS = ["clean-shaven", "stubble", "boxed beard", "full beard", "goatee", "long groomed"];
+  var ACCESSORIES_OPTIONS = [
+    "oversized sunglasses", "gold hoop earrings", "designer handbag", "fitted cap",
+    "chunky necklace", "headphones", "beanie", "smartwatch", "crossbody bag", "backpack",
+    "bucket hat", "diamond grillz", "scarf", "belt bag", "tote bag", "clutch purse",
+    "durag", "hair bow", "clear glasses", "laptop",
+  ];
+  var SPECIAL_NEEDS_OPTIONS = [
+    "none", "wheelchair", "crutches", "cane", "hearing aid", "cochlear implant", "bifocals",
+    "prosthetic limb", "white cane for vision", "service dog", "mobility walker",
+    "braces on teeth", "leg brace", "arm cast", "oxygen tank",
+  ];
+  var JEWELRY_OPTIONS = [
+    "chunky gold chains", "delicate necklaces", "statement earrings", "multiple rings",
+    "anklets", "body chains", "diamond studs", "diamond chain", "thick cuban link chain",
+    "layered bracelets", "choker necklace", "pendant necklace", "nose ring",
+  ];
+  var TATTOOS_OPTIONS = [
+    "none", "face tattoos", "neck tattoos", "arm sleeve tattoos", "minimalist line tattoos",
+    "chest tattoos", "hand tattoos", "leg tattoos", "back tattoos", "tribal tattoos",
+    "floral tattoos", "geometric tattoos",
+  ];
+  var CROWN_HEAD_EFFECTS_OPTIONS = [
+    "none", "neon halo with drips", "angel halo", "flower crown", "golden crown",
+    "diamond tiara", "pink tiara", "butterfly clips", "bandana headband", "jeweled headpiece",
+    "bow headband", "star crown",
+  ];
+
+  var POSE_OPTIONS = [
+    "standing pose", "action pose", "waving", "arms crossed", "sitting pose", "jumping",
+    "blowing a kiss", "kneeling down", "taking a selfie", "throwing up the peace sign",
+    "kneeling in prayer", "praying", "lifting hands in praise",
+  ];
+  var BACKGROUND_OPTIONS = [
+    "solid white background", "transparent background png", "soft pastel gradient",
+    "dreamy cloud scene", "sparkly confetti effect", "heart-filled backdrop", "rainbow gradient",
+    "marble texture", "floral garden scene", "starry night sky", "candy-colored polka dots",
+    "soft glitter fade",
+  ];
+  var DYNAMIC_SCENE_EFFECT_OPTIONS = [
+    "floating in clouds", "emerging from splash", "surrounded by sparkles",
+    "hair blowing in wind", "money flying around", "neon glow aura", "soft angelic light",
+    "energy burst explosion",
+  ];
+  var TIME_ERA_OPTIONS = [
+    "modern day", "90s hip-hop", "90s Y2K", "1920s art deco", "1970s groovy", "1980s neon",
+    "futuristic cyberpunk", "medieval fantasy", "victorian steampunk", "retro 50s", "1960s glam",
+  ];
+  var CAMERA_ANGLE_OPTIONS = [
+    "front view", "side profile", "three-quarter view", "low angle shot", "high angle shot",
+    "bird's eye view", "worm's eye view", "over the shoulder", "close-up portrait",
+    "full body shot", "dutch angle", "extreme close-up",
+  ];
+  var LIGHTING_EFFECTS_OPTIONS = [
+    "studio lighting", "golden hour glow", "soft diffused light", "dramatic shadows",
+    "rim lighting", "neon glow", "candlelight", "sunlight through window", "moonlight",
+    "stage lighting", "holographic light", "bioluminescent glow", "underlit glow",
+    "backlit silhouette", "cool blue tones", "warm amber tones",
+  ];
+  var FRAMING_OPTIONS = [
+    "no frame", "simple frame border", "ornate decorative frame", "modern minimalist frame",
+    "vintage wooden frame", "gold gilded frame", "rose gold frame", "polaroid style frame",
+    "film strip border", "comic book panel frame", "glowing neon frame", "holographic frame",
+    "diamond encrusted frame", "floral wreath frame", "abstract geometric frame",
+    "shadow frame with depth",
+  ];
+
+  var FANTASY_ELEMENTS_OPTIONS = [
+    "fairy wings", "angel wings", "phoenix wings", "bat wings", "dragon wings",
+    "magical aura", "glowing energy", "floating sparkles", "mystical symbols", "elemental powers",
+  ];
+  var PROPS_OPTIONS = [
+    "magic wand", "sword", "staff", "microphone", "guitar", "skateboard", "basketball",
+    "books", "pretty keychain", "phone", "shopping bags", "coffee cup", "balloon",
+    "flowers", "gift box",
+  ];
+  var COSPLAY_CHARACTER_OPTIONS = [
+    "none", "anime character", "superhero", "video game character", "disney princess",
+    "fantasy creature", "sci-fi character", "movie villain", "historical figure",
+    "pop culture icon", "manga character", "cosplay inspired", "pirate", "mermaid",
+    "cowboy", "cowgirl", "rapper", "singer", "astronaut", "chef", "pilot",
+  ];
+
+  var COMPANION_SPECIES_OPTIONS = [
+    "fluffy puppy", "big dog", "playful kitten", "bunny rabbit", "hamster", "bird on shoulder",
+    "tiny dragon", "magical unicorn", "baby panda", "teddy bear", "guinea pig", "ferret",
+    "baby fox", "baby raccoon", "hedgehog", "parrot",
+  ];
+  var COMPANION_POSITION_OPTIONS = ["in purse", "on leash", "in arms", "on shoulder", "perched nearby", "sitting beside"];
+  var COMPANION_ACCESSORIES_OPTIONS = ["collar", "bandana", "tiny bow", "tiny purse", "none"];
+
+  // Field-name -> display-label maps, used by both the UI renderer and the
+  // flattened field-entry list so labels never drift from field names.
+  var IDENTITY_LABELS = {
+    humanIdentity: {
+      ethnicity: "Ethnicity", skinTone: "Skin Tone", ageGroup: "Age Group", gender: "Gender",
+      height: "Height", bodyType: "Body Type", occupationNiche: "Occupation / Niche",
+    },
+    animalIdentity: {
+      species: "Species", furFeatherScaleTexture: "Fur / Feather / Scale Texture",
+      ageGroup: "Age Group", gender: "Gender", height: "Height", bodyType: "Body Type",
+      occupationNiche: "Occupation / Niche",
+    },
+  };
+  var APPEARANCE_LABELS = {
+    hairColor: "Hair Color", hairStyle: "Hair Style", eyeColor: "Eye Color",
+    expression: "Expression", facialFeatures: "Facial Features", eyeSizeShape: "Eye Size/Shape",
+    lashIntensity: "Lash Intensity", lipStyle: "Lip Style", extraGlamDetails: "Extra Glam Details",
+  };
+  var STYLING_LABELS = {
+    outfit: "Outfit", shoes: "Shoes", makeup: "Makeup", nails: "Nails", beard: "Beard",
+    accessories: "Accessories", specialNeeds: "Special Needs", jewelry: "Jewelry",
+    tattoos: "Tattoos", crownHeadEffects: "Crown / Head Effects",
+  };
+  var PRESENTATION_LABELS = {
+    pose: "Pose", background: "Background", dynamicSceneEffect: "Dynamic Scene Effect",
+    timeEra: "Time / Era", cameraAngle: "Camera Angle", lightingEffects: "Lighting Effects",
+    framing: "Framing",
+  };
+  var EXTRAS_LABELS = {
+    fantasyElements: "Fantasy Elements", props: "Props", cosplayCharacter: "Cosplay Character",
+  };
+
+  // ---------------------------------------------------------------------
+  // State
+  // ---------------------------------------------------------------------
+  function buildInitialState(baseType) {
+    return {
+      baseType: baseType || "human",
+      style: {
+        cartoonType: makeField("", CARTOON_TYPE_OPTIONS),
+        artFinish: makeField("", ART_FINISH_OPTIONS),
+      },
+      humanIdentity: {
+        ethnicity: makeField("", ETHNICITY_OPTIONS),
+        skinTone: makeField("", SKIN_TONE_OPTIONS),
+        ageGroup: makeField("", HUMAN_AGE_GROUP_OPTIONS),
+        gender: makeField("", HUMAN_GENDER_OPTIONS),
+        height: makeField("", HEIGHT_OPTIONS),
+        bodyType: makeField("", HUMAN_BODY_TYPE_OPTIONS),
+        occupationNiche: makeField("none", OCCUPATION_NICHE_OPTIONS),
+      },
+      animalIdentity: {
+        species: makeField("sheep", SPECIES_OPTIONS),
+        furFeatherScaleTexture: makeField("", FUR_FEATHER_SCALE_TEXTURE_OPTIONS),
+        ageGroup: makeField("", ANIMAL_AGE_GROUP_OPTIONS),
+        gender: makeField("", ANIMAL_GENDER_OPTIONS),
+        height: makeField("", HEIGHT_OPTIONS),
+        bodyType: makeField("", ANIMAL_BODY_TYPE_OPTIONS),
+        occupationNiche: makeField("none", OCCUPATION_NICHE_OPTIONS),
+      },
+      appearance: {
+        hairColor: makeField("", HAIR_COLOR_OPTIONS),
+        hairStyle: makeField("", HAIR_STYLE_OPTIONS),
+        eyeColor: makeField("", EYE_COLOR_OPTIONS),
+        expression: makeField("none", EXPRESSION_OPTIONS),
+        facialFeatures: makeField("none", FACIAL_FEATURES_OPTIONS),
+        eyeSizeShape: makeField("", EYE_SIZE_SHAPE_OPTIONS),
+        lashIntensity: makeField("", LASH_INTENSITY_OPTIONS),
+        lipStyle: makeField("", LIP_STYLE_OPTIONS),
+        extraGlamDetails: makeField("", EXTRA_GLAM_DETAILS_OPTIONS),
+      },
+      styling: {
+        outfit: makeField("", OUTFIT_OPTIONS),
+        shoes: makeField("", SHOES_OPTIONS),
+        makeup: makeField("", MAKEUP_OPTIONS),
+        nails: makeField("", NAILS_OPTIONS),
+        beard: makeField("", BEARD_OPTIONS),
+        accessories: makeField("", ACCESSORIES_OPTIONS),
+        specialNeeds: makeField("none", SPECIAL_NEEDS_OPTIONS),
+        jewelry: makeField("", JEWELRY_OPTIONS),
+        tattoos: makeField("none", TATTOOS_OPTIONS),
+        crownHeadEffects: makeField("none", CROWN_HEAD_EFFECTS_OPTIONS),
+      },
+      presentation: {
+        pose: makeField("", POSE_OPTIONS),
+        background: makeField("", BACKGROUND_OPTIONS),
+        dynamicSceneEffect: makeField("", DYNAMIC_SCENE_EFFECT_OPTIONS),
+        timeEra: makeField("", TIME_ERA_OPTIONS),
+        cameraAngle: makeField("", CAMERA_ANGLE_OPTIONS),
+        lightingEffects: makeField("", LIGHTING_EFFECTS_OPTIONS),
+        framing: makeField("no frame", FRAMING_OPTIONS),
+      },
+      extras: {
+        fantasyElements: makeField("", FANTASY_ELEMENTS_OPTIONS),
+        props: makeField("", PROPS_OPTIONS),
+        cosplayCharacter: makeField("none", COSPLAY_CHARACTER_OPTIONS),
+      },
+      companion: {
+        include: false,
+        species: makeField("", COMPANION_SPECIES_OPTIONS),
+        position: makeField("", COMPANION_POSITION_OPTIONS),
+        accessories: makeField("none", COMPANION_ACCESSORIES_OPTIONS),
+      },
+    };
+  }
+
+  var store = PromptHaus.util.createStore(buildInitialState());
+
+  function setBaseType(newBaseType) {
+    store.setState({ baseType: newBaseType });
+  }
+
+  function updateNestedField(groupName, fieldName, changes) {
+    var state = store.getState();
+    var group = state[groupName];
+    var newGroup = Object.assign({}, group);
+    newGroup[fieldName] = Object.assign({}, group[fieldName], changes);
+    var patch = {};
+    patch[groupName] = newGroup;
+    store.setState(patch);
+  }
+
+  function toggleCompanionInclude(include) {
+    var state = store.getState();
+    store.setState({ companion: Object.assign({}, state.companion, { include: include }) });
+  }
+
+  // Flattened, active-baseType-aware field list. Both the UI renderer and
+  // the prompt assembler read from this so they can never drift apart.
+  function getActiveFieldEntries() {
+    var state = store.getState();
+    var identityGroup = state.baseType === "animalMascot" ? "animalIdentity" : "humanIdentity";
+    var entries = [];
+
+    function pushGroup(groupName, labels) {
+      var group = state[groupName];
+      Object.keys(labels).forEach(function (fieldName) {
+        entries.push({
+          groupName: groupName,
+          fieldName: fieldName,
+          label: labels[fieldName],
+          field: group[fieldName],
+        });
+      });
+    }
+
+    pushGroup("style", { cartoonType: "Cartoon Type", artFinish: "Art Finish" });
+    pushGroup(identityGroup, IDENTITY_LABELS[identityGroup]);
+    pushGroup("appearance", APPEARANCE_LABELS);
+    pushGroup("styling", STYLING_LABELS);
+    pushGroup("presentation", PRESENTATION_LABELS);
+    pushGroup("extras", EXTRAS_LABELS);
+
+    if (state.companion.include) {
+      entries.push({ groupName: "companion", fieldName: "species", label: "Companion", field: state.companion.species });
+      entries.push({ groupName: "companion", fieldName: "position", label: "Companion Position", field: state.companion.position });
+      entries.push({ groupName: "companion", fieldName: "accessories", label: "Companion Accessories", field: state.companion.accessories });
+    }
+
+    return entries;
+  }
+
+  function assemblePrompt() {
+    var entries = getActiveFieldEntries().map(function (e) {
+      return { label: e.label, field: e.field };
+    });
+    return PromptHaus.engine.buildSentence({
+      intro: "Create 4 variations of a clean, professional character portrait of a",
+      fieldEntries: entries,
+    });
+  }
+
+  function randomize() {
+    getActiveFieldEntries().forEach(function (e) {
+      if (!e.field.includeInPrompt) return;
+      var options = e.field.options || [];
+      if (!options.length) return;
+      var randomValue = options[Math.floor(Math.random() * options.length)];
+      if (e.groupName === "companion") {
+        var companionState = store.getState().companion;
+        var patch = {};
+        patch[e.fieldName] = Object.assign({}, companionState[e.fieldName], {
+          value: randomValue,
+          customValue: "",
+        });
+        store.setState({ companion: Object.assign({}, companionState, patch) });
+      } else {
+        updateNestedField(e.groupName, e.fieldName, { value: randomValue, customValue: "" });
+      }
+    });
+  }
+
+  function reset() {
+    store.setState(buildInitialState(store.getState().baseType));
+  }
+
+  PromptHaus.character = Object.assign({}, store, {
+    setBaseType: setBaseType,
+    updateNestedField: updateNestedField,
+    toggleCompanionInclude: toggleCompanionInclude,
+    getActiveFieldEntries: getActiveFieldEntries,
+    assemblePrompt: assemblePrompt,
+    randomize: randomize,
+    reset: reset,
+    labels: {
+      identity: IDENTITY_LABELS,
+      appearance: APPEARANCE_LABELS,
+      styling: STYLING_LABELS,
+      presentation: PRESENTATION_LABELS,
+      extras: EXTRAS_LABELS,
+      style: { cartoonType: "Cartoon Type", artFinish: "Art Finish" },
+    },
+  });
+})();
