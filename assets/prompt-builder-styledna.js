@@ -14,6 +14,15 @@
   // ---------------------------------------------------------------------
   PromptHaus.util = PromptHaus.util || {};
 
+  // Case-insensitive alphabetical sort, used to display every dropdown's
+  // options A-Z regardless of the order they're declared in source (source
+  // order stays whatever's easiest to diff against the build plan).
+  PromptHaus.util.sortAlpha = function (options) {
+    return (options || []).slice().sort(function (a, b) {
+      return a.localeCompare(b, undefined, { sensitivity: "base" });
+    });
+  };
+
   // Every field in every mode has this shape. `includeInPrompt` defaults to
   // true so Randomize (which only touches included fields) works out of the
   // box; the assembler still skips a field with no resolved value.
@@ -121,18 +130,22 @@
   }
 
   var store = PromptHaus.util.createStore({
-    projectType: PromptHaus.util.makeField("t-shirt design", PROJECT_TYPE_OPTIONS, {
-      affectsAspectRatio: true,
-    }),
+    projectType: PromptHaus.util.makeField(
+      "t-shirt design",
+      PromptHaus.util.sortAlpha(PROJECT_TYPE_OPTIONS),
+      { affectsAspectRatio: true }
+    ),
     // `auto: true` means aspectRatio.value follows projectType automatically.
     // It flips to false the moment the shopper picks a ratio manually, and
-    // the UI can call resetAspectRatioToAuto() to re-link it.
+    // the UI can call resetAspectRatioToAuto() to re-link it. Left in its
+    // declared 1:1 -> 16:9 order rather than alphabetized — these are
+    // ratios, not words, and that order is the one that reads sensibly.
     aspectRatio: PromptHaus.util.makeField(
       suggestedAspectRatio("t-shirt design"),
       ASPECT_RATIO_OPTIONS,
       { auto: true }
     ),
-    targetPlatform: PromptHaus.util.makeField("", TARGET_PLATFORM_OPTIONS),
+    targetPlatform: PromptHaus.util.makeField("", PromptHaus.util.sortAlpha(TARGET_PLATFORM_OPTIONS)),
   });
 
   function setProjectType(newValue) {

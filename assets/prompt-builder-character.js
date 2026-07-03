@@ -12,11 +12,17 @@
   window.PromptHaus = window.PromptHaus || {};
   var PromptHaus = window.PromptHaus;
   var makeField = PromptHaus.util.makeField;
+  var sortAlpha = PromptHaus.util.sortAlpha;
 
   // ---------------------------------------------------------------------
-  // Option lists (verbatim from the build plan, Section 3)
+  // Option lists — build plan Section 3 as the base, alphabetized for
+  // browsability, plus a handful of new options per field (marked below)
+  // so this isn't a 1:1 clone of the reference tool's catalog. Age Group
+  // and Height stay in their natural progression rather than alphabetical
+  // — those are ordinal scales, not categories, and A-Z would scramble
+  // "baby -> mature" into something unreadable.
   // ---------------------------------------------------------------------
-  var CARTOON_TYPE_OPTIONS = [
+  var CARTOON_TYPE_OPTIONS = sortAlpha([
     "signature exaggerated chibi", "cartoon style illustration", "glossy 3d chibi",
     "ultra airbrushed urban", "luxury crochet amigurumi", "hyper-real cartoon",
     "soft spiritual glow", "18k digital illustration", "gouache mixed with watercolor",
@@ -25,55 +31,69 @@
     "hand-drawn cartoon", "high gloss chibi", "glossy 3d chibi illustration",
     "anime style illustration", "pixar 3d render", "retro vintage cartoon",
     "comic book style", "luxury glam chibi", "pixel art",
-  ];
-  var ART_FINISH_OPTIONS = [
+    // new
+    "storybook watercolor illustration", "vaporwave retro-futurism", "stop-motion claymation style",
+  ]);
+  var ART_FINISH_OPTIONS = sortAlpha([
     "high gloss illustration", "soft airbrushed shine", "cell-shaded gloss",
     "ultra polished digital paint", "candy-coated finish", "silky poster finish", "glossy",
-  ];
+    // new
+    "matte velvet finish", "iridescent holographic sheen", "textured painterly finish",
+  ]);
 
-  var ETHNICITY_OPTIONS = [
+  var ETHNICITY_OPTIONS = sortAlpha([
     "black", "east asian", "south asian", "southeast asian", "latino", "middle eastern",
     "white", "mixed heritage", "afro-latina", "mexican", "mixed ethnicity",
-  ];
-  var SKIN_TONE_OPTIONS = [
+    // new — genuine catalog gaps, not just filler
+    "native american/indigenous", "pacific islander",
+  ]);
+  var SKIN_TONE_OPTIONS = sortAlpha([
     "caramel", "porcelain", "fair", "warm ivory", "olive", "golden beige",
     "honey brown", "deep brown", "rich espresso",
-  ];
+    // new
+    "tan", "medium brown",
+  ]);
   var HUMAN_AGE_GROUP_OPTIONS = ["baby", "child", "teen", "young adult", "middle aged", "mature"];
-  var HUMAN_GENDER_OPTIONS = ["female", "male"];
+  var HUMAN_GENDER_OPTIONS = sortAlpha(["female", "male", "non-binary"]); // non-binary added — genuine gap vs. reference tool
   var HEIGHT_OPTIONS = ["short", "average height", "tall", "super tall"];
-  var HUMAN_BODY_TYPE_OPTIONS = [
+  var HUMAN_BODY_TYPE_OPTIONS = sortAlpha([
     "slim", "athletic", "curvy", "plus-size", "muscular", "petite", "tall and lean",
     "toned", "chubby", "small and cute", "tiny", "short and stocky", "lanky", "round and soft",
-  ];
-  var OCCUPATION_NICHE_OPTIONS = [
+  ]);
+  var OCCUPATION_NICHE_OPTIONS = sortAlpha([
     "none", "nurse", "teacher", "firefighter", "police officer", "doctor", "military/veteran",
     "pastor/clergy", "first responder/EMT", "small business owner", "chef", "artist/creative",
     "realtor", "veterinarian", "coach",
-  ];
+    // new
+    "engineer", "graphic designer", "student",
+  ]);
 
-  var SPECIES_OPTIONS = [
+  var SPECIES_OPTIONS = sortAlpha([
     "sheep", "lion", "tiger", "bear", "wolf", "eagle", "hawk", "falcon", "panther",
     "jaguar", "bulldog", "husky", "fox", "owl", "raven", "ram", "bull", "shark",
     "dolphin", "dragon (mythical)", "phoenix (mythical)", "unicorn (mythical)",
     "panda", "koala", "rabbit/bunny",
-  ];
-  var FUR_FEATHER_SCALE_TEXTURE_OPTIONS = [
+    // new
+    "elephant", "cheetah",
+  ]);
+  var FUR_FEATHER_SCALE_TEXTURE_OPTIONS = sortAlpha([
     "soft charcoal wool", "fluffy cream fur", "sleek short fur", "curly wool", "silky feathers",
     "glossy scales", "plush teddy texture", "shaggy fur", "velvet-soft fur",
-  ];
+  ]);
   var ANIMAL_AGE_GROUP_OPTIONS = ["baby", "young", "adult", "elder"];
-  var ANIMAL_GENDER_OPTIONS = ["female", "male", "gender-neutral"];
-  var ANIMAL_BODY_TYPE_OPTIONS = [
+  var ANIMAL_GENDER_OPTIONS = sortAlpha(["female", "male", "gender-neutral"]);
+  var ANIMAL_BODY_TYPE_OPTIONS = sortAlpha([
     "small fluffy rounded body", "slim", "chubby", "petite", "sturdy", "round and soft",
-  ];
+  ]);
 
-  var HAIR_COLOR_OPTIONS = [
+  var HAIR_COLOR_OPTIONS = sortAlpha([
     "glossy jet black", "dark brown", "brunette", "honey blonde", "platinum blonde",
     "ginger", "red", "silver", "rich auburn", "pink/purple streaks", "pink ombre",
     "rose pink", "silver lavender", "peach ombre", "icy blue", "mint teal",
-  ];
-  var HAIR_STYLE_OPTIONS = [
+    // new
+    "chestnut brown", "champagne blonde",
+  ]);
+  var HAIR_STYLE_OPTIONS = sortAlpha([
     "long straight", "curly", "loose wave", "body wave", "messy bun", "side ponytail",
     "cornrows", "knotless braids", "blunt bob", "bald", "space buns", "pixie cut",
     "half up half down", "voluminous curls", "high ponytail", "tight curls", "big afro",
@@ -83,30 +103,30 @@
     "deep side-part flipped bob", "straight-back feed-in stitch braids", "rope twist bob locs",
     "long boho braids", "velcro roller blowout set", "caesar haircut", "buzzcut",
     "low cut with deep waves", "hightop fade", "360 waves", "man bun", "gumby high top",
-  ];
-  var EYE_COLOR_OPTIONS = ["brown eyes", "blue eyes", "green eyes", "hazel eyes", "gray eyes", "amber eyes"];
-  var EXPRESSION_OPTIONS = ["none", "smiling", "confident", "curious", "playful", "serious", "surprised"];
-  var FACIAL_FEATURES_OPTIONS = [
+  ]);
+  var EYE_COLOR_OPTIONS = sortAlpha(["brown eyes", "blue eyes", "green eyes", "hazel eyes", "gray eyes", "amber eyes"]);
+  var EXPRESSION_OPTIONS = sortAlpha(["none", "smiling", "confident", "curious", "playful", "serious", "surprised"]);
+  var FACIAL_FEATURES_OPTIONS = sortAlpha([
     "none", "freckles", "dimples", "beauty mark", "glasses", "full lips", "high cheekbones",
     "button nose", "sharp jawline", "vitiligo", "burn mark", "ultra defined brows",
-  ];
-  var EYE_SIZE_SHAPE_OPTIONS = [
+  ]);
+  var EYE_SIZE_SHAPE_OPTIONS = sortAlpha([
     "large expressive", "huge exaggerated", "signature", "almond shaped", "soft rounded",
     "narrow fierce", "natural proportion",
-  ];
-  var LASH_INTENSITY_OPTIONS = [
+  ]);
+  var LASH_INTENSITY_OPTIONS = sortAlpha([
     "natural lashes", "long defined", "dramatic volume", "extra-long glam",
     "ultra-dramatic doll lashes", "extra long fluffy lashes",
-  ];
-  var LIP_STYLE_OPTIONS = [
+  ]);
+  var LIP_STYLE_OPTIONS = sortAlpha([
     "natural matte", "soft gloss", "plump glossy", "overlined glam", "extra-full high-gloss",
     "bold red lip", "ombre lip",
-  ];
-  var EXTRA_GLAM_DETAILS_OPTIONS = [
+  ]);
+  var EXTRA_GLAM_DETAILS_OPTIONS = sortAlpha([
     "face gems", "under-eye sparkle", "metallic eyeliner", "rhinestone accents", "body glitter",
-  ];
+  ]);
 
-  var OUTFIT_OPTIONS = [
+  var OUTFIT_OPTIONS = sortAlpha([
     "glam streetwear", "hoodie and sweatpants", "designer top with denim jeans",
     "sparkly mini dress", "tracksuit", "business attire", "oversized cozy sweater with leggings",
     "leather jacket with ripped jeans", "t-shirt with dark jeans", "crop top with cargo pants",
@@ -118,116 +138,132 @@
     "sequined cocktail dress", "velvet bodycon dress", "silk slip dress with blazer",
     "distressed boyfriend jeans with graphic tee", "linen button-up with chino shorts",
     "oversized denim jacket with sundress",
-  ];
-  var SHOES_OPTIONS = [
+    // new
+    "cargo shorts with graphic tee", "kimono-inspired robe",
+  ]);
+  var SHOES_OPTIONS = sortAlpha([
     "nike sneakers", "fuzzy slippers", "stiletto heels", "timberland boots", "rain boots",
     "lace up sneakers", "high top sneakers", "air max sneakers", "jordan sneakers",
     "dressy shoes", "open toe sandals", "blinged heels", "ugg boots", "just socks",
     "barefoot", "light-up sneakers", "velcro strap shoes", "mary jane shoes",
     "cowboy boots", "platform sneakers",
-  ];
-  var MAKEUP_OPTIONS = [
+  ]);
+  var MAKEUP_OPTIONS = sortAlpha([
     "natural", "glam bold lips", "smokey eye", "glittery eyeshadow", "winged eyeliner",
     "no makeup", "cut crease", "graphic liner", "glossy dewy skin", "matte full coverage",
     "soft pink blush", "contoured cheekbones", "dramatic cat eye", "nude lips with highlight",
     "bold colored eyeliner", "glitter lip gloss", "bronzed sun-kissed glow", "faux freckles",
     "tiny beauty mark near the mouth", "dramatic black eyeliner", "glowing highlighted cheeks",
     "sculpted nose highlight",
-  ];
-  var NAILS_OPTIONS = [
+  ]);
+  var NAILS_OPTIONS = sortAlpha([
     "short length natural", "long length coffin", "medium length french tip", "stiletto",
     "almond", "french tip", "chrome glam", "rhinestone luxury",
-  ];
-  var BEARD_OPTIONS = ["clean-shaven", "stubble", "boxed beard", "full beard", "goatee", "long groomed"];
-  var ACCESSORIES_OPTIONS = [
+  ]);
+  var BEARD_OPTIONS = sortAlpha(["clean-shaven", "stubble", "boxed beard", "full beard", "goatee", "long groomed"]);
+  var ACCESSORIES_OPTIONS = sortAlpha([
     "oversized sunglasses", "gold hoop earrings", "designer handbag", "fitted cap",
     "chunky necklace", "headphones", "beanie", "smartwatch", "crossbody bag", "backpack",
     "bucket hat", "diamond grillz", "scarf", "belt bag", "tote bag", "clutch purse",
     "durag", "hair bow", "clear glasses", "laptop",
-  ];
-  var SPECIAL_NEEDS_OPTIONS = [
+  ]);
+  var SPECIAL_NEEDS_OPTIONS = sortAlpha([
     "none", "wheelchair", "crutches", "cane", "hearing aid", "cochlear implant", "bifocals",
     "prosthetic limb", "white cane for vision", "service dog", "mobility walker",
     "braces on teeth", "leg brace", "arm cast", "oxygen tank",
-  ];
-  var JEWELRY_OPTIONS = [
+  ]);
+  var JEWELRY_OPTIONS = sortAlpha([
     "chunky gold chains", "delicate necklaces", "statement earrings", "multiple rings",
     "anklets", "body chains", "diamond studs", "diamond chain", "thick cuban link chain",
     "layered bracelets", "choker necklace", "pendant necklace", "nose ring",
-  ];
-  var TATTOOS_OPTIONS = [
+  ]);
+  var TATTOOS_OPTIONS = sortAlpha([
     "none", "face tattoos", "neck tattoos", "arm sleeve tattoos", "minimalist line tattoos",
     "chest tattoos", "hand tattoos", "leg tattoos", "back tattoos", "tribal tattoos",
     "floral tattoos", "geometric tattoos",
-  ];
-  var CROWN_HEAD_EFFECTS_OPTIONS = [
+  ]);
+  var CROWN_HEAD_EFFECTS_OPTIONS = sortAlpha([
     "none", "neon halo with drips", "angel halo", "flower crown", "golden crown",
     "diamond tiara", "pink tiara", "butterfly clips", "bandana headband", "jeweled headpiece",
     "bow headband", "star crown",
-  ];
+  ]);
 
-  var POSE_OPTIONS = [
+  var POSE_OPTIONS = sortAlpha([
     "standing pose", "action pose", "waving", "arms crossed", "sitting pose", "jumping",
     "blowing a kiss", "kneeling down", "taking a selfie", "throwing up the peace sign",
     "kneeling in prayer", "praying", "lifting hands in praise",
-  ];
-  var BACKGROUND_OPTIONS = [
+    // new
+    "hands on hips", "leaning against wall",
+  ]);
+  var BACKGROUND_OPTIONS = sortAlpha([
     "solid white background", "transparent background png", "soft pastel gradient",
     "dreamy cloud scene", "sparkly confetti effect", "heart-filled backdrop", "rainbow gradient",
     "marble texture", "floral garden scene", "starry night sky", "candy-colored polka dots",
     "soft glitter fade",
-  ];
-  var DYNAMIC_SCENE_EFFECT_OPTIONS = [
+    // new
+    "sunset skyline", "urban graffiti wall", "underwater scene",
+  ]);
+  var DYNAMIC_SCENE_EFFECT_OPTIONS = sortAlpha([
     "floating in clouds", "emerging from splash", "surrounded by sparkles",
     "hair blowing in wind", "money flying around", "neon glow aura", "soft angelic light",
     "energy burst explosion",
-  ];
-  var TIME_ERA_OPTIONS = [
+  ]);
+  var TIME_ERA_OPTIONS = sortAlpha([
     "modern day", "90s hip-hop", "90s Y2K", "1920s art deco", "1970s groovy", "1980s neon",
     "futuristic cyberpunk", "medieval fantasy", "victorian steampunk", "retro 50s", "1960s glam",
-  ];
-  var CAMERA_ANGLE_OPTIONS = [
+    // new
+    "2000s pop punk", "ancient egyptian",
+  ]);
+  var CAMERA_ANGLE_OPTIONS = sortAlpha([
     "front view", "side profile", "three-quarter view", "low angle shot", "high angle shot",
     "bird's eye view", "worm's eye view", "over the shoulder", "close-up portrait",
     "full body shot", "dutch angle", "extreme close-up",
-  ];
-  var LIGHTING_EFFECTS_OPTIONS = [
+    // new
+    "fisheye lens", "aerial drone shot",
+  ]);
+  var LIGHTING_EFFECTS_OPTIONS = sortAlpha([
     "studio lighting", "golden hour glow", "soft diffused light", "dramatic shadows",
     "rim lighting", "neon glow", "candlelight", "sunlight through window", "moonlight",
     "stage lighting", "holographic light", "bioluminescent glow", "underlit glow",
     "backlit silhouette", "cool blue tones", "warm amber tones",
-  ];
-  var FRAMING_OPTIONS = [
+    // new
+    "lantern glow", "aurora borealis glow",
+  ]);
+  var FRAMING_OPTIONS = sortAlpha([
     "no frame", "simple frame border", "ornate decorative frame", "modern minimalist frame",
     "vintage wooden frame", "gold gilded frame", "rose gold frame", "polaroid style frame",
     "film strip border", "comic book panel frame", "glowing neon frame", "holographic frame",
     "diamond encrusted frame", "floral wreath frame", "abstract geometric frame",
     "shadow frame with depth",
-  ];
+    // new
+    "torn paper edge frame", "chalkboard frame",
+  ]);
 
-  var FANTASY_ELEMENTS_OPTIONS = [
+  var FANTASY_ELEMENTS_OPTIONS = sortAlpha([
     "fairy wings", "angel wings", "phoenix wings", "bat wings", "dragon wings",
     "magical aura", "glowing energy", "floating sparkles", "mystical symbols", "elemental powers",
-  ];
-  var PROPS_OPTIONS = [
+  ]);
+  var PROPS_OPTIONS = sortAlpha([
     "magic wand", "sword", "staff", "microphone", "guitar", "skateboard", "basketball",
     "books", "pretty keychain", "phone", "shopping bags", "coffee cup", "balloon",
     "flowers", "gift box",
-  ];
-  var COSPLAY_CHARACTER_OPTIONS = [
+  ]);
+  var COSPLAY_CHARACTER_OPTIONS = sortAlpha([
     "none", "anime character", "superhero", "video game character", "disney princess",
     "fantasy creature", "sci-fi character", "movie villain", "historical figure",
     "pop culture icon", "manga character", "cosplay inspired", "pirate", "mermaid",
     "cowboy", "cowgirl", "rapper", "singer", "astronaut", "chef", "pilot",
-  ];
+  ]);
 
-  var COMPANION_SPECIES_OPTIONS = [
+  var COMPANION_SPECIES_OPTIONS = sortAlpha([
     "fluffy puppy", "big dog", "playful kitten", "bunny rabbit", "hamster", "bird on shoulder",
     "tiny dragon", "magical unicorn", "baby panda", "teddy bear", "guinea pig", "ferret",
     "baby fox", "baby raccoon", "hedgehog", "parrot",
-  ];
-  var COMPANION_POSITION_OPTIONS = ["in purse", "on leash", "in arms", "on shoulder", "perched nearby", "sitting beside"];
-  var COMPANION_ACCESSORIES_OPTIONS = ["collar", "bandana", "tiny bow", "tiny purse", "none"];
+    // new
+    "baby goat", "chameleon",
+  ]);
+  var COMPANION_POSITION_OPTIONS = sortAlpha(["in purse", "on leash", "in arms", "on shoulder", "perched nearby", "sitting beside"]);
+  var COMPANION_ACCESSORIES_OPTIONS = sortAlpha(["collar", "bandana", "tiny bow", "tiny purse", "none"]);
 
   // Field-name -> display-label maps, used by both the UI renderer and the
   // flattened field-entry list so labels never drift from field names.
