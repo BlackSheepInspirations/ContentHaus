@@ -13,7 +13,7 @@
   var MODES = ["character", "text", "couples", "combined"];
   var MODE_LABELS = { character: "Character", text: "Text", couples: "Couples", combined: "Combined" };
   // Flips to true as each mode ships in later build steps.
-  var BUILT_MODES = { character: true, text: false, couples: false, combined: false };
+  var BUILT_MODES = { character: true, text: true, couples: false, combined: false };
 
   var activeMode = "character";
 
@@ -71,19 +71,39 @@
     return el("div", { class: "ph-field" }, [labelRow, select, customInput]);
   }
 
-  function renderFieldGroup(title, entries, onChange) {
+  // Plain text input — no dropdown, no custom-value split, no "Include in
+  // prompt" checkbox (the whole point of Text Mode is stylizing this exact
+  // text, so it's always included when non-empty).
+  function renderFreeTextField(entry, onChange) {
+    var input = el("textarea", {
+      class: "ph-field__custom ph-field__freetext",
+      placeholder: 'Type the text you want stylized (e.g. "Blessed & Grateful")',
+      rows: "2",
+    });
+    input.value = entry.field.value || "";
+    input.addEventListener("input", function () {
+      onChange({ value: input.value });
+    });
+    return el("div", { class: "ph-field" }, [
+      el("div", { class: "ph-field__label-row" }, [el("span", { class: "ph-field__label", text: entry.label })]),
+      input,
+    ]);
+  }
+
+  function renderFieldGroup(title, entries, onChange, subtitle) {
     var fieldsContainer = el("div", { class: "ph-field-group__fields" });
     entries.forEach(function (entry) {
+      var renderFn = entry.field.isFreeText ? renderFreeTextField : renderField;
       fieldsContainer.appendChild(
-        renderField(entry, function (changes) {
+        renderFn(entry, function (changes) {
           onChange(entry, changes);
         })
       );
     });
-    return el("fieldset", { class: "ph-field-group" }, [
-      el("legend", { class: "ph-field-group__title", text: title }),
-      fieldsContainer,
-    ]);
+    var children = [el("legend", { class: "ph-field-group__title", text: title })];
+    if (subtitle) children.push(el("p", { class: "ph-field-group__subtitle", text: subtitle }));
+    children.push(fieldsContainer);
+    return el("fieldset", { class: "ph-field-group" }, children);
   }
 
   // ---------------------------------------------------------------------
@@ -178,6 +198,37 @@
   }
 
   // ---------------------------------------------------------------------
+  // Text Mode panel
+  // ---------------------------------------------------------------------
+  function renderTextPanel() {
+    var text = PromptHaus.text;
+
+    function handleFieldChange(entry, changes) {
+      text.updateField(entry.fieldName, changes);
+      renderApp();
+    }
+
+    var panel = el("div", { class: "ph-panel ph-panel--text" });
+    panel.appendChild(
+      renderFieldGroup(
+        "Core Style",
+        text.getFixedEntries(),
+        handleFieldChange,
+        "Stays consistent across all 4 generated variations."
+      )
+    );
+    panel.appendChild(
+      renderFieldGroup(
+        "Variation Details",
+        text.getVariableEntries(),
+        handleFieldChange,
+        "Free to vary between the 4 variations for different artistic takes."
+      )
+    );
+    return panel;
+  }
+
+  // ---------------------------------------------------------------------
   // Shell: tabs, live preview, action buttons
   // ---------------------------------------------------------------------
   function renderTabs(root) {
@@ -202,7 +253,7 @@
     root.appendChild(tabs);
   }
 
-  function renderPreview(root, assembled) {
+  function renderPreview(root, assembled, modeApi) {
     var styleDNAState = PromptHaus.styleDNA.getState();
     var platform = styleDNAState.targetPlatform.value;
     var formatted = PromptHaus.engine.formatForPlatform(assembled, platform, styleDNAState.aspectRatio.value);
@@ -228,14 +279,14 @@
     randomizeBtn.title =
       'Picks a new random value for every field with "Include in prompt" checked, and clears any typed custom value for those fields.';
     randomizeBtn.addEventListener("click", function () {
-      PromptHaus.character.randomize();
+      modeApi.randomize();
       renderApp();
     });
 
     var resetBtn = el("button", { type: "button", class: "ph-btn ph-btn--reset", text: "Reset" });
     resetBtn.title = "Clears every field back to Select.../None.";
     resetBtn.addEventListener("click", function () {
-      PromptHaus.character.reset();
+      modeApi.reset();
       renderApp();
     });
 
@@ -326,7 +377,10 @@
 
     if (activeMode === "character") {
       left.appendChild(renderCharacterPanel());
-      renderPreview(right, PromptHaus.character.assemblePrompt());
+      renderPreview(right, PromptHaus.character.assemblePrompt(), PromptHaus.character);
+    } else if (activeMode === "text") {
+      left.appendChild(renderTextPanel());
+      renderPreview(right, PromptHaus.text.assemblePrompt(), PromptHaus.text);
     } else {
       left.appendChild(el("p", { class: "ph-coming-soon", text: MODE_LABELS[activeMode] + " Mode is coming soon." }));
     }
