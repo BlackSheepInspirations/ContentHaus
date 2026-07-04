@@ -6,11 +6,11 @@
  * consistent across all 4 generated variations, and a "Variation Details"
  * group the AI is free to vary between them.
  *
- * Two fields beyond the build plan's original schema — Text Case and
- * Surface Texture — per the "don't just clone the reference tool" call:
- * both are real levers in print-on-demand prompt engineering (case affects
- * legibility/vibe, material finish is a huge lever for physical mockups)
- * that the reference tool's field set didn't cover at all.
+ * Beyond the build plan's original schema, per the "don't just clone the
+ * reference tool" call: Text Case and Surface Texture fields (case affects
+ * legibility/vibe, material finish is a huge lever for physical mockups),
+ * plus an opt-in Accent Word/Phrase sub-panel that lets one word get its
+ * own distinct styling separate from the rest of the text.
  */
 (function () {
   "use strict";
@@ -109,6 +109,16 @@
     "glow outline", "confetti scatter overlay", "grain/noise overlay",
   ]);
 
+  // New sub-panel — lets the shopper call out one word or short phrase with
+  // its own distinct look (e.g. "Blessed" in cursive gold, rest of the text
+  // in plain white block letters). Common in this niche's real designs;
+  // the reference tool has no way to single out part of the text at all.
+  var ACCENT_STYLE_OPTIONS = sortAlpha([
+    "contrasting color accent", "cursive script accent", "outlined accent",
+    "glitter accent", "larger scale accent", "metallic foil accent",
+    "underline accent", "circled/highlighted accent",
+  ]);
+
   var FIXED_LABELS = {
     yourText: "Text Content",
     letterStyle: "Letter Style",
@@ -145,6 +155,11 @@
       wordStack: makeField("", WORD_STACK_OPTIONS),
       iconPacks: makeField("none", ICON_PACKS_OPTIONS),
       addOns: makeField("none", ADD_ONS_OPTIONS),
+      accent: {
+        include: false,
+        phrase: makeField("", [], { isFreeText: true }),
+        style: makeField("", ACCENT_STYLE_OPTIONS),
+      },
     };
   }
 
@@ -155,6 +170,34 @@
     var patch = {};
     patch[fieldName] = Object.assign({}, state[fieldName], changes);
     store.setState(patch);
+  }
+
+  function toggleAccentInclude(include) {
+    var state = store.getState();
+    store.setState({ accent: Object.assign({}, state.accent, { include: include }) });
+  }
+
+  function updateAccentField(fieldName, changes) {
+    var state = store.getState();
+    var patch = {};
+    patch[fieldName] = Object.assign({}, state.accent[fieldName], changes);
+    store.setState({ accent: Object.assign({}, state.accent, patch) });
+  }
+
+  // Composes the accent phrase + style into one descriptive clause rather
+  // than letting them appear as two disconnected list items in the
+  // "Maintain: ..." clause — null when the shopper hasn't opted in or
+  // hasn't typed a phrase yet.
+  function buildAccentField() {
+    var state = store.getState();
+    if (!state.accent.include) return null;
+    var phrase = (state.accent.phrase.value || "").trim();
+    if (!phrase) return null;
+    var style = PromptHaus.engine.resolveFieldValue(state.accent.style);
+    var text = style
+      ? 'the word/phrase "' + phrase + '" styled with ' + style
+      : 'the word/phrase "' + phrase + '" set apart from the rest of the text';
+    return makeField(text);
   }
 
   function getFixedEntries() {
@@ -175,10 +218,19 @@
     var toEntry = function (e) {
       return { label: e.label, field: e.field };
     };
+    var count = parseInt(PromptHaus.styleDNA.getState().variationCount.value, 10) || 4;
+    var fixedEntries = getFixedEntries().map(toEntry);
+    var accentField = buildAccentField();
+    if (accentField) fixedEntries.push({ label: "Accent", field: accentField });
+
+    var intro = "Generate " + count + (count === 1 ? " variation." : " variations.");
+    if (count > 1) intro += " Interpretation guide:";
+
     return PromptHaus.engine.buildMetaInstruction({
-      intro: "Interpretation guide:",
-      fixedFieldEntries: getFixedEntries().map(toEntry),
+      intro: intro,
+      fixedFieldEntries: fixedEntries,
       variableFieldEntries: getVariableEntries().map(toEntry),
+      variationCount: count,
       outro:
         "High quality digital illustration, immaculate composition, vibrant and polished finish with professional rendering.",
     });
@@ -193,6 +245,15 @@
       var randomValue = options[Math.floor(Math.random() * options.length)];
       updateField(e.fieldName, { value: randomValue, customValue: "" });
     });
+    // Accent style may randomize too, but the typed phrase itself never does.
+    var state = store.getState();
+    if (state.accent.include && state.accent.style.includeInPrompt) {
+      var styleOptions = state.accent.style.options || [];
+      if (styleOptions.length) {
+        var randomStyle = styleOptions[Math.floor(Math.random() * styleOptions.length)];
+        updateAccentField("style", { value: randomStyle, customValue: "" });
+      }
+    }
   }
 
   function reset() {
@@ -201,6 +262,8 @@
 
   PromptHaus.text = Object.assign({}, store, {
     updateField: updateField,
+    toggleAccentInclude: toggleAccentInclude,
+    updateAccentField: updateAccentField,
     getFixedEntries: getFixedEntries,
     getVariableEntries: getVariableEntries,
     assemblePrompt: assemblePrompt,

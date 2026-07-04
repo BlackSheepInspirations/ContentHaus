@@ -57,8 +57,12 @@
   }
 
   // Text Mode style: meta-instruction prompt — what to hold fixed vs. vary
-  // between the 4 variations.
+  // between the N variations. With variationCount <= 1 there's nothing to
+  // vary between, so fixed and variable fields collapse into one plain list
+  // instead of a "Maintain / Vary" split that wouldn't make sense for a
+  // single output.
   function buildMetaInstruction(config) {
+    var count = config.variationCount || 4;
     var fixed = resolveFields(config.fixedFieldEntries).map(function (r) {
       return r.value;
     });
@@ -67,9 +71,14 @@
     });
     var parts = [];
     if (config.intro) parts.push(config.intro);
-    if (fixed.length) parts.push("Maintain: " + fixed.join(", ") + ".");
-    if (variable.length) {
-      parts.push("Vary between variations: " + variable.join(", ") + ".");
+    if (count <= 1) {
+      var all = fixed.concat(variable);
+      if (all.length) parts.push(all.join(", ") + ".");
+    } else {
+      if (fixed.length) parts.push("Maintain: " + fixed.join(", ") + ".");
+      if (variable.length) {
+        parts.push("Vary between the " + count + " variations: " + variable.join(", ") + ".");
+      }
     }
     if (config.outro) parts.push(config.outro);
     return {

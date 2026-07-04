@@ -90,6 +90,21 @@
     ]);
   }
 
+  // Opt-in sub-panel: a checkbox that reveals a field group when checked.
+  // Shared shape for Character's Companion and Text's Accent Word/Phrase.
+  function renderSubPanel(headerText, isChecked, onToggle, renderContent) {
+    var toggle = el("input", { type: "checkbox", class: "ph-subpanel__toggle" });
+    toggle.checked = isChecked;
+    toggle.addEventListener("change", function () {
+      onToggle(toggle.checked);
+    });
+    var panel = el("div", { class: "ph-subpanel" }, [
+      el("label", { class: "ph-subpanel__header" }, [toggle, el("span", { text: headerText })]),
+    ]);
+    if (isChecked) panel.appendChild(renderContent());
+    return panel;
+  }
+
   function renderFieldGroup(title, entries, onChange, subtitle) {
     var fieldsContainer = el("div", { class: "ph-field-group__fields" });
     entries.forEach(function (entry) {
@@ -170,29 +185,27 @@
     panel.appendChild(renderFieldGroup("Presentation", entriesFor("presentation", character.labels.presentation), handleFieldChange));
     panel.appendChild(renderFieldGroup("Extras", entriesFor("extras", character.labels.extras), handleFieldChange));
 
-    var companionInclude = el("input", { type: "checkbox", class: "ph-companion__toggle" });
-    companionInclude.checked = state.companion.include;
-    companionInclude.addEventListener("change", function () {
-      character.toggleCompanionInclude(companionInclude.checked);
-      renderApp();
-    });
-    var companionPanel = el("div", { class: "ph-companion" }, [
-      el("label", { class: "ph-companion__header" }, [companionInclude, el("span", { text: "Add a Companion" })]),
-    ]);
-    if (state.companion.include) {
-      companionPanel.appendChild(
-        renderFieldGroup(
-          "Companion Details",
-          [
-            { groupName: "companion", fieldName: "species", label: "Companion Species", field: state.companion.species },
-            { groupName: "companion", fieldName: "position", label: "Companion Position", field: state.companion.position },
-            { groupName: "companion", fieldName: "accessories", label: "Companion Accessories", field: state.companion.accessories },
-          ],
-          handleFieldChange
-        )
-      );
-    }
-    panel.appendChild(companionPanel);
+    panel.appendChild(
+      renderSubPanel(
+        "Add a Companion",
+        state.companion.include,
+        function (checked) {
+          character.toggleCompanionInclude(checked);
+          renderApp();
+        },
+        function () {
+          return renderFieldGroup(
+            "Companion Details",
+            [
+              { groupName: "companion", fieldName: "species", label: "Companion Species", field: state.companion.species },
+              { groupName: "companion", fieldName: "position", label: "Companion Position", field: state.companion.position },
+              { groupName: "companion", fieldName: "accessories", label: "Companion Accessories", field: state.companion.accessories },
+            ],
+            handleFieldChange
+          );
+        }
+      )
+    );
 
     return panel;
   }
@@ -208,21 +221,53 @@
       renderApp();
     }
 
+    var count = PromptHaus.styleDNA.getState().variationCount.value;
+    var countLabel = count + (count === "1" ? " variation" : " variations");
+
     var panel = el("div", { class: "ph-panel ph-panel--text" });
     panel.appendChild(
       renderFieldGroup(
         "Core Style",
         text.getFixedEntries(),
         handleFieldChange,
-        "Stays consistent across all 4 generated variations."
+        "Stays consistent across all " + countLabel + "."
       )
     );
+
+    var state = text.getState();
+    panel.appendChild(
+      renderSubPanel(
+        "Add an Accent Word/Phrase",
+        state.accent.include,
+        function (checked) {
+          text.toggleAccentInclude(checked);
+          renderApp();
+        },
+        function () {
+          return renderFieldGroup(
+            "Accent Details",
+            [
+              { fieldName: "phrase", label: "Accent Word/Phrase", field: state.accent.phrase },
+              { fieldName: "style", label: "Accent Style", field: state.accent.style },
+            ],
+            function (entry, changes) {
+              text.updateAccentField(entry.fieldName, changes);
+              renderApp();
+            },
+            "Give one word or short phrase its own distinct look — the rest of the text keeps its normal style."
+          );
+        }
+      )
+    );
+
     panel.appendChild(
       renderFieldGroup(
         "Variation Details",
         text.getVariableEntries(),
         handleFieldChange,
-        "Free to vary between the 4 variations for different artistic takes."
+        count === "1"
+          ? "Only 1 variation selected above, so these just describe the single output."
+          : "Free to vary between the " + countLabel + " for different artistic takes."
       )
     );
     return panel;
@@ -349,6 +394,18 @@
       renderApp();
     });
 
+    var variationSelect = el("select", { class: "ph-field__select" });
+    styleDNAState.variationCount.options.forEach(function (opt) {
+      var optionNode = el("option", { value: opt });
+      optionNode.textContent = opt + (opt === "1" ? " variation" : " variations");
+      if (opt === styleDNAState.variationCount.value) optionNode.selected = true;
+      variationSelect.appendChild(optionNode);
+    });
+    variationSelect.addEventListener("change", function () {
+      PromptHaus.styleDNA.setVariationCount(variationSelect.value);
+      renderApp();
+    });
+
     root.appendChild(
       el("div", { class: "ph-styledna" }, [
         el("div", { class: "ph-styledna__field" }, [el("span", { class: "ph-field__label", text: "Project Type" }), projectSelect]),
@@ -358,6 +415,7 @@
           autoBadge,
         ]),
         el("div", { class: "ph-styledna__field" }, [el("span", { class: "ph-field__label", text: "Target Platform" }), platformSelect]),
+        el("div", { class: "ph-styledna__field" }, [el("span", { class: "ph-field__label", text: "Variations" }), variationSelect]),
       ])
     );
   }

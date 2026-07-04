@@ -431,8 +431,11 @@
     var entries = getActiveFieldEntries().map(function (e) {
       return { label: e.label, field: e.field };
     });
+    var count = parseInt(PromptHaus.styleDNA.getState().variationCount.value, 10) || 4;
+    var intro = "Create " + count + (count === 1 ? " variation" : " variations") +
+      " of a clean, professional character portrait of a";
     return PromptHaus.engine.buildSentence({
-      intro: "Create 4 variations of a clean, professional character portrait of a",
+      intro: intro,
       fieldEntries: entries,
     });
   }

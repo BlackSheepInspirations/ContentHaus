@@ -146,6 +146,9 @@
       { auto: true }
     ),
     targetPlatform: PromptHaus.util.makeField("", PromptHaus.util.sortAlpha(TARGET_PLATFORM_OPTIONS)),
+    // Shared across every mode (Character/Text/Couples/Combined) — how many
+    // AI-generated variations the assembled prompt asks for.
+    variationCount: PromptHaus.util.makeField("4", ["1", "2", "3", "4"]),
   });
 
   function setProjectType(newValue) {
@@ -185,11 +188,16 @@
     PromptHaus.util.updateField(store, "targetPlatform", { value: newValue });
   }
 
+  function setVariationCount(newValue) {
+    PromptHaus.util.updateField(store, "variationCount", { value: newValue });
+  }
+
   PromptHaus.styleDNA = Object.assign({}, store, {
     setProjectType: setProjectType,
     setAspectRatioManually: setAspectRatioManually,
     resetAspectRatioToAuto: resetAspectRatioToAuto,
     setTargetPlatform: setTargetPlatform,
+    setVariationCount: setVariationCount,
     suggestedAspectRatio: suggestedAspectRatio,
   });
 })();
