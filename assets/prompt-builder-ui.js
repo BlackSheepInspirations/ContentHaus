@@ -683,13 +683,16 @@
             "Accent Details",
             [
               { fieldName: "phrase", label: "Accent Word/Phrase", field: state.accent.phrase },
-              { fieldName: "style", label: "Accent Style", field: state.accent.style },
+              { fieldName: "letterStyle", label: "Accent Letter Style", field: state.accent.letterStyle },
+              { fieldName: "colorScheme", label: "Accent Color Scheme", field: state.accent.colorScheme },
+              { fieldName: "textCase", label: "Accent Text Case", field: state.accent.textCase },
+              { fieldName: "surfaceTexture", label: "Accent Surface Texture", field: state.accent.surfaceTexture },
             ],
             function (entry, changes) {
               text.updateAccentField(entry.fieldName, changes);
               renderApp();
             },
-            "Give one word or short phrase its own distinct look — the rest of the text keeps its normal style."
+            "Give one word or short phrase its own distinct look, with the same level of control as the main text — the rest of the text keeps its normal style."
           );
         },
         "Style just one word or phrase differently from the rest — e.g. \"Blessed\" in cursive gold, the rest of the text in plain white block letters."
@@ -1359,6 +1362,13 @@
       renderApp();
     });
 
+    var mockupSelect = el("select", { class: "ph-field__select" });
+    appendSelectOptions(mockupSelect, styleDNAState.mockupView, styleDNAState.mockupView.value);
+    mockupSelect.addEventListener("change", function () {
+      PromptHaus.styleDNA.setMockupView(mockupSelect.value);
+      renderApp();
+    });
+
     var variationSelect = el("select", { class: "ph-field__select" });
     styleDNAState.variationCount.options.forEach(function (opt) {
       var optionNode = el("option", { value: opt });
@@ -1408,6 +1418,9 @@
     var holidayField = el("div", { class: "ph-styledna__field" }, [labelWithIcon("gift", "Holiday / Theme"), holidaySelect]);
     holidayField.title = "Calendar holidays plus lifestyle/niche themes (Coffee Culture, Hustle Culture, etc.) — shared across every mode.";
 
+    var mockupField = el("div", { class: "ph-styledna__field" }, [labelWithIcon("monitor", "Mockup View"), mockupSelect]);
+    mockupField.title = "Which product/surface the design is shown on (t-shirt, mug, phone case, etc.) — shared across every mode.";
+
     root.appendChild(
       el("div", { class: "ph-styledna" }, [
         projectField,
@@ -1416,6 +1429,7 @@
         variationField,
         holidayField,
         bufferField,
+        mockupField,
       ])
     );
   }

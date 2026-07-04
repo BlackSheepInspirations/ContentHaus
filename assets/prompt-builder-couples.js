@@ -233,7 +233,10 @@
   // getSceneFieldEntries above) since they're exactly the kind of "the
   // couple can't contradict each other" field Couple Dynamic exists for.
   function getSharedStyleDNAEntries() {
-    var entries = [{ label: "Holiday / Theme", field: PromptHaus.styleDNA.getState().holiday }];
+    var entries = [
+      { label: "Holiday / Theme", field: PromptHaus.styleDNA.getState().holiday },
+      { label: "Mockup View", field: PromptHaus.styleDNA.getState().mockupView },
+    ];
     entries = entries.concat(PromptHaus.styleDNA.getImageryEntries());
     var bufferEntry = PromptHaus.styleDNA.getBufferEntry();
     if (bufferEntry) entries.push(bufferEntry);

@@ -382,6 +382,7 @@
     }
 
     entries.push({ label: "Holiday / Theme", field: PromptHaus.styleDNA.getState().holiday });
+    entries.push({ label: "Mockup View", field: PromptHaus.styleDNA.getState().mockupView });
     entries = entries.concat(PromptHaus.styleDNA.getImageryEntries());
     var bufferEntry = PromptHaus.styleDNA.getBufferEntry();
     if (bufferEntry) entries.push(bufferEntry);
@@ -438,6 +439,7 @@
 
     var holidayResolved = PromptHaus.engine.resolveFields([
       { label: "Holiday / Theme", field: PromptHaus.styleDNA.getState().holiday },
+      { label: "Mockup View", field: PromptHaus.styleDNA.getState().mockupView },
     ]);
     if (holidayResolved.length) groups.push({ title: "Holiday / Theme", items: holidayResolved });
 

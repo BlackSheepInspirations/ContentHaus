@@ -48,15 +48,9 @@
     "champagne gold", "emerald jewel tone", "monochrome grayscale",
   ]);
 
-  var MOCKUP_VIEW_OPTIONS = sortAlpha([
-    "none", "on a black t-shirt", "on a white t-shirt", "on a black sweatshirt",
-    "on a white sweatshirt", "large", "poster mockup", "candle mockup", "tote bag mockup",
-    "tumbler mockup", "laptop mockup", "decal mockup", "onesie mockup", "fitted cap mockup",
-    "trucker hat mockup", "phone case mockup", "shopping bag mockup", "perfume mockup",
-    "ebook cover mockup", "billboard mockup", "storefront mockup", "sticker sheet mockup",
-    // new
-    "coffee mug mockup", "hat patch mockup", "notebook cover mockup",
-  ]);
+  // Mockup View moved to shared Style DNA (next to Buffer/Padding) — it
+  // applies just as much to a Character portrait or Graphics design as it
+  // does to Text lettering, so it's no longer Text Mode's own field.
 
   // New field — case affects both legibility and vibe (e.g. "grunge" reads
   // very differently in lowercase vs. all-caps), and the reference tool
@@ -109,21 +103,19 @@
     "glow outline", "confetti scatter overlay", "grain/noise overlay",
   ]);
 
-  // New sub-panel — lets the shopper call out one word or short phrase with
-  // its own distinct look (e.g. "Blessed" in cursive gold, rest of the text
-  // in plain white block letters). Common in this niche's real designs;
-  // the reference tool has no way to single out part of the text at all.
-  var ACCENT_STYLE_OPTIONS = sortAlpha([
-    "contrasting color accent", "cursive script accent", "outlined accent",
-    "glitter accent", "larger scale accent", "metallic foil accent",
-    "underline accent", "circled/highlighted accent",
-  ]);
+  // Accent Word/Phrase sub-panel — lets the shopper call out one word or
+  // short phrase with its own distinct look (e.g. "Blessed" in cursive
+  // gold, rest of the text in plain white block letters). Common in this
+  // niche's real designs; the reference tool has no way to single out
+  // part of the text at all. Reuses the exact same 4 option lists as Core
+  // Style (Letter Style/Color Scheme/Text Case/Surface Texture) rather
+  // than a separate smaller "Accent Style" list, so the accent word gets
+  // the same depth of control as the rest of the text.
 
   var FIXED_LABELS = {
     yourText: "Text Content",
     letterStyle: "Letter Style",
     colorScheme: "Color Scheme",
-    mockupView: "Mockup View",
     textCase: "Text Case",
     surfaceTexture: "Surface Texture",
   };
@@ -146,7 +138,6 @@
       yourText: makeField("", [], { isFreeText: true }),
       letterStyle: makeField("", LETTER_STYLE_OPTIONS),
       colorScheme: makeField("", COLOR_SCHEME_OPTIONS),
-      mockupView: makeField("none", MOCKUP_VIEW_OPTIONS),
       textCase: makeField("", TEXT_CASE_OPTIONS),
       surfaceTexture: makeField("", SURFACE_TEXTURE_OPTIONS),
       background: makeField("", BACKGROUND_OPTIONS),
@@ -158,7 +149,10 @@
       accent: {
         include: false,
         phrase: makeField("", [], { isFreeText: true }),
-        style: makeField("", ACCENT_STYLE_OPTIONS),
+        letterStyle: makeField("", LETTER_STYLE_OPTIONS),
+        colorScheme: makeField("", COLOR_SCHEME_OPTIONS),
+        textCase: makeField("", TEXT_CASE_OPTIONS),
+        surfaceTexture: makeField("", SURFACE_TEXTURE_OPTIONS),
       },
     };
   }
@@ -184,18 +178,39 @@
     store.setState({ accent: Object.assign({}, state.accent, patch) });
   }
 
-  // Composes the accent phrase + style into one descriptive clause rather
-  // than letting them appear as two disconnected list items in the
-  // "Maintain: ..." clause — null when the shopper hasn't opted in or
-  // hasn't typed a phrase yet.
+  var ACCENT_STYLE_LABELS = {
+    letterStyle: "Letter Style",
+    colorScheme: "Color Scheme",
+    textCase: "Text Case",
+    surfaceTexture: "Surface Texture",
+  };
+
+  function getAccentStyleEntries() {
+    var accent = store.getState().accent;
+    return Object.keys(ACCENT_STYLE_LABELS).map(function (fieldName) {
+      return { fieldName: fieldName, label: ACCENT_STYLE_LABELS[fieldName], field: accent[fieldName] };
+    });
+  }
+
+  // Composes the accent phrase + its own Letter Style/Color Scheme/Text
+  // Case/Surface Texture into one descriptive clause rather than letting
+  // them appear as several disconnected list items in the "Maintain: ..."
+  // clause — null when the shopper hasn't opted in or hasn't typed a
+  // phrase yet.
   function buildAccentField() {
     var state = store.getState();
     if (!state.accent.include) return null;
     var phrase = (state.accent.phrase.value || "").trim();
     if (!phrase) return null;
-    var style = PromptHaus.engine.resolveFieldValue(state.accent.style);
-    var text = style
-      ? 'the word/phrase "' + phrase + '" styled with ' + style
+    var descriptors = PromptHaus.engine.resolveFields(
+      getAccentStyleEntries().map(function (e) {
+        return { label: e.label, field: e.field };
+      })
+    ).map(function (r) {
+      return r.value;
+    });
+    var text = descriptors.length
+      ? 'the word/phrase "' + phrase + '" styled with ' + descriptors.join(", ")
       : 'the word/phrase "' + phrase + '" set apart from the rest of the text';
     return makeField(text);
   }
@@ -225,9 +240,11 @@
     var fixedEntries = getFixedEntries().map(toEntry);
     var accentField = buildAccentField();
     if (accentField) fixedEntries.push({ label: "Accent", field: accentField });
-    // Holiday / Theme and Buffer/Padding live in shared Style DNA — stay
-    // fixed across variations same as everything else in Core Style.
+    // Holiday / Theme, Mockup View, and Buffer/Padding live in shared Style
+    // DNA — stay fixed across variations same as everything else in Core
+    // Style.
     fixedEntries.push({ label: "Holiday / Theme", field: PromptHaus.styleDNA.getState().holiday });
+    fixedEntries.push({ label: "Mockup View", field: PromptHaus.styleDNA.getState().mockupView });
     fixedEntries = fixedEntries.concat(PromptHaus.styleDNA.getImageryEntries());
     var bufferEntry = PromptHaus.styleDNA.getBufferEntry();
     if (bufferEntry) fixedEntries.push(bufferEntry);
@@ -255,14 +272,17 @@
       var randomValue = options[Math.floor(Math.random() * options.length)];
       updateField(e.fieldName, { value: randomValue, customValue: "" });
     });
-    // Accent style may randomize too, but the typed phrase itself never does.
+    // Accent's own style fields may randomize too, but the typed phrase
+    // itself never does.
     var state = store.getState();
-    if (state.accent.include && state.accent.style.includeInPrompt) {
-      var styleOptions = state.accent.style.options || [];
-      if (styleOptions.length) {
-        var randomStyle = styleOptions[Math.floor(Math.random() * styleOptions.length)];
-        updateAccentField("style", { value: randomStyle, customValue: "" });
-      }
+    if (state.accent.include) {
+      getAccentStyleEntries().forEach(function (e) {
+        if (!e.field.includeInPrompt) return;
+        var options = e.field.options || [];
+        if (!options.length) return;
+        var randomValue = options[Math.floor(Math.random() * options.length)];
+        updateAccentField(e.fieldName, { value: randomValue, customValue: "" });
+      });
     }
   }
 
@@ -294,6 +314,7 @@
 
     var holidayResolved = PromptHaus.engine.resolveFields([
       { label: "Holiday / Theme", field: PromptHaus.styleDNA.getState().holiday },
+      { label: "Mockup View", field: PromptHaus.styleDNA.getState().mockupView },
     ]);
     if (holidayResolved.length) groups.push({ title: "Holiday / Theme", items: holidayResolved });
 

@@ -215,6 +215,19 @@
   var IMAGERY_SLOT_NAMES = ["slot1", "slot2", "slot3"];
   var IMAGERY_SLOT_LABELS = { slot1: "Imagery 1", slot2: "Imagery 2", slot3: "Imagery 3" };
 
+  // Mockup View — shared across every mode for the same reason as Holiday/
+  // Theme/Buffer: which product/surface the design is shown on applies
+  // just as much to a Character portrait or Graphics design as it does to
+  // Text lettering, where this originally lived alone.
+  var MOCKUP_VIEW_OPTIONS = PromptHaus.util.sortAlpha([
+    "none", "on a black t-shirt", "on a white t-shirt", "on a black sweatshirt",
+    "on a white sweatshirt", "large", "poster mockup", "candle mockup", "tote bag mockup",
+    "tumbler mockup", "laptop mockup", "decal mockup", "onesie mockup", "fitted cap mockup",
+    "trucker hat mockup", "phone case mockup", "shopping bag mockup", "perfume mockup",
+    "ebook cover mockup", "billboard mockup", "storefront mockup", "sticker sheet mockup",
+    "coffee mug mockup", "hat patch mockup", "notebook cover mockup",
+  ]);
+
   // Sensible default mapping used for the aspect-ratio auto-suggest.
   // Square-ish print goods -> 1:1, packaging/labels & portrait social -> 4:5,
   // phone-native vertical formats -> 9:16. Adjustable later; nothing in the
@@ -292,6 +305,7 @@
       slot2: PromptHaus.util.makeGroupedField("", IMAGERY_GROUPS, { quantity: 1 }),
       slot3: PromptHaus.util.makeGroupedField("", IMAGERY_GROUPS, { quantity: 1 }),
     },
+    mockupView: PromptHaus.util.makeField("none", MOCKUP_VIEW_OPTIONS),
   });
 
   function setProjectType(newValue) {
@@ -341,6 +355,10 @@
 
   function setAddBuffer(enabled) {
     store.setState({ addBuffer: enabled });
+  }
+
+  function setMockupView(newValue) {
+    PromptHaus.util.updateField(store, "mockupView", { value: newValue });
   }
 
   // Shared synthetic entry every mode's assembler mixes into its own field
@@ -405,6 +423,7 @@
     setHoliday: setHoliday,
     setAddBuffer: setAddBuffer,
     getBufferEntry: getBufferEntry,
+    setMockupView: setMockupView,
     updateImagerySlot: updateImagerySlot,
     setImageryQuantity: setImageryQuantity,
     getImagerySlotEntries: getImagerySlotEntries,
