@@ -17,6 +17,19 @@
 
 {{ 'prompt-builder.css' | asset_url | stylesheet_tag }}
 
+{% comment %}
+  Rendered as a sibling of #prompt-haus-app, never inside it — the JS does
+  root.innerHTML = "" on every re-render, which would wipe out any
+  Liquid-rendered content placed inside that div.
+{% endcomment %}
+<div class="ph-brand-header">
+  <div class="ph-marketing__hero">
+    <p class="ph-marketing__eyebrow">{{ section.settings.brand_eyebrow }}</p>
+    <h1 class="ph-marketing__heading">{{ section.settings.brand_heading }}</h1>
+    <div class="ph-marketing__subheading">{{ section.settings.brand_subheading }}</div>
+  </div>
+</div>
+
 {% if ph_has_access %}
   <div id="prompt-haus-app" data-section-id="{{ section.id }}"></div>
 
@@ -49,6 +62,24 @@
 {
   "name": "Prompt Haus Builder",
   "settings": [
+    {
+      "type": "text",
+      "id": "brand_eyebrow",
+      "label": "Eyebrow text",
+      "default": "Black Sheep Creations & Inspirations"
+    },
+    {
+      "type": "text",
+      "id": "brand_heading",
+      "label": "Heading",
+      "default": "The AI Creator's Prompt Haus"
+    },
+    {
+      "type": "textarea",
+      "id": "brand_subheading",
+      "label": "Subheading",
+      "default": "Turn your ideas into ready-to-use AI prompts for art, products, content, branding, and creative projects. Customized your way."
+    },
     {
       "type": "text",
       "id": "access_tag",

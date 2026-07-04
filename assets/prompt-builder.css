@@ -5,7 +5,8 @@
    the custom properties can't just live scoped to that one selector. */
 #prompt-haus-app,
 .ph-locked,
-.ph-marketing {
+.ph-marketing,
+.ph-brand-header {
   --ph-cream: #FAF6EF;
   --ph-black: #1A1815;
   --ph-gold: #C9A84C;
@@ -23,6 +24,24 @@
   max-width: 1280px;
   margin: 0 auto;
   padding: 24px 16px 64px;
+}
+
+/* Branded header above the tool page (sections/prompt-builder.liquid) —
+   sibling of #prompt-haus-app, reuses .ph-marketing__hero's eyebrow/
+   heading/subheading styling for consistent branding across both pages. */
+.ph-brand-header {
+  background: var(--ph-cream);
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 40px 16px 16px;
+}
+/* .ph-marketing__hero's own margin-bottom (spacing before its video/CTA on
+   the marketing page) would otherwise leave a gap of the theme's page
+   background showing between this header and the tool/locked-state below,
+   since both are separate cream-colored blocks rather than one continuous
+   background. */
+.ph-brand-header .ph-marketing__hero {
+  margin-bottom: 0;
 }
 
 #prompt-haus-app * {
