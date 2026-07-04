@@ -437,7 +437,7 @@
     var hauteResolved = PromptHaus.engine.resolveFields(hauteEntries);
     var plateTextEntry = buildPlateTextEntry();
     if (plateTextEntry) hauteResolved.push({ label: plateTextEntry.label, value: PromptHaus.engine.resolveFieldValue(plateTextEntry.field) });
-    if (hauteResolved.length) groups.push({ title: "Haute Details", items: hauteResolved });
+    if (hauteResolved.length) groups.push({ title: "Custom Vanity Plates", items: hauteResolved });
 
     var transportEntries = [{ label: "Transportation", field: state.transportation.type }];
     if (PromptHaus.engine.resolveFieldValue(state.transportation.type)) {

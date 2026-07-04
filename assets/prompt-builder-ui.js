@@ -141,8 +141,8 @@
     "Extras": "sparkle", "Companion Details": "paw", "Couple Dynamic": "heart",
     "Core Style": "text", "Variation Details": "layers", "Accent Details": "sparkle",
     "Illustrated Style": "image", "Realistic Style": "image", "Frame It": "crop",
-    "Vanity Plate Details": "gift", "What Should the Plate Say?": "text", "Makeup & Nails": "sparkle",
-    "Mascot Link": "paw", "What Is It": "sparkle", "Haute Details": "gift",
+    "Makeup & Nails": "sparkle",
+    "Mascot Link": "paw", "What Is It": "sparkle", "Custom Vanity Plates": "gift",
     "Imagery": "image",
   };
 
@@ -355,6 +355,24 @@
     if (subtitle) children.push(el("p", { class: "ph-field-group__subtitle", text: subtitle }));
     children.push(fieldsContainer);
     return el("fieldset", { class: "ph-field-group" }, children);
+  }
+
+  // Same field-row rendering as renderFieldGroup, minus the wrapping
+  // <fieldset>/legend/border — for stitching several logical groups of
+  // fields into one continuous section (e.g. Custom Vanity Plates) instead
+  // of nesting a bordered box inside another bordered box, which reads as
+  // separate, disconnected sections and makes it easy to miss fields.
+  function renderPlainFieldRow(entries, onChange) {
+    var fieldsContainer = el("div", { class: "ph-field-group__fields" });
+    entries.forEach(function (entry) {
+      var renderFn = entry.field.isFreeText ? renderFreeTextField : renderField;
+      fieldsContainer.appendChild(
+        renderFn(entry, function (changes) {
+          onChange(entry, changes);
+        })
+      );
+    });
+    return fieldsContainer;
   }
 
   // Like renderField, but adds a quantity number input ("3x sparkles") —
@@ -932,14 +950,18 @@
       )
     );
 
-    // Haute Details
+    // Custom Vanity Plates — one continuous section rather than nested
+    // boxes-within-a-box (Plate Text used to get its own bordered
+    // sub-section, then Vanity Plate Details another one below it), which
+    // read as separate/disconnected and made it easy to miss fields that
+    // were actually part of the same feature.
     var hauteSection = el("fieldset", { class: "ph-field-group" });
-    hauteSection.appendChild(el("legend", { class: "ph-field-group__title" }, [icon("gift"), el("span", { text: "Haute Details" })]));
+    hauteSection.appendChild(el("legend", { class: "ph-field-group__title" }, [icon("gift"), el("span", { text: "Custom Vanity Plates" })]));
     var vanityPlateField = renderField({ label: "Vanity Plate Type", field: state.haute.vanityPlateType }, function (changes) {
       graphics.updateVanityPlateType(changes);
       renderApp();
     });
-    vanityPlateField.title = "Picking any type here unlocks the full frame/border/plate-finish detail fields below.";
+    vanityPlateField.title = "Picking any type here unlocks the plate text/frame/border/finish fields below.";
     hauteSection.appendChild(el("div", { class: "ph-field-group__fields" }, [vanityPlateField]));
 
     var vanityPlateOn = PromptHaus.engine.resolveFieldValue(state.haute.vanityPlateType);
@@ -948,8 +970,7 @@
       // actually says is the first thing anyone wants to nail down, before
       // fussing over frame/border/finish details below it.
       hauteSection.appendChild(
-        renderFieldGroup(
-          "What Should the Plate Say?",
+        renderPlainFieldRow(
           [
             { fieldName: "plateText", label: "Plate Text", field: state.haute.plateText },
             { fieldName: "plateTextColor", label: "Plate Text Color", field: state.haute.plateTextColor },
@@ -962,14 +983,10 @@
         )
       );
       hauteSection.appendChild(
-        renderFieldGroup(
-          "Vanity Plate Details",
-          graphics.getHauteDetailEntries(),
-          function (entry, changes) {
-            graphics.updateHauteDetailField(entry.fieldName, changes);
-            renderApp();
-          }
-        )
+        renderPlainFieldRow(graphics.getHauteDetailEntries(), function (entry, changes) {
+          graphics.updateHauteDetailField(entry.fieldName, changes);
+          renderApp();
+        })
       );
     }
     panel.appendChild(hauteSection);
