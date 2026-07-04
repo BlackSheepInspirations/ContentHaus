@@ -217,7 +217,7 @@
   }
 
   // Used both by the UI (to render the editable Couple Dynamic fieldset)
-  // and by the assembler below — does NOT include Holiday Theme, since
+  // and by the assembler below — does NOT include Holiday / Theme, since
   // that lives in Style DNA and has its own editor in the Style DNA bar;
   // injecting it here would duplicate that editor with a handler that
   // doesn't know how to write back to Style DNA.
@@ -228,12 +228,12 @@
     });
   }
 
-  // Holiday Theme and Buffer/Padding resolved as their own entries —
+  // Holiday / Theme and Buffer/Padding resolved as their own entries —
   // folded into the assembler's scene-level output (not the UI-facing
   // getSceneFieldEntries above) since they're exactly the kind of "the
   // couple can't contradict each other" field Couple Dynamic exists for.
   function getSharedStyleDNAEntries() {
-    var entries = [{ label: "Holiday Theme", field: PromptHaus.styleDNA.getState().holiday }];
+    var entries = [{ label: "Holiday / Theme", field: PromptHaus.styleDNA.getState().holiday }];
     entries = entries.concat(PromptHaus.styleDNA.getImageryEntries());
     var bufferEntry = PromptHaus.styleDNA.getBufferEntry();
     if (bufferEntry) entries.push(bufferEntry);

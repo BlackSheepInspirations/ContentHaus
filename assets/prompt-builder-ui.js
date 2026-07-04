@@ -298,7 +298,7 @@
     ]);
   }
 
-  // Imagery — shared across every mode (Style DNA, same as Holiday Theme/
+  // Imagery — shared across every mode (Style DNA, same as Holiday / Theme/
   // Buffer), so it's rendered once here and dropped into each mode's panel
   // rather than reimplemented per mode. 3 independent slots so someone can
   // layer e.g. a cross + a dragonfly + the sun without a checkbox-list UI.
@@ -1263,7 +1263,7 @@
         el("div", { class: "ph-styledna__field" }, [labelWithIcon("crop", "Aspect Ratio"), aspectSelect, autoBadge]),
         el("div", { class: "ph-styledna__field" }, [labelWithIcon("monitor", "Target Platform"), platformSelect]),
         el("div", { class: "ph-styledna__field" }, [labelWithIcon("sparkle", "Variations"), variationSelect]),
-        el("div", { class: "ph-styledna__field" }, [labelWithIcon("gift", "Holiday Theme"), holidaySelect]),
+        el("div", { class: "ph-styledna__field" }, [labelWithIcon("gift", "Holiday / Theme"), holidaySelect]),
         bufferField,
       ])
     );
@@ -1343,7 +1343,7 @@
       left.appendChild(el("p", { class: "ph-coming-soon", text: MODE_LABELS[activeMode] + " Mode is coming soon." }));
     }
 
-    // Imagery lives in shared Style DNA (like Holiday Theme/Buffer), so it
+    // Imagery lives in shared Style DNA (like Holiday / Theme/Buffer), so it
     // renders once here rather than being duplicated into all 5 panels.
     left.appendChild(renderImagerySection());
 

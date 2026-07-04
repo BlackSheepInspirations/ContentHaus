@@ -124,13 +124,16 @@
     "Leonardo AI", "Adobe Firefly", "Flux",
   ];
 
-  // Holiday Theme — shared across every mode (a holiday theme applies just
-  // as much to Text lettering or a Couples scene as to a Character
-  // portrait), so it lives here rather than duplicated per mode. Grouped
-  // like Character Type: 40 items browses better by category than as one
-  // flat wall. Spans US federal/civic + religious/cultural observances
-  // rather than skewing toward any single one.
+  // Holiday / Theme — shared across every mode (a theme applies just as
+  // much to Text lettering or a Couples scene as to a Character portrait),
+  // so it lives here rather than duplicated per mode. Grouped like
+  // Character Type: browses better by category than as one flat wall.
+  // Spans US federal/civic + religious/cultural observances rather than
+  // skewing toward any single one, plus a Lifestyle/Hobbies/Niches group
+  // for non-calendar themes (Coffee Culture, Hustle Culture, etc.) — this
+  // field covers "what's the vibe," not just "what date is it."
   var HOLIDAY_GROUPS = [
+    { label: "General", options: ["none"] },
     {
       label: "US Federal & Civic",
       options: [
@@ -156,15 +159,24 @@
         "father's day", "pride month", "earth day", "kwanzaa",
       ],
     },
+    {
+      label: "Lifestyle, Hobbies & Niches",
+      options: [
+        "back to school", "graduation", "marriage/wedding/engagement", "parenting",
+        "mental health awareness", "self love", "coffee culture", "wine culture", "work life",
+        "hustle culture", "motivational/inspirational", "animal lover", "travel/adventure",
+        "aviation/transportation",
+      ],
+    },
   ];
 
-  // Imagery — shared across every mode, same rationale as Holiday Theme:
+  // Imagery — shared across every mode, same rationale as Holiday / Theme:
   // a cross worked into the background or a dragonfly perched on a sleeve
   // applies just as much to a Text lettering design as a Character
   // portrait. Grouped like Character Type/Holiday: browses better by
   // category than as one flat wall. Faith-Based stays deliberately
   // multi-tradition (not skewed to one religion); Holiday imagery is kept
-  // distinct from Holiday Theme above — Theme sets the overall mood/season,
+  // distinct from Holiday / Theme above — Theme sets the overall mood/season,
   // this is a literal object/symbol integrated into the image, so e.g.
   // "menorah" only lives here, not duplicated in both.
   var IMAGERY_GROUPS = [
@@ -332,7 +344,7 @@
   }
 
   // Shared synthetic entry every mode's assembler mixes into its own field
-  // list (same treatment as Holiday Theme) — null when unchecked, so it
+  // list (same treatment as Holiday / Theme) — null when unchecked, so it
   // resolves to nothing rather than a literal "false" appearing anywhere.
   function getBufferEntry() {
     if (!store.getState().addBuffer) return null;

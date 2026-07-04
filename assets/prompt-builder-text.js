@@ -225,9 +225,9 @@
     var fixedEntries = getFixedEntries().map(toEntry);
     var accentField = buildAccentField();
     if (accentField) fixedEntries.push({ label: "Accent", field: accentField });
-    // Holiday Theme and Buffer/Padding live in shared Style DNA — stay
+    // Holiday / Theme and Buffer/Padding live in shared Style DNA — stay
     // fixed across variations same as everything else in Core Style.
-    fixedEntries.push({ label: "Holiday Theme", field: PromptHaus.styleDNA.getState().holiday });
+    fixedEntries.push({ label: "Holiday / Theme", field: PromptHaus.styleDNA.getState().holiday });
     fixedEntries = fixedEntries.concat(PromptHaus.styleDNA.getImageryEntries());
     var bufferEntry = PromptHaus.styleDNA.getBufferEntry();
     if (bufferEntry) fixedEntries.push(bufferEntry);
@@ -293,9 +293,9 @@
     if (variableResolved.length) groups.push({ title: "Variation Details", items: variableResolved });
 
     var holidayResolved = PromptHaus.engine.resolveFields([
-      { label: "Holiday Theme", field: PromptHaus.styleDNA.getState().holiday },
+      { label: "Holiday / Theme", field: PromptHaus.styleDNA.getState().holiday },
     ]);
-    if (holidayResolved.length) groups.push({ title: "Holiday Theme", items: holidayResolved });
+    if (holidayResolved.length) groups.push({ title: "Holiday / Theme", items: holidayResolved });
 
     var imageryEntries = PromptHaus.styleDNA.getImageryEntries();
     if (imageryEntries.length) {

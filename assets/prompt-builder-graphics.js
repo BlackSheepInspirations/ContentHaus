@@ -78,7 +78,7 @@
     "copper", "champagne gold", "holographic", "red chrome",
   ]);
 
-  // Grouped like Character Type/Holiday Theme — ~65 items browses better
+  // Grouped like Character Type/Holiday / Theme — ~65 items browses better
   // by region than as one flat wall. No literal "Custom" entry: every
   // field already has an "Or type your own..." override, so a dedicated
   // sentinel option would just duplicate that.
@@ -369,7 +369,7 @@
       entries.push({ label: "Transportation Color", field: state.transportation.color });
     }
 
-    entries.push({ label: "Holiday Theme", field: PromptHaus.styleDNA.getState().holiday });
+    entries.push({ label: "Holiday / Theme", field: PromptHaus.styleDNA.getState().holiday });
     entries = entries.concat(PromptHaus.styleDNA.getImageryEntries());
     var bufferEntry = PromptHaus.styleDNA.getBufferEntry();
     if (bufferEntry) entries.push(bufferEntry);
@@ -425,9 +425,9 @@
     if (transportResolved.length) groups.push({ title: "Transportation", items: transportResolved });
 
     var holidayResolved = PromptHaus.engine.resolveFields([
-      { label: "Holiday Theme", field: PromptHaus.styleDNA.getState().holiday },
+      { label: "Holiday / Theme", field: PromptHaus.styleDNA.getState().holiday },
     ]);
-    if (holidayResolved.length) groups.push({ title: "Holiday Theme", items: holidayResolved });
+    if (holidayResolved.length) groups.push({ title: "Holiday / Theme", items: holidayResolved });
 
     var imageryEntries = PromptHaus.styleDNA.getImageryEntries();
     if (imageryEntries.length) {

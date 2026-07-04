@@ -511,10 +511,10 @@
     var entries = getActiveFieldEntries().map(function (e) {
       return { label: e.label, field: e.field };
     });
-    // Holiday Theme, Imagery, and Buffer/Padding live in shared Style DNA,
+    // Holiday / Theme, Imagery, and Buffer/Padding live in shared Style DNA,
     // not Character's own state, since they apply the same way across
     // every mode.
-    entries.push({ label: "Holiday Theme", field: PromptHaus.styleDNA.getState().holiday });
+    entries.push({ label: "Holiday / Theme", field: PromptHaus.styleDNA.getState().holiday });
     entries = entries.concat(PromptHaus.styleDNA.getImageryEntries());
     var bufferEntry = PromptHaus.styleDNA.getBufferEntry();
     if (bufferEntry) entries.push(bufferEntry);
@@ -582,9 +582,9 @@
       if (resolved.length) groups.push({ title: titleFor[groupName], items: resolved });
     });
     var holidayResolved = PromptHaus.engine.resolveFields([
-      { label: "Holiday Theme", field: PromptHaus.styleDNA.getState().holiday },
+      { label: "Holiday / Theme", field: PromptHaus.styleDNA.getState().holiday },
     ]);
-    if (holidayResolved.length) groups.push({ title: "Holiday Theme", items: holidayResolved });
+    if (holidayResolved.length) groups.push({ title: "Holiday / Theme", items: holidayResolved });
     var imageryEntries = PromptHaus.styleDNA.getImageryEntries();
     if (imageryEntries.length) {
       groups.push({
