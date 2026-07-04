@@ -87,7 +87,7 @@
     "Extras": "sparkle", "Companion Details": "paw", "Couple Dynamic": "heart",
     "Core Style": "text", "Variation Details": "layers", "Accent Details": "sparkle",
     "Illustrated Style": "image", "Realistic Style": "image", "Frame It": "crop",
-    "Vanity Plate Details": "gift", "Plate Text": "text", "Makeup & Nails": "sparkle",
+    "Vanity Plate Details": "gift", "What Should the Plate Say?": "text", "Makeup & Nails": "sparkle",
     "Mascot Link": "paw", "What Is It": "sparkle", "Haute Details": "gift",
     "Imagery": "image",
   };
@@ -886,19 +886,12 @@
 
     var vanityPlateOn = PromptHaus.engine.resolveFieldValue(state.haute.vanityPlateType);
     if (vanityPlateOn) {
+      // Comes first, right after picking a plate type — what the plate
+      // actually says is the first thing anyone wants to nail down, before
+      // fussing over frame/border/finish details below it.
       hauteSection.appendChild(
         renderFieldGroup(
-          "Vanity Plate Details",
-          graphics.getHauteDetailEntries(),
-          function (entry, changes) {
-            graphics.updateHauteDetailField(entry.fieldName, changes);
-            renderApp();
-          }
-        )
-      );
-      hauteSection.appendChild(
-        renderFieldGroup(
-          "Plate Text",
+          "What Should the Plate Say?",
           [
             { fieldName: "plateText", label: "Plate Text", field: state.haute.plateText },
             { fieldName: "plateTextColor", label: "Plate Text Color", field: state.haute.plateTextColor },
@@ -906,6 +899,16 @@
           function (entry, changes) {
             if (entry.fieldName === "plateText") graphics.updatePlateText(changes);
             else graphics.updatePlateTextColor(changes);
+            renderApp();
+          }
+        )
+      );
+      hauteSection.appendChild(
+        renderFieldGroup(
+          "Vanity Plate Details",
+          graphics.getHauteDetailEntries(),
+          function (entry, changes) {
+            graphics.updateHauteDetailField(entry.fieldName, changes);
             renderApp();
           }
         )

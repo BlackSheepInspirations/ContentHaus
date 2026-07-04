@@ -31,51 +31,63 @@
   ]);
 
   var VANITY_PLATE_TYPE_OPTIONS = sortAlpha([
-    "none", "diamond bling", "rhinestone glam", "crystal luxury", "luxury pearl",
-    "rose gold glitter", "holographic sparkle", "pink bling deluxe", "sapphire glam",
-    "emerald luxury", "onyx bling", "opal shimmer", "platinum frost", "amethyst sparkle",
+    "none", "iced diamond bling", "glam rhinestone", "luxe crystal", "pearl elegance",
+    "rose gold sparkle", "holographic shimmer", "deluxe pink bling", "sapphire glam",
+    "emerald luxe", "onyx bling", "opal shimmer", "frosted platinum", "amethyst glam",
+    // new
+    "ruby red bling", "citrine gold sparkle", "turquoise glam",
   ]);
 
   var BASE_STYLE_OPTIONS = sortAlpha([
-    "luxury oem bling vanity plate", "luxury diamond frame", "luxury crystal frame",
-    "luxury chrome frame", "luxury rose gold frame", "luxury gold frame",
-    "luxury pink glam frame", "luxury black diamond frame", "luxury platinum frame",
-    "luxury iced-out frame", "luxury sapphire frame", "luxury emerald frame",
-    "luxury onyx frame", "luxury opal frame", "luxury two-tone frame", "luxury matte black frame",
+    "oem bling plate", "diamond-studded frame", "crystal-encrusted frame", "chrome luxe frame",
+    "rose gold frame", "gold-plated frame", "pink glam frame", "black diamond frame",
+    "platinum frame", "fully iced frame", "sapphire frame", "emerald frame", "onyx frame",
+    "opal frame", "two-tone frame", "matte black frame",
+    // new
+    "engraved vintage frame", "brushed titanium frame",
   ]);
 
   var BORDER_FINISH_OPTIONS = sortAlpha([
-    "silver crystal", "pink crystal", "rose gold crystal", "gold crystal", "champagne crystal",
-    "black diamond", "iridescent crystal", "ab crystal (aurora borealis)", "mixed jewel",
-    "diamond dust", "emerald crystal", "sapphire crystal", "ruby crystal", "amethyst crystal",
-    "opal shimmer", "frosted crystal",
+    "silver crystal trim", "pink crystal trim", "rose gold crystal", "gold crystal trim",
+    "champagne crystal", "black diamond trim", "iridescent crystal", "aurora crystal (ab)",
+    "mixed jewel trim", "diamond dust shimmer", "emerald crystal", "sapphire crystal",
+    "ruby crystal", "amethyst crystal", "opal shimmer trim", "frosted crystal",
+    // new
+    "smoky quartz trim", "moonstone shimmer",
   ]);
 
   // Shared list for both Top Accent and Bottom Accent.
   var ACCENT_OPTIONS = sortAlpha([
-    "none", "jeweled crown", "princess crown", "queen crown", "rhinestone bow", "butterfly",
-    "angel wings", "heart", "tiara", "star burst", "halo", "flower crown", "laurel wreath",
-    "lightning bolt", "cross", "paw print",
+    "none", "gem crown", "princess tiara", "queen's crown", "rhinestone bow", "butterfly charm",
+    "angel wings", "sparkling heart", "classic tiara", "starburst shimmer", "glowing halo",
+    "flower crown", "laurel wreath", "lightning bolt", "faith cross", "paw print",
+    // new
+    "shooting star", "infinity charm",
   ]);
 
   var PLATE_FINISH_OPTIONS = sortAlpha([
-    "warm ivory automotive enamel", "pure white automotive enamel", "pearl white", "satin white",
-    "gloss white", "metallic silver", "gloss black", "rose gold metal", "matte black",
-    "champagne gold metal", "copper metal", "deep red automotive enamel", "navy automotive enamel",
-    "chrome mirror",
+    "ivory enamel", "white enamel", "pearl white sheen", "satin white", "glossy white",
+    "metallic silver", "glossy black", "rose gold metallic", "matte black",
+    "champagne gold metallic", "copper metallic", "deep red enamel", "navy enamel", "mirror chrome",
+    // new
+    "gunmetal gray", "champagne pearl",
   ]);
 
   var LETTER_STYLE_OPTIONS = sortAlpha([
-    "oem embossed tall condensed", "raised embossed block", "deep embossed luxury",
-    "chrome embossed", "matte black embossed", "script embossed", "retro block embossed",
-    "bold sans embossed", "cursive luxury embossed", "stencil embossed",
+    "tall condensed embossed", "raised block embossed", "deep luxe embossed", "chrome embossed",
+    "matte black embossed", "elegant script embossed", "retro block embossed", "bold sans embossed",
+    "flowing cursive embossed", "stencil-cut embossed",
+    // new
+    "engraved serif", "3d raised lettering",
   ]);
 
   // Reused for both Letter Color and Plate Text Color — same kind of
   // choice (color of embossed/printed lettering), no need for two lists.
   var LETTER_COLOR_OPTIONS = sortAlpha([
-    "gloss black", "chrome", "silver", "gold", "rose gold", "pink chrome", "white", "matte black",
-    "copper", "champagne gold", "holographic", "red chrome",
+    "black gloss", "chrome", "silver", "gold", "rose gold", "chrome pink", "white", "matte black",
+    "copper", "gold champagne", "holographic", "chrome red",
+    // new
+    "navy blue", "emerald green",
   ]);
 
   // Grouped like Character Type/Holiday / Theme — ~65 items browses better
