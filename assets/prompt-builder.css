@@ -295,6 +295,51 @@
   color: var(--ph-teal);
 }
 
+/* Starter Presets — clickable card row at the top of a mode's panel */
+.ph-preset-row {
+  margin-bottom: 20px;
+}
+.ph-preset-row__label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ph-teal);
+}
+.ph-preset-row__cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.ph-preset-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 200px;
+  padding: 12px 14px;
+  border: 1.5px solid var(--ph-border);
+  border-radius: 12px;
+  background: var(--ph-cream);
+  text-align: left;
+  cursor: pointer;
+}
+.ph-preset-card:hover {
+  border-color: var(--ph-gold);
+}
+.ph-preset-card__name {
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--ph-espresso);
+}
+.ph-preset-card__description {
+  font-size: 12px;
+  color: var(--ph-charcoal);
+  opacity: 0.8;
+  line-height: 1.35;
+}
+
 /* Couples Mode */
 .ph-btn--swap {
   background: var(--ph-teal);

@@ -311,7 +311,41 @@
     return groups;
   }
 
+  // ---------------------------------------------------------------------
+  // Starter Presets — Couple Dynamic (scene-level) fields only, same
+  // reasoning as Character Mode: identity fields for either person stay
+  // untouched, presets are a vibe/scene starting point, not a cast choice.
+  // ---------------------------------------------------------------------
+  var PRESETS = [
+    {
+      id: "anniversaryPortrait",
+      name: "Anniversary Portrait",
+      description: "In love, gazing at each other, golden hour glow, ornate frame.",
+      apply: function () {
+        updateCoupleDynamicField("relationshipVibe", { value: "in love", customValue: "" });
+        updateCoupleDynamicField("poseInteraction", { value: "gazing at each other", customValue: "" });
+        updateCoupleDynamicField("background", { value: "soft pastel gradient", customValue: "" });
+        updateCoupleDynamicField("lightingEffects", { value: "golden hour glow", customValue: "" });
+        updateCoupleDynamicField("coordinationStyle", { value: "coordinated colors", customValue: "" });
+        updateCoupleDynamicField("framing", { value: "ornate decorative frame", customValue: "" });
+      },
+    },
+    {
+      id: "matchingBesties",
+      name: "Matching Besties",
+      description: "Best friends, side by side, matching accessories, playful backdrop.",
+      apply: function () {
+        updateCoupleDynamicField("relationshipVibe", { value: "best friends", customValue: "" });
+        updateCoupleDynamicField("poseInteraction", { value: "side by side", customValue: "" });
+        updateCoupleDynamicField("coordinationStyle", { value: "matching accessories", customValue: "" });
+        updateCoupleDynamicField("background", { value: "candy-colored polka dots", customValue: "" });
+        updateCoupleDynamicField("framing", { value: "no frame", customValue: "" });
+      },
+    },
+  ];
+
   PromptHaus.couples = Object.assign({}, store, {
+    presets: PRESETS,
     setBaseType: setBaseType,
     updateCoupleDynamicField: updateCoupleDynamicField,
     updatePersonField: updatePersonField,

@@ -498,7 +498,60 @@
     store.setState(buildInitialState());
   }
 
+  // ---------------------------------------------------------------------
+  // Starter Presets — two of these also set shared Style DNA (Holiday/
+  // Theme, Imagery), which is intentional: a "Coffee Lover" or "Faith-
+  // Based" starting point should carry that theme into whichever other
+  // mode the shopper switches to next, same as picking it manually would.
+  // ---------------------------------------------------------------------
+  var PRESETS = [
+    {
+      id: "vanityPlateBling",
+      name: "Vanity Plate Bling",
+      description: "Diamond bling plate, luxury diamond frame, chrome lettering.",
+      apply: function () {
+        updateVanityPlateType({ value: "diamond bling", customValue: "" });
+        updateHauteDetailField("baseStyle", { value: "luxury diamond frame", customValue: "" });
+        updateHauteDetailField("plateFinish", { value: "pearl white", customValue: "" });
+        updateHauteDetailField("letterColor", { value: "chrome", customValue: "" });
+      },
+    },
+    {
+      id: "faithBasedGraphic",
+      name: "Faith-Based Graphic",
+      description: "Illustrated style, dreamy cloud backdrop, cross worked into the imagery.",
+      apply: function () {
+        setStyleCategory("illustrated");
+        updateFrameItField("background", { value: "dreamy cloud scene", customValue: "" });
+        updateFrameItField("lightingEffects", { value: "soft diffused light", customValue: "" });
+        PromptHaus.styleDNA.updateImagerySlot("slot1", { value: "cross", customValue: "" });
+      },
+    },
+    {
+      id: "coffeeLoverGraphic",
+      name: "Coffee Lover Graphic",
+      description: "Realistic clean vector design, coffee cup prop, Coffee Culture theme.",
+      apply: function () {
+        setStyleCategory("realistic");
+        updateRealisticStyle({ value: "clean vector flat design", customValue: "" });
+        updateWhatIsItField("props", { value: "coffee cup", customValue: "" });
+        setWhatIsItQuantity("props", 1);
+        PromptHaus.styleDNA.setHoliday("coffee culture");
+      },
+    },
+    {
+      id: "aviationTravelGraphic",
+      name: "Aviation/Travel Graphic",
+      description: "Air transportation category, Travel/Adventure theme.",
+      apply: function () {
+        updateTransportationCategory({ value: "air" });
+        PromptHaus.styleDNA.setHoliday("travel/adventure");
+      },
+    },
+  ];
+
   PromptHaus.graphics = Object.assign({}, store, {
+    presets: PRESETS,
     updateWhatIsItField: updateWhatIsItField,
     setWhatIsItQuantity: setWhatIsItQuantity,
     setStyleCategory: setStyleCategory,

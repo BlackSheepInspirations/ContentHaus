@@ -313,7 +313,53 @@
     return groups;
   }
 
+  // ---------------------------------------------------------------------
+  // Starter Presets — sets Core Style/Variation Details fields only,
+  // never Text Content itself (yourText stays whatever the shopper typed).
+  // ---------------------------------------------------------------------
+  var PRESETS = [
+    {
+      id: "boldStatementTee",
+      name: "Bold Statement Tee",
+      description: "Chunky varsity letters, vibrant multicolor, uppercase.",
+      apply: function () {
+        updateField("letterStyle", { value: "chunky varsity letters", customValue: "" });
+        updateField("colorScheme", { value: "vibrant multicolor", customValue: "" });
+        updateField("textCase", { value: "uppercase", customValue: "" });
+      },
+    },
+    {
+      id: "bohoScript",
+      name: "Boho Script",
+      description: "Calligraphy lettering, pastel color scheme, title case.",
+      apply: function () {
+        updateField("letterStyle", { value: "calligraphy", customValue: "" });
+        updateField("colorScheme", { value: "pastel", customValue: "" });
+        updateField("textCase", { value: "title case", customValue: "" });
+      },
+    },
+    {
+      id: "retroVarsityText",
+      name: "Retro Varsity Text",
+      description: "Chenille varsity patch lettering, bold gradient blend.",
+      apply: function () {
+        updateField("letterStyle", { value: "chenille varsity patch", customValue: "" });
+        updateField("colorScheme", { value: "bold gradient blend", customValue: "" });
+      },
+    },
+    {
+      id: "faithBasedScript",
+      name: "Faith-Based Script",
+      description: "Brush lettering script, champagne gold color scheme.",
+      apply: function () {
+        updateField("letterStyle", { value: "brush lettering script", customValue: "" });
+        updateField("colorScheme", { value: "champagne gold", customValue: "" });
+      },
+    },
+  ];
+
   PromptHaus.text = Object.assign({}, store, {
+    presets: PRESETS,
     updateField: updateField,
     getSelectionsByGroup: getSelectionsByGroup,
     toggleAccentInclude: toggleAccentInclude,

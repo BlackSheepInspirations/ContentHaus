@@ -599,7 +599,90 @@
     return groups;
   }
 
+  // ---------------------------------------------------------------------
+  // Starter Presets — a curated jumping-off point, not a final answer.
+  // Deliberately only touch style/scene fields (Character Type, Art
+  // Finish, Outfit, Background, Pose, Lighting, Framing) and never
+  // Ethnicity/Skin Tone/Gender/Age/Body Type/Occupation — those are who
+  // the shopper is depicting, not a stylistic choice a preset should be
+  // making for them. Every field a preset sets stays fully editable
+  // afterward, same as anything else in the panel.
+  // ---------------------------------------------------------------------
+  var PRESETS = [
+    {
+      id: "boyMomChibi",
+      name: "Boy Mom Chibi",
+      description: "Exaggerated chibi style, hoodie & sweatpants, graffiti wall backdrop.",
+      apply: function () {
+        setBaseType("human");
+        updateNestedField("style", "characterType", { value: "signature exaggerated chibi", customValue: "" });
+        updateNestedField("style", "artFinish", { value: "high gloss illustration", customValue: "" });
+        updateNestedField("styling", "outfit", { value: "hoodie and sweatpants", customValue: "" });
+        updateNestedField("presentation", "background", { value: "urban graffiti wall", customValue: "" });
+        updateNestedField("presentation", "pose", { value: "hands on hips", customValue: "" });
+        updateNestedField("presentation", "framing", { value: "no frame", customValue: "" });
+      },
+    },
+    {
+      id: "girlMomGlam",
+      name: "Girl Mom Glam",
+      description: "Luxury glam chibi, glam makeup, sparkly confetti backdrop.",
+      apply: function () {
+        setBaseType("human");
+        updateNestedField("style", "characterType", { value: "luxury glam chibi", customValue: "" });
+        updateNestedField("style", "artFinish", { value: "candy-coated finish", customValue: "" });
+        updateNestedField("styling", "outfit", { value: "sparkly mini dress", customValue: "" });
+        updateNestedField("appearance", "extraGlamDetails", { value: "under-eye sparkle", customValue: "" });
+        updateNestedField("presentation", "background", { value: "sparkly confetti effect", customValue: "" });
+        updateNestedField("presentation", "pose", { value: "blowing a kiss", customValue: "" });
+        updateNestedField("presentation", "framing", { value: "no frame", customValue: "" });
+      },
+    },
+    {
+      id: "faithBasedBlessed",
+      name: "Faith-Based Blessed",
+      description: "Realistic illustration, soft angelic light, gold gilded frame.",
+      apply: function () {
+        setBaseType("human");
+        updateNestedField("style", "characterType", { value: "realistic human illustration", customValue: "" });
+        updateNestedField("style", "artFinish", { value: "soft airbrushed shine", customValue: "" });
+        updateNestedField("presentation", "pose", { value: "lifting hands in praise", customValue: "" });
+        updateNestedField("presentation", "dynamicSceneEffect", { value: "soft angelic light", customValue: "" });
+        updateNestedField("presentation", "background", { value: "dreamy cloud scene", customValue: "" });
+        updateNestedField("presentation", "framing", { value: "gold gilded frame", customValue: "" });
+      },
+    },
+    {
+      id: "vintageVarsity",
+      name: "Vintage Varsity",
+      description: "90s cartoon nostalgia, baseball jersey, retro film-strip frame.",
+      apply: function () {
+        setBaseType("human");
+        updateNestedField("style", "characterType", { value: "90s cartoon nostalgia", customValue: "" });
+        updateNestedField("style", "artFinish", { value: "textured painterly finish", customValue: "" });
+        updateNestedField("styling", "outfit", { value: "baseball jersey", customValue: "" });
+        updateNestedField("presentation", "background", { value: "solid white background", customValue: "" });
+        updateNestedField("presentation", "timeEra", { value: "retro 50s", customValue: "" });
+        updateNestedField("presentation", "framing", { value: "film strip border", customValue: "" });
+      },
+    },
+    {
+      id: "petLoverMascot",
+      name: "Pet Lover Mascot",
+      description: "Animal Mascot base, cartoon illustration, floral garden backdrop.",
+      apply: function () {
+        setBaseType("animalMascot");
+        updateNestedField("style", "characterType", { value: "cartoon style illustration", customValue: "" });
+        updateNestedField("style", "artFinish", { value: "glossy", customValue: "" });
+        updateNestedField("presentation", "pose", { value: "standing pose", customValue: "" });
+        updateNestedField("presentation", "background", { value: "floral garden scene", customValue: "" });
+        updateNestedField("presentation", "framing", { value: "no frame", customValue: "" });
+      },
+    },
+  ];
+
   PromptHaus.character = Object.assign({}, store, {
+    presets: PRESETS,
     setBaseType: setBaseType,
     updateNestedField: updateNestedField,
     toggleCompanionInclude: toggleCompanionInclude,

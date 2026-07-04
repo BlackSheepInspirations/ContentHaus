@@ -140,6 +140,32 @@
     return el("div", { class: "ph-pill-toggle" }, options.map(pillButton));
   }
 
+  // Starter Presets — a row of clickable cards at the top of a mode's
+  // panel. Applying one is just a fast way to fill in a bunch of fields
+  // at once; every field it touches stays fully editable afterward, same
+  // as anything a shopper picks by hand. Returns null when a mode has no
+  // presets so callers can skip appending anything.
+  function renderPresetRow(presets, onApply) {
+    if (!presets || !presets.length) return null;
+    var cards = presets.map(function (preset) {
+      var card = el("button", { type: "button", class: "ph-preset-card" }, [
+        el("span", { class: "ph-preset-card__name", text: preset.name }),
+        el("span", { class: "ph-preset-card__description", text: preset.description }),
+      ]);
+      card.addEventListener("click", function () {
+        onApply(preset);
+      });
+      return card;
+    });
+    return el("div", { class: "ph-preset-row" }, [
+      el("p", { class: "ph-preset-row__label" }, [
+        icon("sparkle"),
+        el("span", { text: "Starter Presets — click one, then customize" }),
+      ]),
+      el("div", { class: "ph-preset-row__cards" }, cards),
+    ]);
+  }
+
   function renderBaseTypeToggle(currentBaseType, onSetHuman, onSetMascot) {
     return renderTwoOptionToggle([
       { isActive: currentBaseType === "human", icon: "person", title: "Human", subtitle: "People characters", onClick: onSetHuman },
@@ -231,15 +257,15 @@
 
   // Opt-in sub-panel: a checkbox that reveals a field group when checked.
   // Shared shape for Character's Companion and Text's Accent Word/Phrase.
-  function renderSubPanel(headerText, isChecked, onToggle, renderContent) {
+  function renderSubPanel(headerText, isChecked, onToggle, renderContent, tooltip) {
     var toggle = el("input", { type: "checkbox", class: "ph-subpanel__toggle" });
     toggle.checked = isChecked;
     toggle.addEventListener("change", function () {
       onToggle(toggle.checked);
     });
-    var panel = el("div", { class: "ph-subpanel" }, [
-      el("label", { class: "ph-subpanel__header" }, [toggle, el("span", { text: headerText })]),
-    ]);
+    var header = el("label", { class: "ph-subpanel__header" }, [toggle, el("span", { text: headerText })]);
+    if (tooltip) header.title = tooltip;
+    var panel = el("div", { class: "ph-subpanel" }, [header]);
     if (isChecked) panel.appendChild(renderContent());
     return panel;
   }
@@ -353,6 +379,12 @@
 
     var panel = el("div", { class: "ph-panel ph-panel--character" });
 
+    var characterPresetRow = renderPresetRow(character.presets, function (preset) {
+      preset.apply();
+      renderApp();
+    });
+    if (characterPresetRow) panel.appendChild(characterPresetRow);
+
     panel.appendChild(
       renderBaseTypeToggle(
         state.baseType,
@@ -408,7 +440,8 @@
             ],
             handleFieldChange
           );
-        }
+        },
+        "Adds a small pet/animal alongside the main character (e.g. a puppy in a purse) — separate from the Animal Mascot base type above, which replaces the character itself."
       )
     );
 
@@ -491,6 +524,12 @@
 
     var panel = el("div", { class: "ph-panel ph-panel--couples" });
 
+    var couplesPresetRow = renderPresetRow(couples.presets, function (preset) {
+      preset.apply();
+      renderApp();
+    });
+    if (couplesPresetRow) panel.appendChild(couplesPresetRow);
+
     panel.appendChild(
       renderBaseTypeToggle(
         state.baseType,
@@ -547,6 +586,13 @@
     var countLabel = count + (count === "1" ? " variation" : " variations");
 
     var panel = el("div", { class: "ph-panel ph-panel--text" });
+
+    var textPresetRow = renderPresetRow(text.presets, function (preset) {
+      preset.apply();
+      renderApp();
+    });
+    if (textPresetRow) panel.appendChild(textPresetRow);
+
     panel.appendChild(
       renderFieldGroup(
         "Core Style",
@@ -578,7 +624,8 @@
             },
             "Give one word or short phrase its own distinct look — the rest of the text keeps its normal style."
           );
-        }
+        },
+        "Style just one word or phrase differently from the rest — e.g. \"Blessed\" in cursive gold, the rest of the text in plain white block letters."
       )
     );
 
@@ -724,6 +771,12 @@
 
     var panel = el("div", { class: "ph-panel ph-panel--graphics" });
 
+    var graphicsPresetRow = renderPresetRow(graphics.presets, function (preset) {
+      preset.apply();
+      renderApp();
+    });
+    if (graphicsPresetRow) panel.appendChild(graphicsPresetRow);
+
     // What Is It
     var whatIsItFields = el("div", { class: "ph-field-group__fields" });
     graphics.getWhatIsItEntries().forEach(function (entry) {
@@ -811,14 +864,12 @@
     // Haute Details
     var hauteSection = el("fieldset", { class: "ph-field-group" });
     hauteSection.appendChild(el("legend", { class: "ph-field-group__title" }, [icon("gift"), el("span", { text: "Haute Details" })]));
-    hauteSection.appendChild(
-      el("div", { class: "ph-field-group__fields" }, [
-        renderField({ label: "Vanity Plate Type", field: state.haute.vanityPlateType }, function (changes) {
-          graphics.updateVanityPlateType(changes);
-          renderApp();
-        }),
-      ])
-    );
+    var vanityPlateField = renderField({ label: "Vanity Plate Type", field: state.haute.vanityPlateType }, function (changes) {
+      graphics.updateVanityPlateType(changes);
+      renderApp();
+    });
+    vanityPlateField.title = "Picking any type here unlocks the full frame/border/plate-finish detail fields below.";
+    hauteSection.appendChild(el("div", { class: "ph-field-group__fields" }, [vanityPlateField]));
 
     var vanityPlateOn = PromptHaus.engine.resolveFieldValue(state.haute.vanityPlateType);
     if (vanityPlateOn) {
@@ -1266,13 +1317,25 @@
     ]);
     bufferField.title = "Asks the AI to leave empty space around the edges so nothing gets cropped at the borders.";
 
+    var projectField = el("div", { class: "ph-styledna__field" }, [labelWithIcon("shirt", "Project Type"), projectSelect]);
+    projectField.title = "What you're making — also auto-suggests a matching Aspect Ratio below.";
+
+    var platformField = el("div", { class: "ph-styledna__field" }, [labelWithIcon("monitor", "Target Platform"), platformSelect]);
+    platformField.title = "Formats the copied prompt for that AI tool specifically (tags-only for Midjourney, plain sentences for ChatGPT/DALL·E, etc.). Leave on Select... for a general-purpose prompt.";
+
+    var variationField = el("div", { class: "ph-styledna__field" }, [labelWithIcon("sparkle", "Variations"), variationSelect]);
+    variationField.title = "How many versions to ask the AI for in one generation.";
+
+    var holidayField = el("div", { class: "ph-styledna__field" }, [labelWithIcon("gift", "Holiday / Theme"), holidaySelect]);
+    holidayField.title = "Calendar holidays plus lifestyle/niche themes (Coffee Culture, Hustle Culture, etc.) — shared across every mode.";
+
     root.appendChild(
       el("div", { class: "ph-styledna" }, [
-        el("div", { class: "ph-styledna__field" }, [labelWithIcon("shirt", "Project Type"), projectSelect]),
+        projectField,
         el("div", { class: "ph-styledna__field" }, [labelWithIcon("crop", "Aspect Ratio"), aspectSelect, autoBadge]),
-        el("div", { class: "ph-styledna__field" }, [labelWithIcon("monitor", "Target Platform"), platformSelect]),
-        el("div", { class: "ph-styledna__field" }, [labelWithIcon("sparkle", "Variations"), variationSelect]),
-        el("div", { class: "ph-styledna__field" }, [labelWithIcon("gift", "Holiday / Theme"), holidaySelect]),
+        platformField,
+        variationField,
+        holidayField,
         bufferField,
       ])
     );
