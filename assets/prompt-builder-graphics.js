@@ -171,6 +171,9 @@
     lightingEffects: "Lighting Effects",
     framing: "Framing",
   };
+  // No separate Letter Color here — Plate Text Color (paired with Plate
+  // Text below) already covers "what color is the lettering," and having
+  // both read as two conflicting answers to the same question.
   var HAUTE_DETAILS_LABELS = {
     baseStyle: "Base Style",
     borderFinish: "Border Finish",
@@ -178,7 +181,6 @@
     bottomAccent: "Bottom Accent",
     plateFinish: "Plate Finish",
     letterStyle: "Letter Style",
-    letterColor: "Letter Color",
     stateTheme: "State/Region Theme",
   };
 
@@ -214,7 +216,6 @@
           bottomAccent: makeField("none", ACCENT_OPTIONS),
           plateFinish: makeField("", PLATE_FINISH_OPTIONS),
           letterStyle: makeField("", LETTER_STYLE_OPTIONS),
-          letterColor: makeField("", LETTER_COLOR_OPTIONS),
           stateTheme: PromptHaus.util.makeGroupedField("", STATE_REGION_GROUPS),
         },
         plateText: makeField("", [], { isFreeText: true }),
@@ -531,12 +532,12 @@
     {
       id: "vanityPlateBling",
       name: "Vanity Plate Bling",
-      description: "Diamond bling plate, luxury diamond frame, chrome lettering.",
+      description: "Diamond bling plate, diamond-studded frame, chrome lettering.",
       apply: function () {
-        updateVanityPlateType({ value: "diamond bling", customValue: "" });
-        updateHauteDetailField("baseStyle", { value: "luxury diamond frame", customValue: "" });
-        updateHauteDetailField("plateFinish", { value: "pearl white", customValue: "" });
-        updateHauteDetailField("letterColor", { value: "chrome", customValue: "" });
+        updateVanityPlateType({ value: "iced diamond bling", customValue: "" });
+        updateHauteDetailField("baseStyle", { value: "diamond-studded frame", customValue: "" });
+        updateHauteDetailField("plateFinish", { value: "pearl white sheen", customValue: "" });
+        updatePlateTextColor({ value: "chrome", customValue: "" });
       },
     },
     {
