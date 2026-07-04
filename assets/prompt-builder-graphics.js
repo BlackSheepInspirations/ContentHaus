@@ -30,21 +30,27 @@
     "high-end commercial render",
   ]);
 
+  // Deliberately spans both glam/feminine and rugged/masculine styles
+  // across all 7 vanity-plate lists below — a vanity plate feature reads
+  // as one-note if it only covers one aesthetic.
   var VANITY_PLATE_TYPE_OPTIONS = sortAlpha([
     "none", "iced diamond bling", "glam rhinestone", "luxe crystal", "pearl elegance",
     "rose gold sparkle", "holographic shimmer", "deluxe pink bling", "sapphire glam",
     "emerald luxe", "onyx bling", "opal shimmer", "frosted platinum", "amethyst glam",
-    // new
     "ruby red bling", "citrine gold sparkle", "turquoise glam",
+    // new — masculine-leaning
+    "blacked-out matte", "gunmetal bling", "carbon fiber bling", "chrome skull bling",
+    "iced-out chain style",
   ]);
 
   var BASE_STYLE_OPTIONS = sortAlpha([
     "oem bling plate", "diamond-studded frame", "crystal-encrusted frame", "chrome luxe frame",
     "rose gold frame", "gold-plated frame", "pink glam frame", "black diamond frame",
     "platinum frame", "fully iced frame", "sapphire frame", "emerald frame", "onyx frame",
-    "opal frame", "two-tone frame", "matte black frame",
-    // new
-    "engraved vintage frame", "brushed titanium frame",
+    "opal frame", "two-tone frame", "matte black frame", "engraved vintage frame",
+    "brushed titanium frame",
+    // new — masculine-leaning
+    "skull-accented frame", "chain-link frame", "carbon fiber frame", "gunmetal frame",
   ]);
 
   var BORDER_FINISH_OPTIONS = sortAlpha([
@@ -52,8 +58,9 @@
     "champagne crystal", "black diamond trim", "iridescent crystal", "aurora crystal (ab)",
     "mixed jewel trim", "diamond dust shimmer", "emerald crystal", "sapphire crystal",
     "ruby crystal", "amethyst crystal", "opal shimmer trim", "frosted crystal",
-    // new
     "smoky quartz trim", "moonstone shimmer",
+    // new — masculine-leaning
+    "barbed wire trim", "chain-link trim", "studded leather trim", "gunmetal trim",
   ]);
 
   // Shared list for both Top Accent and Bottom Accent.
@@ -61,33 +68,35 @@
     "none", "gem crown", "princess tiara", "queen's crown", "rhinestone bow", "butterfly charm",
     "angel wings", "sparkling heart", "classic tiara", "starburst shimmer", "glowing halo",
     "flower crown", "laurel wreath", "lightning bolt", "faith cross", "paw print",
-    // new
     "shooting star", "infinity charm",
+    // new — masculine-leaning
+    "skull accent", "chain link accent", "flame accent", "dagger accent", "wolf head accent",
   ]);
 
   var PLATE_FINISH_OPTIONS = sortAlpha([
     "ivory enamel", "white enamel", "pearl white sheen", "satin white", "glossy white",
     "metallic silver", "glossy black", "rose gold metallic", "matte black",
     "champagne gold metallic", "copper metallic", "deep red enamel", "navy enamel", "mirror chrome",
-    // new
     "gunmetal gray", "champagne pearl",
+    // new — masculine-leaning
+    "carbon fiber finish", "brushed steel finish", "black chrome finish",
   ]);
 
   var LETTER_STYLE_OPTIONS = sortAlpha([
     "tall condensed embossed", "raised block embossed", "deep luxe embossed", "chrome embossed",
     "matte black embossed", "elegant script embossed", "retro block embossed", "bold sans embossed",
-    "flowing cursive embossed", "stencil-cut embossed",
-    // new
-    "engraved serif", "3d raised lettering",
+    "flowing cursive embossed", "stencil-cut embossed", "engraved serif", "3d raised lettering",
+    // new — masculine-leaning
+    "gothic blackletter embossed", "military stencil embossed", "biker script embossed",
   ]);
 
   // Reused for both Letter Color and Plate Text Color — same kind of
   // choice (color of embossed/printed lettering), no need for two lists.
   var LETTER_COLOR_OPTIONS = sortAlpha([
     "black gloss", "chrome", "silver", "gold", "rose gold", "chrome pink", "white", "matte black",
-    "copper", "gold champagne", "holographic", "chrome red",
-    // new
-    "navy blue", "emerald green",
+    "copper", "gold champagne", "holographic", "chrome red", "navy blue", "emerald green",
+    // new — masculine-leaning
+    "gunmetal gray", "blood red",
   ]);
 
   // Grouped like Character Type/Holiday / Theme — ~65 items browses better

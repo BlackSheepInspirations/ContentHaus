@@ -281,7 +281,7 @@
     "marble texture", "floral garden scene", "starry night sky", "candy-colored polka dots",
     "soft glitter fade",
     // new
-    "sunset skyline", "urban graffiti wall", "underwater scene",
+    "sunset skyline", "urban graffiti wall", "underwater scene", "paint splatter",
   ]);
   var DYNAMIC_SCENE_EFFECT_OPTIONS = sortAlpha([
     "floating in clouds", "emerging from splash", "surrounded by sparkles",
