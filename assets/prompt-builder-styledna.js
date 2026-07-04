@@ -156,7 +156,7 @@
       label: "Secular / Cultural",
       options: [
         "new year's eve", "valentine's day", "st. patrick's day", "halloween", "mother's day",
-        "father's day", "pride month", "earth day", "kwanzaa",
+        "father's day", "grandparents' day", "pride month", "earth day", "kwanzaa",
       ],
     },
     {
