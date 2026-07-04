@@ -246,6 +246,9 @@
     "none", "neon halo with drips", "angel halo", "flower crown", "golden crown",
     "diamond tiara", "pink tiara", "butterfly clips", "bandana headband", "jeweled headpiece",
     "bow headband", "star crown",
+    // new — same religious headwear already in Accessories, duplicated here too since this
+    // list is the more literally headwear-themed one (Accessories is a broader mixed bag)
+    "hijab", "turban", "kufi cap", "kippah/yarmulke",
   ]);
 
   var POSE_OPTIONS = sortAlpha([
