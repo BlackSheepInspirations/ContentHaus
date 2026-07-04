@@ -75,15 +75,20 @@
     shield: '<path d="M10 2 16 4.5V10c0 4-3 6.5-6 8-3-1.5-6-4-6-8V4.5Z"/><path d="M7 9l3 2 3-2"/>',
   };
 
-  // Field-category -> icon name, used by both the Style DNA bar and each
-  // mode's fieldset headers so the same concept always gets the same icon.
-  var FIELD_ICONS = {
-    projectType: "shirt", aspectRatio: "crop", targetPlatform: "monitor",
-    variationCount: "sparkle", holiday: "gift", addBuffer: "bufferBox",
-    style: "sparkle", humanIdentity: "person", animalIdentity: "paw",
-    appearance: "sparkle", styling: "shirt", presentation: "monitor",
-    extras: "sparkle", companion: "paw", coupleDynamic: "heart",
-    whatIsIt: "sparkle", frameIt: "crop", hauteDetails: "gift",
+  // Fieldset legend title -> icon name, so each sub-section header reads
+  // at a glance instead of as a wall of plain-text labels. Keyed by the
+  // exact display title (not a groupName) since that's what every
+  // renderFieldGroup call site already has on hand; a title with no entry
+  // here just renders without an icon rather than erroring.
+  var TITLE_ICONS = {
+    "Style": "sparkle", "Human Identity": "person", "Animal Identity": "paw",
+    "Appearance": "sparkle", "Styling": "shirt", "Presentation": "monitor",
+    "Extras": "sparkle", "Companion Details": "paw", "Couple Dynamic": "heart",
+    "Core Style": "text", "Variation Details": "layers", "Accent Details": "sparkle",
+    "Illustrated Style": "image", "Realistic Style": "image", "Frame It": "crop",
+    "Vanity Plate Details": "gift", "Plate Text": "text", "Makeup & Nails": "sparkle",
+    "Mascot Link": "paw", "What Is It": "sparkle", "Haute Details": "gift",
+    "Imagery": "image",
   };
 
   function icon(name, extraClass) {
@@ -249,7 +254,11 @@
         })
       );
     });
-    var children = [el("legend", { class: "ph-field-group__title", text: title })];
+    var titleIcon = TITLE_ICONS[title];
+    var legend = titleIcon
+      ? el("legend", { class: "ph-field-group__title" }, [icon(titleIcon), el("span", { text: title })])
+      : el("legend", { class: "ph-field-group__title", text: title });
+    var children = [legend];
     if (subtitle) children.push(el("p", { class: "ph-field-group__subtitle", text: subtitle }));
     children.push(fieldsContainer);
     return el("fieldset", { class: "ph-field-group" }, children);
@@ -314,7 +323,7 @@
       );
     });
     return el("fieldset", { class: "ph-field-group" }, [
-      el("legend", { class: "ph-field-group__title", text: "Imagery" }),
+      el("legend", { class: "ph-field-group__title" }, [icon("image"), el("span", { text: "Imagery" })]),
       el("p", {
         class: "ph-field-group__subtitle",
         text: "Faith-based, holiday, or nature elements integrated into the image — pick up to 3.",
@@ -727,7 +736,7 @@
     });
     panel.appendChild(
       el("fieldset", { class: "ph-field-group" }, [
-        el("legend", { class: "ph-field-group__title", text: "What Is It" }),
+        el("legend", { class: "ph-field-group__title" }, [icon("sparkle"), el("span", { text: "What Is It" })]),
         el("p", { class: "ph-field-group__subtitle", text: 'Pro tip: pick ONE category for best results — mix two only if they genuinely combine (e.g. a fantasy element + animal).' }),
         whatIsItFields,
       ])
@@ -801,7 +810,7 @@
 
     // Haute Details
     var hauteSection = el("fieldset", { class: "ph-field-group" });
-    hauteSection.appendChild(el("legend", { class: "ph-field-group__title", text: "Haute Details" }));
+    hauteSection.appendChild(el("legend", { class: "ph-field-group__title" }, [icon("gift"), el("span", { text: "Haute Details" })]));
     hauteSection.appendChild(
       el("div", { class: "ph-field-group__fields" }, [
         renderField({ label: "Vanity Plate Type", field: state.haute.vanityPlateType }, function (changes) {

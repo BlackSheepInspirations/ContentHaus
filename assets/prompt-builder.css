@@ -34,6 +34,7 @@
   max-width: 1280px;
   margin: 0 auto;
   padding: 40px 16px 16px;
+  overflow: hidden;
 }
 /* .ph-marketing__hero's own margin-bottom (spacing before its video/CTA on
    the marketing page) would otherwise leave a gap of the theme's page
@@ -331,9 +332,15 @@
   background: #fff;
 }
 .ph-field-group__title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-weight: 700;
   color: var(--ph-espresso);
   padding: 0 6px;
+}
+.ph-field-group__title .ph-icon {
+  color: var(--ph-teal);
 }
 .ph-field-group__subtitle {
   margin: 4px 6px 0;
@@ -372,11 +379,17 @@
 }
 .ph-field__select,
 .ph-field__custom {
-  padding: 8px;
+  padding: 8px 14px;
   border: 1px solid var(--ph-border);
   border-radius: 6px;
   font-size: 14px;
   background: var(--ph-cream);
+}
+/* Dropdowns specifically go full pill shape (matches the mockup); free-text
+   inputs stay a normal rounded rect — a fully pill-shaped text box looks
+   odd once someone's typed a sentence into it. */
+.ph-field__select {
+  border-radius: 999px;
 }
 .ph-field__select:focus,
 .ph-field__custom:focus {
@@ -737,10 +750,38 @@
   max-width: 1000px;
   margin: 0 auto;
   padding: 48px 24px 80px;
+  overflow: hidden;
 }
 .ph-marketing__hero {
+  position: relative;
   text-align: center;
   margin-bottom: 40px;
+}
+/* Soft decorative corner accents — purely cosmetic (negative z-index keeps
+   them behind the heading/eyebrow/subheading, pointer-events off keeps
+   them out of the way of clicks), applies wherever this hero renders: the
+   standalone marketing page and the gated tool page's branded header. */
+.ph-marketing__hero::before,
+.ph-marketing__hero::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  border-radius: 50%;
+  pointer-events: none;
+}
+.ph-marketing__hero::before {
+  width: 240px;
+  height: 240px;
+  top: -20px;
+  left: -40px;
+  background: radial-gradient(circle, rgba(201, 168, 76, 0.3), transparent 70%);
+}
+.ph-marketing__hero::after {
+  width: 280px;
+  height: 280px;
+  top: -30px;
+  right: -60px;
+  background: radial-gradient(circle, rgba(13, 115, 119, 0.24), transparent 70%);
 }
 .ph-marketing__eyebrow {
   color: var(--ph-gold);
