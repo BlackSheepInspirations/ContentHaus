@@ -496,6 +496,7 @@
   border-radius: 6px;
   font-size: 14px;
   background: var(--ph-cream);
+  color: var(--ph-black);
 }
 /* Dropdowns specifically go full pill shape (matches the mockup); free-text
    inputs stay a normal rounded rect — a fully pill-shaped text box looks
