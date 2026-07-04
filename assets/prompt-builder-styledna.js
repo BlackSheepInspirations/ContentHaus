@@ -158,6 +158,51 @@
     },
   ];
 
+  // Imagery — shared across every mode, same rationale as Holiday Theme:
+  // a cross worked into the background or a dragonfly perched on a sleeve
+  // applies just as much to a Text lettering design as a Character
+  // portrait. Grouped like Character Type/Holiday: browses better by
+  // category than as one flat wall. Faith-Based stays deliberately
+  // multi-tradition (not skewed to one religion); Holiday imagery is kept
+  // distinct from Holiday Theme above — Theme sets the overall mood/season,
+  // this is a literal object/symbol integrated into the image, so e.g.
+  // "menorah" only lives here, not duplicated in both.
+  var IMAGERY_GROUPS = [
+    {
+      label: "Faith-Based",
+      options: PromptHaus.util.sortAlpha([
+        "cross", "dove", "praying hands", "jesus (good shepherd)", "angel wings", "halo",
+        "open bible", "rosary", "star of david", "hamsa", "mosque silhouette",
+        "crescent moon and star", "prayer beads (misbaha)", "om symbol", "buddha statue",
+        "prayer wheel", "diya (oil lamp)", "guardian angel", "yin yang",
+      ]),
+    },
+    {
+      label: "Holiday",
+      options: PromptHaus.util.sortAlpha([
+        "christmas tree", "nativity scene", "santa claus", "rudolph the reindeer", "candy cane",
+        "stocking", "gingerbread man", "snowman", "holly and mistletoe", "wreath", "ornament",
+        "menorah", "dreidel", "kwanzaa kinara (candles)", "easter bunny", "easter eggs",
+        "empty tomb", "easter lily", "cupid", "rose bouquet", "heart", "leprechaun",
+        "four-leaf clover", "pot of gold", "jack-o'-lantern", "witch hat", "bat", "ghost",
+        "turkey", "cornucopia", "diwali rangoli pattern", "red lantern (lunar new year)",
+        "dragon (lunar new year)", "sugar skull", "marigold flowers",
+      ]),
+    },
+    {
+      label: "Nature",
+      options: PromptHaus.util.sortAlpha([
+        "pine tree", "oak tree", "palm tree", "willow tree", "cherry blossom tree",
+        "autumn maple tree", "rose", "sunflower", "daisy", "lotus flower", "tulip", "peony",
+        "hibiscus flower", "wildflower bouquet", "dragonfly", "butterfly", "ladybug", "bee",
+        "firefly", "sun", "full moon", "stars", "rainbow", "northern lights", "mountain range",
+        "ocean wave", "waterfall", "snowflake",
+      ]),
+    },
+  ];
+  var IMAGERY_SLOT_NAMES = ["slot1", "slot2", "slot3"];
+  var IMAGERY_SLOT_LABELS = { slot1: "Imagery 1", slot2: "Imagery 2", slot3: "Imagery 3" };
+
   // Sensible default mapping used for the aspect-ratio auto-suggest.
   // Square-ish print goods -> 1:1, packaging/labels & portrait social -> 4:5,
   // phone-native vertical formats -> 9:16. Adjustable later; nothing in the
@@ -226,6 +271,15 @@
     // since it's just a yes/no checkbox ("add a buffer/padding around the
     // image so nothing gets cropped at the edges").
     addBuffer: false,
+    // 3 independent slots rather than one multi-select box — same "combine
+    // by filling more than one slot" pattern as Graphics Mode's What Is It
+    // section, so someone can layer e.g. a cross + a dove + the sun without
+    // a new checkbox-list UI paradigm.
+    imagery: {
+      slot1: PromptHaus.util.makeGroupedField("", IMAGERY_GROUPS, { quantity: 1 }),
+      slot2: PromptHaus.util.makeGroupedField("", IMAGERY_GROUPS, { quantity: 1 }),
+      slot3: PromptHaus.util.makeGroupedField("", IMAGERY_GROUPS, { quantity: 1 }),
+    },
   });
 
   function setProjectType(newValue) {
@@ -288,6 +342,48 @@
     };
   }
 
+  function updateImagerySlot(slotName, changes) {
+    var state = store.getState();
+    var patch = {};
+    patch[slotName] = Object.assign({}, state.imagery[slotName], changes);
+    store.setState({ imagery: Object.assign({}, state.imagery, patch) });
+  }
+
+  function setImageryQuantity(slotName, quantity) {
+    updateImagerySlot(slotName, { quantity: Math.max(1, quantity || 1) });
+  }
+
+  // [{ fieldName, label, field }] for each slot — used by the shared UI
+  // renderer and by randomize().
+  function getImagerySlotEntries() {
+    var imagery = store.getState().imagery;
+    return IMAGERY_SLOT_NAMES.map(function (slotName) {
+      return { fieldName: slotName, label: IMAGERY_SLOT_LABELS[slotName], field: imagery[slotName] };
+    });
+  }
+
+  // A quantity > 1 prefixes the resolved value ("3x dragonflies") rather
+  // than attempting real pluralization, matching Graphics Mode's What Is
+  // It fields — same mix of already-singular/plural option phrases.
+  function composeImagerySlotEntry(entry) {
+    var resolved = PromptHaus.engine.resolveFieldValue(entry.field);
+    if (!resolved) return null;
+    var qty = entry.field.quantity || 1;
+    var text = qty > 1 ? qty + "x " + resolved : resolved;
+    return { label: "Imagery", field: PromptHaus.util.makeField(text) };
+  }
+
+  // Every mode's assembler mixes these in (same treatment as Holiday
+  // Theme/Buffer) — empty slots simply don't contribute an entry.
+  function getImageryEntries() {
+    var entries = [];
+    getImagerySlotEntries().forEach(function (entry) {
+      var composed = composeImagerySlotEntry(entry);
+      if (composed) entries.push(composed);
+    });
+    return entries;
+  }
+
   PromptHaus.styleDNA = Object.assign({}, store, {
     setProjectType: setProjectType,
     setAspectRatioManually: setAspectRatioManually,
@@ -297,6 +393,10 @@
     setHoliday: setHoliday,
     setAddBuffer: setAddBuffer,
     getBufferEntry: getBufferEntry,
+    updateImagerySlot: updateImagerySlot,
+    setImageryQuantity: setImageryQuantity,
+    getImagerySlotEntries: getImagerySlotEntries,
+    getImageryEntries: getImageryEntries,
     suggestedAspectRatio: suggestedAspectRatio,
   });
 })();

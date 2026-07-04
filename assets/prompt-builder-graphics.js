@@ -370,6 +370,7 @@
     }
 
     entries.push({ label: "Holiday Theme", field: PromptHaus.styleDNA.getState().holiday });
+    entries = entries.concat(PromptHaus.styleDNA.getImageryEntries());
     var bufferEntry = PromptHaus.styleDNA.getBufferEntry();
     if (bufferEntry) entries.push(bufferEntry);
 
@@ -427,6 +428,16 @@
       { label: "Holiday Theme", field: PromptHaus.styleDNA.getState().holiday },
     ]);
     if (holidayResolved.length) groups.push({ title: "Holiday Theme", items: holidayResolved });
+
+    var imageryEntries = PromptHaus.styleDNA.getImageryEntries();
+    if (imageryEntries.length) {
+      groups.push({
+        title: "Imagery",
+        items: imageryEntries.map(function (e) {
+          return { label: e.label, value: e.field.value };
+        }),
+      });
+    }
 
     var bufferEntry = PromptHaus.styleDNA.getBufferEntry();
     if (bufferEntry) groups.push({ title: "Buffer/Padding", items: [{ label: bufferEntry.label, value: bufferEntry.field.value }] });

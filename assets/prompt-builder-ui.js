@@ -255,6 +255,74 @@
     return el("fieldset", { class: "ph-field-group" }, children);
   }
 
+  // Like renderField, but adds a quantity number input ("3x sparkles") —
+  // shared by Graphics Mode's What Is It fields and the Imagery section
+  // below, both of which let a single slot mean "3 of this."
+  function renderWhatIsItField(entry, onChange) {
+    var field = entry.field;
+
+    var select = el("select", { class: "ph-field__select" });
+    appendSelectOptions(select, field, field.value);
+    select.addEventListener("change", function () {
+      onChange({ value: select.value });
+    });
+
+    var customInput = el("input", { type: "text", class: "ph-field__custom", placeholder: "Or type your own..." });
+    customInput.value = field.customValue || "";
+    customInput.addEventListener("input", function () {
+      onChange({ customValue: customInput.value });
+    });
+
+    var quantityInput = el("input", { type: "number", min: "1", class: "ph-field__quantity" });
+    quantityInput.value = field.quantity || 1;
+    quantityInput.addEventListener("change", function () {
+      onChange({ quantity: parseInt(quantityInput.value, 10) || 1 });
+    });
+
+    var checkbox = el("input", { type: "checkbox", class: "ph-field__checkbox" });
+    checkbox.checked = field.includeInPrompt !== false;
+    checkbox.addEventListener("change", function () {
+      onChange({ includeInPrompt: checkbox.checked });
+    });
+
+    var labelRow = el("div", { class: "ph-field__label-row" }, [
+      el("span", { class: "ph-field__label", text: entry.label }),
+      el("label", { class: "ph-field__include" }, [checkbox, el("span", { text: "Include in prompt" })]),
+    ]);
+
+    return el("div", { class: "ph-field" }, [
+      labelRow,
+      select,
+      customInput,
+      el("label", { class: "ph-field__quantity-label" }, [el("span", { text: "Quantity" }), quantityInput]),
+    ]);
+  }
+
+  // Imagery — shared across every mode (Style DNA, same as Holiday Theme/
+  // Buffer), so it's rendered once here and dropped into each mode's panel
+  // rather than reimplemented per mode. 3 independent slots so someone can
+  // layer e.g. a cross + a dragonfly + the sun without a checkbox-list UI.
+  function renderImagerySection() {
+    var styleDNA = PromptHaus.styleDNA;
+    var fieldsContainer = el("div", { class: "ph-field-group__fields" });
+    styleDNA.getImagerySlotEntries().forEach(function (entry) {
+      fieldsContainer.appendChild(
+        renderWhatIsItField(entry, function (changes) {
+          styleDNA.updateImagerySlot(entry.fieldName, changes);
+          renderApp();
+        })
+      );
+    });
+    return el("fieldset", { class: "ph-field-group" }, [
+      el("legend", { class: "ph-field-group__title", text: "Imagery" }),
+      el("p", {
+        class: "ph-field-group__subtitle",
+        text: "Faith-based, holiday, or nature elements integrated into the image — pick up to 3.",
+      }),
+      fieldsContainer,
+    ]);
+  }
+
   // ---------------------------------------------------------------------
   // Character Mode panel
   // ---------------------------------------------------------------------
@@ -641,49 +709,6 @@
   // ---------------------------------------------------------------------
   // Graphics Mode panel
   // ---------------------------------------------------------------------
-  // Like renderField, but adds a quantity number input ("3x sparkles") —
-  // only the 4 What Is It fields need this, so a dedicated renderer is
-  // simpler than overloading the generic one for a one-off need.
-  function renderWhatIsItField(entry, onChange) {
-    var field = entry.field;
-
-    var select = el("select", { class: "ph-field__select" });
-    appendSelectOptions(select, field, field.value);
-    select.addEventListener("change", function () {
-      onChange({ value: select.value });
-    });
-
-    var customInput = el("input", { type: "text", class: "ph-field__custom", placeholder: "Or type your own..." });
-    customInput.value = field.customValue || "";
-    customInput.addEventListener("input", function () {
-      onChange({ customValue: customInput.value });
-    });
-
-    var quantityInput = el("input", { type: "number", min: "1", class: "ph-field__quantity" });
-    quantityInput.value = field.quantity || 1;
-    quantityInput.addEventListener("change", function () {
-      onChange({ quantity: parseInt(quantityInput.value, 10) || 1 });
-    });
-
-    var checkbox = el("input", { type: "checkbox", class: "ph-field__checkbox" });
-    checkbox.checked = field.includeInPrompt !== false;
-    checkbox.addEventListener("change", function () {
-      onChange({ includeInPrompt: checkbox.checked });
-    });
-
-    var labelRow = el("div", { class: "ph-field__label-row" }, [
-      el("span", { class: "ph-field__label", text: entry.label }),
-      el("label", { class: "ph-field__include" }, [checkbox, el("span", { text: "Include in prompt" })]),
-    ]);
-
-    return el("div", { class: "ph-field" }, [
-      labelRow,
-      select,
-      customInput,
-      el("label", { class: "ph-field__quantity-label" }, [el("span", { text: "Quantity" }), quantityInput]),
-    ]);
-  }
-
   function renderGraphicsPanel() {
     var graphics = PromptHaus.graphics;
     var state = graphics.getState();
@@ -1317,6 +1342,10 @@
     } else {
       left.appendChild(el("p", { class: "ph-coming-soon", text: MODE_LABELS[activeMode] + " Mode is coming soon." }));
     }
+
+    // Imagery lives in shared Style DNA (like Holiday Theme/Buffer), so it
+    // renders once here rather than being duplicated into all 5 panels.
+    left.appendChild(renderImagerySection());
 
     body.appendChild(left);
     body.appendChild(right);
