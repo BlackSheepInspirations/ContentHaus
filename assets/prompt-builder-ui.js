@@ -10,10 +10,10 @@
   window.PromptHaus = window.PromptHaus || {};
   var PromptHaus = window.PromptHaus;
 
-  var MODES = ["character", "text", "couples", "combined"];
-  var MODE_LABELS = { character: "Character", text: "Text", couples: "Couples", combined: "Combined" };
+  var MODES = ["character", "text", "couples", "combined", "graphics"];
+  var MODE_LABELS = { character: "Character", text: "Text", couples: "Couples", combined: "Combined", graphics: "Graphics" };
   // Flips to true as each mode ships in later build steps.
-  var BUILT_MODES = { character: true, text: true, couples: true, combined: true };
+  var BUILT_MODES = { character: true, text: true, couples: true, combined: true, graphics: true };
 
   var activeMode = "character";
   // Transient banner shown after a Save Prompt click (success or "limit
@@ -549,6 +549,181 @@
   }
 
   // ---------------------------------------------------------------------
+  // Graphics Mode panel
+  // ---------------------------------------------------------------------
+  // Like renderField, but adds a quantity number input ("3x sparkles") —
+  // only the 4 What Is It fields need this, so a dedicated renderer is
+  // simpler than overloading the generic one for a one-off need.
+  function renderWhatIsItField(entry, onChange) {
+    var field = entry.field;
+
+    var select = el("select", { class: "ph-field__select" });
+    appendSelectOptions(select, field, field.value);
+    select.addEventListener("change", function () {
+      onChange({ value: select.value });
+    });
+
+    var customInput = el("input", { type: "text", class: "ph-field__custom", placeholder: "Or type your own..." });
+    customInput.value = field.customValue || "";
+    customInput.addEventListener("input", function () {
+      onChange({ customValue: customInput.value });
+    });
+
+    var quantityInput = el("input", { type: "number", min: "1", class: "ph-field__quantity" });
+    quantityInput.value = field.quantity || 1;
+    quantityInput.addEventListener("change", function () {
+      onChange({ quantity: parseInt(quantityInput.value, 10) || 1 });
+    });
+
+    var checkbox = el("input", { type: "checkbox", class: "ph-field__checkbox" });
+    checkbox.checked = field.includeInPrompt !== false;
+    checkbox.addEventListener("change", function () {
+      onChange({ includeInPrompt: checkbox.checked });
+    });
+
+    var labelRow = el("div", { class: "ph-field__label-row" }, [
+      el("span", { class: "ph-field__label", text: entry.label }),
+      el("label", { class: "ph-field__include" }, [checkbox, el("span", { text: "Include in prompt" })]),
+    ]);
+
+    return el("div", { class: "ph-field" }, [
+      labelRow,
+      select,
+      customInput,
+      el("label", { class: "ph-field__quantity-label" }, [el("span", { text: "Quantity" }), quantityInput]),
+    ]);
+  }
+
+  function renderGraphicsPanel() {
+    var graphics = PromptHaus.graphics;
+    var state = graphics.getState();
+
+    var panel = el("div", { class: "ph-panel ph-panel--graphics" });
+
+    // What Is It
+    var whatIsItFields = el("div", { class: "ph-field-group__fields" });
+    graphics.getWhatIsItEntries().forEach(function (entry) {
+      whatIsItFields.appendChild(
+        renderWhatIsItField(entry, function (changes) {
+          graphics.updateWhatIsItField(entry.fieldName, changes);
+          renderApp();
+        })
+      );
+    });
+    panel.appendChild(
+      el("fieldset", { class: "ph-field-group" }, [
+        el("legend", { class: "ph-field-group__title", text: "What Is It" }),
+        el("p", { class: "ph-field-group__subtitle", text: 'Pro tip: pick ONE category for best results — mix two only if they genuinely combine (e.g. a fantasy element + animal).' }),
+        whatIsItFields,
+      ])
+    );
+
+    // Style It
+    var illustratedBtn = el("button", {
+      type: "button",
+      class: "ph-basetype-toggle__btn" + (state.styleCategory === "illustrated" ? " is-active" : ""),
+      text: "Illustrated",
+    });
+    var realisticBtn = el("button", {
+      type: "button",
+      class: "ph-basetype-toggle__btn" + (state.styleCategory === "realistic" ? " is-active" : ""),
+      text: "Realistic",
+    });
+    illustratedBtn.addEventListener("click", function () {
+      graphics.setStyleCategory("illustrated");
+      renderApp();
+    });
+    realisticBtn.addEventListener("click", function () {
+      graphics.setStyleCategory("realistic");
+      renderApp();
+    });
+    panel.appendChild(el("h4", { class: "ph-person__title", text: "Style It" }));
+    panel.appendChild(el("div", { class: "ph-basetype-toggle" }, [illustratedBtn, realisticBtn]));
+
+    if (state.styleCategory === "realistic") {
+      panel.appendChild(
+        renderFieldGroup(
+          "Realistic Style",
+          [{ fieldName: "realisticStyle", label: "Style", field: state.realisticStyle }],
+          function (entry, changes) {
+            graphics.updateRealisticStyle(changes);
+            renderApp();
+          }
+        )
+      );
+    } else {
+      panel.appendChild(
+        renderFieldGroup(
+          "Illustrated Style",
+          [
+            { fieldName: "characterType", label: "Character Type", field: state.illustrated.characterType },
+            { fieldName: "artFinish", label: "Art Finish", field: state.illustrated.artFinish },
+          ],
+          function (entry, changes) {
+            graphics.updateIllustratedField(entry.fieldName, changes);
+            renderApp();
+          }
+        )
+      );
+    }
+
+    // Frame It
+    panel.appendChild(
+      renderFieldGroup(
+        "Frame It",
+        graphics.getFrameItEntries(),
+        function (entry, changes) {
+          graphics.updateFrameItField(entry.fieldName, changes);
+          renderApp();
+        }
+      )
+    );
+
+    // Haute Details
+    var hauteSection = el("fieldset", { class: "ph-field-group" });
+    hauteSection.appendChild(el("legend", { class: "ph-field-group__title", text: "Haute Details" }));
+    hauteSection.appendChild(
+      el("div", { class: "ph-field-group__fields" }, [
+        renderField({ label: "Vanity Plate Type", field: state.haute.vanityPlateType }, function (changes) {
+          graphics.updateVanityPlateType(changes);
+          renderApp();
+        }),
+      ])
+    );
+
+    var vanityPlateOn = PromptHaus.engine.resolveFieldValue(state.haute.vanityPlateType);
+    if (vanityPlateOn) {
+      hauteSection.appendChild(
+        renderFieldGroup(
+          "Vanity Plate Details",
+          graphics.getHauteDetailEntries(),
+          function (entry, changes) {
+            graphics.updateHauteDetailField(entry.fieldName, changes);
+            renderApp();
+          }
+        )
+      );
+      hauteSection.appendChild(
+        renderFieldGroup(
+          "Plate Text",
+          [
+            { fieldName: "plateText", label: "Plate Text", field: state.haute.plateText },
+            { fieldName: "plateTextColor", label: "Plate Text Color", field: state.haute.plateTextColor },
+          ],
+          function (entry, changes) {
+            if (entry.fieldName === "plateText") graphics.updatePlateText(changes);
+            else graphics.updatePlateTextColor(changes);
+            renderApp();
+          }
+        )
+      );
+    }
+    panel.appendChild(hauteSection);
+
+    return panel;
+  }
+
+  // ---------------------------------------------------------------------
   // Shell: tabs, live preview, action buttons
   // ---------------------------------------------------------------------
   function renderTabs(root) {
@@ -861,6 +1036,11 @@
       left.appendChild(renderCombinedPanel());
       renderSelectionsPanel(right, PromptHaus.combined.getSelectionsByGroup());
       renderCombinedPreview(right);
+      renderSavedPrompts(right, activeMode);
+    } else if (activeMode === "graphics") {
+      left.appendChild(renderGraphicsPanel());
+      renderSelectionsPanel(right, PromptHaus.graphics.getSelectionsByGroup());
+      renderPreview(right, PromptHaus.graphics.assemblePrompt(), PromptHaus.graphics, activeMode);
       renderSavedPrompts(right, activeMode);
     } else {
       left.appendChild(el("p", { class: "ph-coming-soon", text: MODE_LABELS[activeMode] + " Mode is coming soon." }));

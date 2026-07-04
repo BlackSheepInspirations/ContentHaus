@@ -110,6 +110,11 @@
     "cosmetic branding", "lock screen text", "pinterest pin", "tiktok cover",
     "sticker pack", "cricut design", "sublimation graphic", "planner stickers",
     "logotype", "album cover text", "movie poster", "clip art",
+    // new — ad/marketing/product-photography formats, for Graphics Mode's
+    // standalone-graphic and commercial use cases (not just POD products)
+    "instagram ad", "facebook ad", "tiktok ad graphic", "pinterest ad",
+    "product photography/mockup (etsy/shopify listing)", "flyer", "print banner",
+    "email graphic", "billboard ad", "background/wallpaper (no character, no text)",
   ];
 
   var ASPECT_RATIO_OPTIONS = ["1:1", "4:5", "9:16", "16:9"];
@@ -179,6 +184,16 @@
     "album cover text": "1:1",
     "movie poster": "4:5",
     "clip art": "1:1",
+    "instagram ad": "4:5",
+    "facebook ad": "1:1",
+    "tiktok ad graphic": "9:16",
+    "pinterest ad": "4:5",
+    "product photography/mockup (etsy/shopify listing)": "1:1",
+    "flyer": "4:5",
+    "print banner": "16:9",
+    "email graphic": "16:9",
+    "billboard ad": "16:9",
+    "background/wallpaper (no character, no text)": "9:16",
   };
   var DEFAULT_ASPECT_RATIO = "4:5";
 

@@ -253,6 +253,22 @@
 .ph-field__custom:focus {
   outline: 2px solid var(--ph-gold);
 }
+.ph-field__quantity-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--ph-teal);
+  margin-top: 2px;
+}
+.ph-field__quantity {
+  width: 64px;
+  padding: 6px;
+  border: 1px solid var(--ph-border);
+  border-radius: 6px;
+  font-size: 13px;
+  background: var(--ph-cream);
+}
 .ph-field__freetext {
   resize: vertical;
   font-family: inherit;

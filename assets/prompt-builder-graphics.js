@@ -1,0 +1,430 @@
+/**
+ * The AI Creator's Prompt Haus — Graphics Mode (standalone graphics/ads/
+ * product visuals — distinct from full Character portraits)
+ * Depends on prompt-builder-styledna.js, prompt-builder-engine.js, and
+ * prompt-builder-character.js (reuses its option lists per the "single
+ * source of truth" principle — see PromptHaus.character.optionLists).
+ *
+ * Four sections: What Is It (pick one core element — animal/pet, fantasy
+ * element, prop, or cosplay/character, each with a quantity), Style It
+ * (Illustrated reuses Character Type/Art Finish, or Realistic for ads/
+ * product photography that shouldn't look cartoony), Frame It (reuses
+ * Presentation fields), and Haute Details (the vanity-plate system).
+ */
+(function () {
+  "use strict";
+
+  window.PromptHaus = window.PromptHaus || {};
+  var PromptHaus = window.PromptHaus;
+  var makeField = PromptHaus.util.makeField;
+  var sortAlpha = PromptHaus.util.sortAlpha;
+  var lists = PromptHaus.character.optionLists;
+
+  // ---------------------------------------------------------------------
+  // New option lists (not reused from Character)
+  // ---------------------------------------------------------------------
+  var REALISTIC_STYLE_OPTIONS = sortAlpha([
+    "photorealistic product shot", "studio product photography", "lifestyle photography",
+    "flat lay photography", "minimalist commercial photography", "bold graphic poster design",
+    "clean vector flat design", "editorial fashion photography", "cinematic ad photography",
+    "high-end commercial render",
+  ]);
+
+  var VANITY_PLATE_TYPE_OPTIONS = sortAlpha([
+    "none", "diamond bling", "rhinestone glam", "crystal luxury", "luxury pearl",
+    "rose gold glitter", "holographic sparkle", "pink bling deluxe", "sapphire glam",
+    "emerald luxury", "onyx bling", "opal shimmer", "platinum frost", "amethyst sparkle",
+  ]);
+
+  var BASE_STYLE_OPTIONS = sortAlpha([
+    "luxury oem bling vanity plate", "luxury diamond frame", "luxury crystal frame",
+    "luxury chrome frame", "luxury rose gold frame", "luxury gold frame",
+    "luxury pink glam frame", "luxury black diamond frame", "luxury platinum frame",
+    "luxury iced-out frame", "luxury sapphire frame", "luxury emerald frame",
+    "luxury onyx frame", "luxury opal frame", "luxury two-tone frame", "luxury matte black frame",
+  ]);
+
+  var BORDER_FINISH_OPTIONS = sortAlpha([
+    "silver crystal", "pink crystal", "rose gold crystal", "gold crystal", "champagne crystal",
+    "black diamond", "iridescent crystal", "ab crystal (aurora borealis)", "mixed jewel",
+    "diamond dust", "emerald crystal", "sapphire crystal", "ruby crystal", "amethyst crystal",
+    "opal shimmer", "frosted crystal",
+  ]);
+
+  // Shared list for both Top Accent and Bottom Accent.
+  var ACCENT_OPTIONS = sortAlpha([
+    "none", "jeweled crown", "princess crown", "queen crown", "rhinestone bow", "butterfly",
+    "angel wings", "heart", "tiara", "star burst", "halo", "flower crown", "laurel wreath",
+    "lightning bolt", "cross", "paw print",
+  ]);
+
+  var PLATE_FINISH_OPTIONS = sortAlpha([
+    "warm ivory automotive enamel", "pure white automotive enamel", "pearl white", "satin white",
+    "gloss white", "metallic silver", "gloss black", "rose gold metal", "matte black",
+    "champagne gold metal", "copper metal", "deep red automotive enamel", "navy automotive enamel",
+    "chrome mirror",
+  ]);
+
+  var LETTER_STYLE_OPTIONS = sortAlpha([
+    "oem embossed tall condensed", "raised embossed block", "deep embossed luxury",
+    "chrome embossed", "matte black embossed", "script embossed", "retro block embossed",
+    "bold sans embossed", "cursive luxury embossed", "stencil embossed",
+  ]);
+
+  // Reused for both Letter Color and Plate Text Color — same kind of
+  // choice (color of embossed/printed lettering), no need for two lists.
+  var LETTER_COLOR_OPTIONS = sortAlpha([
+    "gloss black", "chrome", "silver", "gold", "rose gold", "pink chrome", "white", "matte black",
+    "copper", "champagne gold", "holographic", "red chrome",
+  ]);
+
+  // Grouped like Character Type/Holiday Theme — ~65 items browses better
+  // by region than as one flat wall. No literal "Custom" entry: every
+  // field already has an "Or type your own..." override, so a dedicated
+  // sentinel option would just duplicate that.
+  var STATE_REGION_GROUPS = [
+    {
+      label: "US States & DC",
+      options: [
+        "alabama", "alaska", "arizona", "arkansas", "california", "colorado", "connecticut",
+        "delaware", "district of columbia", "florida", "georgia", "hawaii", "idaho", "illinois",
+        "indiana", "iowa", "kansas", "kentucky", "louisiana", "maine", "maryland", "massachusetts",
+        "michigan", "minnesota", "mississippi", "missouri", "montana", "nebraska", "nevada",
+        "new hampshire", "new jersey", "new mexico", "new york", "north carolina", "north dakota",
+        "ohio", "oklahoma", "oregon", "pennsylvania", "rhode island", "south carolina",
+        "south dakota", "tennessee", "texas", "utah", "vermont", "virginia", "washington",
+        "west virginia", "wisconsin", "wyoming",
+      ],
+    },
+    {
+      label: "US Territories",
+      options: ["puerto rico", "guam", "us virgin islands", "american samoa", "northern mariana islands"],
+    },
+    {
+      label: "International",
+      options: [
+        "canada", "england", "scotland", "wales", "northern ireland", "mexico", "australia",
+        "jamaica", "india",
+      ],
+    },
+  ];
+
+  var WHAT_IS_IT_LABELS = {
+    animalPet: "Animal/Pet",
+    fantasyElements: "Fantasy Element",
+    props: "Prop",
+    cosplayCharacter: "Cosplay/Character",
+  };
+  var FRAME_IT_LABELS = {
+    background: "Background",
+    dynamicSceneEffect: "Dynamic Scene Effect",
+    lightingEffects: "Lighting Effects",
+    framing: "Framing",
+  };
+  var HAUTE_DETAILS_LABELS = {
+    baseStyle: "Base Style",
+    borderFinish: "Border Finish",
+    topAccent: "Top Accent",
+    bottomAccent: "Bottom Accent",
+    plateFinish: "Plate Finish",
+    letterStyle: "Letter Style",
+    letterColor: "Letter Color",
+    stateTheme: "State/Region Theme",
+  };
+
+  // ---------------------------------------------------------------------
+  // State
+  // ---------------------------------------------------------------------
+  function buildInitialState() {
+    return {
+      whatIsIt: {
+        animalPet: makeField("", lists.species, { quantity: 1 }),
+        fantasyElements: makeField("", lists.fantasyElements, { quantity: 1 }),
+        props: makeField("", lists.props, { quantity: 1 }),
+        cosplayCharacter: makeField("none", lists.cosplayCharacter, { quantity: 1 }),
+      },
+      styleCategory: "illustrated",
+      illustrated: {
+        characterType: PromptHaus.util.makeGroupedField("", lists.characterTypeGroups),
+        artFinish: makeField("", lists.artFinish),
+      },
+      realisticStyle: makeField("", REALISTIC_STYLE_OPTIONS),
+      frameIt: {
+        background: makeField("", lists.background),
+        dynamicSceneEffect: makeField("", lists.dynamicSceneEffect),
+        lightingEffects: makeField("", lists.lightingEffects),
+        framing: makeField("no frame", lists.framing),
+      },
+      haute: {
+        vanityPlateType: makeField("none", VANITY_PLATE_TYPE_OPTIONS),
+        details: {
+          baseStyle: makeField("", BASE_STYLE_OPTIONS),
+          borderFinish: makeField("", BORDER_FINISH_OPTIONS),
+          topAccent: makeField("none", ACCENT_OPTIONS),
+          bottomAccent: makeField("none", ACCENT_OPTIONS),
+          plateFinish: makeField("", PLATE_FINISH_OPTIONS),
+          letterStyle: makeField("", LETTER_STYLE_OPTIONS),
+          letterColor: makeField("", LETTER_COLOR_OPTIONS),
+          stateTheme: PromptHaus.util.makeGroupedField("", STATE_REGION_GROUPS),
+        },
+        plateText: makeField("", [], { isFreeText: true }),
+        plateTextColor: makeField("", LETTER_COLOR_OPTIONS),
+      },
+    };
+  }
+
+  var store = PromptHaus.util.createStore(buildInitialState());
+
+  function updateWhatIsItField(fieldName, changes) {
+    var state = store.getState();
+    var patch = {};
+    patch[fieldName] = Object.assign({}, state.whatIsIt[fieldName], changes);
+    store.setState({ whatIsIt: Object.assign({}, state.whatIsIt, patch) });
+  }
+
+  function setWhatIsItQuantity(fieldName, quantity) {
+    updateWhatIsItField(fieldName, { quantity: Math.max(1, quantity || 1) });
+  }
+
+  function setStyleCategory(category) {
+    store.setState({ styleCategory: category });
+  }
+
+  function updateIllustratedField(fieldName, changes) {
+    var state = store.getState();
+    var patch = {};
+    patch[fieldName] = Object.assign({}, state.illustrated[fieldName], changes);
+    store.setState({ illustrated: Object.assign({}, state.illustrated, patch) });
+  }
+
+  function updateRealisticStyle(changes) {
+    var state = store.getState();
+    store.setState({ realisticStyle: Object.assign({}, state.realisticStyle, changes) });
+  }
+
+  function updateFrameItField(fieldName, changes) {
+    var state = store.getState();
+    var patch = {};
+    patch[fieldName] = Object.assign({}, state.frameIt[fieldName], changes);
+    store.setState({ frameIt: Object.assign({}, state.frameIt, patch) });
+  }
+
+  function updateVanityPlateType(changes) {
+    var state = store.getState();
+    store.setState({ haute: Object.assign({}, state.haute, { vanityPlateType: Object.assign({}, state.haute.vanityPlateType, changes) }) });
+  }
+
+  function updateHauteDetailField(fieldName, changes) {
+    var state = store.getState();
+    var patch = {};
+    patch[fieldName] = Object.assign({}, state.haute.details[fieldName], changes);
+    store.setState({ haute: Object.assign({}, state.haute, { details: Object.assign({}, state.haute.details, patch) }) });
+  }
+
+  function updatePlateText(changes) {
+    var state = store.getState();
+    store.setState({ haute: Object.assign({}, state.haute, { plateText: Object.assign({}, state.haute.plateText, changes) }) });
+  }
+
+  function updatePlateTextColor(changes) {
+    var state = store.getState();
+    store.setState({ haute: Object.assign({}, state.haute, { plateTextColor: Object.assign({}, state.haute.plateTextColor, changes) }) });
+  }
+
+  function getWhatIsItEntries() {
+    var state = store.getState();
+    return Object.keys(WHAT_IS_IT_LABELS).map(function (fieldName) {
+      return { fieldName: fieldName, label: WHAT_IS_IT_LABELS[fieldName], field: state.whatIsIt[fieldName] };
+    });
+  }
+
+  function getFrameItEntries() {
+    var state = store.getState();
+    return Object.keys(FRAME_IT_LABELS).map(function (fieldName) {
+      return { fieldName: fieldName, label: FRAME_IT_LABELS[fieldName], field: state.frameIt[fieldName] };
+    });
+  }
+
+  function getHauteDetailEntries() {
+    var state = store.getState();
+    return Object.keys(HAUTE_DETAILS_LABELS).map(function (fieldName) {
+      return { fieldName: fieldName, label: HAUTE_DETAILS_LABELS[fieldName], field: state.haute.details[fieldName] };
+    });
+  }
+
+  // A quantity > 1 prefixes the resolved value ("3x sparkles") rather than
+  // attempting real pluralization, since option phrases are a mix of
+  // already-singular/plural nouns that don't pluralize consistently with
+  // a simple "+s".
+  function composeWhatIsItEntry(entry) {
+    var resolved = PromptHaus.engine.resolveFieldValue(entry.field);
+    if (!resolved) return null;
+    var qty = entry.field.quantity || 1;
+    var text = qty > 1 ? qty + "x " + resolved : resolved;
+    return { label: entry.label, field: makeField(text) };
+  }
+
+  function buildPlateTextEntry() {
+    var haute = store.getState().haute;
+    var text = (haute.plateText.value || "").trim();
+    if (!text || haute.plateText.includeInPrompt === false) return null;
+    var color = PromptHaus.engine.resolveFieldValue(haute.plateTextColor);
+    var phrase = color ? 'plate text "' + text + '" in ' + color + " lettering" : 'plate text "' + text + '"';
+    return { label: "Plate Text", field: makeField(phrase) };
+  }
+
+  function buildEntries() {
+    var state = store.getState();
+    var entries = [];
+
+    getWhatIsItEntries().forEach(function (e) {
+      var composed = composeWhatIsItEntry(e);
+      if (composed) entries.push(composed);
+    });
+
+    if (state.styleCategory === "realistic") {
+      entries.push({ label: "Style", field: state.realisticStyle });
+    } else {
+      entries.push({ label: "Character Type", field: state.illustrated.characterType });
+      entries.push({ label: "Art Finish", field: state.illustrated.artFinish });
+    }
+
+    entries = entries.concat(getFrameItEntries().map(function (e) {
+      return { label: e.label, field: e.field };
+    }));
+
+    entries.push({ label: "Vanity Plate Type", field: state.haute.vanityPlateType });
+    var vanityPlateOn = PromptHaus.engine.resolveFieldValue(state.haute.vanityPlateType);
+    if (vanityPlateOn) {
+      entries = entries.concat(getHauteDetailEntries().map(function (e) {
+        return { label: e.label, field: e.field };
+      }));
+      var plateTextEntry = buildPlateTextEntry();
+      if (plateTextEntry) entries.push(plateTextEntry);
+    }
+
+    entries.push({ label: "Holiday Theme", field: PromptHaus.styleDNA.getState().holiday });
+    var bufferEntry = PromptHaus.styleDNA.getBufferEntry();
+    if (bufferEntry) entries.push(bufferEntry);
+
+    return entries;
+  }
+
+  function assemblePrompt() {
+    var count = parseInt(PromptHaus.styleDNA.getState().variationCount.value, 10) || 4;
+    var intro = "Create " + count + (count === 1 ? " variation" : " variations") +
+      " of a clean, professional graphic featuring a";
+    return PromptHaus.engine.buildSentence({ intro: intro, fieldEntries: buildEntries() });
+  }
+
+  function getSelectionsByGroup() {
+    var groups = [];
+
+    var whatIsItResolved = [];
+    getWhatIsItEntries().forEach(function (e) {
+      var composed = composeWhatIsItEntry(e);
+      if (composed) whatIsItResolved.push({ label: composed.label, value: PromptHaus.engine.resolveFieldValue(composed.field) });
+    });
+    if (whatIsItResolved.length) groups.push({ title: "What Is It", items: whatIsItResolved });
+
+    var state = store.getState();
+    var styleEntries = state.styleCategory === "realistic"
+      ? [{ label: "Style", field: state.realisticStyle }]
+      : [{ label: "Character Type", field: state.illustrated.characterType }, { label: "Art Finish", field: state.illustrated.artFinish }];
+    var styleResolved = PromptHaus.engine.resolveFields(styleEntries);
+    if (styleResolved.length) groups.push({ title: "Style It", items: styleResolved });
+
+    var frameResolved = PromptHaus.engine.resolveFields(getFrameItEntries().map(function (e) {
+      return { label: e.label, field: e.field };
+    }));
+    if (frameResolved.length) groups.push({ title: "Frame It", items: frameResolved });
+
+    var hauteEntries = [{ label: "Vanity Plate Type", field: state.haute.vanityPlateType }];
+    if (PromptHaus.engine.resolveFieldValue(state.haute.vanityPlateType)) {
+      hauteEntries = hauteEntries.concat(getHauteDetailEntries().map(function (e) {
+        return { label: e.label, field: e.field };
+      }));
+    }
+    var hauteResolved = PromptHaus.engine.resolveFields(hauteEntries);
+    var plateTextEntry = buildPlateTextEntry();
+    if (plateTextEntry) hauteResolved.push({ label: plateTextEntry.label, value: PromptHaus.engine.resolveFieldValue(plateTextEntry.field) });
+    if (hauteResolved.length) groups.push({ title: "Haute Details", items: hauteResolved });
+
+    var holidayResolved = PromptHaus.engine.resolveFields([
+      { label: "Holiday Theme", field: PromptHaus.styleDNA.getState().holiday },
+    ]);
+    if (holidayResolved.length) groups.push({ title: "Holiday Theme", items: holidayResolved });
+
+    var bufferEntry = PromptHaus.styleDNA.getBufferEntry();
+    if (bufferEntry) groups.push({ title: "Buffer/Padding", items: [{ label: bufferEntry.label, value: bufferEntry.field.value }] });
+
+    return groups;
+  }
+
+  function randomizeFieldList(entries, updateFn) {
+    entries.forEach(function (e) {
+      if (!e.field.includeInPrompt) return;
+      var options = e.field.options || [];
+      if (!options.length) return;
+      var randomValue = options[Math.floor(Math.random() * options.length)];
+      updateFn(e.fieldName, { value: randomValue, customValue: "" });
+    });
+  }
+
+  function randomize() {
+    randomizeFieldList(getWhatIsItEntries(), updateWhatIsItField);
+    var state = store.getState();
+    if (state.styleCategory === "realistic") {
+      if (state.realisticStyle.includeInPrompt && state.realisticStyle.options.length) {
+        updateRealisticStyle({
+          value: state.realisticStyle.options[Math.floor(Math.random() * state.realisticStyle.options.length)],
+          customValue: "",
+        });
+      }
+    } else {
+      randomizeFieldList(
+        [
+          { fieldName: "characterType", field: state.illustrated.characterType },
+          { fieldName: "artFinish", field: state.illustrated.artFinish },
+        ],
+        updateIllustratedField
+      );
+    }
+    randomizeFieldList(getFrameItEntries(), updateFrameItField);
+    randomizeFieldList([{ fieldName: "vanityPlateType", field: state.haute.vanityPlateType }], function (_, changes) {
+      updateVanityPlateType(changes);
+    });
+    if (PromptHaus.engine.resolveFieldValue(store.getState().haute.vanityPlateType)) {
+      randomizeFieldList(getHauteDetailEntries(), updateHauteDetailField);
+    }
+  }
+
+  function reset() {
+    store.setState(buildInitialState());
+  }
+
+  PromptHaus.graphics = Object.assign({}, store, {
+    updateWhatIsItField: updateWhatIsItField,
+    setWhatIsItQuantity: setWhatIsItQuantity,
+    setStyleCategory: setStyleCategory,
+    updateIllustratedField: updateIllustratedField,
+    updateRealisticStyle: updateRealisticStyle,
+    updateFrameItField: updateFrameItField,
+    updateVanityPlateType: updateVanityPlateType,
+    updateHauteDetailField: updateHauteDetailField,
+    updatePlateText: updatePlateText,
+    updatePlateTextColor: updatePlateTextColor,
+    getWhatIsItEntries: getWhatIsItEntries,
+    getFrameItEntries: getFrameItEntries,
+    getHauteDetailEntries: getHauteDetailEntries,
+    assemblePrompt: assemblePrompt,
+    getSelectionsByGroup: getSelectionsByGroup,
+    randomize: randomize,
+    reset: reset,
+    labels: {
+      whatIsIt: WHAT_IS_IT_LABELS,
+      frameIt: FRAME_IT_LABELS,
+      hauteDetails: HAUTE_DETAILS_LABELS,
+    },
+  });
+})();
