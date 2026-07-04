@@ -222,6 +222,10 @@
         "air force wings", "space force delta", "coast guard emblem", "purple heart medal",
         "folded flag triangle", "dog tags", "american flag", "bald eagle",
         "combat boots and helmet memorial",
+        // new — broader US patriotic symbols, not just military-specific
+        "liberty bell", "statue of liberty", "uncle sam", "capitol building",
+        "mount rushmore", "fireworks", "great seal of the united states",
+        "red, white, and blue bunting",
       ]),
     },
   ];
