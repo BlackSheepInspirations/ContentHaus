@@ -68,6 +68,11 @@
     step2: '<circle cx="10" cy="10" r="7.5"/><path d="M10 6v4l3 2"/>',
     step3: '<circle cx="10" cy="10" r="7.5"/><path d="M4 10s2.5-4 6-4 6 4 6 4-2.5 4-6 4-6-4-6-4Z"/>',
     step4: '<circle cx="10" cy="10" r="7.5"/><rect x="7.5" y="7" width="6" height="6.5" rx="1"/><path d="M6.5 8.5V5.5A1 1 0 0 1 7.5 4.5h4.3"/>',
+    plane: '<path d="M2 10 17 3 10 18l-2-7-6-1Z"/>',
+    train: '<rect x="4" y="4" width="12" height="9" rx="2"/><path d="M7 7.5h6M4 13h12"/><circle cx="7" cy="16" r="1.3"/><circle cx="13" cy="16" r="1.3"/>',
+    boat: '<path d="M3 13h14l-2 4H5l-2-4Z"/><path d="M10 3v9M10 5l4 2-4 2"/>',
+    car: '<path d="M4 13 5.5 8h9L16 13"/><rect x="3" y="13" width="14" height="3" rx="1"/><circle cx="6.5" cy="16.5" r="1.3"/><circle cx="13.5" cy="16.5" r="1.3"/>',
+    shield: '<path d="M10 2 16 4.5V10c0 4-3 6.5-6 8-3-1.5-6-4-6-8V4.5Z"/><path d="M7 9l3 2 3-2"/>',
   };
 
   // Field-category -> icon name, used by both the Style DNA bar and each
@@ -113,6 +118,21 @@
       return btn;
     }
     return el("div", { class: "ph-basetype-toggle" }, options.map(optionButton));
+  }
+
+  // Lighter-weight N-option pill toggle — same "click to pick" idea as the
+  // two-option toggle above, but sized for a row of several choices (e.g.
+  // Transportation's Air/Land/Military/Rail/Water) rather than 2 big cards.
+  function renderPillToggle(options) {
+    function pillButton(opt) {
+      var btn = el("button", { type: "button", class: "ph-pill-toggle__btn" + (opt.isActive ? " is-active" : "") }, [
+        icon(opt.icon, "ph-pill-toggle__icon"),
+        el("span", { class: "ph-pill-toggle__label", text: opt.title }),
+      ]);
+      btn.addEventListener("click", opt.onClick);
+      return btn;
+    }
+    return el("div", { class: "ph-pill-toggle" }, options.map(pillButton));
   }
 
   function renderBaseTypeToggle(currentBaseType, onSetHuman, onSetMascot) {
@@ -795,18 +815,41 @@
     }
     panel.appendChild(hauteSection);
 
-    // Transportation — same "pick a type, reveal a color detail" shape as
-    // Haute Details above.
+    // Transportation — a category pill toggle first (keeps the 45-item
+    // catalog from becoming one muddy dropdown), which reveals just that
+    // category's own Vehicle dropdown, which in turn reveals Color once a
+    // vehicle is picked. Clicking the active pill again clears the category
+    // (and Vehicle/Color with it) so it's easy to back out entirely.
     var transportSection = el("fieldset", { class: "ph-field-group" });
     transportSection.appendChild(el("legend", { class: "ph-field-group__title", text: "Transportation" }));
+    var transportCategory = state.transportation.category.value;
+    function selectTransportCategory(cat) {
+      return function () {
+        graphics.updateTransportationCategory({ value: transportCategory === cat ? "" : cat });
+        renderApp();
+      };
+    }
     transportSection.appendChild(
-      el("div", { class: "ph-field-group__fields" }, [
-        renderField({ label: "Transportation Type", field: state.transportation.type }, function (changes) {
-          graphics.updateTransportationType(changes);
-          renderApp();
-        }),
+      renderPillToggle([
+        { isActive: transportCategory === "air", icon: "plane", title: "Air", onClick: selectTransportCategory("air") },
+        { isActive: transportCategory === "land", icon: "car", title: "Land", onClick: selectTransportCategory("land") },
+        { isActive: transportCategory === "military", icon: "shield", title: "Military", onClick: selectTransportCategory("military") },
+        { isActive: transportCategory === "rail", icon: "train", title: "Rail", onClick: selectTransportCategory("rail") },
+        { isActive: transportCategory === "water", icon: "boat", title: "Water", onClick: selectTransportCategory("water") },
       ])
     );
+    if (transportCategory) {
+      transportSection.appendChild(
+        renderFieldGroup(
+          "Vehicle",
+          [{ fieldName: "type", label: "Vehicle", field: state.transportation.type }],
+          function (entry, changes) {
+            graphics.updateTransportationType(changes);
+            renderApp();
+          }
+        )
+      );
+    }
     var transportationOn = PromptHaus.engine.resolveFieldValue(state.transportation.type);
     if (transportationOn) {
       transportSection.appendChild(

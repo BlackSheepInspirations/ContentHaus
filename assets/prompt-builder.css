@@ -258,6 +258,42 @@
   color: var(--ph-teal);
 }
 
+/* Pill toggle — lighter-weight sibling of the basetype toggle above, for
+   picking among several options (e.g. Transportation's category row)
+   instead of just two. */
+.ph-pill-toggle {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.ph-pill-toggle__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 2px solid var(--ph-charcoal);
+  background: var(--ph-cream);
+  color: var(--ph-charcoal);
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+}
+.ph-pill-toggle__icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+.ph-pill-toggle__btn.is-active {
+  background: var(--ph-black);
+  color: var(--ph-gold);
+  border-color: var(--ph-teal);
+}
+.ph-pill-toggle__btn.is-active .ph-pill-toggle__icon {
+  color: var(--ph-teal);
+}
+
 /* Couples Mode */
 .ph-btn--swap {
   background: var(--ph-teal);

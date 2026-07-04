@@ -109,41 +109,29 @@
     },
   ];
 
-  // Transportation — same "pick a type, reveal a color detail" pattern as
-  // Vanity Plate Type/Details above. Grouped like Character Type/Holiday/
-  // State Theme: 45 items browses better by category than as one flat wall.
-  var TRANSPORTATION_GROUPS = [
-    {
-      label: "Air",
-      options: ["modern airplane", "old school airplane", "fighter jet", "helicopter", "private jet", "hot air balloon"],
-    },
-    { label: "Rail", options: ["train", "freight train", "steam train"] },
-    {
-      label: "Water",
-      options: [
-        "speed boat", "bass boat", "sail boat", "yacht", "cruise ship", "canoe", "pontoon",
-        "kayak", "jet ski", "fishing boat", "houseboat",
-      ],
-    },
-    {
-      label: "Land Vehicles",
-      options: [
-        "sports car", "luxury car", "suv", "jeep", "modern truck", "old school truck",
-        "convertible", "muscle car", "minivan", "golf cart",
-      ],
-    },
-    {
-      label: "Motorcycles & Bikes",
-      options: ["chopper style motorcycle", "street bike style motorcycle", "moped", "bicycle", "dirt bike", "scooter"],
-    },
-    {
-      label: "Military",
-      options: [
-        "humvee", "aav (amphibious assault vehicle)", "military jet", "military helicopter",
-        "military ship", "tank", "military truck", "submarine", "armored personnel carrier",
-      ],
-    },
-  ];
+  // Transportation — a category pick first (Air/Land/Military/Rail/Water,
+  // as an icon toggle rather than one giant 45-item dropdown), which swaps
+  // in that category's own short options list for Vehicle. Same "pick a
+  // thing, reveal a color detail" pattern as Vanity Plate Type/Details
+  // once a vehicle is chosen.
+  var TRANSPORTATION_CATEGORY_OPTIONS = sortAlpha(["air", "land", "military", "rail", "water"]);
+  var TRANSPORTATION_TYPES_BY_CATEGORY = {
+    air: sortAlpha(["modern airplane", "old school airplane", "fighter jet", "helicopter", "private jet", "hot air balloon"]),
+    rail: sortAlpha(["train", "freight train", "steam train"]),
+    water: sortAlpha([
+      "speed boat", "bass boat", "sail boat", "yacht", "cruise ship", "canoe", "pontoon",
+      "kayak", "jet ski", "fishing boat", "houseboat",
+    ]),
+    land: sortAlpha([
+      "sports car", "luxury car", "suv", "jeep", "modern truck", "old school truck",
+      "convertible", "muscle car", "minivan", "golf cart", "chopper style motorcycle",
+      "street bike style motorcycle", "moped", "bicycle", "dirt bike", "scooter",
+    ]),
+    military: sortAlpha([
+      "humvee", "aav (amphibious assault vehicle)", "military jet", "military helicopter",
+      "military ship", "tank", "military truck", "submarine", "armored personnel carrier",
+    ]),
+  };
   var TRANSPORTATION_COLOR_OPTIONS = sortAlpha([
     "black", "white", "red", "blue", "silver", "gray", "gold", "chrome", "matte black",
     "candy apple red", "racing green", "navy blue", "yellow", "orange", "camo/camouflage",
@@ -212,7 +200,8 @@
         plateTextColor: makeField("", LETTER_COLOR_OPTIONS),
       },
       transportation: {
-        type: PromptHaus.util.makeGroupedField("none", TRANSPORTATION_GROUPS),
+        category: makeField("", TRANSPORTATION_CATEGORY_OPTIONS),
+        type: makeField("", []),
         color: makeField("", TRANSPORTATION_COLOR_OPTIONS),
       },
     };
@@ -274,6 +263,22 @@
   function updatePlateTextColor(changes) {
     var state = store.getState();
     store.setState({ haute: Object.assign({}, state.haute, { plateTextColor: Object.assign({}, state.haute.plateTextColor, changes) }) });
+  }
+
+  // Switching category swaps in that category's own Vehicle options and
+  // clears whatever Vehicle/Color was picked before, since a Water color
+  // choice, say, shouldn't linger once you've moved to Air.
+  function updateTransportationCategory(changes) {
+    var state = store.getState();
+    var nextCategory = Object.assign({}, state.transportation.category, changes);
+    var typeOptions = TRANSPORTATION_TYPES_BY_CATEGORY[nextCategory.value] || [];
+    store.setState({
+      transportation: {
+        category: nextCategory,
+        type: makeField("", typeOptions),
+        color: makeField("", TRANSPORTATION_COLOR_OPTIONS),
+      },
+    });
   }
 
   function updateTransportationType(changes) {
@@ -465,6 +470,9 @@
     if (PromptHaus.engine.resolveFieldValue(store.getState().haute.vanityPlateType)) {
       randomizeFieldList(getHauteDetailEntries(), updateHauteDetailField);
     }
+    updateTransportationCategory({
+      value: TRANSPORTATION_CATEGORY_OPTIONS[Math.floor(Math.random() * TRANSPORTATION_CATEGORY_OPTIONS.length)],
+    });
     randomizeFieldList([{ fieldName: "type", field: store.getState().transportation.type }], function (_, changes) {
       updateTransportationType(changes);
     });
@@ -490,6 +498,7 @@
     updateHauteDetailField: updateHauteDetailField,
     updatePlateText: updatePlateText,
     updatePlateTextColor: updatePlateTextColor,
+    updateTransportationCategory: updateTransportationCategory,
     updateTransportationType: updateTransportationType,
     updateTransportationColor: updateTransportationColor,
     getWhatIsItEntries: getWhatIsItEntries,

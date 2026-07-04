@@ -57,7 +57,10 @@
     },
     {
       label: "Stick Figure & Line Styles",
-      options: ["stick figure minimalist", "stick figure doodle", "line art / continuous line drawing", "monochrome ink sketch"],
+      options: [
+        "stick figure minimalist", "stick figure doodle", "line art / continuous line drawing",
+        "monochrome ink sketch", "pencil sketch", "doodle art",
+      ],
     },
     {
       label: "Minimalist / Modern Graphic",
@@ -68,15 +71,29 @@
       options: [
         "retro comic pop art", "90s cartoon nostalgia", "y2k graphic style", "grunge/punk zine art",
         "cyberpunk neon illustration", "retro pixel art / 8-bit", "claymation style", "anime 90s cel-shaded",
+        "dither art",
       ],
     },
     {
       label: "Fine Art Inspired",
-      options: ["impressionist painting style", "pop surrealism", "watercolor portrait", "charcoal sketch", "pastel illustration"],
+      options: [
+        "impressionist painting style", "pop surrealism", "watercolor portrait", "charcoal sketch",
+        "pastel illustration", "etching / engraving style", "linocut print style",
+      ],
     },
     {
       label: "Novelty / Texture-Based",
-      options: ["vaporwave aesthetic", "low-poly 3d", "stained glass art style", "origami/paper-craft style"],
+      options: [
+        "vaporwave aesthetic", "low-poly 3d", "stained glass art style", "origami/paper-craft style",
+        "risograph print style", "scrapbook collage style",
+      ],
+    },
+    {
+      // New — the existing groups skew illustration/painting; this covers
+      // the dimensional/sculptural rendering styles (chrome, clay, marble,
+      // plush) that are a genuinely different aesthetic family.
+      label: "3D & Sculptural",
+      options: ["3d render", "chrome / liquid metal style", "marble sculpture style", "plush toy style"],
     },
   ];
   var ART_FINISH_OPTIONS = sortAlpha([
