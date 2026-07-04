@@ -207,6 +207,10 @@
     // AI-generated variations the assembled prompt asks for.
     variationCount: PromptHaus.util.makeField("4", ["1", "2", "3", "4"]),
     holiday: PromptHaus.util.makeGroupedField("", HOLIDAY_GROUPS),
+    // Shared across every mode — a plain boolean, not a dropdown field,
+    // since it's just a yes/no checkbox ("add a buffer/padding around the
+    // image so nothing gets cropped at the edges").
+    addBuffer: false,
   });
 
   function setProjectType(newValue) {
@@ -254,6 +258,21 @@
     PromptHaus.util.updateField(store, "holiday", { value: newValue });
   }
 
+  function setAddBuffer(enabled) {
+    store.setState({ addBuffer: enabled });
+  }
+
+  // Shared synthetic entry every mode's assembler mixes into its own field
+  // list (same treatment as Holiday Theme) — null when unchecked, so it
+  // resolves to nothing rather than a literal "false" appearing anywhere.
+  function getBufferEntry() {
+    if (!store.getState().addBuffer) return null;
+    return {
+      label: "Buffer/Padding",
+      field: PromptHaus.util.makeField("buffer of empty space around the edges so nothing gets cropped at the borders"),
+    };
+  }
+
   PromptHaus.styleDNA = Object.assign({}, store, {
     setProjectType: setProjectType,
     setAspectRatioManually: setAspectRatioManually,
@@ -261,6 +280,8 @@
     setTargetPlatform: setTargetPlatform,
     setVariationCount: setVariationCount,
     setHoliday: setHoliday,
+    setAddBuffer: setAddBuffer,
+    getBufferEntry: getBufferEntry,
     suggestedAspectRatio: suggestedAspectRatio,
   });
 })();

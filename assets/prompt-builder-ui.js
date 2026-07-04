@@ -799,6 +799,20 @@
       renderApp();
     });
 
+    var bufferCheckbox = el("input", { type: "checkbox", class: "ph-styledna__checkbox" });
+    bufferCheckbox.checked = styleDNAState.addBuffer;
+    bufferCheckbox.addEventListener("change", function () {
+      PromptHaus.styleDNA.setAddBuffer(bufferCheckbox.checked);
+      renderApp();
+    });
+    var bufferField = el("div", { class: "ph-styledna__field" }, [
+      el("label", { class: "ph-styledna__checkbox-label" }, [
+        bufferCheckbox,
+        el("span", { text: "Add a buffer/padding around the image" }),
+      ]),
+    ]);
+    bufferField.title = "Asks the AI to leave empty space around the edges so nothing gets cropped at the borders.";
+
     root.appendChild(
       el("div", { class: "ph-styledna" }, [
         el("div", { class: "ph-styledna__field" }, [el("span", { class: "ph-field__label", text: "Project Type" }), projectSelect]),
@@ -810,6 +824,7 @@
         el("div", { class: "ph-styledna__field" }, [el("span", { class: "ph-field__label", text: "Target Platform" }), platformSelect]),
         el("div", { class: "ph-styledna__field" }, [el("span", { class: "ph-field__label", text: "Variations" }), variationSelect]),
         el("div", { class: "ph-styledna__field" }, [el("span", { class: "ph-field__label", text: "Holiday Theme" }), holidaySelect]),
+        bufferField,
       ])
     );
   }

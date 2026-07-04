@@ -228,12 +228,15 @@
     });
   }
 
-  // Holiday Theme resolved as its own entry — folded into the assembler's
-  // scene-level output (not the UI-facing getSceneFieldEntries above)
-  // since it's exactly the kind of "the couple can't contradict each
-  // other" field Couple Dynamic exists for.
-  function getHolidayEntry() {
-    return { label: "Holiday Theme", field: PromptHaus.styleDNA.getState().holiday };
+  // Holiday Theme and Buffer/Padding resolved as their own entries —
+  // folded into the assembler's scene-level output (not the UI-facing
+  // getSceneFieldEntries above) since they're exactly the kind of "the
+  // couple can't contradict each other" field Couple Dynamic exists for.
+  function getSharedStyleDNAEntries() {
+    var entries = [{ label: "Holiday Theme", field: PromptHaus.styleDNA.getState().holiday }];
+    var bufferEntry = PromptHaus.styleDNA.getBufferEntry();
+    if (bufferEntry) entries.push(bufferEntry);
+    return entries;
   }
 
   function toEntry(e) {
@@ -243,7 +246,7 @@
   function assemblePrompt() {
     var count = parseInt(PromptHaus.styleDNA.getState().variationCount.value, 10) || 4;
     var sceneEntries = getSceneFieldEntries().map(toEntry);
-    sceneEntries.push(getHolidayEntry());
+    sceneEntries = sceneEntries.concat(getSharedStyleDNAEntries());
     var sceneResolved = PromptHaus.engine.resolveFields(sceneEntries);
     var aResolved = PromptHaus.engine.resolveFields(getPersonFieldEntries("A").map(toEntry));
     var bResolved = PromptHaus.engine.resolveFields(getPersonFieldEntries("B").map(toEntry));
@@ -296,7 +299,7 @@
 
   function getSelectionsByGroup() {
     var sceneEntries = getSceneFieldEntries().map(toEntry);
-    sceneEntries.push(getHolidayEntry());
+    sceneEntries = sceneEntries.concat(getSharedStyleDNAEntries());
     var sceneResolved = PromptHaus.engine.resolveFields(sceneEntries);
     var aResolved = PromptHaus.engine.resolveFields(getPersonFieldEntries("A").map(toEntry));
     var bResolved = PromptHaus.engine.resolveFields(getPersonFieldEntries("B").map(toEntry));

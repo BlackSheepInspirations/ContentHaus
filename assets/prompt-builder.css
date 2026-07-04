@@ -88,6 +88,15 @@
   padding: 2px 8px;
   cursor: pointer;
 }
+.ph-styledna__checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ph-cream);
+  font-size: 13px;
+  cursor: pointer;
+  padding-top: 4px;
+}
 
 /* Layout: fields left, sticky preview right on desktop */
 .ph-body {

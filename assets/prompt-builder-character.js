@@ -494,9 +494,11 @@
     var entries = getActiveFieldEntries().map(function (e) {
       return { label: e.label, field: e.field };
     });
-    // Holiday Theme lives in shared Style DNA, not Character's own state,
-    // since it applies the same way across every mode.
+    // Holiday Theme and Buffer/Padding live in shared Style DNA, not
+    // Character's own state, since they apply the same way across every mode.
     entries.push({ label: "Holiday Theme", field: PromptHaus.styleDNA.getState().holiday });
+    var bufferEntry = PromptHaus.styleDNA.getBufferEntry();
+    if (bufferEntry) entries.push(bufferEntry);
     var count = parseInt(PromptHaus.styleDNA.getState().variationCount.value, 10) || 4;
     var intro = "Create " + count + (count === 1 ? " variation" : " variations") +
       " of a clean, professional character portrait of a";
@@ -564,6 +566,8 @@
       { label: "Holiday Theme", field: PromptHaus.styleDNA.getState().holiday },
     ]);
     if (holidayResolved.length) groups.push({ title: "Holiday Theme", items: holidayResolved });
+    var bufferEntry = PromptHaus.styleDNA.getBufferEntry();
+    if (bufferEntry) groups.push({ title: "Buffer/Padding", items: [{ label: bufferEntry.label, value: bufferEntry.field.value }] });
     return groups;
   }
 
