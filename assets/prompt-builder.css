@@ -424,13 +424,17 @@
   color: var(--ph-teal);
   white-space: nowrap;
 }
-/* Native checkboxes pick up the theme's own accent-color (its red "sale"
-   accent) unless we override it — every checkbox in the tool should read
-   as our teal instead. */
+/* The live theme resets native checkbox appearance entirely and paints
+   the checked fill via `background-color: currentColor` (not
+   accent-color) — so the fix is setting `color`, not accent-color, even
+   though accent-color is the "normal" way to do this. Both are set so
+   this still looks right in a plain/unthemed context (e.g. our own dev
+   harness) where the theme's override isn't present at all. */
 .ph-field__checkbox,
 .ph-styledna__checkbox,
 .ph-subpanel__toggle {
   accent-color: var(--ph-teal);
+  color: var(--ph-teal);
 }
 .ph-field__select,
 .ph-field__custom {
