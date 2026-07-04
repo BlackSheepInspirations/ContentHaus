@@ -218,9 +218,9 @@
       // across every mode, not just Character's uniform options.
       label: "Military & Patriotic",
       options: PromptHaus.util.sortAlpha([
-        "usmc eagle, globe, and anchor", "navy seal trident", "army star insignia",
-        "air force wings", "space force delta", "coast guard emblem", "purple heart medal",
-        "folded flag triangle", "dog tags", "american flag", "bald eagle",
+        "usmc eagle, globe, and anchor", "navy anchor", "navy seal trident",
+        "army star insignia", "air force wings", "space force delta", "coast guard emblem",
+        "purple heart medal", "folded flag triangle", "dog tags", "american flag", "bald eagle",
         "combat boots and helmet memorial",
         // new — broader US patriotic symbols, not just military-specific
         "liberty bell", "statue of liberty", "uncle sam", "capitol building",
