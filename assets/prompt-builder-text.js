@@ -222,6 +222,9 @@
     var fixedEntries = getFixedEntries().map(toEntry);
     var accentField = buildAccentField();
     if (accentField) fixedEntries.push({ label: "Accent", field: accentField });
+    // Holiday Theme lives in shared Style DNA — stays fixed across
+    // variations same as everything else in Core Style.
+    fixedEntries.push({ label: "Holiday Theme", field: PromptHaus.styleDNA.getState().holiday });
 
     var intro = "Generate " + count + (count === 1 ? " variation." : " variations.");
     if (count > 1) intro += " Interpretation guide:";
@@ -281,6 +284,11 @@
 
     var variableResolved = PromptHaus.engine.resolveFields(getVariableEntries().map(toEntry));
     if (variableResolved.length) groups.push({ title: "Variation Details", items: variableResolved });
+
+    var holidayResolved = PromptHaus.engine.resolveFields([
+      { label: "Holiday Theme", field: PromptHaus.styleDNA.getState().holiday },
+    ]);
+    if (holidayResolved.length) groups.push({ title: "Holiday Theme", items: holidayResolved });
 
     return groups;
   }

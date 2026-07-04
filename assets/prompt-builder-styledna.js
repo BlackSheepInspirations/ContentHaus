@@ -119,6 +119,40 @@
     "Leonardo AI", "Adobe Firefly", "Flux",
   ];
 
+  // Holiday Theme — shared across every mode (a holiday theme applies just
+  // as much to Text lettering or a Couples scene as to a Character
+  // portrait), so it lives here rather than duplicated per mode. Grouped
+  // like Character Type: 40 items browses better by category than as one
+  // flat wall. Spans US federal/civic + religious/cultural observances
+  // rather than skewing toward any single one.
+  var HOLIDAY_GROUPS = [
+    {
+      label: "US Federal & Civic",
+      options: [
+        "new year's day", "martin luther king jr. day", "presidents' day", "memorial day",
+        "juneteenth", "independence day (4th of july)", "labor day",
+        "columbus day / indigenous peoples' day", "veterans day", "thanksgiving",
+      ],
+    },
+    { label: "Christian", options: ["christmas", "christmas eve", "easter"] },
+    { label: "Jewish", options: ["hanukkah", "passover", "rosh hashanah", "yom kippur"] },
+    { label: "Islamic", options: ["ramadan", "eid al-fitr", "eid al-adha"] },
+    { label: "Hindu / Dharmic", options: ["diwali", "holi"] },
+    { label: "Latin American", options: ["cinco de mayo", "dia de los muertos (day of the dead)"] },
+    { label: "East Asian", options: ["lunar new year"] },
+    {
+      label: "International / Regional",
+      options: ["canada day", "bastille day", "boxing day", "oktoberfest", "australia day", "nowruz (persian new year)"],
+    },
+    {
+      label: "Secular / Cultural",
+      options: [
+        "new year's eve", "valentine's day", "st. patrick's day", "halloween", "mother's day",
+        "father's day", "pride month", "earth day", "kwanzaa",
+      ],
+    },
+  ];
+
   // Sensible default mapping used for the aspect-ratio auto-suggest.
   // Square-ish print goods -> 1:1, packaging/labels & portrait social -> 4:5,
   // phone-native vertical formats -> 9:16. Adjustable later; nothing in the
@@ -172,6 +206,7 @@
     // Shared across every mode (Character/Text/Couples/Combined) — how many
     // AI-generated variations the assembled prompt asks for.
     variationCount: PromptHaus.util.makeField("4", ["1", "2", "3", "4"]),
+    holiday: PromptHaus.util.makeGroupedField("", HOLIDAY_GROUPS),
   });
 
   function setProjectType(newValue) {
@@ -215,12 +250,17 @@
     PromptHaus.util.updateField(store, "variationCount", { value: newValue });
   }
 
+  function setHoliday(newValue) {
+    PromptHaus.util.updateField(store, "holiday", { value: newValue });
+  }
+
   PromptHaus.styleDNA = Object.assign({}, store, {
     setProjectType: setProjectType,
     setAspectRatioManually: setAspectRatioManually,
     resetAspectRatioToAuto: resetAspectRatioToAuto,
     setTargetPlatform: setTargetPlatform,
     setVariationCount: setVariationCount,
+    setHoliday: setHoliday,
     suggestedAspectRatio: suggestedAspectRatio,
   });
 })();

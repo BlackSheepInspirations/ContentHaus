@@ -34,23 +34,20 @@
     return node;
   }
 
-  // One field row: label, "Include in prompt" checkbox, dropdown, custom
-  // value override. Shared by every mode.
-  function renderField(entry, onChange) {
-    var field = entry.field;
-
-    var select = el("select", { class: "ph-field__select" });
+  // Appends a "Select..." placeholder plus every option to a <select>,
+  // grouped into <optgroup> sections when the field defines them (long,
+  // varied lists like Character Type or Holiday browse better by category
+  // than as one flat alphabetized wall). Shared by the per-mode field
+  // renderer below and the Style DNA bar's own selects.
+  function appendSelectOptions(select, field, currentValue) {
     select.appendChild(el("option", { value: "" }, [document.createTextNode("Select...")]));
     if (field.optionGroups) {
-      // Long, varied lists (e.g. Character Type) browse better grouped by
-      // category than as one flat alphabetized wall — rendered as native
-      // <optgroup> sections, in the curated order the field defines.
       field.optionGroups.forEach(function (group) {
         var optgroup = el("optgroup", { label: group.label });
         group.options.forEach(function (opt) {
           var optionNode = el("option", { value: opt });
           optionNode.textContent = opt;
-          if (opt === field.value) optionNode.selected = true;
+          if (opt === currentValue) optionNode.selected = true;
           optgroup.appendChild(optionNode);
         });
         select.appendChild(optgroup);
@@ -59,10 +56,19 @@
       (field.options || []).forEach(function (opt) {
         var optionNode = el("option", { value: opt });
         optionNode.textContent = opt;
-        if (opt === field.value) optionNode.selected = true;
+        if (opt === currentValue) optionNode.selected = true;
         select.appendChild(optionNode);
       });
     }
+  }
+
+  // One field row: label, "Include in prompt" checkbox, dropdown, custom
+  // value override. Shared by every mode.
+  function renderField(entry, onChange) {
+    var field = entry.field;
+
+    var select = el("select", { class: "ph-field__select" });
+    appendSelectOptions(select, field, field.value);
     select.addEventListener("change", function () {
       onChange({ value: select.value });
     });
@@ -642,15 +648,16 @@
     }
 
     var platformSelect = el("select", { class: "ph-field__select" });
-    platformSelect.appendChild(el("option", { value: "" }, [document.createTextNode("Select...")]));
-    styleDNAState.targetPlatform.options.forEach(function (opt) {
-      var optionNode = el("option", { value: opt });
-      optionNode.textContent = opt;
-      if (opt === styleDNAState.targetPlatform.value) optionNode.selected = true;
-      platformSelect.appendChild(optionNode);
-    });
+    appendSelectOptions(platformSelect, styleDNAState.targetPlatform, styleDNAState.targetPlatform.value);
     platformSelect.addEventListener("change", function () {
       PromptHaus.styleDNA.setTargetPlatform(platformSelect.value);
+      renderApp();
+    });
+
+    var holidaySelect = el("select", { class: "ph-field__select" });
+    appendSelectOptions(holidaySelect, styleDNAState.holiday, styleDNAState.holiday.value);
+    holidaySelect.addEventListener("change", function () {
+      PromptHaus.styleDNA.setHoliday(holidaySelect.value);
       renderApp();
     });
 
@@ -676,6 +683,7 @@
         ]),
         el("div", { class: "ph-styledna__field" }, [el("span", { class: "ph-field__label", text: "Target Platform" }), platformSelect]),
         el("div", { class: "ph-styledna__field" }, [el("span", { class: "ph-field__label", text: "Variations" }), variationSelect]),
+        el("div", { class: "ph-styledna__field" }, [el("span", { class: "ph-field__label", text: "Holiday Theme" }), holidaySelect]),
       ])
     );
   }

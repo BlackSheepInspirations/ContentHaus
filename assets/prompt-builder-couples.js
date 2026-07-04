@@ -216,11 +216,24 @@
     return entries;
   }
 
+  // Used both by the UI (to render the editable Couple Dynamic fieldset)
+  // and by the assembler below — does NOT include Holiday Theme, since
+  // that lives in Style DNA and has its own editor in the Style DNA bar;
+  // injecting it here would duplicate that editor with a handler that
+  // doesn't know how to write back to Style DNA.
   function getSceneFieldEntries() {
     var state = store.getState();
     return Object.keys(COUPLE_DYNAMIC_LABELS).map(function (fieldName) {
       return { fieldName: fieldName, label: COUPLE_DYNAMIC_LABELS[fieldName], field: state.coupleDynamic[fieldName] };
     });
+  }
+
+  // Holiday Theme resolved as its own entry — folded into the assembler's
+  // scene-level output (not the UI-facing getSceneFieldEntries above)
+  // since it's exactly the kind of "the couple can't contradict each
+  // other" field Couple Dynamic exists for.
+  function getHolidayEntry() {
+    return { label: "Holiday Theme", field: PromptHaus.styleDNA.getState().holiday };
   }
 
   function toEntry(e) {
@@ -229,7 +242,9 @@
 
   function assemblePrompt() {
     var count = parseInt(PromptHaus.styleDNA.getState().variationCount.value, 10) || 4;
-    var sceneResolved = PromptHaus.engine.resolveFields(getSceneFieldEntries().map(toEntry));
+    var sceneEntries = getSceneFieldEntries().map(toEntry);
+    sceneEntries.push(getHolidayEntry());
+    var sceneResolved = PromptHaus.engine.resolveFields(sceneEntries);
     var aResolved = PromptHaus.engine.resolveFields(getPersonFieldEntries("A").map(toEntry));
     var bResolved = PromptHaus.engine.resolveFields(getPersonFieldEntries("B").map(toEntry));
 
@@ -280,7 +295,9 @@
   }
 
   function getSelectionsByGroup() {
-    var sceneResolved = PromptHaus.engine.resolveFields(getSceneFieldEntries().map(toEntry));
+    var sceneEntries = getSceneFieldEntries().map(toEntry);
+    sceneEntries.push(getHolidayEntry());
+    var sceneResolved = PromptHaus.engine.resolveFields(sceneEntries);
     var aResolved = PromptHaus.engine.resolveFields(getPersonFieldEntries("A").map(toEntry));
     var bResolved = PromptHaus.engine.resolveFields(getPersonFieldEntries("B").map(toEntry));
     var groups = [];

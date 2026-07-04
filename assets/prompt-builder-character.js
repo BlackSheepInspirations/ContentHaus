@@ -491,6 +491,9 @@
     var entries = getActiveFieldEntries().map(function (e) {
       return { label: e.label, field: e.field };
     });
+    // Holiday Theme lives in shared Style DNA, not Character's own state,
+    // since it applies the same way across every mode.
+    entries.push({ label: "Holiday Theme", field: PromptHaus.styleDNA.getState().holiday });
     var count = parseInt(PromptHaus.styleDNA.getState().variationCount.value, 10) || 4;
     var intro = "Create " + count + (count === 1 ? " variation" : " variations") +
       " of a clean, professional character portrait of a";
@@ -554,6 +557,10 @@
       var resolved = PromptHaus.engine.resolveFields(groupEntries);
       if (resolved.length) groups.push({ title: titleFor[groupName], items: resolved });
     });
+    var holidayResolved = PromptHaus.engine.resolveFields([
+      { label: "Holiday Theme", field: PromptHaus.styleDNA.getState().holiday },
+    ]);
+    if (holidayResolved.length) groups.push({ title: "Holiday Theme", items: holidayResolved });
     return groups;
   }
 
