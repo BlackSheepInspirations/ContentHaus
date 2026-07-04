@@ -424,6 +424,14 @@
   color: var(--ph-teal);
   white-space: nowrap;
 }
+/* Native checkboxes pick up the theme's own accent-color (its red "sale"
+   accent) unless we override it — every checkbox in the tool should read
+   as our teal instead. */
+.ph-field__checkbox,
+.ph-styledna__checkbox,
+.ph-subpanel__toggle {
+  accent-color: var(--ph-teal);
+}
 .ph-field__select,
 .ph-field__custom {
   padding: 8px 14px;
