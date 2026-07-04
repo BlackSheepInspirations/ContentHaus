@@ -201,6 +201,18 @@
     }
   }
 
+  // Whether a field currently has anything that would actually show up in
+  // the prompt (mirrors engine.resolveFieldValue's value-resolution, minus
+  // the includeInPrompt gate) — used to keep "Include in prompt" reading as
+  // unchecked on an untouched field instead of looking pre-opted-in before
+  // there's anything to include.
+  function fieldHasValue(field) {
+    var custom = (field.customValue || "").trim();
+    if (custom) return true;
+    var value = (field.value || "").trim();
+    return value !== "" && value.toLowerCase() !== "none";
+  }
+
   // One field row: label, "Include in prompt" checkbox, dropdown, custom
   // value override. Shared by every mode.
   function renderField(entry, onChange) {
@@ -223,7 +235,7 @@
     });
 
     var checkbox = el("input", { type: "checkbox", class: "ph-field__checkbox" });
-    checkbox.checked = field.includeInPrompt !== false;
+    checkbox.checked = field.includeInPrompt !== false && fieldHasValue(field);
     checkbox.addEventListener("change", function () {
       onChange({ includeInPrompt: checkbox.checked });
     });
@@ -315,7 +327,7 @@
     });
 
     var checkbox = el("input", { type: "checkbox", class: "ph-field__checkbox" });
-    checkbox.checked = field.includeInPrompt !== false;
+    checkbox.checked = field.includeInPrompt !== false && fieldHasValue(field);
     checkbox.addEventListener("change", function () {
       onChange({ includeInPrompt: checkbox.checked });
     });
