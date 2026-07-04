@@ -211,6 +211,19 @@
         "ocean wave", "waterfall", "snowflake",
       ]),
     },
+    {
+      // Branch emblems specifically (not generic military gear — that
+      // already lives in Character's Outfit/Occupation Niche) — an
+      // integrated symbol the same way a cross or a dove is, so it works
+      // across every mode, not just Character's uniform options.
+      label: "Military & Patriotic",
+      options: PromptHaus.util.sortAlpha([
+        "usmc eagle, globe, and anchor", "navy seal trident", "army star insignia",
+        "air force wings", "space force delta", "coast guard emblem", "purple heart medal",
+        "folded flag triangle", "dog tags", "american flag", "bald eagle",
+        "combat boots and helmet memorial",
+      ]),
+    },
   ];
   var IMAGERY_SLOT_NAMES = ["slot1", "slot2", "slot3"];
   var IMAGERY_SLOT_LABELS = { slot1: "Imagery 1", slot2: "Imagery 2", slot3: "Imagery 3" };
