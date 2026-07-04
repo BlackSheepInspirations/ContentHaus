@@ -10,7 +10,7 @@
   window.PromptHaus = window.PromptHaus || {};
   var PromptHaus = window.PromptHaus;
 
-  var MODES = ["character", "text", "couples", "combined", "graphics"];
+  var MODES = ["character", "couples", "text", "graphics", "combined"];
   var MODE_LABELS = { character: "Character", text: "Text", couples: "Couples", combined: "Combined", graphics: "Graphics" };
   // Flips to true as each mode ships in later build steps.
   var BUILT_MODES = { character: true, text: true, couples: true, combined: true, graphics: true };
@@ -1184,11 +1184,15 @@
     { icon: "step4", title: "Copy", subtitle: "Save and use anywhere" },
   ];
 
+  // All 4 steps render identically (uniform teal) — this is purely a
+  // "here's the process you'll walk through" narration, not a progress
+  // tracker, so no single step should read as more/less complete than
+  // another.
   function renderStepper(root) {
     var row = el("div", { class: "ph-stepper" });
     STEPS.forEach(function (step, index) {
       row.appendChild(
-        el("div", { class: "ph-stepper__step" + (index === 0 ? " is-active" : "") }, [
+        el("div", { class: "ph-stepper__step" }, [
           icon(step.icon, "ph-stepper__icon"),
           el("div", { class: "ph-stepper__text" }, [
             el("span", { class: "ph-stepper__title", text: (index + 1) + " " + step.title }),

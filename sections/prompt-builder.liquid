@@ -25,7 +25,7 @@
 <div class="ph-brand-header">
   <div class="ph-marketing__hero">
     <p class="ph-marketing__eyebrow">{{ section.settings.brand_eyebrow }}</p>
-    <h1 class="ph-marketing__heading">{{ section.settings.brand_heading }}</h1>
+    <h1 class="ph-marketing__heading">{{ section.settings.brand_heading | replace: 'AI', '<span class="ph-heading-accent">AI</span>' }}</h1>
     <div class="ph-marketing__subheading">{{ section.settings.brand_subheading }}</div>
   </div>
 </div>
@@ -44,7 +44,7 @@
   <script src="{{ 'prompt-builder-ui.js' | asset_url }}" defer="defer"></script>
 {% else %}
   <div class="ph-locked">
-    <h2 class="ph-locked__heading">{{ section.settings.locked_heading }}</h2>
+    <h2 class="ph-locked__heading">{{ section.settings.locked_heading | replace: 'AI', '<span class="ph-heading-accent">AI</span>' }}</h2>
     <div class="ph-locked__body">{{ section.settings.locked_body }}</div>
     <div class="ph-locked__actions">
       {% if section.settings.access_product %}
