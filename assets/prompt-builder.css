@@ -48,6 +48,19 @@
   box-sizing: border-box;
 }
 
+/* Icon system — inherits color from whatever text color surrounds it */
+.ph-icon {
+  display: inline-flex;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  vertical-align: -3px;
+}
+.ph-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
 /* Tabs */
 .ph-tabs {
   display: flex;
@@ -57,6 +70,9 @@
   flex-wrap: wrap;
 }
 .ph-tabs__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   background: none;
   border: none;
   padding: 12px 18px;
@@ -98,6 +114,14 @@
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
+.ph-label--icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.ph-styledna .ph-label--icon .ph-icon {
+  color: var(--ph-gold);
+}
 .ph-styledna__auto-badge {
   align-self: flex-start;
   font-size: 11px;
@@ -126,6 +150,54 @@
   padding-top: 4px;
 }
 
+/* Decorative progress stepper — narrates the flow, doesn't gate it */
+.ph-stepper {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.ph-stepper__step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  opacity: 0.55;
+}
+.ph-stepper__step.is-active {
+  opacity: 1;
+}
+.ph-stepper__icon {
+  width: 22px;
+  height: 22px;
+  color: var(--ph-espresso);
+  flex-shrink: 0;
+}
+.ph-stepper__step.is-active .ph-stepper__icon {
+  color: var(--ph-teal);
+}
+.ph-stepper__text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+}
+.ph-stepper__title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ph-charcoal);
+}
+.ph-stepper__subtitle {
+  font-size: 11px;
+  color: var(--ph-espresso);
+}
+.ph-stepper__connector {
+  flex: 1;
+  min-width: 24px;
+  height: 1px;
+  border-top: 1px dotted var(--ph-border);
+  margin: 11px 4px 0;
+}
+
 /* Layout: fields left, sticky preview right on desktop */
 .ph-body {
   display: grid;
@@ -151,18 +223,42 @@
 }
 .ph-basetype-toggle__btn {
   flex: 1;
-  padding: 12px;
-  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
   border: 2px solid var(--ph-charcoal);
   background: var(--ph-cream);
   color: var(--ph-charcoal);
-  border-radius: 8px;
+  border-radius: 10px;
   cursor: pointer;
+  text-align: left;
+}
+.ph-basetype-toggle__icon {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+}
+.ph-basetype-toggle__text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.3;
+}
+.ph-basetype-toggle__title {
+  font-weight: 700;
+  font-size: 14px;
+}
+.ph-basetype-toggle__subtitle {
+  font-size: 12px;
+  opacity: 0.75;
 }
 .ph-basetype-toggle__btn.is-active {
   background: var(--ph-black);
   color: var(--ph-gold);
-  border-color: var(--ph-black);
+  border-color: var(--ph-teal);
+}
+.ph-basetype-toggle__btn.is-active .ph-basetype-toggle__icon {
+  color: var(--ph-teal);
 }
 
 /* Couples Mode */
@@ -290,7 +386,8 @@
   cursor: pointer;
 }
 
-/* Your Selections — live recap, sits above the prompt preview */
+/* Creative Brief (was "Your Selections") — curated summary by default,
+   sits above the prompt preview */
 .ph-selections {
   background: #fff;
   border: 1px solid var(--ph-border);
@@ -298,14 +395,66 @@
   padding: 16px;
   margin-bottom: 20px;
 }
+.ph-selections__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
 .ph-selections__title {
   margin: 0;
   color: var(--ph-espresso);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ph-selections__title .ph-icon {
+  color: var(--ph-gold);
 }
 .ph-selections__subtitle {
   margin: 2px 0 12px;
   font-size: 12px;
   color: var(--ph-teal);
+}
+.ph-selections__eye-btn {
+  background: none;
+  border: 1px solid var(--ph-border);
+  border-radius: 999px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ph-teal);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.ph-selections__eye-btn:hover {
+  background: var(--ph-cream);
+}
+.ph-selections__brief {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+.ph-selections__brief-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+.ph-selections__brief-icon {
+  color: var(--ph-gold);
+}
+.ph-selections__brief-label {
+  font-weight: 700;
+  color: var(--ph-charcoal);
+  min-width: 84px;
+}
+.ph-selections__brief-value {
+  color: var(--ph-espresso);
+  text-transform: capitalize;
 }
 .ph-selections__scroll {
   max-height: 340px;
@@ -343,7 +492,7 @@
   margin: 0;
 }
 
-/* Live preview */
+/* Live preview — "Your Prompt, Built Live" */
 .ph-preview {
   background: var(--ph-black);
   color: var(--ph-cream);
@@ -351,25 +500,34 @@
   padding: 18px;
 }
 .ph-preview__title {
-  margin: 0 0 10px;
+  margin: 0 0 4px;
   color: var(--ph-gold);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ph-preview__subtitle {
+  margin: 0 0 12px;
+  font-size: 12px;
+  color: var(--ph-cream);
+  opacity: 0.7;
 }
 .ph-preview__text {
   width: 100%;
   min-height: 160px;
-  background: var(--ph-charcoal);
-  color: var(--ph-cream);
+  background: linear-gradient(180deg, #fbeecb, #f6e1af);
+  color: var(--ph-espresso);
   border: 1px solid var(--ph-gold);
   border-radius: 8px;
-  padding: 10px;
+  padding: 12px;
   font-size: 13px;
   resize: vertical;
 }
 .ph-preview__actions {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 8px;
   margin-top: 12px;
-  flex-wrap: wrap;
 }
 
 /* Combined Mode's dual prompt boxes */
@@ -386,6 +544,10 @@
   font-size: 13px;
 }
 .ph-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   padding: 10px 16px;
   border-radius: 999px;
   font-weight: 700;
@@ -398,7 +560,7 @@
   color: var(--ph-black);
 }
 .ph-btn--randomize {
-  background: var(--ph-teal);
+  background: var(--ph-espresso);
   color: var(--ph-cream);
 }
 .ph-btn--reset {
@@ -406,9 +568,11 @@
   border: 1px solid var(--ph-cream);
   color: var(--ph-cream);
 }
+/* The one teal/white accent among the 4 buttons, per instruction —
+   Randomize moved to espresso so teal isn't duplicated across two buttons. */
 .ph-btn--save {
-  background: var(--ph-espresso);
-  color: var(--ph-cream);
+  background: var(--ph-teal);
+  color: #fff;
 }
 .ph-btn:disabled {
   opacity: 0.4;
@@ -448,6 +612,12 @@
 .ph-saved__title {
   margin: 0 0 10px;
   color: var(--ph-espresso);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ph-saved__title .ph-icon {
+  color: var(--ph-gold);
 }
 .ph-saved__empty {
   font-style: italic;
