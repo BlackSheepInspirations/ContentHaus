@@ -38,6 +38,29 @@
     );
   };
 
+  // Same field shape, but for dropdowns long/varied enough that browsing
+  // by category beats a flat alphabetical list (e.g. Character Type's 50+
+  // options). `optionGroups` is [{ label, options }] in the curated display
+  // order — the UI renders it as native <optgroup> sections. `options`
+  // stays a flattened list so resolveFieldValue/randomize/etc. work
+  // unchanged; they don't need to know a field is grouped.
+  PromptHaus.util.makeGroupedField = function (value, optionGroups, extra) {
+    var flatOptions = [];
+    (optionGroups || []).forEach(function (group) {
+      flatOptions = flatOptions.concat(group.options);
+    });
+    return Object.assign(
+      {
+        value: value || "",
+        customValue: "",
+        includeInPrompt: true,
+        options: flatOptions,
+        optionGroups: optionGroups || [],
+      },
+      extra || {}
+    );
+  };
+
   // Minimal pub/sub store. State updates are shallow-merged at the top
   // level; nested field updates go through util.updateField below.
   PromptHaus.util.createStore = function (initialState) {

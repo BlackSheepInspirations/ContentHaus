@@ -41,12 +41,28 @@
 
     var select = el("select", { class: "ph-field__select" });
     select.appendChild(el("option", { value: "" }, [document.createTextNode("Select...")]));
-    (field.options || []).forEach(function (opt) {
-      var optionNode = el("option", { value: opt });
-      optionNode.textContent = opt;
-      if (opt === field.value) optionNode.selected = true;
-      select.appendChild(optionNode);
-    });
+    if (field.optionGroups) {
+      // Long, varied lists (e.g. Character Type) browse better grouped by
+      // category than as one flat alphabetized wall — rendered as native
+      // <optgroup> sections, in the curated order the field defines.
+      field.optionGroups.forEach(function (group) {
+        var optgroup = el("optgroup", { label: group.label });
+        group.options.forEach(function (opt) {
+          var optionNode = el("option", { value: opt });
+          optionNode.textContent = opt;
+          if (opt === field.value) optionNode.selected = true;
+          optgroup.appendChild(optionNode);
+        });
+        select.appendChild(optgroup);
+      });
+    } else {
+      (field.options || []).forEach(function (opt) {
+        var optionNode = el("option", { value: opt });
+        optionNode.textContent = opt;
+        if (opt === field.value) optionNode.selected = true;
+        select.appendChild(optionNode);
+      });
+    }
     select.addEventListener("change", function () {
       onChange({ value: select.value });
     });

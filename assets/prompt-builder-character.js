@@ -22,18 +22,63 @@
   // — those are ordinal scales, not categories, and A-Z would scramble
   // "baby -> mature" into something unreadable.
   // ---------------------------------------------------------------------
-  var CARTOON_TYPE_OPTIONS = sortAlpha([
-    "signature exaggerated chibi", "cartoon style illustration", "glossy 3d chibi",
-    "ultra airbrushed urban", "luxury crochet amigurumi", "hyper-real cartoon",
-    "soft spiritual glow", "18k digital illustration", "gouache mixed with watercolor",
-    "cgi caricature", "hyper realistic illustration", "bratz-inspired",
-    "hyper realistic bratz doll", "chibi mixed with bratz", "semi realism 4k bratz style",
-    "hand-drawn cartoon", "high gloss chibi", "glossy 3d chibi illustration",
-    "anime style illustration", "pixar 3d render", "retro vintage cartoon",
-    "comic book style", "luxury glam chibi", "pixel art",
-    // new
-    "storybook watercolor illustration", "vaporwave retro-futurism", "stop-motion claymation style",
-  ]);
+  // Character Type — replaces the old "Cartoon Type" list wholesale.
+  // Curated and organized by category rather than alphabetized: at 54
+  // options, browsing by "type of look" beats a flat A-Z wall, and these
+  // are shown as native <optgroup> sections in the UI. Deliberately spans
+  // far beyond the original cute/chibi niche (full photorealism, line art,
+  // flat vector icons, fine art) — this field now also has to cover
+  // advertising/mockup use cases, not just cartoony character art.
+  var CHARACTER_TYPE_GROUPS = [
+    {
+      label: "Chibi / Doll / Cute Stylized",
+      options: [
+        "signature exaggerated chibi", "glossy 3d chibi", "high gloss chibi", "luxury glam chibi",
+        "chibi mixed with bratz", "bratz-inspired", "hyper realistic bratz doll",
+        "semi realism 4k bratz style", "glossy 3d chibi illustration", "luxury crochet amigurumi",
+        "cgi caricature", "hyper-real cartoon", "soft spiritual glow", "ultra airbrushed urban",
+        "anime style illustration",
+      ],
+    },
+    {
+      label: "Cartoon / Illustration",
+      options: ["cartoon style illustration", "hand-drawn cartoon", "comic book style", "retro vintage cartoon", "pixar 3d render"],
+    },
+    {
+      label: "Digital / Mixed Media",
+      options: ["18k digital illustration", "gouache mixed with watercolor", "hyper realistic illustration"],
+    },
+    {
+      label: "Realism / Photo-Adjacent",
+      options: [
+        "photorealistic portrait", "realistic human illustration", "cinematic photoreal",
+        "studio headshot realism", "documentary-style realism", "fine art oil portrait",
+      ],
+    },
+    {
+      label: "Stick Figure & Line Styles",
+      options: ["stick figure minimalist", "stick figure doodle", "line art / continuous line drawing", "monochrome ink sketch"],
+    },
+    {
+      label: "Minimalist / Modern Graphic",
+      options: ["flat vector illustration", "geometric minimalist", "silhouette design", "modern flat icon style"],
+    },
+    {
+      label: "Retro / Pop Culture",
+      options: [
+        "retro comic pop art", "90s cartoon nostalgia", "y2k graphic style", "grunge/punk zine art",
+        "cyberpunk neon illustration", "retro pixel art / 8-bit", "claymation style", "anime 90s cel-shaded",
+      ],
+    },
+    {
+      label: "Fine Art Inspired",
+      options: ["impressionist painting style", "pop surrealism", "watercolor portrait", "charcoal sketch", "pastel illustration"],
+    },
+    {
+      label: "Novelty / Texture-Based",
+      options: ["vaporwave aesthetic", "low-poly 3d", "stained glass art style", "origami/paper-craft style"],
+    },
+  ];
   var ART_FINISH_OPTIONS = sortAlpha([
     "high gloss illustration", "soft airbrushed shine", "cell-shaded gloss",
     "ultra polished digital paint", "candy-coated finish", "silky poster finish", "glossy",
@@ -304,7 +349,7 @@
     return {
       baseType: baseType || "human",
       style: {
-        cartoonType: makeField("", CARTOON_TYPE_OPTIONS),
+        characterType: PromptHaus.util.makeGroupedField("", CHARACTER_TYPE_GROUPS),
         artFinish: makeField("", ART_FINISH_OPTIONS),
       },
       humanIdentity: {
@@ -411,7 +456,7 @@
       });
     }
 
-    pushGroup("style", { cartoonType: "Cartoon Type", artFinish: "Art Finish" });
+    pushGroup("style", { characterType: "Character Type", artFinish: "Art Finish" });
     pushGroup(identityGroup, IDENTITY_LABELS[identityGroup]);
     pushGroup("appearance", APPEARANCE_LABELS);
     pushGroup("styling", STYLING_LABELS);
@@ -512,7 +557,7 @@
       styling: STYLING_LABELS,
       presentation: PRESENTATION_LABELS,
       extras: EXTRAS_LABELS,
-      style: { cartoonType: "Cartoon Type", artFinish: "Art Finish" },
+      style: { characterType: "Character Type", artFinish: "Art Finish" },
     },
   });
 })();
