@@ -1438,9 +1438,12 @@
     root.innerHTML = "";
 
     var shell = el("div", { class: "ph-shell" });
-    renderTabs(shell);
     renderStepper(shell);
+    shell.appendChild(el("hr", { class: "ph-section-divider" }));
     renderTipsPanel(shell);
+    shell.appendChild(el("hr", { class: "ph-section-divider" }));
+    shell.appendChild(el("p", { class: "ph-mode-select-label", text: "Select the Prompt Generator" }));
+    renderTabs(shell);
     renderStyleDNA(shell);
 
     var body = el("div", { class: "ph-body" });
