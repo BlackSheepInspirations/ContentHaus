@@ -771,6 +771,7 @@
 }
 .ph-locked__heading {
   color: var(--ph-espresso);
+  font-size: 28px;
   margin: 0 0 12px;
 }
 .ph-locked__body {
@@ -838,7 +839,7 @@
 }
 .ph-marketing__heading {
   color: var(--ph-black);
-  font-size: 40px;
+  font-size: 32px;
   margin: 0 0 16px;
 }
 .ph-heading-accent {
