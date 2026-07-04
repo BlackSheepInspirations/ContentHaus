@@ -311,6 +311,86 @@
   border: 1px solid var(--ph-cream);
   color: var(--ph-cream);
 }
+.ph-btn--save {
+  background: var(--ph-espresso);
+  color: var(--ph-cream);
+}
+.ph-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.ph-btn--small {
+  padding: 6px 12px;
+  font-size: 12px;
+}
+/* Used inside light cards (Saved Prompts), unlike .ph-btn--reset which is
+   styled cream-on-transparent for the dark preview panel. */
+.ph-btn--delete {
+  background: transparent;
+  border: 1px solid var(--ph-espresso);
+  color: var(--ph-espresso);
+}
+.ph-preview__save-feedback {
+  margin: 10px 0 0;
+  font-size: 13px;
+  font-weight: 600;
+}
+.ph-preview__save-feedback.is-success {
+  color: var(--ph-gold);
+}
+.ph-preview__save-feedback.is-error {
+  color: #e58a8a;
+}
+
+/* Saved Prompts — below the Live Prompt Preview */
+.ph-saved {
+  background: #fff;
+  border: 1px solid var(--ph-border);
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 20px;
+}
+.ph-saved__title {
+  margin: 0 0 10px;
+  color: var(--ph-espresso);
+}
+.ph-saved__empty {
+  font-style: italic;
+  color: var(--ph-espresso);
+  font-size: 13px;
+  margin: 0;
+}
+.ph-saved__item {
+  border: 1px solid var(--ph-border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 10px;
+}
+.ph-saved__item:last-child {
+  margin-bottom: 0;
+}
+.ph-saved__item-text {
+  margin: 0 0 8px;
+  font-size: 13px;
+  color: var(--ph-charcoal);
+}
+.ph-saved__item-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.ph-saved__item-tag {
+  font-size: 11px;
+  color: var(--ph-teal);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.ph-saved__item-actions {
+  display: flex;
+  gap: 6px;
+}
 
 .ph-coming-soon {
   font-style: italic;

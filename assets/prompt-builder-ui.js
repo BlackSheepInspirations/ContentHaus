@@ -16,6 +16,10 @@
   var BUILT_MODES = { character: true, text: true, couples: false, combined: false };
 
   var activeMode = "character";
+  // Transient banner shown after a Save Prompt click (success or "limit
+  // reached"). Lives at module scope, not on a DOM node, so it survives
+  // the full re-render that click triggers; cleared by its own timeout.
+  var saveFeedback = null;
 
   function el(tag, attrs, children) {
     var node = document.createElement(tag);
@@ -333,7 +337,7 @@
     );
   }
 
-  function renderPreview(root, assembled, modeApi) {
+  function renderPreview(root, assembled, modeApi, mode) {
     var styleDNAState = PromptHaus.styleDNA.getState();
     var platform = styleDNAState.targetPlatform.value;
     var formatted = PromptHaus.engine.formatForPlatform(assembled, platform, styleDNAState.aspectRatio.value);
@@ -370,11 +374,93 @@
       renderApp();
     });
 
+    var isFull = PromptHaus.favorites.isFull(mode);
+    var saveBtn = el("button", { type: "button", class: "ph-btn ph-btn--save", text: "Save Prompt" });
+    saveBtn.disabled = isFull;
+    saveBtn.title = isFull
+      ? "You have " + PromptHaus.favorites.MAX_PER_MODE + "/" + PromptHaus.favorites.MAX_PER_MODE + " saved here — delete one below to save another."
+      : "Saves this exact prompt text below (up to " + PromptHaus.favorites.MAX_PER_MODE + " per mode).";
+    saveBtn.addEventListener("click", function () {
+      var result = PromptHaus.favorites.save(mode, { text: formatted, platform: platform });
+      saveFeedback = result.ok
+        ? { text: "Saved!", isError: false }
+        : { text: result.reason, isError: true };
+      renderApp();
+      setTimeout(function () {
+        saveFeedback = null;
+        renderApp();
+      }, 2500);
+    });
+
+    var actions = [randomizeBtn, resetBtn, copyBtn, saveBtn];
+    var previewChildren = [
+      el("h3", { class: "ph-preview__title", text: "Live Prompt Preview" }),
+      textarea,
+      el("div", { class: "ph-preview__actions" }, actions),
+    ];
+    if (saveFeedback) {
+      previewChildren.push(
+        el("p", {
+          class: "ph-preview__save-feedback" + (saveFeedback.isError ? " is-error" : " is-success"),
+          text: saveFeedback.text,
+        })
+      );
+    }
+
+    root.appendChild(el("div", { class: "ph-preview" }, previewChildren));
+  }
+
+  // "Saved Prompts" — below the Live Prompt Preview, per mode (5 slots
+  // each). Each entry keeps its own Copy/Delete so a saved prompt is
+  // useful without needing to regenerate the fields that made it.
+  function renderSavedPrompts(root, mode) {
+    var saved = PromptHaus.favorites.getAll(mode);
+    var max = PromptHaus.favorites.MAX_PER_MODE;
+
+    var list = el("div", { class: "ph-saved__list" });
+    if (!saved.length) {
+      list.appendChild(el("p", { class: "ph-saved__empty", text: "No saved prompts yet — use \"Save Prompt\" above." }));
+    } else {
+      saved.forEach(function (fav) {
+        var preview = fav.text.length > 160 ? fav.text.slice(0, 160) + "…" : fav.text;
+
+        var copyBtn = el("button", { type: "button", class: "ph-btn ph-btn--copy ph-btn--small", text: "Copy" });
+        copyBtn.addEventListener("click", function () {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(fav.text);
+          }
+          copyBtn.textContent = "Copied!";
+          setTimeout(function () {
+            copyBtn.textContent = "Copy";
+          }, 1500);
+        });
+
+        var deleteBtn = el("button", { type: "button", class: "ph-btn ph-btn--delete ph-btn--small", text: "Delete" });
+        deleteBtn.addEventListener("click", function () {
+          PromptHaus.favorites.remove(mode, fav.id);
+          renderApp();
+        });
+
+        var metaParts = [];
+        if (fav.platform) metaParts.push(fav.platform);
+        metaParts.push(new Date(fav.createdAt).toLocaleDateString());
+
+        list.appendChild(
+          el("div", { class: "ph-saved__item" }, [
+            el("p", { class: "ph-saved__item-text", text: preview }),
+            el("div", { class: "ph-saved__item-meta" }, [
+              el("span", { class: "ph-saved__item-tag", text: metaParts.join(" · ") }),
+              el("div", { class: "ph-saved__item-actions" }, [copyBtn, deleteBtn]),
+            ]),
+          ])
+        );
+      });
+    }
+
     root.appendChild(
-      el("div", { class: "ph-preview" }, [
-        el("h3", { class: "ph-preview__title", text: "Live Prompt Preview" }),
-        textarea,
-        el("div", { class: "ph-preview__actions" }, [randomizeBtn, resetBtn, copyBtn]),
+      el("div", { class: "ph-saved" }, [
+        el("h3", { class: "ph-saved__title", text: "Saved Prompts (" + saved.length + "/" + max + ")" }),
+        list,
       ])
     );
   }
@@ -471,11 +557,13 @@
     if (activeMode === "character") {
       left.appendChild(renderCharacterPanel());
       renderSelectionsPanel(right, PromptHaus.character.getSelectionsByGroup());
-      renderPreview(right, PromptHaus.character.assemblePrompt(), PromptHaus.character);
+      renderPreview(right, PromptHaus.character.assemblePrompt(), PromptHaus.character, activeMode);
+      renderSavedPrompts(right, activeMode);
     } else if (activeMode === "text") {
       left.appendChild(renderTextPanel());
       renderSelectionsPanel(right, PromptHaus.text.getSelectionsByGroup());
-      renderPreview(right, PromptHaus.text.assemblePrompt(), PromptHaus.text);
+      renderPreview(right, PromptHaus.text.assemblePrompt(), PromptHaus.text, activeMode);
+      renderSavedPrompts(right, activeMode);
     } else {
       left.appendChild(el("p", { class: "ph-coming-soon", text: MODE_LABELS[activeMode] + " Mode is coming soon." }));
     }
