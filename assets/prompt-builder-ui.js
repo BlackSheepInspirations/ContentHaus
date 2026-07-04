@@ -21,6 +21,17 @@
   // the full re-render that click triggers; cleared by its own timeout.
   var saveFeedback = null;
 
+  // Every renderApp() call tears down and rebuilds the entire DOM (simplest
+  // way to keep everything in sync with the store), which would normally
+  // steal focus/cursor position/scroll out from under someone mid-keystroke
+  // in any text field. Fix: auto-tag every focusable element with a
+  // position-based key as it's created, reset right before each rebuild —
+  // since a single keystroke never changes which fields are visible, the
+  // same element ends up with the same key both times, so renderApp() can
+  // find it again afterward and restore focus/selection/scroll to it.
+  var phKeyCounter = 0;
+  var FOCUSABLE_TAGS = { input: true, select: true, textarea: true };
+
   function el(tag, attrs, children) {
     var node = document.createElement(tag);
     Object.keys(attrs || {}).forEach(function (key) {
@@ -28,6 +39,9 @@
       else if (key === "text") node.textContent = attrs[key];
       else node.setAttribute(key, attrs[key]);
     });
+    if (FOCUSABLE_TAGS[tag]) {
+      node.setAttribute("data-ph-key", String(phKeyCounter++));
+    }
     (children || []).forEach(function (child) {
       if (child) node.appendChild(child);
     });
@@ -1435,6 +1449,20 @@
   function renderApp() {
     var root = document.getElementById("prompt-haus-app");
     if (!root) return;
+
+    var active = document.activeElement;
+    var focusRestore = null;
+    if (active && root.contains(active) && active.hasAttribute("data-ph-key")) {
+      focusRestore = {
+        key: active.getAttribute("data-ph-key"),
+        selectionStart: typeof active.selectionStart === "number" ? active.selectionStart : null,
+        selectionEnd: typeof active.selectionEnd === "number" ? active.selectionEnd : null,
+        scrollX: window.scrollX,
+        scrollY: window.scrollY,
+      };
+    }
+
+    phKeyCounter = 0;
     root.innerHTML = "";
 
     var shell = el("div", { class: "ph-shell" });
@@ -1487,6 +1515,22 @@
     body.appendChild(right);
     shell.appendChild(body);
     root.appendChild(shell);
+
+    if (focusRestore) {
+      var restored = root.querySelector('[data-ph-key="' + focusRestore.key + '"]');
+      if (restored) {
+        restored.focus({ preventScroll: true });
+        if (focusRestore.selectionStart !== null && typeof restored.setSelectionRange === "function") {
+          try {
+            restored.setSelectionRange(focusRestore.selectionStart, focusRestore.selectionEnd);
+          } catch (e) {
+            // setSelectionRange throws on input types that don't support it
+            // (e.g. type=number) — fine to just skip restoring the range.
+          }
+        }
+      }
+      window.scrollTo(focusRestore.scrollX, focusRestore.scrollY);
+    }
   }
 
   PromptHaus.ui = { renderApp: renderApp };
