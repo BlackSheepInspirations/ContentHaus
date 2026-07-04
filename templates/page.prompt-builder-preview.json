@@ -1,7 +1,38 @@
 {
   "sections": {
     "main": {
-      "type": "prompt-builder-preview"
+      "type": "prompt-builder-preview",
+      "blocks": {
+        "feature_1": {
+          "type": "feature",
+          "settings": {
+            "title": "Four connected modes",
+            "description": "Character, Text, Couples, and Combined — sharing one style language so your generations match."
+          }
+        },
+        "feature_2": {
+          "type": "feature",
+          "settings": {
+            "title": "Live-linked mascots",
+            "description": "Combined Mode pulls your mascot straight from the Character panel instead of retyping it."
+          }
+        },
+        "feature_3": {
+          "type": "feature",
+          "settings": {
+            "title": "50+ holiday & lifestyle themes",
+            "description": "US civic, Christian, Jewish, Islamic, Hindu, Latin American, and more — plus lifestyle and niche themes like Coffee Culture and Hustle Culture."
+          }
+        },
+        "feature_4": {
+          "type": "feature",
+          "settings": {
+            "title": "Save your favorites",
+            "description": "Keep up to 5 saved prompts per mode, ready to copy anytime."
+          }
+        }
+      },
+      "block_order": ["feature_1", "feature_2", "feature_3", "feature_4"]
     }
   },
   "order": ["main"]
