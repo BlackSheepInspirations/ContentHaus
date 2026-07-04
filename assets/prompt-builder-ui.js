@@ -48,6 +48,46 @@
     return node;
   }
 
+  // navigator.clipboard.writeText can silently fail or reject inside the
+  // Shopify theme editor's preview iframe (permissions-policy/focus
+  // restrictions vary by embedding context) — falls back to the classic
+  // hidden-textarea + execCommand("copy") technique, which doesn't depend
+  // on that same permissions grant, so the button still works there.
+  // onDone(success) always fires so the caller can show "Copied!" either
+  // way or an error state if both methods genuinely failed.
+  function copyTextToClipboard(text, onDone) {
+    function fallbackCopy() {
+      var textarea = document.createElement("textarea");
+      textarea.value = text;
+      textarea.style.position = "fixed";
+      textarea.style.left = "-9999px";
+      document.body.appendChild(textarea);
+      textarea.focus();
+      textarea.select();
+      var ok = false;
+      try {
+        ok = document.execCommand("copy");
+      } catch (e) {
+        ok = false;
+      }
+      document.body.removeChild(textarea);
+      onDone(ok);
+    }
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(
+        function () {
+          onDone(true);
+        },
+        function () {
+          fallbackCopy();
+        }
+      );
+    } else {
+      fallbackCopy();
+    }
+  }
+
   // ---------------------------------------------------------------------
   // Icon system — one icon per field CATEGORY (Ethnicity, Gender, Style
   // DNA fields, tabs, etc.), not per individual option value. Per-value
@@ -733,14 +773,15 @@
     function makeBox(titleText, formatted) {
       var textarea = el("textarea", { class: "ph-preview__text", readonly: "readonly" });
       textarea.value = formatted;
-      var copyBtn = el("button", { type: "button", class: "ph-btn ph-btn--copy ph-btn--small" }, [icon("copy"), el("span", { text: "Copy" })]);
+      var copyBtn = el("button", { type: "button", class: "ph-btn ph-btn--copy ph-btn--small" }, [icon("copy"), el("span", { class: "ph-btn__label", text: "Copy" })]);
       copyBtn.addEventListener("click", function () {
-        if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(formatted);
-        var label = copyBtn.querySelector("span");
-        label.textContent = "Copied!";
-        setTimeout(function () {
-          label.textContent = "Copy";
-        }, 1500);
+        copyTextToClipboard(formatted, function (ok) {
+          var label = copyBtn.querySelector(".ph-btn__label");
+          label.textContent = ok ? "Copied!" : "Copy failed";
+          setTimeout(function () {
+            label.textContent = "Copy";
+          }, 1500);
+        });
       });
       return el("div", { class: "ph-preview__subbox" }, [
         el("div", { class: "ph-preview__subbox-header" }, [el("span", { text: titleText }), copyBtn]),
@@ -1135,16 +1176,15 @@
   // Shared button builder for the 2x2 action grid (Randomize/Copy/Save/
   // Reset) — same 4 actions everywhere, only the callbacks differ per mode.
   function renderPreviewActions(formatted, onRandomize, onReset, onSave, mode) {
-    var copyBtn = el("button", { type: "button", class: "ph-btn ph-btn--copy" }, [icon("copy"), el("span", { text: "Copy My Prompt" })]);
+    var copyBtn = el("button", { type: "button", class: "ph-btn ph-btn--copy" }, [icon("copy"), el("span", { class: "ph-btn__label", text: "Copy My Prompt" })]);
     copyBtn.addEventListener("click", function () {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(formatted);
-      }
-      var label = copyBtn.querySelector("span");
-      label.textContent = "Copied!";
-      setTimeout(function () {
-        label.textContent = "Copy My Prompt";
-      }, 1500);
+      copyTextToClipboard(formatted, function (ok) {
+        var label = copyBtn.querySelector(".ph-btn__label");
+        label.textContent = ok ? "Copied!" : "Copy failed";
+        setTimeout(function () {
+          label.textContent = "Copy My Prompt";
+        }, 1500);
+      });
     });
 
     var randomizeBtn = el("button", { type: "button", class: "ph-btn ph-btn--randomize" }, [icon("shuffle"), el("span", { text: "Randomize" })]);
@@ -1230,13 +1270,12 @@
 
         var copyBtn = el("button", { type: "button", class: "ph-btn ph-btn--copy ph-btn--small", text: "Copy" });
         copyBtn.addEventListener("click", function () {
-          if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(fav.text);
-          }
-          copyBtn.textContent = "Copied!";
-          setTimeout(function () {
-            copyBtn.textContent = "Copy";
-          }, 1500);
+          copyTextToClipboard(fav.text, function (ok) {
+            copyBtn.textContent = ok ? "Copied!" : "Copy failed";
+            setTimeout(function () {
+              copyBtn.textContent = "Copy";
+            }, 1500);
+          });
         });
 
         var deleteBtn = el("button", { type: "button", class: "ph-btn ph-btn--delete ph-btn--small", text: "Delete" });
