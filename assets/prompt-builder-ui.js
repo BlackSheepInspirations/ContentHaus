@@ -73,6 +73,7 @@
     boat: '<path d="M3 13h14l-2 4H5l-2-4Z"/><path d="M10 3v9M10 5l4 2-4 2"/>',
     car: '<path d="M4 13 5.5 8h9L16 13"/><rect x="3" y="13" width="14" height="3" rx="1"/><circle cx="6.5" cy="16.5" r="1.3"/><circle cx="13.5" cy="16.5" r="1.3"/>',
     shield: '<path d="M10 2 16 4.5V10c0 4-3 6.5-6 8-3-1.5-6-4-6-8V4.5Z"/><path d="M7 9l3 2 3-2"/>',
+    bulb: '<path d="M7 15h6M8 17.5h4"/><path d="M10 2.5c-3 0-5 2.2-5 5 0 2 1.1 3.3 2 4.2.5.5.8 1 .9 1.8h4.2c.1-.8.4-1.3.9-1.8.9-.9 2-2.2 2-4.2 0-2.8-2-5-5-5Z"/>',
   };
 
   // Fieldset legend title -> icon name, so each sub-section header reads
@@ -1384,6 +1385,50 @@
     root.appendChild(row);
   }
 
+  // Same idea as Graphics Mode's own inline "Pro tip" paragraph, just
+  // scoped to the whole tool instead of one field group — general
+  // guidance for getting good results out of any mode.
+  var TIPS = [
+    "Pick ONE core style rather than stacking several — mixing chibi with photorealistic, for example, gives the AI conflicting instructions instead of a clearer one.",
+    "Less is more. A focused handful of specific choices reads better to the AI than maxing out every single field.",
+    "\"Or type your own...\" always overrides the dropdown — use it for anything hyper-specific the options don't cover.",
+    "Set Target Platform before you copy — it reformats the prompt to match how that AI tool reads best (tags for Midjourney, plain sentences for ChatGPT, etc.).",
+    "Stuck? Hit Randomize, then swap out just the 1-2 things you don't love instead of starting over from scratch.",
+    "Save combinations you like to Your Vault so you can revisit and tweak them later instead of rebuilding from memory.",
+  ];
+
+  // Persists across re-renders same as briefExpanded — defaults open since
+  // this is meant to be seen, not discovered by accident.
+  var tipsExpanded = true;
+
+  function renderTipsPanel(root) {
+    var toggleBtn = el("button", { type: "button", class: "ph-tips__toggle" }, [
+      icon(tipsExpanded ? "eyeOff" : "eye"),
+      el("span", { text: tipsExpanded ? "Hide" : "Show" }),
+    ]);
+    toggleBtn.addEventListener("click", function () {
+      tipsExpanded = !tipsExpanded;
+      renderApp();
+    });
+
+    var children = [
+      el("div", { class: "ph-tips__header" }, [
+        el("h3", { class: "ph-tips__title" }, [icon("bulb"), el("span", { text: "Tips for Better Prompts" })]),
+        toggleBtn,
+      ]),
+    ];
+
+    if (tipsExpanded) {
+      var list = el("ul", { class: "ph-tips__list" });
+      TIPS.forEach(function (tip) {
+        list.appendChild(el("li", { text: tip }));
+      });
+      children.push(list);
+    }
+
+    root.appendChild(el("div", { class: "ph-tips" }, children));
+  }
+
   function renderApp() {
     var root = document.getElementById("prompt-haus-app");
     if (!root) return;
@@ -1392,6 +1437,7 @@
     var shell = el("div", { class: "ph-shell" });
     renderTabs(shell);
     renderStepper(shell);
+    renderTipsPanel(shell);
     renderStyleDNA(shell);
 
     var body = el("div", { class: "ph-body" });

@@ -196,6 +196,59 @@
   margin: 11px 4px 0;
 }
 
+/* Tips for Better Prompts — general guidance, shown above the Style DNA
+   bar so it's visible before anyone starts filling in fields. */
+.ph-tips {
+  border: 1.5px solid var(--ph-gold);
+  border-radius: 12px;
+  background: var(--ph-cream);
+  padding: 14px 18px;
+  margin-bottom: 20px;
+}
+.ph-tips__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.ph-tips__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  margin: 0;
+  color: var(--ph-espresso);
+}
+.ph-tips__title .ph-icon {
+  color: var(--ph-gold);
+}
+.ph-tips__toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  background: none;
+  color: var(--ph-teal);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px;
+  flex-shrink: 0;
+}
+.ph-tips__list {
+  margin: 12px 0 0;
+  padding-left: 20px;
+  color: var(--ph-charcoal);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.ph-tips__list li {
+  margin-bottom: 8px;
+}
+.ph-tips__list li:last-child {
+  margin-bottom: 0;
+}
+
 /* Layout: fields left, sticky preview right on desktop */
 .ph-body {
   display: grid;

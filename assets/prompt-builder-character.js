@@ -679,6 +679,20 @@
         updateNestedField("presentation", "framing", { value: "no frame", customValue: "" });
       },
     },
+    {
+      id: "streetwearIcon",
+      name: "Streetwear Icon",
+      description: "Cyberpunk neon illustration, leather jacket, neon glow frame.",
+      apply: function () {
+        setBaseType("human");
+        updateNestedField("style", "characterType", { value: "cyberpunk neon illustration", customValue: "" });
+        updateNestedField("style", "artFinish", { value: "ultra polished digital paint", customValue: "" });
+        updateNestedField("styling", "outfit", { value: "leather jacket with ripped jeans", customValue: "" });
+        updateNestedField("presentation", "background", { value: "sunset skyline", customValue: "" });
+        updateNestedField("presentation", "lightingEffects", { value: "neon glow", customValue: "" });
+        updateNestedField("presentation", "framing", { value: "glowing neon frame", customValue: "" });
+      },
+    },
   ];
 
   PromptHaus.character = Object.assign({}, store, {
