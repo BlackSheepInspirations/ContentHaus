@@ -260,8 +260,34 @@
     store.setState(buildInitialState());
   }
 
+  // Mirrors Character Mode's getSelectionsByGroup() — feeds the "Your
+  // Selections" panel, grouped the same way the field panel itself is.
+  function getSelectionsByGroup() {
+    var toEntry = function (e) {
+      return { label: e.label, field: e.field };
+    };
+    var groups = [];
+
+    var coreResolved = PromptHaus.engine.resolveFields(getFixedEntries().map(toEntry));
+    if (coreResolved.length) groups.push({ title: "Core Style", items: coreResolved });
+
+    var accentField = buildAccentField();
+    if (accentField) {
+      groups.push({
+        title: "Accent",
+        items: [{ label: "Accent", value: PromptHaus.engine.resolveFieldValue(accentField) }],
+      });
+    }
+
+    var variableResolved = PromptHaus.engine.resolveFields(getVariableEntries().map(toEntry));
+    if (variableResolved.length) groups.push({ title: "Variation Details", items: variableResolved });
+
+    return groups;
+  }
+
   PromptHaus.text = Object.assign({}, store, {
     updateField: updateField,
+    getSelectionsByGroup: getSelectionsByGroup,
     toggleAccentInclude: toggleAccentInclude,
     updateAccentField: updateAccentField,
     getFixedEntries: getFixedEntries,

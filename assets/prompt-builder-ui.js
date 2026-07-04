@@ -298,6 +298,41 @@
     root.appendChild(tabs);
   }
 
+  // "Your Selections" — a live, scrollable, human-readable recap of every
+  // currently-included field with a resolved value, grouped the same way
+  // the field panel above it is grouped. Sits above the prompt preview.
+  function renderSelectionsPanel(root, groups) {
+    var body;
+    if (!groups.length) {
+      body = el("p", {
+        class: "ph-selections__empty",
+        text: "Nothing selected yet — choices you make above will appear here.",
+      });
+    } else {
+      body = el("div", { class: "ph-selections__scroll" });
+      groups.forEach(function (group, idx) {
+        if (idx > 0) body.appendChild(el("hr", { class: "ph-selections__divider" }));
+        body.appendChild(el("h4", { class: "ph-selections__group-title", text: group.title }));
+        group.items.forEach(function (item) {
+          body.appendChild(
+            el("div", { class: "ph-selections__item" }, [
+              el("span", { class: "ph-selections__item-label", text: item.label + ":" }),
+              el("span", { class: "ph-selections__item-value", text: " " + item.value }),
+            ])
+          );
+        });
+      });
+    }
+
+    root.appendChild(
+      el("div", { class: "ph-selections" }, [
+        el("h3", { class: "ph-selections__title", text: "Your Selections" }),
+        el("p", { class: "ph-selections__subtitle", text: "Live preview of what you've chosen." }),
+        body,
+      ])
+    );
+  }
+
   function renderPreview(root, assembled, modeApi) {
     var styleDNAState = PromptHaus.styleDNA.getState();
     var platform = styleDNAState.targetPlatform.value;
@@ -435,9 +470,11 @@
 
     if (activeMode === "character") {
       left.appendChild(renderCharacterPanel());
+      renderSelectionsPanel(right, PromptHaus.character.getSelectionsByGroup());
       renderPreview(right, PromptHaus.character.assemblePrompt(), PromptHaus.character);
     } else if (activeMode === "text") {
       left.appendChild(renderTextPanel());
+      renderSelectionsPanel(right, PromptHaus.text.getSelectionsByGroup());
       renderPreview(right, PromptHaus.text.assemblePrompt(), PromptHaus.text);
     } else {
       left.appendChild(el("p", { class: "ph-coming-soon", text: MODE_LABELS[activeMode] + " Mode is coming soon." }));

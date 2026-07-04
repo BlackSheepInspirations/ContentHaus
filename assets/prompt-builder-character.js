@@ -464,11 +464,45 @@
     store.setState(buildInitialState(store.getState().baseType));
   }
 
+  // Same active field list as the assembler, grouped by category with
+  // empty/excluded fields dropped — feeds the "Your Selections" panel so it
+  // can never drift out of sync with what actually lands in the prompt.
+  function getSelectionsByGroup() {
+    var state = store.getState();
+    var identityGroup = state.baseType === "animalMascot" ? "animalIdentity" : "humanIdentity";
+    var titleFor = {
+      style: "Style",
+      humanIdentity: "Human Identity",
+      animalIdentity: "Animal Identity",
+      appearance: "Appearance",
+      styling: "Styling",
+      presentation: "Presentation",
+      extras: "Extras",
+      companion: "Companion",
+    };
+    var order = ["style", identityGroup, "appearance", "styling", "presentation", "extras", "companion"];
+    var entries = getActiveFieldEntries();
+    var groups = [];
+    order.forEach(function (groupName) {
+      var groupEntries = entries
+        .filter(function (e) {
+          return e.groupName === groupName;
+        })
+        .map(function (e) {
+          return { label: e.label, field: e.field };
+        });
+      var resolved = PromptHaus.engine.resolveFields(groupEntries);
+      if (resolved.length) groups.push({ title: titleFor[groupName], items: resolved });
+    });
+    return groups;
+  }
+
   PromptHaus.character = Object.assign({}, store, {
     setBaseType: setBaseType,
     updateNestedField: updateNestedField,
     toggleCompanionInclude: toggleCompanionInclude,
     getActiveFieldEntries: getActiveFieldEntries,
+    getSelectionsByGroup: getSelectionsByGroup,
     assemblePrompt: assemblePrompt,
     randomize: randomize,
     reset: reset,

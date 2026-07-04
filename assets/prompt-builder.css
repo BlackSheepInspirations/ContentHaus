@@ -209,6 +209,59 @@
   cursor: pointer;
 }
 
+/* Your Selections — live recap, sits above the prompt preview */
+.ph-selections {
+  background: #fff;
+  border: 1px solid var(--ph-border);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+.ph-selections__title {
+  margin: 0;
+  color: var(--ph-espresso);
+}
+.ph-selections__subtitle {
+  margin: 2px 0 12px;
+  font-size: 12px;
+  color: var(--ph-teal);
+}
+.ph-selections__scroll {
+  max-height: 340px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+.ph-selections__group-title {
+  margin: 0 0 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ph-gold);
+}
+.ph-selections__item {
+  font-size: 13px;
+  padding: 3px 0;
+}
+.ph-selections__item-label {
+  font-weight: 700;
+  color: var(--ph-charcoal);
+}
+.ph-selections__item-value {
+  color: var(--ph-espresso);
+}
+.ph-selections__divider {
+  border: none;
+  border-top: 1px solid var(--ph-border);
+  margin: 10px 0;
+}
+.ph-selections__empty {
+  font-style: italic;
+  color: var(--ph-espresso);
+  font-size: 13px;
+  margin: 0;
+}
+
 /* Live preview */
 .ph-preview {
   background: var(--ph-black);
