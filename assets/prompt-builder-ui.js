@@ -13,7 +13,7 @@
   var MODES = ["character", "text", "couples", "combined"];
   var MODE_LABELS = { character: "Character", text: "Text", couples: "Couples", combined: "Combined" };
   // Flips to true as each mode ships in later build steps.
-  var BUILT_MODES = { character: true, text: true, couples: false, combined: false };
+  var BUILT_MODES = { character: true, text: true, couples: true, combined: false };
 
   var activeMode = "character";
   // Transient banner shown after a Save Prompt click (success or "limit
@@ -225,6 +225,129 @@
           );
         }
       )
+    );
+
+    return panel;
+  }
+
+  // ---------------------------------------------------------------------
+  // Couples Mode panel
+  // ---------------------------------------------------------------------
+  function renderPersonPanel(person, title) {
+    var couples = PromptHaus.couples;
+    var state = couples.getState();
+    var personState = person === "B" ? state.characterB : state.characterA;
+    var identityGroup = state.baseType === "animalMascot" ? "animalIdentity" : "humanIdentity";
+    var identityLabels = PromptHaus.character.labels.identity[identityGroup];
+
+    function handleFieldChange(entry, changes) {
+      couples.updatePersonField(person, entry.groupName, entry.fieldName, changes);
+      renderApp();
+    }
+
+    function entriesFor(groupName, labels, group) {
+      return Object.keys(labels).map(function (fieldName) {
+        return { groupName: groupName, fieldName: fieldName, label: labels[fieldName], field: group[fieldName] };
+      });
+    }
+
+    var panel = el("div", { class: "ph-panel ph-panel--person" });
+    panel.appendChild(el("h4", { class: "ph-person__title", text: title }));
+    panel.appendChild(
+      renderFieldGroup(
+        identityGroup === "animalIdentity" ? "Animal Identity" : "Human Identity",
+        entriesFor(identityGroup, identityLabels, personState[identityGroup]),
+        handleFieldChange
+      )
+    );
+    panel.appendChild(
+      renderFieldGroup("Appearance", entriesFor("appearance", PromptHaus.character.labels.appearance, personState.appearance), handleFieldChange)
+    );
+
+    var stylingLabelsMinusOptional = Object.assign({}, PromptHaus.character.labels.styling);
+    delete stylingLabelsMinusOptional.makeup;
+    delete stylingLabelsMinusOptional.nails;
+    panel.appendChild(
+      renderFieldGroup("Styling", entriesFor("styling", stylingLabelsMinusOptional, personState.styling), handleFieldChange)
+    );
+
+    panel.appendChild(
+      renderSubPanel(
+        "Show additional details (Makeup, Nails)",
+        personState.showOptionalDetails,
+        function (checked) {
+          couples.toggleOptionalDetails(person, checked);
+          renderApp();
+        },
+        function () {
+          return renderFieldGroup(
+            "Makeup & Nails",
+            [
+              { groupName: "styling", fieldName: "makeup", label: "Makeup", field: personState.styling.makeup },
+              { groupName: "styling", fieldName: "nails", label: "Nails", field: personState.styling.nails },
+            ],
+            handleFieldChange
+          );
+        }
+      )
+    );
+
+    return panel;
+  }
+
+  function renderCouplesPanel() {
+    var couples = PromptHaus.couples;
+    var state = couples.getState();
+
+    function handleDynamicChange(entry, changes) {
+      couples.updateCoupleDynamicField(entry.fieldName, changes);
+      renderApp();
+    }
+
+    var panel = el("div", { class: "ph-panel ph-panel--couples" });
+
+    var humanBtn = el("button", {
+      type: "button",
+      class: "ph-basetype-toggle__btn" + (state.baseType === "human" ? " is-active" : ""),
+      text: "Human",
+    });
+    var mascotBtn = el("button", {
+      type: "button",
+      class: "ph-basetype-toggle__btn" + (state.baseType === "animalMascot" ? " is-active" : ""),
+      text: "Animal Mascot",
+    });
+    humanBtn.addEventListener("click", function () {
+      couples.setBaseType("human");
+      renderApp();
+    });
+    mascotBtn.addEventListener("click", function () {
+      couples.setBaseType("animalMascot");
+      renderApp();
+    });
+    panel.appendChild(el("div", { class: "ph-basetype-toggle" }, [humanBtn, mascotBtn]));
+
+    var swapBtn = el("button", { type: "button", class: "ph-btn ph-btn--swap", text: "Swap Character A ↔ B" });
+    swapBtn.title = "Swaps every field between Character A and Character B.";
+    swapBtn.addEventListener("click", function () {
+      couples.swapCharacters();
+      renderApp();
+    });
+    panel.appendChild(swapBtn);
+
+    var dynamicEntries = couples.getSceneFieldEntries().map(function (e) {
+      return { fieldName: e.fieldName, label: e.label, field: e.field };
+    });
+    panel.appendChild(
+      renderFieldGroup(
+        "Couple Dynamic",
+        dynamicEntries,
+        handleDynamicChange,
+        "Shared scene/style for both people — kept in one place so they can't contradict each other."
+      )
+    );
+
+    panel.appendChild(
+      el("div", { class: "ph-couples__people" }, [renderPersonPanel("A", "Character A"), renderPersonPanel("B", "Character B")])
     );
 
     return panel;
@@ -579,6 +702,11 @@
       left.appendChild(renderTextPanel());
       renderSelectionsPanel(right, PromptHaus.text.getSelectionsByGroup());
       renderPreview(right, PromptHaus.text.assemblePrompt(), PromptHaus.text, activeMode);
+      renderSavedPrompts(right, activeMode);
+    } else if (activeMode === "couples") {
+      left.appendChild(renderCouplesPanel());
+      renderSelectionsPanel(right, PromptHaus.couples.getSelectionsByGroup());
+      renderPreview(right, PromptHaus.couples.assemblePrompt(), PromptHaus.couples, activeMode);
       renderSavedPrompts(right, activeMode);
     } else {
       left.appendChild(el("p", { class: "ph-coming-soon", text: MODE_LABELS[activeMode] + " Mode is coming soon." }));
