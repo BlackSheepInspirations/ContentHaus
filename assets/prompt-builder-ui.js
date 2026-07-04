@@ -795,6 +795,33 @@
     }
     panel.appendChild(hauteSection);
 
+    // Transportation — same "pick a type, reveal a color detail" shape as
+    // Haute Details above.
+    var transportSection = el("fieldset", { class: "ph-field-group" });
+    transportSection.appendChild(el("legend", { class: "ph-field-group__title", text: "Transportation" }));
+    transportSection.appendChild(
+      el("div", { class: "ph-field-group__fields" }, [
+        renderField({ label: "Transportation Type", field: state.transportation.type }, function (changes) {
+          graphics.updateTransportationType(changes);
+          renderApp();
+        }),
+      ])
+    );
+    var transportationOn = PromptHaus.engine.resolveFieldValue(state.transportation.type);
+    if (transportationOn) {
+      transportSection.appendChild(
+        renderFieldGroup(
+          "Transportation Color",
+          [{ fieldName: "color", label: "Color", field: state.transportation.color }],
+          function (entry, changes) {
+            graphics.updateTransportationColor(changes);
+            renderApp();
+          }
+        )
+      );
+    }
+    panel.appendChild(transportSection);
+
     return panel;
   }
 

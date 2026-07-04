@@ -109,6 +109,47 @@
     },
   ];
 
+  // Transportation — same "pick a type, reveal a color detail" pattern as
+  // Vanity Plate Type/Details above. Grouped like Character Type/Holiday/
+  // State Theme: 45 items browses better by category than as one flat wall.
+  var TRANSPORTATION_GROUPS = [
+    {
+      label: "Air",
+      options: ["modern airplane", "old school airplane", "fighter jet", "helicopter", "private jet", "hot air balloon"],
+    },
+    { label: "Rail", options: ["train", "freight train", "steam train"] },
+    {
+      label: "Water",
+      options: [
+        "speed boat", "bass boat", "sail boat", "yacht", "cruise ship", "canoe", "pontoon",
+        "kayak", "jet ski", "fishing boat", "houseboat",
+      ],
+    },
+    {
+      label: "Land Vehicles",
+      options: [
+        "sports car", "luxury car", "suv", "jeep", "modern truck", "old school truck",
+        "convertible", "muscle car", "minivan", "golf cart",
+      ],
+    },
+    {
+      label: "Motorcycles & Bikes",
+      options: ["chopper style motorcycle", "street bike style motorcycle", "moped", "bicycle", "dirt bike", "scooter"],
+    },
+    {
+      label: "Military",
+      options: [
+        "humvee", "aav (amphibious assault vehicle)", "military jet", "military helicopter",
+        "military ship", "tank", "military truck", "submarine", "armored personnel carrier",
+      ],
+    },
+  ];
+  var TRANSPORTATION_COLOR_OPTIONS = sortAlpha([
+    "black", "white", "red", "blue", "silver", "gray", "gold", "chrome", "matte black",
+    "candy apple red", "racing green", "navy blue", "yellow", "orange", "camo/camouflage",
+    "two-tone paint",
+  ]);
+
   var WHAT_IS_IT_LABELS = {
     animalPet: "Animal/Pet",
     fantasyElements: "Fantasy Element",
@@ -170,6 +211,10 @@
         plateText: makeField("", [], { isFreeText: true }),
         plateTextColor: makeField("", LETTER_COLOR_OPTIONS),
       },
+      transportation: {
+        type: PromptHaus.util.makeGroupedField("none", TRANSPORTATION_GROUPS),
+        color: makeField("", TRANSPORTATION_COLOR_OPTIONS),
+      },
     };
   }
 
@@ -229,6 +274,16 @@
   function updatePlateTextColor(changes) {
     var state = store.getState();
     store.setState({ haute: Object.assign({}, state.haute, { plateTextColor: Object.assign({}, state.haute.plateTextColor, changes) }) });
+  }
+
+  function updateTransportationType(changes) {
+    var state = store.getState();
+    store.setState({ transportation: Object.assign({}, state.transportation, { type: Object.assign({}, state.transportation.type, changes) }) });
+  }
+
+  function updateTransportationColor(changes) {
+    var state = store.getState();
+    store.setState({ transportation: Object.assign({}, state.transportation, { color: Object.assign({}, state.transportation.color, changes) }) });
   }
 
   function getWhatIsItEntries() {
@@ -303,6 +358,12 @@
       if (plateTextEntry) entries.push(plateTextEntry);
     }
 
+    entries.push({ label: "Transportation", field: state.transportation.type });
+    var transportationOn = PromptHaus.engine.resolveFieldValue(state.transportation.type);
+    if (transportationOn) {
+      entries.push({ label: "Transportation Color", field: state.transportation.color });
+    }
+
     entries.push({ label: "Holiday Theme", field: PromptHaus.styleDNA.getState().holiday });
     var bufferEntry = PromptHaus.styleDNA.getBufferEntry();
     if (bufferEntry) entries.push(bufferEntry);
@@ -349,6 +410,13 @@
     var plateTextEntry = buildPlateTextEntry();
     if (plateTextEntry) hauteResolved.push({ label: plateTextEntry.label, value: PromptHaus.engine.resolveFieldValue(plateTextEntry.field) });
     if (hauteResolved.length) groups.push({ title: "Haute Details", items: hauteResolved });
+
+    var transportEntries = [{ label: "Transportation", field: state.transportation.type }];
+    if (PromptHaus.engine.resolveFieldValue(state.transportation.type)) {
+      transportEntries.push({ label: "Transportation Color", field: state.transportation.color });
+    }
+    var transportResolved = PromptHaus.engine.resolveFields(transportEntries);
+    if (transportResolved.length) groups.push({ title: "Transportation", items: transportResolved });
 
     var holidayResolved = PromptHaus.engine.resolveFields([
       { label: "Holiday Theme", field: PromptHaus.styleDNA.getState().holiday },
@@ -397,6 +465,14 @@
     if (PromptHaus.engine.resolveFieldValue(store.getState().haute.vanityPlateType)) {
       randomizeFieldList(getHauteDetailEntries(), updateHauteDetailField);
     }
+    randomizeFieldList([{ fieldName: "type", field: store.getState().transportation.type }], function (_, changes) {
+      updateTransportationType(changes);
+    });
+    if (PromptHaus.engine.resolveFieldValue(store.getState().transportation.type)) {
+      randomizeFieldList([{ fieldName: "color", field: store.getState().transportation.color }], function (_, changes) {
+        updateTransportationColor(changes);
+      });
+    }
   }
 
   function reset() {
@@ -414,6 +490,8 @@
     updateHauteDetailField: updateHauteDetailField,
     updatePlateText: updatePlateText,
     updatePlateTextColor: updatePlateTextColor,
+    updateTransportationType: updateTransportationType,
+    updateTransportationColor: updateTransportationColor,
     getWhatIsItEntries: getWhatIsItEntries,
     getFrameItEntries: getFrameItEntries,
     getHauteDetailEntries: getHauteDetailEntries,
