@@ -364,6 +364,7 @@
   background: rgba(255, 255, 255, 0.4);
 }
 .ph-person__title {
+  font-size: 16px;
   margin: 0 0 12px;
   color: var(--ph-espresso);
 }
@@ -380,6 +381,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
+  font-size: 15px;
   font-weight: 700;
   color: var(--ph-espresso);
   padding: 0 6px;
@@ -493,6 +495,7 @@
   gap: 8px;
 }
 .ph-selections__title {
+  font-size: 18px;
   margin: 0;
   color: var(--ph-espresso);
   display: flex;
@@ -591,6 +594,7 @@
   padding: 18px;
 }
 .ph-preview__title {
+  font-size: 18px;
   margin: 0 0 4px;
   color: var(--ph-gold);
   display: flex;
@@ -708,6 +712,7 @@
   margin-top: 20px;
 }
 .ph-saved__title {
+  font-size: 18px;
   margin: 0 0 10px;
   color: var(--ph-espresso);
   display: flex;
@@ -902,6 +907,7 @@
 }
 .ph-marketing__feature h3 {
   color: var(--ph-espresso);
+  font-size: 17px;
   margin: 0 0 8px;
 }
 .ph-marketing__feature p {
