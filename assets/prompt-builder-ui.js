@@ -773,13 +773,15 @@
     panel.appendChild(renderCharacterPanel());
     panel.appendChild(el("h4", { class: "ph-person__title", text: "Text" }));
     panel.appendChild(renderTextPanel());
+    panel.appendChild(el("h4", { class: "ph-person__title", text: "Graphics" }));
+    panel.appendChild(renderGraphicsPanel());
     return panel;
   }
 
   // Combined Mode doesn't produce one merged prompt — it runs Character's
   // sentence assembler and Text's meta-instruction assembler side by side,
   // each with its own box, sharing one set of Randomize All/Reset
-  // All/Save actions since the two are meant to be used together.
+  // All/Save actions since the three are meant to be used together.
   function renderCombinedPreview(root) {
     var combined = PromptHaus.combined;
     var styleDNAState = PromptHaus.styleDNA.getState();
@@ -787,9 +789,14 @@
 
     var charAssembled = combined.assembleCharacterPrompt();
     var textAssembled = combined.assembleTextPrompt();
+    var graphicsAssembled = combined.assembleGraphicsPrompt();
     var charFormatted = PromptHaus.engine.formatForPlatform(charAssembled, platform, styleDNAState.aspectRatio.value);
     var textFormatted = PromptHaus.engine.formatForPlatform(textAssembled, platform, styleDNAState.aspectRatio.value);
-    var combinedText = "CHARACTER PROMPT:\n" + charFormatted + "\n\nTEXT PROMPT:\n" + textFormatted;
+    var graphicsFormatted = PromptHaus.engine.formatForPlatform(graphicsAssembled, platform, styleDNAState.aspectRatio.value);
+    var combinedText =
+      "CHARACTER PROMPT:\n" + charFormatted +
+      "\n\nTEXT PROMPT:\n" + textFormatted +
+      "\n\nGRAPHICS PROMPT:\n" + graphicsFormatted;
 
     function makeBox(titleText, formatted) {
       var textarea = el("textarea", { class: "ph-preview__text", readonly: "readonly" });
@@ -837,6 +844,7 @@
       el("p", { class: "ph-preview__subtitle", text: "Watch your creative direction turn into a ready-to-use AI prompt." }),
       makeBox("Character Prompt", charFormatted),
       makeBox("Text Prompt", textFormatted),
+      makeBox("Graphics Prompt", graphicsFormatted),
       actions,
     ];
     if (saveFeedback) {

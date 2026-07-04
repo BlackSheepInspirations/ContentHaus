@@ -1,23 +1,28 @@
 /**
  * The AI Creator's Prompt Haus — Combined ("Social Post") Mode
  * Depends on prompt-builder-styledna.js, prompt-builder-engine.js,
- * prompt-builder-character.js, and prompt-builder-text.js.
+ * prompt-builder-character.js, prompt-builder-text.js, and
+ * prompt-builder-graphics.js.
  *
  * Not a merged prompt — per Section 1 of the build plan, this runs
- * Character's sentence-style assembler and Text's meta-instruction
- * assembler side by side so the two separate AI generations share one
- * style language and actually match when composited in Canva.
+ * Character's sentence-style assembler, Text's meta-instruction
+ * assembler, and Graphics's assembler side by side (3 boxes) so the
+ * separate AI generations share one style language and actually match
+ * when composited in Canva.
  *
- * Reuses the SAME PromptHaus.character/PromptHaus.text singleton stores
- * the standalone Character/Text tabs edit — building a character in the
- * Character tab and switching to Combined shows that same character,
- * ready to pair with text, rather than starting over in a separate copy.
+ * Reuses the SAME PromptHaus.character/PromptHaus.text/PromptHaus.graphics
+ * singleton stores the standalone Character/Text/Graphics tabs edit —
+ * building a character in the Character tab and switching to Combined
+ * shows that same character, ready to pair with text and a graphic,
+ * rather than starting over in a separate copy.
  *
  * Mascot Live Link: when on, Text's assembled prompt gets an extra fixed
  * entry describing the mascot, generated FROM Character's current Style/
  * Identity/Appearance/Styling selections (not Presentation/Extras/
  * Companion — those are scene-level, not "what does the mascot look
- * like") rather than typed manually.
+ * like") rather than typed manually. Graphics stays a plain pass-through,
+ * no mascot injection — a standalone graphic doesn't necessarily involve
+ * the mascot the way the paired Text prompt does.
  */
 (function () {
   "use strict";
@@ -106,6 +111,14 @@
     return PromptHaus.text.assemblePrompt(getMascotExtraEntries());
   }
 
+  // Graphics stays a plain pass-through — no mascot injection, since a
+  // standalone graphic (a vanity plate design, a transportation sticker,
+  // etc.) doesn't necessarily involve the mascot the way the paired Text
+  // prompt does.
+  function assembleGraphicsPrompt() {
+    return PromptHaus.graphics.assemblePrompt();
+  }
+
   function getSelectionsByGroup() {
     var groups = [];
     groups = groups.concat(PromptHaus.character.getSelectionsByGroup());
@@ -121,15 +134,17 @@
     }
 
     groups = groups.concat(PromptHaus.text.getSelectionsByGroup());
+    groups = groups.concat(PromptHaus.graphics.getSelectionsByGroup());
     return groups;
   }
 
-  // Randomizes/resets both underlying panels plus Combined's own fields —
-  // Combined Mode should be usable without first visiting the Character/
-  // Text tabs.
+  // Randomizes/resets all three underlying panels plus Combined's own
+  // fields — Combined Mode should be usable without first visiting the
+  // Character/Text/Graphics tabs.
   function randomize() {
     PromptHaus.character.randomize();
     PromptHaus.text.randomize();
+    PromptHaus.graphics.randomize();
     var state = store.getState();
     if (state.mascotAlignment.includeInPrompt) {
       var alignOptions = state.mascotAlignment.options || [];
@@ -154,6 +169,7 @@
   function reset() {
     PromptHaus.character.reset();
     PromptHaus.text.reset();
+    PromptHaus.graphics.reset();
     store.setState(buildInitialState());
   }
 
@@ -162,6 +178,7 @@
     updateField: updateField,
     assembleCharacterPrompt: assembleCharacterPrompt,
     assembleTextPrompt: assembleTextPrompt,
+    assembleGraphicsPrompt: assembleGraphicsPrompt,
     getSelectionsByGroup: getSelectionsByGroup,
     randomize: randomize,
     reset: reset,
