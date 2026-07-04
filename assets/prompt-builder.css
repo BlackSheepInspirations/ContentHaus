@@ -145,14 +145,25 @@
   padding: 2px 8px;
   cursor: pointer;
 }
-.ph-styledna__checkbox-label {
+.ph-styledna__yesno {
   display: flex;
-  align-items: center;
   gap: 8px;
-  color: var(--ph-cream);
-  font-size: 13px;
+}
+.ph-styledna__yesno-btn {
+  flex: 1;
+  border: 1.5px solid var(--ph-border);
+  border-radius: 999px;
+  padding: 8px 16px;
+  background: var(--ph-cream);
+  color: var(--ph-black);
+  font-size: 14px;
+  font-weight: 600;
   cursor: pointer;
-  padding-top: 4px;
+}
+.ph-styledna__yesno-btn.is-active {
+  background: var(--ph-teal);
+  color: var(--ph-cream);
+  border-color: var(--ph-teal);
 }
 
 /* Decorative progress stepper — narrates the flow, doesn't gate it */
@@ -513,7 +524,6 @@
    this still looks right in a plain/unthemed context (e.g. our own dev
    harness) where the theme's override isn't present at all. */
 .ph-field__checkbox,
-.ph-styledna__checkbox,
 .ph-subpanel__toggle {
   accent-color: var(--ph-teal);
   color: var(--ph-teal);

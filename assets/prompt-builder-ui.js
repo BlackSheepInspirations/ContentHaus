@@ -1371,18 +1371,28 @@
       renderApp();
     });
 
-    var bufferCheckbox = el("input", { type: "checkbox", class: "ph-styledna__checkbox" });
-    bufferCheckbox.checked = styleDNAState.addBuffer;
-    bufferCheckbox.addEventListener("change", function () {
-      PromptHaus.styleDNA.setAddBuffer(bufferCheckbox.checked);
-      renderApp();
-    });
+    function yesNoButton(label, isActive, onClick) {
+      var btn = el("button", {
+        type: "button",
+        class: "ph-styledna__yesno-btn" + (isActive ? " is-active" : ""),
+        text: label,
+      });
+      btn.addEventListener("click", onClick);
+      return btn;
+    }
+    var bufferToggle = el("div", { class: "ph-styledna__yesno" }, [
+      yesNoButton("Yes", styleDNAState.addBuffer === true, function () {
+        PromptHaus.styleDNA.setAddBuffer(true);
+        renderApp();
+      }),
+      yesNoButton("No", styleDNAState.addBuffer !== true, function () {
+        PromptHaus.styleDNA.setAddBuffer(false);
+        renderApp();
+      }),
+    ]);
     var bufferField = el("div", { class: "ph-styledna__field" }, [
-      el("label", { class: "ph-styledna__checkbox-label" }, [
-        bufferCheckbox,
-        icon("bufferBox"),
-        el("span", { text: "Add a buffer/padding around the image" }),
-      ]),
+      labelWithIcon("bufferBox", "Buffer/Padding"),
+      bufferToggle,
     ]);
     bufferField.title = "Asks the AI to leave empty space around the edges so nothing gets cropped at the borders.";
 
