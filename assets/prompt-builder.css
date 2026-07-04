@@ -318,6 +318,20 @@
   margin-top: 12px;
   flex-wrap: wrap;
 }
+
+/* Combined Mode's dual prompt boxes */
+.ph-preview__subbox {
+  margin-bottom: 14px;
+}
+.ph-preview__subbox-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+  font-weight: 700;
+  color: var(--ph-gold);
+  font-size: 13px;
+}
 .ph-btn {
   padding: 10px 16px;
   border-radius: 999px;

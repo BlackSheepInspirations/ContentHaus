@@ -214,7 +214,10 @@
     });
   }
 
-  function assemblePrompt() {
+  // extraFixedEntries lets Combined Mode layer in the live-linked mascot
+  // description (and its alignment) without duplicating this assembler —
+  // standalone Text Mode never passes anything, so its output is unchanged.
+  function assemblePrompt(extraFixedEntries) {
     var toEntry = function (e) {
       return { label: e.label, field: e.field };
     };
@@ -225,6 +228,7 @@
     // Holiday Theme lives in shared Style DNA — stays fixed across
     // variations same as everything else in Core Style.
     fixedEntries.push({ label: "Holiday Theme", field: PromptHaus.styleDNA.getState().holiday });
+    if (extraFixedEntries && extraFixedEntries.length) fixedEntries = fixedEntries.concat(extraFixedEntries);
 
     var intro = "Generate " + count + (count === 1 ? " variation." : " variations.");
     if (count > 1) intro += " Interpretation guide:";

@@ -13,7 +13,7 @@
   var MODES = ["character", "text", "couples", "combined"];
   var MODE_LABELS = { character: "Character", text: "Text", couples: "Couples", combined: "Combined" };
   // Flips to true as each mode ships in later build steps.
-  var BUILT_MODES = { character: true, text: true, couples: true, combined: false };
+  var BUILT_MODES = { character: true, text: true, couples: true, combined: true };
 
   var activeMode = "character";
   // Transient banner shown after a Save Prompt click (success or "limit
@@ -423,6 +423,132 @@
   }
 
   // ---------------------------------------------------------------------
+  // Combined ("Social Post") Mode panel
+  // ---------------------------------------------------------------------
+  function renderCombinedPanel() {
+    var combined = PromptHaus.combined;
+    var state = combined.getState();
+
+    var liveLinkToggle = el("input", { type: "checkbox", class: "ph-subpanel__toggle" });
+    liveLinkToggle.checked = state.mascotLiveLink;
+    liveLinkToggle.addEventListener("change", function () {
+      combined.toggleMascotLiveLink(liveLinkToggle.checked);
+      renderApp();
+    });
+
+    var mascotSection = el("div", { class: "ph-subpanel" }, [
+      el("label", { class: "ph-subpanel__header" }, [
+        liveLinkToggle,
+        el("span", { text: "Live-link mascot from the Character panel below" }),
+      ]),
+    ]);
+    if (state.mascotLiveLink) {
+      mascotSection.appendChild(
+        renderFieldGroup(
+          "Mascot Link",
+          [
+            { fieldName: "mascotAlignment", label: "Mascot Position", field: state.mascotAlignment },
+            { fieldName: "mascotArchetype", label: "Mascot Archetype", field: state.mascotArchetype },
+          ],
+          function (entry, changes) {
+            combined.updateField(entry.fieldName, changes);
+            renderApp();
+          },
+          "Archetype layers on top of the live character (e.g. \"nurse mascot\") rather than replacing it."
+        )
+      );
+    }
+
+    var panel = el("div", { class: "ph-panel ph-panel--combined" });
+    panel.appendChild(mascotSection);
+    panel.appendChild(el("h4", { class: "ph-person__title", text: "Character" }));
+    panel.appendChild(renderCharacterPanel());
+    panel.appendChild(el("h4", { class: "ph-person__title", text: "Text" }));
+    panel.appendChild(renderTextPanel());
+    return panel;
+  }
+
+  // Combined Mode doesn't produce one merged prompt — it runs Character's
+  // sentence assembler and Text's meta-instruction assembler side by side,
+  // each with its own box, sharing one set of Randomize All/Reset
+  // All/Save actions since the two are meant to be used together.
+  function renderCombinedPreview(root) {
+    var combined = PromptHaus.combined;
+    var styleDNAState = PromptHaus.styleDNA.getState();
+    var platform = styleDNAState.targetPlatform.value;
+
+    var charAssembled = combined.assembleCharacterPrompt();
+    var textAssembled = combined.assembleTextPrompt();
+    var charFormatted = PromptHaus.engine.formatForPlatform(charAssembled, platform, styleDNAState.aspectRatio.value);
+    var textFormatted = PromptHaus.engine.formatForPlatform(textAssembled, platform, styleDNAState.aspectRatio.value);
+    var combinedText = "CHARACTER PROMPT:\n" + charFormatted + "\n\nTEXT PROMPT:\n" + textFormatted;
+
+    function makeBox(titleText, formatted) {
+      var textarea = el("textarea", { class: "ph-preview__text", readonly: "readonly" });
+      textarea.value = formatted;
+      var copyBtn = el("button", { type: "button", class: "ph-btn ph-btn--copy ph-btn--small", text: "Copy" });
+      copyBtn.addEventListener("click", function () {
+        if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(formatted);
+        copyBtn.textContent = "Copied!";
+        setTimeout(function () {
+          copyBtn.textContent = "Copy";
+        }, 1500);
+      });
+      return el("div", { class: "ph-preview__subbox" }, [
+        el("div", { class: "ph-preview__subbox-header" }, [el("span", { text: titleText }), copyBtn]),
+        textarea,
+      ]);
+    }
+
+    var randomizeBtn = el("button", { type: "button", class: "ph-btn ph-btn--randomize", text: "Randomize All" });
+    randomizeBtn.title = "Randomizes every included field in both the Character and Text panels, plus Mascot Link.";
+    randomizeBtn.addEventListener("click", function () {
+      combined.randomize();
+      renderApp();
+    });
+
+    var resetBtn = el("button", { type: "button", class: "ph-btn ph-btn--reset", text: "Reset All" });
+    resetBtn.title = "Clears every field in both panels, plus Mascot Link, back to Select.../None.";
+    resetBtn.addEventListener("click", function () {
+      combined.reset();
+      renderApp();
+    });
+
+    var isFull = PromptHaus.favorites.isFull("combined");
+    var saveBtn = el("button", { type: "button", class: "ph-btn ph-btn--save", text: "Save Prompt" });
+    saveBtn.disabled = isFull;
+    saveBtn.title = isFull
+      ? "You have " + PromptHaus.favorites.MAX_PER_MODE + "/" + PromptHaus.favorites.MAX_PER_MODE + " saved here — delete one below to save another."
+      : "Saves both prompts together as one entry (up to " + PromptHaus.favorites.MAX_PER_MODE + " per mode).";
+    saveBtn.addEventListener("click", function () {
+      var result = PromptHaus.favorites.save("combined", { text: combinedText, platform: platform });
+      saveFeedback = result.ok ? { text: "Saved!", isError: false } : { text: result.reason, isError: true };
+      renderApp();
+      setTimeout(function () {
+        saveFeedback = null;
+        renderApp();
+      }, 2500);
+    });
+
+    var previewChildren = [
+      el("h3", { class: "ph-preview__title", text: "Live Prompt Preview" }),
+      makeBox("Character Prompt", charFormatted),
+      makeBox("Text Prompt", textFormatted),
+      el("div", { class: "ph-preview__actions" }, [randomizeBtn, resetBtn, saveBtn]),
+    ];
+    if (saveFeedback) {
+      previewChildren.push(
+        el("p", {
+          class: "ph-preview__save-feedback" + (saveFeedback.isError ? " is-error" : " is-success"),
+          text: saveFeedback.text,
+        })
+      );
+    }
+
+    root.appendChild(el("div", { class: "ph-preview" }, previewChildren));
+  }
+
+  // ---------------------------------------------------------------------
   // Shell: tabs, live preview, action buttons
   // ---------------------------------------------------------------------
   function renderTabs(root) {
@@ -715,6 +841,11 @@
       left.appendChild(renderCouplesPanel());
       renderSelectionsPanel(right, PromptHaus.couples.getSelectionsByGroup());
       renderPreview(right, PromptHaus.couples.assemblePrompt(), PromptHaus.couples, activeMode);
+      renderSavedPrompts(right, activeMode);
+    } else if (activeMode === "combined") {
+      left.appendChild(renderCombinedPanel());
+      renderSelectionsPanel(right, PromptHaus.combined.getSelectionsByGroup());
+      renderCombinedPreview(right);
       renderSavedPrompts(right, activeMode);
     } else {
       left.appendChild(el("p", { class: "ph-coming-soon", text: MODE_LABELS[activeMode] + " Mode is coming soon." }));
