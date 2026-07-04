@@ -148,6 +148,9 @@
     "deep side-part flipped bob", "straight-back feed-in stitch braids", "rope twist bob locs",
     "long boho braids", "velcro roller blowout set", "caesar haircut", "buzzcut",
     "low cut with deep waves", "hightop fade", "360 waves", "man bun", "gumby high top",
+    // new — generic locs entry (distinct from the "rope twist bob locs" sub-style already
+    // above), plus rounding out European/Nordic braiding traditions that weren't represented
+    "locs/dreadlocks", "viking braids", "french braid pigtails", "dutch braid crown", "fishtail braid",
   ]);
   var EYE_COLOR_OPTIONS = sortAlpha(["brown eyes", "blue eyes", "green eyes", "hazel eyes", "gray eyes", "amber eyes"]);
   var EXPRESSION_OPTIONS = sortAlpha(["none", "smiling", "confident", "curious", "playful", "serious", "surprised"]);
@@ -183,8 +186,15 @@
     "sequined cocktail dress", "velvet bodycon dress", "silk slip dress with blazer",
     "distressed boyfriend jeans with graphic tee", "linen button-up with chino shorts",
     "oversized denim jacket with sundress",
-    // new
-    "cargo shorts with graphic tee", "kimono-inspired robe",
+    // new — general differentiators
+    "cargo shorts with graphic tee",
+    // new — occupation/uniform garments, so Nurse/Teacher/Firefighter/Military presets and
+    // the Occupation/Niche field have an actual matching outfit instead of relying on generic
+    // streetwear terms to imply a uniform
+    "military dress uniform", "military fatigues (cammies)", "nurse scrubs", "police uniform",
+    "firefighter turnout gear", "doctor's white coat", "EMT/paramedic uniform", "clergy robe with collar",
+    // new — religious/cultural garments, a genuine representation gap the outfit list didn't cover at all
+    "hijab with modest fashion outfit", "sari", "kimono", "dashiki-inspired outfit", "cheongsam/qipao",
   ]);
   var SHOES_OPTIONS = sortAlpha([
     "nike sneakers", "fuzzy slippers", "stiletto heels", "timberland boots", "rain boots",
@@ -211,6 +221,9 @@
     "chunky necklace", "headphones", "beanie", "smartwatch", "crossbody bag", "backpack",
     "bucket hat", "diamond grillz", "scarf", "belt bag", "tote bag", "clutch purse",
     "durag", "hair bow", "clear glasses", "laptop",
+    // new — religious headwear, standalone from Outfit's bundled hijab look so it can pair
+    // with any outfit choice rather than locking into one specific full-look option
+    "hijab", "turban", "kufi cap", "kippah/yarmulke",
   ]);
   var SPECIAL_NEEDS_OPTIONS = sortAlpha([
     "none", "wheelchair", "crutches", "cane", "hearing aid", "cochlear implant", "bifocals",
@@ -221,6 +234,8 @@
     "chunky gold chains", "delicate necklaces", "statement earrings", "multiple rings",
     "anklets", "body chains", "diamond studs", "diamond chain", "thick cuban link chain",
     "layered bracelets", "choker necklace", "pendant necklace", "nose ring",
+    // new
+    "cross necklace",
   ]);
   var TATTOOS_OPTIONS = sortAlpha([
     "none", "face tattoos", "neck tattoos", "arm sleeve tattoos", "minimalist line tattoos",
