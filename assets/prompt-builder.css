@@ -1,5 +1,11 @@
-/* The AI Creator's Prompt Haus — palette per build plan Section 8 */
-#prompt-haus-app {
+/* The AI Creator's Prompt Haus — palette per build plan Section 8.
+   Shared across the app shell, the locked state, and the marketing page —
+   those last two render outside #prompt-haus-app entirely (the locked
+   state replaces it, the marketing page is a separate page/section), so
+   the custom properties can't just live scoped to that one selector. */
+#prompt-haus-app,
+.ph-locked,
+.ph-marketing {
   --ph-cream: #FAF6EF;
   --ph-black: #1A1815;
   --ph-gold: #C9A84C;
@@ -8,9 +14,12 @@
   --ph-espresso: #3C2A21;
   --ph-border: rgba(46, 42, 38, 0.15);
 
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+#prompt-haus-app {
   background: var(--ph-cream);
   color: var(--ph-black);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   max-width: 1280px;
   margin: 0 auto;
   padding: 24px 16px 64px;
@@ -446,4 +455,125 @@
 .ph-coming-soon {
   font-style: italic;
   color: var(--ph-espresso);
+}
+
+/* Locked state (sections/prompt-builder.liquid, non-purchasers) */
+.ph-locked {
+  background: var(--ph-cream);
+  color: var(--ph-black);
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 64px 24px;
+  text-align: center;
+}
+.ph-locked__heading {
+  color: var(--ph-espresso);
+  margin: 0 0 12px;
+}
+.ph-locked__body {
+  color: var(--ph-charcoal);
+  margin-bottom: 24px;
+}
+.ph-locked__actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.ph-locked__learn-more {
+  border-color: var(--ph-charcoal);
+  color: var(--ph-charcoal);
+}
+
+/* Marketing/preview page (sections/prompt-builder-preview.liquid) */
+.ph-marketing {
+  background: var(--ph-cream);
+  color: var(--ph-black);
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 48px 24px 80px;
+}
+.ph-marketing__hero {
+  text-align: center;
+  margin-bottom: 40px;
+}
+.ph-marketing__eyebrow {
+  color: var(--ph-gold);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 13px;
+  font-weight: 700;
+  margin: 0 0 8px;
+}
+.ph-marketing__heading {
+  color: var(--ph-black);
+  font-size: 40px;
+  margin: 0 0 16px;
+}
+.ph-marketing__subheading {
+  color: var(--ph-charcoal);
+  font-size: 17px;
+  max-width: 640px;
+  margin: 0 auto 24px;
+}
+.ph-marketing__cta {
+  display: inline-block;
+}
+.ph-marketing__video {
+  margin-bottom: 48px;
+}
+.ph-marketing__video-embed {
+  position: relative;
+  width: 100%;
+  padding-top: 56.25%;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--ph-black);
+}
+.ph-marketing__video-embed iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+.ph-marketing__video-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  border-radius: 12px;
+  background: var(--ph-charcoal);
+  color: var(--ph-cream);
+  font-style: italic;
+}
+.ph-marketing__features {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+  margin-bottom: 48px;
+}
+@media (min-width: 700px) {
+  .ph-marketing__features {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.ph-marketing__feature {
+  border: 1px solid var(--ph-border);
+  border-radius: 12px;
+  padding: 20px;
+  background: #fff;
+}
+.ph-marketing__feature h3 {
+  color: var(--ph-espresso);
+  margin: 0 0 8px;
+}
+.ph-marketing__feature p {
+  color: var(--ph-charcoal);
+  margin: 0;
+  font-size: 14px;
+}
+.ph-marketing__footer-cta {
+  text-align: center;
 }

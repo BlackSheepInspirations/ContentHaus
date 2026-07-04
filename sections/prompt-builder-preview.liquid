@@ -1,0 +1,116 @@
+{% comment %}
+  The AI Creator's Prompt Haus — public marketing/preview page.
+  Not gated — this is the page non-purchasers land on (linked from the
+  locked state in sections/prompt-builder.liquid) to learn what the tool
+  does and buy access. Lives on its own page/template so it's linkable
+  from nav menus, product pages, ads, etc. without carrying any gating
+  logic of its own.
+{% endcomment %}
+
+{{ 'prompt-builder.css' | asset_url | stylesheet_tag }}
+
+<div class="ph-marketing">
+  <div class="ph-marketing__hero">
+    <p class="ph-marketing__eyebrow">{{ section.settings.eyebrow }}</p>
+    <h1 class="ph-marketing__heading">{{ section.settings.heading }}</h1>
+    <div class="ph-marketing__subheading">{{ section.settings.subheading }}</div>
+    {% if section.settings.access_product %}
+      <a href="{{ section.settings.access_product.url }}" class="ph-btn ph-btn--copy ph-marketing__cta">
+        Get Access{% if section.settings.access_product.price %} — {{ section.settings.access_product.price | money }}{% endif %}
+      </a>
+    {% endif %}
+  </div>
+
+  <div class="ph-marketing__video">
+    {% if section.settings.demo_video_url != blank %}
+      <div class="ph-marketing__video-embed">
+        <iframe
+          src="{{ section.settings.demo_video_url }}"
+          title="{{ section.settings.heading }} demo"
+          frameborder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen
+        ></iframe>
+      </div>
+    {% else %}
+      <div class="ph-marketing__video-placeholder">Demo video coming soon</div>
+    {% endif %}
+  </div>
+
+  <div class="ph-marketing__features">
+    {% for block in section.blocks %}
+      {% if block.type == 'feature' %}
+        <div class="ph-marketing__feature" {{ block.shopify_attributes }}>
+          <h3>{{ block.settings.title }}</h3>
+          <p>{{ block.settings.description }}</p>
+        </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+
+  {% if section.settings.access_product %}
+    <div class="ph-marketing__footer-cta">
+      <a href="{{ section.settings.access_product.url }}" class="ph-btn ph-btn--copy ph-marketing__cta">
+        Get Access{% if section.settings.access_product.price %} — {{ section.settings.access_product.price | money }}{% endif %}
+      </a>
+    </div>
+  {% endif %}
+</div>
+
+{% schema %}
+{
+  "name": "Prompt Haus Preview",
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow text",
+      "default": "Black Sheep Creations & Inspirations"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "The AI Creator's Prompt Haus"
+    },
+    {
+      "type": "richtext",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "<p>Build polished AI image-generation prompts across four connected modes — Character, Text, Couples, and Combined — sharing one style language so your generations actually match.</p>"
+    },
+    {
+      "type": "url",
+      "id": "demo_video_url",
+      "label": "Demo video embed URL",
+      "info": "YouTube/Vimeo embed URL (not the regular watch link — use the \"Embed\" URL)."
+    },
+    {
+      "type": "product",
+      "id": "access_product",
+      "label": "Access product"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "feature",
+      "name": "Feature",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Title" },
+        { "type": "textarea", "id": "description", "label": "Description" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Prompt Haus Preview",
+      "blocks": [
+        { "type": "feature", "settings": { "title": "Four connected modes", "description": "Character, Text, Couples, and Combined — sharing one style language so your generations match." } },
+        { "type": "feature", "settings": { "title": "Live-linked mascots", "description": "Combined Mode pulls your mascot straight from the Character panel instead of retyping it." } },
+        { "type": "feature", "settings": { "title": "40 holiday themes", "description": "US civic, Christian, Jewish, Islamic, Hindu, Latin American, and more." } },
+        { "type": "feature", "settings": { "title": "Save your favorites", "description": "Keep up to 5 saved prompts per mode, ready to copy anytime." } }
+      ]
+    }
+  ]
+}
+{% endschema %}

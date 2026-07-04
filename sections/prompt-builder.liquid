@@ -1,26 +1,86 @@
 {% comment %}
   The AI Creator's Prompt Haus — main tool section.
-  Access control (customer.tags gate) lands in Section 6 Step 6 of the build
-  order — intentionally not wired yet so Character Mode can be reviewed on
-  its own first.
+  Gated on customer.tags contains "prompt-haus-access" (added by a Shopify
+  Flow automation on order paid — see docs/access-control-setup.md).
+  request.design_mode bypasses the gate inside the theme editor only, so
+  the merchant can preview/edit this section without needing the tag —
+  it has no effect on the published storefront for real customers.
 {% endcomment %}
 
-<div id="prompt-haus-app" data-section-id="{{ section.id }}"></div>
+{% assign ph_has_access = false %}
+{% if customer and customer.tags contains section.settings.access_tag %}
+  {% assign ph_has_access = true %}
+{% endif %}
+{% if request.design_mode %}
+  {% assign ph_has_access = true %}
+{% endif %}
 
 {{ 'prompt-builder.css' | asset_url | stylesheet_tag }}
-<script src="{{ 'prompt-builder-styledna.js' | asset_url }}" defer="defer"></script>
-<script src="{{ 'prompt-builder-engine.js' | asset_url }}" defer="defer"></script>
-<script src="{{ 'prompt-builder-favorites.js' | asset_url }}" defer="defer"></script>
-<script src="{{ 'prompt-builder-character.js' | asset_url }}" defer="defer"></script>
-<script src="{{ 'prompt-builder-text.js' | asset_url }}" defer="defer"></script>
-<script src="{{ 'prompt-builder-couples.js' | asset_url }}" defer="defer"></script>
-<script src="{{ 'prompt-builder-combined.js' | asset_url }}" defer="defer"></script>
-<script src="{{ 'prompt-builder-ui.js' | asset_url }}" defer="defer"></script>
+
+{% if ph_has_access %}
+  <div id="prompt-haus-app" data-section-id="{{ section.id }}"></div>
+
+  <script src="{{ 'prompt-builder-styledna.js' | asset_url }}" defer="defer"></script>
+  <script src="{{ 'prompt-builder-engine.js' | asset_url }}" defer="defer"></script>
+  <script src="{{ 'prompt-builder-favorites.js' | asset_url }}" defer="defer"></script>
+  <script src="{{ 'prompt-builder-character.js' | asset_url }}" defer="defer"></script>
+  <script src="{{ 'prompt-builder-text.js' | asset_url }}" defer="defer"></script>
+  <script src="{{ 'prompt-builder-couples.js' | asset_url }}" defer="defer"></script>
+  <script src="{{ 'prompt-builder-combined.js' | asset_url }}" defer="defer"></script>
+  <script src="{{ 'prompt-builder-ui.js' | asset_url }}" defer="defer"></script>
+{% else %}
+  <div class="ph-locked">
+    <h2 class="ph-locked__heading">{{ section.settings.locked_heading }}</h2>
+    <div class="ph-locked__body">{{ section.settings.locked_body }}</div>
+    <div class="ph-locked__actions">
+      {% if section.settings.access_product %}
+        <a href="{{ section.settings.access_product.url }}" class="ph-btn ph-btn--copy">
+          Get Access{% if section.settings.access_product.price %} — {{ section.settings.access_product.price | money }}{% endif %}
+        </a>
+      {% endif %}
+      {% if section.settings.learn_more_url != blank %}
+        <a href="{{ section.settings.learn_more_url }}" class="ph-btn ph-btn--reset ph-locked__learn-more">Learn more</a>
+      {% endif %}
+    </div>
+  </div>
+{% endif %}
 
 {% schema %}
 {
   "name": "Prompt Haus Builder",
-  "settings": [],
+  "settings": [
+    {
+      "type": "text",
+      "id": "access_tag",
+      "label": "Access tag",
+      "default": "prompt-haus-access",
+      "info": "Customer tag that unlocks the tool. Must match the tag your Shopify Flow automation adds on purchase."
+    },
+    {
+      "type": "product",
+      "id": "access_product",
+      "label": "Access product",
+      "info": "Shown as the \"Get Access\" button for shoppers who don't have the tag yet."
+    },
+    {
+      "type": "url",
+      "id": "learn_more_url",
+      "label": "Learn more link",
+      "info": "e.g. link to your Prompt Haus marketing page."
+    },
+    {
+      "type": "text",
+      "id": "locked_heading",
+      "label": "Locked state heading",
+      "default": "Unlock The AI Creator's Prompt Haus"
+    },
+    {
+      "type": "richtext",
+      "id": "locked_body",
+      "label": "Locked state body",
+      "default": "<p>Get instant access to the full prompt builder — Character, Text, Couples, and Combined modes, 40 holiday themes, and save up to 5 favorite prompts per mode.</p>"
+    }
+  ],
   "presets": [
     {
       "name": "Prompt Haus Builder"
