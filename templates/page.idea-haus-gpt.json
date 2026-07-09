@@ -1,0 +1,18 @@
+{
+  "sections": {
+    "main": {
+      "type": "gpt-access",
+      "settings": {
+        "eyebrow": "Black Sheep Creations & Inspirations",
+        "heading": "The AI Creator's Idea Haus",
+        "subheading": "Conceptualize your business idea before you build anything else — your AI-guided starting point.",
+        "access_tag": "idea-haus-access",
+        "locked_heading": "Unlock The AI Creator's Idea Haus",
+        "locked_body": "<p>Get instant access to your Idea Haus Custom GPT — work through your business concept, positioning, and direction before you brand or build anything.</p>",
+        "gpt_button_label": "Open Your Idea Haus GPT",
+        "instructions": "<p>Click below to open your Idea Haus GPT in ChatGPT. Bookmark this page — you can come back here anytime to relaunch it.</p>"
+      }
+    }
+  },
+  "order": ["main"]
+}

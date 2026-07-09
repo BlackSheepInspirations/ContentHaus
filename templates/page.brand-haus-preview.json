@@ -1,0 +1,39 @@
+{
+  "sections": {
+    "main": {
+      "type": "brand-haus-preview",
+      "blocks": {
+        "feature_1": {
+          "type": "feature",
+          "settings": {
+            "title": "The Brand DNA Assessment",
+            "description": "21 questions, 12-18 minutes — uncovers how you naturally think, what you value, and what should show up in your brand because of it."
+          }
+        },
+        "feature_2": {
+          "type": "feature",
+          "settings": {
+            "title": "Branding Studio",
+            "description": "Colors, fonts, mood, mission, and values on one visual board — see your brand before you commit to it."
+          }
+        },
+        "feature_3": {
+          "type": "feature",
+          "settings": {
+            "title": "Logo Studio",
+            "description": "A full logo builder — from concept to color and typography direction."
+          }
+        },
+        "feature_4": {
+          "type": "feature",
+          "settings": {
+            "title": "Save your favorites",
+            "description": "Keep up to 5 saved prompts per studio, ready to copy anytime."
+          }
+        }
+      },
+      "block_order": ["feature_1", "feature_2", "feature_3", "feature_4"]
+    }
+  },
+  "order": ["main"]
+}

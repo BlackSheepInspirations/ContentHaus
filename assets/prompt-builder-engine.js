@@ -94,7 +94,7 @@
   var PLATFORM_GROUP = {
     "Midjourney": "tag",
     "Leonardo AI": "tag",
-    "ChatGPT/DALL·E": "sentence",
+    "ChatGPT (GPT Image)": "sentence",
     "Adobe Firefly": "sentence",
     "OpenArt": "sentence",
     "Kittl": "simplified",
@@ -102,7 +102,19 @@
     "Flux": "simplified",
   };
 
-  function toTagStyle(assembled, aspectRatio) {
+  // Splits a freeform "no watermark, no extra limbs, blurry" string into
+  // clean individual items — comma, semicolon, or newline separated, since
+  // it's typed free text rather than a picklist.
+  function cleanNegativeItems(negativePrompt) {
+    return (negativePrompt || "")
+      .split(/[,;\n]/)
+      .map(function (t) {
+        return t.trim();
+      })
+      .filter(Boolean);
+  }
+
+  function toTagStyle(assembled, aspectRatio, negativeItems) {
     var tags = assembled.fragments
       .join(", ")
       .split(",")
@@ -111,20 +123,32 @@
       })
       .filter(Boolean);
     var param = aspectRatio ? "--ar " + aspectRatio : "";
-    return [tags.join(", "), param].filter(Boolean).join(" ");
+    // Midjourney's own native negative-prompt flag — reused as-is for the
+    // other tag-style platform (Leonardo AI) too, since neither has a
+    // separate negative-prompt box the way sentence-style tools do.
+    var negative = negativeItems.length ? "--no " + negativeItems.join(", ") : "";
+    return [tags.join(", "), param, negative].filter(Boolean).join(" ");
   }
 
-  function toSimplifiedStyle(assembled) {
-    return assembled.text.replace(/\s*Aspect ratio:.*$/i, "").trim();
+  function toSimplifiedStyle(assembled, negativeItems) {
+    var base = assembled.text.replace(/\s*Aspect ratio:.*$/i, "").trim();
+    if (negativeItems.length) base += " Avoid: " + negativeItems.join(", ") + ".";
+    return base;
   }
 
   // group defaults to "sentence" (current default natural-language style)
-  // when no platform is selected yet.
-  function formatForPlatform(assembled, platform, aspectRatio) {
+  // when no platform is selected yet. negativePrompt is shared Style DNA
+  // (same field, same platform-aware formatting, on every mode) — kept
+  // out of assembled.fragments entirely so it never gets swept into
+  // Combined's cross-module weaving or randomized like a normal descriptor.
+  function formatForPlatform(assembled, platform, aspectRatio, negativePrompt) {
     var group = PLATFORM_GROUP[platform] || "sentence";
-    if (group === "tag") return toTagStyle(assembled, aspectRatio);
-    if (group === "simplified") return toSimplifiedStyle(assembled);
-    return assembled.text;
+    var negativeItems = cleanNegativeItems(negativePrompt);
+    if (group === "tag") return toTagStyle(assembled, aspectRatio, negativeItems);
+    if (group === "simplified") return toSimplifiedStyle(assembled, negativeItems);
+    var text = assembled.text;
+    if (negativeItems.length) text += " Avoid: " + negativeItems.join(", ") + ".";
+    return text;
   }
 
   PromptHaus.engine = {

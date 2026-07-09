@@ -1,71 +1,73 @@
-/* The AI Creator's Prompt Haus — palette per build plan Section 8.
+/* The AI Creator's Brand Haus — sibling palette to Prompt Haus.
+   Same component CSS, same token names (--bh-cream, --bh-gold, etc.) as
+   Prompt Haus for a minimal, low-risk port — only the hex values change.
+   Black/charcoal/teal/border are unchanged (already proven); cream
+   becomes a near-white warm grey, espresso becomes hot pink, and gold
+   becomes a single warm dark grey — verified at 4.05-4.94:1 contrast
+   against the new background, comfortably passing WCAG AA, so unlike
+   Prompt Haus's gold this one doesn't need a separate on-light variant
+   (--bh-gold-on-light is kept as an alias of the same value only so nothing
+   that already references it breaks).
    Shared across the app shell, the locked state, and the marketing page —
-   those last two render outside #prompt-haus-app entirely (the locked
+   those last two render outside #brand-haus-app entirely (the locked
    state replaces it, the marketing page is a separate page/section), so
    the custom properties can't just live scoped to that one selector. */
-#prompt-haus-app,
-.ph-locked,
-.ph-marketing,
-.ph-brand-header {
-  --ph-cream: #FAF6EF;
-  --ph-black: #1A1815;
-  --ph-gold: #C9A84C;
-  --ph-teal: #0D7377;
-  --ph-charcoal: #2E2A26;
-  --ph-espresso: #3C2A21;
-  --ph-border: rgba(46, 42, 38, 0.15);
-  /* --ph-gold on cream/white is only 2.12:1 — fails WCAG AA even for
-     large text (needs 3:1) or small text (needs 4.5:1). --ph-gold itself
-     stays untouched since it correctly passes at 6-7:1 everywhere it sits
-     on charcoal/black; this darker variant is only for gold TEXT that
-     sits on a light background (eyebrow labels, heading accents, group
-     titles) — decorative gold icons paired with separately-colored
-     visible text aren't subject to the same rule and are left alone. */
-  --ph-gold-on-light: #846E32;
+#brand-haus-app,
+.bh-locked,
+.bh-marketing,
+.bh-brand-header {
+  --bh-cream: #F2F0EB;
+  --bh-black: #1A1815;
+  --bh-gold: #6B6860;
+  --bh-teal: #0D7377;
+  --bh-charcoal: #2E2A26;
+  --bh-espresso: #D6336C;
+  --bh-border: rgba(46, 42, 38, 0.15);
+  --bh-gold-on-light: #6B6860;
 
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
-#prompt-haus-app {
-  background: var(--ph-cream);
-  color: var(--ph-black);
+#brand-haus-app {
+  background: var(--bh-cream);
+  color: var(--bh-black);
   max-width: 1280px;
   margin: 0 auto;
   padding: 24px 16px 64px;
 }
 
 /* Branded header above the tool page (sections/prompt-builder.liquid) —
-   sibling of #prompt-haus-app, reuses .ph-marketing__hero's eyebrow/
+   sibling of #brand-haus-app, reuses .bh-marketing__hero's eyebrow/
    heading/subheading styling for consistent branding across both pages. */
-.ph-brand-header {
-  background: var(--ph-cream);
+.bh-brand-header {
+  background: var(--bh-cream);
   max-width: 1280px;
   margin: 0 auto;
   padding: 40px 16px 16px;
   overflow: hidden;
 }
-/* .ph-marketing__hero's own margin-bottom (spacing before its video/CTA on
+/* .bh-marketing__hero's own margin-bottom (spacing before its video/CTA on
    the marketing page) would otherwise leave a gap of the theme's page
    background showing between this header and the tool/locked-state below,
    since both are separate cream-colored blocks rather than one continuous
    background. */
-.ph-brand-header .ph-marketing__hero {
+.bh-brand-header .bh-marketing__hero {
   margin-bottom: 0;
 }
 
-#prompt-haus-app * {
+#brand-haus-app * {
   box-sizing: border-box;
 }
 
 /* Icon system — inherits color from whatever text color surrounds it */
-.ph-icon {
+.bh-icon {
   display: inline-flex;
   width: 16px;
   height: 16px;
   flex-shrink: 0;
   vertical-align: -3px;
 }
-.ph-icon svg {
+.bh-icon svg {
   width: 100%;
   height: 100%;
 }
@@ -73,22 +75,22 @@
 /* Tabs */
 /* One bordered card holding both tab rows, so the two-row layout reads as
    a single cohesive component rather than two loose strips. */
-.ph-tabs-box {
-  border: 1px solid var(--ph-border);
+.bh-tabs-box {
+  border: 1px solid var(--bh-border);
   border-radius: 12px;
   padding: 14px 16px;
   margin-bottom: 20px;
   background: rgba(255, 255, 255, 0.5);
 }
-.ph-tabs {
+.bh-tabs {
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
 }
-.ph-tabs--row2 {
+.bh-tabs--row2 {
   margin-top: 12px;
 }
-.ph-tabs__item {
+.bh-tabs__item {
   display: inline-flex;
   align-items: center;
   gap: 0;
@@ -96,10 +98,10 @@
 /* Pulled in tight against its own tab's pill instead of sitting in the
    middle of the gap to the next tab, which read as ambiguous about which
    tab it belonged to. */
-.ph-tabs__item .ph-info {
+.bh-tabs__item .bh-info {
   margin-left: -10px;
 }
-.ph-tabs__btn {
+.bh-tabs__btn {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -109,111 +111,111 @@
   padding: 10px 18px;
   font-size: 15px;
   font-weight: 600;
-  color: var(--ph-espresso);
+  color: var(--bh-espresso);
   cursor: pointer;
 }
 /* Selected tab reads unambiguously — solid teal fill + white text/icon,
    not just an underline accent. */
-.ph-tabs__btn.is-active {
-  background: var(--ph-teal);
+.bh-tabs__btn.is-active {
+  background: var(--bh-teal);
   color: #fff;
-  border-color: var(--ph-teal);
+  border-color: var(--bh-teal);
 }
-.ph-tabs__btn.is-disabled {
+.bh-tabs__btn.is-disabled {
   color: rgba(46, 42, 38, 0.4);
   cursor: not-allowed;
 }
 
 /* Style DNA bar */
-.ph-styledna {
+.bh-styledna {
   display: flex;
   flex-wrap: wrap;
   gap: 16px;
-  background: var(--ph-charcoal);
-  color: var(--ph-cream);
+  background: var(--bh-charcoal);
+  color: var(--bh-cream);
   border-radius: 10px;
   padding: 16px;
   margin-bottom: 24px;
 }
-.ph-styledna__field {
+.bh-styledna__field {
   display: flex;
   flex-direction: column;
   gap: 6px;
   flex: 1 1 calc(33.333% - 11px);
   min-width: 160px;
 }
-.ph-styledna__field--full {
+.bh-styledna__field--full {
   flex-basis: 100%;
 }
-.ph-styledna__negative-subtitle {
+.bh-styledna__negative-subtitle {
   margin: 0;
   font-size: 12px;
-  color: var(--ph-cream);
+  color: var(--bh-cream);
   opacity: 0.75;
 }
-.ph-styledna__negative-input {
+.bh-styledna__negative-input {
   width: 100%;
   box-sizing: border-box;
 }
-.ph-styledna__negative-chips {
+.bh-styledna__negative-chips {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
 }
-.ph-styledna__negative-chip {
+.bh-styledna__negative-chip {
   background: transparent;
-  border: 1px solid var(--ph-cream);
-  color: var(--ph-cream);
+  border: 1px solid var(--bh-cream);
+  color: var(--bh-cream);
   border-radius: 999px;
   padding: 4px 12px;
   font-size: 12px;
   cursor: pointer;
 }
-.ph-styledna__negative-chip:hover {
-  border-color: var(--ph-gold);
-  color: var(--ph-gold);
+.bh-styledna__negative-chip:hover {
+  border-color: var(--bh-gold);
+  color: var(--bh-gold);
 }
-.ph-styledna .ph-field__label {
-  color: var(--ph-cream);
+.bh-styledna .bh-field__label {
+  color: var(--bh-cream);
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
-.ph-label--icon {
+.bh-label--icon {
   display: inline-flex;
   align-items: center;
   gap: 6px;
 }
-.ph-styledna .ph-label--icon .ph-icon {
-  color: var(--ph-gold);
+.bh-styledna .bh-label--icon .bh-icon {
+  color: var(--bh-gold);
 }
 /* Info-icon tooltip — a visible affordance for guidance that used to
    only live in an invisible hover-only title attribute. <details>/
    <summary>-based, so click/tap (not just hover) reveals it, with no
    custom JS listeners to manage. */
-.ph-info {
+.bh-info {
   display: inline-block;
   position: relative;
 }
-.ph-info__icon {
+.bh-info__icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 15px;
   height: 15px;
   border-radius: 50%;
-  border: 1px solid var(--ph-gold);
-  color: var(--ph-gold);
+  border: 1px solid var(--bh-gold);
+  color: var(--bh-gold);
   font-size: 10px;
   font-weight: 700;
   font-style: italic;
   cursor: pointer;
   list-style: none;
 }
-.ph-info__icon::-webkit-details-marker {
+.bh-info__icon::-webkit-details-marker {
   display: none;
 }
-.ph-info__icon::marker {
+.bh-info__icon::marker {
   content: "";
 }
 /* Shown on hover (desktop) via opacity/visibility rather than relying on
@@ -222,7 +224,7 @@
    exist) still works via the [open] rule below. Set explicitly rather
    than left to the browser's default "hide everything but <summary> when
    closed" behavior, which would otherwise block the hover-only case. */
-.ph-info__body {
+.bh-info__body {
   display: block;
   position: absolute;
   z-index: 20;
@@ -230,8 +232,8 @@
   left: 0;
   width: 220px;
   background: #fff;
-  color: var(--ph-black);
-  border: 1px solid var(--ph-border);
+  color: var(--bh-black);
+  border: 1px solid var(--bh-border);
   border-radius: 6px;
   padding: 8px 10px;
   margin: 0;
@@ -246,209 +248,209 @@
   transition: opacity 0.12s ease;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
 }
-.ph-info:hover .ph-info__body,
-.ph-info[open] .ph-info__body {
+.bh-info:hover .bh-info__body,
+.bh-info[open] .bh-info__body {
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
 }
-.ph-styledna__auto-badge {
+.bh-styledna__auto-badge {
   align-self: flex-start;
   font-size: 11px;
-  color: var(--ph-gold);
-  border: 1px solid var(--ph-gold);
+  color: var(--bh-gold);
+  border: 1px solid var(--bh-gold);
   border-radius: 999px;
   padding: 2px 8px;
 }
-.ph-styledna__reset-auto {
+.bh-styledna__reset-auto {
   align-self: flex-start;
   font-size: 11px;
-  color: var(--ph-teal);
+  color: var(--bh-teal);
   background: none;
-  border: 1px solid var(--ph-teal);
+  border: 1px solid var(--bh-teal);
   border-radius: 999px;
   padding: 2px 8px;
   cursor: pointer;
 }
-.ph-styledna__yesno {
+.bh-styledna__yesno {
   display: flex;
   gap: 8px;
 }
-.ph-styledna__yesno-btn {
+.bh-styledna__yesno-btn {
   flex: 1;
-  border: 1.5px solid var(--ph-border);
+  border: 1.5px solid var(--bh-border);
   border-radius: 999px;
   padding: 8px 16px;
-  background: var(--ph-cream);
-  color: var(--ph-black);
+  background: var(--bh-cream);
+  color: var(--bh-black);
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
 }
-.ph-styledna__yesno-btn.is-active {
-  background: var(--ph-teal);
-  color: var(--ph-cream);
-  border-color: var(--ph-teal);
+.bh-styledna__yesno-btn.is-active {
+  background: var(--bh-teal);
+  color: var(--bh-cream);
+  border-color: var(--bh-teal);
 }
 
 /* Decorative progress stepper — narrates the flow, doesn't gate it */
-.ph-stepper {
+.bh-stepper {
   display: flex;
   align-items: flex-start;
   gap: 4px;
   margin-bottom: 20px;
   flex-wrap: wrap;
 }
-.ph-stepper__step {
+.bh-stepper__step {
   display: flex;
   align-items: center;
   gap: 8px;
 }
-.ph-stepper__icon {
+.bh-stepper__icon {
   width: 22px;
   height: 22px;
-  color: var(--ph-teal);
+  color: var(--bh-teal);
   flex-shrink: 0;
 }
-.ph-stepper__text {
+.bh-stepper__text {
   display: flex;
   flex-direction: column;
   line-height: 1.25;
 }
-.ph-stepper__title {
+.bh-stepper__title {
   font-size: 13px;
   font-weight: 700;
-  color: var(--ph-charcoal);
+  color: var(--bh-charcoal);
 }
-.ph-stepper__subtitle {
+.bh-stepper__subtitle {
   font-size: 11px;
-  color: var(--ph-espresso);
+  color: var(--bh-espresso);
 }
-.ph-stepper__connector {
+.bh-stepper__connector {
   flex: 1;
   min-width: 24px;
   height: 1px;
-  border-top: 1px dotted var(--ph-border);
+  border-top: 1px dotted var(--bh-border);
   margin: 11px 4px 0;
 }
 
 /* Shared-prompt banner — shown when the page loads with a ?ph_shared_
    prompt= link, sits above everything else so it's the first thing a
    recipient sees. */
-.ph-shared-banner {
-  border: 1.5px solid var(--ph-teal);
+.bh-shared-banner {
+  border: 1.5px solid var(--bh-teal);
   border-radius: 12px;
   background: #fff;
   padding: 14px 18px;
   margin-bottom: 20px;
 }
-.ph-shared-banner__header {
+.bh-shared-banner__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
 }
-.ph-shared-banner__title {
+.bh-shared-banner__title {
   display: flex;
   align-items: center;
   gap: 8px;
   font-size: 14px;
   font-weight: 700;
   margin: 0;
-  color: var(--ph-espresso);
+  color: var(--bh-espresso);
 }
-.ph-shared-banner__title .ph-icon {
-  color: var(--ph-teal);
+.bh-shared-banner__title .bh-icon {
+  color: var(--bh-teal);
 }
-.ph-shared-banner__dismiss {
+.bh-shared-banner__dismiss {
   border: none;
   background: none;
   font-size: 18px;
   line-height: 1;
-  color: var(--ph-charcoal);
+  color: var(--bh-charcoal);
   cursor: pointer;
   padding: 2px 6px;
   flex-shrink: 0;
 }
-.ph-shared-banner__text {
+.bh-shared-banner__text {
   margin: 10px 0;
   font-size: 13px;
-  color: var(--ph-charcoal);
+  color: var(--bh-charcoal);
   white-space: pre-wrap;
-  background: var(--ph-cream);
+  background: var(--bh-cream);
   border-radius: 8px;
   padding: 10px 12px;
 }
 
 /* Tips for Better Prompts — general guidance, shown above the Style DNA
    bar so it's visible before anyone starts filling in fields. */
-.ph-tips {
-  border: 1.5px solid var(--ph-gold);
+.bh-tips {
+  border: 1.5px solid var(--bh-gold);
   border-radius: 12px;
-  background: var(--ph-cream);
+  background: var(--bh-cream);
   padding: 14px 18px;
   margin-bottom: 20px;
 }
-.ph-tips__header {
+.bh-tips__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
 }
-.ph-tips__title {
+.bh-tips__title {
   display: flex;
   align-items: center;
   gap: 8px;
   font-size: 15px;
   margin: 0;
-  color: var(--ph-espresso);
+  color: var(--bh-espresso);
 }
-.ph-tips__title .ph-icon {
-  color: var(--ph-gold);
+.bh-tips__title .bh-icon {
+  color: var(--bh-gold);
 }
-.ph-tips__toggle {
+.bh-tips__toggle {
   display: flex;
   align-items: center;
   gap: 6px;
   border: none;
   background: none;
-  color: var(--ph-teal);
+  color: var(--bh-teal);
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   padding: 4px;
   flex-shrink: 0;
 }
-.ph-tips__list {
+.bh-tips__list {
   margin: 12px 0 0;
   padding-left: 4px;
   list-style: none;
-  color: var(--ph-charcoal);
+  color: var(--bh-charcoal);
   font-size: 13px;
   line-height: 1.5;
 }
-.ph-tips__list li {
+.bh-tips__list li {
   position: relative;
   padding-left: 20px;
   margin-bottom: 8px;
 }
-.ph-tips__list li:last-child {
+.bh-tips__list li:last-child {
   margin-bottom: 0;
 }
-.ph-tips__list li::before {
+.bh-tips__list li::before {
   content: "";
   position: absolute;
   left: 2px;
   top: 5px;
   width: 8px;
   height: 8px;
-  background: var(--ph-teal);
+  background: var(--bh-teal);
   transform: rotate(45deg);
 }
 
 /* FAQ — same shape as Tips, sits under Your Vault. */
-.ph-faq {
-  border: 1.5px solid var(--ph-border);
+.bh-faq {
+  border: 1.5px solid var(--bh-border);
   border-radius: 12px;
   background: #fff;
   padding: 14px 18px;
@@ -458,34 +460,34 @@
    Recently Generated, My HAUS Style, and this FAQ section, so all four
    right-column cards read as one consistent family instead of several
    near-identical hand-rolled headers. */
-.ph-faq__header {
+.bh-faq__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
   margin-bottom: 10px;
 }
-.ph-faq__header .ph-saved__title {
+.bh-faq__header .bh-saved__title {
   margin: 0;
 }
-.ph-faq__title {
+.bh-faq__title {
   display: flex;
   align-items: center;
   gap: 8px;
   font-size: 15px;
   margin: 0;
-  color: var(--ph-espresso);
+  color: var(--bh-espresso);
 }
-.ph-faq__title .ph-icon {
-  color: var(--ph-gold);
+.bh-faq__title .bh-icon {
+  color: var(--bh-gold);
 }
-.ph-faq__toggle {
+.bh-faq__toggle {
   display: flex;
   align-items: center;
   gap: 6px;
   border: none;
   background: none;
-  color: var(--ph-teal);
+  color: var(--bh-teal);
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
@@ -493,289 +495,289 @@
   flex-shrink: 0;
   white-space: nowrap;
 }
-.ph-faq__list {
+.bh-faq__list {
   margin-top: 12px;
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
-.ph-faq__item {
+.bh-faq__item {
   padding-top: 12px;
-  border-top: 1px solid var(--ph-border);
+  border-top: 1px solid var(--bh-border);
 }
-.ph-faq__item:first-child {
+.bh-faq__item:first-child {
   padding-top: 0;
   border-top: none;
 }
-.ph-faq__question {
+.bh-faq__question {
   margin: 0 0 4px;
   font-size: 13px;
   font-weight: 700;
-  color: var(--ph-espresso);
+  color: var(--bh-espresso);
 }
-.ph-faq__answer {
+.bh-faq__answer {
   margin: 0;
   font-size: 13px;
-  color: var(--ph-charcoal);
+  color: var(--bh-charcoal);
   line-height: 1.5;
 }
 
 /* Divider between the process stepper / tips / mode-select sections at the
    top of the shell. */
-.ph-section-divider {
+.bh-section-divider {
   border: none;
-  border-top: 1px solid var(--ph-border);
+  border-top: 1px solid var(--bh-border);
   margin: 24px 0;
 }
-.ph-mode-select-label {
+.bh-mode-select-label {
   font-size: 13px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--ph-teal);
+  color: var(--bh-teal);
   margin: 0 0 12px;
 }
 
 /* Layout: fields left, sticky preview right on desktop */
-.ph-body {
+.bh-body {
   display: grid;
   grid-template-columns: 1fr;
   gap: 24px;
 }
 @media (min-width: 900px) {
-  .ph-body {
+  .bh-body {
     grid-template-columns: 2fr 1fr;
     align-items: start;
   }
-  .ph-body__preview {
+  .bh-body__preview {
     position: sticky;
     top: 24px;
   }
 }
 
 /* Base type toggle */
-.ph-basetype-toggle {
+.bh-basetype-toggle {
   display: flex;
   gap: 8px;
   margin-bottom: 20px;
 }
-.ph-basetype-toggle__btn {
+.bh-basetype-toggle__btn {
   flex: 1;
   display: flex;
   align-items: center;
   gap: 10px;
   padding: 12px 16px;
-  border: 2px solid var(--ph-charcoal);
-  background: var(--ph-cream);
-  color: var(--ph-charcoal);
+  border: 2px solid var(--bh-charcoal);
+  background: var(--bh-cream);
+  color: var(--bh-charcoal);
   border-radius: 10px;
   cursor: pointer;
   text-align: left;
 }
-.ph-basetype-toggle__icon {
+.bh-basetype-toggle__icon {
   width: 22px;
   height: 22px;
   flex-shrink: 0;
 }
-.ph-basetype-toggle__text {
+.bh-basetype-toggle__text {
   display: flex;
   flex-direction: column;
   line-height: 1.3;
 }
-.ph-basetype-toggle__title {
+.bh-basetype-toggle__title {
   font-weight: 700;
   font-size: 14px;
 }
-.ph-basetype-toggle__subtitle {
+.bh-basetype-toggle__subtitle {
   font-size: 12px;
   opacity: 0.75;
 }
-.ph-basetype-toggle__btn.is-active {
-  background: var(--ph-black);
-  color: var(--ph-gold);
-  border-color: var(--ph-teal);
+.bh-basetype-toggle__btn.is-active {
+  background: var(--bh-black);
+  color: var(--bh-gold);
+  border-color: var(--bh-teal);
 }
-.ph-basetype-toggle__btn.is-active .ph-basetype-toggle__icon {
-  color: var(--ph-teal);
+.bh-basetype-toggle__btn.is-active .bh-basetype-toggle__icon {
+  color: var(--bh-teal);
 }
 
 /* Pill toggle — lighter-weight sibling of the basetype toggle above, for
    picking among several options (e.g. Transportation's category row)
    instead of just two. */
-.ph-pill-toggle {
+.bh-pill-toggle {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 16px;
 }
-.ph-pill-toggle__btn {
+.bh-pill-toggle__btn {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   padding: 8px 14px;
-  border: 2px solid var(--ph-charcoal);
-  background: var(--ph-cream);
-  color: var(--ph-charcoal);
+  border: 2px solid var(--bh-charcoal);
+  background: var(--bh-cream);
+  color: var(--bh-charcoal);
   border-radius: 999px;
   font-weight: 600;
   font-size: 13px;
   cursor: pointer;
 }
-.ph-pill-toggle__icon {
+.bh-pill-toggle__icon {
   width: 16px;
   height: 16px;
   flex-shrink: 0;
 }
-.ph-pill-toggle__btn.is-active {
-  background: var(--ph-black);
-  color: var(--ph-gold);
-  border-color: var(--ph-teal);
+.bh-pill-toggle__btn.is-active {
+  background: var(--bh-black);
+  color: var(--bh-gold);
+  border-color: var(--bh-teal);
 }
-.ph-pill-toggle__btn.is-active .ph-pill-toggle__icon {
-  color: var(--ph-teal);
+.bh-pill-toggle__btn.is-active .bh-pill-toggle__icon {
+  color: var(--bh-teal);
 }
 
 /* Starter Presets — clickable card row at the top of a mode's panel */
-.ph-preset-row {
+.bh-preset-row {
   margin-bottom: 20px;
 }
-.ph-preset-row__label {
+.bh-preset-row__label {
   display: flex;
   align-items: center;
   gap: 6px;
   margin: 0 0 8px;
   font-size: 13px;
   font-weight: 700;
-  color: var(--ph-teal);
+  color: var(--bh-teal);
 }
-.ph-preset-row__cards {
+.bh-preset-row__cards {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
 }
-.ph-preset-card {
+.bh-preset-card {
   display: flex;
   flex-direction: column;
   gap: 4px;
   width: 200px;
   padding: 12px 14px;
-  border: 1.5px solid var(--ph-border);
+  border: 1.5px solid var(--bh-border);
   border-radius: 12px;
-  background: var(--ph-cream);
+  background: var(--bh-cream);
   text-align: left;
   cursor: pointer;
 }
-.ph-preset-card:hover {
-  border-color: var(--ph-gold-on-light);
+.bh-preset-card:hover {
+  border-color: var(--bh-gold-on-light);
 }
-.ph-preset-card__name {
+.bh-preset-card__name {
   font-weight: 700;
   font-size: 13px;
-  color: var(--ph-espresso);
+  color: var(--bh-espresso);
 }
-.ph-preset-card__description {
+.bh-preset-card__description {
   font-size: 12px;
-  color: var(--ph-charcoal);
+  color: var(--bh-charcoal);
   opacity: 0.8;
   line-height: 1.35;
 }
 
 /* Couples Mode */
-.ph-btn--swap {
-  background: var(--ph-teal);
-  color: var(--ph-cream);
+.bh-btn--swap {
+  background: var(--bh-teal);
+  color: var(--bh-cream);
   margin-bottom: 20px;
 }
-.ph-couples__people {
+.bh-couples__people {
   display: grid;
   grid-template-columns: 1fr;
   gap: 20px;
   margin-top: 20px;
 }
 @media (min-width: 700px) {
-  .ph-couples__people {
+  .bh-couples__people {
     grid-template-columns: 1fr 1fr;
   }
 }
-.ph-panel--person {
-  border: 1px solid var(--ph-border);
+.bh-panel--person {
+  border: 1px solid var(--bh-border);
   border-radius: 12px;
   padding: 16px;
   background: #fff;
   margin-bottom: 14px;
 }
-.ph-panel__person-slots {
+.bh-panel__person-slots {
   margin-bottom: 20px;
 }
-.ph-person__title {
+.bh-person__title {
   font-size: 16px;
   margin: 0 0 12px;
-  color: var(--ph-espresso);
+  color: var(--bh-espresso);
 }
 
 /* Field groups */
-.ph-field-group {
-  border: 1px solid var(--ph-border);
+.bh-field-group {
+  border: 1px solid var(--bh-border);
   border-radius: 10px;
   padding: 16px;
   margin-bottom: 16px;
   background: #fff;
 }
-.ph-field-group__title {
+.bh-field-group__title {
   display: flex;
   align-items: center;
   gap: 6px;
   font-size: 15px;
   font-weight: 700;
-  color: var(--ph-espresso);
+  color: var(--bh-espresso);
   padding: 0 6px;
 }
-.ph-field-group__title .ph-icon {
-  color: var(--ph-teal);
+.bh-field-group__title .bh-icon {
+  color: var(--bh-teal);
 }
-.ph-field-group__subtitle {
+.bh-field-group__subtitle {
   margin: 4px 6px 0;
   font-size: 12px;
-  color: var(--ph-teal);
+  color: var(--bh-teal);
 }
-.ph-field-group__fields {
+.bh-field-group__fields {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 14px;
   margin-top: 8px;
 }
-.ph-imagery__category-label {
+.bh-imagery__category-label {
   grid-column: 1 / -1;
   margin: 10px 0 0;
   font-weight: 700;
   font-size: 13px;
-  color: var(--ph-black);
+  color: var(--bh-black);
 }
-.ph-imagery__category-label:first-child {
+.bh-imagery__category-label:first-child {
   margin-top: 0;
 }
-.ph-field {
+.bh-field {
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
-.ph-field__label-row {
+.bh-field__label-row {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
   gap: 8px;
 }
-.ph-field__label {
+.bh-field__label {
   font-size: 13px;
   font-weight: 600;
-  color: var(--ph-charcoal);
+  color: var(--bh-charcoal);
 }
-.ph-field__include {
+.bh-field__include {
   display: flex;
   align-items: center;
   gap: 4px;
   font-size: 11px;
-  color: var(--ph-teal);
+  color: var(--bh-teal);
   white-space: nowrap;
 }
 /* The live theme resets native checkbox appearance entirely and paints
@@ -784,122 +786,122 @@
    though accent-color is the "normal" way to do this. Both are set so
    this still looks right in a plain/unthemed context (e.g. our own dev
    harness) where the theme's override isn't present at all. */
-.ph-field__checkbox,
-.ph-subpanel__toggle {
-  accent-color: var(--ph-teal);
-  color: var(--ph-teal);
+.bh-field__checkbox,
+.bh-subpanel__toggle {
+  accent-color: var(--bh-teal);
+  color: var(--bh-teal);
   /* Default browser checkbox renders ~13px — too small a target to
      reliably tap/click. */
   width: 18px;
   height: 18px;
   flex-shrink: 0;
 }
-.ph-field__include,
-.ph-subpanel__header {
+.bh-field__include,
+.bh-subpanel__header {
   /* Padding around the whole label (not just the checkbox glyph) grows
      the actual clickable/tappable area well past 18px without changing
      the visual checkbox size. */
   padding: 4px 0;
 }
-.ph-field__select,
-.ph-field__custom {
+.bh-field__select,
+.bh-field__custom {
   padding: 8px 14px;
-  border: 1px solid var(--ph-border);
+  border: 1px solid var(--bh-border);
   border-radius: 6px;
   font-size: 14px;
-  background: var(--ph-cream);
-  color: var(--ph-black);
+  background: var(--bh-cream);
+  color: var(--bh-black);
 }
 /* Dropdowns specifically go full pill shape (matches the mockup); free-text
    inputs stay a normal rounded rect — a fully pill-shaped text box looks
    odd once someone's typed a sentence into it. */
-.ph-field__select {
+.bh-field__select {
   border-radius: 999px;
 }
-.ph-color-swatch-row {
+.bh-color-swatch-row {
   display: flex;
   align-items: center;
   gap: 8px;
 }
-.ph-color-swatch-row .ph-field__select {
+.bh-color-swatch-row .bh-field__select {
   flex: 1;
 }
-.ph-color-swatch {
+.bh-color-swatch {
   width: 22px;
   height: 22px;
   min-width: 22px;
   border-radius: 999px;
-  border: 1px solid var(--ph-border);
+  border: 1px solid var(--bh-border);
   flex-shrink: 0;
 }
-.ph-color-swatch--empty {
-  background: repeating-linear-gradient(45deg, var(--ph-border), var(--ph-border) 2px, transparent 2px, transparent 5px);
+.bh-color-swatch--empty {
+  background: repeating-linear-gradient(45deg, var(--bh-border), var(--bh-border) 2px, transparent 2px, transparent 5px);
 }
-.ph-field__select:focus,
-.ph-field__custom:focus {
-  outline: 2px solid var(--ph-gold);
+.bh-field__select:focus,
+.bh-field__custom:focus {
+  outline: 2px solid var(--bh-gold);
 }
-.ph-field__quantity-label {
+.bh-field__quantity-label {
   display: flex;
   align-items: center;
   justify-content: space-between;
   font-size: 12px;
-  color: var(--ph-teal);
+  color: var(--bh-teal);
   margin-top: 2px;
 }
-.ph-field__quantity {
+.bh-field__quantity {
   width: 64px;
   padding: 6px;
-  border: 1px solid var(--ph-border);
+  border: 1px solid var(--bh-border);
   border-radius: 6px;
   font-size: 13px;
-  background: var(--ph-cream);
+  background: var(--bh-cream);
 }
-.ph-field__freetext {
+.bh-field__freetext {
   resize: vertical;
   font-family: inherit;
 }
 
 /* Opt-in sub-panels (Character's Companion, Text's Accent Word/Phrase) */
-.ph-subpanel {
-  border: 1px dashed var(--ph-border);
+.bh-subpanel {
+  border: 1px dashed var(--bh-border);
   border-radius: 10px;
   padding: 12px 16px;
   margin-bottom: 16px;
 }
-/* Muted vs. .ph-field-group__title's bold espresso — these are optional
+/* Muted vs. .bh-field-group__title's bold espresso — these are optional
    add-ons (Accent Word/Phrase, Add a Companion, etc.), so they shouldn't
    visually outcompete the primary field groups above them. */
-.ph-subpanel__header {
+.bh-subpanel__header {
   display: flex;
   align-items: center;
   gap: 8px;
   font-weight: 600;
-  color: var(--ph-espresso);
+  color: var(--bh-espresso);
   cursor: pointer;
 }
 
 /* Reference Mode's upload box — bolder teal dashed border + white card
    background (like the old Live-Link Mascot box), split into an image
    half and a description half. */
-.ph-reference-upload {
-  border: 2px dashed var(--ph-teal);
+.bh-reference-upload {
+  border: 2px dashed var(--bh-teal);
   border-radius: 10px;
   padding: 16px;
   margin-bottom: 16px;
   background: #fff;
 }
-.ph-reference-upload__disclaimer {
+.bh-reference-upload__disclaimer {
   margin: 6px 0 12px;
   font-size: 12px;
-  color: var(--ph-teal);
+  color: var(--bh-teal);
 }
-.ph-reference-upload__hint {
+.bh-reference-upload__hint {
   margin: 0 0 6px;
   font-size: 12px;
-  color: var(--ph-teal);
+  color: var(--bh-teal);
 }
-.ph-reference-upload__columns {
+.bh-reference-upload__columns {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
@@ -910,92 +912,92 @@
   align-items: start;
 }
 @media (max-width: 640px) {
-  .ph-reference-upload__columns {
+  .bh-reference-upload__columns {
     grid-template-columns: 1fr;
   }
 }
-.ph-reference-upload__file-input {
+.bh-reference-upload__file-input {
   display: none;
 }
-.ph-reference-upload__image {
+.bh-reference-upload__image {
   display: flex;
   flex-direction: column;
 }
-.ph-reference-upload__dropzone {
+.bh-reference-upload__dropzone {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 8px;
   min-height: 140px;
-  border: 1px dashed var(--ph-border);
+  border: 1px dashed var(--bh-border);
   border-radius: 10px;
   padding: 20px;
   text-align: center;
   font-size: 13px;
-  color: var(--ph-espresso);
+  color: var(--bh-espresso);
   cursor: pointer;
   background: #fff;
 }
-.ph-reference-upload__dropzone.is-dragover {
-  border-color: var(--ph-teal);
-  color: var(--ph-teal);
+.bh-reference-upload__dropzone.is-dragover {
+  border-color: var(--bh-teal);
+  color: var(--bh-teal);
   background: rgba(13, 115, 119, 0.06);
 }
-.ph-reference-upload__preview {
+.bh-reference-upload__preview {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 8px;
 }
-.ph-reference-upload__preview-img {
+.bh-reference-upload__preview-img {
   width: 100%;
   max-height: 200px;
   object-fit: contain;
   border-radius: 10px;
-  border: 1px solid var(--ph-border);
+  border: 1px solid var(--bh-border);
   background: #fff;
 }
-.ph-reference-upload__description .ph-field__freetext {
+.bh-reference-upload__description .bh-field__freetext {
   min-height: 120px;
 }
-.ph-reference-upload__description .ph-btn--delete {
+.bh-reference-upload__description .bh-btn--delete {
   margin-top: 10px;
 }
 
 /* Creative Brief (was "Your Selections") — curated summary by default,
    sits above the prompt preview */
-.ph-selections {
+.bh-selections {
   background: #fff;
-  border: 1px solid var(--ph-border);
+  border: 1px solid var(--bh-border);
   border-radius: 12px;
   padding: 16px;
   margin-bottom: 20px;
 }
-.ph-selections__header {
+.bh-selections__header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   gap: 8px;
 }
-.ph-selections__title {
+.bh-selections__title {
   font-size: 18px;
   margin: 0;
-  color: var(--ph-espresso);
+  color: var(--bh-espresso);
   display: flex;
   align-items: center;
   gap: 8px;
 }
-.ph-selections__title .ph-icon {
-  color: var(--ph-gold);
+.bh-selections__title .bh-icon {
+  color: var(--bh-gold);
 }
-.ph-selections__subtitle {
+.bh-selections__subtitle {
   margin: 2px 0 12px;
   font-size: 12px;
-  color: var(--ph-teal);
+  color: var(--bh-teal);
 }
-.ph-selections__eye-btn {
-  background: var(--ph-teal);
+.bh-selections__eye-btn {
+  background: var(--bh-teal);
   border: none;
   border-radius: 999px;
   display: flex;
@@ -1009,134 +1011,134 @@
   flex-shrink: 0;
   white-space: nowrap;
 }
-.ph-selections__eye-btn:hover {
-  background: var(--ph-charcoal);
+.bh-selections__eye-btn:hover {
+  background: var(--bh-charcoal);
 }
-.ph-selections__brief {
+.bh-selections__brief {
   display: flex;
   flex-direction: column;
   gap: 8px;
   margin-top: 4px;
 }
-.ph-selections__brief-row {
+.bh-selections__brief-row {
   display: flex;
   align-items: center;
   gap: 8px;
   font-size: 13px;
 }
-.ph-selections__brief-icon {
-  color: var(--ph-gold);
+.bh-selections__brief-icon {
+  color: var(--bh-gold);
 }
-.ph-selections__brief-label {
+.bh-selections__brief-label {
   font-weight: 700;
-  color: var(--ph-charcoal);
+  color: var(--bh-charcoal);
   min-width: 84px;
 }
-.ph-selections__brief-value {
-  color: var(--ph-espresso);
+.bh-selections__brief-value {
+  color: var(--bh-espresso);
   text-transform: capitalize;
 }
-.ph-selections__scroll {
+.bh-selections__scroll {
   max-height: 340px;
   overflow-y: auto;
   padding-right: 4px;
 }
-.ph-selections__group-title {
+.bh-selections__group-title {
   margin: 0 0 6px;
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--ph-gold-on-light);
+  color: var(--bh-gold-on-light);
 }
-.ph-selections__item {
+.bh-selections__item {
   font-size: 13px;
   padding: 3px 0;
 }
-.ph-selections__item-label {
+.bh-selections__item-label {
   font-weight: 700;
-  color: var(--ph-charcoal);
+  color: var(--bh-charcoal);
 }
-.ph-selections__item-value {
-  color: var(--ph-espresso);
+.bh-selections__item-value {
+  color: var(--bh-espresso);
 }
-.ph-selections__divider {
+.bh-selections__divider {
   border: none;
-  border-top: 1px solid var(--ph-border);
+  border-top: 1px solid var(--bh-border);
   margin: 10px 0;
 }
-.ph-selections__empty {
+.bh-selections__empty {
   font-style: italic;
-  color: var(--ph-espresso);
+  color: var(--bh-espresso);
   font-size: 13px;
   margin: 0;
 }
 
 /* Live preview — "Your Prompt, Built Live" */
-.ph-preview {
-  background: var(--ph-black);
-  color: var(--ph-cream);
+.bh-preview {
+  background: var(--bh-black);
+  color: var(--bh-cream);
   border-radius: 12px;
   padding: 18px;
 }
-.ph-preview__title {
+.bh-preview__title {
   font-size: 18px;
   margin: 0 0 4px;
-  color: var(--ph-gold);
+  color: var(--bh-gold);
   display: flex;
   align-items: center;
   gap: 8px;
 }
-.ph-preview__subtitle {
+.bh-preview__subtitle {
   margin: 0 0 12px;
   font-size: 12px;
-  color: var(--ph-cream);
+  color: var(--bh-cream);
   opacity: 0.7;
 }
-/* Matches .ph-field__select/.ph-field__custom's look (the Style DNA bar's
+/* Matches .bh-field__select/.bh-field__custom's look (the Style DNA bar's
    "t-shirt design"-style dropdowns) rather than standing out as its own
    distinct treatment. */
-.ph-preview__text {
+.bh-preview__text {
   width: 100%;
   min-height: 160px;
-  background: var(--ph-cream);
-  color: var(--ph-black);
+  background: var(--bh-cream);
+  color: var(--bh-black);
   font-family: inherit;
-  border: 1px solid var(--ph-border);
+  border: 1px solid var(--bh-border);
   border-radius: 6px;
   padding: 8px;
   font-size: 14px;
   resize: vertical;
 }
-.ph-preview__text:focus {
-  outline: 2px solid var(--ph-gold);
+.bh-preview__text:focus {
+  outline: 2px solid var(--bh-gold);
 }
-.ph-preview__actions {
+.bh-preview__actions {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
   margin-top: 12px;
 }
-.ph-preview__export-row {
+.bh-preview__export-row {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 8px;
   margin-top: 8px;
 }
 @media (max-width: 480px) {
-  .ph-preview__export-row {
+  .bh-preview__export-row {
     grid-template-columns: 1fr 1fr;
   }
 }
-.ph-btn--export {
+.bh-btn--export {
   background: transparent;
-  border: 1px solid var(--ph-cream);
-  color: var(--ph-cream);
+  border: 1px solid var(--bh-cream);
+  color: var(--bh-cream);
   padding: 8px 10px;
   font-size: 12px;
 }
 
-.ph-btn {
+.bh-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1151,74 +1153,74 @@
 /* Consistent visible focus ring for every button, pill toggle, and the
    keyboard-operable upload dropzone — same gold used for select/input
    focus, rather than relying on each browser's own inconsistent default. */
-.ph-btn:focus-visible,
-.ph-styledna__yesno-btn:focus-visible,
-.ph-preset-card:focus-visible,
-.ph-tabs__btn:focus-visible,
-.ph-reference-upload__dropzone:focus-visible {
-  outline: 2px solid var(--ph-gold);
+.bh-btn:focus-visible,
+.bh-styledna__yesno-btn:focus-visible,
+.bh-preset-card:focus-visible,
+.bh-tabs__btn:focus-visible,
+.bh-reference-upload__dropzone:focus-visible {
+  outline: 2px solid var(--bh-gold);
   outline-offset: 2px;
 }
-.ph-btn--copy {
-  background: var(--ph-gold);
-  color: var(--ph-black);
+.bh-btn--copy {
+  background: var(--bh-gold);
+  color: var(--bh-black);
 }
-.ph-btn--randomize {
-  background: var(--ph-espresso);
-  color: var(--ph-cream);
+.bh-btn--randomize {
+  background: var(--bh-espresso);
+  color: var(--bh-cream);
 }
-.ph-btn--reset {
+.bh-btn--reset {
   background: transparent;
-  border: 1px solid var(--ph-cream);
-  color: var(--ph-cream);
+  border: 1px solid var(--bh-cream);
+  color: var(--bh-cream);
 }
 /* The one teal/white accent among the 4 buttons, per instruction —
    Randomize moved to espresso so teal isn't duplicated across two buttons. */
-.ph-btn--save {
-  background: var(--ph-teal);
+.bh-btn--save {
+  background: var(--bh-teal);
   color: #fff;
 }
-.ph-btn:disabled {
+.bh-btn:disabled {
   opacity: 0.4;
   cursor: not-allowed;
 }
-.ph-btn--small {
+.bh-btn--small {
   padding: 6px 12px;
   font-size: 12px;
 }
-.ph-companion__controls {
+.bh-companion__controls {
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
   margin: 4px 0 12px;
 }
 /* Outlined pill to match the Remove button's visual weight — plain
-   .ph-btn alone has no border/background of its own, so it read as a
+   .bh-btn alone has no border/background of its own, so it read as a
    bare, disconnected control next to Remove's clearly-defined pill. */
-.ph-btn--add {
-  background: var(--ph-cream);
-  border: 2px solid var(--ph-teal);
-  color: var(--ph-teal);
+.bh-btn--add {
+  background: var(--bh-cream);
+  border: 2px solid var(--bh-teal);
+  color: var(--bh-teal);
 }
-.ph-companion__slot-remove {
+.bh-companion__slot-remove {
   margin-top: 6px;
 }
-/* Used inside light cards (Saved Prompts), unlike .ph-btn--reset which is
+/* Used inside light cards (Saved Prompts), unlike .bh-btn--reset which is
    styled cream-on-transparent for the dark preview panel. */
-.ph-btn--delete {
+.bh-btn--delete {
   background: transparent;
-  border: 1px solid var(--ph-espresso);
-  color: var(--ph-espresso);
+  border: 1px solid var(--bh-espresso);
+  color: var(--bh-espresso);
 }
-.ph-preview__save-feedback {
+.bh-preview__save-feedback {
   margin: 10px 0 0;
   font-size: 13px;
   font-weight: 600;
 }
-.ph-preview__save-feedback.is-success {
-  color: var(--ph-gold);
+.bh-preview__save-feedback.is-success {
+  color: var(--bh-gold);
 }
-.ph-preview__save-feedback.is-error {
+.bh-preview__save-feedback.is-error {
   color: #e58a8a;
 }
 /* Quality Nudge — deliberately louder than the dark preview box around
@@ -1226,7 +1228,7 @@
    site's own palette, so it actually reads as a heads-up worth noticing
    instead of just more ambient styling. #B91C1C on white is 6.47:1,
    comfortably past WCAG AA's 4.5:1 for normal text. */
-.ph-preview__nudge {
+.bh-preview__nudge {
   display: flex;
   align-items: flex-start;
   gap: 8px;
@@ -1240,296 +1242,296 @@
   border: 1px solid #B91C1C;
   border-radius: 6px;
 }
-.ph-preview__nudge-icon {
+.bh-preview__nudge-icon {
   flex-shrink: 0;
   color: #B91C1C;
   margin-top: 1px;
 }
 
 /* Saved Prompts — below the Live Prompt Preview */
-.ph-saved {
+.bh-saved {
   background: #fff;
-  border: 1px solid var(--ph-border);
+  border: 1px solid var(--bh-border);
   border-radius: 12px;
   padding: 16px;
   margin-top: 20px;
 }
-.ph-saved__title {
+.bh-saved__title {
   font-size: 18px;
   margin: 0 0 10px;
-  color: var(--ph-espresso);
+  color: var(--bh-espresso);
   display: flex;
   align-items: center;
   gap: 8px;
 }
-.ph-saved__title .ph-icon {
-  color: var(--ph-gold);
+.bh-saved__title .bh-icon {
+  color: var(--bh-gold);
 }
-.ph-recent__clear-row {
+.bh-recent__clear-row {
   display: flex;
   justify-content: flex-end;
   margin-bottom: 8px;
 }
-.ph-saved__empty {
+.bh-saved__empty {
   font-style: italic;
-  color: var(--ph-espresso);
+  color: var(--bh-espresso);
   font-size: 13px;
   margin: 0;
 }
-.ph-saved__item {
-  border: 1px solid var(--ph-border);
+.bh-saved__item {
+  border: 1px solid var(--bh-border);
   border-radius: 8px;
   padding: 10px 12px;
   margin-bottom: 10px;
 }
-.ph-saved__item:last-child {
+.bh-saved__item:last-child {
   margin-bottom: 0;
 }
-.ph-saved__item-text {
+.bh-saved__item-text {
   margin: 0 0 8px;
   font-size: 13px;
-  color: var(--ph-charcoal);
+  color: var(--bh-charcoal);
 }
-.ph-saved__version-row {
+.bh-saved__version-row {
   display: flex;
   align-items: center;
   gap: 6px;
   margin-bottom: 8px;
 }
-.ph-saved__version-row .ph-icon {
-  color: var(--ph-gold);
+.bh-saved__version-row .bh-icon {
+  color: var(--bh-gold);
   flex-shrink: 0;
 }
-.ph-saved__version-select {
+.bh-saved__version-select {
   font-size: 12px;
   padding: 3px 6px;
-  border: 1px solid var(--ph-border);
+  border: 1px solid var(--bh-border);
   border-radius: 4px;
   background: #fff;
-  color: var(--ph-charcoal);
+  color: var(--bh-charcoal);
 }
-.ph-saved__item-meta {
+.bh-saved__item-meta {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
 }
-.ph-saved__item-tag {
+.bh-saved__item-tag {
   font-size: 11px;
-  color: var(--ph-teal);
+  color: var(--bh-teal);
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
-.ph-saved__item-actions {
+.bh-saved__item-actions {
   display: flex;
   gap: 6px;
 }
-.ph-saved__item-title-row {
+.bh-saved__item-title-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
   margin-bottom: 4px;
 }
-.ph-saved__item-title {
+.bh-saved__item-title {
   margin: 0;
   font-size: 14px;
   font-weight: 700;
-  color: var(--ph-espresso);
+  color: var(--bh-espresso);
 }
-.ph-saved__rename-btn {
+.bh-saved__rename-btn {
   background: transparent;
   border: none;
-  color: var(--ph-teal);
+  color: var(--bh-teal);
   cursor: pointer;
   padding: 2px;
   display: inline-flex;
   flex-shrink: 0;
 }
-.ph-saved__item-title-input {
+.bh-saved__item-title-input {
   flex: 1;
   font-size: 14px;
   font-weight: 700;
-  color: var(--ph-espresso);
-  border: 1px solid var(--ph-teal);
+  color: var(--bh-espresso);
+  border: 1px solid var(--bh-teal);
   border-radius: 6px;
   padding: 4px 8px;
   font-family: inherit;
 }
-.ph-btn--load {
+.bh-btn--load {
   background: transparent;
-  border: 1px solid var(--ph-teal);
-  color: var(--ph-teal);
+  border: 1px solid var(--bh-teal);
+  color: var(--bh-teal);
 }
-/* Vault-wide export row lives inside the same white .ph-saved card as
-   the per-item list — .ph-btn--export's default cream-on-transparent
+/* Vault-wide export row lives inside the same white .bh-saved card as
+   the per-item list — .bh-btn--export's default cream-on-transparent
    styling is meant for the dark preview panel, so it needs the same
-   light-card override .ph-btn--delete already gets over .ph-btn--reset. */
-.ph-saved__vault-export {
+   light-card override .bh-btn--delete already gets over .bh-btn--reset. */
+.bh-saved__vault-export {
   margin-bottom: 14px;
   padding-bottom: 14px;
-  border-bottom: 1px solid var(--ph-border);
+  border-bottom: 1px solid var(--bh-border);
 }
-.ph-saved__vault-export-label {
+.bh-saved__vault-export-label {
   display: block;
   font-size: 12px;
-  color: var(--ph-espresso);
+  color: var(--bh-espresso);
   margin-bottom: 8px;
 }
-.ph-saved__vault-export .ph-btn--export {
-  border-color: var(--ph-espresso);
-  color: var(--ph-espresso);
+.bh-saved__vault-export .bh-btn--export {
+  border-color: var(--bh-espresso);
+  color: var(--bh-espresso);
 }
 
 /* Brand Kit ("My HAUS Style") — sits in the same white card style as
    Your Vault, right below it. */
-.ph-brandkit {
+.bh-brandkit {
   background: #fff;
-  border: 1px solid var(--ph-border);
+  border: 1px solid var(--bh-border);
   border-radius: 12px;
   padding: 16px;
   margin-top: 20px;
 }
-.ph-brandkit__intro {
+.bh-brandkit__intro {
   font-size: 13px;
-  color: var(--ph-teal);
+  color: var(--bh-teal);
   margin: 0 0 14px;
 }
-.ph-brandkit__card {
-  border: 1px solid var(--ph-border);
+.bh-brandkit__card {
+  border: 1px solid var(--bh-border);
   border-radius: 10px;
   padding: 14px;
   margin-bottom: 14px;
 }
-.ph-brandkit__card.is-active {
-  border-color: var(--ph-teal);
+.bh-brandkit__card.is-active {
+  border-color: var(--bh-teal);
   border-width: 2px;
 }
-.ph-brandkit__card-actions {
+.bh-brandkit__card-actions {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
   margin-top: 8px;
 }
-.ph-brandkit__disclaimer {
+.bh-brandkit__disclaimer {
   font-size: 12px;
-  color: var(--ph-espresso);
-  background: var(--ph-cream);
+  color: var(--bh-espresso);
+  background: var(--bh-cream);
   border-radius: 8px;
   padding: 10px 12px;
   margin: 10px 0 0;
 }
-.ph-brandkit__category {
+.bh-brandkit__category {
   margin-top: 12px;
 }
-.ph-brandkit__override-label {
+.bh-brandkit__override-label {
   margin: 8px 6px 4px;
   font-size: 12px;
   font-weight: 600;
-  color: var(--ph-espresso);
+  color: var(--bh-espresso);
 }
-.ph-brandkit__new-row {
+.bh-brandkit__new-row {
   display: flex;
   gap: 8px;
   margin-top: 8px;
 }
-.ph-brandkit__new-input {
+.bh-brandkit__new-input {
   flex: 1;
   padding: 8px 14px;
-  border: 1px solid var(--ph-border);
+  border: 1px solid var(--bh-border);
   border-radius: 999px;
   font-size: 14px;
   font-family: inherit;
 }
 
 /* Logo Mode — Section A callouts (static UI text, never in the prompt) */
-.ph-logo-callout {
+.bh-logo-callout {
   display: flex;
   align-items: flex-start;
   gap: 8px;
-  background: var(--ph-cream);
-  border: 1px solid var(--ph-gold);
+  background: var(--bh-cream);
+  border: 1px solid var(--bh-gold);
   border-radius: 10px;
   padding: 10px 14px;
   margin: 0 0 16px;
   font-size: 13px;
-  color: var(--ph-espresso);
+  color: var(--bh-espresso);
   line-height: 1.5;
 }
-.ph-logo-callout .ph-icon {
-  color: var(--ph-gold);
+.bh-logo-callout .bh-icon {
+  color: var(--bh-gold);
   flex-shrink: 0;
   margin-top: 2px;
 }
-.ph-logo-symbol-only {
+.bh-logo-symbol-only {
   display: flex;
   align-items: flex-start;
   gap: 8px;
   font-size: 13px;
-  color: var(--ph-charcoal);
+  color: var(--bh-charcoal);
   margin-bottom: 10px;
   cursor: pointer;
 }
-.ph-logo-negconstraints {
+.bh-logo-negconstraints {
   display: flex;
   flex-direction: column;
   gap: 8px;
   margin-top: 8px;
 }
-.ph-logo-inline-disclaimer {
+.bh-logo-inline-disclaimer {
   font-size: 12px;
-  color: var(--ph-espresso);
-  background: var(--ph-cream);
+  color: var(--bh-espresso);
+  background: var(--bh-cream);
   border-radius: 8px;
   padding: 8px 12px;
   margin: 8px 0 0;
 }
 
-.ph-coming-soon {
+.bh-coming-soon {
   font-style: italic;
-  color: var(--ph-espresso);
+  color: var(--bh-espresso);
 }
 
 /* Locked state (sections/prompt-builder.liquid, non-purchasers) */
-.ph-locked {
-  background: var(--ph-cream);
-  color: var(--ph-black);
+.bh-locked {
+  background: var(--bh-cream);
+  color: var(--bh-black);
   max-width: 640px;
   margin: 0 auto;
   padding: 64px 24px;
   text-align: center;
 }
-.ph-locked__heading {
-  color: var(--ph-espresso);
+.bh-locked__heading {
+  color: var(--bh-espresso);
   font-size: 28px;
   margin: 0 0 12px;
 }
-.ph-locked__body {
-  color: var(--ph-charcoal);
+.bh-locked__body {
+  color: var(--bh-charcoal);
   margin-bottom: 24px;
 }
-.ph-locked__actions {
+.bh-locked__actions {
   display: flex;
   gap: 12px;
   justify-content: center;
   flex-wrap: wrap;
 }
-.ph-locked__learn-more {
-  border-color: var(--ph-charcoal);
-  color: var(--ph-charcoal);
+.bh-locked__learn-more {
+  border-color: var(--bh-charcoal);
+  color: var(--bh-charcoal);
 }
 
 /* Marketing/preview page (sections/prompt-builder-preview.liquid) */
-.ph-marketing {
-  background: var(--ph-cream);
-  color: var(--ph-black);
+.bh-marketing {
+  background: var(--bh-cream);
+  color: var(--bh-black);
   max-width: 1000px;
   margin: 0 auto;
   padding: 48px 24px 80px;
   overflow: hidden;
 }
-.ph-marketing__hero {
+.bh-marketing__hero {
   position: relative;
   text-align: center;
   margin-bottom: 40px;
@@ -1538,65 +1540,65 @@
    them behind the heading/eyebrow/subheading, pointer-events off keeps
    them out of the way of clicks), applies wherever this hero renders: the
    standalone marketing page and the gated tool page's branded header. */
-.ph-marketing__hero::before,
-.ph-marketing__hero::after {
+.bh-marketing__hero::before,
+.bh-marketing__hero::after {
   content: "";
   position: absolute;
   z-index: -1;
   border-radius: 50%;
   pointer-events: none;
 }
-.ph-marketing__hero::before {
+.bh-marketing__hero::before {
   width: 240px;
   height: 240px;
   top: -20px;
   left: -40px;
   background: radial-gradient(circle, rgba(201, 168, 76, 0.3), transparent 70%);
 }
-.ph-marketing__hero::after {
+.bh-marketing__hero::after {
   width: 280px;
   height: 280px;
   top: -30px;
   right: -60px;
   background: radial-gradient(circle, rgba(13, 115, 119, 0.24), transparent 70%);
 }
-.ph-marketing__eyebrow {
-  color: var(--ph-gold-on-light);
+.bh-marketing__eyebrow {
+  color: var(--bh-gold-on-light);
   text-transform: uppercase;
   letter-spacing: 0.08em;
   font-size: 13px;
   font-weight: 700;
   margin: 0 0 8px;
 }
-.ph-marketing__heading {
-  color: var(--ph-black);
+.bh-marketing__heading {
+  color: var(--bh-black);
   font-size: 32px;
   margin: 0 0 16px;
 }
-.ph-heading-accent {
-  color: var(--ph-gold-on-light);
+.bh-heading-accent {
+  color: var(--bh-gold-on-light);
 }
-.ph-marketing__subheading {
-  color: var(--ph-charcoal);
+.bh-marketing__subheading {
+  color: var(--bh-charcoal);
   font-size: 17px;
   max-width: 640px;
   margin: 0 auto 24px;
 }
-.ph-marketing__cta {
+.bh-marketing__cta {
   display: inline-block;
 }
-.ph-marketing__video {
+.bh-marketing__video {
   margin-bottom: 48px;
 }
-.ph-marketing__video-embed {
+.bh-marketing__video-embed {
   position: relative;
   width: 100%;
   padding-top: 56.25%;
   border-radius: 12px;
   overflow: hidden;
-  background: var(--ph-black);
+  background: var(--bh-black);
 }
-.ph-marketing__video-embed iframe {
+.bh-marketing__video-embed iframe {
   position: absolute;
   top: 0;
   left: 0;
@@ -1604,44 +1606,44 @@
   height: 100%;
   border: 0;
 }
-.ph-marketing__video-placeholder {
+.bh-marketing__video-placeholder {
   display: flex;
   align-items: center;
   justify-content: center;
   height: 300px;
   border-radius: 12px;
-  background: var(--ph-charcoal);
-  color: var(--ph-cream);
+  background: var(--bh-charcoal);
+  color: var(--bh-cream);
   font-style: italic;
 }
-.ph-marketing__features {
+.bh-marketing__features {
   display: grid;
   grid-template-columns: 1fr;
   gap: 20px;
   margin-bottom: 48px;
 }
 @media (min-width: 700px) {
-  .ph-marketing__features {
+  .bh-marketing__features {
     grid-template-columns: 1fr 1fr;
   }
 }
-.ph-marketing__feature {
-  border: 1px solid var(--ph-border);
+.bh-marketing__feature {
+  border: 1px solid var(--bh-border);
   border-radius: 12px;
   padding: 20px;
   background: #fff;
 }
-.ph-marketing__feature h3 {
-  color: var(--ph-espresso);
+.bh-marketing__feature h3 {
+  color: var(--bh-espresso);
   font-size: 17px;
   margin: 0 0 8px;
 }
-.ph-marketing__feature p {
-  color: var(--ph-charcoal);
+.bh-marketing__feature p {
+  color: var(--bh-charcoal);
   margin: 0;
   font-size: 14px;
 }
-.ph-marketing__footer-cta {
+.bh-marketing__footer-cta {
   text-align: center;
 }
 
@@ -1649,15 +1651,15 @@
    loading a Vault/Recent item saved under an older version of the tool
    whose defensive merge still couldn't reconcile every field) — see the
    try/catch around renderAppContent() in prompt-builder-ui.js. */
-.ph-render-error {
+.bh-render-error {
   max-width: 480px;
   margin: 40px auto;
   padding: 20px;
   background: #fff;
-  border: 1px solid var(--ph-border);
+  border: 1px solid var(--bh-border);
   border-radius: 12px;
   text-align: center;
-  color: var(--ph-espresso);
+  color: var(--bh-espresso);
   font-size: 14px;
   line-height: 1.5;
 }
@@ -1665,51 +1667,109 @@
 /* Collection Builder — a pure aggregation view, not a field-building
    mode, so its panel is just a checklist rather than the usual dense
    field groups. */
-.ph-collection__checklist {
+.bh-collection__checklist {
   display: flex;
   flex-direction: column;
   gap: 10px;
   margin-top: 12px;
 }
-.ph-collection__checklist-item {
+.bh-collection__checklist-item {
   display: flex;
   align-items: center;
   gap: 8px;
   padding: 10px 12px;
   background: #fff;
-  border: 1px solid var(--ph-border);
+  border: 1px solid var(--bh-border);
   border-radius: 8px;
   cursor: pointer;
   font-size: 14px;
-  color: var(--ph-charcoal);
+  color: var(--bh-charcoal);
 }
-.ph-collection__checklist-item .ph-icon {
-  color: var(--ph-gold);
+.bh-collection__checklist-item .bh-icon {
+  color: var(--bh-gold);
 }
-.ph-collection__item {
+.bh-collection__item {
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 10px;
   padding: 14px;
   margin-bottom: 14px;
 }
-.ph-collection__item:last-child {
+.bh-collection__item:last-child {
   margin-bottom: 0;
 }
-.ph-collection__item--combined {
-  border-color: var(--ph-gold);
+.bh-collection__item--combined {
+  border-color: var(--bh-gold);
   background: rgba(212, 175, 55, 0.12);
 }
-.ph-collection__item-title {
+.bh-collection__item-title {
   display: flex;
   align-items: center;
   gap: 8px;
   margin: 0 0 10px;
   font-size: 15px;
-  color: var(--ph-gold);
+  color: var(--bh-gold);
 }
-.ph-collection__item-actions {
+.bh-collection__item-actions {
   display: flex;
   gap: 10px;
   margin-top: 10px;
+}
+
+/* Brand DNA Assessment (Founder Interview) */
+.bh-founder-interview {
+  background: #fff;
+  border: 1px solid var(--bh-border);
+  border-radius: 12px;
+  padding: 28px;
+  max-width: 640px;
+  margin: 0 auto;
+}
+.bh-founder-interview--intro,
+.bh-founder-interview--results {
+  text-align: left;
+}
+.bh-founder-interview__progress-track {
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(46, 42, 38, 0.1);
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+.bh-founder-interview__progress-fill {
+  height: 100%;
+  background: var(--bh-espresso);
+  transition: width 0.2s ease;
+}
+.bh-founder-interview__question {
+  font-size: 20px;
+  line-height: 1.4;
+  margin: 4px 0 20px;
+  color: var(--bh-charcoal);
+}
+.bh-founder-interview__options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.bh-founder-interview__option {
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+}
+.bh-founder-interview__profile-name {
+  font-size: 26px;
+  color: var(--bh-espresso);
+  margin: 4px 0 6px;
+}
+.bh-founder-interview__result-row {
+  margin: 12px 0;
+}
+.bh-founder-interview__mission {
+  font-style: italic;
+  padding: 12px 16px;
+  background: rgba(46, 42, 38, 0.04);
+  border-left: 3px solid var(--bh-espresso);
+  border-radius: 4px;
 }

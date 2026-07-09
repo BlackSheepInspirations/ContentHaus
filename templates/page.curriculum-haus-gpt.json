@@ -1,0 +1,18 @@
+{
+  "sections": {
+    "main": {
+      "type": "gpt-access",
+      "settings": {
+        "eyebrow": "Black Sheep Creations & Inspirations",
+        "heading": "The AI Creator's Curriculum Haus",
+        "subheading": "Build your course, curriculum, and lesson content with adult-learning-informed AI guidance.",
+        "access_tag": "curriculum-haus-access",
+        "locked_heading": "Unlock The AI Creator's Curriculum Haus",
+        "locked_body": "<p>Get instant access to your Curriculum Haus Custom GPT — build course outlines, lesson plans, and learning content grounded in adult learning principles.</p>",
+        "gpt_button_label": "Open Your Curriculum Haus GPT",
+        "instructions": "<p>Click below to open your Curriculum Haus GPT in ChatGPT. Bookmark this page — you can come back here anytime to relaunch it.</p>"
+      }
+    }
+  },
+  "order": ["main"]
+}

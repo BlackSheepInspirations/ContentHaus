@@ -1,24 +1,19 @@
 /**
- * The AI Creator's Prompt Haus — Saved Prompts (Favorites)
+ * The AI Creator's Marketing Haus — Saved Prompts (Favorites)
  * No dependencies on the other modules; pure localStorage wrapper.
  *
- * Client-side only, by design: a database-backed favorites system would
- * bring the same ongoing-cost problem the build plan already ruled out
- * for saves in general. localStorage is zero server cost, at the trade-off
- * that favorites live per-browser rather than syncing across a customer's
- * devices — worth disclosing, not worth solving for a capped 5-per-mode
- * feature.
- *
- * Capped at 5 per mode (Character/Text/Couples/Combined each get their own
- * 5 slots) rather than one shared pool, per explicit instruction.
+ * Direct port of Prompt Haus's own PromptHaus.favorites — same client-
+ * side-only rationale, same Version History and Recent Log mechanics —
+ * under a separate namespace and separate storage keys so the two
+ * products' saved data never mixes even if a customer has purchased both.
  */
 (function () {
   "use strict";
 
-  window.PromptHaus = window.PromptHaus || {};
-  var PromptHaus = window.PromptHaus;
+  window.MarketingHaus = window.MarketingHaus || {};
+  var MarketingHaus = window.MarketingHaus;
 
-  var STORAGE_KEY = "promptHausFavorites";
+  var STORAGE_KEY = "marketingHausFavorites";
   var MAX_PER_MODE = 5;
 
   function safeParse(json) {
@@ -48,15 +43,6 @@
     return getAll(mode).length >= MAX_PER_MODE;
   }
 
-  // Returns { ok: true } or { ok: false, reason: '...' }. Deliberately
-  // refuses rather than silently evicting the oldest favorite when full —
-  // losing a saved prompt without the shopper choosing that feels worse
-  // than making them delete one first.
-  //
-  // snapshot (optional) holds the raw field state that produced this
-  // prompt — styleDNA plus whatever mode-specific stores fed it — so a
-  // saved item can be loaded back into the builder and re-edited, not
-  // just re-copied as flat text.
   function save(mode, promptObj) {
     var store = readStore();
     var list = store[mode] || [];
@@ -97,16 +83,6 @@
     writeStore(store);
   }
 
-  // ---------------------------------------------------------------------
-  // Version History — lets a Vault item accumulate multiple saved builds
-  // instead of every edit needing its own separate Vault slot (a capped
-  // resource at 5 per mode). Items saved before this existed have no
-  // `versions` array at all; getCurrentVersion/getVersionCount treat that
-  // as "exactly one version" (the item's own top-level text/platform/
-  // snapshot/createdAt) rather than requiring a migration step, so old
-  // Vault items keep working unchanged until someone actually adds a
-  // version to one.
-  // ---------------------------------------------------------------------
   var MAX_VERSIONS_PER_ITEM = 5;
 
   function getCurrentVersion(fav) {
@@ -121,10 +97,6 @@
     return fav.versions && fav.versions.length ? fav.versions.length : 1;
   }
 
-  // The item's own top-level text/platform/snapshot/createdAt always
-  // mirror whichever version is active — every other bit of existing
-  // code (the full-vault export, older reads) keeps working against
-  // those fields unmodified, seeing whatever version is current.
   function syncTopLevelToActiveVersion(fav) {
     var current = fav.versions[fav.activeVersionIndex];
     fav.text = current.text;
@@ -170,9 +142,6 @@
     writeStore(store);
   }
 
-  // Every saved item across every mode, in one flat list — used for the
-  // "export the whole vault at once" actions, which don't care which tab
-  // a given prompt was built in.
   function getAllFlat() {
     var store = readStore();
     var out = [];
@@ -187,17 +156,7 @@
     return out;
   }
 
-  // ---------------------------------------------------------------------
-  // Recent Log — an automatic safety net, distinct from Your Vault above.
-  // Vault is a deliberate "I want to keep this" action with a full field
-  // snapshot for restoring; this just remembers the last few prompts that
-  // got copied or saved, as flat text only (no snapshot — that's what
-  // Vault is for), so nothing's lost if someone forgets to hit Save.
-  // Logged on Copy/Save clicks specifically (see prompt-builder-ui.js),
-  // not on Randomize — randomizing repeatedly would flood this with
-  // near-instant entries and defeat the point of a curated recent list.
-  // ---------------------------------------------------------------------
-  var RECENT_LOG_KEY = "promptHausRecentLog";
+  var RECENT_LOG_KEY = "marketingHausRecentLog";
   var RECENT_LOG_MAX = 10;
 
   function readRecentLog() {
@@ -215,12 +174,6 @@
     window.localStorage.setItem(RECENT_LOG_KEY, JSON.stringify(list));
   }
 
-  // Skips logging an exact duplicate of the most recent entry — clicking
-  // Copy twice in a row on the same unchanged prompt shouldn't create two
-  // entries. entry.snapshot is optional — same shape/rationale as Vault's
-  // own snapshot (see buildVaultSnapshot in prompt-builder-ui.js), so a
-  // Recent Log entry can offer the same "Load" restore Vault items do,
-  // not just re-copy the flat text.
   function logRecent(mode, entry) {
     var list = readRecentLog();
     if (list.length && list[0].text === entry.text && list[0].mode === mode) return;
@@ -250,7 +203,7 @@
     writeRecentLog([]);
   }
 
-  PromptHaus.favorites = {
+  MarketingHaus.favorites = {
     MAX_PER_MODE: MAX_PER_MODE,
     RECENT_LOG_MAX: RECENT_LOG_MAX,
     MAX_VERSIONS_PER_ITEM: MAX_VERSIONS_PER_ITEM,

@@ -1,0 +1,39 @@
+{
+  "sections": {
+    "main": {
+      "type": "marketing-haus-preview",
+      "blocks": {
+        "feature_1": {
+          "type": "feature",
+          "settings": {
+            "title": "Product Mockup Studio",
+            "description": "Show your design on a person, a table, a shelf — styled with the props and setting around it, not just a bare product shot."
+          }
+        },
+        "feature_2": {
+          "type": "feature",
+          "settings": {
+            "title": "Social Media & Ad Copy Studios",
+            "description": "Platform-ready captions, posts, and ad copy that all sound like the same brand."
+          }
+        },
+        "feature_3": {
+          "type": "feature",
+          "settings": {
+            "title": "Brand Kit",
+            "description": "Set your colors, fonts, mood, and voice once — every studio picks it up automatically."
+          }
+        },
+        "feature_4": {
+          "type": "feature",
+          "settings": {
+            "title": "Save your favorites",
+            "description": "Keep up to 5 saved prompts per studio, ready to copy anytime."
+          }
+        }
+      },
+      "block_order": ["feature_1", "feature_2", "feature_3", "feature_4"]
+    }
+  },
+  "order": ["main"]
+}

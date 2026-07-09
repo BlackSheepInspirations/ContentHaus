@@ -1,0 +1,8 @@
+{
+  "sections": {
+    "main": {
+      "type": "brand-haus"
+    }
+  },
+  "order": ["main"]
+}

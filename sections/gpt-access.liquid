@@ -1,0 +1,80 @@
+{% comment %}
+  Generic gated "GPT Access" page — for products that deliver access to a
+  Custom GPT link rather than a Shopify-hosted JS tool (Idea Haus,
+  Curriculum Haus). Same tag-gate pattern as Content Haus/Marketing Haus,
+  but the unlocked state is just a link-reveal instead of a full app.
+  Reuses Prompt Haus's own CSS (.ph-*) rather than a new stylesheet, since
+  there's no separate palette decision for these two products yet and
+  they're positioned as siblings under the same Black Sheep Creations
+  look. One section, reused by two different page templates with their
+  own settings — see page.idea-haus.json / page.curriculum-haus.json.
+{% endcomment %}
+
+{% assign has_access = false %}
+{% if customer and customer.tags contains section.settings.access_tag %}
+  {% assign has_access = true %}
+{% endif %}
+{% if request.design_mode %}
+  {% assign has_access = true %}
+{% endif %}
+
+{{ 'prompt-builder.css' | asset_url | stylesheet_tag }}
+
+<div class="ph-brand-header">
+  <div class="ph-marketing__hero">
+    <p class="ph-marketing__eyebrow">{{ section.settings.eyebrow }}</p>
+    <h1 class="ph-marketing__heading">{{ section.settings.heading | replace: 'AI', '<span class="ph-heading-accent">AI</span>' }}</h1>
+    <div class="ph-marketing__subheading">{{ section.settings.subheading }}</div>
+  </div>
+</div>
+
+{% if has_access %}
+  <div class="ph-locked">
+    <h2 class="ph-locked__heading">You're in!</h2>
+    <div class="ph-locked__body">{{ section.settings.instructions }}</div>
+    <div class="ph-locked__actions">
+      {% if section.settings.gpt_url != blank %}
+        <a href="{{ section.settings.gpt_url }}" class="ph-btn ph-btn--copy" target="_blank" rel="noopener">
+          {{ section.settings.gpt_button_label | default: "Open Your GPT" }}
+        </a>
+      {% endif %}
+    </div>
+  </div>
+{% else %}
+  <div class="ph-locked">
+    <h2 class="ph-locked__heading">{{ section.settings.locked_heading | replace: 'AI', '<span class="ph-heading-accent">AI</span>' }}</h2>
+    <div class="ph-locked__body">{{ section.settings.locked_body }}</div>
+    <div class="ph-locked__actions">
+      {% if section.settings.access_product %}
+        <a href="{{ section.settings.access_product.url }}" class="ph-btn ph-btn--copy">
+          Get Access{% if section.settings.access_product.price %} — {{ section.settings.access_product.price | money }}{% endif %}
+        </a>
+      {% endif %}
+      {% if section.settings.learn_more_url != blank %}
+        <a href="{{ section.settings.learn_more_url }}" class="ph-btn ph-btn--reset ph-locked__learn-more">Learn more</a>
+      {% endif %}
+    </div>
+  </div>
+{% endif %}
+
+{% schema %}
+{
+  "name": "GPT Access Page",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow text", "default": "Black Sheep Creations & Inspirations" },
+    { "type": "text", "id": "heading", "label": "Heading" },
+    { "type": "textarea", "id": "subheading", "label": "Subheading" },
+    { "type": "text", "id": "access_tag", "label": "Access tag", "info": "Must match the tag your Shopify Flow automation adds on purchase." },
+    { "type": "product", "id": "access_product", "label": "Access product", "info": "Shown as the \"Get Access\" button for shoppers who don't have the tag yet." },
+    { "type": "url", "id": "learn_more_url", "label": "Learn more link" },
+    { "type": "text", "id": "locked_heading", "label": "Locked state heading", "default": "Unlock This Tool" },
+    { "type": "richtext", "id": "locked_body", "label": "Locked state body" },
+    { "type": "url", "id": "gpt_url", "label": "Custom GPT link", "info": "The shareable ChatGPT link customers use once unlocked." },
+    { "type": "text", "id": "gpt_button_label", "label": "GPT button label", "default": "Open Your GPT" },
+    { "type": "richtext", "id": "instructions", "label": "Unlocked state instructions", "info": "e.g. how to use the GPT, tips for best results." }
+  ],
+  "presets": [
+    { "name": "GPT Access Page" }
+  ]
+}
+{% endschema %}

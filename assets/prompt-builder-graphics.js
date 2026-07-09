@@ -53,16 +53,6 @@
     "skull-accented frame", "chain-link frame", "carbon fiber frame", "gunmetal frame",
   ]);
 
-  var BORDER_FINISH_OPTIONS = sortAlpha([
-    "silver crystal trim", "pink crystal trim", "rose gold crystal", "gold crystal trim",
-    "champagne crystal", "black diamond trim", "iridescent crystal", "aurora crystal (ab)",
-    "mixed jewel trim", "diamond dust shimmer", "emerald crystal", "sapphire crystal",
-    "ruby crystal", "amethyst crystal", "opal shimmer trim", "frosted crystal",
-    "smoky quartz trim", "moonstone shimmer",
-    // new — masculine-leaning
-    "barbed wire trim", "chain-link trim", "studded leather trim", "gunmetal trim",
-  ]);
-
   // Shared list for both Top Accent and Bottom Accent.
   var ACCENT_OPTIONS = sortAlpha([
     "none", "gem crown", "princess tiara", "queen's crown", "rhinestone bow", "butterfly charm",
@@ -159,28 +149,50 @@
     "two-tone paint",
   ]);
 
+  // Merges the old separate Fantasy Element and Cosplay/Character fields
+  // into one "Characters & Creatures" pick — both answer the same
+  // underlying question ("what being is this"), so splitting them into
+  // two lists just made someone choose between two dropdowns that meant
+  // the same thing. "none" dropped from the merged list — like the other
+  // 4 categories, an empty/unselected default now covers "not this one."
+  var CHARACTERS_CREATURES_OPTIONS = sortAlpha(
+    lists.fantasyElements.concat(lists.cosplayCharacter.filter(function (opt) { return opt !== "none"; }))
+  );
+  var NATURE_FLORALS_OPTIONS = sortAlpha([
+    "rose", "sunflower", "daisy", "tulip", "peony", "lavender sprig", "eucalyptus leaves",
+    "palm leaves", "cactus", "succulent", "wildflower bouquet", "cherry blossom branch",
+    "ivy vines", "fern leaves", "lotus flower", "orchid",
+  ]);
+  var FOOD_DRINK_OPTIONS = sortAlpha([
+    "donut", "cupcake", "ice cream cone", "pizza slice", "taco", "birthday cake",
+    "croissant", "avocado toast", "watermelon slice", "strawberry", "macarons",
+    "hot cocoa mug", "champagne glass", "gingerbread cookie", "candy cane",
+  ]);
   var WHAT_IS_IT_LABELS = {
     animalPet: "Animal/Pet",
-    fantasyElements: "Fantasy Element",
-    props: "Prop",
-    cosplayCharacter: "Cosplay/Character",
+    charactersCreatures: "Character/Creature",
+    natureFlorals: "Nature/Florals",
+    foodDrink: "Food/Drink",
+    props: "Object/Prop",
   };
   var FRAME_IT_LABELS = {
     background: "Background",
-    dynamicSceneEffect: "Dynamic Scene Effect",
+    dynamicSceneEffect: "Scene Effect",
     lightingEffects: "Lighting Effects",
     framing: "Framing",
   };
   // No separate Letter Color here — Plate Text Color (paired with Plate
   // Text below) already covers "what color is the lettering," and having
-  // both read as two conflicting answers to the same question.
+  // both read as two conflicting answers to the same question. No Border
+  // Finish either — Base Style's own frame options already cover border/
+  // trim treatment, so the two read as duplicate/conflicting answers about
+  // the same visible edge.
   var HAUTE_DETAILS_LABELS = {
     baseStyle: "Base Style",
-    borderFinish: "Border Finish",
-    topAccent: "Top Accent",
-    bottomAccent: "Bottom Accent",
     plateFinish: "Plate Finish",
     letterStyle: "Letter Style",
+    topAccent: "Top Accent",
+    bottomAccent: "Bottom Accent",
     stateTheme: "State/Region Theme",
   };
 
@@ -191,9 +203,10 @@
     return {
       whatIsIt: {
         animalPet: makeField("", lists.species, { quantity: 1 }),
-        fantasyElements: makeField("", lists.fantasyElements, { quantity: 1 }),
+        charactersCreatures: makeField("", CHARACTERS_CREATURES_OPTIONS, { quantity: 1 }),
+        natureFlorals: makeField("", NATURE_FLORALS_OPTIONS, { quantity: 1 }),
+        foodDrink: makeField("", FOOD_DRINK_OPTIONS, { quantity: 1 }),
         props: makeField("", lists.props, { quantity: 1 }),
-        cosplayCharacter: makeField("none", lists.cosplayCharacter, { quantity: 1 }),
       },
       styleCategory: "illustrated",
       illustrated: {
@@ -202,16 +215,17 @@
       },
       realisticStyle: makeField("", REALISTIC_STYLE_OPTIONS),
       frameIt: {
-        background: makeField("", lists.background),
+        background: PromptHaus.util.makeGroupedField("", lists.backgroundGroups),
         dynamicSceneEffect: makeField("", lists.dynamicSceneEffect),
-        lightingEffects: makeField("", lists.lightingEffects),
+        // Defaulted like Character/Couples' own Lighting Effects — no
+        // Pose/Camera Angle field exists here to match, so just this one.
+        lightingEffects: makeField("studio lighting", lists.lightingEffects),
         framing: makeField("no frame", lists.framing),
       },
       haute: {
         vanityPlateType: makeField("none", VANITY_PLATE_TYPE_OPTIONS),
         details: {
           baseStyle: makeField("", BASE_STYLE_OPTIONS),
-          borderFinish: makeField("", BORDER_FINISH_OPTIONS),
           topAccent: makeField("none", ACCENT_OPTIONS),
           bottomAccent: makeField("none", ACCENT_OPTIONS),
           plateFinish: makeField("", PLATE_FINISH_OPTIONS),
@@ -355,27 +369,29 @@
     return { label: "Plate Text", field: makeField(phrase) };
   }
 
-  function buildEntries() {
-    var state = store.getState();
+  function buildWhatIsItComposedEntries() {
     var entries = [];
-
     getWhatIsItEntries().forEach(function (e) {
       var composed = composeWhatIsItEntry(e);
       if (composed) entries.push(composed);
     });
+    return entries;
+  }
 
+  function buildStyleItEntries() {
+    var state = store.getState();
     if (state.styleCategory === "realistic") {
-      entries.push({ label: "Style", field: state.realisticStyle });
-    } else {
-      entries.push({ label: "Character Type", field: state.illustrated.characterType });
-      entries.push({ label: "Art Finish", field: state.illustrated.artFinish });
+      return [{ label: "Style", field: state.realisticStyle }];
     }
+    return [
+      { label: "Character Type", field: state.illustrated.characterType },
+      { label: "Art Finish", field: state.illustrated.artFinish },
+    ];
+  }
 
-    entries = entries.concat(getFrameItEntries().map(function (e) {
-      return { label: e.label, field: e.field };
-    }));
-
-    entries.push({ label: "Vanity Plate Type", field: state.haute.vanityPlateType });
+  function buildVanityPlateEntries() {
+    var state = store.getState();
+    var entries = [{ label: "Vanity Plate Type", field: state.haute.vanityPlateType }];
     var vanityPlateOn = PromptHaus.engine.resolveFieldValue(state.haute.vanityPlateType);
     if (vanityPlateOn) {
       entries = entries.concat(getHauteDetailEntries().map(function (e) {
@@ -384,19 +400,56 @@
       var plateTextEntry = buildPlateTextEntry();
       if (plateTextEntry) entries.push(plateTextEntry);
     }
+    return entries;
+  }
 
-    entries.push({ label: "Transportation", field: state.transportation.type });
+  function buildTransportationEntries() {
+    var state = store.getState();
+    var entries = [{ label: "Transportation", field: state.transportation.type }];
     var transportationOn = PromptHaus.engine.resolveFieldValue(state.transportation.type);
     if (transportationOn) {
       entries.push({ label: "Transportation Color", field: state.transportation.color });
     }
+    return entries;
+  }
 
-    entries.push({ label: "Holiday / Theme", field: PromptHaus.styleDNA.getState().holiday });
+  // Graphics' own descriptors only — no shared Style DNA (Holiday/Mockup/
+  // Imagery/Buffer). Split out from buildEntries() so Combined Mode's
+  // unified assembler can pull just these without pulling in the shared DNA
+  // fields a second (or third) time.
+  function buildOwnEntries() {
+    var entries = buildWhatIsItComposedEntries();
+    entries = entries.concat(buildStyleItEntries());
+    entries = entries.concat(getFrameItEntries().map(function (e) {
+      return { label: e.label, field: e.field };
+    }));
+    entries = entries.concat(buildVanityPlateEntries());
+    entries = entries.concat(buildTransportationEntries());
+    return entries;
+  }
+
+  // Combined Mode's Graphics contribution — just Style It (the one overall
+  // style choice, rendered at the top of Combined) + Custom Vanity Plates +
+  // Transportation. No What Is It (Character's own Identity/Companion
+  // covers "who/what is depicted") and no Frame It (Character's own
+  // Presentation covers background/lighting/framing for the whole scene).
+  function buildEntriesForCombined() {
+    return buildStyleItEntries().concat(buildVanityPlateEntries()).concat(buildTransportationEntries());
+  }
+
+  function buildEntries() {
+    var entries = buildOwnEntries();
+    entries.push({ label: "Holiday", field: PromptHaus.styleDNA.getState().holiday });
+    entries.push({ label: "Theme", field: PromptHaus.styleDNA.getState().theme });
+    entries.push({ label: "Niche", field: PromptHaus.styleDNA.getState().niche });
     entries.push({ label: "Mockup View", field: PromptHaus.styleDNA.getState().mockupView });
+    entries.push({ label: "Filter It", field: PromptHaus.styleDNA.getState().filter });
     entries = entries.concat(PromptHaus.styleDNA.getImageryEntries());
+    entries = entries.concat(PromptHaus.brandKit.getActiveKitEntries());
+    var projectTypeEntry = PromptHaus.styleDNA.getProjectTypeEntry("graphics");
+    if (projectTypeEntry) entries.push(projectTypeEntry);
     var bufferEntry = PromptHaus.styleDNA.getBufferEntry();
     if (bufferEntry) entries.push(bufferEntry);
-
     return entries;
   }
 
@@ -448,10 +501,13 @@
     if (transportResolved.length) groups.push({ title: "Transportation", items: transportResolved });
 
     var holidayResolved = PromptHaus.engine.resolveFields([
-      { label: "Holiday / Theme", field: PromptHaus.styleDNA.getState().holiday },
+      { label: "Holiday", field: PromptHaus.styleDNA.getState().holiday },
+      { label: "Theme", field: PromptHaus.styleDNA.getState().theme },
+      { label: "Niche", field: PromptHaus.styleDNA.getState().niche },
       { label: "Mockup View", field: PromptHaus.styleDNA.getState().mockupView },
+      { label: "Filter It", field: PromptHaus.styleDNA.getState().filter },
     ]);
-    if (holidayResolved.length) groups.push({ title: "Holiday / Theme", items: holidayResolved });
+    if (holidayResolved.length) groups.push({ title: "Holiday, Theme & Niche", items: holidayResolved });
 
     var imageryEntries = PromptHaus.styleDNA.getImageryEntries();
     if (imageryEntries.length) {
@@ -464,9 +520,18 @@
     }
 
     var bufferEntry = PromptHaus.styleDNA.getBufferEntry();
-    if (bufferEntry) groups.push({ title: "Buffer/Padding", items: [{ label: bufferEntry.label, value: bufferEntry.field.value }] });
+    if (bufferEntry) groups.push({ title: "Image Buffer/Padding", items: [{ label: bufferEntry.label, value: bufferEntry.field.value }] });
 
     return groups;
+  }
+
+  // Combined Mode's "Your Selections" panel mirrors buildEntriesForCombined
+  // — drop What Is It/Frame It so the summary never shows a value that got
+  // silently excluded from the assembled prompt.
+  function getSelectionsByGroupForCombined() {
+    return getSelectionsByGroup().filter(function (g) {
+      return g.title !== "What Is It" && g.title !== "Frame It";
+    });
   }
 
   function randomizeFieldList(entries, updateFn) {
@@ -516,10 +581,12 @@
         updateTransportationColor(changes);
       });
     }
+    PromptHaus.styleDNA.randomizeContent();
   }
 
   function reset() {
     store.setState(buildInitialState());
+    PromptHaus.styleDNA.resetContent();
   }
 
   // ---------------------------------------------------------------------
@@ -548,7 +615,7 @@
         setStyleCategory("illustrated");
         updateFrameItField("background", { value: "dreamy cloud scene", customValue: "" });
         updateFrameItField("lightingEffects", { value: "soft diffused light", customValue: "" });
-        PromptHaus.styleDNA.updateImagerySlot("slot1", { value: "cross", customValue: "" });
+        PromptHaus.styleDNA.updateImagerySlot("faithBased1", { value: "cross", customValue: "" });
       },
     },
     {
@@ -592,8 +659,12 @@
     getWhatIsItEntries: getWhatIsItEntries,
     getFrameItEntries: getFrameItEntries,
     getHauteDetailEntries: getHauteDetailEntries,
+    buildOwnEntries: buildOwnEntries,
+    buildEntriesForCombined: buildEntriesForCombined,
+    buildStyleItEntries: buildStyleItEntries,
     assemblePrompt: assemblePrompt,
     getSelectionsByGroup: getSelectionsByGroup,
+    getSelectionsByGroupForCombined: getSelectionsByGroupForCombined,
     randomize: randomize,
     reset: reset,
     labels: {

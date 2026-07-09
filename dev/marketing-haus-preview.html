@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Marketing Haus — Local Dev Preview</title>
+<link rel="stylesheet" href="../assets/marketing-haus.css" id="mh-css-link" />
+</head>
+<body>
+<!-- Dev-only harness: mirrors what sections/marketing-haus.liquid mounts,
+     so we can preview in a plain browser before Shopify CLI is set up.
+     Not part of the shipped theme. -->
+<div class="mh-brand-header">
+  <div class="mh-marketing__hero">
+    <p class="mh-marketing__eyebrow">Black Sheep Creations &amp; Inspirations</p>
+    <h1 class="mh-marketing__heading">The <span class="mh-heading-accent">AI</span> Creator's Marketing Haus</h1>
+    <div class="mh-marketing__subheading">Create the mockups, posts, ads, emails, and marketing content around your brand. Customized your way.</div>
+  </div>
+</div>
+<div id="marketing-haus-app"></div>
+<script>
+  // Cache-bust on every load during local dev so edited asset files are
+  // always picked up without a manual hard-refresh.
+  var v = Date.now();
+  document.getElementById("mh-css-link").href = "../assets/marketing-haus.css?v=" + v;
+  [
+    "../assets/marketing-haus-util.js",
+    "../assets/marketing-haus-engine.js",
+    "../assets/marketing-haus-favorites.js",
+    "../assets/marketing-haus-styledna.js",
+    "../assets/marketing-haus-brandkit.js",
+    "../assets/marketing-haus-mockup.js",
+    "../assets/marketing-haus-social.js",
+    "../assets/marketing-haus-adcopy.js",
+    "../assets/marketing-haus-email.js",
+    "../assets/marketing-haus-sales.js",
+    "../assets/marketing-haus-invitations.js",
+    "../assets/marketing-haus-devotional.js",
+    "../assets/marketing-haus-testimonial.js",
+    "../assets/marketing-haus-ui.js",
+  ].forEach(function (src) {
+    document.write('<script src="' + src + '?v=' + v + '"></' + 'script>');
+  });
+</script>
+</body>
+</html>

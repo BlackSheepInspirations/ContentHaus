@@ -1,0 +1,114 @@
+{% comment %}
+  Brand Haus — public marketing/preview page.
+  Not gated — this is the page non-purchasers land on (linked from the
+  locked state in sections/brand-haus.liquid) to learn what the tool does
+  and buy access.
+{% endcomment %}
+
+{{ 'brand-haus.css' | asset_url | stylesheet_tag }}
+
+<div class="bh-marketing">
+  <div class="bh-marketing__hero">
+    <p class="bh-marketing__eyebrow">{{ section.settings.eyebrow }}</p>
+    <h1 class="bh-marketing__heading">{{ section.settings.heading | replace: 'AI', '<span class="bh-heading-accent">AI</span>' }}</h1>
+    <div class="bh-marketing__subheading">{{ section.settings.subheading }}</div>
+    {% if section.settings.access_product %}
+      <a href="{{ section.settings.access_product.url }}" class="bh-btn bh-btn--copy bh-marketing__cta">
+        Get Access{% if section.settings.access_product.price %} — {{ section.settings.access_product.price | money }}{% endif %}
+      </a>
+    {% endif %}
+  </div>
+
+  <div class="bh-marketing__video">
+    {% if section.settings.demo_video_url != blank %}
+      <div class="bh-marketing__video-embed">
+        <iframe
+          src="{{ section.settings.demo_video_url }}"
+          title="{{ section.settings.heading }} demo"
+          frameborder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen
+        ></iframe>
+      </div>
+    {% else %}
+      <div class="bh-marketing__video-placeholder">Demo video coming soon</div>
+    {% endif %}
+  </div>
+
+  <div class="bh-marketing__features">
+    {% for block in section.blocks %}
+      {% if block.type == 'feature' %}
+        <div class="bh-marketing__feature" {{ block.shopify_attributes }}>
+          <h3>{{ block.settings.title }}</h3>
+          <p>{{ block.settings.description }}</p>
+        </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+
+  {% if section.settings.access_product %}
+    <div class="bh-marketing__footer-cta">
+      <a href="{{ section.settings.access_product.url }}" class="bh-btn bh-btn--copy bh-marketing__cta">
+        Get Access{% if section.settings.access_product.price %} — {{ section.settings.access_product.price | money }}{% endif %}
+      </a>
+    </div>
+  {% endif %}
+</div>
+
+{% schema %}
+{
+  "name": "Brand Haus Preview",
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow text",
+      "default": "Black Sheep Creations & Inspirations"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Brand Haus — Where You Define Your Brand DNA Blueprint™"
+    },
+    {
+      "type": "richtext",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "<p>Discover who you are as a brand before you create anything — powered by Black Sheep Creations.</p>"
+    },
+    {
+      "type": "url",
+      "id": "demo_video_url",
+      "label": "Demo video embed URL",
+      "info": "YouTube/Vimeo embed URL (not the regular watch link — use the \"Embed\" URL)."
+    },
+    {
+      "type": "product",
+      "id": "access_product",
+      "label": "Access product"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "feature",
+      "name": "Feature",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Title" },
+        { "type": "textarea", "id": "description", "label": "Description" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Brand Haus Preview",
+      "blocks": [
+        { "type": "feature", "settings": { "title": "The Brand DNA Assessment", "description": "21 questions, 12-18 minutes — uncovers how you naturally think, what you value, and what should show up in your brand because of it." } },
+        { "type": "feature", "settings": { "title": "Branding Studio", "description": "Colors, fonts, mood, mission, and values on one visual board — see your brand before you commit to it." } },
+        { "type": "feature", "settings": { "title": "Logo Studio", "description": "A full logo builder — from concept to color and typography direction." } },
+        { "type": "feature", "settings": { "title": "Save your favorites", "description": "Keep up to 5 saved prompts per studio, ready to copy anytime." } }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Prompt Haus — Local Dev Preview</title>
-<link rel="stylesheet" href="../assets/prompt-builder.css" />
+<link rel="stylesheet" href="../assets/prompt-builder.css" id="ph-css-link" />
 </head>
 <body>
 <!-- Dev-only harness: mirrors what sections/prompt-builder.liquid mounts,
@@ -22,6 +22,7 @@
   // Cache-bust on every load during local dev so edited asset files are
   // always picked up without a manual hard-refresh.
   var v = Date.now();
+  document.getElementById("ph-css-link").href = "../assets/prompt-builder.css?v=" + v;
   [
     "../assets/prompt-builder-styledna.js",
     "../assets/prompt-builder-engine.js",
@@ -29,8 +30,13 @@
     "../assets/prompt-builder-character.js",
     "../assets/prompt-builder-text.js",
     "../assets/prompt-builder-couples.js",
+    "../assets/prompt-builder-family.js",
     "../assets/prompt-builder-combined.js",
     "../assets/prompt-builder-graphics.js",
+    "../assets/prompt-builder-reference.js",
+    "../assets/prompt-builder-animals.js",
+    "../assets/prompt-builder-brandkit.js",
+    "../assets/prompt-builder-logo.js",
     "../assets/prompt-builder-ui.js",
   ].forEach(function (src) {
     document.write('<script src="' + src + '?v=' + v + '"></' + 'script>');

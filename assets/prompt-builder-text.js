@@ -7,10 +7,12 @@
  * group the AI is free to vary between them.
  *
  * Beyond the build plan's original schema, per the "don't just clone the
- * reference tool" call: Text Case and Surface Texture fields (case affects
- * legibility/vibe, material finish is a huge lever for physical mockups),
- * plus an opt-in Accent Word/Phrase sub-panel that lets one word get its
- * own distinct styling separate from the rest of the text.
+ * reference tool" call: a Text Case field (affects legibility/vibe) and a
+ * grouped Text Effects field (glow/atmosphere/decorative finish — a much
+ * bigger lever than a plain material texture), plus an opt-in Second
+ * Phrase sub-panel that gives one word — or a fully separate second line/
+ * phrase — its own distinct styling and position relative to the main
+ * text.
  */
 (function () {
   "use strict";
@@ -39,14 +41,38 @@
     "brush lettering script", "art deco lettering", "acid wash tie-dye lettering",
   ]);
 
-  var COLOR_SCHEME_OPTIONS = sortAlpha([
-    "orange", "rainbow", "pastel", "gold", "ice blue", "silver/chrome", "sunset",
-    "ocean", "forest", "red/fire", "purple", "lime green", "black", "copper/bronze",
-    "mint", "vibrant multicolor", "electric neon mix", "candy bright multicolor",
-    "tropical vibrant", "bold gradient blend",
-    // new
-    "champagne gold", "emerald jewel tone", "monochrome grayscale",
-  ]);
+  // Grouped like Character Type/Text Effects — curated category order
+  // (not alphabetized), so related colors browse together.
+  var COLOR_SCHEME_GROUPS = [
+    {
+      label: "Standard Colors",
+      options: ["black", "white", "brown", "red", "yellow", "blue", "green", "teal", "purple", "pink", "orange"],
+    },
+    {
+      label: "Neutral / Minimal",
+      options: ["tan", "gray", "grayscale monochrome", "cream neutral", "soft beige"],
+    },
+    {
+      label: "Warm / Earthy",
+      options: ["red/fire", "sunset", "copper/bronze", "desert clay"],
+    },
+    {
+      label: "Cool / Nature",
+      options: ["forest", "ocean", "ice blue", "mint"],
+    },
+    {
+      label: "Bright / Playful",
+      options: ["rainbow", "candy bright multicolor", "vibrant multicolor", "pastel multicolor", "tropical brights", "lime green"],
+    },
+    {
+      label: "Luxury / Metallic",
+      options: ["gold", "champagne gold", "silver/chrome", "emerald jewel", "rose gold", "sapphire blue", "opal"],
+    },
+    {
+      label: "Gradient / Special Mix",
+      options: ["pastel gradient", "purple mix", "bold gradient blend", "neon mix", "holographic rainbow"],
+    },
+  ];
 
   // Mockup View moved to shared Style DNA (next to Buffer/Padding) — it
   // applies just as much to a Character portrait or Graphics design as it
@@ -59,13 +85,41 @@
     "uppercase", "lowercase", "title case", "sentence case", "mixed case (random)",
   ]);
 
-  // New field — the letters' own material/surface finish, distinct from
-  // Add-Ons below (which are border/shadow effects layered on top).
-  var SURFACE_TEXTURE_OPTIONS = sortAlpha([
-    "glitter texture", "foil texture", "chrome texture", "denim texture", "leather texture",
-    "embroidered thread texture", "distressed grunge texture", "holographic texture",
-    "glossy vinyl texture", "matte rubber texture",
-  ]);
+  // New field — a broader, more dramatic effect layered over the whole
+  // word (glow, atmosphere, decorative finish), distinct from Add-Ons
+  // below (border/shadow accents). Grouped like Character Type/Holiday —
+  // browses better by category than as one 35+-item flat wall.
+  var TEXT_EFFECTS_GROUPS = [
+    {
+      label: "Material / Surface",
+      options: [
+        "high gloss", "super matte", "metallic foil", "marble texture", "velvet texture", "glass text effect",
+        // folded in from the old standalone Surface Texture field
+        "chrome texture", "denim texture", "leather texture", "embroidered thread texture",
+        "distressed grunge texture", "holographic texture", "glossy vinyl texture", "matte rubber texture",
+      ],
+    },
+    {
+      label: "Glow / Light",
+      options: ["neon glow text", "flame glow text", "ember glow", "aura glow text", "backlit sign effect"],
+    },
+    {
+      label: "Cool / Soft Atmosphere",
+      options: ["ice lettering", "frosty glow text", "cloud soft text", "mist text effect", "ice crystal text"],
+    },
+    {
+      label: "Luxury / Decorative",
+      options: ["glitter texture", "rhinestone effect", "diamond lettering", "pearl finish", "gold leaf foil"],
+    },
+    {
+      label: "Fluid / Playful",
+      options: ["jelly texture", "gummy candy texture", "liquid ripple", "marshmallow puff text", "candy coated"],
+    },
+    {
+      label: "Digital / Effects",
+      options: ["holographic shift", "chrome gradient warp", "glitch text effect", "3d extruded typography", "pixel distortion text"],
+    },
+  ];
 
   var BACKGROUND_OPTIONS = sortAlpha([
     "clean white", "gradient", "paint splatter", "themed scene", "transparent", "smoke/clouds",
@@ -83,6 +137,15 @@
   ]);
 
   var WORD_STACK_OPTIONS = sortAlpha(["one line only", "multi line", "line per word"]);
+
+  // Second Phrase's own relationship to the main text — "inline accent"
+  // covers the original one-word-called-out-within-a-sentence case (e.g.
+  // "Blessed" inside "Blessed Mama"); the other 3 cover a fully separate
+  // second line/phrase with its own typography (e.g. a call-and-response
+  // design: "Do You Trust Me" / "Well, Do Ya?").
+  var ACCENT_POSITION_OPTIONS = sortAlpha([
+    "inline accent within main text", "below main text", "above main text", "beside main text",
+  ]);
 
   var ICON_PACKS_OPTIONS = sortAlpha([
     "none", "hearts", "sparkles", "money bags", "music notes", "roses", "cute stars",
@@ -103,21 +166,24 @@
     "glow outline", "confetti scatter overlay", "grain/noise overlay",
   ]);
 
-  // Accent Word/Phrase sub-panel — lets the shopper call out one word or
-  // short phrase with its own distinct look (e.g. "Blessed" in cursive
-  // gold, rest of the text in plain white block letters). Common in this
-  // niche's real designs; the reference tool has no way to single out
-  // part of the text at all. Reuses the exact same 4 option lists as Core
-  // Style (Letter Style/Color Scheme/Text Case/Surface Texture) rather
-  // than a separate smaller "Accent Style" list, so the accent word gets
-  // the same depth of control as the rest of the text.
+  // Second Phrase sub-panel — lets the shopper call out one word inline
+  // (e.g. "Blessed" in cursive gold inside "Blessed Mama") OR add a fully
+  // separate second line/phrase with its own typography and position
+  // relative to the main text (e.g. a call-and-response design: "Do You
+  // Trust Me" / "Well, Do Ya?" positioned below). Reuses the exact same 4
+  // option lists as Core Style (Letter Style/Color Scheme/Text Case/Text
+  // Effects) rather than a separate smaller list, so it gets the same
+  // depth of control as the main text.
 
+  // No separate Surface Texture here — Text Effects's own Material /
+  // Surface category absorbed it (see TEXT_EFFECTS_GROUPS above), so the
+  // two don't read as two overlapping answers to the same question.
   var FIXED_LABELS = {
     yourText: "Text Content",
     letterStyle: "Letter Style",
     colorScheme: "Color Scheme",
     textCase: "Text Case",
-    surfaceTexture: "Surface Texture",
+    textEffects: "Text Effects",
   };
   var VARIABLE_LABELS = {
     background: "Background",
@@ -137,9 +203,9 @@
     return {
       yourText: makeField("", [], { isFreeText: true }),
       letterStyle: makeField("", LETTER_STYLE_OPTIONS),
-      colorScheme: makeField("", COLOR_SCHEME_OPTIONS),
+      colorScheme: PromptHaus.util.makeGroupedField("", COLOR_SCHEME_GROUPS),
       textCase: makeField("", TEXT_CASE_OPTIONS),
-      surfaceTexture: makeField("", SURFACE_TEXTURE_OPTIONS),
+      textEffects: PromptHaus.util.makeGroupedField("", TEXT_EFFECTS_GROUPS),
       background: makeField("", BACKGROUND_OPTIONS),
       textSpacing: makeField("balanced", TEXT_SPACING_OPTIONS),
       wordShape: makeField("", WORD_SHAPE_OPTIONS),
@@ -150,9 +216,14 @@
         include: false,
         phrase: makeField("", [], { isFreeText: true }),
         letterStyle: makeField("", LETTER_STYLE_OPTIONS),
-        colorScheme: makeField("", COLOR_SCHEME_OPTIONS),
+        colorScheme: PromptHaus.util.makeGroupedField("", COLOR_SCHEME_GROUPS),
         textCase: makeField("", TEXT_CASE_OPTIONS),
-        surfaceTexture: makeField("", SURFACE_TEXTURE_OPTIONS),
+        // Text Effects replaces Surface Texture here too — same widget as
+        // Core Style's, so the accent phrase gets the same depth of
+        // control (glow/atmosphere/decorative finish, not just a plain
+        // material texture).
+        textEffects: PromptHaus.util.makeGroupedField("", TEXT_EFFECTS_GROUPS),
+        position: makeField("", ACCENT_POSITION_OPTIONS),
       },
     };
   }
@@ -182,7 +253,7 @@
     letterStyle: "Letter Style",
     colorScheme: "Color Scheme",
     textCase: "Text Case",
-    surfaceTexture: "Surface Texture",
+    textEffects: "Text Effects",
   };
 
   function getAccentStyleEntries() {
@@ -193,10 +264,19 @@
   }
 
   // Composes the accent phrase + its own Letter Style/Color Scheme/Text
-  // Case/Surface Texture into one descriptive clause rather than letting
+  // Case/Text Effects into one descriptive clause rather than letting
   // them appear as several disconnected list items in the "Maintain: ..."
   // clause — null when the shopper hasn't opted in or hasn't typed a
   // phrase yet.
+  //
+  // Position changes the framing entirely, not just adds a detail: a
+  // Position other than the inline default means this isn't one word
+  // called out inside the main sentence (e.g. "Blessed" in "Blessed
+  // Mama") — it's a fully separate second line/phrase with its own
+  // typography (e.g. a call-and-response design: "Do You Trust Me" /
+  // "Well, Do Ya?"), so it needs its own "second line of text" wording
+  // rather than "set apart from the rest of the text," which implies it's
+  // carved out of the main text instead of standing beside it.
   function buildAccentField() {
     var state = store.getState();
     if (!state.accent.include) return null;
@@ -209,10 +289,19 @@
     ).map(function (r) {
       return r.value;
     });
-    var text = descriptors.length
-      ? 'the word/phrase "' + phrase + '" styled with ' + descriptors.join(", ")
-      : 'the word/phrase "' + phrase + '" set apart from the rest of the text';
-    return makeField(text);
+    var position = PromptHaus.engine.resolveFieldValue(state.accent.position);
+    var isSeparateLine = position && position !== "inline accent within main text";
+    var subject = isSeparateLine ? 'a second line of text reading "' + phrase + '"' : 'the word/phrase "' + phrase + '"';
+
+    var pieces = [];
+    if (descriptors.length) pieces.push("styled with " + descriptors.join(", "));
+    if (isSeparateLine) {
+      pieces.push("positioned " + position);
+    } else if (!descriptors.length) {
+      pieces.push("set apart from the rest of the text");
+    }
+
+    return makeField((subject + " " + pieces.join(", ")).trim());
   }
 
   function getFixedEntries() {
@@ -229,6 +318,9 @@
     });
   }
 
+  var PROMPT_OUTRO =
+    "High quality digital illustration, immaculate composition, vibrant and polished finish with professional rendering.";
+
   // extraFixedEntries lets Combined Mode layer in the live-linked mascot
   // description (and its alignment) without duplicating this assembler —
   // standalone Text Mode never passes anything, so its output is unchanged.
@@ -239,13 +331,19 @@
     var count = parseInt(PromptHaus.styleDNA.getState().variationCount.value, 10) || 4;
     var fixedEntries = getFixedEntries().map(toEntry);
     var accentField = buildAccentField();
-    if (accentField) fixedEntries.push({ label: "Accent", field: accentField });
-    // Holiday / Theme, Mockup View, and Buffer/Padding live in shared Style
-    // DNA — stay fixed across variations same as everything else in Core
-    // Style.
-    fixedEntries.push({ label: "Holiday / Theme", field: PromptHaus.styleDNA.getState().holiday });
+    if (accentField) fixedEntries.push({ label: "Second Phrase", field: accentField });
+    // Holiday, Theme, Niche, Mockup View, Filter, and Buffer/Padding live
+    // in shared Style DNA — stay fixed across variations same as
+    // everything else in Core Style.
+    fixedEntries.push({ label: "Holiday", field: PromptHaus.styleDNA.getState().holiday });
+    fixedEntries.push({ label: "Theme", field: PromptHaus.styleDNA.getState().theme });
+    fixedEntries.push({ label: "Niche", field: PromptHaus.styleDNA.getState().niche });
     fixedEntries.push({ label: "Mockup View", field: PromptHaus.styleDNA.getState().mockupView });
+    fixedEntries.push({ label: "Filter It", field: PromptHaus.styleDNA.getState().filter });
     fixedEntries = fixedEntries.concat(PromptHaus.styleDNA.getImageryEntries());
+    fixedEntries = fixedEntries.concat(PromptHaus.brandKit.getActiveKitEntries());
+    var projectTypeEntry = PromptHaus.styleDNA.getProjectTypeEntry("text");
+    if (projectTypeEntry) fixedEntries.push(projectTypeEntry);
     var bufferEntry = PromptHaus.styleDNA.getBufferEntry();
     if (bufferEntry) fixedEntries.push(bufferEntry);
     if (extraFixedEntries && extraFixedEntries.length) fixedEntries = fixedEntries.concat(extraFixedEntries);
@@ -258,8 +356,7 @@
       fixedFieldEntries: fixedEntries,
       variableFieldEntries: getVariableEntries().map(toEntry),
       variationCount: count,
-      outro:
-        "High quality digital illustration, immaculate composition, vibrant and polished finish with professional rendering.",
+      outro: PROMPT_OUTRO,
     });
   }
 
@@ -272,8 +369,8 @@
       var randomValue = options[Math.floor(Math.random() * options.length)];
       updateField(e.fieldName, { value: randomValue, customValue: "" });
     });
-    // Accent's own style fields may randomize too, but the typed phrase
-    // itself never does.
+    // Accent's own style fields (and Position) may randomize too, but the
+    // typed phrase itself never does.
     var state = store.getState();
     if (state.accent.include) {
       getAccentStyleEntries().forEach(function (e) {
@@ -283,11 +380,22 @@
         var randomValue = options[Math.floor(Math.random() * options.length)];
         updateAccentField(e.fieldName, { value: randomValue, customValue: "" });
       });
+      if (state.accent.position.includeInPrompt) {
+        var positionOptions = state.accent.position.options || [];
+        if (positionOptions.length) {
+          updateAccentField("position", {
+            value: positionOptions[Math.floor(Math.random() * positionOptions.length)],
+            customValue: "",
+          });
+        }
+      }
     }
+    PromptHaus.styleDNA.randomizeContent();
   }
 
   function reset() {
     store.setState(buildInitialState());
+    PromptHaus.styleDNA.resetContent();
   }
 
   // Mirrors Character Mode's getSelectionsByGroup() — feeds the "Your
@@ -304,8 +412,8 @@
     var accentField = buildAccentField();
     if (accentField) {
       groups.push({
-        title: "Accent",
-        items: [{ label: "Accent", value: PromptHaus.engine.resolveFieldValue(accentField) }],
+        title: "Second Phrase",
+        items: [{ label: "Second Phrase", value: PromptHaus.engine.resolveFieldValue(accentField) }],
       });
     }
 
@@ -313,10 +421,13 @@
     if (variableResolved.length) groups.push({ title: "Variation Details", items: variableResolved });
 
     var holidayResolved = PromptHaus.engine.resolveFields([
-      { label: "Holiday / Theme", field: PromptHaus.styleDNA.getState().holiday },
+      { label: "Holiday", field: PromptHaus.styleDNA.getState().holiday },
+      { label: "Theme", field: PromptHaus.styleDNA.getState().theme },
+      { label: "Niche", field: PromptHaus.styleDNA.getState().niche },
       { label: "Mockup View", field: PromptHaus.styleDNA.getState().mockupView },
+      { label: "Filter It", field: PromptHaus.styleDNA.getState().filter },
     ]);
-    if (holidayResolved.length) groups.push({ title: "Holiday / Theme", items: holidayResolved });
+    if (holidayResolved.length) groups.push({ title: "Holiday, Theme & Niche", items: holidayResolved });
 
     var imageryEntries = PromptHaus.styleDNA.getImageryEntries();
     if (imageryEntries.length) {
@@ -329,7 +440,7 @@
     }
 
     var bufferEntry = PromptHaus.styleDNA.getBufferEntry();
-    if (bufferEntry) groups.push({ title: "Buffer/Padding", items: [{ label: bufferEntry.label, value: bufferEntry.field.value }] });
+    if (bufferEntry) groups.push({ title: "Image Buffer/Padding", items: [{ label: bufferEntry.label, value: bufferEntry.field.value }] });
 
     return groups;
   }
@@ -352,10 +463,10 @@
     {
       id: "bohoScript",
       name: "Boho Script",
-      description: "Calligraphy lettering, pastel color scheme, title case.",
+      description: "Calligraphy lettering, pastel gradient color scheme, title case.",
       apply: function () {
         updateField("letterStyle", { value: "calligraphy", customValue: "" });
-        updateField("colorScheme", { value: "pastel", customValue: "" });
+        updateField("colorScheme", { value: "pastel gradient", customValue: "" });
         updateField("textCase", { value: "title case", customValue: "" });
       },
     },
@@ -387,8 +498,17 @@
     updateAccentField: updateAccentField,
     getFixedEntries: getFixedEntries,
     getVariableEntries: getVariableEntries,
+    buildAccentField: buildAccentField,
     assemblePrompt: assemblePrompt,
     randomize: randomize,
     reset: reset,
+    // Single source of truth for option lists other modes need to reuse
+    // (Reference Mode now) rather than duplicating them.
+    optionLists: {
+      letterStyle: LETTER_STYLE_OPTIONS,
+      colorSchemeGroups: COLOR_SCHEME_GROUPS,
+      textCase: TEXT_CASE_OPTIONS,
+      textEffectsGroups: TEXT_EFFECTS_GROUPS,
+    },
   });
 })();

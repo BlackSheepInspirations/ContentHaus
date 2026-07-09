@@ -26,6 +26,24 @@
   var sortAlpha = PromptHaus.util.sortAlpha;
   var lists = PromptHaus.character.optionLists;
   var charLabels = PromptHaus.character.labels;
+  // Randomize caps/exclusions — same rationale/numbers as Character Mode's
+  // own groups: Occupation/Height/Body Type excluded outright, Appearance
+  // and Styling capped to a focused subset rather than a full sweep.
+  var IDENTITY_RANDOM_EXCLUDE = ["height", "bodyType", "occupationNiche"];
+  var APPEARANCE_RANDOM_CAP = 5;
+  var STYLING_RANDOM_CAP = 3;
+  // Couple Dynamic bundles several layers into one flat field set — these
+  // two lists split out which fields are Presentation-equivalent (the
+  // shared scene) vs. Extras-equivalent (optional fantasy/props/cosplay),
+  // each capped the same as Character Mode's own groups. Relationship
+  // Vibe/Pose Interaction/Coordination Style, and Character Type/Art
+  // Finish, stay uncapped — they're either core to what makes this
+  // "Couples" or a single either/or style pick.
+  var COUPLE_STYLE_FIELDS = ["characterType", "artFinish"];
+  var COUPLE_PRESENTATION_FIELDS = ["background", "dynamicSceneEffect", "timeEra", "cameraAngle", "lightingEffects", "framing"];
+  var COUPLE_EXTRAS_FIELDS = ["fantasyElements", "props", "cosplayCharacter"];
+  var COUPLE_PRESENTATION_RANDOM_CAP = 3;
+  var COUPLE_EXTRAS_RANDOM_CAP = 1;
 
   // ---------------------------------------------------------------------
   // Couple Dynamic — new option lists (Section 3 of the build plan)
@@ -49,7 +67,7 @@
     characterType: "Character Type",
     artFinish: "Art Finish",
     background: "Background",
-    dynamicSceneEffect: "Dynamic Scene Effect",
+    dynamicSceneEffect: "Scene Effect",
     timeEra: "Time / Era",
     cameraAngle: "Camera Angle",
     lightingEffects: "Lighting Effects",
@@ -69,11 +87,15 @@
     return {
       characterType: PromptHaus.util.makeGroupedField("", lists.characterTypeGroups),
       artFinish: makeField("", lists.artFinish),
-      background: makeField("", lists.background),
+      background: PromptHaus.util.makeGroupedField("", lists.backgroundGroups),
       dynamicSceneEffect: makeField("", lists.dynamicSceneEffect),
       timeEra: makeField("", lists.timeEra),
-      cameraAngle: makeField("", lists.cameraAngle),
-      lightingEffects: makeField("", lists.lightingEffects),
+      // Defaulted like Character Mode's own Camera Angle/Lighting Effects
+      // — Couples has no direct "standing pose" equivalent (poseInteraction
+      // is inherently a 2-person interaction, e.g. "holding hands," with
+      // nothing that maps to a single default), so that one's left as-is.
+      cameraAngle: makeField("front view", lists.cameraAngle),
+      lightingEffects: makeField("studio lighting", lists.lightingEffects),
       framing: makeField("no frame", lists.framing),
       fantasyElements: makeField("", lists.fantasyElements),
       props: makeField("", lists.props),
@@ -131,13 +153,97 @@
     };
   }
 
+  // Shared pool for the couple (e.g. their 2 dogs + 1 cat together), not
+  // per-person — a couple photo with pets doesn't usually split "belongs
+  // to A vs B." Same shape/cap as Character Mode's own Companion feature.
+  function buildCompanionSlot() {
+    return {
+      category: makeField("", lists.creatureCategories),
+      breed: makeField("", []),
+      color: makeField("", lists.creatureColors),
+      eyeColor: makeField("", lists.eyeColor),
+      position: makeField("", lists.companionPosition),
+      accessories: makeField("none", lists.companionAccessories),
+    };
+  }
+
   function buildInitialState(baseType) {
     return {
       baseType: baseType || "human",
       coupleDynamic: buildCoupleDynamic(),
       characterA: buildPerson(),
       characterB: buildPerson(),
+      companions: {
+        count: 0,
+        slots: [buildCompanionSlot(), buildCompanionSlot(), buildCompanionSlot()],
+      },
     };
+  }
+
+  var MAX_COMPANIONS = 3;
+
+  function setCompanionCount(count) {
+    var state = store.getState();
+    var clamped = Math.max(0, Math.min(MAX_COMPANIONS, count));
+    store.setState({ companions: Object.assign({}, state.companions, { count: clamped }) });
+  }
+
+  function toggleCompanionInclude(include) {
+    setCompanionCount(include ? 1 : 0);
+  }
+
+  function updateCompanionSlotCategory(index, changes) {
+    var state = store.getState();
+    var slot = state.companions.slots[index];
+    var nextCategory = Object.assign({}, slot.category, changes);
+    var breedOptions = lists.creatureBreedsByCategory[nextCategory.value] || [];
+    var newSlot = Object.assign({}, slot, { category: nextCategory, breed: makeField("", breedOptions) });
+    var newSlots = state.companions.slots.slice();
+    newSlots[index] = newSlot;
+    store.setState({ companions: Object.assign({}, state.companions, { slots: newSlots }) });
+  }
+
+  function updateCompanionSlotField(index, fieldName, changes) {
+    var state = store.getState();
+    var slot = state.companions.slots[index];
+    var newSlot = Object.assign({}, slot);
+    newSlot[fieldName] = Object.assign({}, slot[fieldName], changes);
+    var newSlots = state.companions.slots.slice();
+    newSlots[index] = newSlot;
+    store.setState({ companions: Object.assign({}, state.companions, { slots: newSlots }) });
+  }
+
+  // Removes whichever slot is picked (not just the last one) — shifts any
+  // slots after it down by one so there's no gap, and appends a fresh
+  // empty slot at the end to keep the array at its fixed length of 3.
+  function removeCompanionSlot(index) {
+    var state = store.getState();
+    var newSlots = state.companions.slots.slice();
+    newSlots.splice(index, 1);
+    newSlots.push(buildCompanionSlot());
+    store.setState({
+      companions: Object.assign({}, state.companions, {
+        slots: newSlots,
+        count: Math.max(0, state.companions.count - 1),
+      }),
+    });
+  }
+
+  // Flattened companion entries, numbered once a second slot is active —
+  // mirrors Character Mode's own getActiveFieldEntries companion block.
+  function getCompanionFieldEntries() {
+    var state = store.getState();
+    var entries = [];
+    for (var i = 0; i < state.companions.count; i++) {
+      var slot = state.companions.slots[i];
+      var prefix = state.companions.count > 1 ? "Companion " + (i + 1) : "Companion";
+      entries.push({ fieldName: "breed", slotIndex: i, label: prefix, field: slot.breed });
+      entries.push({ fieldName: "color", slotIndex: i, label: prefix + " Color", field: slot.color });
+      entries.push({ fieldName: "eyeColor", slotIndex: i, label: prefix + " Eye Color", field: slot.eyeColor });
+      entries.push({ fieldName: "position", slotIndex: i, label: prefix + " Position", field: slot.position });
+      entries.push({ fieldName: "accessories", slotIndex: i, label: prefix + " Accessories", field: slot.accessories });
+    }
+    return entries;
   }
 
   var store = PromptHaus.util.createStore(buildInitialState());
@@ -234,10 +340,16 @@
   // couple can't contradict each other" field Couple Dynamic exists for.
   function getSharedStyleDNAEntries() {
     var entries = [
-      { label: "Holiday / Theme", field: PromptHaus.styleDNA.getState().holiday },
+      { label: "Holiday", field: PromptHaus.styleDNA.getState().holiday },
+      { label: "Theme", field: PromptHaus.styleDNA.getState().theme },
+      { label: "Niche", field: PromptHaus.styleDNA.getState().niche },
       { label: "Mockup View", field: PromptHaus.styleDNA.getState().mockupView },
+      { label: "Filter It", field: PromptHaus.styleDNA.getState().filter },
     ];
     entries = entries.concat(PromptHaus.styleDNA.getImageryEntries());
+    entries = entries.concat(PromptHaus.brandKit.getActiveKitEntries());
+    var projectTypeEntry = PromptHaus.styleDNA.getProjectTypeEntry("couples");
+    if (projectTypeEntry) entries.push(projectTypeEntry);
     var bufferEntry = PromptHaus.styleDNA.getBufferEntry();
     if (bufferEntry) entries.push(bufferEntry);
     return entries;
@@ -254,6 +366,7 @@
     var sceneResolved = PromptHaus.engine.resolveFields(sceneEntries);
     var aResolved = PromptHaus.engine.resolveFields(getPersonFieldEntries("A").map(toEntry));
     var bResolved = PromptHaus.engine.resolveFields(getPersonFieldEntries("B").map(toEntry));
+    var companionResolved = PromptHaus.engine.resolveFields(getCompanionFieldEntries().map(toEntry));
 
     var parts = [];
     parts.push(
@@ -261,15 +374,17 @@
     );
     if (aResolved.length) parts.push("Character A: a " + aResolved.map(function (r) { return r.value; }).join(", ") + ".");
     if (bResolved.length) parts.push("Character B: a " + bResolved.map(function (r) { return r.value; }).join(", ") + ".");
+    if (companionResolved.length) parts.push("Also include " + companionResolved.map(function (r) { return r.value; }).join(", ") + ".");
     if (sceneResolved.length) parts.push(sceneResolved.map(function (r) { return r.value; }).join(", ") + ".");
 
     var text = parts.filter(Boolean).join(" ");
-    var fragments = aResolved.concat(bResolved).concat(sceneResolved).map(function (r) {
+    var fragments = aResolved.concat(bResolved).concat(companionResolved).concat(sceneResolved).map(function (r) {
       return r.value;
     });
     var resolved = aResolved
       .map(function (r) { return { label: "A — " + r.label, value: r.value }; })
       .concat(bResolved.map(function (r) { return { label: "B — " + r.label, value: r.value }; }))
+      .concat(companionResolved)
       .concat(sceneResolved);
 
     return { text: text, fragments: fragments, resolved: resolved };
@@ -286,19 +401,54 @@
   }
 
   function randomize() {
-    randomizeEntries(getSceneFieldEntries(), function (e, changes) {
-      updateCoupleDynamicField(e.fieldName, changes);
+    var sceneEntries = getSceneFieldEntries();
+    var cappedSceneFields = COUPLE_PRESENTATION_FIELDS.concat(COUPLE_EXTRAS_FIELDS);
+    randomizeEntries(
+      sceneEntries.filter(function (e) { return cappedSceneFields.indexOf(e.fieldName) === -1; }),
+      function (e, changes) { updateCoupleDynamicField(e.fieldName, changes); }
+    );
+    PromptHaus.util.randomizeGroupWithCap(
+      sceneEntries.filter(function (e) { return COUPLE_PRESENTATION_FIELDS.indexOf(e.fieldName) !== -1; }),
+      COUPLE_PRESENTATION_RANDOM_CAP,
+      function (fieldName, changes) { updateCoupleDynamicField(fieldName, changes); },
+      function (fieldName) { updateCoupleDynamicField(fieldName, { value: "", customValue: "" }); }
+    );
+    PromptHaus.util.randomizeGroupWithCap(
+      sceneEntries.filter(function (e) { return COUPLE_EXTRAS_FIELDS.indexOf(e.fieldName) !== -1; }),
+      COUPLE_EXTRAS_RANDOM_CAP,
+      function (fieldName, changes) { updateCoupleDynamicField(fieldName, changes); },
+      function (fieldName) { updateCoupleDynamicField(fieldName, { value: "", customValue: "" }); }
+    );
+
+    ["A", "B"].forEach(function (person) {
+      var entries = getPersonFieldEntries(person);
+      randomizeEntries(
+        entries.filter(function (e) {
+          return e.groupName !== "styling" && e.groupName !== "appearance" && IDENTITY_RANDOM_EXCLUDE.indexOf(e.fieldName) === -1;
+        }),
+        function (e, changes) {
+          updatePersonField(person, e.groupName, e.fieldName, changes);
+        }
+      );
+      PromptHaus.util.randomizeGroupWithCap(
+        entries.filter(function (e) { return e.groupName === "appearance"; }),
+        APPEARANCE_RANDOM_CAP,
+        function (fieldName, changes) { updatePersonField(person, "appearance", fieldName, changes); },
+        function (fieldName) { updatePersonField(person, "appearance", fieldName, { value: "", customValue: "" }); }
+      );
+      PromptHaus.util.randomizeGroupWithCap(
+        entries.filter(function (e) { return e.groupName === "styling"; }),
+        STYLING_RANDOM_CAP,
+        function (fieldName, changes) { updatePersonField(person, "styling", fieldName, changes); },
+        function (fieldName) { updatePersonField(person, "styling", fieldName, { value: "", customValue: "" }); }
+      );
     });
-    randomizeEntries(getPersonFieldEntries("A"), function (e, changes) {
-      updatePersonField("A", e.groupName, e.fieldName, changes);
-    });
-    randomizeEntries(getPersonFieldEntries("B"), function (e, changes) {
-      updatePersonField("B", e.groupName, e.fieldName, changes);
-    });
+    PromptHaus.styleDNA.randomizeContent();
   }
 
   function reset() {
     store.setState(buildInitialState(store.getState().baseType));
+    PromptHaus.styleDNA.resetContent();
   }
 
   function getSelectionsByGroup() {
@@ -307,10 +457,12 @@
     var sceneResolved = PromptHaus.engine.resolveFields(sceneEntries);
     var aResolved = PromptHaus.engine.resolveFields(getPersonFieldEntries("A").map(toEntry));
     var bResolved = PromptHaus.engine.resolveFields(getPersonFieldEntries("B").map(toEntry));
+    var companionResolved = PromptHaus.engine.resolveFields(getCompanionFieldEntries().map(toEntry));
     var groups = [];
     if (sceneResolved.length) groups.push({ title: "Couple Dynamic", items: sceneResolved });
     if (aResolved.length) groups.push({ title: "Character A", items: aResolved });
     if (bResolved.length) groups.push({ title: "Character B", items: bResolved });
+    if (companionResolved.length) groups.push({ title: "Companion", items: companionResolved });
     return groups;
   }
 
@@ -356,10 +508,20 @@
     swapCharacters: swapCharacters,
     getPersonFieldEntries: getPersonFieldEntries,
     getSceneFieldEntries: getSceneFieldEntries,
+    getCompanionFieldEntries: getCompanionFieldEntries,
+    toggleCompanionInclude: toggleCompanionInclude,
+    setCompanionCount: setCompanionCount,
+    updateCompanionSlotCategory: updateCompanionSlotCategory,
+    updateCompanionSlotField: updateCompanionSlotField,
+    removeCompanionSlot: removeCompanionSlot,
+    MAX_COMPANIONS: MAX_COMPANIONS,
     getSelectionsByGroup: getSelectionsByGroup,
     assemblePrompt: assemblePrompt,
     randomize: randomize,
     reset: reset,
     labels: { coupleDynamic: COUPLE_DYNAMIC_LABELS },
+    STYLE_FIELDS: COUPLE_STYLE_FIELDS,
+    PRESENTATION_FIELDS: COUPLE_PRESENTATION_FIELDS,
+    EXTRAS_FIELDS: COUPLE_EXTRAS_FIELDS,
   });
 })();

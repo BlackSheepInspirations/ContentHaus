@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Brand Haus — Local Dev Preview</title>
+<link rel="stylesheet" href="../assets/brand-haus.css" id="bh-css-link" />
+</head>
+<body>
+<!-- Dev-only harness: mirrors what sections/brand-haus.liquid mounts, so
+     we can preview in a plain browser before Shopify CLI is set up. Not
+     part of the shipped theme. -->
+<div class="bh-brand-header">
+  <div class="bh-marketing__hero">
+    <p class="bh-marketing__eyebrow">Black Sheep Creations &amp; Inspirations</p>
+    <h1 class="bh-marketing__heading">Brand Haus — Where You Define Your <span class="bh-heading-accent">Brand</span> DNA Blueprint&trade;</h1>
+    <div class="bh-marketing__subheading">Discover who you are as a brand before you create anything — powered by Black Sheep Creations.</div>
+  </div>
+</div>
+<div id="brand-haus-app"></div>
+<script>
+  // Cache-bust on every load during local dev so edited asset files are
+  // always picked up without a manual hard-refresh.
+  var v = Date.now();
+  document.getElementById("bh-css-link").href = "../assets/brand-haus.css?v=" + v;
+  [
+    "../assets/brand-haus-util.js",
+    "../assets/brand-haus-engine.js",
+    "../assets/brand-haus-favorites.js",
+    "../assets/brand-haus-identity.js",
+    "../assets/brand-haus-branddna.js",
+    "../assets/brand-haus-branding.js",
+    "../assets/brand-haus-logo.js",
+    "../assets/brand-haus-founderinterview.js",
+    "../assets/brand-haus-ui.js",
+  ].forEach(function (src) {
+    document.write('<script src="' + src + '?v=' + v + '"></' + 'script>');
+  });
+</script>
+</body>
+</html>
