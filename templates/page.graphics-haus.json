@@ -1,0 +1,8 @@
+{
+  "sections": {
+    "main": {
+      "type": "graphics-haus"
+    }
+  },
+  "order": ["main"]
+}

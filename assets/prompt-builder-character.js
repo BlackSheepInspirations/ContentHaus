@@ -802,6 +802,7 @@
   function reset() {
     store.setState(buildInitialState(store.getState().baseType));
     PromptHaus.styleDNA.resetContent();
+    if (PromptHaus.characterVideo) PromptHaus.characterVideo.reset();
   }
 
   // Same active field list as the assembler, grouped by category with

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Product Haus — Local Dev Preview</title>
+<link rel="stylesheet" href="../assets/product-haus.css" id="pdh-css-link" />
+</head>
+<body>
+<!-- Dev-only harness: mirrors what sections/product-haus.liquid mounts,
+     so we can preview in a plain browser before Shopify CLI is set up.
+     Not part of the shipped theme. -->
+<div class="pdh-brand-header">
+  <div class="pdh-marketing__hero">
+    <p class="pdh-marketing__eyebrow">Black Sheep Creations &amp; Inspirations</p>
+    <h1 class="pdh-marketing__heading">The <span class="pdh-heading-accent">AI</span> Creator's Product Haus</h1>
+    <div class="pdh-marketing__subheading">Create the sellable digital products around your brand — invitations, devotional cards, and more. Customized your way.</div>
+  </div>
+</div>
+<div id="product-haus-app"></div>
+<script>
+  // Cache-bust on every load during local dev so edited asset files are
+  // always picked up without a manual hard-refresh.
+  var v = Date.now();
+  document.getElementById("pdh-css-link").href = "../assets/product-haus.css?v=" + v;
+  [
+    "../assets/product-haus-util.js",
+    "../assets/product-haus-engine.js",
+    "../assets/product-haus-favorites.js",
+    "../assets/product-haus-styledna.js",
+    "../assets/product-haus-brandkit.js",
+    "../assets/product-haus-looklock.js",
+    "../assets/product-haus-invitations.js",
+    "../assets/product-haus-devotional.js",
+    "../assets/product-haus-generators.js",
+    "../assets/product-haus-generators-coloringpage.js",
+    "../assets/product-haus-generators-plannerpages.js",
+    "../assets/product-haus-generators-junkjournal.js",
+    "../assets/product-haus-generators-kidsworksheet.js",
+    "../assets/product-haus-generators-wallart.js",
+    "../assets/product-haus-generators-quotewallart.js",
+    "../assets/product-haus-generators-coloringbook.js",
+    "../assets/product-haus-generators-activitybook.js",
+    "../assets/product-haus-generators-prayercards.js",
+    "../assets/product-haus-generators-devotionalpages.js",
+    "../assets/product-haus-generators-ebookpages.js",
+    "../assets/product-haus-checklists-eventchecklist.js",
+    "../assets/product-haus-generators-eventchecklist.js",
+    "../assets/product-haus-checklists-vendorchecklist.js",
+    "../assets/product-haus-generators-vendorchecklist.js",
+    "../assets/product-haus-ui.js",
+  ].forEach(function (src) {
+    document.write('<script src="' + src + '?v=' + v + '"></' + 'script>');
+  });
+</script>
+</body>
+</html>

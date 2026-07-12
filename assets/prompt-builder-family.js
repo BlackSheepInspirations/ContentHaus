@@ -63,6 +63,12 @@
   var FAMILY_EXTRAS_FIELDS = ["fantasyElements", "props", "cosplayCharacter"];
   var FAMILY_PRESENTATION_RANDOM_CAP = 3;
   var FAMILY_EXTRAS_RANDOM_CAP = 1;
+  // Same Appearance/Styling randomize caps Character and Couples both use
+  // per person — Family's own per-person Randomize previously had no caps
+  // at all, dumping every one of the 13 identity/appearance/styling fields
+  // per person instead of a curated subset like its two sibling modes.
+  var PERSON_APPEARANCE_RANDOM_CAP = 5;
+  var PERSON_STYLING_RANDOM_CAP = 3;
 
   var RELATIONSHIP_VIBE_OPTIONS = sortAlpha([
     "none", "immediate family", "extended family", "multigenerational family", "friend group",
@@ -433,19 +439,36 @@
     });
   }
 
+  // Identity fields randomize directly/uncapped (mirroring Character's own
+  // treatment of its own identity group); Appearance and Styling each get
+  // a capped random subset instead of every field turning on every time.
+  var PERSON_APPEARANCE_FIELDS = Object.keys(PERSON_APPEARANCE_LABELS);
+  var PERSON_STYLING_FIELDS = Object.keys(PERSON_STYLING_LABELS);
+  var PERSON_CAPPED_FIELDS = PERSON_APPEARANCE_FIELDS.concat(PERSON_STYLING_FIELDS);
+
+  function randomizePerson(group, index) {
+    var entries = getPersonFieldEntries(group, index);
+    function apply(fieldName, changes) { updatePersonField(group, index, fieldName, changes); }
+    function clear(fieldName) { updatePersonField(group, index, fieldName, { value: "", customValue: "" }); }
+    randomizeEntries(
+      entries.filter(function (e) { return PERSON_CAPPED_FIELDS.indexOf(e.fieldName) === -1; }),
+      function (e, changes) { apply(e.fieldName, changes); }
+    );
+    PromptHaus.util.randomizeGroupWithCap(
+      entries.filter(function (e) { return PERSON_APPEARANCE_FIELDS.indexOf(e.fieldName) !== -1; }),
+      PERSON_APPEARANCE_RANDOM_CAP, apply, clear
+    );
+    PromptHaus.util.randomizeGroupWithCap(
+      entries.filter(function (e) { return PERSON_STYLING_FIELDS.indexOf(e.fieldName) !== -1; }),
+      PERSON_STYLING_RANDOM_CAP, apply, clear
+    );
+  }
+
   function randomize() {
     var state = store.getState();
 
-    for (var a = 0; a < state.adults.count; a++) {
-      randomizeEntries(getPersonFieldEntries("adults", a), function (e, changes) {
-        updatePersonField("adults", e.slotIndex, e.fieldName, changes);
-      });
-    }
-    for (var k = 0; k < state.kids.count; k++) {
-      randomizeEntries(getPersonFieldEntries("kids", k), function (e, changes) {
-        updatePersonField("kids", e.slotIndex, e.fieldName, changes);
-      });
-    }
+    for (var a = 0; a < state.adults.count; a++) { randomizePerson("adults", a); }
+    for (var k = 0; k < state.kids.count; k++) { randomizePerson("kids", k); }
 
     // Companion excluded entirely from randomize — an opted-into add-on,
     // not something that should get re-rolled alongside everything else.

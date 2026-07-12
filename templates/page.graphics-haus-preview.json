@@ -1,0 +1,53 @@
+{
+  "sections": {
+    "main": {
+      "type": "graphics-haus-preview",
+      "blocks": {
+        "feature_1": {
+          "type": "feature",
+          "settings": {
+            "title": "Clipart Pack Generator",
+            "description": "Themed clipart sets — holiday, seasonal, niche — built as a matching bundle, not one image at a time."
+          }
+        },
+        "feature_2": {
+          "type": "feature",
+          "settings": {
+            "title": "Seasonal Cute Animal Generator",
+            "description": "On-trend cute-animal characters for stickers, cards, and seasonal collections."
+          }
+        },
+        "feature_3": {
+          "type": "feature",
+          "settings": {
+            "title": "Faux Textile Character & Object Generator",
+            "description": "Yarn, knit, and patchwork-look characters and objects — the cozy handmade look, without the handmade time."
+          }
+        },
+        "feature_4": {
+          "type": "feature",
+          "settings": {
+            "title": "Retro Object Icon Generator",
+            "description": "Nostalgic object icons — stamps, soda cans, gems, and more — in a consistent retro style."
+          }
+        },
+        "feature_5": {
+          "type": "feature",
+          "settings": {
+            "title": "License Plate Generator",
+            "description": "Custom novelty license plate graphics, with their own dedicated set of controls."
+          }
+        },
+        "feature_6": {
+          "type": "feature",
+          "settings": {
+            "title": "Look Lock",
+            "description": "Save a look you love and carry its exact aesthetic into every other generator — no retyping."
+          }
+        }
+      },
+      "block_order": ["feature_1", "feature_2", "feature_3", "feature_4", "feature_5", "feature_6"]
+    }
+  },
+  "order": ["main"]
+}

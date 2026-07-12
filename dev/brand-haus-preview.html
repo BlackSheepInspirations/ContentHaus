@@ -13,12 +13,30 @@
 <div class="bh-brand-header">
   <div class="bh-marketing__hero">
     <p class="bh-marketing__eyebrow">Black Sheep Creations &amp; Inspirations</p>
-    <h1 class="bh-marketing__heading">Brand Haus — Where You Define Your <span class="bh-heading-accent">Brand</span> DNA Blueprint&trade;</h1>
-    <div class="bh-marketing__subheading">Discover who you are as a brand before you create anything — powered by Black Sheep Creations.</div>
+    <h1 class="bh-marketing__heading">The Brand Haus</h1>
+    <p class="bh-marketing__tagline">Where You Define Your <span class="bh-heading-accent">Brand DNA Blueprint</span>&trade;</p>
+    <div class="bh-marketing__subheading">Discover who you are as a brand before you create anything.<br>Powered by Black Sheep Creations.</div>
   </div>
 </div>
 <div id="brand-haus-app"></div>
 <script>
+  // Mirrors the window.BrandHausHeroImages block sections/brand-haus.liquid
+  // injects via asset_url — same relative-path pattern, just pointed at
+  // this repo's own assets/ folder instead of Shopify's CDN, so the hero
+  // image slot in Chapter 1 can be previewed locally once files exist.
+  window.BrandHausHeroImages = {
+    "trusted-guide": "../assets/brand-haus-hero-trusted-guide.jpg",
+    "bold-pioneer": "../assets/brand-haus-hero-bold-pioneer.jpg",
+    "cozy-craftsman": "../assets/brand-haus-hero-cozy-craftsman.jpg",
+    "elevated-icon": "../assets/brand-haus-hero-elevated-icon.jpg",
+    "free-spirit": "../assets/brand-haus-hero-free-spirit.jpg",
+    "joyful-connector": "../assets/brand-haus-hero-joyful-connector.jpg",
+    "quiet-authority": "../assets/brand-haus-hero-quiet-authority.jpg",
+    "modern-minimalist": "../assets/brand-haus-hero-modern-minimalist.jpg",
+    "community-builder": "../assets/brand-haus-hero-community-builder.jpg",
+    "luxe-rebel": "../assets/brand-haus-hero-luxe-rebel.jpg",
+    "trail-forger": "../assets/brand-haus-hero-trail-forger.jpg"
+  };
   // Cache-bust on every load during local dev so edited asset files are
   // always picked up without a manual hard-refresh.
   var v = Date.now();
@@ -26,12 +44,20 @@
   [
     "../assets/brand-haus-util.js",
     "../assets/brand-haus-engine.js",
+    "../assets/brand-haus-generators.js",
     "../assets/brand-haus-favorites.js",
     "../assets/brand-haus-identity.js",
     "../assets/brand-haus-branddna.js",
     "../assets/brand-haus-branding.js",
     "../assets/brand-haus-logo.js",
     "../assets/brand-haus-founderinterview.js",
+    "../assets/brand-haus-results.js",
+    "../assets/brand-haus-blueprint.js",
+    "../assets/brand-haus-playbook-content.js",
+    "../assets/brand-haus-playbook.js",
+    "../assets/brand-haus-brandkit.js",
+    "../assets/brand-haus-generators-businesscardkit.js",
+    "../assets/brand-haus-generators-mediakit.js",
     "../assets/brand-haus-ui.js",
   ].forEach(function (src) {
     document.write('<script src="' + src + '?v=' + v + '"></' + 'script>');

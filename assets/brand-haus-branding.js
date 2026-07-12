@@ -51,6 +51,7 @@
   var MOOD_OPTIONS = sortAlpha([
     "minimalist and clean", "warm and cozy", "bold and vibrant", "elegant and luxurious", "playful and fun",
     "rustic and organic", "modern and edgy", "romantic and soft", "professional and polished", "boho and eclectic",
+    "rugged and outdoorsy",
   ]);
 
   var BRAND_VOICE_OPTIONS = sortAlpha([
@@ -64,7 +65,7 @@
     "side-by-side comparison layout",
   ];
 
-  var MAX_COLORS = 5;
+  var MAX_COLORS = 6;
   var MAX_VALUES = 5;
 
   var PRESETS = [
@@ -223,15 +224,20 @@
     }
     if (colors.length) addZone("a color palette strip showing these exact swatches in order: " + colors.join(", "), colors.join(", ") + " color palette");
     if (headingFont || bodyFont) {
+      // Gives the model its own short, generic sample copy for this
+      // zone — without it, image generators tend to reach for the
+      // nearest substantial text block elsewhere in the prompt (the
+      // mission statement) to fill the "body text" area, which is what
+      // caused the mission to render twice on the finished board.
       var typoBits = [];
-      if (headingFont) typoBits.push("heading text styled like a " + headingFont + " typeface");
-      if (bodyFont) typoBits.push("body text styled like a " + bodyFont + " typeface");
-      addZone("a typography sample zone showing " + typoBits.join(" and "), typoBits.join(", "));
+      if (headingFont) typoBits.push('heading text reading "Your Next Big Idea" styled like a ' + headingFont + " typeface");
+      if (bodyFont) typoBits.push('body text reading "This is how your brand sounds." styled like a ' + bodyFont + " typeface");
+      addZone("a typography sample zone showing " + typoBits.join(" and ") + " — do not repeat the mission statement or any other zone's text here", typoBits.join(", "));
     }
     if (mood) addZone("an overall mood/aesthetic direction of " + mood, mood);
     if (mission) addZone('a mission statement zone reading: "' + mission + '"', "mission statement");
     if (values.length) addZone("a core values list zone displaying: " + values.join(", "), values.join(", "));
-    if (brandVoice) addZone("a brand voice/personality of " + brandVoice, brandVoice);
+    if (brandVoice) addZone("a voice/personality of " + brandVoice, brandVoice);
 
     var intro = "Design a cohesive brand identity board as one image, laid out as a " + layoutStyle + ", including:";
     var text = zones.length ? intro + " " + zones.join("; ") + "." : intro;
@@ -307,15 +313,15 @@
 
     wrap.appendChild(ui.renderFieldGroup("Mood & Voice", [
       { label: "Mood / Aesthetic", field: state.mood },
-      { label: "Brand Voice / Personality", field: state.brandVoice },
+      { label: "Voice / Personality", field: state.brandVoice },
     ], function (entry, changes) {
       if (entry.label === "Mood / Aesthetic") updateField("mood", changes);
       else updateField("brandVoice", changes);
       BrandHaus.ui.renderApp();
     }));
 
-    wrap.appendChild(ui.renderPlainFieldRow(
-      [{ label: "Mission Statement", field: state.mission, placeholder: "In a sentence or two, what does this brand do and why does it matter?" }],
+    wrap.appendChild(ui.renderFieldGroup("Mission Statement",
+      [{ label: "", field: state.mission, placeholder: "In a sentence or two, what does this brand do and why does it matter?" }],
       function (entry, changes) { updateField("mission", changes); BrandHaus.ui.renderApp(); }
     ));
 

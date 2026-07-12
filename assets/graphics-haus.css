@@ -1,0 +1,1850 @@
+/* The AI Creator's Graphics Haus — sibling palette to Prompt Haus.
+   Same component CSS, same token names (--gh-cream, --gh-gold, etc.) as
+   every other Haus for a minimal, low-risk port — only the hex values
+   change. Black/charcoal/teal/border/cream are unchanged (shared utility
+   accent, already proven across every Haus); espresso becomes a violet/
+   indigo (this Haus's own distinct accent, distinguishing it from Product
+   Haus's terracotta and Marketing Haus's hot pink) and gold is the same
+   real gold every other Haus uses (not the flat grey Marketing Haus's own
+   --mh-gold mislabels as "gold" — never repeating that bug in a new
+   product); --gh-gold-on-light is kept as an alias of the same value only
+   so nothing that already references it breaks.
+   Shared across the app shell, the locked state, and the marketing page —
+   those last two render outside #graphics-haus-app entirely (the locked
+   state replaces it, the marketing page is a separate page/section), so
+   the custom properties can't just live scoped to that one selector. */
+#graphics-haus-app,
+.gh-locked,
+.gh-marketing,
+.gh-brand-header {
+  --gh-cream: #F2F0EB;
+  --gh-black: #1A1815;
+  --gh-gold: #C9A84C;
+  --gh-teal: #0D7377;
+  --gh-charcoal: #2E2A26;
+  --gh-espresso: #5B3C8C;
+  --gh-border: rgba(46, 42, 38, 0.15);
+  --gh-gold-on-light: #C9A84C;
+
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+#graphics-haus-app {
+  background: var(--gh-cream);
+  color: var(--gh-black);
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 24px 16px 64px;
+}
+
+/* Branded header above the tool page (sections/prompt-builder.liquid) —
+   sibling of #graphics-haus-app, reuses .gh-marketing__hero's eyebrow/
+   heading/subheading styling for consistent branding across both pages. */
+.gh-brand-header {
+  background: var(--gh-cream);
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 40px 16px 16px;
+  overflow: hidden;
+}
+/* .gh-marketing__hero's own margin-bottom (spacing before its video/CTA on
+   the marketing page) would otherwise leave a gap of the theme's page
+   background showing between this header and the tool/locked-state below,
+   since both are separate cream-colored blocks rather than one continuous
+   background. */
+.gh-brand-header .gh-marketing__hero {
+  margin-bottom: 0;
+}
+
+#graphics-haus-app * {
+  box-sizing: border-box;
+}
+
+/* Icon system — inherits color from whatever text color surrounds it */
+.gh-icon {
+  display: inline-flex;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  vertical-align: -3px;
+}
+.gh-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* Style DNA bar */
+.gh-styledna {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  background: var(--gh-charcoal);
+  color: var(--gh-cream);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 24px;
+}
+.gh-styledna__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1 1 calc(33.333% - 11px);
+  min-width: 160px;
+}
+.gh-styledna__field--full {
+  flex-basis: 100%;
+}
+.gh-styledna__negative-subtitle {
+  margin: 0;
+  font-size: 12px;
+  color: var(--gh-cream);
+  opacity: 0.75;
+}
+.gh-styledna__negative-input {
+  width: 100%;
+  box-sizing: border-box;
+}
+.gh-styledna__negative-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.gh-styledna__negative-chip {
+  background: transparent;
+  border: 1px solid var(--gh-cream);
+  color: var(--gh-cream);
+  border-radius: 999px;
+  padding: 4px 12px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.gh-styledna__negative-chip:hover {
+  border-color: var(--gh-gold);
+  color: var(--gh-gold);
+}
+.gh-styledna .gh-field__label {
+  color: var(--gh-cream);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.gh-label--icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.gh-styledna .gh-label--icon .gh-icon {
+  color: var(--gh-gold);
+}
+/* Info-icon tooltip — a visible affordance for guidance that used to
+   only live in an invisible hover-only title attribute. <details>/
+   <summary>-based, so click/tap (not just hover) reveals it, with no
+   custom JS listeners to manage. */
+.gh-info {
+  display: inline-block;
+  position: relative;
+}
+.gh-info__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  border: 1px solid var(--gh-gold);
+  color: var(--gh-gold);
+  font-size: 10px;
+  font-weight: 700;
+  font-style: italic;
+  cursor: pointer;
+  list-style: none;
+}
+.gh-info__icon::-webkit-details-marker {
+  display: none;
+}
+.gh-info__icon::marker {
+  content: "";
+}
+/* Shown on hover (desktop) via opacity/visibility rather than relying on
+   <details>'s native open/closed display — that way hover works even
+   without clicking, and click (for touch devices, where hover doesn't
+   exist) still works via the [open] rule below. Set explicitly rather
+   than left to the browser's default "hide everything but <summary> when
+   closed" behavior, which would otherwise block the hover-only case. */
+.gh-info__body {
+  display: block;
+  position: absolute;
+  z-index: 20;
+  top: 22px;
+  left: 0;
+  width: 220px;
+  background: #fff;
+  color: var(--gh-black);
+  border: 1px solid var(--gh-border);
+  border-radius: 6px;
+  padding: 8px 10px;
+  margin: 0;
+  font-size: 12px;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: normal;
+  line-height: 1.4;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.12s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+.gh-info:hover .gh-info__body,
+.gh-info[open] .gh-info__body {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+.gh-styledna__auto-badge {
+  align-self: flex-start;
+  font-size: 11px;
+  color: var(--gh-gold);
+  border: 1px solid var(--gh-gold);
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+.gh-styledna__reset-auto {
+  align-self: flex-start;
+  font-size: 11px;
+  color: var(--gh-teal);
+  background: none;
+  border: 1px solid var(--gh-teal);
+  border-radius: 999px;
+  padding: 2px 8px;
+  cursor: pointer;
+}
+.gh-styledna__yesno {
+  display: flex;
+  gap: 8px;
+}
+.gh-styledna__yesno-btn {
+  flex: 1;
+  border: 1.5px solid var(--gh-border);
+  border-radius: 999px;
+  padding: 8px 16px;
+  background: var(--gh-cream);
+  color: var(--gh-black);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.gh-styledna__yesno-btn.is-active {
+  background: var(--gh-teal);
+  color: var(--gh-cream);
+  border-color: var(--gh-teal);
+}
+
+/* Decorative progress stepper — narrates the flow, doesn't gate it */
+.gh-stepper {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.gh-stepper__step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.gh-stepper__icon {
+  width: 22px;
+  height: 22px;
+  color: var(--gh-teal);
+  flex-shrink: 0;
+}
+.gh-stepper__text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+}
+.gh-stepper__title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--gh-charcoal);
+}
+.gh-stepper__subtitle {
+  font-size: 11px;
+  color: var(--gh-espresso);
+}
+.gh-stepper__connector {
+  flex: 1;
+  min-width: 24px;
+  height: 1px;
+  border-top: 1px dotted var(--gh-border);
+  margin: 11px 4px 0;
+}
+
+/* Shared-prompt banner — shown when the page loads with a ?ph_shared_
+   prompt= link, sits above everything else so it's the first thing a
+   recipient sees. */
+.gh-shared-banner {
+  border: 1.5px solid var(--gh-teal);
+  border-radius: 12px;
+  background: #fff;
+  padding: 14px 18px;
+  margin-bottom: 20px;
+}
+.gh-shared-banner__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.gh-shared-banner__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  margin: 0;
+  color: var(--gh-espresso);
+}
+.gh-shared-banner__title .gh-icon {
+  color: var(--gh-teal);
+}
+.gh-shared-banner__dismiss {
+  border: none;
+  background: none;
+  font-size: 18px;
+  line-height: 1;
+  color: var(--gh-charcoal);
+  cursor: pointer;
+  padding: 2px 6px;
+  flex-shrink: 0;
+}
+.gh-shared-banner__text {
+  margin: 10px 0;
+  font-size: 13px;
+  color: var(--gh-charcoal);
+  white-space: pre-wrap;
+  background: var(--gh-cream);
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+/* Tips for Better Prompts — general guidance, shown above the Style DNA
+   bar so it's visible before anyone starts filling in fields. */
+.gh-tips {
+  border: 1.5px solid var(--gh-gold);
+  border-radius: 12px;
+  background: var(--gh-cream);
+  padding: 14px 18px;
+  margin-bottom: 20px;
+}
+.gh-tips__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.gh-tips__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  margin: 0;
+  color: var(--gh-espresso);
+}
+.gh-tips__title .gh-icon {
+  color: var(--gh-gold);
+}
+.gh-tips__toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  background: none;
+  color: var(--gh-teal);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px;
+  flex-shrink: 0;
+}
+.gh-tips__list {
+  margin: 12px 0 0;
+  padding-left: 4px;
+  list-style: none;
+  color: var(--gh-charcoal);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.gh-tips__list li {
+  position: relative;
+  padding-left: 20px;
+  margin-bottom: 8px;
+}
+.gh-tips__list li:last-child {
+  margin-bottom: 0;
+}
+.gh-tips__list li::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 5px;
+  width: 8px;
+  height: 8px;
+  background: var(--gh-teal);
+  transform: rotate(45deg);
+}
+
+/* FAQ — same shape as Tips, sits under Your Vault. */
+.gh-faq {
+  border: 1.5px solid var(--gh-border);
+  border-radius: 12px;
+  background: #fff;
+  padding: 14px 18px;
+  margin-top: 20px;
+}
+/* Shared header row — title + collapse toggle — reused by Your Vault,
+   Recently Generated, My HAUS Style, and this FAQ section, so all four
+   right-column cards read as one consistent family instead of several
+   near-identical hand-rolled headers. */
+.gh-faq__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.gh-faq__header .gh-saved__title {
+  margin: 0;
+}
+.gh-faq__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  margin: 0;
+  color: var(--gh-espresso);
+}
+.gh-faq__title .gh-icon {
+  color: var(--gh-gold);
+}
+.gh-faq__toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  background: none;
+  color: var(--gh-teal);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.gh-faq__list {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.gh-faq__item {
+  padding-top: 12px;
+  border-top: 1px solid var(--gh-border);
+}
+.gh-faq__item:first-child {
+  padding-top: 0;
+  border-top: none;
+}
+.gh-faq__question {
+  margin: 0 0 4px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--gh-espresso);
+}
+.gh-faq__answer {
+  margin: 0;
+  font-size: 13px;
+  color: var(--gh-charcoal);
+  line-height: 1.5;
+}
+
+/* Divider between the process stepper / tips / mode-select sections at the
+   top of the shell. */
+.gh-section-divider {
+  border: none;
+  border-top: 1px solid var(--gh-border);
+  margin: 24px 0;
+}
+/* Layout: fields left, sticky preview right on desktop */
+.gh-body {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+@media (min-width: 900px) {
+  .gh-body {
+    grid-template-columns: 2fr 1fr;
+    align-items: start;
+  }
+  .gh-body__preview {
+    position: sticky;
+    top: 24px;
+  }
+}
+
+/* Base type toggle */
+.gh-basetype-toggle {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.gh-basetype-toggle__btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border: 2px solid var(--gh-charcoal);
+  background: var(--gh-cream);
+  color: var(--gh-charcoal);
+  border-radius: 10px;
+  cursor: pointer;
+  text-align: left;
+}
+.gh-basetype-toggle__icon {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+}
+.gh-basetype-toggle__text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.3;
+}
+.gh-basetype-toggle__title {
+  font-weight: 700;
+  font-size: 14px;
+}
+.gh-basetype-toggle__subtitle {
+  font-size: 12px;
+  opacity: 0.75;
+}
+.gh-basetype-toggle__btn.is-active {
+  background: var(--gh-black);
+  color: var(--gh-gold);
+  border-color: var(--gh-teal);
+}
+.gh-basetype-toggle__btn.is-active .gh-basetype-toggle__icon {
+  color: var(--gh-teal);
+}
+
+/* Pill toggle — lighter-weight sibling of the basetype toggle above, for
+   picking among several options (e.g. Transportation's category row)
+   instead of just two. */
+.gh-pill-toggle {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.gh-pill-toggle__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 2px solid var(--gh-charcoal);
+  background: var(--gh-cream);
+  color: var(--gh-charcoal);
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+}
+.gh-pill-toggle__icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+.gh-pill-toggle__btn.is-active {
+  background: var(--gh-black);
+  color: var(--gh-gold);
+  border-color: var(--gh-teal);
+}
+.gh-pill-toggle__btn.is-active .gh-pill-toggle__icon {
+  color: var(--gh-teal);
+}
+
+/* Starter Presets — clickable card row at the top of a mode's panel */
+.gh-preset-row {
+  margin-bottom: 20px;
+}
+.gh-preset-row__label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--gh-teal);
+}
+.gh-preset-row__cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.gh-preset-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 200px;
+  padding: 12px 14px;
+  border: 1.5px solid var(--gh-border);
+  border-radius: 12px;
+  background: var(--gh-cream);
+  text-align: left;
+  cursor: pointer;
+}
+.gh-preset-card:hover {
+  border-color: var(--gh-gold-on-light);
+}
+.gh-preset-card__name {
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--gh-espresso);
+}
+.gh-preset-card__description {
+  font-size: 12px;
+  color: var(--gh-charcoal);
+  opacity: 0.8;
+  line-height: 1.35;
+}
+
+/* Quick Generators — grid nav (Starter Presets' card pattern repurposed
+   as primary navigation) + a focused single-generator panel with just
+   its own 3-6 fields, plus the two bonus prompt variations below them. */
+.gh-generator-grid__intro {
+  margin: 0 0 16px;
+  font-size: 13px;
+  color: var(--gh-teal);
+}
+.gh-generator-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.gh-generator-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 220px;
+  padding: 16px;
+  border: 1.5px solid var(--gh-border);
+  border-radius: 12px;
+  background: #fff;
+  text-align: left;
+  cursor: pointer;
+}
+.gh-generator-card:hover {
+  border-color: var(--gh-gold-on-light);
+}
+.gh-generator-card .gh-icon {
+  color: var(--gh-teal);
+}
+.gh-generator-card__name {
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--gh-espresso);
+}
+.gh-generator-card__description {
+  font-size: 12px;
+  color: var(--gh-charcoal);
+  opacity: 0.85;
+  line-height: 1.4;
+}
+.gh-generator-panel__back {
+  margin-bottom: 14px;
+}
+.gh-generator-panel__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 20px;
+  margin: 0 0 6px;
+  color: var(--gh-espresso);
+}
+.gh-generator-panel__title .gh-icon {
+  color: var(--gh-teal);
+}
+.gh-generator-panel__description {
+  margin: 0 0 16px;
+  font-size: 13px;
+  color: var(--gh-charcoal);
+  opacity: 0.85;
+}
+.gh-generator-variations {
+  margin-top: 20px;
+}
+.gh-generator-variations__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  margin: 0 0 10px;
+  color: var(--gh-teal);
+}
+.gh-generator-variation {
+  border: 1px solid var(--gh-border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  background: #fff;
+}
+.gh-generator-variation__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.gh-generator-variation__label {
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--gh-espresso);
+}
+.gh-generator-variation__text {
+  margin: 0;
+  font-size: 13px;
+  color: var(--gh-charcoal);
+  line-height: 1.5;
+}
+
+/* Couples Mode */
+.gh-btn--swap {
+  background: var(--gh-teal);
+  color: var(--gh-cream);
+  margin-bottom: 20px;
+}
+.gh-couples__people {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+  margin-top: 20px;
+}
+@media (min-width: 700px) {
+  .gh-couples__people {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.gh-panel--person {
+  border: 1px solid var(--gh-border);
+  border-radius: 12px;
+  padding: 16px;
+  background: #fff;
+  margin-bottom: 14px;
+}
+.gh-panel__person-slots {
+  margin-bottom: 20px;
+}
+.gh-person__title {
+  font-size: 16px;
+  margin: 0 0 12px;
+  color: var(--gh-espresso);
+}
+
+/* Field groups */
+.gh-field-group {
+  border: 1px solid var(--gh-border);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 16px;
+  background: #fff;
+}
+.gh-field-group__title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--gh-espresso);
+  padding: 0 6px;
+}
+.gh-field-group__title .gh-icon {
+  color: var(--gh-teal);
+}
+.gh-field-group__subtitle {
+  margin: 4px 6px 0;
+  font-size: 12px;
+  color: var(--gh-teal);
+}
+.gh-field-group__fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+  margin-top: 8px;
+}
+.gh-imagery__category-label {
+  grid-column: 1 / -1;
+  margin: 10px 0 0;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--gh-black);
+}
+.gh-imagery__category-label:first-child {
+  margin-top: 0;
+}
+.gh-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.gh-field__label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+.gh-field__label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gh-charcoal);
+}
+.gh-field__include {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--gh-teal);
+  white-space: nowrap;
+}
+/* The live theme resets native checkbox appearance entirely and paints
+   the checked fill via `background-color: currentColor` (not
+   accent-color) — so the fix is setting `color`, not accent-color, even
+   though accent-color is the "normal" way to do this. Both are set so
+   this still looks right in a plain/unthemed context (e.g. our own dev
+   harness) where the theme's override isn't present at all. */
+.gh-field__checkbox,
+.gh-subpanel__toggle {
+  accent-color: var(--gh-teal);
+  color: var(--gh-teal);
+  /* Default browser checkbox renders ~13px — too small a target to
+     reliably tap/click. */
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+.gh-field__include,
+.gh-subpanel__header {
+  /* Padding around the whole label (not just the checkbox glyph) grows
+     the actual clickable/tappable area well past 18px without changing
+     the visual checkbox size. */
+  padding: 4px 0;
+}
+.gh-field__select,
+.gh-field__custom {
+  padding: 8px 14px;
+  border: 1px solid var(--gh-border);
+  border-radius: 6px;
+  font-size: 14px;
+  background: var(--gh-cream);
+  color: var(--gh-black);
+}
+/* Dropdowns specifically go full pill shape (matches the mockup); free-text
+   inputs stay a normal rounded rect — a fully pill-shaped text box looks
+   odd once someone's typed a sentence into it. */
+.gh-field__select {
+  border-radius: 999px;
+}
+.gh-color-swatch-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.gh-color-swatch-row .gh-field__select {
+  flex: 1;
+}
+.gh-color-swatch {
+  width: 22px;
+  height: 22px;
+  min-width: 22px;
+  border-radius: 999px;
+  border: 1px solid var(--gh-border);
+  flex-shrink: 0;
+}
+.gh-color-swatch--empty {
+  background: repeating-linear-gradient(45deg, var(--gh-border), var(--gh-border) 2px, transparent 2px, transparent 5px);
+}
+.gh-field__select:focus,
+.gh-field__custom:focus {
+  outline: 2px solid var(--gh-gold);
+}
+.gh-field__quantity-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--gh-teal);
+  margin-top: 2px;
+}
+.gh-field__quantity {
+  width: 64px;
+  padding: 6px;
+  border: 1px solid var(--gh-border);
+  border-radius: 6px;
+  font-size: 13px;
+  background: var(--gh-cream);
+}
+.gh-field__freetext {
+  resize: vertical;
+  font-family: inherit;
+}
+
+/* Opt-in sub-panels (Character's Companion, Text's Accent Word/Phrase) */
+.gh-subpanel {
+  border: 1px dashed var(--gh-border);
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+}
+/* Muted vs. .gh-field-group__title's bold espresso — these are optional
+   add-ons (Accent Word/Phrase, Add a Companion, etc.), so they shouldn't
+   visually outcompete the primary field groups above them. */
+.gh-subpanel__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: var(--gh-espresso);
+  cursor: pointer;
+}
+
+/* Reference Mode's upload box — bolder teal dashed border + white card
+   background (like the old Live-Link Mascot box), split into an image
+   half and a description half. */
+.gh-reference-upload {
+  border: 2px dashed var(--gh-teal);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 16px;
+  background: #fff;
+}
+.gh-reference-upload__disclaimer {
+  margin: 6px 0 12px;
+  font-size: 12px;
+  color: var(--gh-teal);
+}
+.gh-reference-upload__hint {
+  margin: 0 0 6px;
+  font-size: 12px;
+  color: var(--gh-teal);
+}
+.gh-reference-upload__columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  /* start, not stretch — the two columns naturally have different
+     content heights (disclaimer + dropzone vs. label + hint + textarea),
+     and stretching one to match the other is what caused the dropzone's
+     flex-grow to overflow past the box's own bottom edge. */
+  align-items: start;
+}
+@media (max-width: 640px) {
+  .gh-reference-upload__columns {
+    grid-template-columns: 1fr;
+  }
+}
+.gh-reference-upload__file-input {
+  display: none;
+}
+.gh-reference-upload__image {
+  display: flex;
+  flex-direction: column;
+}
+.gh-reference-upload__dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 140px;
+  border: 1px dashed var(--gh-border);
+  border-radius: 10px;
+  padding: 20px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--gh-espresso);
+  cursor: pointer;
+  background: #fff;
+}
+.gh-reference-upload__dropzone.is-dragover {
+  border-color: var(--gh-teal);
+  color: var(--gh-teal);
+  background: rgba(13, 115, 119, 0.06);
+}
+.gh-reference-upload__preview {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+.gh-reference-upload__preview-img {
+  width: 100%;
+  max-height: 200px;
+  object-fit: contain;
+  border-radius: 10px;
+  border: 1px solid var(--gh-border);
+  background: #fff;
+}
+.gh-reference-upload__description .gh-field__freetext {
+  min-height: 120px;
+}
+.gh-reference-upload__description .gh-btn--delete {
+  margin-top: 10px;
+}
+
+/* Creative Brief (was "Your Selections") — curated summary by default,
+   sits above the prompt preview */
+.gh-selections {
+  background: #fff;
+  border: 1px solid var(--gh-border);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+.gh-selections__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+.gh-selections__title {
+  font-size: 18px;
+  margin: 0;
+  color: var(--gh-espresso);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.gh-selections__title .gh-icon {
+  color: var(--gh-gold);
+}
+.gh-selections__subtitle {
+  margin: 2px 0 12px;
+  font-size: 12px;
+  color: var(--gh-teal);
+}
+.gh-selections__eye-btn {
+  background: var(--gh-teal);
+  border: none;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.gh-selections__eye-btn:hover {
+  background: var(--gh-charcoal);
+}
+.gh-selections__brief {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+.gh-selections__brief-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+.gh-selections__brief-icon {
+  color: var(--gh-gold);
+}
+.gh-selections__brief-label {
+  font-weight: 700;
+  color: var(--gh-charcoal);
+  min-width: 84px;
+}
+.gh-selections__brief-value {
+  color: var(--gh-espresso);
+  text-transform: capitalize;
+}
+.gh-selections__scroll {
+  max-height: 340px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+.gh-selections__group-title {
+  margin: 0 0 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--gh-gold-on-light);
+}
+.gh-selections__item {
+  font-size: 13px;
+  padding: 3px 0;
+}
+.gh-selections__item-label {
+  font-weight: 700;
+  color: var(--gh-charcoal);
+}
+.gh-selections__item-value {
+  color: var(--gh-espresso);
+}
+.gh-selections__divider {
+  border: none;
+  border-top: 1px solid var(--gh-border);
+  margin: 10px 0;
+}
+.gh-selections__empty {
+  font-style: italic;
+  color: var(--gh-espresso);
+  font-size: 13px;
+  margin: 0;
+}
+
+/* Live preview — "Your Prompt, Built Live" */
+.gh-preview {
+  background: var(--gh-black);
+  color: var(--gh-cream);
+  border-radius: 12px;
+  padding: 18px;
+}
+.gh-preview__title {
+  font-size: 18px;
+  margin: 0 0 4px;
+  color: var(--gh-gold);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.gh-preview__subtitle {
+  margin: 0 0 12px;
+  font-size: 12px;
+  color: var(--gh-cream);
+  opacity: 0.7;
+}
+/* Matches .gh-field__select/.gh-field__custom's look (the Style DNA bar's
+   "t-shirt design"-style dropdowns) rather than standing out as its own
+   distinct treatment. */
+.gh-preview__text {
+  width: 100%;
+  min-height: 160px;
+  background: var(--gh-cream);
+  color: var(--gh-black);
+  font-family: inherit;
+  border: 1px solid var(--gh-border);
+  border-radius: 6px;
+  padding: 8px;
+  font-size: 14px;
+  resize: vertical;
+}
+.gh-preview__text:focus {
+  outline: 2px solid var(--gh-gold);
+}
+.gh-preview__actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 12px;
+}
+.gh-preview__export-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-top: 8px;
+}
+@media (max-width: 480px) {
+  .gh-preview__export-row {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.gh-btn--export {
+  background: transparent;
+  border: 1px solid var(--gh-cream);
+  color: var(--gh-cream);
+  padding: 8px 10px;
+  font-size: 12px;
+}
+
+.gh-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  border: none;
+}
+/* Consistent visible focus ring for every button, pill toggle, and the
+   keyboard-operable upload dropzone — same gold used for select/input
+   focus, rather than relying on each browser's own inconsistent default. */
+.gh-btn:focus-visible,
+.gh-styledna__yesno-btn:focus-visible,
+.gh-preset-card:focus-visible,
+.gh-reference-upload__dropzone:focus-visible {
+  outline: 2px solid var(--gh-gold);
+  outline-offset: 2px;
+}
+.gh-btn--copy {
+  background: var(--gh-gold);
+  color: var(--gh-black);
+}
+.gh-btn--randomize {
+  background: var(--gh-espresso);
+  color: var(--gh-cream);
+}
+.gh-btn--reset {
+  background: transparent;
+  border: 1px solid var(--gh-cream);
+  color: var(--gh-cream);
+}
+/* The one teal/white accent among the 4 buttons, per instruction —
+   Randomize moved to espresso so teal isn't duplicated across two buttons. */
+.gh-btn--save {
+  background: var(--gh-teal);
+  color: #fff;
+}
+.gh-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.gh-btn--small {
+  padding: 6px 12px;
+  font-size: 12px;
+}
+.gh-companion__controls {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 4px 0 12px;
+}
+/* Outlined pill to match the Remove button's visual weight — plain
+   .gh-btn alone has no border/background of its own, so it read as a
+   bare, disconnected control next to Remove's clearly-defined pill. */
+.gh-btn--add {
+  background: var(--gh-cream);
+  border: 2px solid var(--gh-teal);
+  color: var(--gh-teal);
+}
+.gh-companion__slot-remove {
+  margin-top: 6px;
+}
+/* Used inside light cards (Saved Prompts), unlike .gh-btn--reset which is
+   styled cream-on-transparent for the dark preview panel. */
+.gh-btn--delete {
+  background: transparent;
+  border: 1px solid var(--gh-espresso);
+  color: var(--gh-espresso);
+}
+.gh-color-swatch-item .gh-btn--reset {
+  border-color: var(--gh-charcoal);
+  color: var(--gh-charcoal);
+}
+.gh-color-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+.gh-color-swatch-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+/* Text-slot list row (e.g. Brand Kit's Core Values) — same flex/gap
+   pattern as .gh-color-swatch-item just above, for its text input +
+   Remove button pair. */
+.gh-text-slot-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.gh-color-swatch-item input[type="color"] {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid var(--gh-border);
+  border-radius: 6px;
+  cursor: pointer;
+}
+.gh-color-hex {
+  width: 90px;
+}
+.gh-preview__save-feedback {
+  margin: 10px 0 0;
+  font-size: 13px;
+  font-weight: 600;
+}
+.gh-preview__save-feedback.is-success {
+  color: var(--gh-gold);
+}
+.gh-preview__save-feedback.is-error {
+  color: #e58a8a;
+}
+/* Quality Nudge — deliberately louder than the dark preview box around
+   it (white background, red text/icon) rather than blending into the
+   site's own palette, so it actually reads as a heads-up worth noticing
+   instead of just more ambient styling. #B91C1C on white is 6.47:1,
+   comfortably past WCAG AA's 4.5:1 for normal text. */
+.gh-preview__nudge {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: #B91C1C;
+  background: #fff;
+  border: 1px solid #B91C1C;
+  border-radius: 6px;
+}
+.gh-preview__nudge-icon {
+  flex-shrink: 0;
+  color: #B91C1C;
+  margin-top: 1px;
+}
+
+/* Saved Prompts — below the Live Prompt Preview */
+.gh-saved {
+  background: #fff;
+  border: 1px solid var(--gh-border);
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 20px;
+}
+.gh-saved__title {
+  font-size: 18px;
+  margin: 0 0 10px;
+  color: var(--gh-espresso);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.gh-saved__title .gh-icon {
+  color: var(--gh-gold);
+}
+.gh-recent__clear-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 8px;
+}
+.gh-saved__empty {
+  font-style: italic;
+  color: var(--gh-espresso);
+  font-size: 13px;
+  margin: 0;
+}
+.gh-saved__item {
+  border: 1px solid var(--gh-border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 10px;
+}
+.gh-saved__item:last-child {
+  margin-bottom: 0;
+}
+.gh-saved__item-text {
+  margin: 0 0 8px;
+  font-size: 13px;
+  color: var(--gh-charcoal);
+}
+.gh-saved__version-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.gh-saved__version-row .gh-icon {
+  color: var(--gh-gold);
+  flex-shrink: 0;
+}
+.gh-saved__version-select {
+  font-size: 12px;
+  padding: 3px 6px;
+  border: 1px solid var(--gh-border);
+  border-radius: 4px;
+  background: #fff;
+  color: var(--gh-charcoal);
+}
+.gh-saved__item-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.gh-saved__item-tag {
+  font-size: 11px;
+  color: var(--gh-teal);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.gh-saved__item-actions {
+  display: flex;
+  gap: 6px;
+}
+.gh-saved__item-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.gh-saved__item-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--gh-espresso);
+}
+.gh-saved__rename-btn {
+  background: transparent;
+  border: none;
+  color: var(--gh-teal);
+  cursor: pointer;
+  padding: 2px;
+  display: inline-flex;
+  flex-shrink: 0;
+}
+.gh-saved__item-title-input {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--gh-espresso);
+  border: 1px solid var(--gh-teal);
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-family: inherit;
+}
+.gh-btn--load {
+  background: transparent;
+  border: 1px solid var(--gh-teal);
+  color: var(--gh-teal);
+}
+/* Vault-wide export row lives inside the same white .gh-saved card as
+   the per-item list — .gh-btn--export's default cream-on-transparent
+   styling is meant for the dark preview panel, so it needs the same
+   light-card override .gh-btn--delete already gets over .gh-btn--reset. */
+.gh-saved__vault-export {
+  margin-bottom: 14px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--gh-border);
+}
+.gh-saved__vault-export-label {
+  display: block;
+  font-size: 12px;
+  color: var(--gh-espresso);
+  margin-bottom: 8px;
+}
+.gh-saved__vault-export .gh-btn--export {
+  border-color: var(--gh-espresso);
+  color: var(--gh-espresso);
+}
+
+/* Brand Kit ("My HAUS Style") — sits in the same white card style as
+   Your Vault, right below it. */
+.gh-brandkit {
+  background: #fff;
+  border: 1px solid var(--gh-border);
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 20px;
+}
+.gh-brandkit__intro {
+  font-size: 13px;
+  color: var(--gh-teal);
+  margin: 0 0 14px;
+}
+.gh-brandkit__card {
+  border: 1px solid var(--gh-border);
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 14px;
+}
+.gh-brandkit__card.is-active {
+  border-color: var(--gh-teal);
+  border-width: 2px;
+}
+.gh-brandkit__card-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+.gh-brandkit__disclaimer {
+  font-size: 12px;
+  color: var(--gh-espresso);
+  background: var(--gh-cream);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin: 10px 0 0;
+}
+.gh-brandkit__synced-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--gh-espresso);
+  border: 1px solid var(--gh-border);
+  border-radius: 999px;
+  padding: 5px 10px;
+}
+.gh-brandkit__category {
+  margin-top: 12px;
+}
+.gh-brandkit__override-label {
+  margin: 8px 6px 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--gh-espresso);
+}
+.gh-brandkit__new-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+.gh-brandkit__new-input {
+  flex: 1;
+  padding: 8px 14px;
+  border: 1px solid var(--gh-border);
+  border-radius: 999px;
+  font-size: 14px;
+  font-family: inherit;
+}
+
+/* Logo Mode — Section A callouts (static UI text, never in the prompt) */
+.gh-logo-callout {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  background: var(--gh-cream);
+  border: 1px solid var(--gh-gold);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin: 0 0 16px;
+  font-size: 13px;
+  color: var(--gh-espresso);
+  line-height: 1.5;
+}
+.gh-logo-callout .gh-icon {
+  color: var(--gh-gold);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.gh-logo-symbol-only {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--gh-charcoal);
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.gh-logo-negconstraints {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+.gh-logo-inline-disclaimer {
+  font-size: 12px;
+  color: var(--gh-espresso);
+  background: var(--gh-cream);
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin: 8px 0 0;
+}
+
+/* Locked state (sections/prompt-builder.liquid, non-purchasers) */
+.gh-locked {
+  background: var(--gh-cream);
+  color: var(--gh-black);
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 64px 24px;
+  text-align: center;
+}
+.gh-locked__heading {
+  color: var(--gh-espresso);
+  font-size: 28px;
+  margin: 0 0 12px;
+}
+.gh-locked__body {
+  color: var(--gh-charcoal);
+  margin-bottom: 24px;
+}
+.gh-locked__actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.gh-locked__learn-more {
+  border-color: var(--gh-charcoal);
+  color: var(--gh-charcoal);
+}
+
+/* Marketing/preview page (sections/prompt-builder-preview.liquid) */
+.gh-marketing {
+  background: var(--gh-cream);
+  color: var(--gh-black);
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 48px 24px 80px;
+  overflow: hidden;
+}
+.gh-marketing__hero {
+  position: relative;
+  text-align: center;
+  margin-bottom: 40px;
+}
+/* Soft decorative corner accents — purely cosmetic (negative z-index keeps
+   them behind the heading/eyebrow/subheading, pointer-events off keeps
+   them out of the way of clicks), applies wherever this hero renders: the
+   standalone marketing page and the gated tool page's branded header. */
+.gh-marketing__hero::before,
+.gh-marketing__hero::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  border-radius: 50%;
+  pointer-events: none;
+}
+.gh-marketing__hero::before {
+  width: 240px;
+  height: 240px;
+  top: -20px;
+  left: -40px;
+  background: radial-gradient(circle, rgba(201, 168, 76, 0.3), transparent 70%);
+}
+.gh-marketing__hero::after {
+  width: 280px;
+  height: 280px;
+  top: -30px;
+  right: -60px;
+  background: radial-gradient(circle, rgba(13, 115, 119, 0.24), transparent 70%);
+}
+.gh-marketing__eyebrow {
+  color: var(--gh-gold-on-light);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 13px;
+  font-weight: 700;
+  margin: 0 0 8px;
+}
+.gh-marketing__heading {
+  color: var(--gh-black);
+  font-size: 32px;
+  margin: 0 0 16px;
+}
+.gh-heading-accent {
+  color: var(--gh-gold-on-light);
+}
+.gh-marketing__subheading {
+  color: var(--gh-charcoal);
+  font-size: 17px;
+  max-width: 640px;
+  margin: 0 auto 24px;
+}
+.gh-marketing__cta {
+  display: inline-block;
+}
+.gh-marketing__video {
+  margin-bottom: 48px;
+}
+.gh-marketing__video-embed {
+  position: relative;
+  width: 100%;
+  padding-top: 56.25%;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--gh-black);
+}
+.gh-marketing__video-embed iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+.gh-marketing__video-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  border-radius: 12px;
+  background: var(--gh-charcoal);
+  color: var(--gh-cream);
+  font-style: italic;
+}
+.gh-marketing__features {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+  margin-bottom: 48px;
+}
+@media (min-width: 700px) {
+  .gh-marketing__features {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.gh-marketing__feature {
+  border: 1px solid var(--gh-border);
+  border-radius: 12px;
+  padding: 20px;
+  background: #fff;
+}
+.gh-marketing__feature h3 {
+  color: var(--gh-espresso);
+  font-size: 17px;
+  margin: 0 0 8px;
+}
+.gh-marketing__feature p {
+  color: var(--gh-charcoal);
+  margin: 0;
+  font-size: 14px;
+}
+.gh-marketing__footer-cta {
+  text-align: center;
+}
+
+/* Fallback shown in place of the whole builder if a render crashes (e.g.
+   loading a Vault/Recent item saved under an older version of the tool
+   whose defensive merge still couldn't reconcile every field) — see the
+   try/catch around renderAppContent() in prompt-builder-ui.js. */
+.gh-render-error {
+  max-width: 480px;
+  margin: 40px auto;
+  padding: 20px;
+  background: #fff;
+  border: 1px solid var(--gh-border);
+  border-radius: 12px;
+  text-align: center;
+  color: var(--gh-espresso);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* Collection Builder — a pure aggregation view, not a field-building
+   mode, so its panel is just a checklist rather than the usual dense
+   field groups. */
+.gh-collection__checklist {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 12px;
+}
+.gh-collection__checklist-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: #fff;
+  border: 1px solid var(--gh-border);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--gh-charcoal);
+}
+.gh-collection__checklist-item .gh-icon {
+  color: var(--gh-gold);
+}
+.gh-collection__item {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 14px;
+}
+.gh-collection__item:last-child {
+  margin-bottom: 0;
+}
+.gh-collection__item--combined {
+  border-color: var(--gh-gold);
+  background: rgba(212, 175, 55, 0.12);
+}
+.gh-collection__item-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 10px;
+  font-size: 15px;
+  color: var(--gh-gold);
+}
+.gh-collection__item-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+/* Brand DNA Assessment (Founder Interview) */
+.gh-founder-interview {
+  background: #fff;
+  border: 1px solid var(--gh-border);
+  border-radius: 12px;
+  padding: 28px;
+  max-width: 640px;
+  margin: 0 auto;
+}
+.gh-founder-interview--intro,
+.gh-founder-interview--results {
+  text-align: left;
+}
+.gh-founder-interview__progress-track {
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(46, 42, 38, 0.1);
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+.gh-founder-interview__progress-fill {
+  height: 100%;
+  background: var(--gh-espresso);
+  transition: width 0.2s ease;
+}
+.gh-founder-interview__question {
+  font-size: 20px;
+  line-height: 1.4;
+  margin: 4px 0 20px;
+  color: var(--gh-charcoal);
+}
+.gh-founder-interview__options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.gh-founder-interview__option {
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+}
+.gh-founder-interview__profile-name {
+  font-size: 26px;
+  color: var(--gh-espresso);
+  margin: 4px 0 6px;
+}
+.gh-founder-interview__result-row {
+  margin: 12px 0;
+}
+.gh-founder-interview__mission {
+  font-style: italic;
+  padding: 12px 16px;
+  background: rgba(46, 42, 38, 0.04);
+  border-left: 3px solid var(--gh-espresso);
+  border-radius: 4px;
+}

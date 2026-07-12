@@ -190,6 +190,31 @@ out as their own outputs.
 
 ---
 
+## Customer Impression — the fourth layer
+
+Where Tensions and Founder DNA both measure the *founder*, Customer
+Impression measures how the founder wants the *customer* to experience
+the brand — closing the gap identified against Kapferer's Brand Identity
+Prism (Relationship, Reflection, and Self-Image facets, which nothing
+else in this framework addresses). Four dimensions, each a small closed
+set of labels rather than a spectrum or magnitude — every answer casts a
+flat +2 vote for one label, and the highest-voted label per dimension is
+the result (ties broken by key order):
+
+| Dimension | Labels | Question source |
+|---|---|---|
+| Self-Image | capable, understood, bold, refined, grounded | Q21-23 |
+| Reflection | insider, accomplished, bold, tasteful, connected | Q24-25 |
+| Relationship | mentor, companion, authority, indulgence, utility | Q26-27 |
+| Differentiation | people, story, pointOfView, standard, community | Q28-29 |
+
+**Feeds**: computed and stored on the results object
+(`customerImpressionScores`, `customerImpression`) but not yet surfaced
+in the Results page UI — that's a future chapter/output, not a scoring
+gap.
+
+---
+
 ## The Profile Library
 
 The scoring engine's job, eventually, is to take a person's 8-number
@@ -282,6 +307,16 @@ Expression: High · Energy: High · Luxury: High · Playfulness: Mid
 - **Colors**: black + hot pink/electric accent + gold · **Fonts**: Oswald + Montserrat
 - **Values seed**: Individuality, Boldness, Excellence
 - **Mission seed**: "We make [what] for people who were never going to play it safe anyway."
+
+### The Trail Forger
+Added as the 11th profile to cover Aaker's Ruggedness trait — none of
+the original 10 read as tough/outdoorsy/self-reliant.
+Authority: Mid · Freedom: High · Tradition: High · Community: Mid ·
+Structure: High · Calm: Mid · Accessibility: High · Sophistication: Mid
+- **Mood**: rugged and outdoorsy · **Voice**: calm and grounded
+- **Colors**: weathered brown/charcoal + forest green + rust accent · **Fonts**: Abril Fatface + Roboto Mono
+- **Values seed**: Durability, Self-Reliance, Honesty
+- **Mission seed**: "We make [what] for people who don't trust anything until it's been tested by the elements."
 
 ---
 

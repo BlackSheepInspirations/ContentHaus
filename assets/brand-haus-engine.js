@@ -26,6 +26,18 @@
     return value;
   }
 
+  // True when a field resolves empty because the user explicitly chose
+  // the "none" sentinel option, as opposed to resolving empty because
+  // it's untouched/blank. getFieldValueMap uses this to tell "deliberately
+  // omit this facet" apart from "nothing typed yet, fall back to default."
+  function isNoneSelection(field) {
+    if (!field || field.includeInPrompt === false) return false;
+    var custom = (field.customValue || "").trim();
+    if (custom) return false;
+    var value = (field.value || "").trim();
+    return value.toLowerCase() === "none";
+  }
+
   // entries: [{ label, field }] -> [{ label, value }], empties dropped
   function resolveFields(entries) {
     return (entries || [])
@@ -84,6 +96,7 @@
 
   BrandHaus.engine = {
     resolveFieldValue: resolveFieldValue,
+    isNoneSelection: isNoneSelection,
     resolveFields: resolveFields,
     buildSentence: buildSentence,
     formatForPlatform: formatForPlatform,

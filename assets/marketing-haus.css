@@ -1212,6 +1212,31 @@
   border: 1px solid var(--mh-espresso);
   color: var(--mh-espresso);
 }
+.mh-color-swatch-item .mh-btn--reset {
+  border-color: var(--mh-charcoal);
+  color: var(--mh-charcoal);
+}
+.mh-color-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+.mh-color-swatch-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.mh-color-swatch-item input[type="color"] {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid var(--mh-border);
+  border-radius: 6px;
+  cursor: pointer;
+}
+.mh-color-hex {
+  width: 90px;
+}
 .mh-preview__save-feedback {
   margin: 10px 0 0;
   font-size: 13px;
@@ -1246,6 +1271,106 @@
   flex-shrink: 0;
   color: #B91C1C;
   margin-top: 1px;
+}
+
+/* Quick Generators — grid nav (Starter Presets' card pattern repurposed
+   as primary navigation) + a focused single-generator panel with just
+   its own 3-6 fields, plus the two bonus prompt variations below them.
+   Ported verbatim from Graphics Haus's own generator engine CSS. */
+.mh-generator-grid__intro {
+  margin: 0 0 16px;
+  font-size: 13px;
+  color: var(--mh-teal);
+}
+.mh-generator-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.mh-generator-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 220px;
+  padding: 16px;
+  border: 1.5px solid var(--mh-border);
+  border-radius: 12px;
+  background: #fff;
+  text-align: left;
+  cursor: pointer;
+}
+.mh-generator-card:hover {
+  border-color: var(--mh-gold-on-light);
+}
+.mh-generator-card .mh-icon {
+  color: var(--mh-teal);
+}
+.mh-generator-card__name {
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--mh-espresso);
+}
+.mh-generator-card__description {
+  font-size: 12px;
+  color: var(--mh-charcoal);
+  opacity: 0.85;
+  line-height: 1.4;
+}
+.mh-generator-panel__back {
+  margin-bottom: 14px;
+}
+.mh-generator-panel__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 20px;
+  margin: 0 0 6px;
+  color: var(--mh-espresso);
+}
+.mh-generator-panel__title .mh-icon {
+  color: var(--mh-teal);
+}
+.mh-generator-panel__description {
+  margin: 0 0 16px;
+  font-size: 13px;
+  color: var(--mh-charcoal);
+  opacity: 0.85;
+}
+.mh-generator-variations {
+  margin-top: 20px;
+}
+.mh-generator-variations__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  margin: 0 0 10px;
+  color: var(--mh-teal);
+}
+.mh-generator-variation {
+  border: 1px solid var(--mh-border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  background: #fff;
+}
+.mh-generator-variation__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.mh-generator-variation__label {
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--mh-espresso);
+}
+.mh-generator-variation__text {
+  margin: 0;
+  font-size: 13px;
+  color: var(--mh-charcoal);
+  line-height: 1.5;
 }
 
 /* Saved Prompts — below the Live Prompt Preview */
@@ -1421,6 +1546,16 @@
   border-radius: 8px;
   padding: 10px 12px;
   margin: 10px 0 0;
+}
+.mh-brandkit__synced-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--mh-espresso);
+  border: 1px solid var(--mh-border);
+  border-radius: 999px;
+  padding: 5px 10px;
 }
 .mh-brandkit__category {
   margin-top: 12px;
@@ -1664,16 +1799,15 @@
   line-height: 1.5;
 }
 
-/* Collection Builder — a pure aggregation view, not a field-building
-   mode, so its panel is just a checklist rather than the usual dense
-   field groups. */
-.mh-collection__checklist {
+/* Capped checklist (renderCappedChecklist) — Mockup Studio's Surrounding
+   Props picker, Sales Studio's own checklist field. */
+.mh-checklist {
   display: flex;
   flex-direction: column;
   gap: 10px;
   margin-top: 12px;
 }
-.mh-collection__checklist-item {
+.mh-checklist__item {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -1685,7 +1819,7 @@
   font-size: 14px;
   color: var(--mh-charcoal);
 }
-.mh-collection__checklist-item .mh-icon {
+.mh-checklist__item .mh-icon {
   color: var(--mh-gold);
 }
 .mh-collection__item {

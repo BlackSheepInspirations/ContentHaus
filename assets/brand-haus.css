@@ -1,13 +1,12 @@
-/* The AI Creator's Brand Haus — sibling palette to Prompt Haus.
-   Same component CSS, same token names (--bh-cream, --bh-gold, etc.) as
-   Prompt Haus for a minimal, low-risk port — only the hex values change.
-   Black/charcoal/teal/border are unchanged (already proven); cream
-   becomes a near-white warm grey, espresso becomes hot pink, and gold
-   becomes a single warm dark grey — verified at 4.05-4.94:1 contrast
-   against the new background, comfortably passing WCAG AA, so unlike
-   Prompt Haus's gold this one doesn't need a separate on-light variant
-   (--bh-gold-on-light is kept as an alias of the same value only so nothing
-   that already references it breaks).
+/* The AI Creator's Brand Haus — own palette, distinct from Marketing
+   Haus's hot pink (deliberately dropped per design review — reads too
+   similar to its sibling product and didn't fit a "flagship diagnostic"
+   feel). Same token names as before, --bh-espresso now carries teal
+   instead of pink, unifying with --bh-teal as one accent color rather
+   than two competing ones. Black/charcoal/border/near-white background
+   unchanged — verified at 4.94:1 contrast against the background,
+   comfortably passing WCAG AA (already proven during Marketing Haus's
+   own palette work, since this is the same teal).
    Shared across the app shell, the locked state, and the marketing page —
    those last two render outside #brand-haus-app entirely (the locked
    state replaces it, the marketing page is a separate page/section), so
@@ -18,10 +17,20 @@
 .bh-brand-header {
   --bh-cream: #F2F0EB;
   --bh-black: #1A1815;
-  --bh-gold: #6B6860;
+  /* Despite the name, this used to be a flat grey-brown (#6B6860) rather
+     than an actual gold — invisible as a "pop" accent on the dark preview
+     panel (title icon, Copy button) and weak everywhere else it's used
+     (borders, focus rings, active-state text). Brightened to the same
+     warm gold Prompt Haus's own --ph-gold already uses correctly for
+     this identical role, rather than inventing a new one-off color.
+     --bh-gold-on-light is intentionally untouched — that one is a
+     readable-on-light-background fallback, already overridden per-
+     profile by accentStyleFor, and #6B6860 still reads fine there. */
+  --bh-gold: #C9A84C;
   --bh-teal: #0D7377;
+  --bh-steel: #2E5A8C;
   --bh-charcoal: #2E2A26;
-  --bh-espresso: #D6336C;
+  --bh-espresso: #0D7377;
   --bh-border: rgba(46, 42, 38, 0.15);
   --bh-gold-on-light: #6B6860;
 
@@ -31,9 +40,10 @@
 #brand-haus-app {
   background: var(--bh-cream);
   color: var(--bh-black);
-  max-width: 1280px;
+  max-width: 1360px;
   margin: 0 auto;
   padding: 24px 16px 64px;
+  font-size: 16px;
 }
 
 /* Branded header above the tool page (sections/prompt-builder.liquid) —
@@ -41,7 +51,7 @@
    heading/subheading styling for consistent branding across both pages. */
 .bh-brand-header {
   background: var(--bh-cream);
-  max-width: 1280px;
+  max-width: 1360px;
   margin: 0 auto;
   padding: 40px 16px 16px;
   overflow: hidden;
@@ -72,58 +82,256 @@
   height: 100%;
 }
 
-/* Tabs */
-/* One bordered card holding both tab rows, so the two-row layout reads as
-   a single cohesive component rather than two loose strips. */
-.bh-tabs-box {
-  border: 1px solid var(--bh-border);
+/* Sidebar wizard shell — replaces the old horizontal tab row. Sidebar and
+   main content live in separate grid columns (not a fixed-position
+   overlay), so main content can never render behind or crossing the
+   sidebar — it just extends the row height as it grows, and the sidebar
+   stretches to match rather than clipping or overlapping. */
+.bh-shell {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 900px) {
+  .bh-shell {
+    grid-template-columns: 240px 1fr;
+    align-items: stretch;
+    gap: 32px;
+  }
+}
+/* The black column stretches to match the content column's full height
+   (however long the page is), while .bh-sidebar__inner stays pinned near
+   the top of the viewport as you scroll — same sticky-in-grid-cell
+   technique as .bh-body__preview, just with the sticky element nested
+   one level deeper so the background can extend past one viewport. */
+.bh-sidebar {
+  background: var(--bh-black);
   border-radius: 12px;
-  padding: 14px 16px;
   margin-bottom: 20px;
-  background: rgba(255, 255, 255, 0.5);
 }
-.bh-tabs {
+.bh-sidebar__inner {
+  position: sticky;
+  top: 24px;
+  padding: 24px 18px;
+}
+.bh-sidebar__brand {
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 0 0 20px;
+}
+.bh-sidebar__steps {
   display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.bh-sidebar__step {
+  display: flex;
+  align-items: center;
   gap: 10px;
-  flex-wrap: wrap;
-}
-.bh-tabs--row2 {
-  margin-top: 12px;
-}
-.bh-tabs__item {
-  display: inline-flex;
-  align-items: center;
-  gap: 0;
-}
-/* Pulled in tight against its own tab's pill instead of sitting in the
-   middle of the gap to the next tab, which read as ambiguous about which
-   tab it belonged to. */
-.bh-tabs__item .bh-info {
-  margin-left: -10px;
-}
-.bh-tabs__btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
   background: none;
-  border: 2px solid transparent;
-  border-radius: 999px;
-  padding: 10px 18px;
-  font-size: 15px;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 10px;
+  font-size: 16px;
   font-weight: 600;
-  color: var(--bh-espresso);
+  color: rgba(242, 240, 235, 0.65);
+  text-align: left;
   cursor: pointer;
 }
-/* Selected tab reads unambiguously — solid teal fill + white text/icon,
-   not just an underline accent. */
-.bh-tabs__btn.is-active {
-  background: var(--bh-teal);
-  color: #fff;
-  border-color: var(--bh-teal);
+.bh-sidebar__step-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid rgba(242, 240, 235, 0.4);
+  font-size: 11px;
+  flex-shrink: 0;
 }
-.bh-tabs__btn.is-disabled {
-  color: rgba(46, 42, 38, 0.4);
-  cursor: not-allowed;
+.bh-sidebar__step-icon {
+  display: none;
+}
+.bh-sidebar__step.is-active {
+  background: rgba(242, 240, 235, 0.08);
+  color: var(--bh-cream);
+}
+.bh-sidebar__step.is-active .bh-sidebar__step-number {
+  background: var(--bh-teal);
+  border-color: var(--bh-teal);
+  color: var(--bh-cream);
+}
+.bh-sidebar__substeps {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 2px 0 6px 14px;
+  padding-left: 14px;
+  border-left: 1px solid rgba(242, 240, 235, 0.15);
+}
+.bh-sidebar__substep {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  padding: 9px 8px;
+  font-size: 15px;
+  font-weight: 600;
+  color: rgba(242, 240, 235, 0.55);
+  text-align: left;
+  cursor: pointer;
+}
+.bh-sidebar__substep-icon {
+  width: 14px;
+  height: 14px;
+}
+.bh-sidebar__substep.is-active {
+  background: rgba(242, 240, 235, 0.08);
+  color: var(--bh-cream);
+}
+.bh-sidebar__substep.is-active .bh-sidebar__substep-icon {
+  color: var(--bh-teal);
+}
+
+/* Version History — every completed assessment run, timestamped, viewed
+   without touching the live wizard state. Sits below the main step list,
+   set off by a divider so it doesn't read as a 6th wizard step. */
+.bh-sidebar__history {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(242, 240, 235, 0.15);
+}
+.bh-sidebar__history-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  padding: 9px 8px;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: rgba(242, 240, 235, 0.55);
+  text-align: left;
+  cursor: pointer;
+}
+.bh-sidebar__history-toggle .bh-icon {
+  width: 14px;
+  height: 14px;
+}
+.bh-sidebar__history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 4px;
+  padding-left: 8px;
+}
+.bh-sidebar__history-row {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  padding: 7px 8px;
+  text-align: left;
+  cursor: pointer;
+}
+.bh-sidebar__history-row:hover {
+  background: rgba(242, 240, 235, 0.08);
+}
+.bh-sidebar__history-date {
+  font-size: 11px;
+  color: rgba(242, 240, 235, 0.45);
+}
+.bh-sidebar__history-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(242, 240, 235, 0.85);
+}
+.bh-sidebar__history-preview {
+  background: rgba(242, 240, 235, 0.06);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin: 2px 0 6px;
+}
+.bh-sidebar__history-preview-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--bh-cream);
+  margin: 0 0 4px;
+}
+.bh-sidebar__history-preview-mission {
+  font-size: 12px;
+  font-style: italic;
+  line-height: 1.5;
+  color: rgba(242, 240, 235, 0.7);
+  margin: 0 0 6px;
+}
+.bh-sidebar__history-preview-values {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: rgba(242, 240, 235, 0.5);
+  margin: 0 0 8px;
+}
+.bh-sidebar__history-swatches {
+  display: flex;
+  gap: 4px;
+}
+.bh-sidebar__history-swatch {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+.bh-sidebar__history-restore {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  background: rgba(242, 240, 235, 0.1);
+  border: 1px solid rgba(242, 240, 235, 0.25);
+  border-radius: 6px;
+  margin-top: 10px;
+  padding: 7px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--bh-cream);
+  text-align: left;
+  cursor: pointer;
+}
+.bh-sidebar__history-restore:hover {
+  background: rgba(242, 240, 235, 0.18);
+}
+.bh-sidebar__history-restore .bh-icon {
+  width: 12px;
+  height: 12px;
+}
+.bh-sidebar__history-clear {
+  background: none;
+  border: none;
+  padding: 8px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: rgba(214, 51, 108, 0.75);
+  text-align: left;
+  cursor: pointer;
+}
+.bh-sidebar__history-clear:hover {
+  color: #d6336c;
+}
+.bh-main {
+  min-width: 0;
 }
 
 /* Style DNA bar */
@@ -187,7 +395,11 @@
   gap: 6px;
 }
 .bh-styledna .bh-label--icon .bh-icon {
-  color: var(--bh-gold);
+  color: var(--bh-cream);
+}
+.bh-styledna .bh-info__icon {
+  border-color: var(--bh-cream);
+  color: var(--bh-cream);
 }
 /* Info-icon tooltip — a visible affordance for guidance that used to
    only live in an invisible hover-only title attribute. <details>/
@@ -529,14 +741,6 @@
   border-top: 1px solid var(--bh-border);
   margin: 24px 0;
 }
-.bh-mode-select-label {
-  font-size: 13px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--bh-teal);
-  margin: 0 0 12px;
-}
 
 /* Layout: fields left, sticky preview right on desktop */
 .bh-body {
@@ -682,6 +886,106 @@
   line-height: 1.35;
 }
 
+/* Quick Generators — grid nav (Starter Presets' card pattern repurposed
+   as primary navigation) + a focused single-generator panel with just
+   its own 3-6 fields, plus the bundle/variation blocks below them.
+   Ported from Graphics Haus's own gh-generator-* block, renamed. */
+.bh-generator-grid__intro {
+  margin: 0 0 16px;
+  font-size: 13px;
+  color: var(--bh-teal);
+}
+.bh-generator-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.bh-generator-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 220px;
+  padding: 16px;
+  border: 1.5px solid var(--bh-border);
+  border-radius: 12px;
+  background: #fff;
+  text-align: left;
+  cursor: pointer;
+}
+.bh-generator-card:hover {
+  border-color: var(--bh-gold-on-light);
+}
+.bh-generator-card .bh-icon {
+  color: var(--bh-teal);
+}
+.bh-generator-card__name {
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--bh-espresso);
+}
+.bh-generator-card__description {
+  font-size: 12px;
+  color: var(--bh-charcoal);
+  opacity: 0.85;
+  line-height: 1.4;
+}
+.bh-generator-panel__back {
+  margin-bottom: 14px;
+}
+.bh-generator-panel__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 20px;
+  margin: 0 0 6px;
+  color: var(--bh-espresso);
+}
+.bh-generator-panel__title .bh-icon {
+  color: var(--bh-teal);
+}
+.bh-generator-panel__description {
+  margin: 0 0 16px;
+  font-size: 13px;
+  color: var(--bh-charcoal);
+  opacity: 0.85;
+}
+.bh-generator-variations {
+  margin-top: 20px;
+}
+.bh-generator-variations__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  margin: 0 0 10px;
+  color: var(--bh-teal);
+}
+.bh-generator-variation {
+  border: 1px solid var(--bh-border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  background: #fff;
+}
+.bh-generator-variation__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.bh-generator-variation__label {
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--bh-espresso);
+}
+.bh-generator-variation__text {
+  margin: 0;
+  font-size: 13px;
+  color: var(--bh-charcoal);
+  line-height: 1.5;
+}
+
 /* Couples Mode */
 .bh-btn--swap {
   background: var(--bh-teal);
@@ -727,7 +1031,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 15px;
+  font-size: 17px;
   font-weight: 700;
   color: var(--bh-espresso);
   padding: 0 6px;
@@ -737,7 +1041,7 @@
 }
 .bh-field-group__subtitle {
   margin: 4px 6px 0;
-  font-size: 12px;
+  font-size: 14px;
   color: var(--bh-teal);
 }
 .bh-field-group__fields {
@@ -768,7 +1072,7 @@
   gap: 8px;
 }
 .bh-field__label {
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--bh-charcoal);
 }
@@ -1082,7 +1386,7 @@
   padding: 18px;
 }
 .bh-preview__title {
-  font-size: 18px;
+  font-size: 22px;
   margin: 0 0 4px;
   color: var(--bh-gold);
   display: flex;
@@ -1119,6 +1423,9 @@
   gap: 8px;
   margin-top: 12px;
 }
+.bh-chapter__next-steps-actions {
+  margin-top: 28px;
+}
 .bh-preview__export-row {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -1143,10 +1450,10 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 10px 16px;
+  padding: 12px 18px;
   border-radius: 999px;
   font-weight: 700;
-  font-size: 13px;
+  font-size: 14px;
   cursor: pointer;
   border: none;
 }
@@ -1156,7 +1463,7 @@
 .bh-btn:focus-visible,
 .bh-styledna__yesno-btn:focus-visible,
 .bh-preset-card:focus-visible,
-.bh-tabs__btn:focus-visible,
+.bh-sidebar__step:focus-visible,
 .bh-reference-upload__dropzone:focus-visible {
   outline: 2px solid var(--bh-gold);
   outline-offset: 2px;
@@ -1167,6 +1474,10 @@
 }
 .bh-btn--randomize {
   background: var(--bh-espresso);
+  color: var(--bh-cream);
+}
+.bh-btn--teal {
+  background: var(--bh-teal);
   color: var(--bh-cream);
 }
 .bh-btn--reset {
@@ -1187,6 +1498,13 @@
 .bh-btn--small {
   padding: 6px 12px;
   font-size: 12px;
+}
+.bh-btn--large {
+  padding: 14px 26px;
+  font-size: 15px;
+}
+.bh-text--black {
+  color: var(--bh-black) !important;
 }
 .bh-companion__controls {
   display: flex;
@@ -1211,6 +1529,34 @@
   background: transparent;
   border: 1px solid var(--bh-espresso);
   color: var(--bh-espresso);
+}
+/* The color-swatch row's own light card, same reasoning as the
+   .bh-founder-interview override above — cream-on-transparent would be
+   nearly invisible here. */
+.bh-color-swatch-item .bh-btn--reset {
+  border-color: var(--bh-charcoal);
+  color: var(--bh-charcoal);
+}
+.bh-color-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+.bh-color-swatch-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.bh-color-swatch-item input[type="color"] {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid var(--bh-border);
+  border-radius: 6px;
+  cursor: pointer;
+}
+.bh-color-hex {
+  width: 90px;
 }
 .bh-preview__save-feedback {
   margin: 10px 0 0;
@@ -1573,16 +1919,30 @@
 .bh-marketing__heading {
   color: var(--bh-black);
   font-size: 32px;
-  margin: 0 0 16px;
+  margin: 0 0 8px;
 }
 .bh-heading-accent {
-  color: var(--bh-gold-on-light);
+  color: var(--bh-teal);
+}
+.bh-marketing__tagline {
+  color: var(--bh-charcoal);
+  font-size: 17px;
+  font-weight: 600;
+  margin: 0 0 16px;
 }
 .bh-marketing__subheading {
   color: var(--bh-charcoal);
-  font-size: 17px;
+  font-size: 18px;
   max-width: 640px;
   margin: 0 auto 24px;
+}
+/* <br> has no box to apply margin to directly — display:block gives it
+   one, so the second line ("Powered by...") reads as its own spaced-out
+   row instead of crowding the sentence above it. */
+.bh-marketing__subheading br {
+  display: block;
+  margin-top: 10px;
+  content: "";
 }
 .bh-marketing__cta {
   display: inline-block;
@@ -1721,13 +2081,16 @@
   background: #fff;
   border: 1px solid var(--bh-border);
   border-radius: 12px;
-  padding: 28px;
-  max-width: 640px;
+  padding: 32px;
+  max-width: 900px;
   margin: 0 auto;
 }
 .bh-founder-interview--intro,
 .bh-founder-interview--results {
   text-align: left;
+}
+.bh-founder-interview--celebration .bh-chapter__congrats {
+  margin-bottom: 24px;
 }
 .bh-founder-interview__progress-track {
   height: 6px;
@@ -1742,9 +2105,21 @@
   transition: width 0.2s ease;
 }
 .bh-founder-interview__question {
-  font-size: 20px;
+  font-size: 24px;
   line-height: 1.4;
-  margin: 4px 0 20px;
+  margin: 4px 0 24px;
+  color: var(--bh-charcoal);
+}
+.bh-founder-interview__lead {
+  font-size: 18px;
+  line-height: 1.5;
+  margin: 8px 0 10px;
+  color: var(--bh-charcoal);
+}
+.bh-founder-interview__question--sub {
+  font-size: 24px;
+  font-style: italic;
+  margin: 4px 0 24px;
   color: var(--bh-charcoal);
 }
 .bh-founder-interview__options {
@@ -1756,20 +2131,1170 @@
 .bh-founder-interview__option {
   width: 100%;
   text-align: left;
-  padding: 14px 18px;
+  padding: 16px 20px;
+}
+.bh-founder-interview__option.is-selected {
+  border-color: var(--bh-teal);
+  border-width: 2px;
+  background: var(--bh-teal);
+}
+.bh-founder-interview__option.is-selected .bh-preset-card__name {
+  color: #fff;
+}
+.bh-founder-interview__nav-row {
+  display: flex;
+  gap: 10px;
+}
+.bh-founder-interview__option .bh-preset-card__name {
+  font-size: 16px;
 }
 .bh-founder-interview__profile-name {
-  font-size: 26px;
-  color: var(--bh-espresso);
-  margin: 4px 0 6px;
+  font-size: 30px;
+  color: var(--bh-results-standout, var(--bh-espresso));
+  margin: 4px 0 14px;
 }
 .bh-founder-interview__result-row {
   margin: 12px 0;
 }
-.bh-founder-interview__mission {
+.bh-founder-interview__mission,
+.bh-chapter__highlight-line {
   font-style: italic;
   padding: 12px 16px;
   background: rgba(46, 42, 38, 0.04);
   border-left: 3px solid var(--bh-espresso);
   border-radius: 4px;
+}
+/* Inline bold+colored short values (Guide 6's Voice/Mood/Photography/
+   Color Direction) — a lighter-weight cousin of the boxed highlight
+   above, for a phrase inline with its label rather than its own block. */
+.bh-chapter__dna-value {
+  font-weight: 700;
+  color: var(--bh-espresso);
+}
+
+/* Back/Retake sit on the intro/results card's white background here, not
+   the dark preview panel .bh-btn--reset was designed for — cream-on-
+   transparent is nearly invisible on white, so override to dark. */
+.bh-founder-interview .bh-btn--reset {
+  border-color: var(--bh-charcoal);
+  color: var(--bh-charcoal);
+}
+.bh-founder-interview--intro .bh-field-group__subtitle {
+  margin-bottom: 24px;
+  font-size: 16px;
+}
+.bh-founder-interview--intro .bh-field {
+  margin-bottom: 20px;
+}
+.bh-founder-interview--intro .bh-field__label {
+  font-size: 15px;
+  margin-bottom: 6px;
+}
+/* Wraps the input/textarea and its "e.g." examples in one visually
+   continuous box — the examples text used to render as a separate line
+   below a bordered field, reading as unrelated helper copy instead of
+   part of the same control. */
+.bh-founder-interview__field-box {
+  border: 1px solid var(--bh-border);
+  border-radius: 8px;
+  background: var(--bh-cream);
+  padding: 4px 4px 10px;
+}
+.bh-founder-interview__field-box .bh-field__custom,
+.bh-founder-interview__field-box .bh-field__freetext {
+  border: none;
+  background: transparent;
+  width: 100%;
+  box-sizing: border-box;
+  display: block;
+}
+.bh-founder-interview__examples {
+  margin: 0;
+  padding: 0 12px;
+  font-size: 14px;
+  color: var(--bh-charcoal);
+  opacity: 0.75;
+}
+.bh-founder-interview--intro .bh-btn {
+  margin-top: 12px;
+}
+.bh-founder-interview__welcome-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 30px;
+  line-height: 1.3;
+  margin: 4px 0 20px;
+  flex-wrap: wrap;
+}
+.bh-founder-interview__welcome-body {
+  font-size: 17px;
+  line-height: 1.65;
+  color: var(--bh-black);
+  margin: 0 0 16px;
+}
+.bh-founder-interview__welcome-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 24px;
+}
+
+/* Your Brand DNA — six-chapter narrative (brand-haus-results.js) and
+   Your Blueprint (brand-haus-blueprint.js) share this card treatment.
+   Wider than the single-column intro/question cards since chapters carry
+   much more content (sliders, palettes, bullet lists). */
+.bh-founder-interview--results {
+  max-width: 900px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  /* Every existing rule elsewhere in this file that reads var(--bh-
+     espresso) (profile name, core value names, mission-statement
+     border) picks this up automatically inside Results/Blueprint,
+     without needing each individual selector touched — so the
+     founder's OWN matched colors show through instead of Brand Haus's
+     fixed teal identity. --bh-teal is deliberately left alone: the
+     "Continue to Branding Studio" / export CTAs inside these pages
+     should stay actually teal, not shift with the match. */
+  --bh-espresso: var(--bh-results-accent, #0D7377);
+}
+.bh-chapter {
+  background: #fff;
+  border: 1px solid var(--bh-border);
+  border-radius: 12px;
+  padding: 32px;
+  margin-bottom: 20px;
+  font-size: 16px;
+}
+.bh-chapter:last-child {
+  margin-bottom: 0;
+}
+.bh-chapter--hero {
+  border-color: var(--bh-results-accent, var(--bh-teal));
+  border-width: 1.5px;
+}
+/* Text left, optional hero art right — stacks on narrow screens. The
+   image column simply isn't there at all when a profile has no art yet
+   (see renderHeroImage in brand-haus-results.js), so the text column
+   fills the full width on its own until artwork exists. */
+.bh-chapter__hero-top {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 32px;
+  align-items: stretch;
+  margin-bottom: 24px;
+}
+.bh-chapter__hero-text {
+  flex: 1 1 320px;
+  min-width: 280px;
+}
+.bh-chapter__hero-image {
+  flex: 1 1 280px;
+  min-width: 240px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+.bh-chapter__hero-image img {
+  width: 100%;
+  height: 100%;
+  min-height: 220px;
+  object-fit: cover;
+  display: block;
+}
+.bh-chapter__heading {
+  margin-bottom: 24px;
+  font-size: 20px;
+  color: var(--bh-results-primary, var(--bh-espresso));
+}
+.bh-chapter__heading .bh-icon {
+  color: var(--bh-results-primary, var(--bh-teal));
+}
+/* "Your Next Steps" is a completion box, not an identity section — it
+   keeps Brand Haus's own teal rather than following the matched
+   profile's primary color like every other chapter heading. */
+.bh-chapter__heading.bh-chapter__heading--complete,
+.bh-chapter__heading.bh-chapter__heading--complete .bh-icon {
+  color: var(--bh-teal);
+}
+/* Playbook-only chapter numbering ("Guide 17 of 20") — pushed to the
+   far right of the heading row via margin-left:auto. Tied to the same
+   per-profile --bh-gold-on-light label color as .bh-chapter__eyebrow
+   (was a flat --bh-charcoal before, which is why it never looked tied
+   to the matched brand) — still de-emphasized via opacity so it reads
+   as a wayfinding aid, not a second title competing for attention. */
+.bh-chapter__number-badge {
+  margin-left: auto;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--bh-gold-on-light);
+  opacity: 0.85;
+  white-space: nowrap;
+}
+.bh-chapter__section-title {
+  font-size: 15px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--bh-results-accent-2, var(--bh-teal));
+  margin: 36px 0 16px;
+}
+.bh-chapter__section-title:first-of-type {
+  margin-top: 0;
+}
+/* The "you've reached a milestone" moment at the top of Your Brand DNA
+   and Your Blueprint — bold and icon-flanked on purpose, not a plain
+   paragraph, so it actually reads as a celebration. */
+.bh-chapter__congrats {
+  text-align: center;
+  margin: 0 0 32px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--bh-border);
+}
+.bh-chapter__congrats-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--bh-results-accent, var(--bh-teal));
+  margin: 0 0 10px;
+}
+.bh-chapter__congrats-title .bh-icon {
+  color: var(--bh-results-standout, var(--bh-results-accent, var(--bh-teal)));
+  width: 20px;
+  height: 20px;
+}
+.bh-chapter__congrats-body {
+  font-size: 18px;
+  line-height: 1.6;
+  color: var(--bh-charcoal);
+  max-width: 640px;
+  margin: 0 auto 16px;
+}
+.bh-chapter__congrats-body:last-child {
+  margin-bottom: 0;
+}
+.bh-chapter__eyebrow {
+  font-size: 17px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--bh-gold-on-light);
+  margin: 20px 0 4px;
+}
+.bh-chapter__eyebrow:first-child {
+  margin-top: 0;
+}
+/* For an eyebrow directly after a visual element (a color swatch, a
+   font sample card) rather than a running paragraph — those already
+   carry their own bottom margin, so the full 20px reads as too much
+   extra gap on top of it. */
+.bh-chapter__eyebrow--first {
+  margin-top: 8px;
+}
+.bh-chapter__reassurance {
+  font-size: 14px;
+  color: var(--bh-results-accent, var(--bh-teal));
+  margin: 10px 0 0;
+}
+/* Shared label style for "Primary Alignment" and "Supporting
+   Influences" — same class on both so they can never visually drift
+   apart from each other again. */
+.bh-chapter__score-caption-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--bh-charcoal);
+  margin: 0 0 8px;
+}
+.bh-chapter__score-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 32px;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--bh-border);
+}
+.bh-chapter__score {
+  display: flex;
+  flex-direction: column;
+  min-width: 200px;
+}
+.bh-chapter__score-number {
+  font-size: 44px;
+  font-weight: 700;
+  color: var(--bh-results-standout, var(--bh-results-accent, var(--bh-teal)));
+  line-height: 1;
+  margin-bottom: 6px;
+}
+.bh-chapter__score-description {
+  font-size: 13px;
+  color: var(--bh-charcoal);
+  opacity: 0.7;
+  line-height: 1.4;
+  margin: 0;
+  max-width: 180px;
+}
+.bh-chapter__influences {
+  flex: 1;
+  min-width: 280px;
+  padding-left: 32px;
+  border-left: 1px solid var(--bh-border);
+}
+.bh-chapter__influence-cells {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+}
+.bh-chapter__influence-cell {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1 1 200px;
+  padding-left: 24px;
+  border-left: 1px solid var(--bh-border);
+}
+.bh-chapter__influence-cell:first-child {
+  padding-left: 0;
+  border-left: none;
+}
+.bh-chapter__influence-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.bh-chapter__influence-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--bh-black);
+}
+.bh-chapter__influence-desc {
+  font-size: 13px;
+  color: var(--bh-charcoal);
+  opacity: 0.75;
+  line-height: 1.4;
+}
+
+/* Brand Tensions — proprietary slider-and-marker, deliberately not a
+   generic filled progress bar. */
+.bh-tension-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+@media (min-width: 640px) {
+  .bh-tension-grid {
+    grid-template-columns: 1fr 1fr;
+    row-gap: 20px;
+    column-gap: 28px;
+  }
+}
+.bh-tension-slider__labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--bh-charcoal);
+  margin-bottom: 5px;
+}
+.bh-tension-slider__track {
+  position: relative;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--bh-border);
+}
+.bh-tension-slider__marker {
+  position: absolute;
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--bh-results-accent, var(--bh-teal));
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 1px var(--bh-results-accent, var(--bh-teal));
+  transform: translate(-50%, -50%);
+}
+/* Separates the slider + position readout from the surrounding prose in
+   the Playbook's Chapter 3 — without a boundary the track and labels
+   were bleeding visually into the paragraph above/below it. Same border-
+   and-tint treatment as .bh-chapter__take-action, for a consistent
+   "this is a distinct component" language across the document. */
+.bh-chapter__slider-box {
+  margin: 12px 0 16px;
+  padding: 16px 20px;
+  border: 1px solid var(--bh-results-accent, var(--bh-teal));
+  border-radius: 10px;
+  background: rgba(13, 115, 119, 0.05);
+}
+.bh-chapter__slider-box-position {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--bh-charcoal);
+  margin: 10px 0 0;
+}
+
+/* Founder Fingerprint™ — the radar/polygon graphic built from the
+   founder's 8 Brand Tensions positions (see renderFounderFingerprint in
+   brand-haus-results.js). Capped width so it reads as a distinct, quotable
+   graphic rather than stretching to the full chapter width. */
+.bh-fingerprint-wrap {
+  max-width: 340px;
+  margin: 20px auto 24px;
+  text-align: center;
+}
+.bh-fingerprint {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+}
+.bh-fingerprint-caption {
+  margin: 8px 0 0;
+  font-size: 13px;
+  font-style: italic;
+  color: var(--bh-charcoal);
+  opacity: 0.7;
+}
+
+/* Chapter 7's closing quick-reference card — meant to be screenshotted
+   or handed off on its own, so it gets its own visual boundary rather
+   than blending into the walkthrough above it. */
+.bh-quickref {
+  margin-top: 28px;
+  padding: 20px 24px;
+  border: 1px solid var(--bh-results-accent, var(--bh-teal));
+  border-radius: 12px;
+  background: rgba(13, 115, 119, 0.05);
+}
+.bh-quickref__label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--bh-results-accent, var(--bh-teal));
+  margin: 0 0 14px;
+}
+.bh-quickref__swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.bh-quickref__swatch {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.bh-quickref__swatch-color {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  display: inline-block;
+}
+.bh-quickref__swatch-hex {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--bh-charcoal);
+}
+.bh-quickref__fonts {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--bh-charcoal);
+  margin: 0 0 12px;
+}
+.bh-quickref__rule {
+  font-size: 14px;
+  color: var(--bh-charcoal);
+  margin: 0 0 4px;
+}
+.bh-quickref__rule:last-child {
+  margin-bottom: 0;
+}
+
+/* Founder DNA — clustered single-direction bars */
+.bh-dna-cluster-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 32px;
+}
+@media (min-width: 640px) {
+  .bh-dna-cluster-grid {
+    grid-template-columns: 1fr 1fr;
+    row-gap: 32px;
+    column-gap: 28px;
+  }
+}
+.bh-dna-cluster__title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 0 0 14px;
+}
+.bh-dna-cluster__title {
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--bh-gold-on-light);
+  margin: 0;
+}
+/* Quick-glance ring next to a cluster title — a faster read on the
+   strongest dimension than scanning all three bars underneath. */
+.bh-mini-ring {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.bh-mini-ring__hole {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.bh-mini-ring__pct {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--bh-charcoal);
+}
+/* Larger size for each Supporting Influence's percentage — same ring,
+   just sized to carry more visual weight next to the primary score. */
+.bh-mini-ring--lg {
+  width: 76px;
+  height: 76px;
+  flex-shrink: 0;
+}
+.bh-mini-ring--lg .bh-mini-ring__hole {
+  width: 60px;
+  height: 60px;
+}
+.bh-mini-ring--lg .bh-mini-ring__pct {
+  font-size: 18px;
+}
+/* Small round icon accent on the right of a text row — Core Values and
+   Customer Impression rows both use it as a quick-glance anchor. */
+.bh-icon-badge {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--bh-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.bh-icon-badge .bh-icon {
+  color: var(--bh-results-standout, var(--bh-teal));
+  width: 16px;
+  height: 16px;
+}
+.bh-dna-bar {
+  margin-bottom: 10px;
+}
+.bh-dna-bar__label-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: var(--bh-charcoal);
+  margin-bottom: 4px;
+}
+.bh-dna-bar__track {
+  height: 7px;
+  border-radius: 3px;
+  background: var(--bh-border);
+  overflow: hidden;
+}
+.bh-dna-bar__fill {
+  height: 100%;
+  background: var(--bh-results-accent-2, var(--bh-steel, var(--bh-teal)));
+  border-radius: 3px;
+}
+
+/* Chapter 3 — expression chips, palette cards, typography demo */
+.bh-chapter__chip-groups {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.bh-chapter__chip-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border: 1px solid var(--bh-border);
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+.bh-chapter__chip-label {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--bh-gold-on-light);
+}
+.bh-chapter__chip-value {
+  font-size: 15px;
+  color: var(--bh-charcoal);
+  text-transform: capitalize;
+}
+.bh-palette-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.bh-palette-swatch {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 84px;
+}
+.bh-palette-swatch__color {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+}
+.bh-palette-swatch__role {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--bh-charcoal);
+}
+.bh-palette-swatch__hex {
+  font-size: 12px;
+  color: var(--bh-espresso);
+}
+/* Typography — 3-card layout (primary font, secondary font, alternative
+   pairings) rather than one stacked heading+body demo block. */
+.bh-typography-cards {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+@media (min-width: 720px) {
+  .bh-typography-cards {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+}
+.bh-font-card {
+  border: 1px solid var(--bh-border);
+  border-radius: 10px;
+  padding: 16px;
+}
+.bh-font-card__label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--bh-results-accent-2, var(--bh-gold-on-light));
+  margin: 0 0 10px;
+}
+.bh-font-card__name {
+  font-size: 22px;
+  color: var(--bh-black);
+  margin: 0 0 8px;
+}
+.bh-font-card__alphabet {
+  font-size: 12px;
+  color: var(--bh-charcoal);
+  opacity: 0.75;
+  margin: 0 0 10px;
+  word-break: break-word;
+}
+.bh-font-card__glyph {
+  font-size: 36px;
+  color: var(--bh-black);
+  margin: 0;
+  line-height: 1;
+}
+.bh-font-card--pairings {
+  display: flex;
+  flex-direction: column;
+}
+.bh-font-pairing-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.bh-font-pairing-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  background: none;
+  border: none;
+  border-top: 1px solid var(--bh-border);
+  padding: 10px 0;
+  text-align: left;
+  cursor: pointer;
+}
+.bh-font-pairing-row:first-child {
+  border-top: none;
+  padding-top: 0;
+}
+.bh-font-pairing-row__names {
+  font-size: 14px;
+  color: var(--bh-charcoal);
+}
+.bh-font-pairing-row__plus {
+  opacity: 0.5;
+  font-family: inherit !important;
+}
+.bh-font-pairing-row__chevron {
+  color: var(--bh-results-standout, var(--bh-teal));
+  font-size: 18px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+/* Chapter 4 — Foundation */
+.bh-chapter__mission-intro {
+  font-size: 14px;
+  color: var(--bh-charcoal);
+  opacity: 0.85;
+  margin: 0 0 10px;
+}
+.bh-chapter__foundation-line {
+  font-size: 17px;
+  color: var(--bh-charcoal);
+  line-height: 1.6;
+  margin: 0;
+}
+.bh-chapter__value-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+/* Each row's own .bh-chapter__section-title sits inside its own nested
+   wrapper, which makes CSS's :first-of-type reset (zero margin-top on
+   the first section title in a chapter) apply to every row's title
+   individually rather than just the chapter's actual first one — so
+   spacing here comes from this list's own gap, not that margin. */
+.bh-chapter__impression-list {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+.bh-chapter__value-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.bh-chapter__value-row-text {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px;
+}
+.bh-chapter__impression-text {
+  flex: 1;
+}
+.bh-chapter__value-name {
+  font-weight: 700;
+  color: var(--bh-espresso);
+  font-size: 16px;
+}
+.bh-chapter__value-because {
+  font-size: 15px;
+  color: var(--bh-charcoal);
+  opacity: 0.85;
+}
+
+/* Chapter 5 — bullet lists, blind-spot framing */
+.bh-chapter__bullet-list {
+  margin: 0;
+  padding-left: 24px;
+  font-size: 17px;
+  color: var(--bh-charcoal);
+  line-height: 1.65;
+}
+.bh-chapter__bullet-list li {
+  margin-bottom: 10px;
+  padding-left: 4px;
+}
+.bh-chapter__bullet-list li::marker {
+  color: var(--bh-results-accent-2, var(--bh-teal));
+}
+.bh-chapter__bullet-list li:last-child {
+  margin-bottom: 0;
+}
+.bh-chapter__blindspot-intro {
+  font-size: 14px;
+  color: var(--bh-charcoal);
+  opacity: 0.85;
+  margin: 0 0 10px;
+}
+
+/* Your Blueprint — completion + Brand Evolution opening block */
+.bh-chapter__evolution {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--bh-border);
+}
+.bh-chapter__why-this-matters {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--bh-border);
+}
+.bh-chapter__why-this-matters-label {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--bh-results-accent, var(--bh-teal));
+  margin: 0 0 6px;
+}
+.bh-chapter__why-this-matters-body {
+  font-size: 15px;
+  font-style: italic;
+  color: var(--bh-charcoal);
+  margin: 0;
+}
+.bh-chapter__take-action {
+  margin-top: 20px;
+  padding: 18px 20px;
+  border: 1px solid var(--bh-results-accent, var(--bh-teal));
+  border-radius: 10px;
+  background: rgba(13, 115, 119, 0.05);
+}
+.bh-chapter__take-action-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--bh-results-accent, var(--bh-teal));
+  margin: 0 0 10px;
+}
+.bh-chapter__take-action-label .bh-icon {
+  color: var(--bh-results-accent, var(--bh-teal));
+}
+.bh-chapter__take-action-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.bh-chapter__take-action-list li {
+  position: relative;
+  padding-left: 22px;
+  margin-bottom: 8px;
+  font-size: 15px;
+  color: var(--bh-charcoal);
+}
+.bh-chapter__take-action-list li:last-child {
+  margin-bottom: 0;
+}
+.bh-chapter__take-action-list li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  color: var(--bh-results-accent, var(--bh-teal));
+  font-weight: 700;
+}
+/* "If You Remember Nothing Else" — reused at 4 points across the app,
+   deliberately punchier than Take Action (centered, larger type, a
+   thicker border) since it's a single quotable brand-truth statement,
+   not a checklist. */
+.bh-chapter__remember {
+  margin: 28px 0;
+  padding: 32px 28px;
+  border: 2px solid var(--bh-results-accent, var(--bh-teal));
+  border-radius: 14px;
+  background: rgba(13, 115, 119, 0.06);
+  text-align: center;
+}
+.bh-chapter__remember-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--bh-results-accent, var(--bh-teal));
+  margin: 0 0 16px;
+}
+.bh-chapter__remember-label .bh-icon {
+  color: var(--bh-results-accent, var(--bh-teal));
+}
+.bh-chapter__remember-line {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--bh-black);
+  margin: 0 0 6px;
+}
+.bh-chapter__remember-line:last-child {
+  margin-bottom: 0;
+}
+.bh-chapter__remember-line--emphasis {
+  margin-top: 10px;
+  font-weight: 800;
+  color: var(--bh-results-accent, var(--bh-teal));
+}
+/* "A Final Note From Your Brand Strategist" — the closing manifesto,
+   reused both as the Report's own closing card and (heroStyle) as the
+   page-level closing bookend matching the "...is Complete" banner. */
+.bh-chapter__strategist-note {
+  text-align: center;
+  padding: 40px 32px;
+}
+.bh-chapter__strategist-label {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--bh-gold-on-light);
+  margin: 0 0 24px;
+}
+.bh-chapter__strategist-lines {
+  max-width: 560px;
+  margin: 0 auto;
+}
+.bh-chapter__strategist-line {
+  font-size: 19px;
+  line-height: 1.5;
+  color: var(--bh-black);
+  margin: 0 0 10px;
+}
+.bh-chapter__strategist-line:last-child {
+  margin-bottom: 0;
+}
+.bh-chapter__strategist-divider {
+  width: 48px;
+  height: 3px;
+  margin: 28px auto;
+  border-radius: 2px;
+  background: var(--bh-results-accent, var(--bh-teal));
+}
+/* Each Part now lands alone on its own page (page-break-before:always
+   in the print stylesheet) — a plain left-aligned header looked like a
+   stray leftover on an otherwise empty page. Full centering + much
+   larger type makes that isolation read as an intentional title page,
+   the way a printed book's Part divider actually looks. */
+.bh-playbook__part-divider {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 460px;
+  padding: 40px 24px;
+  text-align: center;
+}
+.bh-playbook__part-number {
+  font-size: 15px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  color: var(--bh-gold-on-light);
+  margin: 0 0 20px;
+}
+.bh-playbook__part-title {
+  font-size: 52px;
+  line-height: 1.08;
+  margin: 0 0 16px;
+  color: var(--bh-black);
+  max-width: 640px;
+}
+.bh-playbook__part-subtitle {
+  font-size: 19px;
+  color: var(--bh-charcoal);
+  opacity: 0.75;
+  margin: 0;
+  max-width: 460px;
+}
+.bh-playbook__jump-nav {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+.bh-playbook__jump-nav a {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--bh-border);
+  background: #fff;
+  color: var(--bh-charcoal);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+}
+.bh-playbook__jump-nav a:hover {
+  border-color: var(--bh-results-accent, var(--bh-teal));
+}
+/* Playbook's own 18-chapter table of contents — sits above Part I so a
+   founder treating this as a reference (which Chapter 1 explicitly asks
+   them to do) can jump straight to a chapter instead of scrolling. */
+.bh-playbook__toc {
+  margin-bottom: 8px;
+  padding: 20px 24px;
+  border: 1px solid var(--bh-border);
+  border-radius: 12px;
+  background: #fff;
+}
+.bh-playbook__toc-heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--bh-results-accent, var(--bh-teal));
+  margin: 0 0 14px;
+}
+.bh-playbook__toc-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 18px;
+}
+@media (min-width: 700px) {
+  .bh-playbook__toc-grid {
+    grid-template-columns: 1fr 1fr;
+    column-gap: 32px;
+  }
+}
+.bh-playbook__toc-part-title {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--bh-gold-on-light);
+  margin: 0 0 8px;
+}
+.bh-playbook__toc-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.bh-playbook__toc-list li {
+  margin-bottom: 6px;
+}
+.bh-playbook__toc-list a {
+  font-size: 14px;
+  color: var(--bh-charcoal);
+  text-decoration: none;
+}
+.bh-playbook__toc-list a:hover {
+  color: var(--bh-results-accent, var(--bh-teal));
+  text-decoration: underline;
+}
+/* Groups one tension (Chapter 3) or one cluster (Chapter 4) worth of
+   sub-fields together with a visible break from the next one — these
+   chapters repeat the same 5-6-field shape 4-8 times in a row and
+   without a divider they'd read as one undifferentiated wall of text. */
+.bh-chapter__tension-section {
+  padding-bottom: 24px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--bh-border);
+}
+.bh-chapter__tension-section:last-of-type {
+  padding-bottom: 0;
+  margin-bottom: 0;
+  border-bottom: none;
+}
+.bh-blueprint__section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+/* Each of the 3 Blueprint documents (Snapshot, Report, Playbook) is its
+   own collapsible block — the generous top/bottom padding plus the
+   border is what actually reads as "these are 3 distinct things," not
+   one long scroll where a report's last paragraph runs straight into
+   the next title. */
+.bh-blueprint__doc {
+  padding: 20px 0 28px;
+  margin-bottom: 8px;
+  border-top: 1px solid var(--bh-border);
+}
+.bh-blueprint__doc:first-of-type {
+  border-top: none;
+  padding-top: 0;
+}
+.bh-blueprint__doc.is-collapsed {
+  padding-bottom: 20px;
+}
+.bh-blueprint__doc-title-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  border: none;
+  background: none;
+  padding: 4px 0;
+  cursor: pointer;
+  text-align: left;
+}
+.bh-blueprint__doc-title-btn:hover .bh-founder-interview__profile-name {
+  color: var(--bh-results-accent, var(--bh-teal));
+}
+.bh-blueprint__doc-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.bh-blueprint__doc-chevron {
+  display: inline-flex;
+  color: var(--bh-charcoal);
+  opacity: 0.6;
+  transition: transform 0.15s ease;
+  transform: rotate(-90deg);
+  flex-shrink: 0;
+}
+.bh-blueprint__doc-title-btn[aria-expanded="true"] .bh-blueprint__doc-chevron {
+  transform: rotate(0deg);
+}
+/* Visible even while the doc is collapsed — a bold subtitle + italic
+   description turn the collapsed header into a real preview of what's
+   inside, instead of just a bare title a founder has to open to
+   understand. */
+.bh-blueprint__doc-subtitle {
+  margin: 0;
+  padding-left: 30px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--bh-results-accent, var(--bh-teal));
+}
+.bh-blueprint__doc-description {
+  margin: 0;
+  padding-left: 30px;
+  font-size: 14px;
+  font-style: italic;
+  color: var(--bh-charcoal);
+  opacity: 0.75;
+  max-width: 480px;
+}
+.bh-blueprint__export-hint {
+  font-size: 13px;
+  color: var(--bh-charcoal);
+  opacity: 0.65;
+  margin: 0 0 24px;
 }

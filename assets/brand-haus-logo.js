@@ -73,12 +73,6 @@
   ];
   var STYLE_ERA_OPTIONS = ["modern-minimal", "70s-retro", "hand-crafted artisanal", "techy-geometric", "timeless-classic"];
 
-  var LOGO_COLOR_OPTIONS = sortAlpha([
-    "black", "white", "charcoal grey", "hot pink", "teal", "gold", "navy blue", "forest green",
-    "burgundy", "cream / ivory", "sky blue", "coral", "lavender", "mustard yellow", "terracotta",
-    "sage green", "dusty rose", "copper / rust",
-  ]);
-  var LOGO_NEUTRAL_OPTIONS = sortAlpha(["white", "black", "light grey", "charcoal", "cream / ivory", "tan / beige", "warm grey"]);
   var GRADIENT_OPTIONS = sortAlpha(["none", "subtle two-tone gradient", "vibrant multi-color gradient", "metallic sheen", "duotone"]);
   var COLOR_MOOD_OPTIONS = sortAlpha(["warm", "cool", "monochrome", "high contrast", "pastel", "jewel-tone", "earthy and muted", "vibrant and saturated"]);
   var FONT_STYLE_OPTIONS = sortAlpha([
@@ -138,10 +132,10 @@
       industry: makeField("", INDUSTRY_OPTIONS),
       personality: makeField("", PERSONALITY_OPTIONS),
       color: {
-        primary: makeField("", LOGO_COLOR_OPTIONS),
-        secondary: makeField("", LOGO_COLOR_OPTIONS),
-        accent: makeField("", LOGO_COLOR_OPTIONS),
-        neutral: makeField("", LOGO_NEUTRAL_OPTIONS),
+        primary: makeField("", [], { isColorPicker: true }),
+        secondary: makeField("", [], { isColorPicker: true }),
+        accent: makeField("", [], { isColorPicker: true }),
+        neutral: makeField("", [], { isColorPicker: true }),
         gradient: makeField("", GRADIENT_OPTIONS),
         mood: makeField("", COLOR_MOOD_OPTIONS),
       },
@@ -373,8 +367,10 @@
     updateCompositionField("lockup", { value: randomPick(state.composition.lockup), customValue: "" });
     updateCompositionField("container", { value: randomPick(state.composition.container), customValue: "" });
     updateField("colorConstraint", { value: randomPick(state.colorConstraint), customValue: "" });
-    updateColorField("primary", { value: randomPick(state.color.primary), customValue: "" });
-    updateColorField("accent", { value: randomPick(state.color.accent), customValue: "" });
+    // Primary/Accent color are no longer picked from a curated word list
+    // (see buildInitialState) — they're an exact hex pick, and there's no
+    // sensible "random hex" to land Randomize on that wouldn't just be
+    // arbitrary noise, so those two are deliberately left alone here.
     if (!state.noTextSymbolOnly && (resolved(state.brandName) || resolved(state.initials))) {
       updateTypographyField("primaryFont", { value: randomPick(state.typography.primaryFont), customValue: "" });
       updateTypographyField("accentFont", { value: randomPick(state.typography.accentFont), customValue: "" });
@@ -610,17 +606,17 @@
     panel.appendChild(ui.renderFieldGroup("Iconography", [{ label: "Symbol System", field: state.iconography }], function (entry, changes) { updateField("iconography", changes); BrandHaus.ui.renderApp(); }, "No icon, an abstract mark, or a literal symbol — the foundation of the visual."));
 
     panel.appendChild(ui.renderFieldGroup("Colors", [
-      { label: "Primary Color(s)", field: state.color.primary },
-      { label: "Secondary Color(s)", field: state.color.secondary },
-      { label: "Accent Color(s)", field: state.color.accent },
-      { label: "Neutral/Base Colors", field: state.color.neutral },
+      { label: "Primary Color", field: state.color.primary },
+      { label: "Secondary Color", field: state.color.secondary },
+      { label: "Accent Color", field: state.color.accent },
+      { label: "Neutral/Base Color", field: state.color.neutral },
       { label: "Gradient Style", field: state.color.gradient },
       { label: "Color Mood", field: state.color.mood },
     ], function (entry, changes) {
-      var map = { "Primary Color(s)": "primary", "Secondary Color(s)": "secondary", "Accent Color(s)": "accent", "Neutral/Base Colors": "neutral", "Gradient Style": "gradient", "Color Mood": "mood" };
+      var map = { "Primary Color": "primary", "Secondary Color": "secondary", "Accent Color": "accent", "Neutral/Base Color": "neutral", "Gradient Style": "gradient", "Color Mood": "mood" };
       updateColorField(map[entry.label], changes);
       BrandHaus.ui.renderApp();
-    }, "Works standalone — type your own or a hex code (e.g. \"#B76E79\") for an exact match."));
+    }, "Pick each color from the wheel or paste an exact hex code. Gradient Style and Color Mood are separate style descriptors, not literal colors, so those stay as dropdowns."));
 
     panel.appendChild(ui.renderFieldGroup("Typography", [
       { label: "Primary Font", field: state.typography.primaryFont },

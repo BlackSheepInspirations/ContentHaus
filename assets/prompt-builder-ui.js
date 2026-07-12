@@ -186,7 +186,7 @@
   // own stores in addition to its own, so its snapshot bundles all four
   // plus the shared Style DNA bar; every other mode only needs its own
   // store + Style DNA.
-  var VAULT_CROSS_MODULES = { combined: ["character", "text", "graphics"] };
+  var VAULT_CROSS_MODULES = { combined: ["character", "text", "graphics"], character: ["characterVideo"] };
 
   function buildVaultSnapshot(mode) {
     var snapshot = { styleDNA: JSON.parse(JSON.stringify(PromptHaus.styleDNA.getState())) };
@@ -359,6 +359,7 @@
     warning: '<path d="M10 2.5 18 17H2Z"/><path d="M10 8v3.5"/><circle cx="10" cy="14" r="0.75" fill="currentColor" stroke="none"/>',
     people: '<circle cx="6.5" cy="6" r="2.2"/><path d="M2.5 17c0-2.7 1.8-4.8 4-4.8s4 2.1 4 4.8"/><circle cx="14" cy="7.3" r="1.8"/><path d="M10.7 17c.3-2.2 1.8-3.9 3.3-3.9s3 1.7 3.3 3.9"/>',
     sheep: '<ellipse cx="9" cy="10.5" rx="6.5" ry="5"/><circle cx="15.5" cy="8" r="2.3"/><path d="M6 14.5v2M9.5 15v2M13 14.5v2"/>',
+    video: '<rect x="2" y="4" width="16" height="12" rx="2"/><path d="M8 7.5v5l5-2.5-5-2.5Z" fill="currentColor" stroke="none"/>',
   };
 
   // Fieldset legend title -> icon name, so each sub-section header reads
@@ -990,6 +991,88 @@
   //    Framing and all of Extras duplicate Graphics's Frame It/What Is It.
   // Showing any of these would let a shopper fill in a value that then
   // silently gets dropped from the assembled prompt.
+
+  // Character Mode's Video Motion Prompt companion — a collapsible
+  // opt-in section (renderSubPanel, same pattern as "Add a Companion"),
+  // with its own small field set and its own independent Copy button.
+  // Deliberately does not re-describe the character/scene — image-to-
+  // video tools take the already-rendered image as their visual
+  // reference, so this only ever covers motion/camera/duration/audio.
+  function renderCharacterVideoSection() {
+    var video = PromptHaus.characterVideo;
+    if (!video) return null;
+    var state = video.getState();
+
+    function handleChange(entry, changes) {
+      video.updateField(entry.name, changes);
+      renderApp();
+    }
+
+    return renderSubPanel(
+      "Turn This Into a Video Prompt",
+      state.enabled,
+      function (checked) {
+        video.setEnabled(checked);
+        renderApp();
+      },
+      function () {
+        var wrap = el("div", { class: "ph-character-video" });
+        wrap.appendChild(el("p", { class: "ph-field-group__subtitle", text: "Builds a second, separate prompt for animating the image once it's rendered — for pasting into an image-to-video tool, not for the image prompt itself." }));
+
+        // renderFreeTextField's placeholder is hard-coded to Text Mode's
+        // own wording in this file (it doesn't read entry.placeholder) —
+        // override it directly on the returned element rather than
+        // showing Text Mode's placeholder here, same "grab the element,
+        // tweak it" pattern renderLogoTextFieldWithInclude already uses.
+        var motionField = renderFreeTextField(
+          { name: "motionDescription", label: "Motion / Action", field: state.motionDescription },
+          function (changes) { handleChange({ name: "motionDescription" }, changes); }
+        );
+        motionField.querySelector("textarea").placeholder = "e.g. she takes a sip of her coffee and smiles";
+        wrap.appendChild(motionField);
+
+        wrap.appendChild(renderFieldGroup(
+          "Video Settings",
+          [
+            { name: "targetTool", label: "Target Tool", field: state.targetTool },
+            { name: "cameraMovement", label: "Camera Movement", field: state.cameraMovement },
+            { name: "duration", label: "Duration", field: state.duration },
+            { name: "audioType", label: "Audio", field: state.audioType },
+            { name: "qualityDescriptor", label: "Quality", field: state.qualityDescriptor },
+          ],
+          handleChange
+        ));
+
+        if (PromptHaus.engine.resolveFieldValue(state.audioType) === "Dialogue / Voiceover") {
+          var dialogueField = renderFreeTextField(
+            { name: "dialogueText", label: "What's Said", field: state.dialogueText },
+            function (changes) { handleChange({ name: "dialogueText" }, changes); }
+          );
+          dialogueField.querySelector("textarea").placeholder = "e.g. \"This is my favorite part of the morning.\"";
+          wrap.appendChild(dialogueField);
+        }
+
+        var formatted = video.assemblePrompt().text;
+        var textarea = el("textarea", { class: "ph-preview__text ph-character-video__text", readonly: "readonly" });
+        textarea.value = formatted;
+        wrap.appendChild(textarea);
+
+        var copyBtn = el("button", { type: "button", class: "ph-btn ph-btn--copy ph-btn--small" }, [icon("copy"), el("span", { class: "ph-btn__label", text: "Copy Video Prompt" })]);
+        copyBtn.addEventListener("click", function () {
+          copyTextToClipboard(formatted, function (ok) {
+            var label = copyBtn.querySelector(".ph-btn__label");
+            label.textContent = ok ? "Copied!" : "Copy failed";
+            setTimeout(function () { label.textContent = "Copy Video Prompt"; }, 1500);
+          });
+        });
+        wrap.appendChild(copyBtn);
+
+        return wrap;
+      },
+      "Generates a separate motion/camera/audio prompt for animating the rendered image in a tool like MidJourney, Kling, or Runway."
+    );
+  }
+
   function renderCharacterPanel(combinedMode) {
     var character = PromptHaus.character;
     var state = character.getState();
@@ -1119,6 +1202,11 @@
           "Optional fantasy elements or props to add to the scene."
         )
       );
+    }
+
+    if (!combinedMode) {
+      var videoSection = renderCharacterVideoSection();
+      if (videoSection) panel.appendChild(videoSection);
     }
 
     return panel;

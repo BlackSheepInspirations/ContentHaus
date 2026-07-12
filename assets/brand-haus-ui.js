@@ -79,23 +79,309 @@
     URL.revokeObjectURL(url);
   }
 
-  function printPromptText(text) {
+  function printPromptText(text, title, heading) {
     var win = window.open("", "_blank", "width=650,height=800");
     if (!win) return;
     var escaped = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     win.document.write(
-      "<html><head><title>Your Marketing Prompt — The AI Creator's Brand Haus</title><style>" +
+      "<html><head><title>" + (title || "Your Marketing Prompt — The AI Creator's Brand Haus") + "</title><style>" +
         "body{font-family:Georgia,serif;padding:48px;color:#1A1815;line-height:1.6;max-width:600px;margin:0 auto;}" +
-        "h1{font-size:16px;letter-spacing:0.05em;text-transform:uppercase;color:#D6336C;margin-bottom:28px;}" +
+        "h1{font-size:16px;letter-spacing:0.05em;text-transform:uppercase;color:#0D7377;margin-bottom:28px;}" +
         "p{font-size:15px;white-space:pre-wrap;}" +
         "</style></head><body>" +
-        "<h1>Black Sheep Creations &amp; Inspirations — The AI Creator's Brand Haus</h1>" +
+        "<h1>" + (heading || "Black Sheep Creations &amp; Inspirations — The AI Creator's Brand Haus") + "</h1>" +
         "<p>" + escaped + "</p>" +
         "</body></html>"
     );
     win.document.close();
     win.focus();
     setTimeout(function () { win.print(); }, 250);
+  }
+
+  // Same slug results.js's own (unexported) profileSlug() produces — kept
+  // in sync by convention rather than a shared export, since it's a
+  // one-line pure string transform and this is the only other place that
+  // needs it (to read window.BrandHausHeroImages, the per-profile hero
+  // photo map already injected by brand-haus.liquid for Chapter 2).
+  function profileSlugForCover(profile) {
+    return profile.name.toLowerCase().replace(/^the /, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+  }
+
+  // The Brand Playbook's "epic cover" — a dramatic, magazine-style
+  // opening page reserved for that one document (Snapshot and Report
+  // keep the plain cover — a founder said the dramatic treatment reads
+  // better as "the master reference" than on the shorter documents).
+  // Built entirely from assets already in the theme: the matched
+  // profile's own hero photo (same 11 images Chapter 2 already uses, via
+  // window.BrandHausHeroImages) and its own real palette for the glow/
+  // blob colors and seal — no new artwork, no per-profile authored copy.
+  // Typography is deliberately FIXED (Bebas Neue / Montserrat / Inter)
+  // rather than swapped to the matched profile's own headingFont/
+  // bodyFont — some profile fonts (script faces, ultra-wide serifs) read
+  // "wonky" at poster scale on a cover this bold, and a fixed system is
+  // how a real print series keeps its covers consistent across volumes
+  // regardless of which book (profile) you're holding. Personalization
+  // on this cover still comes through via the hero photo, accent/blob
+  // colors, and profile name — the typeface doesn't need to also vary
+  // for it to feel personal. Height is sized to roughly one US Letter
+  // page at print resolution (11in page − 0.3in top/bottom margins ≈
+  // 998px usable, trimmed further for safety margin against real Chrome
+  // print rendering slightly taller than headless verification did) so
+  // page-break-after:always reliably lands it alone on page 1.
+  function buildEpicCoverCss(profile) {
+    var colors = (profile && profile.output && profile.output.colors) || {};
+    var accent = colors.standOut || colors.accent || "#0D7377";
+    var accent2 = colors.secondary || colors.accent || "#6B6860";
+    var accent3 = colors.support || colors.primary || "#2E2A26";
+    return (
+      // A flex column with a FIXED (not min-) height — combined with
+      // flex-shrink:0 on every text block and flex:1 on the hero-zone,
+      // this structurally guarantees the whole cover always fits inside
+      // one printed page's usable height rather than hoping font-metric
+      // estimates land right: whatever's left after the fixed-size text
+      // blocks take their space is exactly what the hero-zone gets,
+      // every time, on any profile's copy. 880px, not the ~998px a
+      // naive "11in page minus 0.3in margins" calculation suggests —
+      // empirically confirmed via real headless-Chrome print-to-pdf
+      // that usable height lands closer to ~910-920px, meaning Chrome's
+      // own default print margins stack on top of the body's own 0.3in
+      // CSS padding rather than being replaced by it. 880px leaves a
+      // real safety margin under that.
+      ".bh-epic-cover{position:relative;overflow:hidden;background:#0D0D0D;color:#F2F0EB;height:880px;padding:40px 60px 24px;box-sizing:border-box;display:flex;flex-direction:column;page-break-after:always;break-after:page;font-family:'Inter',-apple-system,sans-serif;}" +
+      ".bh-epic-cover__blob{position:absolute;border-radius:50%;filter:blur(70px);opacity:0.5;}" +
+      ".bh-epic-cover__blob--1{width:340px;height:340px;top:-80px;right:-60px;background:" + accent + ";}" +
+      ".bh-epic-cover__blob--2{width:280px;height:280px;bottom:60px;left:-80px;background:" + accent2 + ";}" +
+      ".bh-epic-cover__blob--3{width:220px;height:220px;bottom:-60px;right:120px;background:" + accent3 + ";}" +
+      ".bh-epic-cover__brandbar{position:relative;flex-shrink:0;font-family:'Montserrat',sans-serif;font-weight:500;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:rgba(242,240,235,0.6);margin:0 0 20px;}" +
+      ".bh-epic-cover__title-block{position:relative;flex-shrink:0;max-width:560px;}" +
+      // Bebas Neue is a condensed display face — noticeably shorter and
+      // narrower per letter than a serif like Playfair Display at the
+      // same visual weight, which is what makes room for a much larger
+      // hero image below without the title losing any visual punch.
+      ".bh-epic-cover__title{font-family:'Bebas Neue',sans-serif;font-size:56px;line-height:0.96;font-weight:400;letter-spacing:0.01em;margin:0 0 10px;color:#F2F0EB;}" +
+      ".bh-epic-cover__title-accent{color:" + accent + ";}" +
+      ".bh-epic-cover__identity{font-family:'Montserrat',sans-serif;font-weight:600;font-size:19px;color:" + accent + ";margin:0 0 5px;}" +
+      ".bh-epic-cover__rule{height:3px;width:56px;border-radius:2px;background:" + accent + ";margin:0 0 10px;}" +
+      ".bh-epic-cover__tagline{font-family:'Inter',sans-serif;font-weight:400;font-style:italic;font-size:13px;line-height:1.4;color:rgba(242,240,235,0.72);max-width:400px;margin:0;}" +
+      // flex:1 fills whatever vertical space is left — with a fixed
+      // cover height and every sibling flex-shrink:0, that's now a large
+      // majority of the page. The zone also breaks out of the cover's
+      // own left/right padding via negative margins so the photo can run
+      // full-bleed, edge to edge, instead of sitting in a small inset
+      // box. object-fit:cover (not contain) is what actually makes the
+      // photo read as "almost the background image" — these hero photos
+      // are roughly square, so "contain" inside a wide-but-short zone
+      // left most of the width empty; "cover" fills the entire zone and
+      // crops instead, the standard technique for a dominant hero image.
+      ".bh-epic-cover__hero-zone{position:relative;flex:1;min-height:160px;margin:8px -60px;overflow:hidden;background:#0D0D0D;}" +
+      ".bh-epic-cover__glow{position:absolute;left:50%;top:50%;width:60%;height:60%;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle, rgba(242,240,235,0.18), transparent 70%);}" +
+      // object-fit:cover (not contain) — see note above the zone. These
+      // hero images aren't true alpha-transparent PNGs — they're flat
+      // JPEGs where the "isolated art" was flattened onto a solid canvas
+      // (white on most profiles, an actual checkerboard pattern on at
+      // least one) instead of preserving real transparency or a color
+      // that matches this dark cover. object-fit:cover's default framing
+      // only reliably crops that margin out top/bottom (via the fade
+      // below); left/right, whether it's hidden at all came down to
+      // luck — how wide that particular photo's own margin happened to
+      // be relative to this zone's aspect ratio (confirmed by comparing
+      // several hero photos directly: some already crop clean, one
+      // showed a visible checkerboard patch on both sides in a real
+      // exported PDF). scale(1.25) crops in evenly from all four sides
+      // regardless of any single photo's own margin width, at the cost
+      // of losing a bit of each photo's outermost splatter/torn-edge
+      // detail — never the actual subject, which every one of these
+      // compositions keeps centered with real room to spare.
+      ".bh-epic-cover__hero{position:absolute;top:0;left:0;right:0;bottom:0;width:100%;height:100%;object-fit:cover;object-position:center center;transform:scale(1.25);filter:grayscale(0.25) contrast(1.05);opacity:0.94;}" +
+      ".bh-epic-cover__hero-fade{position:absolute;left:0;right:0;height:14%;pointer-events:none;}" +
+      ".bh-epic-cover__hero-fade--top{top:0;background:linear-gradient(to bottom, #0D0D0D, rgba(13,13,13,0));}" +
+      ".bh-epic-cover__hero-fade--bottom{bottom:0;background:linear-gradient(to top, #0D0D0D, rgba(13,13,13,0));}" +
+      ".bh-epic-cover__seal{position:relative;flex-shrink:0;display:flex;align-items:center;gap:12px;margin:0 0 16px;}" +
+      ".bh-epic-cover__seal-label{font-family:'Montserrat',sans-serif;font-weight:600;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:rgba(242,240,235,0.55);line-height:1.7;margin:0;}" +
+      ".bh-epic-cover__icon-row{position:relative;flex-shrink:0;display:flex;gap:20px;padding-top:14px;border-top:1px solid rgba(242,240,235,0.15);}" +
+      // flex:1 1 0 (not a fixed px flex-basis) so the 4 items always
+      // divide the row evenly and never wrap to a 5th line, regardless
+      // of exactly how much horizontal padding the surrounding page ends
+      // up with.
+      ".bh-epic-cover__icon-item{flex:1 1 0;min-width:0;}" +
+      ".bh-epic-cover__icon-item .bh-icon{color:" + accent + ";width:18px;height:18px;margin-bottom:6px;}" +
+      ".bh-epic-cover__icon-label{font-family:'Montserrat',sans-serif;font-weight:600;font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:#F2F0EB;margin:0 0 3px;}" +
+      ".bh-epic-cover__icon-desc{font-family:'Inter',sans-serif;font-weight:400;font-size:11px;line-height:1.35;color:rgba(242,240,235,0.6);margin:0;}" +
+      ".bh-epic-cover__footer{position:relative;flex-shrink:0;text-align:center;font-family:'Montserrat',sans-serif;font-weight:500;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:rgba(242,240,235,0.45);margin-top:10px;}"
+    );
+  }
+
+  function buildEpicCoverHtml(profile) {
+    var heroMap = window.BrandHausHeroImages || {};
+    var heroSrc = profile ? heroMap[profileSlugForCover(profile)] : null;
+    var sealSvg =
+      '<svg viewBox="0 0 100 100" width="72" height="72" style="flex-shrink:0;">' +
+        '<circle cx="50" cy="50" r="46" fill="none" stroke="#F2F0EB" stroke-width="1.2" opacity="0.7"/>' +
+        '<circle cx="50" cy="50" r="38" fill="none" stroke="#F2F0EB" stroke-width="0.8" opacity="0.5"/>' +
+        '<path d="M50 26 L55 46 L75 50 L55 54 L50 74 L45 54 L25 50 L45 46 Z" fill="#F2F0EB" opacity="0.85"/>' +
+      "</svg>";
+    function iconSvg(name) {
+      return '<span class="bh-icon"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">' + (ICONS[name] || "") + "</svg></span>";
+    }
+    function iconItem(iconName, label, desc) {
+      return '<div class="bh-epic-cover__icon-item">' + iconSvg(iconName) + '<p class="bh-epic-cover__icon-label">' + label + '</p><p class="bh-epic-cover__icon-desc">' + desc + "</p></div>";
+    }
+
+    return (
+      '<div class="bh-epic-cover">' +
+        '<div class="bh-epic-cover__blob bh-epic-cover__blob--1"></div>' +
+        '<div class="bh-epic-cover__blob bh-epic-cover__blob--2"></div>' +
+        '<div class="bh-epic-cover__blob bh-epic-cover__blob--3"></div>' +
+        '<p class="bh-epic-cover__brandbar">Black Sheep Creations &amp; Inspirations</p>' +
+        '<div class="bh-epic-cover__title-block">' +
+          '<h1 class="bh-epic-cover__title">Your<br><span class="bh-epic-cover__title-accent">Brand</span><br>Playbook&trade;</h1>' +
+          (profile ? '<p class="bh-epic-cover__identity">' + profile.name + "</p>" : "") +
+          '<div class="bh-epic-cover__rule"></div>' +
+          '<p class="bh-epic-cover__tagline">A 20-guide reference for building, communicating, and growing your brand — built entirely from your answers.</p>' +
+        "</div>" +
+        '<div class="bh-epic-cover__hero-zone">' +
+          '<div class="bh-epic-cover__glow"></div>' +
+          (heroSrc ? '<img class="bh-epic-cover__hero" src="' + heroSrc + '" alt="">' +
+          '<div class="bh-epic-cover__hero-fade bh-epic-cover__hero-fade--top"></div>' +
+          '<div class="bh-epic-cover__hero-fade bh-epic-cover__hero-fade--bottom"></div>' : "") +
+        "</div>" +
+        '<div class="bh-epic-cover__seal">' + sealSvg + '<p class="bh-epic-cover__seal-label">Discovered From Within<br>Built For Impact</p></div>' +
+        '<div class="bh-epic-cover__icon-row">' +
+          iconItem("heart", "Understand", "The psychology behind your brand.") +
+          iconItem("sparkle", "Clarify", "The strategy that sets you apart.") +
+          iconItem("logoMark", "Align", "Your message, visuals, and decisions.") +
+          iconItem("lightning", "Elevate", "Build a brand that outlasts today.") +
+        "</div>" +
+        '<p class="bh-epic-cover__footer">This isn\'t a label. It\'s a blueprint.</p>' +
+      "</div>"
+    );
+  }
+
+  // Prints the founder's actual on-screen chapters — full color, real
+  // layout, matched-profile accent — instead of a plain-text recap.
+  // "Save as PDF" in the browser's own print dialog then produces the
+  // color piece a founder would actually expect to keep, with zero new
+  // PDF-generation dependency. sectionEl is cloned rather than moved, so
+  // the live page is untouched; accentStyle is the same string
+  // accentStyleFor(profile) already produces for the on-screen version,
+  // reapplied here since the print window doesn't inherit anything from
+  // the page that opened it.
+  // profile is optional — when passed, the export gets a branded cover
+  // block (wordmark, document title, profile name, accent rule) and every
+  // heading/body element is forced into the founder's own chosen fonts,
+  // so the exported piece reads like a finished deliverable rather than a
+  // recap of the on-screen app (which never applies those fonts itself,
+  // outside the one live typography sample in Chapter 3).
+  // coverVariant "epic" (Playbook only, for now) swaps in the dramatic
+  // magazine-style cover above instead of the plain branded one.
+  function printStyledSection(sectionEl, accentStyle, title, profile, coverVariant) {
+    var win = window.open("", "_blank", "width=900,height=1000");
+    if (!win) return;
+    var cssLink = document.getElementById("bh-css-link") || document.querySelector('link[href*="brand-haus.css"]');
+    var cssHref = cssLink ? cssLink.href : "";
+    var fontsLink = document.getElementById("bh-branding-fonts-link");
+    var fontsHref = fontsLink ? fontsLink.href : "";
+    var headingFont = (profile && profile.output && profile.output.headingFont) || "Playfair Display";
+    var bodyFont = (profile && profile.output && profile.output.bodyFont) || "Inter";
+    var accentColor = (profile && profile.output && profile.output.colors && profile.output.colors.standOut) || "#0D7377";
+    var primaryColor = (profile && profile.output && profile.output.colors && profile.output.colors.primary) || "#1A1815";
+    var docTitle = title || "Your Brand DNA — Black Sheep Creations";
+    var isEpicCover = coverVariant === "epic" && !!profile;
+    // The app-wide Google Fonts link (fontsHref) only requests weights
+    // 400/600/700 for its 15 fonts — enough for the profile-driven fonts
+    // used everywhere else, but not the Montserrat 500/600 or Inter
+    // italic the epic cover's fixed typography needs. A second small
+    // link scoped to just this popup covers the gap without bloating
+    // the shared app-wide stylesheet with weights nothing else uses.
+    var epicFontsHref = "https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@500;600&family=Inter:ital,wght@0,400;1,400&display=swap";
+
+    win.document.write(
+      "<html><head><title>" + docTitle + "</title>" +
+      (cssHref ? '<link rel="stylesheet" href="' + cssHref + '">' : "") +
+      (fontsHref ? '<link rel="stylesheet" href="' + fontsHref + '">' : "") +
+      (isEpicCover ? '<link rel="stylesheet" href="' + epicFontsHref + '">' : "") +
+      "<style>" +
+        // Chrome/Firefox drop background colors on print by default unless
+        // told otherwise — without this, every color swatch and progress
+        // ring prints blank even though borders/text come through fine.
+        "*{-webkit-print-color-adjust:exact;print-color-adjust:exact;color-adjust:exact;}" +
+        "body{background:#fff;margin:0;padding:32px 40px;font-family:'" + bodyFont + "',-apple-system,sans-serif;color:#1A1815;}" +
+        ".bh-founder-interview--results{max-width:100%;}" +
+        // brand-haus.css only defines --bh-border/--bh-teal/etc. scoped to
+        // #brand-haus-app and a few other selectors that don't exist in
+        // this popup's own document — every var(--bh-border) etc. cloned
+        // classes reference (card borders, slider tracks, neutral swatch)
+        // silently resolved to nothing without this, which is why only the
+        // colors set inline via accentStyle survived. Redefining the same
+        // tokens here, scoped to .bh-print-wrap, restores all of them.
+        ".bh-print-wrap{--bh-cream:#F2F0EB;--bh-black:#1A1815;--bh-gold:#6B6860;--bh-teal:#0D7377;--bh-steel:#2E5A8C;--bh-charcoal:#2E2A26;--bh-espresso:#0D7377;--bh-border:rgba(46,42,38,0.15);--bh-gold-on-light:#6B6860;}" +
+        // Deliberately NOT page-break-inside:avoid on .bh-chapter itself — a
+        // chapter can run well past one printed page (Chapter 3's 8 tension
+        // sections especially), and "avoid" on a block taller than a page
+        // forces an extra blank page before it rather than preventing a
+        // split. Avoid is reserved below for genuinely small, atomic pieces
+        // instead. page-break-before IS forced here though (both properties
+        // for older/newer engine support) so every chapter and every Part
+        // divider starts its own fresh page — deliberate, requested
+        // behavior, not a bug: it costs extra pages but reads like a real
+        // printed reference document instead of one continuous scroll with
+        // chapters bleeding into each other mid-page.
+        ".bh-chapter,.bh-playbook__part-divider{page-break-inside:auto;page-break-before:always;break-before:page;box-shadow:none;margin-bottom:16px;}" +
+        // The rule above is right for every chapter AFTER the first one —
+        // that's what makes each chapter start its own fresh page. But
+        // applied to the very FIRST chapter too, it forces a break right
+        // after the print masthead, leaving page 1 almost blank before
+        // real content starts on page 2 (seen in a real exported PDF on
+        // the Snapshot and Brand DNA Report, both of which open straight
+        // into a .bh-chapter with no table of contents in between —
+        // unlike the Playbook, which already has one). Only these two
+        // specific structural positions are un-forced; the Playbook's own
+        // TOC-then-Part-divider opening is untouched and unaffected.
+        ".bh-print-wrap>.bh-chapter:first-child,.bh-print-wrap>.bh-blueprint__print-chapters>.bh-chapter:first-child{page-break-before:auto;break-before:auto;}" +
+        ".bh-chapter__section-title{page-break-after:avoid;break-after:avoid;}" +
+        // Everything in this list is a small, self-contained box that reads
+        // as broken if the browser slices it mid-border — the take-action/
+        // why-this-matters/quickref cards and the mission-statement pull-
+        // quote all learned this the hard way (seen split across two pages
+        // in a real exported PDF) before being added here.
+        ".bh-palette-swatch,.bh-font-card,.bh-chapter__bullet-list li,.bh-tension-slider,.bh-dna-cluster,.bh-chapter__take-action,.bh-chapter__why-this-matters,.bh-founder-interview__mission,.bh-chapter__highlight-line,.bh-chapter__slider-box,.bh-quickref,.bh-fingerprint-wrap,.bh-chapter__evolution{page-break-inside:avoid;break-inside:avoid;}" +
+        // The hero image relies on flex "stretch" against its text sibling
+        // for height on screen; if the print page is narrow enough that
+        // flex-wrap drops it to its own row, it has no sibling to stretch
+        // against and blows up to fill the row instead. Print never needs
+        // the side-by-side layout to be that wide, so cap it directly.
+        ".bh-chapter__hero-image{flex:0 0 200px;max-width:200px;}" +
+        ".bh-chapter__hero-image img{height:auto;min-height:0;aspect-ratio:1/1;}" +
+        ".bh-print-cover{text-align:center;padding-bottom:24px;margin-bottom:28px;border-bottom:1px solid rgba(0,0,0,0.1);}" +
+        ".bh-print-cover__eyebrow{font-size:11px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:rgba(26,24,21,0.5);margin:0 0 14px;font-family:'" + bodyFont + "',-apple-system,sans-serif;}" +
+        ".bh-print-cover__title{font-size:32px;line-height:1.15;margin:0 0 8px;color:#1A1815;font-family:'" + headingFont + "',serif;}" +
+        ".bh-print-cover__profile{font-size:18px;margin:0 0 16px;color:" + primaryColor + ";font-family:'" + headingFont + "',serif;}" +
+        ".bh-print-cover__rule{height:4px;width:72px;margin:0 auto;border-radius:2px;background:" + accentColor + ";}" +
+        ".bh-print-footer{margin-top:32px;padding-top:16px;border-top:1px solid rgba(0,0,0,0.1);text-align:center;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:rgba(26,24,21,0.45);font-family:'" + bodyFont + "',-apple-system,sans-serif;page-break-inside:avoid;}" +
+        ".bh-print-footer__disclaimer{margin-top:6px;font-size:11px;letter-spacing:normal;text-transform:none;font-style:italic;color:rgba(26,24,21,0.4);}" +
+        ".bh-print-wrap h1,.bh-print-wrap h2,.bh-print-wrap h3,.bh-print-wrap .bh-chapter__eyebrow,.bh-print-wrap .bh-chapter__section-title,.bh-print-wrap .bh-founder-interview__profile-name,.bh-print-wrap .bh-blueprint__section-header h3{font-family:'" + headingFont + "',serif!important;}" +
+        ".bh-print-wrap p,.bh-print-wrap li,.bh-print-wrap span,.bh-print-wrap div{font-family:'" + bodyFont + "',-apple-system,sans-serif;}" +
+        ".bh-print-wrap .bh-btn,.bh-print-wrap button:not(.bh-font-pairing-row){display:none!important;}" +
+        ".bh-print-wrap .bh-font-pairing-row{cursor:default;}" +
+        ".bh-print-wrap .bh-font-pairing-row__chevron{display:none;}" +
+        "@media print{body{padding:0.3in;}}" +
+        (isEpicCover ? buildEpicCoverCss(profile) : "") +
+      "</style></head><body>" +
+      (isEpicCover ? buildEpicCoverHtml(profile) :
+      '<div class="bh-print-cover">' +
+        '<p class="bh-print-cover__eyebrow">Black Sheep Creations &amp; Inspirations</p>' +
+        '<h1 class="bh-print-cover__title">' + docTitle.split(" — ")[0] + "</h1>" +
+        (profile ? '<p class="bh-print-cover__profile">' + profile.name + "</p>" : "") +
+        '<div class="bh-print-cover__rule"></div>' +
+      "</div>") +
+      '<div class="bh-founder-interview bh-founder-interview--results bh-print-wrap" style="' + (accentStyle || "") + '"></div>' +
+      '<p class="bh-print-footer">Black Sheep Creations &amp; Inspirations &middot; Brand DNA Blueprint&trade;<br><span class="bh-print-footer__disclaimer">This document offers creative direction, not a guarantee of results — every recommendation is meant to be refined as your brand grows.</span></p>' +
+      "</body></html>"
+    );
+    win.document.close();
+    win.document.querySelector(".bh-print-wrap").appendChild(sectionEl.cloneNode(true));
+    win.focus();
+    setTimeout(function () { win.print(); }, 400);
   }
 
   function buildShareUrl(text) {
@@ -108,9 +394,25 @@
   // Vault snapshot save/restore — same crash-safety pattern as Prompt
   // Haus (deep-merge onto current defaults, never wholesale-replace).
   // ---------------------------------------------------------------------
+  // Vault "mode" is normally a top-level BrandHaus.<mode> namespace
+  // ("branding"/"logo"), but Quick Generators has no such namespace per
+  // generator — its vault key is "gen:<id>" instead, routed through
+  // BrandHaus.generators' own per-generator store lookup. Same "gen:"
+  // prefix convention Product Haus/Marketing Haus/Graphics Haus already
+  // use for their own Quick Generators tabs.
+  function getModeStore(mode) {
+    if (mode.indexOf("gen:") === 0) return BrandHaus.generators.getGeneratorStore(mode.slice(4));
+    return BrandHaus[mode];
+  }
+
+  function modeLabel(mode) {
+    if (mode.indexOf("gen:") === 0) return BrandHaus.generators.getGeneratorLabel(mode.slice(4));
+    return MODE_LABELS[mode] || mode;
+  }
+
   function buildVaultSnapshot(mode) {
     var snapshot = { identity: JSON.parse(JSON.stringify(BrandHaus.identity.getState())) };
-    snapshot[mode] = JSON.parse(JSON.stringify(BrandHaus[mode].getState()));
+    snapshot[mode] = JSON.parse(JSON.stringify(getModeStore(mode).getState()));
     return snapshot;
   }
 
@@ -144,12 +446,12 @@
   function loadVaultSnapshot(mode, snapshot) {
     if (!snapshot) return;
     if (snapshot.identity) BrandHaus.identity.setState(deepMergeSnapshot(BrandHaus.identity.getState(), snapshot.identity));
-    if (snapshot[mode]) BrandHaus[mode].setState(deepMergeSnapshot(BrandHaus[mode].getState(), snapshot[mode]));
+    if (snapshot[mode]) getModeStore(mode).setState(deepMergeSnapshot(getModeStore(mode).getState(), snapshot[mode]));
   }
 
   function buildVaultTitle(mode) {
     var context = BrandHaus.engine.resolveFieldValue(BrandHaus.identity.getState().businessName);
-    return context ? (MODE_LABELS[mode] || mode) + " — " + context : (MODE_LABELS[mode] || mode);
+    return context ? modeLabel(mode) + " — " + context : modeLabel(mode);
   }
 
   function buildFullVaultText() {
@@ -160,7 +462,7 @@
     });
     var sections = [];
     Object.keys(byMode).forEach(function (mode) {
-      var label = (MODE_LABELS[mode] || mode).toUpperCase();
+      var label = modeLabel(mode).toUpperCase();
       var lines = byMode[mode].map(function (fav, index) {
         return (fav.title || "Untitled " + (index + 1)) + "\n" + fav.text;
       });
@@ -208,6 +510,7 @@
     car: '<path d="M4 13 5.5 8h9L16 13"/><rect x="3" y="13" width="14" height="3" rx="1"/><circle cx="6.5" cy="16.5" r="1.3"/><circle cx="13.5" cy="16.5" r="1.3"/>',
     bulb: '<path d="M7 15h6M8 17.5h4"/><path d="M10 2.5c-3 0-5 2.2-5 5 0 2 1.1 3.3 2 4.2.5.5.8 1 .9 1.8h4.2c.1-.8.4-1.3.9-1.8.9-.9 2-2.2 2-4.2 0-2.8-2-5-5-5Z"/>',
     mail: '<rect x="2.5" y="4.5" width="15" height="11" rx="1.3"/><path d="M3 5.5 10 11l7-5.5"/>',
+    chevron: '<path d="M5 7.5 10 12.5 15 7.5"/>',
   };
 
   var TITLE_ICONS = {
@@ -217,6 +520,7 @@
     "Typography Direction": "type", "Composition & Lockup": "crop", "Brand Story": "heart",
     "Negative Constraints": "shield", "Pro Mode": "sparkle", "Colors": "palette",
     "Typography": "type", "Core Values": "heart", "Brand Voice": "sparkle",
+    "Mission Statement": "bulb",
   };
 
   function icon(name, extraClass) {
@@ -407,6 +711,35 @@
   // ---------------------------------------------------------------------
   var HEX_PATTERN = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i;
 
+  // A single swatch+hex pair for one named color role (Logo Studio's
+  // Primary/Secondary/Accent/Neutral) — the one-item cousin of
+  // renderColorPickerList's array (that one's Add/Remove semantics don't
+  // fit a fixed named role; there's exactly one primary color, not a
+  // variable-length list of them). Reuses the exact same swatch/hex/
+  // Change markup and CSS classes so both read as one consistent picker
+  // pattern app-wide rather than two different-looking color controls.
+  function renderSingleColorField(entry, onChange) {
+    var value = entry.field.value || "";
+    var swatchInput = el("input", { type: "color" });
+    swatchInput.value = HEX_PATTERN.test(value) ? value : "#6B6860";
+    var hexInput = el("input", { type: "text", class: "bh-field__custom bh-color-hex", placeholder: "#000000" });
+    hexInput.value = value;
+    swatchInput.addEventListener("input", function () {
+      hexInput.value = swatchInput.value;
+      onChange({ value: swatchInput.value });
+    });
+    hexInput.addEventListener("input", function () {
+      if (HEX_PATTERN.test(hexInput.value)) swatchInput.value = hexInput.value;
+      onChange({ value: hexInput.value });
+    });
+    var changeBtn = el("button", { type: "button", class: "bh-btn bh-btn--small bh-btn--reset", text: "Change" });
+    changeBtn.addEventListener("click", function () { swatchInput.click(); });
+    return el("div", { class: "bh-field" }, [
+      el("div", { class: "bh-field__label-row" }, [el("label", { class: "bh-field__label", text: entry.label })]),
+      el("div", { class: "bh-color-swatch-item" }, [swatchInput, hexInput, changeBtn]),
+    ]);
+  }
+
   function renderColorPickerList(options) {
     var wrap = el("fieldset", { class: "bh-field-group" });
     wrap.appendChild(el("legend", { class: "bh-field-group__title" }, [icon("palette"), el("span", { text: options.title })]));
@@ -425,9 +758,15 @@
         if (HEX_PATTERN.test(hexInput.value)) swatchInput.value = hexInput.value;
         options.onUpdate(index, hexInput.value);
       });
+      // The swatch itself IS the color-wheel trigger (clicking it opens
+      // the native picker), but nothing about a small native color input
+      // signals that — this button makes "click here to change it" an
+      // explicit, obvious action instead of something to discover.
+      var changeBtn = el("button", { type: "button", class: "bh-btn bh-btn--small bh-btn--reset", text: "Change" });
+      changeBtn.addEventListener("click", function () { swatchInput.click(); });
       var removeBtn = el("button", { type: "button", class: "bh-btn bh-btn--small bh-btn--delete", text: "Remove" });
       removeBtn.addEventListener("click", function () { options.onRemove(index); });
-      row.appendChild(el("div", { class: "bh-color-swatch-item" }, [swatchInput, hexInput, removeBtn]));
+      row.appendChild(el("div", { class: "bh-color-swatch-item" }, [swatchInput, hexInput, changeBtn, removeBtn]));
     });
     wrap.appendChild(row);
     if (options.colors.length < options.max) {
@@ -479,6 +818,7 @@
   function fieldRenderFn(entry) {
     if (entry.field.isFreeText) return renderFreeTextField;
     if (entry.isFontPicker) return renderFontPreviewField;
+    if (entry.field.isColorPicker) return renderSingleColorField;
     return renderField;
   }
 
@@ -803,8 +1143,15 @@
       loadBtn.title = "Restores every field in the builder to exactly how it was when this was generated.";
       loadBtn.addEventListener("click", function () {
         loadVaultSnapshot(entry.mode, entry.snapshot);
-        activeMode = entry.mode;
+        if (entry.mode === "branding" || entry.mode === "logo") {
+          activeStep = "brandingStudio";
+          brandingSubMode = entry.mode;
+        } else if (entry.mode.indexOf("gen:") === 0) {
+          activeStep = "quickGenerators";
+          BrandHaus.generators.setActiveGenerator(entry.mode.slice(4));
+        }
         renderApp();
+        scrollShellToTop();
       });
     }
     var copyBtn = el("button", { type: "button", class: "bh-btn bh-btn--copy bh-btn--small", text: "Copy" });
@@ -817,7 +1164,7 @@
     var deleteBtn = el("button", { type: "button", class: "bh-btn bh-btn--delete bh-btn--small", text: "Delete" });
     deleteBtn.addEventListener("click", function () { BrandHaus.favorites.removeRecent(entry.id); renderApp(); });
 
-    var metaParts = [MODE_LABELS[entry.mode] || entry.mode, new Date(entry.loggedAt).toLocaleString()];
+    var metaParts = [modeLabel(entry.mode), new Date(entry.loggedAt).toLocaleString()];
     var actionBtns = [];
     if (loadBtn) actionBtns.push(loadBtn);
     actionBtns.push(copyBtn, deleteBtn);
@@ -937,43 +1284,298 @@
   }
 
   // ---------------------------------------------------------------------
-  // Tabs + shell
+  // Vault/recent-log labels — keyed by originating studio ("branding" /
+  // "logo"), not by wizard step. Founder Interview never uses the vault
+  // system (it has its own Apply/Retake flow), so it's not in this map.
   // ---------------------------------------------------------------------
-  var MODES = ["founderInterview", "branding", "logo"];
   var MODE_LABELS = {
-    founderInterview: "Brand DNA Assessment",
     branding: "Branding Studio",
     logo: "Logo Studio",
   };
-  var MODE_ICONS = {
-    founderInterview: "bulb",
-    branding: "palette",
-    logo: "logoMark",
+
+  // ---------------------------------------------------------------------
+  // Sidebar wizard + step router
+  // ---------------------------------------------------------------------
+  var STEPS = ["welcome", "conversation", "brandDNA", "brandingStudio", "blueprint", "quickGenerators"];
+  var STEP_LABELS = {
+    welcome: "Welcome",
+    conversation: "Brand DNA Assessment",
+    brandDNA: "Your Brand DNA",
+    brandingStudio: "Branding Studio",
+    blueprint: "Your Blueprint",
+    quickGenerators: "Quick Generators",
   };
-  var BUILT_MODES = {
-    founderInterview: true,
-    branding: true,
-    logo: true,
+  var STEP_ICONS = {
+    welcome: "sparkle",
+    conversation: "bulb",
+    brandDNA: "layers",
+    brandingStudio: "palette",
+    blueprint: "document",
+    quickGenerators: "crop",
   };
 
-  var activeMode = "founderInterview";
+  var activeStep = "welcome";
+  var brandingSubMode = "branding"; // "logo" | "branding" — sub-nav within the Branding Studio step
+  var lastAutoAppliedResults = null;
+  var historyPanelOpen = false;
+  var historyExpandedIndex = -1;
+  var HISTORY_MODE = "assessment";
 
-  function renderTabs(root) {
-    var row = el("div", { class: "bh-tabs" });
-    MODES.forEach(function (mode) {
-      var isBuilt = BUILT_MODES[mode];
+  var BRANDING_SUBSTEPS = ["branding", "logo"];
+  var BRANDING_SUBSTEP_LABELS = { logo: "Logo Studio", branding: "Branding Studio" };
+  var BRANDING_SUBSTEP_ICONS = { logo: "logoMark", branding: "palette" };
+
+  // Every step (Branding Studio, Logo Studio, Your Blueprint, etc.) reads
+  // top-to-bottom, so a founder landing mid-scroll on a new step feels
+  // broken rather than guided. Called on every step/sub-step switch, never
+  // on in-place re-renders (e.g. editing a field), so normal interaction
+  // never yanks the page around.
+  function scrollShellToTop() {
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  }
+
+  // Lets other mode files (e.g. brand-haus-results.js's chapter-6 CTAs)
+  // navigate the wizard without reaching into this file's closure state.
+  function setActiveStep(step) {
+    if (STEPS.indexOf(step) === -1) return;
+    activeStep = step;
+    renderApp();
+    scrollShellToTop();
+  }
+
+  function renderSidebar(root) {
+    var list = el("div", { class: "bh-sidebar__steps" });
+    STEPS.forEach(function (step, index) {
+      var isActive = step === activeStep;
       var btn = el("button", {
         type: "button",
-        class: "bh-tabs__btn" + (mode === activeMode ? " is-active" : "") + (!isBuilt ? " is-disabled" : ""),
-      }, [icon(MODE_ICONS[mode]), el("span", { text: MODE_LABELS[mode] + (!isBuilt ? " (coming soon)" : "") })]);
-      if (isBuilt) {
-        btn.addEventListener("click", function () { activeMode = mode; renderApp(); });
-      } else {
-        btn.disabled = true;
+        class: "bh-sidebar__step" + (isActive ? " is-active" : ""),
+      }, [
+        el("span", { class: "bh-sidebar__step-number", text: String(index + 1) }),
+        icon(STEP_ICONS[step], "bh-sidebar__step-icon"),
+        el("span", { class: "bh-sidebar__step-label", text: STEP_LABELS[step] }),
+      ]);
+      btn.addEventListener("click", function () { activeStep = step; renderApp(); scrollShellToTop(); });
+      list.appendChild(btn);
+
+      if (step === "brandingStudio" && isActive) {
+        var subList = el("div", { class: "bh-sidebar__substeps" });
+        BRANDING_SUBSTEPS.forEach(function (sub) {
+          var subBtn = el("button", {
+            type: "button",
+            class: "bh-sidebar__substep" + (brandingSubMode === sub ? " is-active" : ""),
+          }, [icon(BRANDING_SUBSTEP_ICONS[sub], "bh-sidebar__substep-icon"), el("span", { text: BRANDING_SUBSTEP_LABELS[sub] })]);
+          subBtn.addEventListener("click", function () { brandingSubMode = sub; renderApp(); scrollShellToTop(); });
+          subList.appendChild(subBtn);
+        });
+        list.appendChild(subList);
       }
-      row.appendChild(el("span", { class: "bh-tabs__item" }, [btn]));
     });
-    root.appendChild(el("div", { class: "bh-tabs-box" }, [row]));
+    var innerChildren = [
+      el("p", { class: "bh-sidebar__brand", text: "Brand Strategy Steps" }),
+      list,
+    ];
+    var historyBlock = renderHistoryBlock();
+    if (historyBlock) innerChildren.push(historyBlock);
+
+    root.appendChild(el("nav", { class: "bh-sidebar", "aria-label": "Brand Haus steps" }, [
+      el("div", { class: "bh-sidebar__inner" }, innerChildren),
+    ]));
+  }
+
+  // Newest first — addVersion always appends, so the plain array order
+  // is oldest-first; a founder checking history cares about the most
+  // recent completion first.
+  function listAssessmentVersions(fav) {
+    var versions = fav.versions && fav.versions.length
+      ? fav.versions
+      : [{ text: fav.text, snapshot: fav.snapshot, createdAt: fav.createdAt }];
+    return versions.slice().reverse();
+  }
+
+  function formatHistoryDate(ts) {
+    var d = new Date(ts);
+    return d.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" }) + " · " + d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+  }
+
+  // Every completed assessment run — timestamped, viewable without
+  // touching the live wizard state, per the founder's request for
+  // something like Content Haus's prompt vault but for results instead
+  // of prompts. Lives in the sidebar (visible from any step) rather than
+  // a page-specific panel, reusing BrandHaus.favorites' existing Version
+  // History mechanics under a dedicated "assessment" mode instead of a
+  // second storage system.
+  function renderHistoryBlock() {
+    if (!BrandHaus.favorites) return null;
+    var items = BrandHaus.favorites.getAll(HISTORY_MODE);
+    if (!items.length) return null;
+    var fav = items[0];
+    var versions = listAssessmentVersions(fav);
+
+    var toggle = el("button", { type: "button", class: "bh-sidebar__history-toggle" }, [
+      icon("layers", "bh-sidebar__substep-icon"),
+      el("span", { text: "Version History (" + versions.length + ")" }),
+    ]);
+    toggle.addEventListener("click", function () {
+      historyPanelOpen = !historyPanelOpen;
+      historyExpandedIndex = -1;
+      renderApp();
+    });
+
+    // versions is newest-first (see listAssessmentVersions), but
+    // BrandHaus.favorites.setActiveVersion expects an index into the
+    // underlying oldest-first fav.versions array — this converts between
+    // the two so "Restore" marks the right version as active in the vault.
+    var totalVersions = versions.length;
+    var children = [toggle];
+    if (historyPanelOpen) {
+      var listEl = el("div", { class: "bh-sidebar__history-list" });
+      versions.forEach(function (v, i) {
+        var row = el("button", { type: "button", class: "bh-sidebar__history-row" }, [
+          el("span", { class: "bh-sidebar__history-date", text: formatHistoryDate(v.createdAt) }),
+          el("span", { class: "bh-sidebar__history-name", text: v.text || "" }),
+        ]);
+        row.addEventListener("click", function () {
+          historyExpandedIndex = historyExpandedIndex === i ? -1 : i;
+          renderApp();
+        });
+        listEl.appendChild(row);
+        if (historyExpandedIndex === i && v.snapshot) {
+          var originalIndex = totalVersions - 1 - i;
+          listEl.appendChild(renderHistorySnapshotPreview(v.snapshot, fav.id, originalIndex));
+        }
+      });
+      var clearBtn = el("button", { type: "button", class: "bh-sidebar__history-clear", text: "Clear History" });
+      clearBtn.addEventListener("click", function () {
+        BrandHaus.favorites.remove(HISTORY_MODE, fav.id);
+        historyPanelOpen = false;
+        historyExpandedIndex = -1;
+        renderApp();
+      });
+      listEl.appendChild(clearBtn);
+      children.push(listEl);
+    }
+    return el("div", { class: "bh-sidebar__history" }, children);
+  }
+
+  // Read-only summary by default, but "Restore This Version" is a real
+  // action — it swaps the live results to this past snapshot, marks it
+  // active in the vault (so history stays consistent with what's live),
+  // and jumps to Your Brand DNA. A confirm guards it since it silently
+  // overwrites whatever the founder is currently looking at.
+  function renderHistorySnapshotPreview(snapshot, favId, versionIndex) {
+    var profile = snapshot.match.best.profile;
+    var founderOutput = snapshot.founderOutput;
+    var roleOrder = ["primary", "secondary", "neutral", "accent", "support", "standOut"];
+    var swatches = roleOrder.filter(function (role) { return profile.output.colors[role]; }).map(function (role) {
+      return el("span", { class: "bh-sidebar__history-swatch", style: "background:" + profile.output.colors[role] + ";" });
+    });
+    var restoreBtn = el("button", { type: "button", class: "bh-sidebar__history-restore" }, [icon("refresh", "bh-sidebar__substep-icon"), el("span", { text: "Restore This Version" })]);
+    restoreBtn.title = "Makes this the version shown on Your Brand DNA — your current results stay saved in this same history, just no longer the active one.";
+    restoreBtn.addEventListener("click", function () {
+      if (favId != null && versionIndex != null) BrandHaus.favorites.setActiveVersion(HISTORY_MODE, favId, versionIndex);
+      BrandHaus.founderInterview.setState({ results: snapshot, step: "results", celebrationDismissed: true });
+      historyPanelOpen = false;
+      historyExpandedIndex = -1;
+      setActiveStep("brandDNA");
+    });
+    return el("div", { class: "bh-sidebar__history-preview" }, [
+      el("p", { class: "bh-sidebar__history-preview-name", text: profile.name }),
+      el("p", { class: "bh-sidebar__history-preview-mission", text: founderOutput.missionStatement }),
+      el("p", { class: "bh-sidebar__history-preview-values", text: founderOutput.values.join(" · ") }),
+      el("div", { class: "bh-sidebar__history-swatches" }, swatches),
+      restoreBtn,
+    ]);
+  }
+
+  function renderWelcomeStep() {
+    var beginBtn = el("button", { type: "button", class: "bh-btn bh-btn--teal bh-btn--large" }, [icon("lightning"), el("span", { text: "Begin" })]);
+    beginBtn.addEventListener("click", function () { activeStep = "conversation"; renderApp(); scrollShellToTop(); });
+    return el("div", { class: "bh-founder-interview bh-founder-interview--welcome" }, [
+      el("h2", { class: "bh-founder-interview__welcome-title" }, [
+        icon("sparkle"),
+        el("span", { text: "Welcome to Your " }),
+        el("span", { class: "bh-heading-accent", text: "Brand DNA Blueprint™" }),
+      ]),
+      el("p", { class: "bh-founder-interview__welcome-body", text: "Over the next few minutes, you'll answer a series of questions about how you think, what you value, and what you're building. There are no right answers — this is a conversation, not a quiz." }),
+      el("p", { class: "bh-founder-interview__welcome-body", text: "By the end, you'll have a complete picture of your brand's natural identity: your colors, your voice, your mission, and the values that should show up in everything you create." }),
+      el("div", { class: "bh-founder-interview__welcome-actions" }, [beginBtn]),
+    ]);
+  }
+
+  // Auto-syncs Branding Studio to whichever assessment `results` object
+  // is currently live, once per DISTINCT completed assessment — tracked
+  // by object identity rather than a permanent one-shot flag. A plain
+  // boolean here previously meant: apply once ever, then never again —
+  // so retaking the assessment (a brand new `results` object, a
+  // different matched profile) silently stopped syncing into Branding
+  // Studio after the very first completion, since the flag was already
+  // "used up." Comparing against the specific object we last applied
+  // means a retake (new object) always re-syncs once, while simply
+  // revisiting this step with the SAME completed assessment still
+  // leaves any manual edits alone.
+  function maybeAutoApplyAssessment() {
+    var results = BrandHaus.founderInterview.getState().results;
+    if (!results || results === lastAutoAppliedResults) return;
+    lastAutoAppliedResults = results;
+    BrandHaus.founderInterview.applyToBrandingStudio();
+  }
+
+  function resolvedValue(field) {
+    return BrandHaus.engine.resolveFieldValue(field);
+  }
+
+  function renderBrandingStudioStep() {
+    // Runs regardless of which sub-tab (Logo/Branding) is active — the
+    // identity check inside is what actually decides whether anything
+    // happens, so calling it unconditionally here is cheap and means
+    // there's exactly one code path that syncs the assessment into
+    // Branding Studio, not two that can drift out of sync with each
+    // other (see the removed explicit call in Chapter 7's "Continue to
+    // Branding Studio" button).
+    maybeAutoApplyAssessment();
+
+    var modeApi = BrandHaus[brandingSubMode];
+    var body = el("div", { class: "bh-body" });
+    var left = el("div", { class: "bh-body__fields" });
+    var right = el("div", { class: "bh-body__preview" });
+    left.appendChild(modeApi.renderPanel());
+    renderSelectionsPanel(right, brandingSubMode, modeApi.getSelectionsByGroup());
+    renderPreview(right, modeApi.assemblePrompt(), modeApi, brandingSubMode);
+    // Brand Kit is a generic save/view/set-active gallery (renderSection
+    // doesn't touch mode-specific state) — Logo Studio was missing it
+    // purely because this gate only checked for "branding", not because
+    // it needs anything different.
+    if ((brandingSubMode === "branding" || brandingSubMode === "logo") && BrandHaus.brandKit) BrandHaus.brandKit.renderSection(right, brandingSubMode);
+    renderSavedPrompts(right, brandingSubMode);
+    renderRecentLog(right);
+    body.appendChild(left);
+    body.appendChild(right);
+    return body;
+  }
+
+  // Quick Generators — a grid of small, locked-template generators (see
+  // brand-haus-generators.js), a sibling capability to Branding Studio's
+  // broad Studios rather than another sub-step of it. Selections/preview/
+  // Vault only render once a generator is actually open (currentId set);
+  // Recently Generated is global across every mode so it always shows.
+  function renderQuickGeneratorsStep() {
+    var modeApi = BrandHaus.generators;
+    var body = el("div", { class: "bh-body" });
+    var left = el("div", { class: "bh-body__fields" });
+    var right = el("div", { class: "bh-body__preview" });
+    left.appendChild(modeApi.renderPanel());
+    var activeId = modeApi.getActiveGeneratorId();
+    if (activeId) {
+      var vaultKey = "gen:" + activeId;
+      renderSelectionsPanel(right, vaultKey, modeApi.getSelectionsByGroup());
+      renderPreview(right, modeApi.assemblePrompt(), modeApi, vaultKey);
+      renderSavedPrompts(right, vaultKey);
+    }
+    renderRecentLog(right);
+    body.appendChild(left);
+    body.appendChild(right);
+    return body;
   }
 
   function renderApp() {
@@ -1007,39 +1609,51 @@
     }
   }
 
+  function renderStepContent(root) {
+    if (activeStep === "welcome") {
+      root.appendChild(renderWelcomeStep());
+      return;
+    }
+    if (activeStep === "conversation") {
+      root.appendChild(BrandHaus.founderInterview.renderFull());
+      return;
+    }
+    if (activeStep === "brandDNA") {
+      if (BrandHaus.results && typeof BrandHaus.results.renderStep3 === "function") {
+        root.appendChild(BrandHaus.results.renderStep3());
+      } else {
+        root.appendChild(el("p", { class: "bh-coming-soon", text: "Your Brand DNA is coming soon — complete the Brand DNA Assessment first." }));
+      }
+      return;
+    }
+    if (activeStep === "brandingStudio") {
+      renderIdentityBar(root);
+      root.appendChild(renderBrandingStudioStep());
+      return;
+    }
+    if (activeStep === "blueprint") {
+      if (BrandHaus.blueprint && typeof BrandHaus.blueprint.renderFull === "function") {
+        root.appendChild(BrandHaus.blueprint.renderFull());
+      } else {
+        root.appendChild(el("p", { class: "bh-coming-soon", text: "Your Blueprint is coming soon." }));
+      }
+      return;
+    }
+    if (activeStep === "quickGenerators") {
+      root.appendChild(renderQuickGeneratorsStep());
+      return;
+    }
+  }
+
   function renderAppContent(root, focusRestore, scrollX, scrollY, previewHeights) {
     mhKeyCounter = 0;
     root.innerHTML = "";
 
     var shell = el("div", { class: "bh-shell" });
-    shell.appendChild(el("p", { class: "bh-mode-select-label", text: "Select the Studio" }));
-    renderTabs(shell);
-    renderIdentityBar(shell);
-
-    var body = el("div", { class: "bh-body" });
-    var left = el("div", { class: "bh-body__fields" });
-    var right = el("div", { class: "bh-body__preview" });
-
-    var modeApi = BrandHaus[activeMode];
-    var isFullWidthMode = activeMode === "founderInterview" && modeApi && typeof modeApi.renderFull === "function";
-
-    if (isFullWidthMode) {
-      var fullWidthWrap = el("div", { style: "grid-column: 1 / -1;" }, [modeApi.renderFull()]);
-      body.appendChild(fullWidthWrap);
-    } else if (modeApi && typeof modeApi.renderPanel === "function") {
-      left.appendChild(modeApi.renderPanel());
-      renderSelectionsPanel(right, activeMode, modeApi.getSelectionsByGroup());
-      renderPreview(right, modeApi.assemblePrompt(), modeApi, activeMode);
-      renderSavedPrompts(right, activeMode);
-      renderRecentLog(right);
-      body.appendChild(left);
-      body.appendChild(right);
-    } else {
-      left.appendChild(el("p", { class: "bh-coming-soon", text: (MODE_LABELS[activeMode] || activeMode) + " is coming soon." }));
-      body.appendChild(left);
-      body.appendChild(right);
-    }
-    shell.appendChild(body);
+    var main = el("div", { class: "bh-main" });
+    renderStepContent(main); // may mutate activeStep (auto-advance) — must run before the sidebar reads it
+    renderSidebar(shell);
+    shell.appendChild(main);
     root.appendChild(shell);
 
     if (focusRestore) {
@@ -1083,6 +1697,12 @@
     renderFieldGroup: renderFieldGroup,
     renderPlainFieldRow: renderPlainFieldRow,
     renderApp: renderApp,
+    setActiveStep: setActiveStep,
+    printPromptText: printPromptText,
+    printStyledSection: printStyledSection,
+    copyTextToClipboard: copyTextToClipboard,
+    buildVaultSnapshot: buildVaultSnapshot,
+    buildVaultTitle: buildVaultTitle,
   };
 
   document.addEventListener("click", function (e) {

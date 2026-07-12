@@ -1,8 +1,8 @@
 /**
- * The AI Creator's Marketing Haus — Invitations & Stationery Studio
- * Depends on marketing-haus-util.js, marketing-haus-engine.js,
- * marketing-haus-styledna.js, and marketing-haus-ui.js's exposed
- * MarketingHaus.ui helpers (all must load first).
+ * The AI Creator's Product Haus — Invitations & Stationery Studio
+ * Depends on product-haus-util.js, product-haus-engine.js,
+ * product-haus-styledna.js, and product-haus-ui.js's exposed
+ * ProductHaus.ui helpers (all must load first).
  *
  * Covers both halves of a card at once — the wording (names/date/time/
  * RSVP, in the right tone) and, optionally, a visual style descriptor for
@@ -12,10 +12,10 @@
 (function () {
   "use strict";
 
-  window.MarketingHaus = window.MarketingHaus || {};
-  var MarketingHaus = window.MarketingHaus;
-  var makeField = MarketingHaus.util.makeField;
-  var sortAlpha = MarketingHaus.util.sortAlpha;
+  window.ProductHaus = window.ProductHaus || {};
+  var ProductHaus = window.ProductHaus;
+  var makeField = ProductHaus.util.makeField;
+  var sortAlpha = ProductHaus.util.sortAlpha;
 
   var ITEM_TYPE_OPTIONS = sortAlpha([
     "wedding invitation", "birthday invitation", "baby shower invitation", "bridal shower invitation",
@@ -63,10 +63,10 @@
     };
   }
 
-  var store = MarketingHaus.util.createStore(buildInitialState());
+  var store = ProductHaus.util.createStore(buildInitialState());
 
   function updateField(fieldName, changes) {
-    MarketingHaus.util.updateField(store, fieldName, changes);
+    ProductHaus.util.updateField(store, fieldName, changes);
   }
 
   function applyPreset(preset) {
@@ -102,7 +102,7 @@
 
   function assemblePrompt() {
     var state = store.getState();
-    var fieldEntries = MarketingHaus.styleDNA.getVoiceEntries().concat(MarketingHaus.brandKit.getActiveKitEntries()).concat([
+    var fieldEntries = ProductHaus.styleDNA.getVoiceEntries().concat(ProductHaus.brandKit.getActiveKitEntries()).concat([
       { label: "Item Type", field: state.itemType },
       { label: "Occasion / Theme", field: state.occasion },
       { label: "Key Details to Include", field: state.keyDetails },
@@ -110,7 +110,7 @@
       { label: "Visual Style", field: state.visualStyle },
       { label: "Layout", field: state.layout },
     ]);
-    return MarketingHaus.engine.buildSentence({
+    return ProductHaus.engine.buildSentence({
       intro: "Write the wording for, and describe the visual design of, a:",
       fieldEntries: fieldEntries,
     });
@@ -118,7 +118,7 @@
 
   function getSelectionsByGroup() {
     var state = store.getState();
-    var items = MarketingHaus.engine.resolveFields([
+    var items = ProductHaus.engine.resolveFields([
       { label: "Item Type", field: state.itemType },
       { label: "Occasion / Theme", field: state.occasion },
       { label: "Key Details to Include", field: state.keyDetails },
@@ -130,14 +130,14 @@
   }
 
   function renderPanel() {
-    var ui = MarketingHaus.ui;
-    var wrap = ui.el("div", { class: "mh-panel" });
+    var ui = ProductHaus.ui;
+    var wrap = ui.el("div", { class: "pdh-panel" });
     var state = store.getState();
 
-    var presetRow = ui.renderPresetRow(PRESETS, function (preset) { applyPreset(preset); MarketingHaus.ui.renderApp(); }, "Starter Presets — click one, then customize");
+    var presetRow = ui.renderPresetRow(PRESETS, function (preset) { applyPreset(preset); ProductHaus.ui.renderApp(); }, "Starter Presets — click one, then customize");
     if (presetRow) wrap.appendChild(presetRow);
 
-    wrap.appendChild(ui.renderFieldGroup("Item Type", [{ label: "Item Type", field: state.itemType }], function (entry, changes) { updateField("itemType", changes); MarketingHaus.ui.renderApp(); }));
+    wrap.appendChild(ui.renderFieldGroup("Item Type", [{ label: "Item Type", field: state.itemType }], function (entry, changes) { updateField("itemType", changes); ProductHaus.ui.renderApp(); }));
 
     wrap.appendChild(ui.renderPlainFieldRow(
       [
@@ -147,7 +147,7 @@
       function (entry, changes) {
         if (entry.label === "Occasion / Theme") updateField("occasion", changes);
         else updateField("keyDetails", changes);
-        MarketingHaus.ui.renderApp();
+        ProductHaus.ui.renderApp();
       }
     ));
 
@@ -157,18 +157,18 @@
     ], function (entry, changes) {
       if (entry.label === "Wording Tone") updateField("wordingTone", changes);
       else updateField("layout", changes);
-      MarketingHaus.ui.renderApp();
+      ProductHaus.ui.renderApp();
     }));
 
     wrap.appendChild(ui.renderPlainFieldRow(
       [{ label: "Visual Style (optional)", field: state.visualStyle, placeholder: "e.g. \"watercolor florals in burnt orange and sage\"" }],
-      function (entry, changes) { updateField("visualStyle", changes); MarketingHaus.ui.renderApp(); }
+      function (entry, changes) { updateField("visualStyle", changes); ProductHaus.ui.renderApp(); }
     ));
 
     return wrap;
   }
 
-  MarketingHaus.invitations = Object.assign({}, store, {
+  ProductHaus.invitations = Object.assign({}, store, {
     randomize: randomize,
     reset: reset,
     assemblePrompt: assemblePrompt,

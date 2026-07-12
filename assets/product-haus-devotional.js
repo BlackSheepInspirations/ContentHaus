@@ -1,8 +1,8 @@
 /**
- * The AI Creator's Marketing Haus — Devotional & Motivation Card Studio
- * Depends on marketing-haus-util.js, marketing-haus-engine.js,
- * marketing-haus-styledna.js, and marketing-haus-ui.js's exposed
- * MarketingHaus.ui helpers (all must load first).
+ * The AI Creator's Product Haus — Devotional & Motivation Card Studio
+ * Depends on product-haus-util.js, product-haus-engine.js,
+ * product-haus-styledna.js, and product-haus-ui.js's exposed
+ * ProductHaus.ui helpers (all must load first).
  *
  * Covers faith-based and secular encouragement content alike — Faith
  * Tradition explicitly includes a non-faith "general inspirational"
@@ -13,10 +13,10 @@
 (function () {
   "use strict";
 
-  window.MarketingHaus = window.MarketingHaus || {};
-  var MarketingHaus = window.MarketingHaus;
-  var makeField = MarketingHaus.util.makeField;
-  var sortAlpha = MarketingHaus.util.sortAlpha;
+  window.ProductHaus = window.ProductHaus || {};
+  var ProductHaus = window.ProductHaus;
+  var makeField = ProductHaus.util.makeField;
+  var sortAlpha = ProductHaus.util.sortAlpha;
 
   var CARD_TYPE_OPTIONS = sortAlpha([
     "daily devotional", "scripture / verse card", "affirmation card", "prayer card",
@@ -67,10 +67,10 @@
     };
   }
 
-  var store = MarketingHaus.util.createStore(buildInitialState());
+  var store = ProductHaus.util.createStore(buildInitialState());
 
   function updateField(fieldName, changes) {
-    MarketingHaus.util.updateField(store, fieldName, changes);
+    ProductHaus.util.updateField(store, fieldName, changes);
   }
 
   function applyPreset(preset) {
@@ -107,7 +107,7 @@
 
   function assemblePrompt() {
     var state = store.getState();
-    var fieldEntries = MarketingHaus.styleDNA.getVoiceEntries().concat(MarketingHaus.brandKit.getActiveKitEntries()).concat([
+    var fieldEntries = ProductHaus.styleDNA.getVoiceEntries().concat(ProductHaus.brandKit.getActiveKitEntries()).concat([
       { label: "Card Type", field: state.cardType },
       { label: "Faith Tradition / Framework", field: state.faithTradition },
       { label: "Topic / Focus", field: state.topic },
@@ -116,7 +116,7 @@
       { label: "Visual Style", field: state.visualStyle },
       { label: "Format", field: state.format },
     ]);
-    return MarketingHaus.engine.buildSentence({
+    return ProductHaus.engine.buildSentence({
       intro: "Write the content for, and describe the visual design of, a:",
       fieldEntries: fieldEntries,
     });
@@ -124,7 +124,7 @@
 
   function getSelectionsByGroup() {
     var state = store.getState();
-    var items = MarketingHaus.engine.resolveFields([
+    var items = ProductHaus.engine.resolveFields([
       { label: "Card Type", field: state.cardType },
       { label: "Faith Tradition / Framework", field: state.faithTradition },
       { label: "Topic / Focus", field: state.topic },
@@ -137,11 +137,11 @@
   }
 
   function renderPanel() {
-    var ui = MarketingHaus.ui;
-    var wrap = ui.el("div", { class: "mh-panel" });
+    var ui = ProductHaus.ui;
+    var wrap = ui.el("div", { class: "pdh-panel" });
     var state = store.getState();
 
-    var presetRow = ui.renderPresetRow(PRESETS, function (preset) { applyPreset(preset); MarketingHaus.ui.renderApp(); }, "Starter Presets — click one, then customize");
+    var presetRow = ui.renderPresetRow(PRESETS, function (preset) { applyPreset(preset); ProductHaus.ui.renderApp(); }, "Starter Presets — click one, then customize");
     if (presetRow) wrap.appendChild(presetRow);
 
     wrap.appendChild(ui.renderFieldGroup("Card Type & Framework", [
@@ -150,7 +150,7 @@
     ], function (entry, changes) {
       if (entry.label === "Card Type") updateField("cardType", changes);
       else updateField("faithTradition", changes);
-      MarketingHaus.ui.renderApp();
+      ProductHaus.ui.renderApp();
     }, "\"General inspirational\" keeps the content secular — no faith framing at all."));
 
     wrap.appendChild(ui.renderPlainFieldRow(
@@ -161,7 +161,7 @@
       function (entry, changes) {
         if (entry.label === "Topic / Focus") updateField("topic", changes);
         else updateField("reference", changes);
-        MarketingHaus.ui.renderApp();
+        ProductHaus.ui.renderApp();
       }
     ));
 
@@ -171,18 +171,18 @@
     ], function (entry, changes) {
       if (entry.label === "Tone") updateField("tone", changes);
       else updateField("format", changes);
-      MarketingHaus.ui.renderApp();
+      ProductHaus.ui.renderApp();
     }));
 
     wrap.appendChild(ui.renderPlainFieldRow(
       [{ label: "Visual Style (optional)", field: state.visualStyle, placeholder: "e.g. \"soft floral watercolor border\"" }],
-      function (entry, changes) { updateField("visualStyle", changes); MarketingHaus.ui.renderApp(); }
+      function (entry, changes) { updateField("visualStyle", changes); ProductHaus.ui.renderApp(); }
     ));
 
     return wrap;
   }
 
-  MarketingHaus.devotional = Object.assign({}, store, {
+  ProductHaus.devotional = Object.assign({}, store, {
     randomize: randomize,
     reset: reset,
     assemblePrompt: assemblePrompt,

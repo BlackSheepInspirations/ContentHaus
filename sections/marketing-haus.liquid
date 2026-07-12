@@ -37,14 +37,26 @@
   <script src="{{ 'marketing-haus-favorites.js' | asset_url }}" defer="defer"></script>
   <script src="{{ 'marketing-haus-styledna.js' | asset_url }}" defer="defer"></script>
   <script src="{{ 'marketing-haus-brandkit.js' | asset_url }}" defer="defer"></script>
+  <script src="{{ 'marketing-haus-looklock.js' | asset_url }}" defer="defer"></script>
   <script src="{{ 'marketing-haus-mockup.js' | asset_url }}" defer="defer"></script>
   <script src="{{ 'marketing-haus-social.js' | asset_url }}" defer="defer"></script>
   <script src="{{ 'marketing-haus-adcopy.js' | asset_url }}" defer="defer"></script>
   <script src="{{ 'marketing-haus-email.js' | asset_url }}" defer="defer"></script>
   <script src="{{ 'marketing-haus-sales.js' | asset_url }}" defer="defer"></script>
-  <script src="{{ 'marketing-haus-invitations.js' | asset_url }}" defer="defer"></script>
-  <script src="{{ 'marketing-haus-devotional.js' | asset_url }}" defer="defer"></script>
   <script src="{{ 'marketing-haus-testimonial.js' | asset_url }}" defer="defer"></script>
+  <script src="{{ 'marketing-haus-generators.js' | asset_url }}" defer="defer"></script>
+  <script src="{{ 'marketing-haus-generators-flyer.js' | asset_url }}" defer="defer"></script>
+  <script src="{{ 'marketing-haus-generators-infographic.js' | asset_url }}" defer="defer"></script>
+  <script src="{{ 'marketing-haus-generators-pinterestpin.js' | asset_url }}" defer="defer"></script>
+  <script src="{{ 'marketing-haus-generators-quotegraphic.js' | asset_url }}" defer="defer"></script>
+  <script src="{{ 'marketing-haus-generators-leadmagnet.js' | asset_url }}" defer="defer"></script>
+  <script src="{{ 'marketing-haus-generators-productad.js' | asset_url }}" defer="defer"></script>
+  <script src="{{ 'marketing-haus-generators-videomotion.js' | asset_url }}" defer="defer"></script>
+  <script src="{{ 'marketing-haus-generators-videoscript.js' | asset_url }}" defer="defer"></script>
+  <script src="{{ 'marketing-haus-generators-mediakit.js' | asset_url }}" defer="defer"></script>
+  <script src="{{ 'marketing-haus-generators-socialcover.js' | asset_url }}" defer="defer"></script>
+  <script src="{{ 'marketing-haus-generators-posttemplate.js' | asset_url }}" defer="defer"></script>
+  <script src="{{ 'marketing-haus-generators-digitalelements.js' | asset_url }}" defer="defer"></script>
   <script src="{{ 'marketing-haus-ui.js' | asset_url }}" defer="defer"></script>
 {% else %}
   <div class="mh-locked">
@@ -62,6 +74,8 @@
     </div>
   </div>
 {% endif %}
+
+{% render 'haus-links', current: 'marketing-haus' %}
 
 {% schema %}
 {
@@ -114,7 +128,7 @@
       "type": "richtext",
       "id": "locked_body",
       "label": "Locked state body",
-      "default": "<p>Get instant access to Product Mockup Studio, Social Media Studio, Ad Copy, Email, Sales Copy, Invitations, Devotional Cards, and the Testimonial Formatter — create marketing content across every channel in one place.</p>"
+      "default": "<p>Get instant access to Product Mockup Studio, Social Media Studio, Ad Copy, Email, Sales Copy, and the Testimonial Formatter — create marketing content across every channel in one place.</p>"
     }
   ],
   "presets": [

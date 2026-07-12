@@ -1,0 +1,1939 @@
+/* The AI Creator's Product Haus — sibling palette to Prompt Haus.
+   Same component CSS, same token names (--pdh-cream, --pdh-gold, etc.) as
+   Prompt Haus/Marketing Haus for a minimal, low-risk port — only the hex
+   values change. Black/charcoal/teal/border/cream are unchanged (shared
+   with Marketing Haus, already proven); espresso becomes a warm
+   terracotta/rust (this Haus's own distinct accent, replacing Marketing
+   Haus's hot pink) and gold is a real gold (unlike Marketing Haus's
+   --mh-gold, which is actually a flat grey mislabeled "gold" — fixed
+   here from the start rather than repeating that bug in a new product;
+   --pdh-gold-on-light is kept as an alias of the same value only so nothing
+   that already references it breaks).
+   Shared across the app shell, the locked state, and the marketing page —
+   those last two render outside #product-haus-app entirely (the locked
+   state replaces it, the marketing page is a separate page/section), so
+   the custom properties can't just live scoped to that one selector. */
+#product-haus-app,
+.pdh-locked,
+.pdh-marketing,
+.pdh-brand-header {
+  --pdh-cream: #F2F0EB;
+  --pdh-black: #1A1815;
+  --pdh-gold: #C9A84C;
+  --pdh-teal: #0D7377;
+  --pdh-charcoal: #2E2A26;
+  --pdh-espresso: #B5502B;
+  --pdh-border: rgba(46, 42, 38, 0.15);
+  --pdh-gold-on-light: #C9A84C;
+
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+#product-haus-app {
+  background: var(--pdh-cream);
+  color: var(--pdh-black);
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 24px 16px 64px;
+}
+
+/* Branded header above the tool page (sections/prompt-builder.liquid) —
+   sibling of #product-haus-app, reuses .pdh-marketing__hero's eyebrow/
+   heading/subheading styling for consistent branding across both pages. */
+.pdh-brand-header {
+  background: var(--pdh-cream);
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 40px 16px 16px;
+  overflow: hidden;
+}
+/* .pdh-marketing__hero's own margin-bottom (spacing before its video/CTA on
+   the marketing page) would otherwise leave a gap of the theme's page
+   background showing between this header and the tool/locked-state below,
+   since both are separate cream-colored blocks rather than one continuous
+   background. */
+.pdh-brand-header .pdh-marketing__hero {
+  margin-bottom: 0;
+}
+
+#product-haus-app * {
+  box-sizing: border-box;
+}
+
+/* Icon system — inherits color from whatever text color surrounds it */
+.pdh-icon {
+  display: inline-flex;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  vertical-align: -3px;
+}
+.pdh-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* Tabs */
+/* One bordered card holding both tab rows, so the two-row layout reads as
+   a single cohesive component rather than two loose strips. */
+.pdh-tabs-box {
+  border: 1px solid var(--pdh-border);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 20px;
+  background: rgba(255, 255, 255, 0.5);
+}
+.pdh-tabs {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.pdh-tabs--row2 {
+  margin-top: 12px;
+}
+.pdh-tabs__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+}
+/* Pulled in tight against its own tab's pill instead of sitting in the
+   middle of the gap to the next tab, which read as ambiguous about which
+   tab it belonged to. */
+.pdh-tabs__item .pdh-info {
+  margin-left: -10px;
+}
+.pdh-tabs__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: 2px solid transparent;
+  border-radius: 999px;
+  padding: 10px 18px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--pdh-espresso);
+  cursor: pointer;
+}
+/* Selected tab reads unambiguously — solid teal fill + white text/icon,
+   not just an underline accent. */
+.pdh-tabs__btn.is-active {
+  background: var(--pdh-teal);
+  color: #fff;
+  border-color: var(--pdh-teal);
+}
+.pdh-tabs__btn.is-disabled {
+  color: rgba(46, 42, 38, 0.4);
+  cursor: not-allowed;
+}
+
+/* Style DNA bar */
+.pdh-styledna {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  background: var(--pdh-charcoal);
+  color: var(--pdh-cream);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 24px;
+}
+.pdh-styledna__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1 1 calc(33.333% - 11px);
+  min-width: 160px;
+}
+.pdh-styledna__field--full {
+  flex-basis: 100%;
+}
+.pdh-styledna__negative-subtitle {
+  margin: 0;
+  font-size: 12px;
+  color: var(--pdh-cream);
+  opacity: 0.75;
+}
+.pdh-styledna__negative-input {
+  width: 100%;
+  box-sizing: border-box;
+}
+.pdh-styledna__negative-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.pdh-styledna__negative-chip {
+  background: transparent;
+  border: 1px solid var(--pdh-cream);
+  color: var(--pdh-cream);
+  border-radius: 999px;
+  padding: 4px 12px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.pdh-styledna__negative-chip:hover {
+  border-color: var(--pdh-gold);
+  color: var(--pdh-gold);
+}
+.pdh-styledna .pdh-field__label {
+  color: var(--pdh-cream);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.pdh-label--icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.pdh-styledna .pdh-label--icon .pdh-icon {
+  color: var(--pdh-gold);
+}
+/* Info-icon tooltip — a visible affordance for guidance that used to
+   only live in an invisible hover-only title attribute. <details>/
+   <summary>-based, so click/tap (not just hover) reveals it, with no
+   custom JS listeners to manage. */
+.pdh-info {
+  display: inline-block;
+  position: relative;
+}
+.pdh-info__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  border: 1px solid var(--pdh-gold);
+  color: var(--pdh-gold);
+  font-size: 10px;
+  font-weight: 700;
+  font-style: italic;
+  cursor: pointer;
+  list-style: none;
+}
+.pdh-info__icon::-webkit-details-marker {
+  display: none;
+}
+.pdh-info__icon::marker {
+  content: "";
+}
+/* Shown on hover (desktop) via opacity/visibility rather than relying on
+   <details>'s native open/closed display — that way hover works even
+   without clicking, and click (for touch devices, where hover doesn't
+   exist) still works via the [open] rule below. Set explicitly rather
+   than left to the browser's default "hide everything but <summary> when
+   closed" behavior, which would otherwise block the hover-only case. */
+.pdh-info__body {
+  display: block;
+  position: absolute;
+  z-index: 20;
+  top: 22px;
+  left: 0;
+  width: 220px;
+  background: #fff;
+  color: var(--pdh-black);
+  border: 1px solid var(--pdh-border);
+  border-radius: 6px;
+  padding: 8px 10px;
+  margin: 0;
+  font-size: 12px;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: normal;
+  line-height: 1.4;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.12s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+.pdh-info:hover .pdh-info__body,
+.pdh-info[open] .pdh-info__body {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+.pdh-styledna__auto-badge {
+  align-self: flex-start;
+  font-size: 11px;
+  color: var(--pdh-gold);
+  border: 1px solid var(--pdh-gold);
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+.pdh-styledna__reset-auto {
+  align-self: flex-start;
+  font-size: 11px;
+  color: var(--pdh-teal);
+  background: none;
+  border: 1px solid var(--pdh-teal);
+  border-radius: 999px;
+  padding: 2px 8px;
+  cursor: pointer;
+}
+.pdh-styledna__yesno {
+  display: flex;
+  gap: 8px;
+}
+.pdh-styledna__yesno-btn {
+  flex: 1;
+  border: 1.5px solid var(--pdh-border);
+  border-radius: 999px;
+  padding: 8px 16px;
+  background: var(--pdh-cream);
+  color: var(--pdh-black);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.pdh-styledna__yesno-btn.is-active {
+  background: var(--pdh-teal);
+  color: var(--pdh-cream);
+  border-color: var(--pdh-teal);
+}
+
+/* Decorative progress stepper — narrates the flow, doesn't gate it */
+.pdh-stepper {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.pdh-stepper__step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.pdh-stepper__icon {
+  width: 22px;
+  height: 22px;
+  color: var(--pdh-teal);
+  flex-shrink: 0;
+}
+.pdh-stepper__text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+}
+.pdh-stepper__title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--pdh-charcoal);
+}
+.pdh-stepper__subtitle {
+  font-size: 11px;
+  color: var(--pdh-espresso);
+}
+.pdh-stepper__connector {
+  flex: 1;
+  min-width: 24px;
+  height: 1px;
+  border-top: 1px dotted var(--pdh-border);
+  margin: 11px 4px 0;
+}
+
+/* Shared-prompt banner — shown when the page loads with a ?ph_shared_
+   prompt= link, sits above everything else so it's the first thing a
+   recipient sees. */
+.pdh-shared-banner {
+  border: 1.5px solid var(--pdh-teal);
+  border-radius: 12px;
+  background: #fff;
+  padding: 14px 18px;
+  margin-bottom: 20px;
+}
+.pdh-shared-banner__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.pdh-shared-banner__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  margin: 0;
+  color: var(--pdh-espresso);
+}
+.pdh-shared-banner__title .pdh-icon {
+  color: var(--pdh-teal);
+}
+.pdh-shared-banner__dismiss {
+  border: none;
+  background: none;
+  font-size: 18px;
+  line-height: 1;
+  color: var(--pdh-charcoal);
+  cursor: pointer;
+  padding: 2px 6px;
+  flex-shrink: 0;
+}
+.pdh-shared-banner__text {
+  margin: 10px 0;
+  font-size: 13px;
+  color: var(--pdh-charcoal);
+  white-space: pre-wrap;
+  background: var(--pdh-cream);
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+/* Tips for Better Prompts — general guidance, shown above the Style DNA
+   bar so it's visible before anyone starts filling in fields. */
+.pdh-tips {
+  border: 1.5px solid var(--pdh-gold);
+  border-radius: 12px;
+  background: var(--pdh-cream);
+  padding: 14px 18px;
+  margin-bottom: 20px;
+}
+.pdh-tips__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.pdh-tips__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  margin: 0;
+  color: var(--pdh-espresso);
+}
+.pdh-tips__title .pdh-icon {
+  color: var(--pdh-gold);
+}
+.pdh-tips__toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  background: none;
+  color: var(--pdh-teal);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px;
+  flex-shrink: 0;
+}
+.pdh-tips__list {
+  margin: 12px 0 0;
+  padding-left: 4px;
+  list-style: none;
+  color: var(--pdh-charcoal);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.pdh-tips__list li {
+  position: relative;
+  padding-left: 20px;
+  margin-bottom: 8px;
+}
+.pdh-tips__list li:last-child {
+  margin-bottom: 0;
+}
+.pdh-tips__list li::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 5px;
+  width: 8px;
+  height: 8px;
+  background: var(--pdh-teal);
+  transform: rotate(45deg);
+}
+
+/* FAQ — same shape as Tips, sits under Your Vault. */
+.pdh-faq {
+  border: 1.5px solid var(--pdh-border);
+  border-radius: 12px;
+  background: #fff;
+  padding: 14px 18px;
+  margin-top: 20px;
+}
+/* Shared header row — title + collapse toggle — reused by Your Vault,
+   Recently Generated, My HAUS Style, and this FAQ section, so all four
+   right-column cards read as one consistent family instead of several
+   near-identical hand-rolled headers. */
+.pdh-faq__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.pdh-faq__header .pdh-saved__title {
+  margin: 0;
+}
+.pdh-faq__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  margin: 0;
+  color: var(--pdh-espresso);
+}
+.pdh-faq__title .pdh-icon {
+  color: var(--pdh-gold);
+}
+.pdh-faq__toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  background: none;
+  color: var(--pdh-teal);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.pdh-faq__list {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.pdh-faq__item {
+  padding-top: 12px;
+  border-top: 1px solid var(--pdh-border);
+}
+.pdh-faq__item:first-child {
+  padding-top: 0;
+  border-top: none;
+}
+.pdh-faq__question {
+  margin: 0 0 4px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--pdh-espresso);
+}
+.pdh-faq__answer {
+  margin: 0;
+  font-size: 13px;
+  color: var(--pdh-charcoal);
+  line-height: 1.5;
+}
+
+/* Divider between the process stepper / tips / mode-select sections at the
+   top of the shell. */
+.pdh-section-divider {
+  border: none;
+  border-top: 1px solid var(--pdh-border);
+  margin: 24px 0;
+}
+.pdh-mode-select-label {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--pdh-teal);
+  margin: 0 0 12px;
+}
+
+/* Layout: fields left, sticky preview right on desktop */
+.pdh-body {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+@media (min-width: 900px) {
+  .pdh-body {
+    grid-template-columns: 2fr 1fr;
+    align-items: start;
+  }
+  .pdh-body__preview {
+    position: sticky;
+    top: 24px;
+  }
+}
+
+/* Base type toggle */
+.pdh-basetype-toggle {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.pdh-basetype-toggle__btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border: 2px solid var(--pdh-charcoal);
+  background: var(--pdh-cream);
+  color: var(--pdh-charcoal);
+  border-radius: 10px;
+  cursor: pointer;
+  text-align: left;
+}
+.pdh-basetype-toggle__icon {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+}
+.pdh-basetype-toggle__text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.3;
+}
+.pdh-basetype-toggle__title {
+  font-weight: 700;
+  font-size: 14px;
+}
+.pdh-basetype-toggle__subtitle {
+  font-size: 12px;
+  opacity: 0.75;
+}
+.pdh-basetype-toggle__btn.is-active {
+  background: var(--pdh-black);
+  color: var(--pdh-gold);
+  border-color: var(--pdh-teal);
+}
+.pdh-basetype-toggle__btn.is-active .pdh-basetype-toggle__icon {
+  color: var(--pdh-teal);
+}
+
+/* Pill toggle — lighter-weight sibling of the basetype toggle above, for
+   picking among several options (e.g. Transportation's category row)
+   instead of just two. */
+.pdh-pill-toggle {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.pdh-pill-toggle__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 2px solid var(--pdh-charcoal);
+  background: var(--pdh-cream);
+  color: var(--pdh-charcoal);
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+}
+.pdh-pill-toggle__icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+.pdh-pill-toggle__btn.is-active {
+  background: var(--pdh-black);
+  color: var(--pdh-gold);
+  border-color: var(--pdh-teal);
+}
+.pdh-pill-toggle__btn.is-active .pdh-pill-toggle__icon {
+  color: var(--pdh-teal);
+}
+
+/* Starter Presets — clickable card row at the top of a mode's panel */
+.pdh-preset-row {
+  margin-bottom: 20px;
+}
+.pdh-preset-row__label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--pdh-teal);
+}
+.pdh-preset-row__cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.pdh-preset-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 200px;
+  padding: 12px 14px;
+  border: 1.5px solid var(--pdh-border);
+  border-radius: 12px;
+  background: var(--pdh-cream);
+  text-align: left;
+  cursor: pointer;
+}
+.pdh-preset-card:hover {
+  border-color: var(--pdh-gold-on-light);
+}
+.pdh-preset-card__name {
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--pdh-espresso);
+}
+.pdh-preset-card__description {
+  font-size: 12px;
+  color: var(--pdh-charcoal);
+  opacity: 0.8;
+  line-height: 1.35;
+}
+
+/* Quick Generators — grid nav (Starter Presets' card pattern repurposed
+   as primary navigation) + a focused single-generator panel with just
+   its own 3-6 fields, plus the two bonus prompt variations below them. */
+.pdh-generator-grid__intro {
+  margin: 0 0 16px;
+  font-size: 13px;
+  color: var(--pdh-teal);
+}
+.pdh-generator-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.pdh-generator-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 220px;
+  padding: 16px;
+  border: 1.5px solid var(--pdh-border);
+  border-radius: 12px;
+  background: #fff;
+  text-align: left;
+  cursor: pointer;
+}
+.pdh-generator-card:hover {
+  border-color: var(--pdh-gold-on-light);
+}
+.pdh-generator-card .pdh-icon {
+  color: var(--pdh-teal);
+}
+.pdh-generator-card__name {
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--pdh-espresso);
+}
+.pdh-generator-card__description {
+  font-size: 12px;
+  color: var(--pdh-charcoal);
+  opacity: 0.85;
+  line-height: 1.4;
+}
+.pdh-generator-panel__back {
+  margin-bottom: 14px;
+}
+.pdh-generator-panel__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 20px;
+  margin: 0 0 6px;
+  color: var(--pdh-espresso);
+}
+.pdh-generator-panel__title .pdh-icon {
+  color: var(--pdh-teal);
+}
+.pdh-generator-panel__description {
+  margin: 0 0 16px;
+  font-size: 13px;
+  color: var(--pdh-charcoal);
+  opacity: 0.85;
+}
+.pdh-generator-variations {
+  margin-top: 20px;
+}
+.pdh-generator-variations__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  margin: 0 0 10px;
+  color: var(--pdh-teal);
+}
+.pdh-generator-variation {
+  border: 1px solid var(--pdh-border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  background: #fff;
+}
+.pdh-generator-variation__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.pdh-generator-variation__label {
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--pdh-espresso);
+}
+.pdh-generator-variation__text {
+  margin: 0;
+  font-size: 13px;
+  color: var(--pdh-charcoal);
+  line-height: 1.5;
+}
+
+/* Couples Mode */
+.pdh-btn--swap {
+  background: var(--pdh-teal);
+  color: var(--pdh-cream);
+  margin-bottom: 20px;
+}
+.pdh-couples__people {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+  margin-top: 20px;
+}
+@media (min-width: 700px) {
+  .pdh-couples__people {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.pdh-panel--person {
+  border: 1px solid var(--pdh-border);
+  border-radius: 12px;
+  padding: 16px;
+  background: #fff;
+  margin-bottom: 14px;
+}
+.pdh-panel__person-slots {
+  margin-bottom: 20px;
+}
+.pdh-person__title {
+  font-size: 16px;
+  margin: 0 0 12px;
+  color: var(--pdh-espresso);
+}
+
+/* Field groups */
+.pdh-field-group {
+  border: 1px solid var(--pdh-border);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 16px;
+  background: #fff;
+}
+.pdh-field-group__title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--pdh-espresso);
+  padding: 0 6px;
+}
+.pdh-field-group__title .pdh-icon {
+  color: var(--pdh-teal);
+}
+.pdh-field-group__subtitle {
+  margin: 4px 6px 0;
+  font-size: 12px;
+  color: var(--pdh-teal);
+}
+.pdh-field-group__fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+  margin-top: 8px;
+}
+.pdh-imagery__category-label {
+  grid-column: 1 / -1;
+  margin: 10px 0 0;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--pdh-black);
+}
+.pdh-imagery__category-label:first-child {
+  margin-top: 0;
+}
+.pdh-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.pdh-field__label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+.pdh-field__label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--pdh-charcoal);
+}
+.pdh-field__include {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--pdh-teal);
+  white-space: nowrap;
+}
+/* The live theme resets native checkbox appearance entirely and paints
+   the checked fill via `background-color: currentColor` (not
+   accent-color) — so the fix is setting `color`, not accent-color, even
+   though accent-color is the "normal" way to do this. Both are set so
+   this still looks right in a plain/unthemed context (e.g. our own dev
+   harness) where the theme's override isn't present at all. */
+.pdh-field__checkbox,
+.pdh-subpanel__toggle {
+  accent-color: var(--pdh-teal);
+  color: var(--pdh-teal);
+  /* Default browser checkbox renders ~13px — too small a target to
+     reliably tap/click. */
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+.pdh-field__include,
+.pdh-subpanel__header {
+  /* Padding around the whole label (not just the checkbox glyph) grows
+     the actual clickable/tappable area well past 18px without changing
+     the visual checkbox size. */
+  padding: 4px 0;
+}
+.pdh-field__select,
+.pdh-field__custom {
+  padding: 8px 14px;
+  border: 1px solid var(--pdh-border);
+  border-radius: 6px;
+  font-size: 14px;
+  background: var(--pdh-cream);
+  color: var(--pdh-black);
+}
+/* Dropdowns specifically go full pill shape (matches the mockup); free-text
+   inputs stay a normal rounded rect — a fully pill-shaped text box looks
+   odd once someone's typed a sentence into it. */
+.pdh-field__select {
+  border-radius: 999px;
+}
+.pdh-color-swatch-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.pdh-color-swatch-row .pdh-field__select {
+  flex: 1;
+}
+.pdh-color-swatch {
+  width: 22px;
+  height: 22px;
+  min-width: 22px;
+  border-radius: 999px;
+  border: 1px solid var(--pdh-border);
+  flex-shrink: 0;
+}
+.pdh-color-swatch--empty {
+  background: repeating-linear-gradient(45deg, var(--pdh-border), var(--pdh-border) 2px, transparent 2px, transparent 5px);
+}
+.pdh-field__select:focus,
+.pdh-field__custom:focus {
+  outline: 2px solid var(--pdh-gold);
+}
+.pdh-field__quantity-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--pdh-teal);
+  margin-top: 2px;
+}
+.pdh-field__quantity {
+  width: 64px;
+  padding: 6px;
+  border: 1px solid var(--pdh-border);
+  border-radius: 6px;
+  font-size: 13px;
+  background: var(--pdh-cream);
+}
+.pdh-field__freetext {
+  resize: vertical;
+  font-family: inherit;
+}
+
+/* Opt-in sub-panels (Character's Companion, Text's Accent Word/Phrase) */
+.pdh-subpanel {
+  border: 1px dashed var(--pdh-border);
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+}
+/* Muted vs. .pdh-field-group__title's bold espresso — these are optional
+   add-ons (Accent Word/Phrase, Add a Companion, etc.), so they shouldn't
+   visually outcompete the primary field groups above them. */
+.pdh-subpanel__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: var(--pdh-espresso);
+  cursor: pointer;
+}
+
+/* Reference Mode's upload box — bolder teal dashed border + white card
+   background (like the old Live-Link Mascot box), split into an image
+   half and a description half. */
+.pdh-reference-upload {
+  border: 2px dashed var(--pdh-teal);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 16px;
+  background: #fff;
+}
+.pdh-reference-upload__disclaimer {
+  margin: 6px 0 12px;
+  font-size: 12px;
+  color: var(--pdh-teal);
+}
+.pdh-reference-upload__hint {
+  margin: 0 0 6px;
+  font-size: 12px;
+  color: var(--pdh-teal);
+}
+.pdh-reference-upload__columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  /* start, not stretch — the two columns naturally have different
+     content heights (disclaimer + dropzone vs. label + hint + textarea),
+     and stretching one to match the other is what caused the dropzone's
+     flex-grow to overflow past the box's own bottom edge. */
+  align-items: start;
+}
+@media (max-width: 640px) {
+  .pdh-reference-upload__columns {
+    grid-template-columns: 1fr;
+  }
+}
+.pdh-reference-upload__file-input {
+  display: none;
+}
+.pdh-reference-upload__image {
+  display: flex;
+  flex-direction: column;
+}
+.pdh-reference-upload__dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 140px;
+  border: 1px dashed var(--pdh-border);
+  border-radius: 10px;
+  padding: 20px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--pdh-espresso);
+  cursor: pointer;
+  background: #fff;
+}
+.pdh-reference-upload__dropzone.is-dragover {
+  border-color: var(--pdh-teal);
+  color: var(--pdh-teal);
+  background: rgba(13, 115, 119, 0.06);
+}
+.pdh-reference-upload__preview {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+.pdh-reference-upload__preview-img {
+  width: 100%;
+  max-height: 200px;
+  object-fit: contain;
+  border-radius: 10px;
+  border: 1px solid var(--pdh-border);
+  background: #fff;
+}
+.pdh-reference-upload__description .pdh-field__freetext {
+  min-height: 120px;
+}
+.pdh-reference-upload__description .pdh-btn--delete {
+  margin-top: 10px;
+}
+
+/* Creative Brief (was "Your Selections") — curated summary by default,
+   sits above the prompt preview */
+.pdh-selections {
+  background: #fff;
+  border: 1px solid var(--pdh-border);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+.pdh-selections__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+.pdh-selections__title {
+  font-size: 18px;
+  margin: 0;
+  color: var(--pdh-espresso);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.pdh-selections__title .pdh-icon {
+  color: var(--pdh-gold);
+}
+.pdh-selections__subtitle {
+  margin: 2px 0 12px;
+  font-size: 12px;
+  color: var(--pdh-teal);
+}
+.pdh-selections__eye-btn {
+  background: var(--pdh-teal);
+  border: none;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.pdh-selections__eye-btn:hover {
+  background: var(--pdh-charcoal);
+}
+.pdh-selections__brief {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+.pdh-selections__brief-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+.pdh-selections__brief-icon {
+  color: var(--pdh-gold);
+}
+.pdh-selections__brief-label {
+  font-weight: 700;
+  color: var(--pdh-charcoal);
+  min-width: 84px;
+}
+.pdh-selections__brief-value {
+  color: var(--pdh-espresso);
+  text-transform: capitalize;
+}
+.pdh-selections__scroll {
+  max-height: 340px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+.pdh-selections__group-title {
+  margin: 0 0 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--pdh-gold-on-light);
+}
+.pdh-selections__item {
+  font-size: 13px;
+  padding: 3px 0;
+}
+.pdh-selections__item-label {
+  font-weight: 700;
+  color: var(--pdh-charcoal);
+}
+.pdh-selections__item-value {
+  color: var(--pdh-espresso);
+}
+.pdh-selections__divider {
+  border: none;
+  border-top: 1px solid var(--pdh-border);
+  margin: 10px 0;
+}
+.pdh-selections__empty {
+  font-style: italic;
+  color: var(--pdh-espresso);
+  font-size: 13px;
+  margin: 0;
+}
+
+/* Live preview — "Your Prompt, Built Live" */
+.pdh-preview {
+  background: var(--pdh-black);
+  color: var(--pdh-cream);
+  border-radius: 12px;
+  padding: 18px;
+}
+.pdh-preview__title {
+  font-size: 18px;
+  margin: 0 0 4px;
+  color: var(--pdh-gold);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.pdh-preview__subtitle {
+  margin: 0 0 12px;
+  font-size: 12px;
+  color: var(--pdh-cream);
+  opacity: 0.7;
+}
+/* Matches .pdh-field__select/.pdh-field__custom's look (the Style DNA bar's
+   "t-shirt design"-style dropdowns) rather than standing out as its own
+   distinct treatment. */
+.pdh-preview__text {
+  width: 100%;
+  min-height: 160px;
+  background: var(--pdh-cream);
+  color: var(--pdh-black);
+  font-family: inherit;
+  border: 1px solid var(--pdh-border);
+  border-radius: 6px;
+  padding: 8px;
+  font-size: 14px;
+  resize: vertical;
+}
+.pdh-preview__text:focus {
+  outline: 2px solid var(--pdh-gold);
+}
+.pdh-preview__actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 12px;
+}
+.pdh-preview__export-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-top: 8px;
+}
+@media (max-width: 480px) {
+  .pdh-preview__export-row {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.pdh-btn--export {
+  background: transparent;
+  border: 1px solid var(--pdh-cream);
+  color: var(--pdh-cream);
+  padding: 8px 10px;
+  font-size: 12px;
+}
+
+.pdh-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  border: none;
+}
+/* Consistent visible focus ring for every button, pill toggle, and the
+   keyboard-operable upload dropzone — same gold used for select/input
+   focus, rather than relying on each browser's own inconsistent default. */
+.pdh-btn:focus-visible,
+.pdh-styledna__yesno-btn:focus-visible,
+.pdh-preset-card:focus-visible,
+.pdh-tabs__btn:focus-visible,
+.pdh-reference-upload__dropzone:focus-visible {
+  outline: 2px solid var(--pdh-gold);
+  outline-offset: 2px;
+}
+.pdh-btn--copy {
+  background: var(--pdh-gold);
+  color: var(--pdh-black);
+}
+.pdh-btn--randomize {
+  background: var(--pdh-espresso);
+  color: var(--pdh-cream);
+}
+.pdh-btn--reset {
+  background: transparent;
+  border: 1px solid var(--pdh-cream);
+  color: var(--pdh-cream);
+}
+/* The one teal/white accent among the 4 buttons, per instruction —
+   Randomize moved to espresso so teal isn't duplicated across two buttons. */
+.pdh-btn--save {
+  background: var(--pdh-teal);
+  color: #fff;
+}
+.pdh-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.pdh-btn--small {
+  padding: 6px 12px;
+  font-size: 12px;
+}
+.pdh-companion__controls {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 4px 0 12px;
+}
+/* Outlined pill to match the Remove button's visual weight — plain
+   .pdh-btn alone has no border/background of its own, so it read as a
+   bare, disconnected control next to Remove's clearly-defined pill. */
+.pdh-btn--add {
+  background: var(--pdh-cream);
+  border: 2px solid var(--pdh-teal);
+  color: var(--pdh-teal);
+}
+.pdh-companion__slot-remove {
+  margin-top: 6px;
+}
+/* Used inside light cards (Saved Prompts), unlike .pdh-btn--reset which is
+   styled cream-on-transparent for the dark preview panel. */
+.pdh-btn--delete {
+  background: transparent;
+  border: 1px solid var(--pdh-espresso);
+  color: var(--pdh-espresso);
+}
+.pdh-color-swatch-item .pdh-btn--reset {
+  border-color: var(--pdh-charcoal);
+  color: var(--pdh-charcoal);
+}
+.pdh-color-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+.pdh-color-swatch-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.pdh-color-swatch-item input[type="color"] {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid var(--pdh-border);
+  border-radius: 6px;
+  cursor: pointer;
+}
+.pdh-color-hex {
+  width: 90px;
+}
+.pdh-preview__save-feedback {
+  margin: 10px 0 0;
+  font-size: 13px;
+  font-weight: 600;
+}
+.pdh-preview__save-feedback.is-success {
+  color: var(--pdh-gold);
+}
+.pdh-preview__save-feedback.is-error {
+  color: #e58a8a;
+}
+/* Quality Nudge — deliberately louder than the dark preview box around
+   it (white background, red text/icon) rather than blending into the
+   site's own palette, so it actually reads as a heads-up worth noticing
+   instead of just more ambient styling. #B91C1C on white is 6.47:1,
+   comfortably past WCAG AA's 4.5:1 for normal text. */
+.pdh-preview__nudge {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: #B91C1C;
+  background: #fff;
+  border: 1px solid #B91C1C;
+  border-radius: 6px;
+}
+.pdh-preview__nudge-icon {
+  flex-shrink: 0;
+  color: #B91C1C;
+  margin-top: 1px;
+}
+
+/* Saved Prompts — below the Live Prompt Preview */
+.pdh-saved {
+  background: #fff;
+  border: 1px solid var(--pdh-border);
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 20px;
+}
+.pdh-saved__title {
+  font-size: 18px;
+  margin: 0 0 10px;
+  color: var(--pdh-espresso);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.pdh-saved__title .pdh-icon {
+  color: var(--pdh-gold);
+}
+.pdh-recent__clear-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 8px;
+}
+.pdh-saved__empty {
+  font-style: italic;
+  color: var(--pdh-espresso);
+  font-size: 13px;
+  margin: 0;
+}
+.pdh-saved__item {
+  border: 1px solid var(--pdh-border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 10px;
+}
+.pdh-saved__item:last-child {
+  margin-bottom: 0;
+}
+.pdh-saved__item-text {
+  margin: 0 0 8px;
+  font-size: 13px;
+  color: var(--pdh-charcoal);
+}
+.pdh-saved__version-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.pdh-saved__version-row .pdh-icon {
+  color: var(--pdh-gold);
+  flex-shrink: 0;
+}
+.pdh-saved__version-select {
+  font-size: 12px;
+  padding: 3px 6px;
+  border: 1px solid var(--pdh-border);
+  border-radius: 4px;
+  background: #fff;
+  color: var(--pdh-charcoal);
+}
+.pdh-saved__item-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.pdh-saved__item-tag {
+  font-size: 11px;
+  color: var(--pdh-teal);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.pdh-saved__item-actions {
+  display: flex;
+  gap: 6px;
+}
+.pdh-saved__item-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.pdh-saved__item-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--pdh-espresso);
+}
+.pdh-saved__rename-btn {
+  background: transparent;
+  border: none;
+  color: var(--pdh-teal);
+  cursor: pointer;
+  padding: 2px;
+  display: inline-flex;
+  flex-shrink: 0;
+}
+.pdh-saved__item-title-input {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--pdh-espresso);
+  border: 1px solid var(--pdh-teal);
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-family: inherit;
+}
+.pdh-btn--load {
+  background: transparent;
+  border: 1px solid var(--pdh-teal);
+  color: var(--pdh-teal);
+}
+/* Vault-wide export row lives inside the same white .pdh-saved card as
+   the per-item list — .pdh-btn--export's default cream-on-transparent
+   styling is meant for the dark preview panel, so it needs the same
+   light-card override .pdh-btn--delete already gets over .pdh-btn--reset. */
+.pdh-saved__vault-export {
+  margin-bottom: 14px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--pdh-border);
+}
+.pdh-saved__vault-export-label {
+  display: block;
+  font-size: 12px;
+  color: var(--pdh-espresso);
+  margin-bottom: 8px;
+}
+.pdh-saved__vault-export .pdh-btn--export {
+  border-color: var(--pdh-espresso);
+  color: var(--pdh-espresso);
+}
+
+/* Brand Kit ("My HAUS Style") — sits in the same white card style as
+   Your Vault, right below it. */
+.pdh-brandkit {
+  background: #fff;
+  border: 1px solid var(--pdh-border);
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 20px;
+}
+.pdh-brandkit__intro {
+  font-size: 13px;
+  color: var(--pdh-teal);
+  margin: 0 0 14px;
+}
+.pdh-brandkit__card {
+  border: 1px solid var(--pdh-border);
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 14px;
+}
+.pdh-brandkit__card.is-active {
+  border-color: var(--pdh-teal);
+  border-width: 2px;
+}
+.pdh-brandkit__card-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+.pdh-brandkit__disclaimer {
+  font-size: 12px;
+  color: var(--pdh-espresso);
+  background: var(--pdh-cream);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin: 10px 0 0;
+}
+.pdh-brandkit__synced-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--pdh-espresso);
+  border: 1px solid var(--pdh-border);
+  border-radius: 999px;
+  padding: 5px 10px;
+}
+.pdh-brandkit__category {
+  margin-top: 12px;
+}
+.pdh-brandkit__override-label {
+  margin: 8px 6px 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--pdh-espresso);
+}
+.pdh-brandkit__new-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+.pdh-brandkit__new-input {
+  flex: 1;
+  padding: 8px 14px;
+  border: 1px solid var(--pdh-border);
+  border-radius: 999px;
+  font-size: 14px;
+  font-family: inherit;
+}
+
+/* Logo Mode — Section A callouts (static UI text, never in the prompt) */
+.pdh-logo-callout {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  background: var(--pdh-cream);
+  border: 1px solid var(--pdh-gold);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin: 0 0 16px;
+  font-size: 13px;
+  color: var(--pdh-espresso);
+  line-height: 1.5;
+}
+.pdh-logo-callout .pdh-icon {
+  color: var(--pdh-gold);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.pdh-logo-symbol-only {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--pdh-charcoal);
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.pdh-logo-negconstraints {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+.pdh-logo-inline-disclaimer {
+  font-size: 12px;
+  color: var(--pdh-espresso);
+  background: var(--pdh-cream);
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin: 8px 0 0;
+}
+
+.pdh-coming-soon {
+  font-style: italic;
+  color: var(--pdh-espresso);
+}
+
+/* Locked state (sections/prompt-builder.liquid, non-purchasers) */
+.pdh-locked {
+  background: var(--pdh-cream);
+  color: var(--pdh-black);
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 64px 24px;
+  text-align: center;
+}
+.pdh-locked__heading {
+  color: var(--pdh-espresso);
+  font-size: 28px;
+  margin: 0 0 12px;
+}
+.pdh-locked__body {
+  color: var(--pdh-charcoal);
+  margin-bottom: 24px;
+}
+.pdh-locked__actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.pdh-locked__learn-more {
+  border-color: var(--pdh-charcoal);
+  color: var(--pdh-charcoal);
+}
+
+/* Marketing/preview page (sections/prompt-builder-preview.liquid) */
+.pdh-marketing {
+  background: var(--pdh-cream);
+  color: var(--pdh-black);
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 48px 24px 80px;
+  overflow: hidden;
+}
+.pdh-marketing__hero {
+  position: relative;
+  text-align: center;
+  margin-bottom: 40px;
+}
+/* Soft decorative corner accents — purely cosmetic (negative z-index keeps
+   them behind the heading/eyebrow/subheading, pointer-events off keeps
+   them out of the way of clicks), applies wherever this hero renders: the
+   standalone marketing page and the gated tool page's branded header. */
+.pdh-marketing__hero::before,
+.pdh-marketing__hero::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  border-radius: 50%;
+  pointer-events: none;
+}
+.pdh-marketing__hero::before {
+  width: 240px;
+  height: 240px;
+  top: -20px;
+  left: -40px;
+  background: radial-gradient(circle, rgba(201, 168, 76, 0.3), transparent 70%);
+}
+.pdh-marketing__hero::after {
+  width: 280px;
+  height: 280px;
+  top: -30px;
+  right: -60px;
+  background: radial-gradient(circle, rgba(13, 115, 119, 0.24), transparent 70%);
+}
+.pdh-marketing__eyebrow {
+  color: var(--pdh-gold-on-light);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 13px;
+  font-weight: 700;
+  margin: 0 0 8px;
+}
+.pdh-marketing__heading {
+  color: var(--pdh-black);
+  font-size: 32px;
+  margin: 0 0 16px;
+}
+.pdh-heading-accent {
+  color: var(--pdh-gold-on-light);
+}
+.pdh-marketing__subheading {
+  color: var(--pdh-charcoal);
+  font-size: 17px;
+  max-width: 640px;
+  margin: 0 auto 24px;
+}
+.pdh-marketing__cta {
+  display: inline-block;
+}
+.pdh-marketing__video {
+  margin-bottom: 48px;
+}
+.pdh-marketing__video-embed {
+  position: relative;
+  width: 100%;
+  padding-top: 56.25%;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--pdh-black);
+}
+.pdh-marketing__video-embed iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+.pdh-marketing__video-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  border-radius: 12px;
+  background: var(--pdh-charcoal);
+  color: var(--pdh-cream);
+  font-style: italic;
+}
+.pdh-marketing__features {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+  margin-bottom: 48px;
+}
+@media (min-width: 700px) {
+  .pdh-marketing__features {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.pdh-marketing__feature {
+  border: 1px solid var(--pdh-border);
+  border-radius: 12px;
+  padding: 20px;
+  background: #fff;
+}
+.pdh-marketing__feature h3 {
+  color: var(--pdh-espresso);
+  font-size: 17px;
+  margin: 0 0 8px;
+}
+.pdh-marketing__feature p {
+  color: var(--pdh-charcoal);
+  margin: 0;
+  font-size: 14px;
+}
+.pdh-marketing__footer-cta {
+  text-align: center;
+}
+
+/* Fallback shown in place of the whole builder if a render crashes (e.g.
+   loading a Vault/Recent item saved under an older version of the tool
+   whose defensive merge still couldn't reconcile every field) — see the
+   try/catch around renderAppContent() in prompt-builder-ui.js. */
+.pdh-render-error {
+  max-width: 480px;
+  margin: 40px auto;
+  padding: 20px;
+  background: #fff;
+  border: 1px solid var(--pdh-border);
+  border-radius: 12px;
+  text-align: center;
+  color: var(--pdh-espresso);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* Collection Builder — a pure aggregation view, not a field-building
+   mode, so its panel is just a checklist rather than the usual dense
+   field groups. */
+.pdh-collection__checklist {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 12px;
+}
+.pdh-collection__checklist-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: #fff;
+  border: 1px solid var(--pdh-border);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--pdh-charcoal);
+}
+/* Checklist Items picker (Event Checklist, Event Vendor Checklist) — the
+   existing .pdh-checklist/.pdh-checklist__item classes renderCappedChecklist
+   emits have no matching CSS today (confirmed unstyled), so this widget
+   gets its own class pair instead, styled on .pdh-collection__checklist-item's
+   already-correct card pattern above. */
+.pdh-checklist-items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 4px 0 14px;
+}
+.pdh-checklist-items__item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 12px;
+  background: #fff;
+  border: 1px solid var(--pdh-border);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--pdh-charcoal);
+}
+.pdh-checklist-items__item input[type="checkbox"] {
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.pdh-collection__checklist-item .pdh-icon {
+  color: var(--pdh-gold);
+}
+.pdh-collection__item {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 14px;
+}
+.pdh-collection__item:last-child {
+  margin-bottom: 0;
+}
+.pdh-collection__item--combined {
+  border-color: var(--pdh-gold);
+  background: rgba(212, 175, 55, 0.12);
+}
+.pdh-collection__item-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 10px;
+  font-size: 15px;
+  color: var(--pdh-gold);
+}
+.pdh-collection__item-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+/* Brand DNA Assessment (Founder Interview) */
+.pdh-founder-interview {
+  background: #fff;
+  border: 1px solid var(--pdh-border);
+  border-radius: 12px;
+  padding: 28px;
+  max-width: 640px;
+  margin: 0 auto;
+}
+.pdh-founder-interview--intro,
+.pdh-founder-interview--results {
+  text-align: left;
+}
+.pdh-founder-interview__progress-track {
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(46, 42, 38, 0.1);
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+.pdh-founder-interview__progress-fill {
+  height: 100%;
+  background: var(--pdh-espresso);
+  transition: width 0.2s ease;
+}
+.pdh-founder-interview__question {
+  font-size: 20px;
+  line-height: 1.4;
+  margin: 4px 0 20px;
+  color: var(--pdh-charcoal);
+}
+.pdh-founder-interview__options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.pdh-founder-interview__option {
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+}
+.pdh-founder-interview__profile-name {
+  font-size: 26px;
+  color: var(--pdh-espresso);
+  margin: 4px 0 6px;
+}
+.pdh-founder-interview__result-row {
+  margin: 12px 0;
+}
+.pdh-founder-interview__mission {
+  font-style: italic;
+  padding: 12px 16px;
+  background: rgba(46, 42, 38, 0.04);
+  border-left: 3px solid var(--pdh-espresso);
+  border-radius: 4px;
+}

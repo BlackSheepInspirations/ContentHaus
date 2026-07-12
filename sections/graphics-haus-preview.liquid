@@ -1,0 +1,116 @@
+{% comment %}
+  The AI Creator's Graphics Haus — public marketing/preview page.
+  Not gated — this is the page non-purchasers land on (linked from the
+  locked state in sections/graphics-haus.liquid) to learn what the tool
+  does and buy access.
+{% endcomment %}
+
+{{ 'graphics-haus.css' | asset_url | stylesheet_tag }}
+
+<div class="gh-marketing">
+  <div class="gh-marketing__hero">
+    <p class="gh-marketing__eyebrow">{{ section.settings.eyebrow }}</p>
+    <h1 class="gh-marketing__heading">{{ section.settings.heading | replace: 'AI', '<span class="gh-heading-accent">AI</span>' }}</h1>
+    <div class="gh-marketing__subheading">{{ section.settings.subheading }}</div>
+    {% if section.settings.access_product %}
+      <a href="{{ section.settings.access_product.url }}" class="gh-btn gh-btn--copy gh-marketing__cta">
+        Get Access{% if section.settings.access_product.price %} — {{ section.settings.access_product.price | money }}{% endif %}
+      </a>
+    {% endif %}
+  </div>
+
+  <div class="gh-marketing__video">
+    {% if section.settings.demo_video_url != blank %}
+      <div class="gh-marketing__video-embed">
+        <iframe
+          src="{{ section.settings.demo_video_url }}"
+          title="{{ section.settings.heading }} demo"
+          frameborder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen
+        ></iframe>
+      </div>
+    {% else %}
+      <div class="gh-marketing__video-placeholder">Demo video coming soon</div>
+    {% endif %}
+  </div>
+
+  <div class="gh-marketing__features">
+    {% for block in section.blocks %}
+      {% if block.type == 'feature' %}
+        <div class="gh-marketing__feature" {{ block.shopify_attributes }}>
+          <h3>{{ block.settings.title }}</h3>
+          <p>{{ block.settings.description }}</p>
+        </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+
+  {% if section.settings.access_product %}
+    <div class="gh-marketing__footer-cta">
+      <a href="{{ section.settings.access_product.url }}" class="gh-btn gh-btn--copy gh-marketing__cta">
+        Get Access{% if section.settings.access_product.price %} — {{ section.settings.access_product.price | money }}{% endif %}
+      </a>
+    </div>
+  {% endif %}
+</div>
+
+{% schema %}
+{
+  "name": "Graphics Haus Preview",
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow text",
+      "default": "Black Sheep Creations & Inspirations"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "The AI Creator's Graphics Haus"
+    },
+    {
+      "type": "richtext",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "<p>Build the clipart, characters, and printable graphics your shop sells — clean, on-theme, and consistent across every set.</p>"
+    },
+    {
+      "type": "url",
+      "id": "demo_video_url",
+      "label": "Demo video embed URL",
+      "info": "YouTube/Vimeo embed URL (not the regular watch link — use the \"Embed\" URL)."
+    },
+    {
+      "type": "product",
+      "id": "access_product",
+      "label": "Access product"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "feature",
+      "name": "Feature",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Title" },
+        { "type": "textarea", "id": "description", "label": "Description" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Graphics Haus Preview",
+      "blocks": [
+        { "type": "feature", "settings": { "title": "Clipart Pack Generator", "description": "Themed clipart sets — holiday, seasonal, niche — built as a matching bundle, not one image at a time." } },
+        { "type": "feature", "settings": { "title": "Seasonal Cute Animal Generator", "description": "On-trend cute-animal characters for stickers, cards, and seasonal collections." } },
+        { "type": "feature", "settings": { "title": "Faux Textile Character & Object Generator", "description": "Yarn, knit, and patchwork-look characters and objects — the cozy handmade look, without the handmade time." } },
+        { "type": "feature", "settings": { "title": "Retro Object Icon Generator", "description": "Nostalgic object icons — stamps, soda cans, gems, and more — in a consistent retro style." } },
+        { "type": "feature", "settings": { "title": "License Plate Generator", "description": "Custom novelty license plate graphics, with their own dedicated set of controls." } },
+        { "type": "feature", "settings": { "title": "Look Lock", "description": "Save a look you love and carry its exact aesthetic into every other generator — no retyping." } }
+      ]
+    }
+  ]
+}
+{% endschema %}

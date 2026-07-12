@@ -68,14 +68,20 @@ output bundle (mood, voice, colors, fonts, starter values, mission
 statement template). Functions as the expanded version of Branding
 Studio's existing 4 Starter Presets.
 
-## 5. The Founder Interview™ — 21 Questions
-✅ **Approved** (wording, sequencing, per-question layer tagging).
-🟡 **Pending** (numeric scoring, presentation UI). See
+## 5. The Founder Interview™ — 30 Questions
+✅ **Approved** (wording, sequencing, per-question layer tagging, numeric
+scoring, presentation UI — all built). See
 [`brand-dna-assessment-questions.md`](brand-dna-assessment-questions.md).
-21 questions, deliberately paced (light aesthetic questions alternating
-with heavier identity/motivation questions), 12-18 minute completion
-target, ending on a signature closing question (Q21) that's explicitly
-locked from future revision.
+30 questions across four layers (Expression, Tensions, Founder DNA, and
+the newer Customer Impression™ layer — Self-Image, Reflection,
+Relationship, Differentiation, added to close a gap against Kapferer's
+Brand Identity Prism), 17-25 minute completion target, ending on a
+signature closing question (now Q30, originally Q21 before the
+expansion) that's explicitly locked from future revision.
+🟡 **Pending**: interleaving Questions 21-29 through the full sequence for
+proper light/heavy emotional pacing (currently appended as one block);
+surfacing Customer Impression results in the Results page UI (computed,
+not yet displayed).
 
 ## 6. Field Mappings
 ✅ **Approved.** Every tension and every profile traces to a real,
@@ -125,4 +131,7 @@ yet written); Manuscript 02 ("The Discovery Engine") content; Manuscript
 - Hybrid rules-engine + AI creative-generation layer on top of the
   assessment's deterministic output (assessment does the psychology, AI
   does creative execution) — noted as an idea, not a decided direction
-- Whether the Profile Library grows beyond 10 profiles
+- ~~Whether the Profile Library grows beyond 10 profiles~~ — resolved:
+  grew to 11 (The Trail Forger, covering Aaker's Ruggedness trait, which
+  none of the original 10 addressed). Whether it grows further beyond 11
+  remains open.

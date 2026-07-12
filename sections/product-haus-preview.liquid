@@ -1,0 +1,114 @@
+{% comment %}
+  The AI Creator's Product Haus — public marketing/preview page.
+  Not gated — this is the page non-purchasers land on (linked from the
+  locked state in sections/product-haus.liquid) to learn what the tool
+  does and buy access.
+{% endcomment %}
+
+{{ 'product-haus.css' | asset_url | stylesheet_tag }}
+
+<div class="pdh-marketing">
+  <div class="pdh-marketing__hero">
+    <p class="pdh-marketing__eyebrow">{{ section.settings.eyebrow }}</p>
+    <h1 class="pdh-marketing__heading">{{ section.settings.heading | replace: 'AI', '<span class="pdh-heading-accent">AI</span>' }}</h1>
+    <div class="pdh-marketing__subheading">{{ section.settings.subheading }}</div>
+    {% if section.settings.access_product %}
+      <a href="{{ section.settings.access_product.url }}" class="pdh-btn pdh-btn--copy pdh-marketing__cta">
+        Get Access{% if section.settings.access_product.price %} — {{ section.settings.access_product.price | money }}{% endif %}
+      </a>
+    {% endif %}
+  </div>
+
+  <div class="pdh-marketing__video">
+    {% if section.settings.demo_video_url != blank %}
+      <div class="pdh-marketing__video-embed">
+        <iframe
+          src="{{ section.settings.demo_video_url }}"
+          title="{{ section.settings.heading }} demo"
+          frameborder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen
+        ></iframe>
+      </div>
+    {% else %}
+      <div class="pdh-marketing__video-placeholder">Demo video coming soon</div>
+    {% endif %}
+  </div>
+
+  <div class="pdh-marketing__features">
+    {% for block in section.blocks %}
+      {% if block.type == 'feature' %}
+        <div class="pdh-marketing__feature" {{ block.shopify_attributes }}>
+          <h3>{{ block.settings.title }}</h3>
+          <p>{{ block.settings.description }}</p>
+        </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+
+  {% if section.settings.access_product %}
+    <div class="pdh-marketing__footer-cta">
+      <a href="{{ section.settings.access_product.url }}" class="pdh-btn pdh-btn--copy pdh-marketing__cta">
+        Get Access{% if section.settings.access_product.price %} — {{ section.settings.access_product.price | money }}{% endif %}
+      </a>
+    </div>
+  {% endif %}
+</div>
+
+{% schema %}
+{
+  "name": "Product Haus Preview",
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow text",
+      "default": "Black Sheep Creations & Inspirations"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "The AI Creator's Product Haus"
+    },
+    {
+      "type": "richtext",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "<p>Create the sellable digital products around your brand — invitations, devotional cards, and more. Customized your way.</p>"
+    },
+    {
+      "type": "url",
+      "id": "demo_video_url",
+      "label": "Demo video embed URL",
+      "info": "YouTube/Vimeo embed URL (not the regular watch link — use the \"Embed\" URL)."
+    },
+    {
+      "type": "product",
+      "id": "access_product",
+      "label": "Access product"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "feature",
+      "name": "Feature",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Title" },
+        { "type": "textarea", "id": "description", "label": "Description" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Product Haus Preview",
+      "blocks": [
+        { "type": "feature", "settings": { "title": "Invitations & Stationery Studio", "description": "Invitations, greeting cards, and stationery designed around your brand — ready to sell as their own digital product." } },
+        { "type": "feature", "settings": { "title": "Devotional & Motivation Card Studio", "description": "Devotional and motivational cards with the tone and look your audience already knows." } },
+        { "type": "feature", "settings": { "title": "Brand Kit", "description": "Set your colors, fonts, mood, and voice once — every studio picks it up automatically." } },
+        { "type": "feature", "settings": { "title": "Save your favorites", "description": "Keep up to 5 saved prompts per studio, ready to copy anytime." } }
+      ]
+    }
+  ]
+}
+{% endschema %}

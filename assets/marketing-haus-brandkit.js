@@ -20,6 +20,16 @@
  * Same multi-kit management depth as Content Haus (up to 3, one active,
  * persisted to localStorage) since that's genuinely useful for anyone
  * doing client/resale work with more than one brand to juggle.
+ *
+ * Total capacity is 5, split into two sources: up to MAX_OWN_KITS (2)
+ * created here directly, plus up to 3 read-only kits synced in from
+ * Brand Haus's own Brand Kit (SHARED_STORAGE_KEY, same-domain
+ * localStorage — not a new access mechanism; each product still gates
+ * its own page independently, this only shares saved field values for
+ * customers who own both). Synced kits can be renamed/deleted/edited
+ * only from Brand Haus, where they're the source of truth — here they're
+ * display + "Set Active" only, badged so it's obvious where they came
+ * from.
  */
 (function () {
   "use strict";
@@ -30,8 +40,11 @@
   var sortAlpha = MarketingHaus.util.sortAlpha;
 
   var STORAGE_KEY = "marketingHausBrandKits";
-  var MAX_KITS = 3;
-  var MAX_COLORS = 5;
+  var SHARED_STORAGE_KEY = "blackSheepBrandKitVault";
+  var MAX_OWN_KITS = 2;
+  var MAX_SYNCED_KITS = 3;
+  var MAX_KITS = MAX_OWN_KITS + MAX_SYNCED_KITS;
+  var MAX_COLORS = 6;
   var MAX_VALUES = 5;
 
   var WEB_SAFE_FONTS = ["Georgia", "Helvetica", "Arial", "Times New Roman", "Courier New"];
@@ -54,6 +67,7 @@
   var MOOD_OPTIONS = sortAlpha([
     "minimalist and clean", "warm and cozy", "bold and vibrant", "elegant and luxurious", "playful and fun",
     "rustic and organic", "modern and edgy", "romantic and soft", "professional and polished", "boho and eclectic",
+    "rugged and outdoorsy",
   ]);
   var BRAND_VOICE_OPTIONS = sortAlpha([
     "warm and approachable", "confident and bold", "playful and quirky", "sophisticated and refined",
@@ -69,6 +83,13 @@
       voice: makeField("", BRAND_VOICE_OPTIONS),
       coreValues: [],
       notThis: makeField("", [], { isFreeText: true }),
+      // Own kits never set this (no UI for it here — this Haus's own
+      // "extra freeform field" concept is notThis, not mission) — it
+      // only ever has a real value on a kit synced in from Brand Haus,
+      // whose own kit schema has mission instead of notThis. Kept here
+      // too so `kit.fields.mission` is always a real field shape rather
+      // than undefined on own kits.
+      mission: makeField("", [], { isFreeText: true }),
     };
   }
 
@@ -95,22 +116,63 @@
     writePersisted(store.getState());
   }
 
-  function getAllKits() {
+  // Read-only mirror of Brand Haus's own 3 kits — Brand Haus is the
+  // source of truth, this just maps its plain-value shape into the
+  // field-object shape this file's UI helpers expect.
+  function readSyncedKits() {
+    if (!window.localStorage) return [];
+    try {
+      var parsed = JSON.parse(window.localStorage.getItem(SHARED_STORAGE_KEY));
+      if (parsed && Array.isArray(parsed.brandHausKits)) {
+        return parsed.brandHausKits.slice(0, MAX_SYNCED_KITS).map(function (k) {
+          return {
+            id: k.id,
+            name: k.name,
+            createdAt: k.savedAt,
+            isSynced: true,
+            fields: {
+              colors: k.colors || [],
+              headingFont: makeField(k.headingFont || "", FONT_OPTIONS),
+              bodyFont: makeField(k.bodyFont || "", FONT_OPTIONS),
+              mood: makeField(k.mood || "", MOOD_OPTIONS),
+              voice: makeField(k.voice || "", BRAND_VOICE_OPTIONS),
+              coreValues: k.coreValues || [],
+              notThis: makeField("", [], { isFreeText: true }),
+              // Brand Haus's own kit schema has mission where this Haus's
+              // own kits have notThis instead — read it here so a synced
+              // kit's Mission Statement actually surfaces somewhere,
+              // instead of silently never appearing (looked like lost
+              // data to anyone using both products).
+              mission: makeField(k.mission || "", [], { isFreeText: true }),
+            },
+          };
+        });
+      }
+    } catch (e) {
+      // fall through to empty
+    }
+    return [];
+  }
+
+  function getAllOwnKits() {
     return store.getState().kits;
   }
+  function getAllKits() {
+    return getAllOwnKits().concat(readSyncedKits());
+  }
   function isFull() {
-    return store.getState().kits.length >= MAX_KITS;
+    return store.getState().kits.length >= MAX_OWN_KITS;
   }
   function getActiveKit() {
     var state = store.getState();
     if (!state.activeKitId) return null;
-    return state.kits.filter(function (k) { return k.id === state.activeKitId; })[0] || null;
+    return getAllKits().filter(function (k) { return k.id === state.activeKitId; })[0] || null;
   }
 
   function createKit(name) {
     var state = store.getState();
-    if (state.kits.length >= MAX_KITS) {
-      return { ok: false, reason: "You already have " + MAX_KITS + " Brand Kits saved — delete one to create another." };
+    if (state.kits.length >= MAX_OWN_KITS) {
+      return { ok: false, reason: "You already have " + MAX_OWN_KITS + " of your own Brand Kits saved here — delete one to create another." };
     }
     var kit = { id: "mhbk-" + Date.now() + "-" + Math.floor(Math.random() * 10000), name: (name || "").trim() || "Untitled Brand Kit", createdAt: Date.now(), fields: buildKitFields() };
     commit({ kits: state.kits.concat([kit]) });
@@ -178,6 +240,8 @@
     if (voice) entries.push({ label: "Brand Voice", field: makeField(voice) });
     var values = (kit.fields.coreValues || []).map(function (v) { return (v || "").trim(); }).filter(Boolean);
     if (values.length) entries.push({ label: "Brand Values", field: makeField(values.join(", ")) });
+    var mission = resolved(kit.fields.mission);
+    if (mission) entries.push({ label: "Brand Mission", field: makeField(mission) });
     return entries;
   }
 
@@ -196,6 +260,7 @@
     addLine("Mood", resolved(kit.fields.mood));
     addLine("Voice", resolved(kit.fields.voice));
     addLine("Core Values", (kit.fields.coreValues || []).filter(Boolean).join(", "));
+    addLine("Mission", resolved(kit.fields.mission));
     addLine("What the Brand is NOT", resolved(kit.fields.notThis));
     return lines.join("\n");
   }
@@ -253,34 +318,41 @@
   function renderKitCard(kit, isActive) {
     var ui = MarketingHaus.ui;
     var isExpanded = expandedKitId === kit.id;
+    var isSynced = !!kit.isSynced;
 
     var titleRow;
-    if (renamingKitId === kit.id) {
+    if (!isSynced && renamingKitId === kit.id) {
       var titleInput = ui.el("input", { type: "text", class: "mh-saved__item-title-input", value: kit.name });
       var confirmRename = function () { renameKit(kit.id, titleInput.value.trim() || kit.name); renamingKitId = null; MarketingHaus.ui.renderApp(); };
       titleInput.addEventListener("keydown", function (e) { if (e.key === "Enter") confirmRename(); if (e.key === "Escape") { renamingKitId = null; MarketingHaus.ui.renderApp(); } });
       titleInput.addEventListener("blur", confirmRename);
       titleRow = ui.el("div", { class: "mh-saved__item-title-row" }, [titleInput]);
     } else {
-      var renameBtn = ui.el("button", { type: "button", class: "mh-saved__rename-btn", title: "Rename" }, [ui.icon("edit")]);
-      renameBtn.addEventListener("click", function () { renamingKitId = kit.id; MarketingHaus.ui.renderApp(); });
-      titleRow = ui.el("div", { class: "mh-saved__item-title-row" }, [
-        ui.el("p", { class: "mh-saved__item-title", text: kit.name + (isActive ? " (active)" : "") }),
-        renameBtn,
-      ]);
+      var titleChildren = [ui.el("p", { class: "mh-saved__item-title", text: kit.name + (isActive ? " (active)" : "") })];
+      if (!isSynced) {
+        var renameBtn = ui.el("button", { type: "button", class: "mh-saved__rename-btn", title: "Rename" }, [ui.icon("edit")]);
+        renameBtn.addEventListener("click", function () { renamingKitId = kit.id; MarketingHaus.ui.renderApp(); });
+        titleChildren.push(renameBtn);
+      }
+      titleRow = ui.el("div", { class: "mh-saved__item-title-row" }, titleChildren);
     }
 
     var activeBtn = ui.el("button", { type: "button", class: "mh-btn mh-btn--small " + (isActive ? "mh-btn--reset" : "mh-btn--copy"), text: isActive ? "Turn Off" : "Set Active" });
     activeBtn.addEventListener("click", function () { setActiveKit(isActive ? null : kit.id); MarketingHaus.ui.renderApp(); });
 
-    var expandBtn = ui.el("button", { type: "button", class: "mh-btn mh-btn--small", text: isExpanded ? "Hide Fields" : "Edit Fields" });
-    expandBtn.addEventListener("click", function () { expandedKitId = isExpanded ? null : kit.id; MarketingHaus.ui.renderApp(); });
+    var actionBtns = [activeBtn];
+    if (isSynced) {
+      actionBtns.push(ui.el("span", { class: "mh-brandkit__synced-badge", text: "From your Brand DNA Blueprint™" }));
+    } else {
+      var expandBtn = ui.el("button", { type: "button", class: "mh-btn mh-btn--small", text: isExpanded ? "Hide Fields" : "Edit Fields" });
+      expandBtn.addEventListener("click", function () { expandedKitId = isExpanded ? null : kit.id; MarketingHaus.ui.renderApp(); });
+      var deleteBtn = ui.el("button", { type: "button", class: "mh-btn mh-btn--delete mh-btn--small", text: "Delete" });
+      deleteBtn.addEventListener("click", function () { deleteKit(kit.id); MarketingHaus.ui.renderApp(); });
+      actionBtns.push(expandBtn, deleteBtn);
+    }
 
-    var deleteBtn = ui.el("button", { type: "button", class: "mh-btn mh-btn--delete mh-btn--small", text: "Delete" });
-    deleteBtn.addEventListener("click", function () { deleteKit(kit.id); MarketingHaus.ui.renderApp(); });
-
-    var children = [titleRow, ui.el("div", { class: "mh-saved__item-actions" }, [activeBtn, expandBtn, deleteBtn])];
-    if (isExpanded) children.push(renderKitFields(kit));
+    var children = [titleRow, ui.el("div", { class: "mh-saved__item-actions" }, actionBtns)];
+    if (isExpanded && !isSynced) children.push(renderKitFields(kit));
 
     return ui.el("div", { class: "mh-saved__item" + (isActive ? " mh-collection__item--combined" : ""), style: isActive ? "border-color: var(--mh-espresso);" : "" }, children);
   }
@@ -307,12 +379,12 @@
       });
       createRow = ui.el("div", { class: "mh-companion__controls" }, [nameInput, createBtn]);
     } else {
-      createRow = ui.el("p", { class: "mh-field-group__subtitle", text: "You have " + MAX_KITS + "/" + MAX_KITS + " Brand Kits — delete one to create another." });
+      createRow = ui.el("p", { class: "mh-field-group__subtitle", text: "You have " + MAX_OWN_KITS + "/" + MAX_OWN_KITS + " of your own Brand Kits — delete one to create another." });
     }
 
     root.appendChild(ui.el("div", { class: "mh-saved" }, [
       ui.el("h3", { class: "mh-saved__title" }, [ui.icon("palette"), ui.el("span", { text: "Brand Kit (" + kits.length + "/" + MAX_KITS + ")" })]),
-      ui.el("p", { class: "mh-field-group__subtitle", text: "Set colors, fonts, mood, voice, and values once — the active kit automatically informs every studio's output." }),
+      ui.el("p", { class: "mh-field-group__subtitle", text: "Set colors, fonts, mood, voice, and values once — the active kit automatically informs every studio's output. Up to " + MAX_OWN_KITS + " of your own here, plus up to " + MAX_SYNCED_KITS + " synced in from your Brand DNA Blueprint™ if you have Brand Haus too." }),
       list,
       createRow,
     ]));

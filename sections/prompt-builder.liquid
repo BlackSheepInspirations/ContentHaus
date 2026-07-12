@@ -37,6 +37,7 @@
   <script src="{{ 'prompt-builder-engine.js' | asset_url }}" defer="defer"></script>
   <script src="{{ 'prompt-builder-favorites.js' | asset_url }}" defer="defer"></script>
   <script src="{{ 'prompt-builder-character.js' | asset_url }}" defer="defer"></script>
+  <script src="{{ 'prompt-builder-character-video.js' | asset_url }}" defer="defer"></script>
   <script src="{{ 'prompt-builder-text.js' | asset_url }}" defer="defer"></script>
   <script src="{{ 'prompt-builder-couples.js' | asset_url }}" defer="defer"></script>
   <script src="{{ 'prompt-builder-family.js' | asset_url }}" defer="defer"></script>
@@ -63,6 +64,8 @@
     </div>
   </div>
 {% endif %}
+
+{% render 'haus-links', current: 'content-haus' %}
 
 {% schema %}
 {

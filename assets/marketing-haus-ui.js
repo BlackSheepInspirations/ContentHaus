@@ -107,10 +107,25 @@
   // ---------------------------------------------------------------------
   // Vault snapshot save/restore — same crash-safety pattern as Prompt
   // Haus (deep-merge onto current defaults, never wholesale-replace).
+  // Every vault key here used to be a plain broad-mode string (e.g.
+  // "social"); the Quick Generators tab adds a second shape, "gen:<id>",
+  // one per sub-generator — getModeStore/modeLabel resolve either shape
+  // to the right underlying store/label, same pattern Product Haus and
+  // Graphics Haus already use for their own Quick Generators tab.
   // ---------------------------------------------------------------------
+  function getModeStore(mode) {
+    if (mode.indexOf("gen:") === 0) return MarketingHaus.generators.getGeneratorStore(mode.slice(4));
+    return MarketingHaus[mode];
+  }
+
+  function modeLabel(mode) {
+    if (mode.indexOf("gen:") === 0) return MarketingHaus.generators.getGeneratorLabel(mode.slice(4));
+    return MODE_LABELS[mode] || mode;
+  }
+
   function buildVaultSnapshot(mode) {
     var snapshot = { styleDNA: JSON.parse(JSON.stringify(MarketingHaus.styleDNA.getState())) };
-    snapshot[mode] = JSON.parse(JSON.stringify(MarketingHaus[mode].getState()));
+    snapshot[mode] = JSON.parse(JSON.stringify(getModeStore(mode).getState()));
     return snapshot;
   }
 
@@ -144,7 +159,8 @@
   function loadVaultSnapshot(mode, snapshot) {
     if (!snapshot) return;
     if (snapshot.styleDNA) MarketingHaus.styleDNA.setState(deepMergeSnapshot(MarketingHaus.styleDNA.getState(), snapshot.styleDNA));
-    if (snapshot[mode]) MarketingHaus[mode].setState(deepMergeSnapshot(MarketingHaus[mode].getState(), snapshot[mode]));
+    var store = getModeStore(mode);
+    if (snapshot[mode] && store) store.setState(deepMergeSnapshot(store.getState(), snapshot[mode]));
   }
 
   function buildVaultTitle(mode) {
@@ -154,7 +170,7 @@
       MarketingHaus.engine.resolveFieldValue(styleDNA.theme) ||
       MarketingHaus.engine.resolveFieldValue(styleDNA.holiday) ||
       MarketingHaus.engine.resolveFieldValue(styleDNA.businessName);
-    return context ? (MODE_LABELS[mode] || mode) + " — " + context : (MODE_LABELS[mode] || mode);
+    return context ? modeLabel(mode) + " — " + context : modeLabel(mode);
   }
 
   function buildFullVaultText() {
@@ -165,7 +181,7 @@
     });
     var sections = [];
     Object.keys(byMode).forEach(function (mode) {
-      var label = (MODE_LABELS[mode] || mode).toUpperCase();
+      var label = modeLabel(mode).toUpperCase();
       var lines = byMode[mode].map(function (fav, index) {
         return (fav.title || "Untitled " + (index + 1)) + "\n" + fav.text;
       });
@@ -430,9 +446,11 @@
         if (HEX_PATTERN.test(hexInput.value)) swatchInput.value = hexInput.value;
         options.onUpdate(index, hexInput.value);
       });
+      var changeBtn = el("button", { type: "button", class: "mh-btn mh-btn--small mh-btn--reset", text: "Change" });
+      changeBtn.addEventListener("click", function () { swatchInput.click(); });
       var removeBtn = el("button", { type: "button", class: "mh-btn mh-btn--small mh-btn--delete", text: "Remove" });
       removeBtn.addEventListener("click", function () { options.onRemove(index); });
-      row.appendChild(el("div", { class: "mh-color-swatch-item" }, [swatchInput, hexInput, removeBtn]));
+      row.appendChild(el("div", { class: "mh-color-swatch-item" }, [swatchInput, hexInput, changeBtn, removeBtn]));
     });
     wrap.appendChild(row);
     if (options.colors.length < options.max) {
@@ -865,7 +883,12 @@
       loadBtn.title = "Restores every field in the builder to exactly how it was when this was generated.";
       loadBtn.addEventListener("click", function () {
         loadVaultSnapshot(entry.mode, entry.snapshot);
-        activeMode = entry.mode;
+        if (entry.mode.indexOf("gen:") === 0) {
+          activeMode = "generators";
+          MarketingHaus.generators.setActiveGenerator(entry.mode.slice(4));
+        } else {
+          activeMode = entry.mode;
+        }
         renderApp();
       });
     }
@@ -879,7 +902,7 @@
     var deleteBtn = el("button", { type: "button", class: "mh-btn mh-btn--delete mh-btn--small", text: "Delete" });
     deleteBtn.addEventListener("click", function () { MarketingHaus.favorites.removeRecent(entry.id); renderApp(); });
 
-    var metaParts = [MODE_LABELS[entry.mode] || entry.mode, new Date(entry.loggedAt).toLocaleString()];
+    var metaParts = [modeLabel(entry.mode), new Date(entry.loggedAt).toLocaleString()];
     var actionBtns = [];
     if (loadBtn) actionBtns.push(loadBtn);
     actionBtns.push(copyBtn, deleteBtn);
@@ -1001,21 +1024,20 @@
   // ---------------------------------------------------------------------
   // Tabs + shell
   // ---------------------------------------------------------------------
-  var MODES = ["mockup", "social", "adcopy", "email", "sales", "invitations", "devotional", "testimonial"];
+  var MODES = ["mockup", "social", "adcopy", "email", "sales", "testimonial", "generators"];
   var MODE_LABELS = {
     mockup: "Mockup Studio", social: "Social Media Studio",
     adcopy: "Ad Copy & Creative Studio", email: "Email Studio", sales: "Sales & Landing Page Studio",
-    invitations: "Invitations & Stationery Studio", devotional: "Devotional & Motivation Card Studio",
-    testimonial: "Testimonial & Social Proof Formatter",
+    testimonial: "Testimonial & Social Proof Formatter", generators: "Quick Generators",
   };
   var MODE_ICONS = {
     mockup: "shirt", social: "layers",
-    adcopy: "lightning", email: "mail", sales: "monitor", invitations: "gift",
-    devotional: "heart", testimonial: "people",
+    adcopy: "lightning", email: "mail", sales: "monitor",
+    testimonial: "people", generators: "sparkle",
   };
   var BUILT_MODES = {
     mockup: true, social: true,
-    adcopy: true, email: true, sales: true, invitations: true, devotional: true, testimonial: true,
+    adcopy: true, email: true, sales: true, testimonial: true, generators: true,
   };
 
   var activeMode = "mockup";
@@ -1083,14 +1105,17 @@
     var right = el("div", { class: "mh-body__preview" });
 
     var modeApi = MarketingHaus[activeMode];
+    var vaultKey = (activeMode === "generators" && modeApi && typeof modeApi.getActiveGeneratorId === "function" && modeApi.getActiveGeneratorId())
+      ? "gen:" + modeApi.getActiveGeneratorId() : activeMode;
     if (modeApi && typeof modeApi.renderPanel === "function") {
       left.appendChild(modeApi.renderPanel());
-      renderSelectionsPanel(right, activeMode, modeApi.getSelectionsByGroup());
-      renderPreview(right, modeApi.assemblePrompt(), modeApi, activeMode);
-      renderSavedPrompts(right, activeMode);
+      renderSelectionsPanel(right, vaultKey, modeApi.getSelectionsByGroup());
+      renderPreview(right, modeApi.assemblePrompt(), modeApi, vaultKey);
+      renderSavedPrompts(right, vaultKey);
     } else {
       left.appendChild(el("p", { class: "mh-coming-soon", text: (MODE_LABELS[activeMode] || activeMode) + " is coming soon." }));
     }
+    if (activeMode === "generators" && MarketingHaus.lookLock) MarketingHaus.lookLock.renderSection(right);
     if (MarketingHaus.brandKit) MarketingHaus.brandKit.renderSection(right);
     renderRecentLog(right);
 
@@ -1140,6 +1165,8 @@
     renderFieldGroup: renderFieldGroup,
     renderPlainFieldRow: renderPlainFieldRow,
     renderApp: renderApp,
+    buildVaultSnapshot: buildVaultSnapshot,
+    buildVaultTitle: buildVaultTitle,
   };
 
   document.addEventListener("click", function (e) {

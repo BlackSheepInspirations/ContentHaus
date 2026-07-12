@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Graphics Haus — Local Dev Preview</title>
+<link rel="stylesheet" href="../assets/graphics-haus.css" id="gh-css-link" />
+</head>
+<body>
+<!-- Dev-only harness: mirrors what sections/graphics-haus.liquid mounts,
+     so we can preview in a plain browser before Shopify CLI is set up.
+     Not part of the shipped theme. -->
+<div class="gh-brand-header">
+  <div class="gh-marketing__hero">
+    <p class="gh-marketing__eyebrow">Black Sheep Creations &amp; Inspirations</p>
+    <h1 class="gh-marketing__heading">The <span class="gh-heading-accent">AI</span> Creator's Graphics Haus</h1>
+    <div class="gh-marketing__subheading">Build the clipart, characters, and printable graphics your shop sells — clean, on-theme, and consistent across every set.</div>
+  </div>
+</div>
+<div id="graphics-haus-app"></div>
+<script>
+  // Cache-bust on every load during local dev so edited asset files are
+  // always picked up without a manual hard-refresh.
+  var v = Date.now();
+  document.getElementById("gh-css-link").href = "../assets/graphics-haus.css?v=" + v;
+  [
+    "../assets/graphics-haus-util.js",
+    "../assets/graphics-haus-engine.js",
+    "../assets/graphics-haus-favorites.js",
+    "../assets/graphics-haus-styledna.js",
+    "../assets/graphics-haus-brandkit.js",
+    "../assets/graphics-haus-looklock.js",
+    "../assets/graphics-haus-mascotlock.js",
+    "../assets/graphics-haus-generators.js",
+    "../assets/graphics-haus-generators-clipartpack.js",
+    "../assets/graphics-haus-generators-seasonalanimal.js",
+    "../assets/graphics-haus-generators-fauxtextile.js",
+    "../assets/graphics-haus-generators-retroicon.js",
+    "../assets/graphics-haus-generators-licenseplate.js",
+    "../assets/graphics-haus-generators-mascot.js",
+    "../assets/graphics-haus-ui.js",
+  ].forEach(function (src) {
+    document.write('<script src="' + src + '?v=' + v + '"></' + 'script>');
+  });
+</script>
+</body>
+</html>

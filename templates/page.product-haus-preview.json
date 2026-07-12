@@ -1,0 +1,39 @@
+{
+  "sections": {
+    "main": {
+      "type": "product-haus-preview",
+      "blocks": {
+        "feature_1": {
+          "type": "feature",
+          "settings": {
+            "title": "Invitations & Stationery Studio",
+            "description": "Invitations, greeting cards, and stationery designed around your brand — ready to sell as their own digital product."
+          }
+        },
+        "feature_2": {
+          "type": "feature",
+          "settings": {
+            "title": "Devotional & Motivation Card Studio",
+            "description": "Devotional and motivational cards with the tone and look your audience already knows."
+          }
+        },
+        "feature_3": {
+          "type": "feature",
+          "settings": {
+            "title": "Brand Kit",
+            "description": "Set your colors, fonts, mood, and voice once — every studio picks it up automatically."
+          }
+        },
+        "feature_4": {
+          "type": "feature",
+          "settings": {
+            "title": "Save your favorites",
+            "description": "Keep up to 5 saved prompts per studio, ready to copy anytime."
+          }
+        }
+      },
+      "block_order": ["feature_1", "feature_2", "feature_3", "feature_4"]
+    }
+  },
+  "order": ["main"]
+}
