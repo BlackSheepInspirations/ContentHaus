@@ -6,6 +6,10 @@
 {% endcomment %}
 
 {{ 'brand-haus.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'brand-haus-util.js' | asset_url }}" defer="defer"></script>
+<script src="{{ 'brand-haus-branddna.js' | asset_url }}" defer="defer"></script>
+<script src="{{ 'brand-haus-wheel.js' | asset_url }}" defer="defer"></script>
+<script src="{{ 'brand-haus-ui.js' | asset_url }}" defer="defer"></script>
 
 <div class="bh-marketing">
   <div class="bh-marketing__hero">
@@ -35,6 +39,20 @@
       <div class="bh-marketing__video-placeholder">Demo video coming soon</div>
     {% endif %}
   </div>
+
+  <div class="bh-marketing__wheel-section">
+    <p class="bh-marketing__wheel-eyebrow">The Brand DNA Archetype Wheel</p>
+    <h2 class="bh-marketing__wheel-heading">Every founder lands on one of 11 profiles</h2>
+    <div id="bh-marketing-wheel"></div>
+  </div>
+  <script defer="defer">
+    document.addEventListener("DOMContentLoaded", function () {
+      var container = document.getElementById("bh-marketing-wheel");
+      if (container && window.BrandHaus && window.BrandHaus.wheel) {
+        window.BrandHaus.wheel.render(window.BrandHaus.ui, container, { personalized: false });
+      }
+    });
+  </script>
 
   <div class="bh-marketing__features">
     {% for block in section.blocks %}

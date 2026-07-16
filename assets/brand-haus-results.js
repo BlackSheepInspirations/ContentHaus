@@ -182,7 +182,13 @@
       ]));
     }
 
-    return ui.el("section", { class: "bh-chapter bh-chapter--hero" }, [heroTop, scoreRow]);
+    var wheelChildren = [heroTop, scoreRow];
+    if (BrandHaus.wheel) {
+      var wheelContainer = ui.el("div", {});
+      BrandHaus.wheel.render(ui, wheelContainer, { personalized: true, results: results });
+      wheelChildren.push(wheelContainer);
+    }
+    return ui.el("section", { class: "bh-chapter bh-chapter--hero" }, wheelChildren);
   }
 
   // ---------------------------------------------------------------------

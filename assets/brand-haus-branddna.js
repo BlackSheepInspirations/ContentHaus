@@ -619,7 +619,8 @@
         idealCustomer: "People who've been burned by hype before and are looking for someone who tells them the truth, even when it's not the easy answer.",
         strengths: ["You build trust faster than most brands earn it in years.", "You make people feel safe enough to ask for help.", "You keep showing up long after the sale is made."],
         blindSpots: ["You can undersell yourself to avoid seeming pushy.", "You may avoid bold moves that risk the relationships you've built."],
-        nextSteps: ["You should write down the one promise you never break — it belongs on your About page.", "You can turn your best client story into a testimonial that leads with trust, not results.", "You'll want a simple way for people to reach you directly — accessibility is part of your brand."] } },
+        nextSteps: ["You should write down the one promise you never break — it belongs on your About page.", "You can turn your best client story into a testimonial that leads with trust, not results.", "You'll want a simple way for people to reach you directly — accessibility is part of your brand."],
+        bestFor: ["Coaches & Consultants", "Healthcare & Wellness Practitioners", "Financial & Advisory Services", "Nonprofits & Community Services"] } },
     { name: "The Bold Pioneer", vector: { warmthAuthority: 0, freedomPurpose: 2.5, traditionInnovation: 2.5, communityRecognition: 0, structureExpression: 2.5, calmEnergy: 2.5, accessibilityLuxury: 0, playfulnessSophistication: 0 },
       output: { mood: "bold and vibrant", voice: "confident and bold", colors: { primary: "#1A1815", secondary: "#D6336C", neutral: "#F2F0EB", accent: "#FFB703", support: "#6B6860", standOut: "#3A86FF" }, headingFont: "Bebas Neue", bodyFont: "Inter", values: ["Courage", "Innovation", "Impact"], influenceBlurb: "Adds courage, momentum, and a push toward what's next.",
         northStar: "To prove the old way wasn't the only way.",
@@ -627,7 +628,8 @@
         idealCustomer: "People who are tired of playing it safe and want a brand that moves as fast as their ambition.",
         strengths: ["You turn ideas into momentum faster than most people can plan.", "You're not afraid to be the first — or the only — one doing it this way.", "You inspire people to take risks alongside you."],
         blindSpots: ["You can move faster than the people around you can follow.", "You may skip the quiet groundwork that makes bold moves last."],
-        nextSteps: ["You should name the status quo you're pushing against — it's the sharpest hook in your story.", "You can turn your boldest decision to date into your founding story.", "You'll want one steady, unglamorous system running in the background so your speed doesn't outpace your delivery."] } },
+        nextSteps: ["You should name the status quo you're pushing against — it's the sharpest hook in your story.", "You can turn your boldest decision to date into your founding story.", "You'll want one steady, unglamorous system running in the background so your speed doesn't outpace your delivery."],
+        bestFor: ["Tech Startups & SaaS", "Disruptive Consumer Products", "Innovation Consultancies", "Venture-Backed Brands"] } },
     { name: "The Cozy Craftsman", vector: { warmthAuthority: -2.5, freedomPurpose: 0, traditionInnovation: -2.5, communityRecognition: -2.5, structureExpression: 0, calmEnergy: -2.5, accessibilityLuxury: -2.5, playfulnessSophistication: 0 },
       output: { mood: "warm and cozy", voice: "warm and approachable", colors: { primary: "#8B5E3C", secondary: "#4A5D45", neutral: "#F5F0E6", accent: "#C9A84C", support: "#2E2A26", standOut: "#B33A2E" }, headingFont: "Playfair Display", bodyFont: "Georgia", values: ["Craftsmanship", "Family", "Comfort"], influenceBlurb: "Brings patience, care, and an eye for lasting quality.",
         northStar: "To make things worth keeping, the slow way.",
@@ -635,7 +637,8 @@
         idealCustomer: "People who've stopped buying things that don't last and want to know the story behind what they own.",
         strengths: ["You put more care into the details than anyone asks you to.", "You make people feel like they're part of something handmade and honest.", "You build loyalty through consistency, not hype."],
         blindSpots: ["You can undercharge for the time your craft actually takes.", "You may resist growth that feels like it would compromise your process."],
-        nextSteps: ["You should document your process — people buy the story as much as the object.", "You can name the tradition or technique you're rooted in and say so proudly.", "You'll want to protect your pricing as demand grows, not just your process."] } },
+        nextSteps: ["You should document your process — people buy the story as much as the object.", "You can name the tradition or technique you're rooted in and say so proudly.", "You'll want to protect your pricing as demand grows, not just your process."],
+        bestFor: ["Handmade Goods & Artisans", "Home & Furniture", "Food & Beverage Makers", "Heirloom & Legacy Businesses"] } },
     { name: "The Elevated Icon", vector: { warmthAuthority: 2.5, freedomPurpose: 0, traditionInnovation: -2.5, communityRecognition: 2.5, structureExpression: -2.5, calmEnergy: 0, accessibilityLuxury: 2.5, playfulnessSophistication: 2.5 },
       output: { mood: "elegant and luxurious", voice: "sophisticated and refined", colors: { primary: "#1A1815", secondary: "#C9A84C", neutral: "#FAF6EF", accent: "#8B5E3C", support: "#6B6860", standOut: "#0E6E4E" }, headingFont: "Playfair Display", bodyFont: "Lora", values: ["Excellence", "Craftsmanship", "Legacy"], influenceBlurb: "Adds polish, standards, and a taste for the exceptional.",
         northStar: "To set the standard everyone else measures against.",
@@ -643,7 +646,8 @@
         idealCustomer: "People who've outgrown \"good enough\" and are willing to pay for the difference between that and exceptional.",
         strengths: ["You hold a standard of quality that's genuinely rare.", "You make refinement feel earned, not performed.", "You build a brand people aspire to, not just buy from."],
         blindSpots: ["You can come across as unreachable if warmth isn't deliberate.", "You may over-polish something that would land harder left a little rough."],
-        nextSteps: ["You should define what \"excellence\" means in your own words — not the industry's.", "You can show the craftsmanship behind the polish, not just the finished result.", "You'll want at least one warm, human touchpoint so refined doesn't read as cold."] } },
+        nextSteps: ["You should define what \"excellence\" means in your own words — not the industry's.", "You can show the craftsmanship behind the polish, not just the finished result.", "You'll want at least one warm, human touchpoint so refined doesn't read as cold."],
+        bestFor: ["Luxury Goods & Fashion", "High-End Design Services", "Fine Dining & Hospitality", "Premium Real Estate"] } },
     { name: "The Free Spirit", vector: { warmthAuthority: 0, freedomPurpose: -2.5, traditionInnovation: 0, communityRecognition: 0, structureExpression: 2.5, calmEnergy: 1.5, accessibilityLuxury: -2.5, playfulnessSophistication: -2.5 },
       output: { mood: "boho and eclectic", voice: "playful and quirky", colors: { primary: "#E07A5F", secondary: "#3D405B", neutral: "#F2CC8F", accent: "#6B8E7F", support: "#F5F0E6", standOut: "#2EC4B6" }, headingFont: "Pacifico", bodyFont: "Poppins", values: ["Freedom", "Creativity", "Authenticity"], influenceBlurb: "Adds creativity, freedom, and a sense of adventure.",
         northStar: "To build a life and brand that both feel like mine.",
@@ -651,7 +655,8 @@
         idealCustomer: "People who are done performing for an algorithm and want permission to be exactly who they are.",
         strengths: ["You make authenticity feel like the whole point, not a marketing angle.", "You attract people who are relieved to finally feel understood.", "You turn constraints into creative fuel instead of obstacles."],
         blindSpots: ["You can lose structure that would actually help ideas land.", "You may resist the repetition that turns a good idea into a recognizable brand."],
-        nextSteps: ["You should pick 2-3 visual anchors and repeat them on purpose — freedom still needs a signature.", "You can turn your most \"you\" moment into the story new customers hear first.", "You'll want one simple system for follow-through so your creativity has somewhere to land."] } },
+        nextSteps: ["You should pick 2-3 visual anchors and repeat them on purpose — freedom still needs a signature.", "You can turn your most \"you\" moment into the story new customers hear first.", "You'll want one simple system for follow-through so your creativity has somewhere to land."],
+        bestFor: ["Independent Artists & Makers", "Bohemian & Lifestyle Brands", "Travel & Experience Businesses", "Creative Coaching"] } },
     { name: "The Joyful Connector", vector: { warmthAuthority: -2.5, freedomPurpose: 0, traditionInnovation: 0, communityRecognition: -2.5, structureExpression: 1.5, calmEnergy: 2.5, accessibilityLuxury: -2.5, playfulnessSophistication: -2.5 },
       output: { mood: "playful and fun", voice: "playful and quirky", colors: { primary: "#FFB703", secondary: "#219EBC", neutral: "#F5F0E6", accent: "#FB8500", support: "#3D405B", standOut: "#FF3D7F" }, headingFont: "Pacifico", bodyFont: "Poppins", values: ["Joy", "Community", "Connection"], influenceBlurb: "Brings warmth, energy, and an instinct for belonging.",
         northStar: "To make people feel like they belong here.",
@@ -659,7 +664,8 @@
         idealCustomer: "People looking for a brand that feels like a friend, not a transaction.",
         strengths: ["You make people feel instantly welcome.", "You turn customers into a community without even trying that hard.", "You bring energy that's genuinely hard to fake."],
         blindSpots: ["You can avoid the harder conversations that keep a community healthy.", "You may prioritize being liked over being clear."],
-        nextSteps: ["You should name the feeling you want people to leave with, every time — build everything around it.", "You can create one recurring moment (a ritual, a shoutout, a tradition) that makes your community feel like a community.", "You'll want a plain-spoken way to say what you stand for, not just how you feel."] } },
+        nextSteps: ["You should name the feeling you want people to leave with, every time — build everything around it.", "You can create one recurring moment (a ritual, a shoutout, a tradition) that makes your community feel like a community.", "You'll want a plain-spoken way to say what you stand for, not just how you feel."],
+        bestFor: ["Events & Parties", "Social-First Brands", "Kids & Family Products", "Community-Driven Subscription Boxes"] } },
     { name: "The Quiet Authority", vector: { warmthAuthority: 2.5, freedomPurpose: 2.5, traditionInnovation: -2.5, communityRecognition: 0, structureExpression: -2.5, calmEnergy: -2.5, accessibilityLuxury: 0, playfulnessSophistication: 2.5 },
       output: { mood: "professional and polished", voice: "authoritative and expert", colors: { primary: "#1A1815", secondary: "#2E3A46", neutral: "#F2F0EB", accent: "#C9A84C", support: "#6B6860", standOut: "#7A1230" }, headingFont: "Merriweather", bodyFont: "Inter", values: ["Trust", "Excellence", "Integrity"], influenceBlurb: "Adds calm, credibility, and quiet confidence.",
         northStar: "To be trusted because the results speak first.",
@@ -667,7 +673,8 @@
         idealCustomer: "People who've had enough of flashy promises and want someone who simply delivers.",
         strengths: ["You let your work do the convincing.", "You bring calm to situations that would rattle most people.", "You earn trust through competence, not charisma."],
         blindSpots: ["You can be overlooked by people who equate quiet with unsure.", "You may under-share the expertise that would make your case for you."],
-        nextSteps: ["You should say the quiet part out loud — your credentials and results belong somewhere visible.", "You can turn your calmest, most composed moment under pressure into a story that shows your authority.", "You'll want a simple way to show proof (before/after, testimonials, results) since you won't be the one shouting about it."] } },
+        nextSteps: ["You should say the quiet part out loud — your credentials and results belong somewhere visible.", "You can turn your calmest, most composed moment under pressure into a story that shows your authority.", "You'll want a simple way to show proof (before/after, testimonials, results) since you won't be the one shouting about it."],
+        bestFor: ["Legal & Professional Services", "B2B Consulting", "Finance & Accounting", "Executive & Technical Experts"] } },
     { name: "The Modern Minimalist", vector: { warmthAuthority: 0, freedomPurpose: 0, traditionInnovation: 2.5, communityRecognition: 0, structureExpression: -2.5, calmEnergy: -2.5, accessibilityLuxury: 0, playfulnessSophistication: 2.5 },
       output: { mood: "minimalist and clean", voice: "confident and bold", colors: { primary: "#1A1815", secondary: "#FFFFFF", neutral: "#6B6860", accent: "#0D7377", support: "#B4B2A9", standOut: "#FF5A36" }, headingFont: "Montserrat", bodyFont: "Inter", values: ["Clarity", "Quality", "Simplicity"], influenceBlurb: "Brings clarity, restraint, and an eye for what matters.",
         northStar: "To make room for what actually matters.",
@@ -675,7 +682,8 @@
         idealCustomer: "People overwhelmed by too many options who want one clear, well-made choice.",
         strengths: ["You make simplicity feel intentional, not empty.", "You build things that age well because you didn't chase trends.", "You give people permission to want less, better."],
         blindSpots: ["You can read as cold if warmth isn't built in on purpose.", "You may cut things that were actually adding meaning, not just noise."],
-        nextSteps: ["You should decide what stays even when you're editing down — that's your real brand voice.", "You can add one unexpected warm detail so minimal doesn't read as impersonal.", "You'll want to explain your \"why\" since a clean look alone won't tell your whole story."] } },
+        nextSteps: ["You should decide what stays even when you're editing down — that's your real brand voice.", "You can add one unexpected warm detail so minimal doesn't read as impersonal.", "You'll want to explain your \"why\" since a clean look alone won't tell your whole story."],
+        bestFor: ["Architecture & Interior Design", "Tech Products & Apps", "Modern Retail & DTC Goods", "Editorial & Publishing"] } },
     { name: "The Community Builder", vector: { warmthAuthority: -2.5, freedomPurpose: 2.5, traditionInnovation: 0, communityRecognition: -2.5, structureExpression: 0, calmEnergy: 0, accessibilityLuxury: -2.5, playfulnessSophistication: 0 },
       output: { mood: "warm and cozy", voice: "warm and approachable", colors: { primary: "#C97C5D", secondary: "#8B5E3C", neutral: "#F5F0E6", accent: "#6B8E7F", support: "#4A5D45", standOut: "#E8A33D" }, headingFont: "Lora", bodyFont: "Open Sans", values: ["Belonging", "Purpose", "Generosity"], influenceBlurb: "Adds generosity, connection, and a sense of togetherness.",
         northStar: "To make sure no one builds this alone.",
@@ -683,7 +691,8 @@
         idealCustomer: "People looking for belonging as much as a product or service.",
         strengths: ["You make people feel like they matter individually, not just as customers.", "You turn a customer base into an actual community.", "You lead with generosity people can feel."],
         blindSpots: ["You can say yes to everyone and dilute what makes your community special.", "You may avoid boundaries that would protect your time and energy."],
-        nextSteps: ["You should name who this community is actually for — belonging still needs an edge.", "You can create a simple way for members to connect with each other, not just with you.", "You'll want one clear boundary you're willing to hold, even when it's uncomfortable."] } },
+        nextSteps: ["You should name who this community is actually for — belonging still needs an edge.", "You can create a simple way for members to connect with each other, not just with you.", "You'll want one clear boundary you're willing to hold, even when it's uncomfortable."],
+        bestFor: ["Membership & Community Platforms", "Local & Neighborhood Businesses", "Faith-Based & Mission-Driven Orgs", "Education & Mentorship Networks"] } },
     { name: "The Luxe Rebel", vector: { warmthAuthority: 0, freedomPurpose: -2.5, traditionInnovation: 2.5, communityRecognition: 2.5, structureExpression: 2.5, calmEnergy: 2.5, accessibilityLuxury: 2.5, playfulnessSophistication: 0 },
       output: { mood: "bold and vibrant", voice: "confident and bold", colors: { primary: "#1A1815", secondary: "#D6336C", neutral: "#C9A84C", accent: "#6B6860", support: "#F2F0EB", standOut: "#7B2CBF" }, headingFont: "Oswald", bodyFont: "Montserrat", values: ["Individuality", "Boldness", "Excellence"], influenceBlurb: "Brings boldness, individuality, and unapologetic style.",
         northStar: "To prove you can break the rules and still be the standard.",
@@ -691,7 +700,8 @@
         idealCustomer: "People who want luxury on their own terms, not the industry's.",
         strengths: ["You make boldness look effortless.", "You turn \"too much\" into your signature instead of a liability.", "You attract people who want permission to want more."],
         blindSpots: ["You can alienate people who need more reassurance before they trust the bold.", "You may chase novelty at the expense of consistency."],
-        nextSteps: ["You should decide which rules you're breaking on purpose, so it reads as intentional, not chaotic.", "You can build one consistent signature (a color, a phrase, a shape) that survives every reinvention.", "You'll want a moment of genuine substance behind the bold statement so it doesn't read as style alone."] } },
+        nextSteps: ["You should decide which rules you're breaking on purpose, so it reads as intentional, not chaotic.", "You can build one consistent signature (a color, a phrase, a shape) that survives every reinvention.", "You'll want a moment of genuine substance behind the bold statement so it doesn't read as style alone."],
+        bestFor: ["Fashion & Streetwear", "Beauty & Personal Style", "Music & Entertainment", "Nightlife & Experiential Brands"] } },
     // Added to cover Aaker's Ruggedness trait — none of the original 10
     // profiles read as tough/outdoorsy/self-reliant (see docs/brand-dna-
     // framework.md's framework-alignment note). Deliberately warm-
@@ -706,8 +716,57 @@
         idealCustomer: "People who don't trust anything until it's been tested by the elements — and expect their gear, not their marketing, to do the talking.",
         strengths: ["You build trust through durability, not promises.", "You attract people who value substance over polish.", "You stay steady when trends come and go."],
         blindSpots: ["You can undersell the craftsmanship behind what you build.", "You may resist the marketing polish that would help the right people find you."],
-        nextSteps: ["You should show the wear-testing, not just the finished product — proof matters more than promises here.", "You can turn your toughest field story into your founding story.", "You'll want at least one moment of warmth in your brand so rugged doesn't read as unapproachable."] } },
+        nextSteps: ["You should show the wear-testing, not just the finished product — proof matters more than promises here.", "You can turn your toughest field story into your founding story.", "You'll want at least one moment of warmth in your brand so rugged doesn't read as unapproachable."],
+        bestFor: ["Outdoor Gear & Apparel", "Trades & Craftsmen Services", "Automotive & Tools", "Survival & Off-Grid Living"] } },
   ];
+
+  // The Brand DNA Archetype Wheel's fixed display order — a deliberate
+  // emotional arc (connection -> independence -> mastery) rather than the
+  // PROFILES array's definition order, so a viewer reads the wheel as a
+  // progression instead of 11 unrelated slices. One central list shared by
+  // every consumer (marketing page, in-app, exports) so they can't drift
+  // out of sync with each other.
+  var WHEEL_ORDER = [
+    "The Trusted Guide", "The Community Builder", "The Joyful Connector",
+    "The Free Spirit", "The Luxe Rebel", "The Trail Forger",
+    "The Bold Pioneer", "The Cozy Craftsman", "The Elevated Icon",
+    "The Quiet Authority", "The Modern Minimalist",
+  ];
+
+  // The wheel's one-word tag per profile — distinct from `values[0]`
+  // (which duplicates across profiles, e.g. Trusted Guide and Quiet
+  // Authority both lead with "Trust") since a wheel of 11 supposedly-
+  // unique words can't repeat one. Each word is drawn from that profile's
+  // own shipped copy (mostly `values`, "Grit"/"Credibility"/"Clarity"
+  // paraphrased from its `influenceBlurb`), not invented from scratch.
+  var WHEEL_WORDS = {
+    "The Trusted Guide": "Trust",
+    "The Community Builder": "Belonging",
+    "The Joyful Connector": "Joy",
+    "The Free Spirit": "Freedom",
+    "The Luxe Rebel": "Boldness",
+    "The Trail Forger": "Grit",
+    "The Bold Pioneer": "Courage",
+    "The Cozy Craftsman": "Craft",
+    "The Elevated Icon": "Excellence",
+    "The Quiet Authority": "Credibility",
+    "The Modern Minimalist": "Clarity",
+  };
+
+  // Nearest other profiles by real 8D tension-vector distance — same
+  // distance() math a founder's own answers are matched against below,
+  // just profile-to-profile instead of answers-to-profile. Used by the
+  // Wheel to softly illuminate "closest cousins" on selection instead of
+  // hand-picking pairings that could drift from the actual scoring model.
+  function profileCousins(profileName, count) {
+    var target = PROFILES.filter(function (p) { return p.name === profileName; })[0];
+    if (!target) return [];
+    return PROFILES.filter(function (p) { return p.name !== profileName; })
+      .map(function (p) { return { profile: p, distance: distance(target.vector, p.vector) }; })
+      .sort(function (a, b) { return a.distance - b.distance; })
+      .slice(0, count || 2)
+      .map(function (e) { return e.profile; });
+  }
 
   // ---------------------------------------------------------------------
   // Scoring
@@ -852,7 +911,11 @@
     var dist1 = ranked[0].distance;
     var dist2 = ranked[1] ? ranked[1].distance : dist1;
     var marginRatio = dist2 > 0 ? Math.max(0, (dist2 - dist1) / dist2) : 0;
-    return { confidencePct: shares[0].sharePct, influences: influences, alignmentPct: marginToAlignmentPct(marginRatio) };
+    // shares covers all 11 (ranked already is all 11, sorted by distance),
+    // not just the top-2 `influences` — the Wheel's static export view uses
+    // the full list to annotate every profile with a real percentage,
+    // rather than showing a number nowhere or fabricating one.
+    return { confidencePct: shares[0].sharePct, influences: influences, alignmentPct: marginToAlignmentPct(marginRatio), shares: shares };
   }
 
   // ---------------------------------------------------------------------
@@ -1019,6 +1082,9 @@
     QUESTIONS: QUESTIONS,
     FOUNDER_DNA_LIBRARY: FOUNDER_DNA_LIBRARY,
     PROFILES: PROFILES,
+    WHEEL_ORDER: WHEEL_ORDER,
+    WHEEL_WORDS: WHEEL_WORDS,
+    profileCousins: profileCousins,
     scoreAnswers: scoreAnswers,
     matchProfile: matchProfile,
     computeConfidence: computeConfidence,

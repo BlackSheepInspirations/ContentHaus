@@ -378,6 +378,16 @@
         ".bh-print-wrap .bh-btn,.bh-print-wrap button:not(.bh-font-pairing-row){display:none!important;}" +
         ".bh-print-wrap .bh-font-pairing-row{cursor:default;}" +
         ".bh-print-wrap .bh-font-pairing-row__chevron{display:none;}" +
+        // The Archetype Wheel's percentages only mean something next to a
+        // real founder's real completed assessment — never in the generic
+        // in-app/marketing browse-all-11 view. Both `.bh-wheel__score` and
+        // `.bh-wheel__ring-wrap` are always in the DOM (computed from real
+        // data) but hidden by default; this is the one place they surface.
+        // display:unset (not a hardcoded value) since these hide/reveal
+        // both SVG text (wants inline) and HTML <p>/<div> elements (wants
+        // block) with one rule — unset restores each element's own
+        // natural default rendering instead of forcing one value on both.
+        ".bh-print-wrap .bh-wheel__score,.bh-print-wrap .bh-wheel__ring-wrap{display:unset;}" +
         "@media print{body{padding:0.3in;}}" +
         (isEpicCover ? buildEpicCoverCss(profile) : "") +
       "</style></head><body>" +
@@ -526,6 +536,17 @@
     bulb: '<path d="M7 15h6M8 17.5h4"/><path d="M10 2.5c-3 0-5 2.2-5 5 0 2 1.1 3.3 2 4.2.5.5.8 1 .9 1.8h4.2c.1-.8.4-1.3.9-1.8.9-.9 2-2.2 2-4.2 0-2.8-2-5-5-5Z"/>',
     mail: '<rect x="2.5" y="4.5" width="15" height="11" rx="1.3"/><path d="M3 5.5 10 11l7-5.5"/>',
     chevron: '<path d="M5 7.5 10 12.5 15 7.5"/>',
+    // Added for the Brand DNA Archetype Wheel — one glyph per profile,
+    // reusing heart/people/droplet above where they already fit rather
+    // than adding near-duplicates.
+    lantern: '<path d="M10 2v2M7.5 4h5l1 3H6.5l1-3Z"/><rect x="6.5" y="7" width="7" height="8" rx="1.5"/><path d="M8.5 18h3M10 10.5v4"/>',
+    compass: '<circle cx="10" cy="10" r="7.5"/><path d="M13 7 8.5 8.5 7 13l4.5-1.5L13 7Z"/>',
+    anvil: '<path d="M4 14h12M5.5 14v2.5h9V14"/><path d="M6.5 14l1-3.5h5l1 3.5"/><rect x="9" y="4" width="2" height="6.5" rx=".8"/>',
+    trophy: '<path d="M7 3h6v5a3 3 0 0 1-6 0V3Z"/><path d="M7 4H4.5v1.5A2.5 2.5 0 0 0 7 8M13 4h2.5v1.5A2.5 2.5 0 0 1 13 8"/><path d="M10 11v3M7.5 17h5M8 14h4l.5 3h-5l.5-3Z"/>',
+    feather: '<path d="M14 3 5 12a4 4 0 0 0 0 5.5 4 4 0 0 0 5.5 0L19 8"/><path d="M8 15l2-2M6.5 13.5l2-2"/>',
+    crown: '<path d="M3.5 15.5 3 7l4 3 3-5 3 5 4-3-.5 8.5Z"/><path d="M3.5 15.5h13"/>',
+    gem: '<path d="M5 8 10 3l5 5-5 9-5-9Z"/><path d="M5 8h10M7.5 8 10 3l2.5 5M7.5 8 10 17M12.5 8 10 17"/>',
+    peak: '<path d="M2 16 8 6l3 4 2-3 5 9H2Z"/><path d="M13 3v4l2.5-1L13 5"/>',
   };
 
   var TITLE_ICONS = {

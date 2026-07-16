@@ -1939,6 +1939,25 @@
 /* <br> has no box to apply margin to directly — display:block gives it
    one, so the second line ("Powered by...") reads as its own spaced-out
    row instead of crowding the sentence above it. */
+.bh-marketing__wheel-section {
+  max-width: 1040px;
+  margin: 8px auto 32px;
+  padding: 0 24px;
+  text-align: center;
+}
+.bh-marketing__wheel-eyebrow {
+  color: var(--bh-gold-on-light);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 13px;
+  font-weight: 700;
+  margin: 0 0 8px;
+}
+.bh-marketing__wheel-heading {
+  color: var(--bh-black);
+  font-size: 26px;
+  margin: 0 0 20px;
+}
 .bh-marketing__subheading br {
   display: block;
   margin-top: 10px;
@@ -3367,4 +3386,387 @@
   color: var(--bh-charcoal);
   opacity: 0.65;
   margin: 0 0 24px;
+}
+
+/* -------------------------------------------------------------------- */
+/* Brand DNA Archetype Wheel — a deliberate dark "premium instrument"
+   panel, distinct from the light chapter cards around it (matches the
+   approved reference design rather than the app's usual light theme).
+   Score/percentage elements (.bh-wheel__score) are hidden here and only
+   revealed inside the print window's own stylesheet (see
+   printStyledSection in brand-haus-ui.js) — a % only means something
+   next to one specific founder's real completed assessment. */
+/* -------------------------------------------------------------------- */
+.bh-wheel {
+  background: var(--bh-black);
+  border-radius: 16px;
+  padding: 40px 36px 32px;
+  color: #F2F0EB;
+  font-family: inherit;
+  margin: 24px 0;
+}
+.bh-wheel__top {
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  gap: 32px;
+  align-items: start;
+}
+.bh-wheel__stage {
+  display: flex;
+  justify-content: center;
+}
+.bh-wheel__svg {
+  width: 100%;
+  max-width: 520px;
+  height: auto;
+  overflow: visible;
+}
+.bh-wheel__wedge {
+  cursor: pointer;
+  transition: filter 200ms ease, opacity 200ms ease, transform 200ms ease;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.bh-wheel__wedge.is-selected {
+  filter: brightness(1.35) saturate(1.4);
+  transform: scale(1.035);
+}
+.bh-wheel__wedge.is-cousin {
+  filter: brightness(1.12);
+}
+.bh-wheel__wedge.is-dimmed {
+  opacity: 0.32;
+}
+.bh-wheel__icon-badge {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(26, 24, 21, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+.bh-wheel__icon-badge .bh-icon {
+  width: 22px;
+  height: 22px;
+  color: #F2F0EB;
+}
+.bh-wheel__num-circle {
+  fill: #F2F0EB;
+  stroke: none;
+}
+.bh-wheel__num-text {
+  font-size: 11px;
+  font-weight: 700;
+  fill: var(--bh-black);
+}
+.bh-wheel__label-name {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 14px;
+  font-weight: 600;
+  fill: #F2F0EB;
+}
+.bh-wheel__label-word {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+.bh-wheel__label-score {
+  font-size: 10.5px;
+  font-weight: 700;
+  fill: rgba(242, 240, 235, 0.6);
+  font-variant-numeric: tabular-nums;
+}
+.bh-wheel__hub {
+  fill: var(--bh-black);
+  stroke: var(--bh-teal);
+  stroke-width: 2;
+}
+.bh-wheel__hub-sub {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  fill: var(--bh-gold);
+}
+.bh-wheel__hub-title {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 17px;
+  font-weight: 600;
+  fill: #F2F0EB;
+}
+.bh-wheel__hub-hint {
+  font-size: 10px;
+  fill: rgba(242, 240, 235, 0.55);
+}
+
+/* Detail panel */
+.bh-wheel__detail {
+  background: rgba(242, 240, 235, 0.04);
+  border: 1px solid rgba(242, 240, 235, 0.12);
+  border-radius: 14px;
+  padding: 26px 28px;
+}
+.bh-wheel__detail-head {
+  position: relative;
+  padding-right: 96px;
+}
+.bh-wheel__pill {
+  display: inline-block;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  padding: 4px 10px;
+  border-radius: 100px;
+  border: 1px solid rgba(242, 240, 235, 0.3);
+  color: rgba(242, 240, 235, 0.85);
+  margin-bottom: 10px;
+}
+.bh-wheel__pill--match {
+  background: var(--bh-teal);
+  border-color: var(--bh-teal);
+  color: #fff;
+}
+.bh-wheel__name {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 26px;
+  font-weight: 600;
+  margin: 0 0 4px;
+  color: #fff;
+}
+.bh-wheel__word {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin: 0 0 12px;
+}
+.bh-wheel__blurb {
+  font-size: 14px;
+  line-height: 1.55;
+  color: rgba(242, 240, 235, 0.75);
+  margin: 0;
+  max-width: 46ch;
+}
+.bh-wheel__rule {
+  border: none;
+  border-top: 1px solid rgba(242, 240, 235, 0.12);
+  margin: 20px 0;
+}
+.bh-wheel__info-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  margin-bottom: 20px;
+}
+.bh-wheel__info-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(242, 240, 235, 0.55);
+  margin: 0 0 10px;
+}
+.bh-wheel__strengths, .bh-wheel__bestfor {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.bh-wheel__strengths li, .bh-wheel__bestfor li {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: rgba(242, 240, 235, 0.85);
+}
+.bh-wheel__check {
+  width: 13px;
+  height: 13px;
+  flex: none;
+  margin-top: 2px;
+  transform: rotate(90deg);
+  color: var(--bh-teal);
+}
+.bh-wheel__voice-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.bh-wheel__voice-tag {
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 100px;
+  border: 1px solid rgba(242, 240, 235, 0.25);
+  color: rgba(242, 240, 235, 0.85);
+}
+.bh-wheel__callout-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.bh-wheel__callout {
+  background: rgba(242, 240, 235, 0.04);
+  border: 1px solid rgba(242, 240, 235, 0.1);
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+.bh-wheel__callout-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--bh-gold);
+  margin: 0 0 6px;
+}
+.bh-wheel__callout-body {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: rgba(242, 240, 235, 0.8);
+  margin: 0;
+}
+.bh-wheel__callout--quote {
+  display: flex;
+  align-items: center;
+}
+.bh-wheel__quote {
+  font-size: 13px;
+  font-style: italic;
+  line-height: 1.5;
+  color: rgba(242, 240, 235, 0.85);
+  margin: 0;
+}
+
+/* Alignment ring — print-export only, see .bh-wheel__score below */
+.bh-wheel__ring-wrap {
+  position: absolute;
+  top: 0;
+  right: 0;
+  text-align: center;
+}
+.bh-wheel__ring-track {
+  fill: none;
+  stroke: rgba(242, 240, 235, 0.15);
+  stroke-width: 7;
+}
+.bh-wheel__ring-progress {
+  fill: none;
+  stroke: var(--bh-teal);
+  stroke-width: 7;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 400ms ease;
+}
+.bh-wheel__ring-label {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.bh-wheel__ring-pct {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--bh-teal);
+  font-variant-numeric: tabular-nums;
+}
+.bh-wheel__ring-caption {
+  font-size: 8px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(242, 240, 235, 0.55);
+}
+
+/* Cards row */
+.bh-wheel__hint {
+  text-align: center;
+  font-size: 12.5px;
+  color: rgba(242, 240, 235, 0.55);
+  margin: 22px 0 6px;
+}
+.bh-wheel__cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+.bh-wheel__card {
+  background: rgba(242, 240, 235, 0.04);
+  border: 1px solid rgba(242, 240, 235, 0.1);
+  border-top: 3px solid var(--card-color, var(--bh-teal));
+  border-radius: 10px;
+  padding: 14px 10px;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 160ms ease, background 160ms ease, opacity 200ms ease;
+  font-family: inherit;
+}
+.bh-wheel__card:hover {
+  transform: translateY(-3px);
+  background: rgba(242, 240, 235, 0.08);
+}
+.bh-wheel__card.is-selected {
+  background: rgba(242, 240, 235, 0.1);
+  box-shadow: 0 0 0 1px var(--card-color, var(--bh-teal)) inset;
+}
+.bh-wheel__card.is-dimmed {
+  opacity: 0.4;
+}
+.bh-wheel__card-icon {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+.bh-wheel__card-icon .bh-icon {
+  width: 20px;
+  height: 20px;
+  color: var(--card-color, #F2F0EB);
+}
+.bh-wheel__card-name {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #F2F0EB;
+  margin: 0 0 3px;
+  line-height: 1.25;
+}
+.bh-wheel__card-word {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin: 0;
+}
+.bh-wheel__card-score {
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(242, 240, 235, 0.6);
+  margin: 4px 0 0;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Score/alignment elements only ever appear inside an exported/print
+   document — see the .bh-print-wrap override in printStyledSection. */
+.bh-wheel__score {
+  display: none;
+}
+.bh-wheel__ring-wrap {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  .bh-wheel__top {
+    grid-template-columns: 1fr;
+  }
+  .bh-wheel__info-row {
+    grid-template-columns: 1fr;
+  }
+  .bh-wheel__callout-row {
+    grid-template-columns: 1fr;
+  }
 }
