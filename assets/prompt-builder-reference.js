@@ -51,18 +51,26 @@
       image: null,
       imageName: "",
       description: makeField("", [], { isFreeText: true }),
+      // "image" (upload + describe) or "prompt" (paste someone else's
+      // prompt as loose inspiration) — flat key like image/imageName/
+      // description above, not nested, matching this file's convention.
+      // Switching branches never clears the other one's data; harmless to
+      // leave stale since assemblePrompt only reads the active branch and
+      // both are already excluded from Randomize.
+      sourceType: "image",
+      promptReference: makeField("", [], { isFreeText: true }),
       styleAdjustment: {
         characterType: PromptHaus.util.makeGroupedField("", characterLists.characterTypeGroups),
-        artFinish: makeField("", characterLists.artFinish),
+        artFinish: PromptHaus.util.makeGroupedField("", characterLists.artFinishGroups),
       },
       presentation: {
-        pose: makeField("standing pose", characterLists.pose),
+        pose: PromptHaus.util.makeGroupedField("standing pose", characterLists.poseGroups),
         background: PromptHaus.util.makeGroupedField("", characterLists.backgroundGroups),
         dynamicSceneEffect: makeField("", characterLists.dynamicSceneEffect),
         timeEra: makeField("", characterLists.timeEra),
         cameraAngle: makeField("front view", characterLists.cameraAngle),
         lightingEffects: makeField("studio lighting", characterLists.lightingEffects),
-        framing: makeField("no frame", characterLists.framing),
+        framing: PromptHaus.util.makeGroupedField("no frame", characterLists.framingGroups),
       },
       addText: {
         include: false,
@@ -88,6 +96,15 @@
   function updateDescription(changes) {
     var state = store.getState();
     store.setState({ description: Object.assign({}, state.description, changes) });
+  }
+
+  function setSourceType(type) {
+    store.setState({ sourceType: type === "prompt" ? "prompt" : "image" });
+  }
+
+  function updatePromptReference(changes) {
+    var state = store.getState();
+    store.setState({ promptReference: Object.assign({}, state.promptReference, changes) });
   }
 
   function updateStyleAdjustmentField(fieldName, changes) {
@@ -141,6 +158,27 @@
       });
   }
 
+  // Letter Style/Color Scheme/Text Effects contribute a full descriptive
+  // paragraph to the assembled prompt, not their short dropdown label —
+  // used only here at assembly time, never by the UI renderer (which
+  // reads getAddTextStyleEntries() directly and needs the short label).
+  var TEXT_PARAGRAPH_LOOKUP_BY_FIELD = {
+    letterStyle: textLists.letterStylePrompts,
+    colorScheme: textLists.colorSchemePrompts,
+    textEffects: textLists.textEffectsPrompts,
+  };
+  function withTextParagraphLookup(e) {
+    var lookup = TEXT_PARAGRAPH_LOOKUP_BY_FIELD[e.fieldName];
+    if (!lookup) return { label: e.label, field: e.field };
+    var field = PromptHaus.engine.withPromptLookup(e.field, lookup);
+    // Letter Style's paragraphs carry a literal "<product type>" token
+    // meant to be filled in dynamically, not shipped verbatim.
+    if (e.fieldName === "letterStyle" && field.value && field.value.indexOf("<product type>") !== -1) {
+      field = Object.assign({}, field, { value: field.value.split("<product type>").join(PromptHaus.styleDNA.getProjectTypeValue()) });
+    }
+    return { label: e.label, field: field };
+  }
+
   // Composes the typed text + its own styling into one descriptive clause,
   // same pattern as Text Mode's own Second Phrase.
   function buildTextClause() {
@@ -149,9 +187,7 @@
     var text = (addText.text.value || "").trim();
     if (!text) return "";
     var descriptors = PromptHaus.engine.resolveFields(
-      getAddTextStyleEntries().map(function (e) {
-        return { label: e.label, field: e.field };
-      })
+      getAddTextStyleEntries().map(withTextParagraphLookup)
     ).map(function (r) {
       return r.value;
     });
@@ -164,8 +200,18 @@
     var count = parseInt(PromptHaus.styleDNA.getState().variationCount.value, 10) || 4;
     var entries = [];
 
-    var description = (store.getState().description.value || "").trim();
-    if (description) entries.push({ label: "Reference Description", field: makeField(description) });
+    // Image branch: the shopper's own typed description of an uploaded
+    // reference photo (see file header — the image itself never leaves the
+    // browser). Prompt branch: a prompt pasted from elsewhere, used only
+    // as loose creative direction — see the intro construction below for
+    // the anti-plagiarism framing that makes this distinct from just
+    // reusing someone else's wording verbatim.
+    var sourceType = store.getState().sourceType;
+    var sourceText = sourceType === "prompt"
+      ? (store.getState().promptReference.value || "").trim()
+      : (store.getState().description.value || "").trim();
+    var sourceLabel = sourceType === "prompt" ? "Reference Prompt" : "Reference Description";
+    if (sourceText) entries.push({ label: sourceLabel, field: makeField(sourceText) });
 
     // Reimagined Style (characterType) gets folded into the intro instead
     // of riding along as just another comma-separated descriptor — a
@@ -185,12 +231,27 @@
     var reimaginedStyleEntry = getStyleAdjustmentEntries().filter(function (e) {
       return e.fieldName === "characterType";
     })[0];
-    var reimaginedStyle = PromptHaus.engine.resolveFieldValue(reimaginedStyleEntry.field);
+    var reimaginedStyle = PromptHaus.engine.resolveFieldValue(
+      PromptHaus.engine.withPromptLookup(reimaginedStyleEntry.field, characterLists.characterTypePrompts)
+    );
+
+    // Art Finish also carries a full instruction clause ("render the
+    // illustration as handcrafted crochet amigurumi with...") rather than
+    // a short word — pulled out of the flat comma list into its own
+    // sentence ahead of the quality outro instead, matching the placement
+    // fix applied to every other multi-subject mode, so it doesn't read as
+    // just another equal-weight tag next to Pose/Background/short fields.
+    var artFinishEntry = getStyleAdjustmentEntries().filter(function (e) {
+      return e.fieldName === "artFinish";
+    })[0];
+    var artFinishText = artFinishEntry
+      ? PromptHaus.engine.resolveFieldValue(PromptHaus.engine.withPromptLookup(artFinishEntry.field, characterLists.artFinishPrompts))
+      : "";
 
     entries = entries.concat(
       getStyleAdjustmentEntries()
         .filter(function (e) {
-          return e.fieldName !== "characterType";
+          return e.fieldName !== "characterType" && e.fieldName !== "artFinish";
         })
         .map(function (e) {
           return { label: e.label, field: e.field };
@@ -205,9 +266,10 @@
     if (textClause) entries.push({ label: "Text", field: makeField(textClause) });
 
     entries.push({ label: "Holiday", field: PromptHaus.styleDNA.getState().holiday });
-    entries.push({ label: "Theme", field: PromptHaus.styleDNA.getState().theme });
+    entries.push({ label: "Creative Theme", field: PromptHaus.styleDNA.getState().theme });
     entries.push({ label: "Niche", field: PromptHaus.styleDNA.getState().niche });
-    entries.push({ label: "Mockup View", field: PromptHaus.styleDNA.getState().mockupView });
+    entries.push({ label: "Target Audience", field: PromptHaus.styleDNA.getState().targetAudience });
+    entries.push({ label: "Mood", field: PromptHaus.styleDNA.getState().mood });
     entries.push({ label: "Filter It", field: PromptHaus.styleDNA.getState().filter });
     entries = entries.concat(PromptHaus.styleDNA.getImageryEntries());
     entries = entries.concat(PromptHaus.brandKit.getActiveKitEntries());
@@ -222,23 +284,47 @@
     // pasted into never receives it. The prompt only ever has the typed
     // description to work with, so it should say that plainly.
     var countPhrase = "Create " + count + (count === 1 ? " variation" : " variations");
-    var intro = reimaginedStyle
-      ? countPhrase +
-        " reinterpreting the following description entirely in a " + reimaginedStyle +
-        " style — replace any photographic, camera, or realistic-photo qualities in the description with that style, keeping only the subject, pose, and composition it describes:"
-      : countPhrase + " of an image described as";
+    // Reimagined Style carries a full descriptive paragraph (chunk 3), not
+    // a short word — embedding it mid-sentence as "in a {paragraph}
+    // style —" reads as broken once the paragraph's own closing sentence
+    // collides with what follows. Given its own "Style: ..." sentence
+    // instead, matching the same fix already applied to every other
+    // mode's Illustration Style/Art Finish placement.
+    var introParts = [];
+    if (sourceType === "prompt") {
+      // The anti-plagiarism instruction lives here, in the assembled
+      // prompt's own intro sentence addressed to the receiving AI — not
+      // just UI copy — mirroring exactly how the image branch already
+      // resolves its own "description vs. chosen style" conflict below.
+      introParts.push(countPhrase + (sourceText ? " inspired by the following prompt, reimagined as an original composition." : " of an original composition"));
+      if (reimaginedStyle) introParts.push("Style: " + reimaginedStyle);
+      if (sourceText) introParts.push("Use the prompt only as loose creative direction for subject and composition; do not reuse its exact wording, and produce an original result, not a copy:");
+    } else {
+      introParts.push(countPhrase + (sourceText ? " reinterpreting the following description as an original illustration." : " of an image described as"));
+      if (reimaginedStyle) introParts.push("Style: " + reimaginedStyle);
+      if (sourceText) introParts.push("Replace any photographic, camera, or realistic-photo qualities in the description with that style, keeping only the subject, pose, and composition it describes:");
+    }
+    var intro = introParts.join(" ");
+    var stickerSheetGuard = PromptHaus.engine.stickerSheetGuard(count);
+    var outro = (stickerSheetGuard ? stickerSheetGuard + " " : "") +
+      (artFinishText ? "Art finish: " + artFinishText + " " : "") +
+      "High quality digital illustration, immaculate composition, vibrant and polished finish with professional rendering.";
     return PromptHaus.engine.buildSentence({
       intro: intro,
       fieldEntries: entries,
-      outro: "High quality digital illustration, immaculate composition, vibrant and polished finish with professional rendering.",
+      outro: outro,
     });
   }
 
   function getSelectionsByGroup() {
     var groups = [];
 
-    var description = (store.getState().description.value || "").trim();
-    if (description) groups.push({ title: "Reference Description", items: [{ label: "Description", value: description }] });
+    var sourceType = store.getState().sourceType;
+    var sourceText = sourceType === "prompt"
+      ? (store.getState().promptReference.value || "").trim()
+      : (store.getState().description.value || "").trim();
+    var sourceGroupTitle = sourceType === "prompt" ? "Reference Prompt" : "Reference Description";
+    if (sourceText) groups.push({ title: sourceGroupTitle, items: [{ label: sourceType === "prompt" ? "Prompt" : "Description", value: sourceText }] });
 
     var styleResolved = PromptHaus.engine.resolveFields(
       getStyleAdjustmentEntries().map(function (e) {
@@ -257,17 +343,18 @@
 
     var holidayResolved = PromptHaus.engine.resolveFields([
       { label: "Holiday", field: PromptHaus.styleDNA.getState().holiday },
-      { label: "Theme", field: PromptHaus.styleDNA.getState().theme },
+      { label: "Creative Theme", field: PromptHaus.styleDNA.getState().theme },
       { label: "Niche", field: PromptHaus.styleDNA.getState().niche },
-      { label: "Mockup View", field: PromptHaus.styleDNA.getState().mockupView },
+      { label: "Target Audience", field: PromptHaus.styleDNA.getState().targetAudience },
+      { label: "Mood", field: PromptHaus.styleDNA.getState().mood },
       { label: "Filter It", field: PromptHaus.styleDNA.getState().filter },
     ]);
-    if (holidayResolved.length) groups.push({ title: "Holiday, Theme & Niche", items: holidayResolved });
+    if (holidayResolved.length) groups.push({ title: "Concept & Filter", items: holidayResolved });
 
     var imageryEntries = PromptHaus.styleDNA.getImageryEntries();
     if (imageryEntries.length) {
       groups.push({
-        title: "Imagery",
+        title: "Imagery & Scene Elements",
         items: imageryEntries.map(function (e) {
           return { label: e.label, value: e.field.value };
         }),
@@ -314,10 +401,41 @@
     PromptHaus.styleDNA.resetContent();
   }
 
+  // "Regenerate" — distinct from the full Randomize above: reroll just a
+  // couple of "key callout" fields (pooled so it's not always the exact
+  // same pair) while leaving the pasted/typed source text, Art Finish, and
+  // everything else untouched. Works for both source types — the "reroll
+  // a little, keep my text" need doesn't depend on which branch produced
+  // that text. Plain tunable pool/cap, same convention as
+  // PRESENTATION_RANDOM_CAP above.
+  var REGENERATE_CAP = 2;
+  function getRegenerateEntries() {
+    var presentation = getPresentationEntries().filter(function (e) {
+      return e.fieldName === "background" || e.fieldName === "pose";
+    });
+    return getStyleAdjustmentEntries().concat(presentation);
+  }
+  function regenerate() {
+    PromptHaus.util.randomizeGroupWithCap(
+      getRegenerateEntries(),
+      REGENERATE_CAP,
+      function (fieldName, changes) {
+        if (fieldName === "characterType" || fieldName === "artFinish") updateStyleAdjustmentField(fieldName, changes);
+        else updatePresentationField(fieldName, changes);
+      },
+      function (fieldName) {
+        if (fieldName === "characterType" || fieldName === "artFinish") updateStyleAdjustmentField(fieldName, { value: "", customValue: "" });
+        else updatePresentationField(fieldName, { value: "", customValue: "" });
+      }
+    );
+  }
+
   PromptHaus.reference = Object.assign({}, store, {
     setImage: setImage,
     clearImage: clearImage,
     updateDescription: updateDescription,
+    setSourceType: setSourceType,
+    updatePromptReference: updatePromptReference,
     updateStyleAdjustmentField: updateStyleAdjustmentField,
     updatePresentationField: updatePresentationField,
     getPresentationEntries: getPresentationEntries,
@@ -328,6 +446,7 @@
     assemblePrompt: assemblePrompt,
     getSelectionsByGroup: getSelectionsByGroup,
     randomize: randomize,
+    regenerate: regenerate,
     reset: reset,
   });
 })();

@@ -584,6 +584,28 @@
     ] },
   };
 
+  // Playbook "Your Core Motivations™" guide content — one "explains why"
+  // sentence per Founder DNA dimension, adapted from that same
+  // dimension's own FOUNDER_DNA_LIBRARY[key].values[0].because phrase
+  // (already-approved copy, just reworded into a founder-facing
+  // explanation rather than a mission-statement fragment) so this
+  // doesn't introduce a second, possibly-drifting description of what
+  // each motivation means.
+  var CORE_MOTIVATION_EXPLAINS = {
+    purpose: "Purpose explains why you naturally prioritize meaning over the easy or expected choice.",
+    legacy: "Legacy explains why you naturally build things meant to outlast this moment.",
+    belonging: "Belonging explains why you naturally choose connection over standing apart.",
+    freedom: "Freedom explains why you naturally protect your independence, even when it would be easier not to.",
+    recognition: "Recognition explains why you naturally hold yourself to a standard most people wouldn't notice.",
+    creativity: "Creativity explains why you naturally reach for ideas nobody else was brave enough to try.",
+    security: "Security explains why you naturally build things people can count on, every time.",
+    excellence: "Excellence explains why you naturally refuse to let \"good enough\" be the final answer.",
+    impact: "Impact explains why you naturally measure success by what changes for other people.",
+    stewardship: "Stewardship explains why you naturally think about who inherits what you're building.",
+    growth: "Growth explains why you naturally keep choosing to become more of who you already are.",
+    service: "Service explains why you naturally show up for people fully, not just when it's convenient.",
+  };
+
   // ---------------------------------------------------------------------
   // Profile Library — numeric tension vectors converted from the
   // qualitative High/Mid/Low positions in docs/brand-dna-framework.md.
@@ -1007,6 +1029,7 @@
     assembleFounderOutput: assembleFounderOutput,
     TENSION_PLAYBOOK: TENSION_PLAYBOOK,
     CLUSTER_PLAYBOOK: CLUSTER_PLAYBOOK,
+    CORE_MOTIVATION_EXPLAINS: CORE_MOTIVATION_EXPLAINS,
     tensionContributors: tensionContributors,
   };
 

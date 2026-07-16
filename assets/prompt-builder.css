@@ -600,13 +600,19 @@
 }
 
 /* Pill toggle — lighter-weight sibling of the basetype toggle above, for
-   picking among several options (e.g. Transportation's category row)
-   instead of just two. */
+   picking among several options (e.g. Transportation's category row, or
+   Character Type/Art Finish's category buckets) instead of just two.
+   Always a single horizontal row — nowrap + scroll rather than wrapping
+   into a bunched multi-row block once there are more pills than fit. */
 .ph-pill-toggle {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   gap: 8px;
   margin-bottom: 16px;
+  padding-bottom: 2px;
+  scrollbar-width: thin;
 }
 .ph-pill-toggle__btn {
   display: inline-flex;
@@ -620,6 +626,8 @@
   font-weight: 600;
   font-size: 13px;
   cursor: pointer;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 .ph-pill-toggle__icon {
   width: 16px;
@@ -743,6 +751,9 @@
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 14px;
   margin-top: 8px;
+}
+.ph-grouped-pill-field {
+  grid-column: 1 / -1;
 }
 .ph-imagery__category-label {
   grid-column: 1 / -1;
@@ -1161,7 +1172,7 @@
 }
 .ph-btn--copy {
   background: var(--ph-gold);
-  color: var(--ph-black);
+  color: #fff;
 }
 .ph-btn--randomize {
   background: var(--ph-espresso);
@@ -1185,6 +1196,16 @@
 .ph-btn--small {
   padding: 6px 12px;
   font-size: 12px;
+}
+/* Image/Prompt Reference's own "reroll a couple of key details, keep my
+   text" action — lives in the light main panel (not the dark preview
+   grid alongside Randomize), so it gets its own solid teal treatment
+   rather than reusing Randomize's espresso or Save's identical teal in a
+   different context. */
+.ph-btn--regenerate {
+  background: var(--ph-teal);
+  color: #fff;
+  margin-bottom: 16px;
 }
 .ph-companion__controls {
   display: flex;

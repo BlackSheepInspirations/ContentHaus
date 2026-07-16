@@ -28,6 +28,21 @@
     return value;
   }
 
+  // Some fields (Character Type, Art Finish, Letter Style, Color Scheme,
+  // Text Effects) show a short label in the dropdown but need to contribute
+  // a full descriptive paragraph to the assembled prompt instead of the
+  // label itself. Swaps `.value` for its looked-up paragraph before the
+  // field reaches resolveFieldValue — customValue overrides (typed by the
+  // user) are untouched since resolveFieldValue checks customValue first,
+  // and an unmatched/"none" value falls back to the raw value unchanged.
+  function withPromptLookup(field, lookup) {
+    if (!field) return field;
+    var key = (field.value || "").trim().toLowerCase();
+    var resolved = lookup[key];
+    if (!resolved) return field;
+    return Object.assign({}, field, { value: resolved });
+  }
+
   // entries: [{ label, field }] -> [{ label, value }], empties dropped
   function resolveFields(entries) {
     return (entries || [])
@@ -151,12 +166,25 @@
     return text;
   }
 
+  // Shared across every mode: without this, "Generate N variations" alone
+  // is frequently read by image-generation AI tools as an instruction to
+  // composite the N variants into ONE image (a grid/sticker-sheet/mood
+  // board) rather than produce N separate standalone images — a reported
+  // bug confirmed via screenshot evidence. Nothing to guard against with
+  // only 1 variation.
+  function stickerSheetGuard(count) {
+    if (!count || count <= 1) return "";
+    return "Create each variation as its own complete, separate image — never combine multiple variations into a single grid, collage, comparison sheet, or sticker sheet.";
+  }
+
   PromptHaus.engine = {
     resolveFieldValue: resolveFieldValue,
     resolveFields: resolveFields,
+    withPromptLookup: withPromptLookup,
     buildSentence: buildSentence,
     buildMetaInstruction: buildMetaInstruction,
     formatForPlatform: formatForPlatform,
+    stickerSheetGuard: stickerSheetGuard,
     PLATFORM_GROUP: PLATFORM_GROUP,
   };
 })();

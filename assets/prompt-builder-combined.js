@@ -136,9 +136,10 @@
     // Shared Style DNA — added once here, not per-panel, since this is now
     // one prompt describing one scene.
     entries.push({ label: "Holiday", field: PromptHaus.styleDNA.getState().holiday });
-    entries.push({ label: "Theme", field: PromptHaus.styleDNA.getState().theme });
+    entries.push({ label: "Creative Theme", field: PromptHaus.styleDNA.getState().theme });
     entries.push({ label: "Niche", field: PromptHaus.styleDNA.getState().niche });
-    entries.push({ label: "Mockup View", field: PromptHaus.styleDNA.getState().mockupView });
+    entries.push({ label: "Target Audience", field: PromptHaus.styleDNA.getState().targetAudience });
+    entries.push({ label: "Mood", field: PromptHaus.styleDNA.getState().mood });
     entries.push({ label: "Filter It", field: PromptHaus.styleDNA.getState().filter });
     entries = entries.concat(PromptHaus.styleDNA.getImageryEntries());
     entries = entries.concat(PromptHaus.brandKit.getActiveKitEntries());
@@ -147,12 +148,15 @@
     var bufferEntry = PromptHaus.styleDNA.getBufferEntry();
     if (bufferEntry) entries.push(bufferEntry);
 
+    var stickerSheetGuard = PromptHaus.engine.stickerSheetGuard(count);
     var intro = "Create " + count + (count === 1 ? " variation" : " variations") +
       " of one cohesive image combining a";
+    var outro = (stickerSheetGuard ? stickerSheetGuard + " " : "") +
+      "High quality digital illustration, immaculate composition, vibrant and polished finish with professional rendering.";
     return PromptHaus.engine.buildSentence({
       intro: intro,
       fieldEntries: entries,
-      outro: "High quality digital illustration, immaculate composition, vibrant and polished finish with professional rendering.",
+      outro: outro,
     });
   }
 
@@ -242,8 +246,8 @@
       apply: function () {
         PromptHaus.styleDNA.setNiche("coffee culture");
         PromptHaus.character.updateNestedField("styling", "outfit", { value: "hoodie and sweatpants", customValue: "" });
-        PromptHaus.text.updateField("letterStyle", { value: "handwritten marker style", customValue: "" });
-        PromptHaus.text.updateField("colorScheme", { value: "copper/bronze", customValue: "" });
+        PromptHaus.text.updateField("letterStyle", { value: "marker lettering", customValue: "" });
+        PromptHaus.text.updateField("colorScheme", { value: "copper / bronze", customValue: "" });
         PromptHaus.graphics.setStyleCategory("illustrated");
         PromptHaus.graphics.updateIllustratedField("characterType", { value: "cartoon style illustration", customValue: "" });
       },
@@ -285,8 +289,8 @@
         PromptHaus.text.updateField("letterStyle", { value: "calligraphy", customValue: "" });
         PromptHaus.text.updateField("colorScheme", { value: "pastel gradient", customValue: "" });
         PromptHaus.graphics.setStyleCategory("illustrated");
-        PromptHaus.graphics.updateIllustratedField("characterType", { value: "impressionist painting style", customValue: "" });
-        PromptHaus.graphics.updateIllustratedField("artFinish", { value: "soft airbrushed shine", customValue: "" });
+        PromptHaus.graphics.updateIllustratedField("characterType", { value: "fine art oil portrait", customValue: "" });
+        PromptHaus.graphics.updateIllustratedField("artFinish", { value: "soft airbrushed finish", customValue: "" });
         PromptHaus.styleDNA.updateImagerySlot("holiday1", { value: "wedding flowers", customValue: "" });
       },
     },
@@ -295,9 +299,9 @@
       name: "Patriotic/Military Collection",
       description: "Military dress uniform, bold metal-punk lettering, flag and eagle imagery.",
       apply: function () {
-        PromptHaus.character.updateNestedField("humanIdentity", "occupationNiche", { value: "military/veteran", customValue: "" });
+        PromptHaus.character.updateNestedField("humanIdentity", "occupationNiche", { value: "veteran", customValue: "" });
         PromptHaus.character.updateNestedField("styling", "outfit", { value: "military dress uniform", customValue: "" });
-        PromptHaus.text.updateField("letterStyle", { value: "metal/punk", customValue: "" });
+        PromptHaus.text.updateField("letterStyle", { value: "heavy metal punk", customValue: "" });
         PromptHaus.graphics.setStyleCategory("illustrated");
         PromptHaus.graphics.updateIllustratedField("characterType", { value: "realistic human illustration", customValue: "" });
         PromptHaus.styleDNA.updateImagerySlot("militaryPatriotic1", { value: "american flag", customValue: "" });

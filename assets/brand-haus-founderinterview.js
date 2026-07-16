@@ -64,6 +64,8 @@
   function buildInitialState() {
     return {
       step: "intro", // "intro" | "question" | "results"
+      firstName: "",
+      businessName: "",
       problemStatement: "",
       audienceDescription: "",
       currentIndex: 0,
@@ -114,8 +116,12 @@
     }
   }
 
-  function startInterview(problemStatement, audienceDescription) {
-    store.setState({ step: "question", currentIndex: 0, furthestIndex: 0, answers: {}, results: null, problemStatement: problemStatement, audienceDescription: audienceDescription });
+  function startInterview(firstName, businessName, problemStatement, audienceDescription) {
+    store.setState({
+      step: "question", currentIndex: 0, furthestIndex: 0, answers: {}, results: null,
+      firstName: firstName, businessName: businessName,
+      problemStatement: problemStatement, audienceDescription: audienceDescription,
+    });
   }
 
   function finish() {
@@ -157,6 +163,9 @@
       answers: Object.assign({}, state.answers),
       problemStatement: state.problemStatement || "",
       audienceDescription: state.audienceDescription || "",
+      firstName: (state.firstName || "").trim(),
+      businessName: (state.businessName || "").trim(),
+      completedAt: new Date().toISOString(),
     };
     store.setState({ step: "results", results: results });
     recordHistoryVersion(results);
@@ -209,6 +218,15 @@
       mission: founderOutput.missionStatement,
       values: founderOutput.values,
     });
+    // Overwrites the same way colors/fonts/mood above do — the founder
+    // just answered a dedicated "do you have a business name?" question,
+    // so that answer should win over whatever (if anything) was already
+    // sitting in the Identity bar. Only skipped when the assessment's own
+    // field was left blank (its intro explicitly allows "leave it blank"),
+    // so an unanswered field never wipes out a name set elsewhere.
+    if (state.results.businessName) {
+      BrandHaus.identity.setBusinessName(state.results.businessName);
+    }
   }
 
   // ---------------------------------------------------------------------
@@ -216,17 +234,27 @@
   // ---------------------------------------------------------------------
   function renderIntro() {
     var ui = BrandHaus.ui;
+    var firstNameInput = ui.el("input", { type: "text", class: "bh-field__custom", placeholder: "First Name" });
+    var businessNameInput = ui.el("input", { type: "text", class: "bh-field__custom", placeholder: "If unknown, leave blank" });
     var problemTextarea = ui.el("textarea", { class: "bh-field__custom bh-field__freetext", rows: "2", placeholder: "Type your answer here..." });
     var audienceInput = ui.el("input", { type: "text", class: "bh-field__custom", placeholder: "Type your answer here..." });
     var startBtn = ui.el("button", { type: "button", class: "bh-btn bh-btn--teal" }, [ui.icon("lightning"), ui.el("span", { text: "Start the Assessment" })]);
     startBtn.addEventListener("click", function () {
-      startInterview(problemTextarea.value.trim(), audienceInput.value.trim());
+      startInterview(firstNameInput.value.trim(), businessNameInput.value.trim(), problemTextarea.value.trim(), audienceInput.value.trim());
       BrandHaus.ui.renderApp();
     });
 
     return ui.el("div", { class: "bh-founder-interview bh-founder-interview--intro" }, [
       ui.el("h2", { class: "bh-preview__title" }, [ui.icon("bulb"), ui.el("span", { text: "The Brand DNA Assessment™" })]),
       ui.el("p", { class: "bh-field-group__subtitle bh-text--black", text: "30 questions, about 17-25 minutes. This isn't about picking colors — it uncovers how you naturally think, what you value, and what should show up in your brand because of it. There are no right answers." }),
+      ui.el("div", { class: "bh-field" }, [
+        ui.el("label", { class: "bh-field__label", text: "What's your first name?" }),
+        ui.el("div", { class: "bh-founder-interview__field-box" }, [firstNameInput]),
+      ]),
+      ui.el("div", { class: "bh-field" }, [
+        ui.el("label", { class: "bh-field__label", text: "Do you already have a business name in mind? (if not, no worries — leave it blank)" }),
+        ui.el("div", { class: "bh-founder-interview__field-box" }, [businessNameInput]),
+      ]),
       ui.el("div", { class: "bh-field" }, [
         ui.el("label", { class: "bh-field__label", text: "In one sentence, what does your business do or solve? (optional — helps personalize your results, not scored)" }),
         ui.el("div", { class: "bh-founder-interview__field-box" }, [

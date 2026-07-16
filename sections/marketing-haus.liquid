@@ -24,7 +24,7 @@
 <div class="mh-brand-header">
   <div class="mh-marketing__hero">
     <p class="mh-marketing__eyebrow">{{ section.settings.brand_eyebrow }}</p>
-    <h1 class="mh-marketing__heading">{{ section.settings.brand_heading | replace: 'AI', '<span class="mh-heading-accent">AI</span>' }}</h1>
+    <h1 class="mh-marketing__heading">{{ section.settings.brand_heading | replace: 'Marketing', '<span class="mh-heading-accent">Marketing</span>' }}</h1>
     <div class="mh-marketing__subheading">{{ section.settings.brand_subheading }}</div>
   </div>
 </div>
@@ -60,7 +60,7 @@
   <script src="{{ 'marketing-haus-ui.js' | asset_url }}" defer="defer"></script>
 {% else %}
   <div class="mh-locked">
-    <h2 class="mh-locked__heading">{{ section.settings.locked_heading | replace: 'AI', '<span class="mh-heading-accent">AI</span>' }}</h2>
+    <h2 class="mh-locked__heading">{{ section.settings.locked_heading | replace: 'Marketing', '<span class="mh-heading-accent">Marketing</span>' }}</h2>
     <div class="mh-locked__body">{{ section.settings.locked_body }}</div>
     <div class="mh-locked__actions">
       {% if section.settings.access_product %}
@@ -91,7 +91,7 @@
       "type": "text",
       "id": "brand_heading",
       "label": "Heading",
-      "default": "The AI Creator's Marketing Haus"
+      "default": "The Marketing Haus"
     },
     {
       "type": "textarea",
@@ -122,7 +122,7 @@
       "type": "text",
       "id": "locked_heading",
       "label": "Locked state heading",
-      "default": "Unlock The AI Creator's Marketing Haus"
+      "default": "Unlock The Marketing Haus"
     },
     {
       "type": "richtext",

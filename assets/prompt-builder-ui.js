@@ -13,13 +13,13 @@
   // Order matches the two-row tab layout: row 1 is the "build a subject"
   // modes, row 2 (after a divider) is the "work with an image/collection"
   // modes — see renderTabs' ROW_1_MODES split below.
-  var MODES = ["character", "couples", "family", "animals", "text", "graphics", "combined", "reference", "logo", "collection"];
-  var MODE_LABELS = { character: "Character", text: "Text", couples: "Couples", family: "Friends & Family", combined: "Combined", graphics: "Graphics", reference: "Image Reference", animals: "Animals & Creatures", logo: "Logo", collection: "Collection Builder" };
+  var MODES = ["character", "couples", "family", "animals", "text", "graphics", "combined", "reference", "collection"];
+  var MODE_LABELS = { character: "Character", text: "Text", couples: "Couples", family: "Friends & Family", combined: "Combined", graphics: "Graphics", reference: "Image/Prompt Reference", animals: "Animals & Creatures", collection: "Collection Builder" };
   // Flips to true as each mode ships in later build steps.
-  var BUILT_MODES = { character: true, text: true, couples: true, family: true, combined: true, graphics: true, reference: true, animals: true, logo: true, collection: true };
+  var BUILT_MODES = { character: true, text: true, couples: true, family: true, combined: true, graphics: true, reference: true, animals: true, collection: true };
   // Modes eligible to include in a Collection — every built mode except
   // Collection Builder itself.
-  var COLLECTION_ELIGIBLE_MODES = ["character", "couples", "family", "animals", "text", "graphics", "combined", "reference", "logo"];
+  var COLLECTION_ELIGIBLE_MODES = ["character", "couples", "family", "animals", "text", "graphics", "combined", "reference"];
   // Ephemeral — which modes are currently checked in Collection Builder.
   // Not persisted; this is a "generate right now from whatever's already
   // set on each mode's own tab" tool, not a saved-state feature the way
@@ -369,6 +369,7 @@
   // here just renders without an icon rather than erroring.
   var TITLE_ICONS = {
     "Style": "sparkle", "Human Identity": "person", "Animal Identity": "paw",
+    "Character Identity - Animal Mode": "paw",
     "Appearance": "sparkle", "Styling": "shirt", "Presentation": "monitor",
     "Extras": "sparkle", "Companion Details": "paw", "Couple Dynamic": "heart", "Friends & Family Dynamic": "people",
     "Companion Type": "sheep", "Companion 1 Type": "sheep", "Companion 2 Type": "sheep", "Companion 3 Type": "sheep",
@@ -378,12 +379,10 @@
     "Illustrated Style": "image", "Realistic Style": "image", "Frame It": "crop",
     "Makeup & Nails": "sparkle",
     "What Is It": "sparkle", "Custom Vanity Plates": "gift",
-    "Imagery": "image", "Text": "text", "Character Position": "crop",
+    "Imagery": "image", "Imagery & Scene Elements": "image", "Text": "text", "Character Position": "crop",
     "Style Adjustment": "sparkle", "Text Details": "text", "Reference Description": "upload",
-    "Filter It": "image",
-    "Foundation": "logoMark", "Composition & Lockup": "crop", "Typography Direction": "text",
-    "Color & Format": "sparkle", "Brand Story": "heart", "Negative Constraints": "shield",
-    "Pro Mode": "sparkle",
+    "Filter & Finish": "image",
+    "Concept • Creative Direction": "sparkle",
     "Creature 1": "paw", "Creature 2": "paw", "Creature 3": "paw",
     "Creature 1 Details": "paw", "Creature 2 Details": "paw", "Creature 3 Details": "paw",
   };
@@ -469,6 +468,88 @@
     }
     return el("div", { class: "ph-pill-toggle" }, options.map(pillButton));
   }
+
+  // Which category pill is currently expanded, per mode+field — purely a
+  // "what's showing right now" UI concern (never saved, vaulted, or
+  // randomized), so it lives as a plain in-memory map here rather than in
+  // any mode's own state, same pattern as tipsExpanded elsewhere in this
+  // file. Keyed by a caller-supplied string (e.g. "character.characterType")
+  // so each mode's own copy of a shared field (Character Type/Art Finish
+  // both appear in 6 modes) tracks its own bucket independently.
+  var activeGroupedPillBucket = {};
+
+  function bucketLabelForValue(groups, value) {
+    for (var i = 0; i < groups.length; i++) {
+      if (groups[i].options.indexOf(value) !== -1) return groups[i].label;
+    }
+    return null;
+  }
+
+  // Renders a grouped field (Character Type's 8 buckets, Art Finish's 4)
+  // as a horizontal row of category pills + a single dropdown scoped to
+  // whichever pill is active — same "category toggle reveals one filtered
+  // dropdown" idea as Transportation's category -> vehicle cascade, so a
+  // large multi-bucket catalog doesn't have to live in one overwhelming
+  // flat dropdown (missing the categories) or one native <optgroup> wall
+  // (all 59 items visible at once, which is the overwhelming part).
+  // iconMap: { [bucketLabel]: iconName }. onChange: (entry, changes) — same
+  // signature every other field-group change handler already uses.
+  function renderGroupedPillField(stateKey, entry, iconMap, onChange) {
+    var field = entry.field;
+    var groups = field.optionGroups || [];
+    if (!groups.length) return renderField(entry, function (changes) { onChange(entry, changes); });
+
+    var valueBucket = bucketLabelForValue(groups, field.value);
+    if (valueBucket) {
+      activeGroupedPillBucket[stateKey] = valueBucket;
+    } else if (!activeGroupedPillBucket[stateKey]) {
+      activeGroupedPillBucket[stateKey] = groups[0].label;
+    }
+    var active = activeGroupedPillBucket[stateKey];
+
+    var pills = renderPillToggle(
+      groups.map(function (group) {
+        return {
+          isActive: group.label === active,
+          icon: iconMap[group.label] || "sparkle",
+          title: group.label,
+          onClick: function () {
+            activeGroupedPillBucket[stateKey] = group.label;
+            renderApp();
+          },
+        };
+      })
+    );
+
+    var activeGroup = groups.filter(function (g) { return g.label === active; })[0] || groups[0];
+    var scopedField = Object.assign({}, field, { options: activeGroup.options, optionGroups: undefined });
+
+    var wrap = el("div", { class: "ph-grouped-pill-field" });
+    wrap.appendChild(pills);
+    wrap.appendChild(renderField({ label: entry.label, field: scopedField }, function (changes) {
+      onChange(entry, changes);
+    }));
+    return wrap;
+  }
+
+  // Bucket -> icon, reusing icons already in the ICONS map rather than
+  // adding new SVG paths.
+  var CHARACTER_TYPE_BUCKET_ICONS = {
+    "Cartoon & Animation": "video",
+    "Character & Stylized": "person",
+    "Illustrative Art Styles": "edit",
+    "Minimal & Graphic": "crop",
+    "Realism & Portraiture": "image",
+    "Retro, Alternative & Digital": "monitor",
+    "Character & Collectible": "gift",
+    "Publishing & Editorial": "document",
+  };
+  var ART_FINISH_BUCKET_ICONS = {
+    "Textile & Crafted": "shirt",
+    "Specialty Finishes": "sparkle",
+    "Digital Rendering": "monitor",
+    "Traditional Mediums": "edit",
+  };
 
   // Starter Presets — a row of clickable cards at the top of a mode's
   // panel. Applying one is just a fast way to fill in a bunch of fields
@@ -713,6 +794,7 @@
                     { fieldName: "breed", label: prefix + " Breed/Type", field: slot.breed },
                     { fieldName: "color", label: prefix + " Color", field: slot.color },
                     { fieldName: "eyeColor", label: prefix + " Eye Color", field: slot.eyeColor },
+                    { fieldName: "size", label: prefix + " Size", field: slot.size },
                     { fieldName: "position", label: prefix + " Position", field: slot.position },
                     { fieldName: "accessories", label: prefix + " Accessories", field: slot.accessories },
                   ],
@@ -720,7 +802,7 @@
                     options.onUpdateField(index, entry.fieldName, changes);
                     renderApp();
                   },
-                  "Breed/type, coloring, eye color, where it's positioned, and any accessories it's wearing."
+                  "Breed/type, coloring, eye color, size, where it's positioned, and any accessories it's wearing."
                 )
               );
             }
@@ -879,19 +961,81 @@
     return fieldsContainer;
   }
 
-  // Filter lives in shared Style DNA (one value, same as Holiday/Mockup
-  // View), but renders inside each mode's own Style section instead of the
-  // dark bar — it's a rendering/finish choice (like Art Finish/Style It),
-  // not a production/output setting like Aspect Ratio or Target Platform.
-  function renderFilterFieldGroup() {
-    return renderFieldGroup(
-      "Filter It",
-      [{ fieldName: "filter", label: "Filter", field: PromptHaus.styleDNA.getState().filter }],
-      function (entry, changes) {
+  // Wraps exactly one grouped (optionGroups) field in a titled fieldset
+  // using the pill-toggle + scoped-dropdown widget — Style's Character
+  // Type is the only occupant of its section in every mode now that Art
+  // Finish moved into Filter & Finish below.
+  function renderPillFieldGroup(title, stateKey, entry, iconMap, onChange, subtitle) {
+    var fieldsContainer = el("div", { class: "ph-field-group__fields" });
+    fieldsContainer.appendChild(renderGroupedPillField(stateKey, entry, iconMap, onChange));
+    var titleIcon = TITLE_ICONS[title];
+    var legend = titleIcon
+      ? el("legend", { class: "ph-field-group__title" }, [icon(titleIcon), el("span", { text: title })])
+      : el("legend", { class: "ph-field-group__title", text: title });
+    var children = [legend];
+    if (subtitle) children.push(el("p", { class: "ph-field-group__subtitle", text: subtitle }));
+    children.push(fieldsContainer);
+    return el("fieldset", { class: "ph-field-group" }, children);
+  }
+
+  // Filter lives in shared Style DNA (one value, same as Holiday/Theme/
+  // Niche), but renders inside each mode's own panel instead of the dark
+  // bar — it's a rendering/finish choice, not a production/output setting
+  // like Aspect Ratio or Target Platform. Art Finish moved in here from
+  // Style (owner's call) since both are "how should this actually look
+  // once rendered" choices — artFinishEntry/onChange/stateKey are omitted
+  // by any mode that has no Art Finish field of its own.
+  function renderFilterAndFinishFieldGroup(artFinishEntry, artFinishStateKey, artFinishOnChange) {
+    var fieldsContainer = el("div", { class: "ph-field-group__fields" });
+    fieldsContainer.appendChild(
+      renderField({ label: "Filter", field: PromptHaus.styleDNA.getState().filter }, function (changes) {
         PromptHaus.styleDNA.updateFilterField(changes);
         renderApp();
+      })
+    );
+    if (artFinishEntry) {
+      fieldsContainer.appendChild(
+        renderGroupedPillField(artFinishStateKey, artFinishEntry, ART_FINISH_BUCKET_ICONS, artFinishOnChange)
+      );
+    }
+    var titleIcon = TITLE_ICONS["Filter & Finish"];
+    var legend = titleIcon
+      ? el("legend", { class: "ph-field-group__title" }, [icon(titleIcon), el("span", { text: "Filter & Finish" })])
+      : el("legend", { class: "ph-field-group__title", text: "Filter & Finish" });
+    var subtitle = "A photo-style post-processing look (black and white, sepia, vintage, etc.), plus the material/rendering finish for the illustration.";
+    return el("fieldset", { class: "ph-field-group" }, [legend, el("p", { class: "ph-field-group__subtitle", text: subtitle }), fieldsContainer]);
+  }
+
+  // Concept • Creative Direction — Holiday/Creative Theme/Niche/Target
+  // Audience/Mood, relocated out of the dark Project Setup bar into a
+  // normal field-group box (same look as Style) so each one gets the
+  // standard dropdown + "type your own" + "include in prompt" treatment
+  // every other field already has, instead of a bare plain-select. Shared
+  // Style DNA state, same as Filter & Finish above — rendered identically in
+  // every mode's own panel.
+  var CONCEPT_FIELD_UPDATERS = {
+    holiday: "updateHolidayField",
+    theme: "updateThemeField",
+    niche: "updateNicheField",
+    targetAudience: "updateTargetAudienceField",
+    mood: "updateMoodField",
+  };
+  function renderConceptBox() {
+    var styleDNAState = PromptHaus.styleDNA.getState();
+    return renderFieldGroup(
+      "Concept • Creative Direction",
+      [
+        { fieldName: "holiday", label: "Holiday", field: styleDNAState.holiday },
+        { fieldName: "theme", label: "Creative Theme", field: styleDNAState.theme },
+        { fieldName: "niche", label: "Niche", field: styleDNAState.niche },
+        { fieldName: "targetAudience", label: "Target Audience", field: styleDNAState.targetAudience },
+        { fieldName: "mood", label: "Mood", field: styleDNAState.mood },
+      ],
+      function (entry, changes) {
+        PromptHaus.styleDNA[CONCEPT_FIELD_UPDATERS[entry.fieldName]](changes);
+        renderApp();
       },
-      "A photo-style post-processing look (black and white, sepia, vintage, etc.)."
+      "Optional creative direction, shared across every mode — for best results, pick up to 2 of these rather than stacking all 5."
     );
   }
 
@@ -940,8 +1084,8 @@
     ]);
   }
 
-  // Imagery — shared across every mode except Logo (Style DNA, same as
-  // Holiday / Theme/Buffer), so it's rendered once here and dropped into
+  // Imagery & Scene Elements — shared across every mode (Style DNA, same
+  // as Holiday/Theme/Niche/Buffer), so it's rendered once here and dropped into
   // each mode's panel rather than reimplemented per mode. 2 widgets per
   // category (12 total) rather than one generic set of slots spanning
   // every category — each category's own options are more obvious grouped
@@ -966,10 +1110,10 @@
         });
     });
     return el("fieldset", { class: "ph-field-group" }, [
-      el("legend", { class: "ph-field-group__title" }, [icon("image"), el("span", { text: "Imagery" })]),
+      el("legend", { class: "ph-field-group__title" }, [icon("image"), el("span", { text: "Imagery & Scene Elements" })]),
       el("p", {
         class: "ph-field-group__subtitle",
-        text: "Faith-based, holiday, nature, sci-fi, fantasy, or military/patriotic elements integrated into the image — select up to 4 total.",
+        text: "Spiritual, holiday, nature, sci-fi, fantasy, military/patriotic, sports, or urban elements integrated into the image — select up to 4 total.",
       }),
       fieldsContainer,
     ]);
@@ -1022,8 +1166,7 @@
         // renderFreeTextField's placeholder is hard-coded to Text Mode's
         // own wording in this file (it doesn't read entry.placeholder) —
         // override it directly on the returned element rather than
-        // showing Text Mode's placeholder here, same "grab the element,
-        // tweak it" pattern renderLogoTextFieldWithInclude already uses.
+        // showing Text Mode's placeholder here.
         var motionField = renderFreeTextField(
           { name: "motionDescription", label: "Motion / Action", field: state.motionDescription },
           function (changes) { handleChange({ name: "motionDescription" }, changes); }
@@ -1090,6 +1233,7 @@
         renderApp();
       });
       if (characterPresetRow) panel.appendChild(characterPresetRow);
+      panel.appendChild(renderConceptBox());
     }
 
     panel.appendChild(
@@ -1118,32 +1262,41 @@
 
     if (!combinedMode) {
       panel.appendChild(
-        renderFieldGroup(
+        renderPillFieldGroup(
           "Style",
-          entriesFor("style", character.labels.style),
-          handleFieldChange,
-          "The overall art style and finish — pick one core look rather than stacking several."
+          "character.characterType",
+          { label: "Character Type", field: state.style.characterType },
+          CHARACTER_TYPE_BUCKET_ICONS,
+          function (entry, changes) { character.updateNestedField("style", "characterType", changes); renderApp(); },
+          "The overall art style — pick one core look rather than stacking several."
         )
       );
-      panel.appendChild(renderFilterFieldGroup());
+      panel.appendChild(
+        renderFilterAndFinishFieldGroup(
+          { label: "Art Finish", field: state.style.artFinish },
+          "character.artFinish",
+          function (entry, changes) { character.updateNestedField("style", "artFinish", changes); renderApp(); }
+        )
+      );
     }
 
-    // Cosplay Character rendered alongside Identity (right next to
-    // Occupation/Niche) rather than off in its own Extras fieldset — it's
-    // still stored under `extras.cosplayCharacter`, just positioned closer
-    // to the other "who is this character" fields. Skipped in Combined
-    // Mode along with the rest of Extras, same reasoning as Presentation's
-    // overlap fields — Graphics's own What Is It > Character/Creature is
-    // what actually feeds the unified prompt there.
+    // Character Archetype (renamed from Cosplay Character) rendered
+    // alongside Identity (right next to Occupation/Niche) rather than off
+    // in its own Extras fieldset — it's still stored under
+    // `extras.characterArchetype`, just positioned closer to the other
+    // "who is this character" fields. Skipped in Combined Mode along with
+    // the rest of Extras, same reasoning as Presentation's overlap fields
+    // — Graphics's own What Is It > Character/Creature is what actually
+    // feeds the unified prompt there.
     var identityEntries = entriesFor(identityGroup, identityLabels);
     if (!combinedMode) {
       identityEntries = identityEntries.concat([
-        { groupName: "extras", fieldName: "cosplayCharacter", label: "Cosplay Character", field: state.extras.cosplayCharacter },
+        { groupName: "extras", fieldName: "characterArchetype", label: "Character Archetype", field: state.extras.characterArchetype },
       ]);
     }
     panel.appendChild(
       renderFieldGroup(
-        state.baseType === "animalMascot" ? "Animal Identity" : "Human Identity",
+        state.baseType === "animalMascot" ? "Character Identity - Animal Mode" : "Human Identity",
         identityEntries,
         handleFieldChange,
         "Who this character is — ethnicity/species, age, gender, body type, and occupation."
@@ -1192,12 +1345,12 @@
     );
 
     if (!combinedMode) {
-      var extrasLabelsMinusCosplay = Object.assign({}, character.labels.extras);
-      delete extrasLabelsMinusCosplay.cosplayCharacter;
+      var extrasLabelsMinusArchetype = Object.assign({}, character.labels.extras);
+      delete extrasLabelsMinusArchetype.characterArchetype;
       panel.appendChild(
         renderFieldGroup(
           "Extras",
-          entriesFor("extras", extrasLabelsMinusCosplay),
+          entriesFor("extras", extrasLabelsMinusArchetype),
           handleFieldChange,
           "Optional fantasy elements or props to add to the scene."
         )
@@ -1243,17 +1396,22 @@
         "Who this person is — ethnicity/species, age, gender, body type, and occupation."
       )
     );
+    // Makeup lives under `appearance` in state (moved up from Styling), but
+    // Couples still shows it inside the gated "Makeup & Nails" subpanel
+    // below rather than the main Appearance group — same optional-details
+    // pattern as Nails.
+    var appearanceLabelsMinusMakeup = Object.assign({}, PromptHaus.character.labels.appearance);
+    delete appearanceLabelsMinusMakeup.makeup;
     panel.appendChild(
       renderFieldGroup(
         "Appearance",
-        entriesFor("appearance", PromptHaus.character.labels.appearance, personState.appearance),
+        entriesFor("appearance", appearanceLabelsMinusMakeup, personState.appearance),
         handleFieldChange,
         "Hair, eyes, and facial features."
       )
     );
 
     var stylingLabelsMinusOptional = Object.assign({}, PromptHaus.character.labels.styling);
-    delete stylingLabelsMinusOptional.makeup;
     delete stylingLabelsMinusOptional.nails;
     panel.appendChild(
       renderFieldGroup(
@@ -1276,7 +1434,7 @@
           return renderFieldGroup(
             "Makeup & Nails",
             [
-              { groupName: "styling", fieldName: "makeup", label: "Makeup", field: personState.styling.makeup },
+              { groupName: "appearance", fieldName: "makeup", label: "Makeup", field: personState.appearance.makeup },
               { groupName: "styling", fieldName: "nails", label: "Nails", field: personState.styling.nails },
             ],
             handleFieldChange,
@@ -1305,6 +1463,7 @@
       renderApp();
     });
     if (couplesPresetRow) panel.appendChild(couplesPresetRow);
+    panel.appendChild(renderConceptBox());
 
     panel.appendChild(
       renderBaseTypeToggle(
@@ -1328,7 +1487,7 @@
     });
     panel.appendChild(swapBtn);
 
-    // Style + Filter It first (the one overall look, shared by both
+    // Style + Filter & Finish first (the one overall look, shared by both
     // people), then Couple Dynamic (the shared scene/relationship), then
     // who's actually in the photo, then an optional shared Companion,
     // then Extras last.
@@ -1340,14 +1499,22 @@
     }
 
     panel.appendChild(
-      renderFieldGroup(
+      renderPillFieldGroup(
         "Style",
-        dynamicEntriesFor(couples.STYLE_FIELDS),
-        handleDynamicChange,
-        "The overall art style and finish — shared by both people, pick one core look rather than stacking several."
+        "couples.characterType",
+        { label: "Character Type", field: state.coupleDynamic.characterType },
+        CHARACTER_TYPE_BUCKET_ICONS,
+        function (changesEntry, changes) { handleDynamicChange({ fieldName: "characterType" }, changes); },
+        "The overall art style — shared by both people, pick one core look rather than stacking several."
       )
     );
-    panel.appendChild(renderFilterFieldGroup());
+    panel.appendChild(
+      renderFilterAndFinishFieldGroup(
+        { label: "Art Finish", field: state.coupleDynamic.artFinish },
+        "couples.artFinish",
+        function (changesEntry, changes) { handleDynamicChange({ fieldName: "artFinish" }, changes); }
+      )
+    );
 
     var scenePlusRelationshipFields = couples.PRESENTATION_FIELDS.concat(["relationshipVibe", "poseInteraction", "coordinationStyle"]);
     panel.appendChild(
@@ -1392,7 +1559,7 @@
   // ---------------------------------------------------------------------
   // Friends & Family Mode panel
   // ---------------------------------------------------------------------
-  // Style + Filter It first (shared, one overall look), then who's
+  // Style + Filter & Finish first (shared, one overall look), then who's
   // actually in the photo (Adults, then Kids — both progressive, up to
   // 2/4), then the shared Family Dynamic (scene + relationship framing),
   // then an optional shared Companion pool, then Add Text last — same
@@ -1414,6 +1581,7 @@
       renderApp();
     });
     if (familyPresetRow) panel.appendChild(familyPresetRow);
+    panel.appendChild(renderConceptBox());
 
     var allDynamicEntries = family.getFamilyDynamicFieldEntries();
     function dynamicEntriesFor(fieldNames) {
@@ -1421,14 +1589,22 @@
     }
 
     panel.appendChild(
-      renderFieldGroup(
+      renderPillFieldGroup(
         "Style",
-        dynamicEntriesFor(["characterType", "artFinish"]),
-        handleDynamicChange,
-        "The overall art style and finish — shared by the whole group, pick one core look rather than stacking several."
+        "family.characterType",
+        { label: "Character Type", field: state.familyDynamic.characterType },
+        CHARACTER_TYPE_BUCKET_ICONS,
+        function (changesEntry, changes) { handleDynamicChange({ fieldName: "characterType" }, changes); },
+        "The overall art style — shared by the whole group, pick one core look rather than stacking several."
       )
     );
-    panel.appendChild(renderFilterFieldGroup());
+    panel.appendChild(
+      renderFilterAndFinishFieldGroup(
+        { label: "Art Finish", field: state.familyDynamic.artFinish },
+        "family.artFinish",
+        function (changesEntry, changes) { handleDynamicChange({ fieldName: "artFinish" }, changes); }
+      )
+    );
 
     panel.appendChild(
       renderFieldGroup(
@@ -1517,7 +1693,7 @@
     panel.appendChild(
       renderFieldGroup(
         "Extras",
-        dynamicEntriesFor(["fantasyElements", "props", "cosplayCharacter"]),
+        dynamicEntriesFor(["fantasyElements", "props", "characterArchetype"]),
         handleDynamicChange,
         "Optional fantasy elements or props to add to the scene."
       )
@@ -1551,6 +1727,7 @@
         renderApp();
       });
       if (textPresetRow) panel.appendChild(textPresetRow);
+      panel.appendChild(renderConceptBox());
     }
 
     panel.appendChild(
@@ -1561,7 +1738,7 @@
         "Stays consistent across all " + countLabel + "."
       )
     );
-    if (!combinedMode) panel.appendChild(renderFilterFieldGroup());
+    if (!combinedMode) panel.appendChild(renderFilterAndFinishFieldGroup(null, null, null));
 
     var state = text.getState();
     panel.appendChild(
@@ -1635,6 +1812,7 @@
       "Collection Presets — sets Character, Text, and Graphics together"
     );
     if (collectionPresetRow) panel.appendChild(collectionPresetRow);
+    panel.appendChild(renderConceptBox());
 
     // Style It (Illustrated/Realistic + Character Type/Art Finish or
     // Realistic Style) sits at the very top, above the Human/Animal
@@ -1766,24 +1944,26 @@
           "The specific photography/rendering look for this graphic."
         )
       );
+      fragment.appendChild(renderFilterAndFinishFieldGroup(null, null, null));
     } else {
       fragment.appendChild(
-        renderFieldGroup(
+        renderPillFieldGroup(
           "Illustrated Style",
-          [
-            { fieldName: "characterType", label: "Character Type", field: state.illustrated.characterType },
-            { fieldName: "artFinish", label: "Art Finish", field: state.illustrated.artFinish },
-          ],
-          function (entry, changes) {
-            graphics.updateIllustratedField(entry.fieldName, changes);
-            renderApp();
-          },
-          "The overall art style and finish — pick one core look rather than stacking several."
+          "graphics.characterType",
+          { label: "Character Type", field: state.illustrated.characterType },
+          CHARACTER_TYPE_BUCKET_ICONS,
+          function (entry, changes) { graphics.updateIllustratedField("characterType", changes); renderApp(); },
+          "The overall art style — pick one core look rather than stacking several."
+        )
+      );
+      fragment.appendChild(
+        renderFilterAndFinishFieldGroup(
+          { label: "Art Finish", field: state.illustrated.artFinish },
+          "graphics.artFinish",
+          function (entry, changes) { graphics.updateIllustratedField("artFinish", changes); renderApp(); }
         )
       );
     }
-
-    fragment.appendChild(renderFilterFieldGroup());
 
     return fragment;
   }
@@ -1864,6 +2044,7 @@
         renderApp();
       });
       if (graphicsPresetRow) panel.appendChild(graphicsPresetRow);
+      panel.appendChild(renderConceptBox());
 
       panel.appendChild(renderGraphicsStyleItSection());
     }
@@ -1973,20 +2154,46 @@
   // ---------------------------------------------------------------------
   // Reference Mode panel
   // ---------------------------------------------------------------------
-  // Styled like the old Live-Link Mascot box (dashed outline, disclosure
-  // text up top) — split into an image half and a description half. The
-  // image never leaves the browser and is never analyzed; it's a visual
-  // reminder for the shopper while they type their own description, which
-  // is what actually feeds the prompt.
-  function renderReferenceUploadSection() {
+  // Two source types share this one section: "image" (upload + describe
+  // it — the original behavior) or "prompt" (paste a prompt found
+  // elsewhere as loose inspiration, not a copy). Both feed the exact same
+  // downstream Style Adjustment/Presentation/Add Text fields; only the
+  // seed content and assemblePrompt()'s intro sentence differ by branch.
+  function renderSourceTypeToggle(currentSourceType, onSetImage, onSetPrompt) {
+    return renderTwoOptionToggle([
+      { isActive: currentSourceType === "image", icon: "upload", title: "Reference an Image", subtitle: "Upload + describe a photo", onClick: onSetImage },
+      { isActive: currentSourceType === "prompt", icon: "document", title: "Reference a Prompt", subtitle: "Paste someone else's prompt", onClick: onSetPrompt },
+    ]);
+  }
+
+  function renderReferenceSourceSection() {
     var reference = PromptHaus.reference;
     var state = reference.getState();
 
     var box = el("div", { class: "ph-reference-upload" });
     box.appendChild(
-      el("p", { class: "ph-field-group__title" }, [icon("upload"), el("span", { text: "Image Upload and Description" })])
+      el("p", { class: "ph-field-group__title" }, [icon("upload"), el("span", { text: "Reference Source" })])
     );
+    box.appendChild(
+      renderSourceTypeToggle(
+        state.sourceType,
+        function () { reference.setSourceType("image"); renderApp(); },
+        function () { reference.setSourceType("prompt"); renderApp(); }
+      )
+    );
+    box.appendChild(
+      state.sourceType === "prompt" ? renderPromptReferenceSection(state) : renderImageReferenceColumns(state)
+    );
+    return box;
+  }
 
+  // Styled like the old Live-Link Mascot box (dashed outline, disclosure
+  // text up top) — split into an image half and a description half. The
+  // image never leaves the browser and is never analyzed; it's a visual
+  // reminder for the shopper while they type their own description, which
+  // is what actually feeds the prompt.
+  function renderImageReferenceColumns(state) {
+    var reference = PromptHaus.reference;
     var columns = el("div", { class: "ph-reference-upload__columns" });
 
     // Left half — image upload/preview. The disclaimer lives here (not
@@ -2091,398 +2298,39 @@
 
     columns.appendChild(imageCol);
     columns.appendChild(descCol);
-    box.appendChild(columns);
 
-    return box;
+    return columns;
   }
 
-  // ---------------------------------------------------------------------
-  // Logo Mode — see prompt-builder-logo.js for the full spec this follows
-  // (Layer 1 user inputs, Layer 2 auto-appended rules, Layer 3 callouts).
-  // These callouts are Section A of that spec: static UI text, never
-  // inserted into the assembled prompt.
-  // ---------------------------------------------------------------------
-  function renderLogoCallout(iconName, text) {
-    return el("p", { class: "ph-logo-callout" }, [icon(iconName), el("span", { text: text })]);
-  }
-
-  // Three-way tier control — Lite/Standard/Pro, mutually exclusive by
-  // construction (unlike two independent toggles, which could combine in
-  // confusing ways). Same pill styling as yesNoButton, just N-wide.
-  function tierButton(label, isActive, onClick) {
-    var btn = el("button", {
-      type: "button",
-      class: "ph-styledna__yesno-btn" + (isActive ? " is-active" : ""),
-      "aria-pressed": isActive ? "true" : "false",
-      text: label,
-    });
-    btn.addEventListener("click", onClick);
-    return btn;
-  }
-
-  function renderLogoTierToggle(logo, state) {
-    var legendId = "ph-logo-tier";
-    var toggle = el(
-      "div",
-      { class: "ph-styledna__yesno ph-field-group__toggle", role: "group", "aria-labelledby": legendId },
-      logo.tiers.map(function (tier) {
-        var labels = { lite: "Lite", standard: "Standard", pro: "Pro" };
-        return tierButton(labels[tier], state.tier === tier, function () {
-          logo.setTier(tier);
-          renderApp();
-        });
-      })
-    );
-    return el("fieldset", { class: "ph-field-group" }, [
-      el("legend", { class: "ph-field-group__title", id: legendId }, [icon("sparkle"), el("span", { text: "Mode" })]),
-      el("p", {
-        class: "ph-field-group__subtitle",
-        text: "Standard is the normal field set. Lite keeps every field but asks the AI for a simpler design. Pro reveals strategist-level controls (Archetype, Style Era, Symbol Meaning, Competitor Avoidance) below.",
-      }),
-      toggle,
-    ]);
-  }
-
-  function renderLogoPanel() {
-    var logo = PromptHaus.logo;
-    var state = logo.getState();
-
-    function handleFieldChange(entry, changes) {
-      logo.updateField(entry.fieldName, changes);
-      renderApp();
-    }
-
-    var panel = el("div", { class: "ph-panel ph-panel--logo" });
-
-    panel.appendChild(
-      renderLogoCallout(
-        "logoMark",
-        "This creates a logo concept, not a production file. AI image generators output a flattened raster image — for a real, scalable logo (favicon, embroidery, one-color print), recreate the result as a vector in Kittl, Illustrator, or with a designer. Use this as your direction, not your final file."
-      )
-    );
-
-    panel.appendChild(renderLogoTierToggle(logo, state));
-
-    panel.appendChild(
-      renderFieldGroup(
-        "Use Mode",
-        [{ fieldName: "useMode", label: "Who is this logo for?", field: state.useMode }],
-        handleFieldChange,
-        "Doesn't change the visual output — only how strongly the trademark guidance below is worded."
-      )
-    );
-
-    panel.appendChild(
-      renderFieldGroup(
-        "Foundation",
-        [
-          { fieldName: "logoType", label: "Logo Type", field: state.logoType },
-          { fieldName: "industry", label: "Industry / Context", field: state.industry },
-          { fieldName: "personality", label: "Brand Personality", field: state.personality },
-        ],
-        handleFieldChange,
-        "The foundation every other choice builds on."
-      )
-    );
-
-    panel.appendChild(
-      renderFieldGroup(
-        "Composition & Lockup",
-        [
-          { fieldName: "layout", label: "Layout", field: state.composition.layout },
-          { fieldName: "lockup", label: "Icon/Text Relationship", field: state.composition.lockup },
-          { fieldName: "container", label: "Container", field: state.composition.container },
-        ],
-        function (entry, changes) {
-          logo.updateCompositionField(entry.fieldName, changes);
-          renderApp();
-        },
-        "Lockup relationship is the #1 thing that makes a logo read as intentional instead of thrown-together. Also drives Canvas Format's auto-suggestion up in the black bar."
-      )
-    );
-
-    panel.appendChild(renderLogoTextSection(logo, state));
-
-    panel.appendChild(
-      renderFieldGroup("Iconography", [{ fieldName: "iconography", label: "Symbol System", field: state.iconography }], handleFieldChange, "No icon, an abstract mark, or a literal symbol — the foundation of the visual.")
-    );
-
-    panel.appendChild(renderLogoColorSection(logo, state));
-    panel.appendChild(renderLogoTypographySection(logo, state));
-
-    panel.appendChild(
-      renderFieldGroup(
-        "Color Constraints",
-        [{ fieldName: "colorConstraint", label: "Usage Rule", field: state.colorConstraint }],
-        handleFieldChange,
-        "How many colors the final mark can actually use — independent of which colors, above."
-      )
-    );
-
-    panel.appendChild(renderLogoNegativeConstraints(state));
-
-    if (state.tier === "pro") {
-      panel.appendChild(renderLogoProModeSection(logo, state));
-    }
-
-    panel.appendChild(
-      renderLogoCallout(
-        "shield",
-        "This tool helps you avoid obvious risks, but it does not perform a trademark check. Before using a logo commercially — especially one you plan to sell to others — verify trademark and copyright independently. This is not legal advice."
-      )
-    );
-
-    return panel;
-  }
-
-  // Brand Name, Initials, and Tagline each get their own "Include in
-  // prompt" checkbox — so someone can type all three once and toggle
-  // which ones actually go into a given generation, without re-typing.
-  // Brand Story moved in here too, same treatment, since it's part of
-  // the same "what does the logo say/mean" cluster.
-  function renderLogoTextFieldWithInclude(entry, onChange) {
-    var fieldEl = renderFreeTextField(entry, onChange);
-    var checkbox = el("input", { type: "checkbox", class: "ph-field__checkbox" });
-    checkbox.checked = entry.field.includeInPrompt !== false;
-    checkbox.addEventListener("change", function () {
-      onChange({ includeInPrompt: checkbox.checked });
-    });
-    fieldEl.querySelector(".ph-field__label-row").appendChild(el("label", { class: "ph-field__include" }, [checkbox, el("span", { text: "Include in prompt" })]));
-    return fieldEl;
-  }
-
-  function renderLogoTextSection(logo, state) {
-    var noTextCheckbox = el("input", { type: "checkbox", class: "ph-field__checkbox" });
-    noTextCheckbox.checked = state.noTextSymbolOnly;
-    noTextCheckbox.addEventListener("change", function () {
-      logo.toggleNoTextSymbolOnly(noTextCheckbox.checked);
-      renderApp();
-    });
-
-    var children = [
-      el("legend", { class: "ph-field-group__title" }, [icon("text"), el("span", { text: "Logo Text" })]),
-      el("label", { class: "ph-logo-symbol-only" }, [noTextCheckbox, el("span", { text: "No text — generate symbol only (recommended for combination marks and wordmarks)" })]),
-    ];
-
-    if (!state.noTextSymbolOnly) {
-      children.push(
-        renderLogoCallout(
-          "text",
-          "AI struggles with text — the more words in the image, the higher the chance of misspelling or garbling. For the cleanest result, consider the symbol-only toggle above, then add your brand name yourself in a design tool. If you do include text, keep it short."
-        ),
-        renderLogoTextFieldWithInclude({ fieldName: "brandName", label: "Brand Name", field: state.brandName }, function (changes) {
-          logo.updateField("brandName", changes);
-          renderApp();
-        }),
-        renderLogoTextFieldWithInclude({ fieldName: "initials", label: "Initials (up to 3)", field: state.initials }, function (changes) {
-          logo.updateField("initials", changes);
-          renderApp();
-        }),
-        renderLogoTextFieldWithInclude({ fieldName: "tagline", label: "Tagline (optional)", field: state.tagline }, function (changes) {
-          logo.updateField("tagline", changes);
-          renderApp();
-        })
-      );
-    }
-
-    children.push(
-      renderLogoTextFieldWithInclude(
-        { fieldName: "brandStory", label: "Brand Story — in your own words, what does this brand do and how should it feel?", field: state.brandStory },
-        function (changes) {
-          logo.updateField("brandStory", changes);
-          renderApp();
-        }
-      )
-    );
-
-    return el("fieldset", { class: "ph-field-group" }, children);
-  }
-
-  function renderLogoColorSection(logo, state) {
-    var entries = [
-      { fieldName: "primary", label: "Primary Color(s)", field: state.color.primary, isColorSwatch: true },
-      { fieldName: "secondary", label: "Secondary Color(s)", field: state.color.secondary, isColorSwatch: true },
-      { fieldName: "accent", label: "Accent Color(s)", field: state.color.accent, isColorSwatch: true },
-      { fieldName: "neutral", label: "Neutral/Base Colors", field: state.color.neutral, isColorSwatch: true },
-      { fieldName: "gradient", label: "Gradient Style", field: state.color.gradient },
-      { fieldName: "mood", label: "Color Mood", field: state.color.mood },
-    ];
-    var fieldsContainer = el("div", { class: "ph-field-group__fields" });
-    entries.forEach(function (entry) {
-      fieldsContainer.appendChild(
-        fieldRenderFn(entry)(entry, function (changes) {
-          logo.updateColorField(entry.fieldName, changes);
-          renderApp();
-        })
-      );
-    });
-    var kitNote = PromptHaus.brandKit.getActiveKit()
-      ? "An active Brand Kit fills these in automatically (unless its Color override is on) — still fully editable here for this one project."
-      : "Works standalone with no Brand Kit — type your own or a hex code (e.g. \"#B76E79\") for an exact match.";
-    return el("fieldset", { class: "ph-field-group" }, [
-      el("legend", { class: "ph-field-group__title" }, [icon("sparkle"), el("span", { text: "Color" })]),
-      el("p", { class: "ph-field-group__subtitle", text: kitNote }),
-      fieldsContainer,
-    ]);
-  }
-
-  function renderLogoTypographySection(logo, state) {
-    var entries = [
-      { fieldName: "primaryFont", label: "Primary Font", field: state.typography.primaryFont },
-      { fieldName: "secondaryFont", label: "Secondary Font", field: state.typography.secondaryFont },
-      { fieldName: "accentFont", label: "Accent Font", field: state.typography.accentFont },
-    ];
-    return renderFieldGroup(
-      "Typography",
-      entries,
-      function (entry, changes) {
-        logo.updateTypographyField(entry.fieldName, changes);
+  // Prompt branch — a single full-width free-text field for pasting a
+  // prompt found elsewhere. No image upload here; the pasted text is the
+  // entire seed. The anti-plagiarism instruction itself lives in
+  // assemblePrompt()'s intro sentence (addressed to the receiving AI) —
+  // this hint just reinforces that framing for the shopper up front.
+  function renderPromptReferenceSection(state) {
+    var reference = PromptHaus.reference;
+    var box = el("div", { class: "ph-reference-upload__prompt" });
+    var promptField = renderFreeTextField(
+      { label: "Paste the Original Prompt", field: state.promptReference },
+      function (changes) {
+        reference.updatePromptReference(changes);
         renderApp();
-      },
-      "Only matters once there's actual text — Brand Name and/or Initials above. Same three-slot shape as Brand Kit's own Typography System."
+      }
     );
-  }
-
-  function renderLogoProModeSection(logo, state) {
-    var entries = [
-      { fieldName: "archetype", label: "Brand Archetype", field: state.archetype },
-      { fieldName: "styleEra", label: "Style Era", field: state.styleEra },
-      { fieldName: "symbolMeaning", label: "Symbol Meaning — what should this logo represent emotionally?", field: state.symbolMeaning },
-    ];
-    var fieldsContainer = el("div", { class: "ph-field-group__fields" });
-    entries.forEach(function (entry) {
-      fieldsContainer.appendChild(
-        fieldRenderFn(entry)(entry, function (changes) {
-          logo.updateField(entry.fieldName, changes);
-          renderApp();
-        })
-      );
-    });
-
-    var competitorEntry = { fieldName: "competitorAvoidance", label: "Competitor-Style Avoidance", field: state.competitorAvoidance };
-    var competitorField = renderFreeTextField(competitorEntry, function (changes) {
-      logo.updateField("competitorAvoidance", changes);
-      renderApp();
-    });
-
-    return el("fieldset", { class: "ph-field-group" }, [
-      el("legend", { class: "ph-field-group__title" }, [icon("sparkle"), el("span", { text: "Pro Mode" })]),
-      el("p", {
-        class: "ph-field-group__subtitle",
-        text: "Archetype drives emotional shape language (e.g. The Ruler → strong symmetry; The Creator → expressive/asymmetric).",
-      }),
-      fieldsContainer,
-      el("p", {
-        class: "ph-field-group__subtitle",
-        text: 'Describe the competitor style you want to avoid in your own words — e.g. "avoid a single swoosh" or "avoid bitten-fruit minimalism." Don\'t name an actual brand: naming one can pull the AI toward it instead of away.',
-      }),
-      competitorField,
-      el("p", {
-        class: "ph-logo-inline-disclaimer",
-        text: "Describing a style to avoid is not the same as clearing a trademark. Avoid recreating any specific company's protected logo, symbol, or likeness — even loosely — and verify trademark/copyright independently before commercial use.",
-      }),
-    ]);
-  }
-
-  function resolvedLogoField(field) {
-    return PromptHaus.engine.resolveFieldValue(field);
-  }
-
-  function renderLogoNegativeConstraints(state) {
-    var items = [
-      { key: "noMockups", label: "No mockups" },
-      { key: "noGradients", label: "No gradients (auto-clears if Gradient Style above is set)" },
-      { key: "noShadows", label: "No shadows" },
-      { key: "no3d", label: "No 3D rendering (auto-clears if Dimensional Treatment is set to 3D)" },
-      { key: "avoidComplexity", label: "Avoid unnecessary complexity" },
-    ];
-    var rows = items.map(function (item) {
-      var checkbox = el("input", { type: "checkbox", class: "ph-field__checkbox" });
-      checkbox.checked = state.negativeConstraints[item.key];
-      checkbox.addEventListener("change", function () {
-        PromptHaus.logo.updateNegativeConstraint(item.key, checkbox.checked);
-        renderApp();
-      });
-      return el("label", { class: "ph-logo-symbol-only" }, [checkbox, el("span", { text: item.label })]);
-    });
-    return el("fieldset", { class: "ph-field-group" }, [
-      el("legend", { class: "ph-field-group__title" }, [icon("shield"), el("span", { text: "Negative Constraints" })]),
-      el("p", {
-        class: "ph-field-group__subtitle",
-        text: "On by default — these become the exclusion list for this logo. If you also typed something into Negative Prompt on another tab, that carries over too, since it's shared across every mode.",
-      }),
-      el("div", { class: "ph-logo-negconstraints" }, rows),
-    ]);
-  }
-
-  // aspectRatio mapping for Logo's own Canvas Format, since it's a
-  // different (square/landscape/portrait) framing than Style DNA's own
-  // numeric aspect ratio — used only for Midjourney/Leonardo's --ar tag.
-  var CANVAS_FORMAT_TO_ASPECT_RATIO = {
-    "square (1:1)": "1:1",
-    "landscape / horizontal": "16:9",
-    "portrait / vertical": "9:16",
-  };
-
-  function renderLogoPreview(root) {
-    var logo = PromptHaus.logo;
-    var state = logo.getState();
-    var styleDNAState = PromptHaus.styleDNA.getState();
-    var platform = styleDNAState.targetPlatform.value;
-    var aspectRatio = CANVAS_FORMAT_TO_ASPECT_RATIO[resolvedLogoField(state.canvasFormat)] || "1:1";
-
-    var assembled = logo.assemblePrompt();
-    var negative = [buildCombinedNegativePrompt(), logo.getNegativeContribution()].filter(Boolean).join(", ");
-    var formattedCore = PromptHaus.engine.formatForPlatform(assembled, platform, aspectRatio, negative);
-    var formatted = formattedCore + " " + logo.buildAutoAppendBlock();
-
-    var textarea = el("textarea", { class: "ph-preview__text", readonly: "readonly" });
-    textarea.value = formatted;
-
-    var actions = renderPreviewActions(
-      formatted,
-      function () {
-        logo.randomize();
-        renderApp();
-      },
-      function () {
-        logo.reset();
-        renderApp();
-      },
-      function () {
-        var result = PromptHaus.favorites.save("logo", {
-          text: formatted,
-          platform: platform,
-          title: buildVaultTitle("logo"),
-          snapshot: buildVaultSnapshot("logo"),
-        });
-        saveFeedback = result.ok ? { text: "Saved!", isError: false } : { text: result.reason, isError: true };
-        renderApp();
-        setTimeout(function () {
-          saveFeedback = null;
-          renderApp();
-        }, 2500);
-      },
-      "logo"
-    );
-
-    var previewChildren = [
-      el("h3", { class: "ph-preview__title" }, [icon("lightning"), el("span", { text: "Your Prompt, Built Live" })]),
-      el("p", { class: "ph-preview__subtitle", text: "Watch your creative direction turn into a ready-to-use AI prompt." }),
-    ];
-    var qualityNudge = renderQualityNudge(assembled);
-    if (qualityNudge) previewChildren.push(qualityNudge);
-    previewChildren.push(textarea, actions);
-    if (saveFeedback) {
-      previewChildren.push(
+    var promptTextarea = promptField.querySelector("textarea");
+    if (promptTextarea) {
+      promptTextarea.rows = 5;
+      promptTextarea.placeholder = "e.g. a prompt you found in a Facebook group, an Etsy listing, or a paid prompt pack";
+      promptField.insertBefore(
         el("p", {
-          class: "ph-preview__save-feedback" + (saveFeedback.isError ? " is-error" : " is-success"),
-          text: saveFeedback.text,
-        })
+          class: "ph-reference-upload__hint",
+          text: "We'll use this only as loose creative direction — the assembled prompt explicitly tells the AI to produce an original result, not a copy of the wording below.",
+        }),
+        promptTextarea
       );
     }
-
-    root.appendChild(el("div", { class: "ph-preview" }, previewChildren));
+    box.appendChild(promptField);
+    return box;
   }
 
   // ---------------------------------------------------------------------
@@ -2497,26 +2345,16 @@
   // introduce a second copy of any mode's fields.
   // ---------------------------------------------------------------------
 
-  // Mirrors the formatting each of renderPreview/renderCombinedPreview/
-  // renderLogoPreview already does for its own mode — duplicated here
-  // rather than factored out of those three, since they're each already
-  // tested and working; a shared refactor would touch all three for a
-  // single new caller's benefit.
+  // Mirrors the formatting renderPreview/renderCombinedPreview already
+  // does for its own mode — duplicated here rather than factored out of
+  // those two, since they're each already tested and working; a shared
+  // refactor would touch both for a single new caller's benefit.
   function getFormattedPromptForMode(mode) {
     var styleDNAState = PromptHaus.styleDNA.getState();
     var platform = styleDNAState.targetPlatform.value;
     if (mode === "combined") {
       var combinedAssembled = PromptHaus.combined.assembleUnifiedPrompt();
       return PromptHaus.engine.formatForPlatform(combinedAssembled, platform, styleDNAState.aspectRatio.value, buildCombinedNegativePrompt());
-    }
-    if (mode === "logo") {
-      var logo = PromptHaus.logo;
-      var logoState = logo.getState();
-      var aspectRatio = CANVAS_FORMAT_TO_ASPECT_RATIO[resolvedLogoField(logoState.canvasFormat)] || "1:1";
-      var logoAssembled = logo.assemblePrompt();
-      var negative = [buildCombinedNegativePrompt(), logo.getNegativeContribution()].filter(Boolean).join(", ");
-      var formattedCore = PromptHaus.engine.formatForPlatform(logoAssembled, platform, aspectRatio, negative);
-      return formattedCore + " " + logo.buildAutoAppendBlock();
     }
     var assembled = PromptHaus[mode].assemblePrompt();
     return PromptHaus.engine.formatForPlatform(assembled, platform, styleDNAState.aspectRatio.value, buildCombinedNegativePrompt());
@@ -2527,9 +2365,10 @@
     panel.appendChild(
       el("p", {
         class: "ph-field-group__subtitle",
-        text: "This is where you can see all of your current prompts, or combine up to 3 of them into one. Each mode uses whatever's already set on its own tab, so build those out first. Holiday/Theme/Niche are already shared across every mode, so setting those once in the bar above carries into every prompt below automatically.",
+        text: "This is where you can see all of your current prompts, or combine up to 3 of them into one. Each mode uses whatever's already set on its own tab, so build those out first. Holiday/Creative Theme/Niche/Target Audience/Mood are already shared across every mode, so setting those once below carries into every prompt automatically.",
       })
     );
+    panel.appendChild(renderConceptBox());
 
     var allSelected = COLLECTION_ELIGIBLE_MODES.every(function (mode) { return !!collectionSelectedModes[mode]; });
     var selectAllBtn = el("button", {
@@ -2736,23 +2575,29 @@
     var state = animals.getState();
 
     var panel = el("div", { class: "ph-panel ph-panel--animals" });
+    panel.appendChild(renderConceptBox());
 
     for (var i = 0; i < animals.CREATURE_SLOT_COUNT; i++) {
       panel.appendChild(renderCreatureSlot(i));
     }
 
     panel.appendChild(
-      renderFieldGroup(
+      renderPillFieldGroup(
         "Style",
-        animals.getStyleEntries(),
-        function (entry, changes) {
-          animals.updateStyleField(entry.fieldName, changes);
-          renderApp();
-        },
-        "The overall illustration style and finish for the whole portrait."
+        "animals.characterType",
+        { label: "Character Type", field: state.style.characterType },
+        CHARACTER_TYPE_BUCKET_ICONS,
+        function (entry, changes) { animals.updateStyleField("characterType", changes); renderApp(); },
+        "The overall illustration style — pick one core look rather than stacking several."
       )
     );
-    panel.appendChild(renderFilterFieldGroup());
+    panel.appendChild(
+      renderFilterAndFinishFieldGroup(
+        { label: "Art Finish", field: state.style.artFinish },
+        "animals.artFinish",
+        function (entry, changes) { animals.updateStyleField("artFinish", changes); renderApp(); }
+      )
+    );
     panel.appendChild(
       renderFieldGroup(
         "Frame It",
@@ -2798,20 +2643,37 @@
     var state = reference.getState();
 
     var panel = el("div", { class: "ph-panel ph-panel--reference" });
-    panel.appendChild(renderReferenceUploadSection());
+    panel.appendChild(renderConceptBox());
+    panel.appendChild(renderReferenceSourceSection());
+
+    var activeSourceText = state.sourceType === "prompt" ? state.promptReference.value : state.description.value;
+    if ((activeSourceText || "").trim()) {
+      var regenerateBtn = el("button", { type: "button", class: "ph-btn ph-btn--regenerate ph-btn--small" }, [icon("sparkle"), el("span", { text: "Regenerate" })]);
+      regenerateBtn.title = "Rerolls just a couple of key details (like Reimagined Style or Pose) — keeps your source text and everything else untouched.";
+      regenerateBtn.addEventListener("click", function () {
+        reference.regenerate();
+        renderApp();
+      });
+      panel.appendChild(regenerateBtn);
+    }
 
     panel.appendChild(
-      renderFieldGroup(
+      renderPillFieldGroup(
         "Style Adjustment",
-        reference.getStyleAdjustmentEntries(),
-        function (entry, changes) {
-          reference.updateStyleAdjustmentField(entry.fieldName, changes);
-          renderApp();
-        },
-        "Reimagine your reference in a different style/finish — e.g. turn a real photo into a watercolor illustration."
+        "reference.characterType",
+        { label: "Reimagined Style", field: state.styleAdjustment.characterType },
+        CHARACTER_TYPE_BUCKET_ICONS,
+        function (entry, changes) { reference.updateStyleAdjustmentField("characterType", changes); renderApp(); },
+        "Reimagine your reference in a different style — e.g. turn a real photo into a watercolor illustration."
       )
     );
-    panel.appendChild(renderFilterFieldGroup());
+    panel.appendChild(
+      renderFilterAndFinishFieldGroup(
+        { label: "Art Finish", field: state.styleAdjustment.artFinish },
+        "reference.artFinish",
+        function (entry, changes) { reference.updateStyleAdjustmentField("artFinish", changes); renderApp(); }
+      )
+    );
 
     panel.appendChild(
       renderFieldGroup(
@@ -2856,16 +2718,16 @@
   // ---------------------------------------------------------------------
   // Shell: tabs, live preview, action buttons
   // ---------------------------------------------------------------------
-  var MODE_ICONS = { character: "person", text: "text", couples: "heart", family: "people", combined: "layers", graphics: "image", reference: "upload", animals: "paw", logo: "logoMark", collection: "document" };
+  var MODE_ICONS = { character: "person", text: "text", couples: "heart", family: "people", combined: "layers", graphics: "image", reference: "upload", animals: "paw", collection: "document" };
 
   // Row 1 is the "build a subject" modes; row 2, after a light divider,
   // is the "work with an image or an existing prompt" modes — keeps the
   // tab bar from reading as one long undifferentiated strip now that
-  // Collection Builder/Image Reference sit alongside the subject modes.
+  // Collection Builder/Image/Prompt Reference sit alongside the subject modes.
   var TAB_ROW_1_MODES = ["character", "couples", "family", "animals", "text", "graphics", "combined"];
-  var TAB_ROW_2_MODES = ["reference", "logo", "collection"];
+  var TAB_ROW_2_MODES = ["reference", "collection"];
   var TAB_INFO_TEXT = {
-    reference: "Upload a reference image and describe how you want it reimagined — a different art style, added text, or both — rather than building a portrait from scratch.",
+    reference: "Reference an image (upload + describe it) or a prompt you found elsewhere (paste it as loose inspiration, not a copy) and describe how you want it reimagined — a different art style, added text, or both.",
     collection: "See every mode's current prompt side by side, or combine up to 3 of them into one spliced-together prompt.",
   };
 
@@ -2953,15 +2815,10 @@
     if (mode === "reference") {
       var rs = PromptHaus.reference.getState();
       return [
-        { icon: "upload", label: "Reference Image", value: rs.image ? "Uploaded" : "Not uploaded" },
+        rs.sourceType === "prompt"
+          ? { icon: "document", label: "Reference Prompt", value: (rs.promptReference.value || "").trim() ? "Pasted" : "Not pasted" }
+          : { icon: "upload", label: "Reference Image", value: rs.image ? "Uploaded" : "Not uploaded" },
         { icon: "sparkle", label: "Reimagined Style", value: resolve(rs.styleAdjustment.characterType) || "Not set" },
-      ];
-    }
-    if (mode === "logo") {
-      var ls = PromptHaus.logo.getState();
-      return [
-        { icon: "logoMark", label: "Logo Type", value: resolve(ls.logoType) || "Not set" },
-        { icon: "sparkle", label: "Mode", value: ls.tier.charAt(0).toUpperCase() + ls.tier.slice(1) },
       ];
     }
     if (mode === "animals") {
@@ -3104,7 +2961,7 @@
   // turns that into a live, personalized nudge right above the prompt
   // someone's about to copy. assembled.fragments is exactly what ends up
   // in the final prompt for every mode (Character/Graphics/Combined/etc.
-  // via buildSentence, Couples/Logo/Animals via their own manual
+  // via buildSentence, Couples/Animals via their own manual
   // assembly — see each mode's own assemblePrompt()), so one threshold
   // works everywhere without needing a per-mode field count.
   var QUALITY_NUDGE_THRESHOLD = 15;
@@ -3343,9 +3200,9 @@
         // this item, instead of needing a separate Vault slot for every
         // tweak — reads the already-rendered preview textarea rather
         // than recomputing per-mode formatting logic a second time here
-        // (Logo/Combined each have their own extra formatting steps that
-        // renderPreview/renderCombinedPreview/renderLogoPreview already
-        // handled once, just above this in the render order).
+        // (Combined has its own extra formatting steps that
+        // renderPreview/renderCombinedPreview already handled once, just
+        // above this in the render order).
         var saveVersionBtn = el("button", { type: "button", class: "ph-btn ph-btn--small", text: "Save as New Version" });
         saveVersionBtn.title = "Adds the prompt you're currently building as a new version of this item — doesn't use up another Vault slot.";
         saveVersionBtn.addEventListener("click", function () {
@@ -3858,7 +3715,7 @@
       "color",
       "sparkle",
       "Color System",
-      "Type your own or a hex code (e.g. \"#B76E79\") for an exact match — reaches Text Mode's Color Scheme + Second Phrase, and Image Reference's Add Text.",
+      "Type your own or a hex code (e.g. \"#B76E79\") for an exact match — reaches Text Mode's Color Scheme + Second Phrase, and Image/Prompt Reference's Add Text.",
       fields
     );
   }
@@ -3874,7 +3731,7 @@
       "typography",
       "text",
       "Typography System",
-      "Primary reaches Text Mode's Letter Style, Graphics' Vanity Plate lettering, and Image Reference's Add Text. Accent reaches Text Mode's Second Phrase. Secondary Font is recorded here but has no matching field yet — this tool doesn't have a body-text concept outside single phrases.",
+      "Primary reaches Text Mode's Letter Style, Graphics' Vanity Plate lettering, and Image/Prompt Reference's Add Text. Accent reaches Text Mode's Second Phrase. Secondary Font is recorded here but has no matching field yet — this tool doesn't have a body-text concept outside single phrases.",
       fields
     );
   }
@@ -3892,7 +3749,7 @@
       "visualStyle",
       "image",
       "Visual Style Direction",
-      "Aesthetic reaches Character/Couples/Graphics/Image Reference's art style + finish. Texture reaches Text Mode + Image Reference's Text Effects. Lighting reaches Character/Couples/Graphics' Lighting Effects. Composition Style has no field to write into, so it's added as its own descriptor in the assembled prompt instead.",
+      "Aesthetic reaches Character/Couples/Graphics/Image/Prompt Reference's art style + finish. Texture reaches Text Mode + Image/Prompt Reference's Text Effects. Lighting reaches Character/Couples/Graphics' Lighting Effects. Composition Style has no field to write into, so it's added as its own descriptor in the assembled prompt instead.",
       fields
     );
   }
@@ -3930,19 +3787,16 @@
 
     var projectSelect = el("select", { class: "ph-field__select" });
     projectSelect.id = "ph-field-" + projectSelect.getAttribute("data-ph-key");
-    styleDNAState.projectType.options
-      .filter(function (opt) {
-        // background/wallpaper promises "no character" — a promise
-        // Character/Couples/Combined Mode can never keep, since
-        // describing a character is the whole job of those modes.
-        return !PromptHaus.styleDNA.isProjectTypeHiddenForMode(opt, activeMode);
-      })
-      .forEach(function (opt) {
+    (styleDNAState.projectType.optionGroups || []).forEach(function (group) {
+      var optgroup = el("optgroup", { label: group.label });
+      group.options.forEach(function (opt) {
         var optionNode = el("option", { value: opt });
         optionNode.textContent = opt;
         if (opt === styleDNAState.projectType.value) optionNode.selected = true;
-        projectSelect.appendChild(optionNode);
+        optgroup.appendChild(optionNode);
       });
+      projectSelect.appendChild(optgroup);
+    });
     projectSelect.addEventListener("change", function () {
       PromptHaus.styleDNA.setProjectType(projectSelect.value);
       renderApp();
@@ -3976,38 +3830,6 @@
     appendSelectOptions(platformSelect, styleDNAState.targetPlatform, styleDNAState.targetPlatform.value);
     platformSelect.addEventListener("change", function () {
       PromptHaus.styleDNA.setTargetPlatform(platformSelect.value);
-      renderApp();
-    });
-
-    var holidaySelect = el("select", { class: "ph-field__select" });
-    holidaySelect.id = "ph-field-" + holidaySelect.getAttribute("data-ph-key");
-    appendSelectOptions(holidaySelect, styleDNAState.holiday, styleDNAState.holiday.value);
-    holidaySelect.addEventListener("change", function () {
-      PromptHaus.styleDNA.setHoliday(holidaySelect.value);
-      renderApp();
-    });
-
-    var themeSelect = el("select", { class: "ph-field__select" });
-    themeSelect.id = "ph-field-" + themeSelect.getAttribute("data-ph-key");
-    appendSelectOptions(themeSelect, styleDNAState.theme, styleDNAState.theme.value);
-    themeSelect.addEventListener("change", function () {
-      PromptHaus.styleDNA.setTheme(themeSelect.value);
-      renderApp();
-    });
-
-    var nicheSelect = el("select", { class: "ph-field__select" });
-    nicheSelect.id = "ph-field-" + nicheSelect.getAttribute("data-ph-key");
-    appendSelectOptions(nicheSelect, styleDNAState.niche, styleDNAState.niche.value);
-    nicheSelect.addEventListener("change", function () {
-      PromptHaus.styleDNA.setNiche(nicheSelect.value);
-      renderApp();
-    });
-
-    var mockupSelect = el("select", { class: "ph-field__select" });
-    mockupSelect.id = "ph-field-" + mockupSelect.getAttribute("data-ph-key");
-    appendSelectOptions(mockupSelect, styleDNAState.mockupView, styleDNAState.mockupView.value);
-    mockupSelect.addEventListener("change", function () {
-      PromptHaus.styleDNA.setMockupView(mockupSelect.value);
       renderApp();
     });
 
@@ -4054,66 +3876,28 @@
     var variationField = el("div", { class: "ph-styledna__field" }, [labelWithIcon("sparkle", "Variations", variationSelect.id, null, variationHelp), variationSelect]);
     variationField.title = variationHelp;
 
-    var holidayHelp = "Calendar holidays and religious/cultural observances — shared across every mode.";
-    var holidayField = el("div", { class: "ph-styledna__field" }, [labelWithIcon("gift", "Holiday", holidaySelect.id, null, holidayHelp), holidaySelect]);
-    holidayField.title = holidayHelp;
-
-    var themeHelp = "Life events and moods (graduation, self love, motivational, etc.) — shared across every mode.";
-    var themeField = el("div", { class: "ph-styledna__field" }, [labelWithIcon("sparkle", "Theme", themeSelect.id, null, themeHelp), themeSelect]);
-    themeField.title = themeHelp;
-
-    var nicheHelp = "Ongoing hobby/interest communities (coffee culture, travel/adventure, hustle culture, etc.) — shared across every mode.";
-    var nicheField = el("div", { class: "ph-styledna__field" }, [labelWithIcon("heart", "Niche", nicheSelect.id, null, nicheHelp), nicheSelect]);
-    nicheField.title = nicheHelp;
-
-    var mockupHelp = "Which product/surface the design is shown on (t-shirt, mug, phone case, etc.) — shared across every mode.";
-    var mockupField = el("div", { class: "ph-styledna__field" }, [labelWithIcon("monitor", "Mockup View", mockupSelect.id, null, mockupHelp), mockupSelect]);
-    mockupField.title = mockupHelp;
-
     var aspectHelp = "Auto-follows Project Type until you set it manually. Only appears in the copied prompt for Midjourney/Leonardo AI (as --ar) — other platforms don't have an equivalent tag, so it won't show up in the text there.";
     var aspectField = el("div", { class: "ph-styledna__field" }, [labelWithIcon("crop", "Aspect Ratio", aspectSelect.id, null, aspectHelp), aspectSelect, autoBadge]);
 
-    // Logo Mode doesn't use Project Type/Aspect Ratio/Mockup/Holiday/Theme/
-    // Niche/Variations/the Negative Prompt widget at all — it has its own
-    // Canvas Format, Output, Negative Constraints, etc. Rather than show
-    // controls that don't do anything there, this bar swaps in Logo's own
-    // Dimensional Treatment/Background/Canvas Format/Output in their place,
-    // keeping only Target Platform + Buffer/Padding from the normal set.
-    //
-    // Animals & Creatures Mode keeps the full standard set of "format"
-    // controls (Project Type/Aspect Ratio/Target Platform/Variations/
-    // Buffer/Mockup/Negative Prompt) but drops Holiday/Theme/Niche — this
-    // tab's own creatures/Style/Frame It/Imagery already cover mood and
-    // setting, and those 3 fields have no matching contribution in its
-    // assembler (see prompt-builder-animals.js), so showing them here
-    // would repeat the exact "widget with no effect" bug Project Type had
-    // before it was fixed.
+    var title = el("div", { class: "ph-styledna__title" }, [icon("shirt"), el("span", { text: "Project Setup" })]);
+
+    // Collection Builder's Project Type/Aspect Ratio/Variations/Buffer are
+    // single shared VALUES, not "this collection's" own setting — editing
+    // them here would silently overwrite the one value every individual
+    // mode's own tab also reads, including modes not even checked here.
+    // Target Platform (how the whole collection gets formatted on copy) is
+    // the only one of this set that makes sense to touch from this tab.
     var children;
-    if (activeMode === "logo") {
-      children = [platformField, bufferField, renderLogoDimensionalBarField(), renderLogoBackgroundBarField(), renderLogoCanvasFormatBarField(), renderLogoOutputBarField()];
-    } else if (activeMode === "collection") {
-      // Project Type/Aspect Ratio/Variations/Mockup View/Buffer are single
-      // shared VALUES, not "this collection's" own setting — editing them
-      // here would silently overwrite the one value every individual
-      // mode's own tab also reads, including modes not even checked here.
-      // Target Platform (how the whole collection gets formatted on copy)
-      // and Holiday/Theme/Niche (explicitly called out in this panel's own
-      // subtitle as "set once here, carries into every prompt") are the
-      // only ones that make sense to touch from this tab.
-      children = [platformField, holidayField, themeField, nicheField, renderNegativePromptField()];
-    } else if (activeMode === "animals") {
-      children = [projectField, aspectField, platformField, variationField, bufferField, mockupField, renderNegativePromptField()];
+    if (activeMode === "collection") {
+      children = [title, platformField, renderNegativePromptField()];
     } else {
       children = [
+        title,
         projectField,
         aspectField,
         platformField,
         variationField,
         bufferField,
-        mockupField,
-        holidayField,
-        themeField,
-        nicheField,
         renderNegativePromptField(),
       ];
     }
@@ -4121,101 +3905,10 @@
     root.appendChild(el("div", { class: "ph-styledna" }, children));
   }
 
-  // ---------------------------------------------------------------------
-  // Logo Mode's own Style DNA bar fields — same plain-select styling as
-  // every other bar field (no custom-text override in this bar, matching
-  // its existing visual language), just backed by PromptHaus.logo instead
-  // of PromptHaus.styleDNA.
-  // ---------------------------------------------------------------------
-  function renderLogoBarSelect(iconName, label, options, currentValue, onChange, tooltip) {
-    var select = el("select", { class: "ph-field__select" });
-    select.id = "ph-field-" + select.getAttribute("data-ph-key");
-    options.forEach(function (opt) {
-      var optionNode = el("option", { value: opt, text: opt });
-      if (opt === currentValue) optionNode.selected = true;
-      select.appendChild(optionNode);
-    });
-    select.addEventListener("change", function () {
-      onChange(select.value);
-      renderApp();
-    });
-    var field = el("div", { class: "ph-styledna__field" }, [labelWithIcon(iconName, label, select.id), select]);
-    if (tooltip) field.title = tooltip;
-    return field;
-  }
-
-  function renderLogoDimensionalBarField() {
-    var state = PromptHaus.logo.getState();
-    return renderLogoBarSelect(
-      "logoMark",
-      "Dimensional Treatment",
-      PromptHaus.logo.optionLists.dimensional,
-      state.dimensional.value,
-      function (value) {
-        PromptHaus.logo.updateField("dimensional", { value: value, customValue: "" });
-      },
-      "Flat is your real, usable logo. Dimensional/3D is a presentation treatment, not a production file."
-    );
-  }
-
-  function renderLogoBackgroundBarField() {
-    var state = PromptHaus.logo.getState();
-    return renderLogoBarSelect(
-      "image",
-      "Background",
-      PromptHaus.logo.optionLists.background,
-      state.background.value,
-      function (value) {
-        PromptHaus.logo.updateField("background", { value: value, customValue: "" });
-      }
-    );
-  }
-
-  function renderLogoCanvasFormatBarField() {
-    var state = PromptHaus.logo.getState();
-    var select = el("select", { class: "ph-field__select" });
-    select.id = "ph-field-" + select.getAttribute("data-ph-key");
-    PromptHaus.logo.optionLists.canvasFormat.forEach(function (opt) {
-      var optionNode = el("option", { value: opt, text: opt });
-      if (opt === state.canvasFormat.value) optionNode.selected = true;
-      select.appendChild(optionNode);
-    });
-    select.addEventListener("change", function () {
-      PromptHaus.logo.setCanvasFormatManually(select.value);
-      renderApp();
-    });
-    var autoBadge = state.canvasFormat.auto
-      ? el("span", { class: "ph-styledna__auto-badge", text: "auto" })
-      : el("button", { type: "button", class: "ph-styledna__reset-auto", text: "reset to auto" });
-    if (!state.canvasFormat.auto) {
-      autoBadge.addEventListener("click", function () {
-        PromptHaus.logo.resetCanvasFormatToAuto();
-        renderApp();
-      });
-    }
-    var field = el("div", { class: "ph-styledna__field" }, [labelWithIcon("crop", "Canvas Format", select.id), select, autoBadge]);
-    field.title = "Auto-suggested from Composition & Lockup's Layout choice below.";
-    return field;
-  }
-
-  function renderLogoOutputBarField() {
-    var state = PromptHaus.logo.getState();
-    return renderLogoBarSelect(
-      "sparkle",
-      "Output",
-      PromptHaus.logo.optionLists.outputVariations,
-      state.outputVariations.value,
-      function (value) {
-        PromptHaus.logo.updateField("outputVariations", { value: value, customValue: "" });
-      },
-      "How many concepts to generate — or a full logo system set (primary + simplified submark)."
-    );
-  }
-
   // One shared exclusion list, not one per section — real AI tools only
   // support a single negative prompt per generation (Midjourney's --no,
   // Stable Diffusion's negative box), so this lives here alongside Holiday/
-  // Filter/Mockup View rather than duplicated into every mode's own Style
+  // Theme/Niche/Filter rather than duplicated into every mode's own Style
   // group. Full-width row (ph-styledna__field--full) since a textarea +
   // chip row doesn't fit the compact 3-per-row dropdown grid above it.
   function renderNegativePromptField() {
@@ -4350,7 +4043,7 @@
     },
     {
       q: "What does Reset actually clear?",
-      a: "That mode's own fields, plus Holiday/Theme, Filter, Imagery, and Negative Prompt. Mockup View, Buffer/Padding, and the format settings (Project Type, Aspect Ratio, Target Platform, Variations) are left as you set them.",
+      a: "That mode's own fields, plus Holiday/Creative Theme/Niche/Target Audience/Mood, Filter, Imagery, and Negative Prompt. Buffer/Padding and the format settings (Project Type, Aspect Ratio, Target Platform, Variations) are left as you set them.",
     },
     {
       q: "What's the difference between Core Style and Variation Details in Text Mode?",
@@ -4390,7 +4083,7 @@
     },
     {
       q: "What's the Imagery section for?",
-      a: "Small symbolic elements — a cross, a holiday icon, a military emblem, a nature/sci-fi/fantasy element — woven into the image. Pick up to 4 total across the 6 categories. Every mode has it except Logo Mode, since a logo's composition is handled by its own Foundation/Composition & Lockup fields instead.",
+      a: "Small symbolic elements — a cross, a holiday icon, a military emblem, a nature/sci-fi/fantasy element — woven into the image. Pick up to 4 total across the categories. Every mode has it.",
     },
     {
       q: "Will my saved prompts still be there if I close my browser?",
@@ -4398,14 +4091,18 @@
     },
     {
       q: "Can I turn a real photo into an illustration style?",
-      a: "Yes — in Image Reference Mode, upload or describe your photo, then use Style Adjustment (Reimagined Style + Art Finish) to recreate it in a different style, like watercolor or chibi.",
+      a: "Yes — in Image/Prompt Reference Mode, upload or describe your photo, then use Style Adjustment (Reimagined Style + Art Finish) to recreate it in a different style, like watercolor or chibi.",
+    },
+    {
+      q: "I found a prompt someone else wrote — will it just get copied if I paste it in?",
+      a: "No. Switch Image/Prompt Reference Mode to \"Reference a Prompt\" and paste it there — the assembled prompt explicitly tells the AI to use it only as loose creative direction and produce an original result, not reuse the wording. Pick your own Reimagined Style/Art Finish on top for an even more distinct result.",
     },
     {
       q: "Why is Filter now inside each mode's Style section instead of the top bar?",
       a: "It's a rendering/finish choice, like Art Finish — grouping it with the rest of the mode's style controls makes it easier to find.",
     },
     {
-      q: "My Image Reference description fights with the style I picked — why, and what fixes it?",
+      q: "My Image/Prompt Reference description fights with the style I picked — why, and what fixes it?",
       a: "If your description was reverse-engineered from a real photo (through ChatGPT or a similar tool), it's usually full of photographic/camera language. Once you pick a Reimagined Style, the prompt automatically tells the AI to replace any photographic qualities in the description with that style — you don't need to edit the description yourself.",
     },
     {
@@ -4418,11 +4115,7 @@
     },
     {
       q: "What does Negative Prompt do?",
-      a: "One shared \"what to avoid\" field at the top of the tool, applied to every mode — formatted as --no tags for Midjourney/Leonardo, or an \"Avoid:\" sentence for everything else. If you're in Logo Mode, its own Negative Constraints checkboxes and Brand Kit's \"What the Brand is NOT\" both merge into this same list automatically.",
-    },
-    {
-      q: "What's the difference between Lite, Standard, and Pro in Logo Mode?",
-      a: "Standard is the normal field set. Lite keeps every field visible but asks the AI for a simpler design. Pro additionally reveals strategist-level controls — Archetype, Style Era, Symbol Meaning, Competitor-Style Avoidance.",
+      a: "One shared \"what to avoid\" field at the top of the tool, applied to every mode — formatted as --no tags for Midjourney/Leonardo, or an \"Avoid:\" sentence for everything else. Brand Kit's \"What the Brand is NOT\" merges into this same list automatically.",
     },
     {
       q: "Can I get a saved prompt back into the builder to keep editing it?",
@@ -4601,11 +4294,6 @@
       renderSelectionsPanel(right, activeMode, PromptHaus.animals.getSelectionsByGroup());
       renderPreview(right, PromptHaus.animals.assemblePrompt(), PromptHaus.animals, activeMode);
       renderSavedPrompts(right, activeMode);
-    } else if (activeMode === "logo") {
-      left.appendChild(renderLogoPanel());
-      renderSelectionsPanel(right, activeMode, PromptHaus.logo.getSelectionsByGroup());
-      renderLogoPreview(right);
-      renderSavedPrompts(right, activeMode);
     } else {
       left.appendChild(el("p", { class: "ph-coming-soon", text: MODE_LABELS[activeMode] + " Mode is coming soon." }));
     }
@@ -4617,18 +4305,13 @@
     // Same FAQ regardless of mode, right under Your Vault / Brand Kit.
     renderFAQSection(right);
 
-    // Imagery lives in shared Style DNA (like Holiday / Theme/Buffer), so it
-    // renders once here rather than being duplicated into all panels.
-    // Logo Mode gets none at all — its own assembler never reads Imagery
-    // (Foundation/Composition & Lockup already own "what's in the mark"),
-    // so showing the widget there would let someone pick something that
-    // silently never reaches the logo prompt, same "invisible field" bug
-    // Project Type had before it was fixed. Same reasoning Logo already
-    // uses to hide Holiday/Theme/Niche from its own Style DNA bar.
-    // Collection Builder has no prompt of its own either — it only ever
-    // displays/combines other modes' already-assembled output — so
-    // picking Imagery here would be exactly the same dead-end widget.
-    if (activeMode !== "logo" && activeMode !== "collection") {
+    // Imagery & Scene Elements lives in shared Style DNA (like Holiday/
+    // Theme/Niche/Buffer), so it renders once here rather than being
+    // duplicated into all panels. Collection Builder has no prompt of its
+    // own — it only ever displays/combines other modes' already-assembled
+    // output — so picking Imagery there would be a dead-end widget, same
+    // "invisible field" bug Project Type had before it was fixed.
+    if (activeMode !== "collection") {
       left.appendChild(renderImagerySection());
     }
 

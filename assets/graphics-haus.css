@@ -1199,7 +1199,7 @@
 }
 .gh-btn--copy {
   background: var(--gh-gold);
-  color: var(--gh-black);
+  color: #fff;
 }
 .gh-btn--randomize {
   background: var(--gh-espresso);
@@ -1651,7 +1651,7 @@
   margin: 0 0 16px;
 }
 .gh-heading-accent {
-  color: var(--gh-gold-on-light);
+  color: var(--gh-espresso);
 }
 .gh-marketing__subheading {
   color: var(--gh-charcoal);

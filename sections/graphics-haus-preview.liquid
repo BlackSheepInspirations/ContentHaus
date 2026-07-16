@@ -10,7 +10,7 @@
 <div class="gh-marketing">
   <div class="gh-marketing__hero">
     <p class="gh-marketing__eyebrow">{{ section.settings.eyebrow }}</p>
-    <h1 class="gh-marketing__heading">{{ section.settings.heading | replace: 'AI', '<span class="gh-heading-accent">AI</span>' }}</h1>
+    <h1 class="gh-marketing__heading">{{ section.settings.heading | replace: 'Graphics', '<span class="gh-heading-accent">Graphics</span>' }}</h1>
     <div class="gh-marketing__subheading">{{ section.settings.subheading }}</div>
     {% if section.settings.access_product %}
       <a href="{{ section.settings.access_product.url }}" class="gh-btn gh-btn--copy gh-marketing__cta">
@@ -69,7 +69,7 @@
       "type": "text",
       "id": "heading",
       "label": "Heading",
-      "default": "The AI Creator's Graphics Haus"
+      "default": "The Graphics Haus"
     },
     {
       "type": "richtext",

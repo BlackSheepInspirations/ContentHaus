@@ -149,14 +149,15 @@
     "two-tone paint",
   ]);
 
-  // Merges the old separate Fantasy Element and Cosplay/Character fields
-  // into one "Characters & Creatures" pick — both answer the same
-  // underlying question ("what being is this"), so splitting them into
-  // two lists just made someone choose between two dropdowns that meant
-  // the same thing. "none" dropped from the merged list — like the other
-  // 4 categories, an empty/unselected default now covers "not this one."
+  // Merges the old separate Fantasy Element and Character Archetype
+  // (formerly Cosplay Character) fields into one "Characters & Creatures"
+  // pick — both answer the same underlying question ("what being is
+  // this"), so splitting them into two lists just made someone choose
+  // between two dropdowns that meant the same thing. "none" dropped from
+  // the merged list — like the other 4 categories, an empty/unselected
+  // default now covers "not this one."
   var CHARACTERS_CREATURES_OPTIONS = sortAlpha(
-    lists.fantasyElements.concat(lists.cosplayCharacter.filter(function (opt) { return opt !== "none"; }))
+    lists.fantasyElements.concat(lists.characterArchetype.filter(function (opt) { return opt !== "none"; }))
   );
   var NATURE_FLORALS_OPTIONS = sortAlpha([
     "rose", "sunflower", "daisy", "tulip", "peony", "lavender sprig", "eucalyptus leaves",
@@ -206,12 +207,12 @@
         charactersCreatures: makeField("", CHARACTERS_CREATURES_OPTIONS, { quantity: 1 }),
         natureFlorals: makeField("", NATURE_FLORALS_OPTIONS, { quantity: 1 }),
         foodDrink: makeField("", FOOD_DRINK_OPTIONS, { quantity: 1 }),
-        props: makeField("", lists.props, { quantity: 1 }),
+        props: PromptHaus.util.makeGroupedField("", lists.propsGroups, { quantity: 1 }),
       },
       styleCategory: "illustrated",
       illustrated: {
         characterType: PromptHaus.util.makeGroupedField("", lists.characterTypeGroups),
-        artFinish: makeField("", lists.artFinish),
+        artFinish: PromptHaus.util.makeGroupedField("", lists.artFinishGroups),
       },
       realisticStyle: makeField("", REALISTIC_STYLE_OPTIONS),
       frameIt: {
@@ -220,7 +221,7 @@
         // Defaulted like Character/Couples' own Lighting Effects — no
         // Pose/Camera Angle field exists here to match, so just this one.
         lightingEffects: makeField("studio lighting", lists.lightingEffects),
-        framing: makeField("no frame", lists.framing),
+        framing: PromptHaus.util.makeGroupedField("no frame", lists.framingGroups),
       },
       haute: {
         vanityPlateType: makeField("none", VANITY_PLATE_TYPE_OPTIONS),
@@ -378,14 +379,19 @@
     return entries;
   }
 
+  // Character Type/Art Finish carry a full descriptive paragraph rather
+  // than a short label at assembly time — this function only feeds
+  // buildOwnEntries()/buildEntriesForCombined() (both assembly-time), never
+  // the UI renderer, which reads state.illustrated.characterType/artFinish
+  // directly and needs the short label to match its <select> options.
   function buildStyleItEntries() {
     var state = store.getState();
     if (state.styleCategory === "realistic") {
       return [{ label: "Style", field: state.realisticStyle }];
     }
     return [
-      { label: "Character Type", field: state.illustrated.characterType },
-      { label: "Art Finish", field: state.illustrated.artFinish },
+      { label: "Character Type", field: PromptHaus.engine.withPromptLookup(state.illustrated.characterType, lists.characterTypePrompts) },
+      { label: "Art Finish", field: PromptHaus.engine.withPromptLookup(state.illustrated.artFinish, lists.artFinishPrompts) },
     ];
   }
 
@@ -419,7 +425,6 @@
   // fields a second (or third) time.
   function buildOwnEntries() {
     var entries = buildWhatIsItComposedEntries();
-    entries = entries.concat(buildStyleItEntries());
     entries = entries.concat(getFrameItEntries().map(function (e) {
       return { label: e.label, field: e.field };
     }));
@@ -440,9 +445,10 @@
   function buildEntries() {
     var entries = buildOwnEntries();
     entries.push({ label: "Holiday", field: PromptHaus.styleDNA.getState().holiday });
-    entries.push({ label: "Theme", field: PromptHaus.styleDNA.getState().theme });
+    entries.push({ label: "Creative Theme", field: PromptHaus.styleDNA.getState().theme });
     entries.push({ label: "Niche", field: PromptHaus.styleDNA.getState().niche });
-    entries.push({ label: "Mockup View", field: PromptHaus.styleDNA.getState().mockupView });
+    entries.push({ label: "Target Audience", field: PromptHaus.styleDNA.getState().targetAudience });
+    entries.push({ label: "Mood", field: PromptHaus.styleDNA.getState().mood });
     entries.push({ label: "Filter It", field: PromptHaus.styleDNA.getState().filter });
     entries = entries.concat(PromptHaus.styleDNA.getImageryEntries());
     entries = entries.concat(PromptHaus.brandKit.getActiveKitEntries());
@@ -453,10 +459,23 @@
     return entries;
   }
 
+  // Character Type/Art Finish carry a full descriptive paragraph (chunk 3)
+  // rather than a short word — previously buildOwnEntries() folded them
+  // into the same flat comma list as What Is It/Frame It/shared Style DNA,
+  // which reads as disconnected/wonky when a multi-sentence paragraph sits
+  // in the middle of a list of short phrases. Pulled into their own intro
+  // sentences instead, mirroring Character Mode's placement.
   function assemblePrompt() {
     var count = parseInt(PromptHaus.styleDNA.getState().variationCount.value, 10) || 4;
-    var intro = "Create " + count + (count === 1 ? " variation" : " variations") +
-      " of a clean, professional graphic featuring a";
+    var styleResolved = PromptHaus.engine.resolveFields(buildStyleItEntries());
+    var introParts = ["Create " + count + (count === 1 ? " variation" : " variations") + " of a clean, professional graphic."];
+    var stickerSheetGuard = PromptHaus.engine.stickerSheetGuard(count);
+    if (stickerSheetGuard) introParts.push(stickerSheetGuard);
+    styleResolved.forEach(function (r) {
+      var prefix = r.label === "Character Type" ? "Illustration style" : r.label === "Art Finish" ? "Art finish" : r.label;
+      introParts.push(prefix + ": " + r.value + (/[.!?]$/.test(r.value) ? "" : "."));
+    });
+    var intro = introParts.join(" ") + " Featuring a";
     return PromptHaus.engine.buildSentence({ intro: intro, fieldEntries: buildEntries() });
   }
 
@@ -502,17 +521,18 @@
 
     var holidayResolved = PromptHaus.engine.resolveFields([
       { label: "Holiday", field: PromptHaus.styleDNA.getState().holiday },
-      { label: "Theme", field: PromptHaus.styleDNA.getState().theme },
+      { label: "Creative Theme", field: PromptHaus.styleDNA.getState().theme },
       { label: "Niche", field: PromptHaus.styleDNA.getState().niche },
-      { label: "Mockup View", field: PromptHaus.styleDNA.getState().mockupView },
+      { label: "Target Audience", field: PromptHaus.styleDNA.getState().targetAudience },
+      { label: "Mood", field: PromptHaus.styleDNA.getState().mood },
       { label: "Filter It", field: PromptHaus.styleDNA.getState().filter },
     ]);
-    if (holidayResolved.length) groups.push({ title: "Holiday, Theme & Niche", items: holidayResolved });
+    if (holidayResolved.length) groups.push({ title: "Concept & Filter", items: holidayResolved });
 
     var imageryEntries = PromptHaus.styleDNA.getImageryEntries();
     if (imageryEntries.length) {
       groups.push({
-        title: "Imagery",
+        title: "Imagery & Scene Elements",
         items: imageryEntries.map(function (e) {
           return { label: e.label, value: e.field.value };
         }),

@@ -111,8 +111,13 @@
   padding: 10px 18px;
   font-size: 15px;
   font-weight: 600;
-  color: var(--mh-espresso);
+  color: var(--mh-charcoal);
   cursor: pointer;
+}
+/* Only the icon reads pink — the label stays charcoal so the pink doesn't
+   dominate the tab row the way it did when both shared one color. */
+.mh-tabs__btn .mh-icon {
+  color: var(--mh-espresso);
 }
 /* Selected tab reads unambiguously — solid teal fill + white text/icon,
    not just an underline accent. */
@@ -121,9 +126,15 @@
   color: #fff;
   border-color: var(--mh-teal);
 }
+.mh-tabs__btn.is-active .mh-icon {
+  color: #fff;
+}
 .mh-tabs__btn.is-disabled {
   color: rgba(46, 42, 38, 0.4);
   cursor: not-allowed;
+}
+.mh-tabs__btn.is-disabled .mh-icon {
+  color: rgba(46, 42, 38, 0.4);
 }
 
 /* Style DNA bar */
@@ -1084,7 +1095,7 @@
 .mh-preview__title {
   font-size: 18px;
   margin: 0 0 4px;
-  color: var(--mh-gold);
+  color: var(--mh-espresso);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -1162,11 +1173,11 @@
   outline-offset: 2px;
 }
 .mh-btn--copy {
-  background: var(--mh-gold);
-  color: var(--mh-black);
+  background: var(--mh-espresso);
+  color: #fff;
 }
 .mh-btn--randomize {
-  background: var(--mh-espresso);
+  background: var(--mh-gold);
   color: var(--mh-cream);
 }
 .mh-btn--reset {
@@ -1711,7 +1722,7 @@
   margin: 0 0 16px;
 }
 .mh-heading-accent {
-  color: var(--mh-gold-on-light);
+  color: var(--mh-espresso);
 }
 .mh-marketing__subheading {
   color: var(--mh-charcoal);

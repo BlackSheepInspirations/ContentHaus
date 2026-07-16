@@ -10,7 +10,7 @@
 <div class="mh-marketing">
   <div class="mh-marketing__hero">
     <p class="mh-marketing__eyebrow">{{ section.settings.eyebrow }}</p>
-    <h1 class="mh-marketing__heading">{{ section.settings.heading | replace: 'AI', '<span class="mh-heading-accent">AI</span>' }}</h1>
+    <h1 class="mh-marketing__heading">{{ section.settings.heading | replace: 'Marketing', '<span class="mh-heading-accent">Marketing</span>' }}</h1>
     <div class="mh-marketing__subheading">{{ section.settings.subheading }}</div>
     {% if section.settings.access_product %}
       <a href="{{ section.settings.access_product.url }}" class="mh-btn mh-btn--copy mh-marketing__cta">
@@ -69,7 +69,7 @@
       "type": "text",
       "id": "heading",
       "label": "Heading",
-      "default": "The AI Creator's Marketing Haus"
+      "default": "The Marketing Haus"
     },
     {
       "type": "richtext",

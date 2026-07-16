@@ -10,7 +10,7 @@
 <div class="bh-marketing">
   <div class="bh-marketing__hero">
     <p class="bh-marketing__eyebrow">{{ section.settings.eyebrow }}</p>
-    <h1 class="bh-marketing__heading">{{ section.settings.heading }}</h1>
+    <h1 class="bh-marketing__heading">{{ section.settings.heading | replace: 'Brand', '<span class="bh-heading-accent">Brand</span>' }}</h1>
     <p class="bh-marketing__tagline">{{ section.settings.tagline | replace: 'Brand DNA Blueprint', '<span class="bh-heading-accent">Brand DNA Blueprint</span>' }}</p>
     <div class="bh-marketing__subheading">{{ section.settings.subheading }}</div>
     {% if section.settings.access_product %}

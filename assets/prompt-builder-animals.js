@@ -16,11 +16,11 @@
  * Attitude/Expression, Pose) is this mode's own, deliberately deeper than
  * Companion's lightweight shape.
  *
- * Style DNA bar is mode-aware for "animals" (see renderStyleDNA in
- * prompt-builder-ui.js) — Project Type/Aspect Ratio/Target Platform/
- * Variations/Buffer/Mockup/Negative Prompt only, no Holiday/Theme/Niche,
- * same pattern Logo Mode established first. Imagery gets the full, un-
- * filtered set of all 6 categories, same as every other mode except Logo —
+ * Project Setup bar (Project Type/Aspect Ratio/Target Platform/
+ * Variations/Buffer/Negative Prompt) plus its own Concept • Creative
+ * Direction box (Holiday/Creative Theme/Niche/Target Audience/Mood) are
+ * shared across every mode, same as everywhere else. Imagery gets the
+ * full, unfiltered set of all categories, same as every other mode —
  * Faith-Based (a halo/cross for a pet that's passed) and Military &
  * Patriotic (a branch mascot like the Marines' bulldog or a unit's animal
  * emblem) both have genuine standing here, not just Nature/Sci-Fi/Fantasy.
@@ -123,7 +123,7 @@
       creatures: creatures,
       style: {
         characterType: PromptHaus.util.makeGroupedField("", characterLists.characterTypeGroups),
-        artFinish: makeField("", characterLists.artFinish),
+        artFinish: PromptHaus.util.makeGroupedField("", characterLists.artFinishGroups),
       },
       frameIt: {
         background: PromptHaus.util.makeGroupedField("", characterLists.backgroundGroups),
@@ -131,7 +131,7 @@
         // Defaulted like Character/Couples/Graphics' own Lighting Effects —
         // no Pose/Camera Angle field exists here to match, so just this one.
         lightingEffects: makeField("studio lighting", characterLists.lightingEffects),
-        framing: makeField("no frame", characterLists.framing),
+        framing: PromptHaus.util.makeGroupedField("no frame", characterLists.framingGroups),
       },
       addText: {
         include: false,
@@ -233,6 +233,27 @@
       });
   }
 
+  // Letter Style/Color Scheme/Text Effects contribute a full descriptive
+  // paragraph to the assembled prompt, not their short dropdown label —
+  // used only here at assembly time, never by the UI renderer (which
+  // reads getAddTextStyleEntries() directly and needs the short label).
+  var TEXT_PARAGRAPH_LOOKUP_BY_FIELD = {
+    letterStyle: textLists.letterStylePrompts,
+    colorScheme: textLists.colorSchemePrompts,
+    textEffects: textLists.textEffectsPrompts,
+  };
+  function withTextParagraphLookup(e) {
+    var lookup = TEXT_PARAGRAPH_LOOKUP_BY_FIELD[e.fieldName];
+    if (!lookup) return { label: e.label, field: e.field };
+    var field = PromptHaus.engine.withPromptLookup(e.field, lookup);
+    // Letter Style's paragraphs carry a literal "<product type>" token
+    // meant to be filled in dynamically, not shipped verbatim.
+    if (e.fieldName === "letterStyle" && field.value && field.value.indexOf("<product type>") !== -1) {
+      field = Object.assign({}, field, { value: field.value.split("<product type>").join(PromptHaus.styleDNA.getProjectTypeValue()) });
+    }
+    return { label: e.label, field: field };
+  }
+
   // Composes the typed text + its own styling into one descriptive clause,
   // same pattern as Reference/Text Mode's own Add Text.
   function buildTextClause() {
@@ -241,9 +262,7 @@
     var text = (addText.text.value || "").trim();
     if (!text) return "";
     var descriptors = PromptHaus.engine.resolveFields(
-      getAddTextStyleEntries().map(function (e) {
-        return { label: e.label, field: e.field };
-      })
+      getAddTextStyleEntries().map(withTextParagraphLookup)
     ).map(function (r) {
       return r.value;
     });
@@ -256,13 +275,20 @@
     return { label: e.label, field: e.field };
   }
 
-  // Shared, non-creature-specific descriptors — everything each mode
-  // besides Holiday/Theme/Niche normally mixes in, minus those three
-  // (deliberately excluded from this mode's own bar, see file header).
+  // Shared, non-creature-specific descriptors — everything every mode
+  // mixes in, including the Concept • Creative Direction set (Holiday/
+  // Creative Theme/Niche/Target Audience/Mood), same as everywhere else.
   function getSharedEntries() {
-    var entries = getStyleEntries().map(toEntry).concat(getFrameItEntries().map(toEntry));
+    var entries = getStyleEntries()
+      .filter(function (e) { return e.fieldName !== "characterType" && e.fieldName !== "artFinish"; })
+      .map(toEntry)
+      .concat(getFrameItEntries().map(toEntry));
     entries.push({ label: "Filter It", field: PromptHaus.styleDNA.getState().filter });
-    entries.push({ label: "Mockup View", field: PromptHaus.styleDNA.getState().mockupView });
+    entries.push({ label: "Holiday", field: PromptHaus.styleDNA.getState().holiday });
+    entries.push({ label: "Creative Theme", field: PromptHaus.styleDNA.getState().theme });
+    entries.push({ label: "Niche", field: PromptHaus.styleDNA.getState().niche });
+    entries.push({ label: "Target Audience", field: PromptHaus.styleDNA.getState().targetAudience });
+    entries.push({ label: "Mood", field: PromptHaus.styleDNA.getState().mood });
     entries = entries.concat(PromptHaus.styleDNA.getImageryEntries());
     entries = entries.concat(PromptHaus.brandKit.getActiveKitEntries());
     var projectTypeEntry = PromptHaus.styleDNA.getProjectTypeEntry("animals");
@@ -275,18 +301,41 @@
   // Same multi-subject shape as Couples Mode's Character A/B — each
   // creature is a full independent subject in the same scene, not a
   // trailing descriptor, so it gets its own "Creature N: a ..." sentence.
+  //
+  // Character Type/Art Finish carry a full descriptive paragraph (chunk 3)
+  // rather than a short word — previously they rode inside getSharedEntries
+  // and landed as one trailing sentence AFTER every creature is already
+  // described. Pulled into their own intro sentences instead, mirroring
+  // Character Mode's Illustration Style/Art Finish placement, so the style
+  // is established before any creature is described.
   function assemblePrompt() {
     var count = parseInt(PromptHaus.styleDNA.getState().variationCount.value, 10) || 4;
     var creatures = store.getState().creatures;
+
+    var styleEntries = getStyleEntries().filter(function (e) { return e.fieldName === "characterType" || e.fieldName === "artFinish"; });
+    var characterTypeEntry = styleEntries.filter(function (e) { return e.fieldName === "characterType"; })[0];
+    var artFinishEntry = styleEntries.filter(function (e) { return e.fieldName === "artFinish"; })[0];
+    var illustrationStyleText = characterTypeEntry
+      ? PromptHaus.engine.resolveFieldValue(PromptHaus.engine.withPromptLookup(characterTypeEntry.field, characterLists.characterTypePrompts))
+      : "";
+    var artFinishText = artFinishEntry
+      ? PromptHaus.engine.resolveFieldValue(PromptHaus.engine.withPromptLookup(artFinishEntry.field, characterLists.artFinishPrompts))
+      : "";
 
     var parts = [];
     parts.push(
       "Create " + count + (count === 1 ? " variation" : " variations") +
       " of a clean, professional portrait featuring the following animal(s)/creature(s)."
     );
+    var stickerSheetGuard = PromptHaus.engine.stickerSheetGuard(count);
+    if (stickerSheetGuard) parts.push(stickerSheetGuard);
+    if (illustrationStyleText) parts.push("Illustration style: " + illustrationStyleText);
+    if (artFinishText) parts.push("Art finish: " + artFinishText);
 
     var allResolved = [];
     var fragments = [];
+    if (illustrationStyleText) { allResolved.push({ label: "Illustration Style", value: illustrationStyleText }); fragments.push(illustrationStyleText); }
+    if (artFinishText) { allResolved.push({ label: "Art Finish", value: artFinishText }); fragments.push(artFinishText); }
     creatures.forEach(function (creature, i) {
       var resolved = PromptHaus.engine.resolveFields(getCreatureFieldEntries(i).map(toEntry));
       if (!resolved.length) return;
@@ -332,16 +381,20 @@
     var textClause = buildTextClause();
     if (textClause) groups.push({ title: "Text", items: [{ label: "Text", value: textClause }] });
 
-    var filterMockupResolved = PromptHaus.engine.resolveFields([
+    var conceptFilterResolved = PromptHaus.engine.resolveFields([
+      { label: "Holiday", field: PromptHaus.styleDNA.getState().holiday },
+      { label: "Creative Theme", field: PromptHaus.styleDNA.getState().theme },
+      { label: "Niche", field: PromptHaus.styleDNA.getState().niche },
+      { label: "Target Audience", field: PromptHaus.styleDNA.getState().targetAudience },
+      { label: "Mood", field: PromptHaus.styleDNA.getState().mood },
       { label: "Filter It", field: PromptHaus.styleDNA.getState().filter },
-      { label: "Mockup View", field: PromptHaus.styleDNA.getState().mockupView },
     ]);
-    if (filterMockupResolved.length) groups.push({ title: "Filter & Mockup View", items: filterMockupResolved });
+    if (conceptFilterResolved.length) groups.push({ title: "Concept & Filter", items: conceptFilterResolved });
 
     var imageryEntries = PromptHaus.styleDNA.getImageryEntries();
     if (imageryEntries.length) {
       groups.push({
-        title: "Imagery",
+        title: "Imagery & Scene Elements",
         items: imageryEntries.map(function (e) {
           return { label: e.label, value: e.field.value };
         }),

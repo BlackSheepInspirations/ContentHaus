@@ -2,13 +2,15 @@
    Same component CSS, same token names (--pdh-cream, --pdh-gold, etc.) as
    Prompt Haus/Marketing Haus for a minimal, low-risk port — only the hex
    values change. Black/charcoal/teal/border/cream are unchanged (shared
-   with Marketing Haus, already proven); espresso becomes a warm
-   terracotta/rust (this Haus's own distinct accent, replacing Marketing
-   Haus's hot pink) and gold is a real gold (unlike Marketing Haus's
-   --mh-gold, which is actually a flat grey mislabeled "gold" — fixed
-   here from the start rather than repeating that bug in a new product;
-   --pdh-gold-on-light is kept as an alias of the same value only so nothing
-   that already references it breaks).
+   with Marketing Haus, already proven); espresso is a bright blue (this
+   Haus's own distinct accent, swapped in from an earlier terracotta/rust —
+   #2563EB chosen so white/cream button text on an espresso background
+   still clears WCAG AA, same ~5:1 contrast the terracotta it replaced had)
+   and gold is a real gold (unlike Marketing Haus's --mh-gold, which is
+   actually a flat grey mislabeled "gold" — fixed here from the start
+   rather than repeating that bug in a new product; --pdh-gold-on-light is
+   kept as an alias of the same value only so nothing that already
+   references it breaks).
    Shared across the app shell, the locked state, and the marketing page —
    those last two render outside #product-haus-app entirely (the locked
    state replaces it, the marketing page is a separate page/section), so
@@ -22,7 +24,7 @@
   --pdh-gold: #C9A84C;
   --pdh-teal: #0D7377;
   --pdh-charcoal: #2E2A26;
-  --pdh-espresso: #B5502B;
+  --pdh-espresso: #2563EB;
   --pdh-border: rgba(46, 42, 38, 0.15);
   --pdh-gold-on-light: #C9A84C;
 
@@ -1263,7 +1265,7 @@
 }
 .pdh-btn--copy {
   background: var(--pdh-gold);
-  color: var(--pdh-black);
+  color: #fff;
 }
 .pdh-btn--randomize {
   background: var(--pdh-espresso);
@@ -1711,7 +1713,7 @@
   margin: 0 0 16px;
 }
 .pdh-heading-accent {
-  color: var(--pdh-gold-on-light);
+  color: var(--pdh-espresso);
 }
 .pdh-marketing__subheading {
   color: var(--pdh-charcoal);

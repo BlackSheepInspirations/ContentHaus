@@ -39,17 +39,22 @@
     return readStore()[mode] || [];
   }
 
-  function isFull(mode) {
-    return getAll(mode).length >= MAX_PER_MODE;
+  // maxOverride lets a specific mode use its own cap instead of the
+  // standard MAX_PER_MODE (e.g. Brand Haus's Saved Results vault, capped
+  // at 3 rather than 5) without a second storage system or a global
+  // constant change that would affect every other mode's Vault.
+  function isFull(mode, maxOverride) {
+    return getAll(mode).length >= (maxOverride || MAX_PER_MODE);
   }
 
-  function save(mode, promptObj) {
+  function save(mode, promptObj, maxOverride) {
+    var max = maxOverride || MAX_PER_MODE;
     var store = readStore();
     var list = store[mode] || [];
-    if (list.length >= MAX_PER_MODE) {
+    if (list.length >= max) {
       return {
         ok: false,
-        reason: "You already have " + MAX_PER_MODE + " saved prompts here — delete one below to save another.",
+        reason: "You already have " + max + " saved prompts here — delete one below to save another.",
       };
     }
     list.push({

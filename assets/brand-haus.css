@@ -2153,6 +2153,26 @@
   color: var(--bh-results-standout, var(--bh-espresso));
   margin: 4px 0 14px;
 }
+/* The one-word motivation tag sitting right under the profile name
+   ("The Quiet Authority — Excellence") — pulls the same top motivation
+   that headlines the Core Motivations guide, so it reads as a teaser
+   into that guide rather than a second, independently-computed label. */
+.bh-chapter__profile-tag {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--bh-charcoal);
+  margin: -8px 0 14px;
+}
+/* The classic-archetype familiarity footnote — deliberately quiet
+   (small, italic, muted) since it's a nice-to-know aside, not part of
+   the actual Brand DNA methodology. */
+.bh-chapter__archetype-note {
+  font-size: 13px;
+  font-style: italic;
+  color: rgba(46, 42, 38, 0.55);
+  margin: 10px 0 0;
+}
 .bh-founder-interview__result-row {
   margin: 12px 0;
 }
@@ -2301,6 +2321,15 @@
   object-fit: cover;
   display: block;
 }
+/* See TIGHT_CROP_SLUGS in brand-haus-results.js — this profile's hero
+   photo has a checkerboard canvas baked into the source file itself,
+   and the box above matches the photo's own aspect ratio exactly (no
+   margin for object-fit:cover to crop away on its own). Scaling the
+   image up within the box's existing overflow:hidden pushes that
+   checkerboard border outside the visible frame on every side. */
+.bh-chapter__hero-image--tight-crop img {
+  transform: scale(1.4);
+}
 .bh-chapter__heading {
   margin-bottom: 24px;
   font-size: 20px;
@@ -2342,6 +2371,12 @@
 }
 .bh-chapter__section-title:first-of-type {
   margin-top: 0;
+}
+.bh-chapter__section-title--with-badge {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
 }
 /* The "you've reached a milestone" moment at the top of Your Brand DNA
    and Your Blueprint — bold and icon-flanked on purpose, not a plain
@@ -3054,6 +3089,41 @@
   font-weight: 800;
   color: var(--bh-results-accent, var(--bh-teal));
 }
+/* Playbook Guide 20's closing credit block — reads like a signature/
+   colophon on a finished deliverable, deliberately quieter than the
+   teal-bordered .bh-chapter__remember box above it since this is a
+   closing flourish, not another callout competing for attention. */
+.bh-chapter__built-for {
+  margin: 32px 0 8px;
+  padding-top: 28px;
+  border-top: 1px solid var(--bh-border);
+  text-align: center;
+}
+.bh-chapter__built-for-label {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--bh-gold-on-light);
+  margin: 0 0 10px;
+}
+.bh-chapter__built-for-name {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--bh-results-primary, var(--bh-black));
+  margin: 0 0 4px;
+}
+.bh-chapter__built-for-role {
+  font-size: 14px;
+  color: var(--bh-charcoal);
+  margin: 0 0 4px;
+}
+.bh-chapter__built-for-date {
+  font-size: 12px;
+  color: rgba(46, 42, 38, 0.55);
+  margin: 0;
+}
+
 /* "A Final Note From Your Brand Strategist" — the closing manifesto,
    reused both as the Report's own closing card and (heroStyle) as the
    page-level closing bookend matching the "...is Complete" banner. */

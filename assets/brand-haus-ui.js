@@ -25,6 +25,16 @@
   var mhKeyCounter = 0;
   var FOCUSABLE_TAGS = { input: true, select: true, textarea: true };
 
+  // Only needed where HTML gets built as a raw string (the print/export
+  // covers below, via win.document.write) — every other render in this
+  // app goes through el()'s textContent assignment, which is already
+  // injection-safe on its own.
+  function escapeHtml(text) {
+    return String(text || "").replace(/[&<>"']/g, function (ch) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch];
+    });
+  }
+
   function el(tag, attrs, children) {
     var node = document.createElement(tag);
     Object.keys(attrs || {}).forEach(function (key) {
@@ -211,7 +221,7 @@
     );
   }
 
-  function buildEpicCoverHtml(profile) {
+  function buildEpicCoverHtml(profile, businessName) {
     var heroMap = window.BrandHausHeroImages || {};
     var heroSrc = profile ? heroMap[profileSlugForCover(profile)] : null;
     var sealSvg =
@@ -237,7 +247,7 @@
           '<h1 class="bh-epic-cover__title">Your<br><span class="bh-epic-cover__title-accent">Brand</span><br>Playbook&trade;</h1>' +
           (profile ? '<p class="bh-epic-cover__identity">' + profile.name + "</p>" : "") +
           '<div class="bh-epic-cover__rule"></div>' +
-          '<p class="bh-epic-cover__tagline">A 20-guide reference for building, communicating, and growing your brand — built entirely from your answers.</p>' +
+          '<p class="bh-epic-cover__tagline">Your guide to building, communicating, and growing ' + escapeHtml(businessName || "your brand") + ' with intention — crafted entirely from your answers.</p>' +
         "</div>" +
         '<div class="bh-epic-cover__hero-zone">' +
           '<div class="bh-epic-cover__glow"></div>' +
@@ -274,7 +284,10 @@
   // outside the one live typography sample in Chapter 3).
   // coverVariant "epic" (Playbook only, for now) swaps in the dramatic
   // magazine-style cover above instead of the plain branded one.
-  function printStyledSection(sectionEl, accentStyle, title, profile, coverVariant) {
+  // businessName is optional — when set, the plain cover gets a "Prepared
+  // for" line and the epic cover's own tagline personalizes; blank simply
+  // omits the line / falls back to "your brand" rather than erroring.
+  function printStyledSection(sectionEl, accentStyle, title, profile, coverVariant, businessName) {
     var win = window.open("", "_blank", "width=900,height=1000");
     if (!win) return;
     var cssLink = document.getElementById("bh-css-link") || document.querySelector('link[href*="brand-haus.css"]');
@@ -285,7 +298,7 @@
     var bodyFont = (profile && profile.output && profile.output.bodyFont) || "Inter";
     var accentColor = (profile && profile.output && profile.output.colors && profile.output.colors.standOut) || "#0D7377";
     var primaryColor = (profile && profile.output && profile.output.colors && profile.output.colors.primary) || "#1A1815";
-    var docTitle = title || "Your Brand DNA — Black Sheep Creations";
+    var docTitle = title || "Your Brand DNA — Curated by Black Sheep Creations";
     var isEpicCover = coverVariant === "epic" && !!profile;
     // The app-wide Google Fonts link (fontsHref) only requests weights
     // 400/600/700 for its 15 fonts — enough for the profile-driven fonts
@@ -356,6 +369,7 @@
         ".bh-print-cover__eyebrow{font-size:11px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:rgba(26,24,21,0.5);margin:0 0 14px;font-family:'" + bodyFont + "',-apple-system,sans-serif;}" +
         ".bh-print-cover__title{font-size:32px;line-height:1.15;margin:0 0 8px;color:#1A1815;font-family:'" + headingFont + "',serif;}" +
         ".bh-print-cover__profile{font-size:18px;margin:0 0 16px;color:" + primaryColor + ";font-family:'" + headingFont + "',serif;}" +
+        ".bh-print-cover__prepared-for{font-size:12px;letter-spacing:0.04em;margin:0 0 16px;color:rgba(26,24,21,0.55);font-family:'" + bodyFont + "',-apple-system,sans-serif;}" +
         ".bh-print-cover__rule{height:4px;width:72px;margin:0 auto;border-radius:2px;background:" + accentColor + ";}" +
         ".bh-print-footer{margin-top:32px;padding-top:16px;border-top:1px solid rgba(0,0,0,0.1);text-align:center;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:rgba(26,24,21,0.45);font-family:'" + bodyFont + "',-apple-system,sans-serif;page-break-inside:avoid;}" +
         ".bh-print-footer__disclaimer{margin-top:6px;font-size:11px;letter-spacing:normal;text-transform:none;font-style:italic;color:rgba(26,24,21,0.4);}" +
@@ -367,11 +381,12 @@
         "@media print{body{padding:0.3in;}}" +
         (isEpicCover ? buildEpicCoverCss(profile) : "") +
       "</style></head><body>" +
-      (isEpicCover ? buildEpicCoverHtml(profile) :
+      (isEpicCover ? buildEpicCoverHtml(profile, businessName) :
       '<div class="bh-print-cover">' +
         '<p class="bh-print-cover__eyebrow">Black Sheep Creations &amp; Inspirations</p>' +
         '<h1 class="bh-print-cover__title">' + docTitle.split(" — ")[0] + "</h1>" +
         (profile ? '<p class="bh-print-cover__profile">' + profile.name + "</p>" : "") +
+        (businessName ? '<p class="bh-print-cover__prepared-for">Prepared for ' + escapeHtml(businessName) + "</p>" : "") +
         '<div class="bh-print-cover__rule"></div>' +
       "</div>") +
       '<div class="bh-founder-interview bh-founder-interview--results bh-print-wrap" style="' + (accentStyle || "") + '"></div>' +
@@ -1147,7 +1162,8 @@
           activeStep = "brandingStudio";
           brandingSubMode = entry.mode;
         } else if (entry.mode.indexOf("gen:") === 0) {
-          activeStep = "quickGenerators";
+          activeStep = "brandingStudio";
+          brandingSubMode = "quickGenerators";
           BrandHaus.generators.setActiveGenerator(entry.mode.slice(4));
         }
         renderApp();
@@ -1296,14 +1312,13 @@
   // ---------------------------------------------------------------------
   // Sidebar wizard + step router
   // ---------------------------------------------------------------------
-  var STEPS = ["welcome", "conversation", "brandDNA", "brandingStudio", "blueprint", "quickGenerators"];
+  var STEPS = ["welcome", "conversation", "brandDNA", "blueprint", "brandingStudio"];
   var STEP_LABELS = {
     welcome: "Welcome",
     conversation: "Brand DNA Assessment",
     brandDNA: "Your Brand DNA",
     brandingStudio: "Branding Studio",
     blueprint: "Your Blueprint",
-    quickGenerators: "Quick Generators",
   };
   var STEP_ICONS = {
     welcome: "sparkle",
@@ -1311,19 +1326,22 @@
     brandDNA: "layers",
     brandingStudio: "palette",
     blueprint: "document",
-    quickGenerators: "crop",
   };
 
   var activeStep = "welcome";
-  var brandingSubMode = "branding"; // "logo" | "branding" — sub-nav within the Branding Studio step
+  var brandingSubMode = "branding"; // "branding" | "logo" | "quickGenerators" — sub-nav within the Branding Studio step
   var lastAutoAppliedResults = null;
   var historyPanelOpen = false;
   var historyExpandedIndex = -1;
   var HISTORY_MODE = "assessment";
 
-  var BRANDING_SUBSTEPS = ["branding", "logo"];
-  var BRANDING_SUBSTEP_LABELS = { logo: "Logo Studio", branding: "Branding Studio" };
-  var BRANDING_SUBSTEP_ICONS = { logo: "logoMark", branding: "palette" };
+  // Quick Generators lives as a third sub-tab alongside Branding/Logo
+  // Studio (not its own top-level step) — it's a sibling capability that
+  // belongs grouped with the rest of "building the brand," not a separate
+  // destination in the main wizard flow.
+  var BRANDING_SUBSTEPS = ["branding", "logo", "quickGenerators"];
+  var BRANDING_SUBSTEP_LABELS = { logo: "Logo Studio", branding: "Branding Studio", quickGenerators: "Quick Generators" };
+  var BRANDING_SUBSTEP_ICONS = { logo: "logoMark", branding: "palette", quickGenerators: "crop" };
 
   // Every step (Branding Studio, Logo Studio, Your Blueprint, etc.) reads
   // top-to-bottom, so a founder landing mid-scroll on a new step feels
@@ -1377,6 +1395,8 @@
     ];
     var historyBlock = renderHistoryBlock();
     if (historyBlock) innerChildren.push(historyBlock);
+    var savedResultsBlock = renderSavedResultsBlock();
+    if (savedResultsBlock) innerChildren.push(savedResultsBlock);
 
     root.appendChild(el("nav", { class: "bh-sidebar", "aria-label": "Brand Haus steps" }, [
       el("div", { class: "bh-sidebar__inner" }, innerChildren),
@@ -1488,6 +1508,138 @@
     ]);
   }
 
+  // ---------------------------------------------------------------------
+  // Saved Results — a small, founder-curated vault sitting right below
+  // Version History, and deliberately separate from it. History is
+  // automatic (a new entry every retake, capped at 5, no naming); this is
+  // opt-in (an explicit "Save Current Results" click, capped at 3,
+  // renamable) so a founder can deliberately keep a couple of favorite
+  // runs to compare or return to, independent of whatever their most
+  // recent retake happens to be. Modeled on the standard Vault's
+  // rename/load/delete pattern (renderSavedPrompts above) rather than
+  // History's read-only-with-restore pattern, since these are curated
+  // choices, not an audit trail.
+  // ---------------------------------------------------------------------
+  var SAVED_RESULTS_MODE = "assessmentSaved";
+  var SAVED_RESULTS_MAX = 3;
+  var savedResultsPanelOpen = false;
+  var savedResultsExpandedIndex = -1;
+  var renamingSavedResultId = null;
+
+  function renderSavedResultsBlock() {
+    if (!BrandHaus.favorites) return null;
+    var results = BrandHaus.founderInterview.getState().results;
+    var saved = BrandHaus.favorites.getAll(SAVED_RESULTS_MODE).slice().reverse();
+    if (!saved.length && !results) return null;
+    var full = BrandHaus.favorites.isFull(SAVED_RESULTS_MODE, SAVED_RESULTS_MAX);
+
+    var toggle = el("button", { type: "button", class: "bh-sidebar__history-toggle" }, [
+      icon("vault", "bh-sidebar__substep-icon"),
+      el("span", { text: "Saved Results (" + saved.length + "/" + SAVED_RESULTS_MAX + ")" }),
+    ]);
+    toggle.addEventListener("click", function () {
+      savedResultsPanelOpen = !savedResultsPanelOpen;
+      savedResultsExpandedIndex = -1;
+      renderApp();
+    });
+
+    var children = [toggle];
+    if (savedResultsPanelOpen) {
+      var listEl = el("div", { class: "bh-sidebar__history-list" });
+
+      if (results) {
+        var saveBtn = el("button", { type: "button", class: "bh-sidebar__history-restore", text: full ? "Vault Full — Delete One to Save Another" : "+ Save Current Results" });
+        saveBtn.disabled = full;
+        if (!full) {
+          saveBtn.addEventListener("click", function () {
+            var profile = results.match.best.profile;
+            BrandHaus.favorites.save(SAVED_RESULTS_MODE, { title: profile.name, text: profile.name, snapshot: results }, SAVED_RESULTS_MAX);
+            renderApp();
+          });
+        }
+        listEl.appendChild(saveBtn);
+      }
+
+      if (!saved.length) {
+        listEl.appendChild(el("p", { class: "bh-saved__empty", text: "No saved results yet — use \"Save Current Results\" above to keep one here for later." }));
+      } else {
+        saved.forEach(function (fav, index) {
+          var titleRow;
+          if (renamingSavedResultId === fav.id) {
+            var titleInput = el("input", { type: "text", class: "bh-saved__item-title-input", value: fav.title || "" });
+            var confirmRename = function () {
+              BrandHaus.favorites.rename(SAVED_RESULTS_MODE, fav.id, titleInput.value.trim() || fav.text);
+              renamingSavedResultId = null;
+              renderApp();
+            };
+            titleInput.addEventListener("keydown", function (e) {
+              if (e.key === "Enter") confirmRename();
+              if (e.key === "Escape") { renamingSavedResultId = null; renderApp(); }
+            });
+            titleInput.addEventListener("blur", confirmRename);
+            titleRow = el("div", { class: "bh-saved__item-title-row" }, [titleInput]);
+          } else {
+            var renameBtn = el("button", { type: "button", class: "bh-saved__rename-btn", "aria-label": "Rename this saved result", title: "Rename" }, [icon("edit")]);
+            renameBtn.addEventListener("click", function (e) { e.stopPropagation(); renamingSavedResultId = fav.id; renderApp(); });
+            titleRow = el("div", { class: "bh-saved__item-title-row" }, [
+              el("p", { class: "bh-saved__item-title", text: fav.title || fav.text }),
+              renameBtn,
+            ]);
+          }
+
+          var row = el("button", { type: "button", class: "bh-sidebar__history-row" }, [
+            el("span", { class: "bh-sidebar__history-date", text: formatHistoryDate(fav.createdAt) }),
+            el("span", { class: "bh-sidebar__history-name", text: fav.title || fav.text }),
+          ]);
+          row.addEventListener("click", function () {
+            savedResultsExpandedIndex = savedResultsExpandedIndex === index ? -1 : index;
+            renderApp();
+          });
+
+          listEl.appendChild(titleRow);
+          listEl.appendChild(row);
+          if (savedResultsExpandedIndex === index && fav.snapshot) {
+            listEl.appendChild(renderSavedResultPreview(fav));
+          }
+        });
+      }
+      children.push(listEl);
+    }
+    return el("div", { class: "bh-sidebar__history" }, children);
+  }
+
+  function renderSavedResultPreview(fav) {
+    var snapshot = fav.snapshot;
+    var profile = snapshot.match.best.profile;
+    var founderOutput = snapshot.founderOutput;
+    var roleOrder = ["primary", "secondary", "neutral", "accent", "support", "standOut"];
+    var swatches = roleOrder.filter(function (role) { return profile.output.colors[role]; }).map(function (role) {
+      return el("span", { class: "bh-sidebar__history-swatch", style: "background:" + profile.output.colors[role] + ";" });
+    });
+    var loadBtn = el("button", { type: "button", class: "bh-sidebar__history-restore" }, [icon("refresh", "bh-sidebar__substep-icon"), el("span", { text: "Load This Result" })]);
+    loadBtn.title = "Makes this the version shown on Your Brand DNA and synced into Branding Studio — this saved copy stays right here either way.";
+    loadBtn.addEventListener("click", function () {
+      BrandHaus.founderInterview.setState({ results: snapshot, step: "results", celebrationDismissed: true });
+      savedResultsPanelOpen = false;
+      savedResultsExpandedIndex = -1;
+      setActiveStep("brandDNA");
+    });
+    var deleteBtn = el("button", { type: "button", class: "bh-sidebar__history-clear", text: "Delete This Saved Result" });
+    deleteBtn.addEventListener("click", function () {
+      BrandHaus.favorites.remove(SAVED_RESULTS_MODE, fav.id);
+      savedResultsExpandedIndex = -1;
+      renderApp();
+    });
+    return el("div", { class: "bh-sidebar__history-preview" }, [
+      el("p", { class: "bh-sidebar__history-preview-name", text: profile.name }),
+      el("p", { class: "bh-sidebar__history-preview-mission", text: founderOutput.missionStatement }),
+      el("p", { class: "bh-sidebar__history-preview-values", text: founderOutput.values.join(" · ") }),
+      el("div", { class: "bh-sidebar__history-swatches" }, swatches),
+      loadBtn,
+      deleteBtn,
+    ]);
+  }
+
   function renderWelcomeStep() {
     var beginBtn = el("button", { type: "button", class: "bh-btn bh-btn--teal bh-btn--large" }, [icon("lightning"), el("span", { text: "Begin" })]);
     beginBtn.addEventListener("click", function () { activeStep = "conversation"; renderApp(); scrollShellToTop(); });
@@ -1534,6 +1686,8 @@
     // other (see the removed explicit call in Chapter 7's "Continue to
     // Branding Studio" button).
     maybeAutoApplyAssessment();
+
+    if (brandingSubMode === "quickGenerators") return renderQuickGeneratorsStep();
 
     var modeApi = BrandHaus[brandingSubMode];
     var body = el("div", { class: "bh-body" });
@@ -1637,10 +1791,6 @@
       } else {
         root.appendChild(el("p", { class: "bh-coming-soon", text: "Your Blueprint is coming soon." }));
       }
-      return;
-    }
-    if (activeStep === "quickGenerators") {
-      root.appendChild(renderQuickGeneratorsStep());
       return;
     }
   }

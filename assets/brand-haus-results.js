@@ -80,21 +80,59 @@
   // 11 images is actually generated and uploaded — the <img> just hides
   // itself on a 404 rather than showing a broken-image icon, and the
   // text column fills the full width on its own when that happens.
+  //
+  // "Quiet Authority" specifically was generated with its isolated art
+  // flattened onto a checkerboard "transparency indicator" canvas instead
+  // of a solid one (a source-asset defect, not something CSS/JS caused) —
+  // confirmed visible along the top/left/right/bottom margins in both the
+  // live "Your Brand DNA" step and the exported Brand DNA Report, where
+  // this box's aspect ratio matches the image's own aspect ratio exactly
+  // (1536x1024, i.e. 3:2) so object-fit:cover has zero margin to crop.
+  // TIGHT_CROP_SLUGS gets a modifier class that scales the image in just
+  // enough to push that checkerboard border outside the visible frame —
+  // scoped to this one profile only so the other 10, already-clean hero
+  // photos don't get an unnecessary/over-aggressive crop.
+  var TIGHT_CROP_SLUGS = ["quiet-authority"];
+
   function renderHeroImage(ui, profile) {
     var map = window.BrandHausHeroImages || {};
-    var src = map[profileSlug(profile)];
+    var slug = profileSlug(profile);
+    var src = map[slug];
     if (!src) return null;
-    var wrap = ui.el("div", { class: "bh-chapter__hero-image" });
+    var wrapClass = "bh-chapter__hero-image" + (TIGHT_CROP_SLUGS.indexOf(slug) !== -1 ? " bh-chapter__hero-image--tight-crop" : "");
+    var wrap = ui.el("div", { class: wrapClass });
     var img = ui.el("img", { src: src, alt: profile.name + " brand identity artwork" });
     img.addEventListener("error", function () { wrap.style.display = "none"; });
     wrap.appendChild(img);
     return wrap;
   }
 
+  // Closest classic Jungian brand archetype(s) per profile — purely a
+  // familiarity footnote for founders who've seen the 12-archetype wheel
+  // before ("so am I a Sage or a Hero?"). Doesn't feed scoring or
+  // anything else; a few profiles legitimately echo the same classic
+  // archetype (11 profiles don't map 1:1 onto 12 archetypes) — that's
+  // expected, not a gap.
+  var PROFILE_ARCHETYPE_TRANSLATION = {
+    "The Trusted Guide": "The Sage",
+    "The Bold Pioneer": "The Explorer or The Hero",
+    "The Cozy Craftsman": "The Caregiver or The Neighbour",
+    "The Elevated Icon": "The Ruler or The Magician",
+    "The Free Spirit": "The Rebel or The Explorer",
+    "The Joyful Connector": "The Entertainer or The Neighbour",
+    "The Quiet Authority": "The Sage or The Ruler",
+    "The Modern Minimalist": "The Creator",
+    "The Community Builder": "The Neighbour or The Hero",
+    "The Luxe Rebel": "The Rebel or The Seducer",
+    "The Trail Forger": "The Explorer",
+  };
+
   function renderChapter1(ui, results) {
     var profile = results.match.best.profile;
     var second = results.match.secondBest.profile;
     var conf = BrandHaus.brandDNA.computeConfidence(results.match.ranked);
+    var topMotivation = BrandHaus.brandDNA.topFounderDNA(results.founderDNAScores || {}, 1)[0];
+    var archetypeTranslation = PROFILE_ARCHETYPE_TRANSLATION[profile.name];
 
     var identitySubtitle = "Not your company name or a personality label — the closest match to how your Brand DNA naturally expresses itself, based on your answers. With touches of " + second.name + " — no one fits a single mold perfectly, and that's fine.";
     if (profile._blendFactor && profile._blendFactor >= 0.2) {
@@ -104,8 +142,10 @@
     var textColumn = ui.el("div", { class: "bh-chapter__hero-text" }, [
       ui.el("p", { class: "bh-chapter__eyebrow", text: "Meet Your Primary Brand Identity™" }),
       ui.el("h2", { class: "bh-founder-interview__profile-name", text: profile.name }),
+      topMotivation ? ui.el("p", { class: "bh-chapter__profile-tag", text: "— " + founderDNALabel(topMotivation.key) }) : null,
       ui.el("p", { class: "bh-field-group__subtitle bh-text--black", text: identitySubtitle }),
-      ui.el("p", { class: "bh-chapter__reassurance", text: "This isn't a label. It's a starting point. Your Brand DNA Blueprint is designed to provide direction, not limitation. Every recommendation can be refined as your vision evolves." }),
+      ui.el("p", { class: "bh-chapter__reassurance", text: "Think of it as a starting point, not a box you're locked into. Your Brand DNA Blueprint is designed to provide direction, not limitation. Every recommendation can be refined as your vision evolves." }),
+      archetypeTranslation ? ui.el("p", { class: "bh-chapter__archetype-note", text: "If you're familiar with brand archetypes, " + profile.name + " most closely echoes " + archetypeTranslation + "." }) : null,
     ]);
 
     var heroTopChildren = [textColumn];

@@ -23,7 +23,7 @@
 <div class="gh-brand-header">
   <div class="gh-marketing__hero">
     <p class="gh-marketing__eyebrow">{{ section.settings.brand_eyebrow }}</p>
-    <h1 class="gh-marketing__heading">{{ section.settings.brand_heading | replace: 'AI', '<span class="gh-heading-accent">AI</span>' }}</h1>
+    <h1 class="gh-marketing__heading">{{ section.settings.brand_heading | replace: 'Graphics', '<span class="gh-heading-accent">Graphics</span>' }}</h1>
     <div class="gh-marketing__subheading">{{ section.settings.brand_subheading }}</div>
   </div>
 </div>
@@ -48,7 +48,7 @@
   <script src="{{ 'graphics-haus-ui.js' | asset_url }}" defer="defer"></script>
 {% else %}
   <div class="gh-locked">
-    <h2 class="gh-locked__heading">{{ section.settings.locked_heading | replace: 'AI', '<span class="gh-heading-accent">AI</span>' }}</h2>
+    <h2 class="gh-locked__heading">{{ section.settings.locked_heading | replace: 'Graphics', '<span class="gh-heading-accent">Graphics</span>' }}</h2>
     <div class="gh-locked__body">{{ section.settings.locked_body }}</div>
     <div class="gh-locked__actions">
       {% if section.settings.access_product %}
@@ -79,7 +79,7 @@
       "type": "text",
       "id": "brand_heading",
       "label": "Heading",
-      "default": "The AI Creator's Graphics Haus"
+      "default": "The Graphics Haus"
     },
     {
       "type": "textarea",
@@ -110,7 +110,7 @@
       "type": "text",
       "id": "locked_heading",
       "label": "Locked state heading",
-      "default": "Unlock The AI Creator's Graphics Haus"
+      "default": "Unlock The Graphics Haus"
     },
     {
       "type": "richtext",

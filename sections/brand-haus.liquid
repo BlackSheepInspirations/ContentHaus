@@ -30,7 +30,7 @@
 <div class="bh-brand-header">
   <div class="bh-marketing__hero">
     <p class="bh-marketing__eyebrow">{{ section.settings.brand_eyebrow }}</p>
-    <h1 class="bh-marketing__heading">{{ section.settings.brand_heading }}</h1>
+    <h1 class="bh-marketing__heading">{{ section.settings.brand_heading | replace: 'Brand', '<span class="bh-heading-accent">Brand</span>' }}</h1>
     <p class="bh-marketing__tagline">{{ section.settings.brand_tagline | replace: 'Brand DNA Blueprint', '<span class="bh-heading-accent">Brand DNA Blueprint</span>' }}</p>
     <div class="bh-marketing__subheading">{{ section.settings.brand_subheading }}</div>
   </div>
@@ -81,7 +81,7 @@
   <script src="{{ 'brand-haus-ui.js' | asset_url }}" defer="defer"></script>
 {% else %}
   <div class="bh-locked">
-    <h2 class="bh-locked__heading">{{ section.settings.locked_heading | replace: 'AI', '<span class="bh-heading-accent">AI</span>' }}</h2>
+    <h2 class="bh-locked__heading">{{ section.settings.locked_heading | replace: 'Brand', '<span class="bh-heading-accent">Brand</span>' }}</h2>
     <div class="bh-locked__body">{{ section.settings.locked_body }}</div>
     <div class="bh-locked__actions">
       {% if section.settings.access_product %}

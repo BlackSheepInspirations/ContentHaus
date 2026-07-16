@@ -13,7 +13,7 @@
  * - Your Brand DNA Report — every chapter from Your Brand DNA (step 3),
  *   re-rendered here so this page is a genuine superset, not a thinner
  *   duplicate.
- * - Your Brand Playbook™ — the 20-chapter, 5-part expansion built in
+ * - Your Brand Playbook™ — the 21-chapter, 5-part expansion built in
  *   brand-haus-playbook.js/brand-haus-playbook-content.js, wired in below
  *   as this step's third section.
  *
@@ -170,7 +170,7 @@
     // then gives back the actual full-color piece.
     var exportBtn = ui.el("button", { type: "button", class: "bh-btn bh-btn--teal bh-btn--small" }, [ui.icon("document"), ui.el("span", { text: "Export Snapshot" })]);
     exportBtn.addEventListener("click", function () {
-      BrandHaus.ui.printStyledSection(content, BrandHaus.results.accentStyleFor(profile), "Your Blueprint Snapshot — Black Sheep Creations", profile);
+      BrandHaus.ui.printStyledSection(content, BrandHaus.results.accentStyleFor(profile), "Your Blueprint Snapshot — Curated by Black Sheep Creations", profile, null, effectiveResults.businessName);
     });
 
     var exportHint = ui.el("p", { class: "bh-blueprint__export-hint", text: 'This opens your browser\'s print dialog — choose "Save as PDF" as the destination to download a PDF instead of printing.' });
@@ -211,7 +211,7 @@
 
     var exportBtn = ui.el("button", { type: "button", class: "bh-btn bh-btn--teal bh-btn--small" }, [ui.icon("document"), ui.el("span", { text: "Export Brand DNA Report" })]);
     exportBtn.addEventListener("click", function () {
-      BrandHaus.ui.printStyledSection(content, r.accentStyleFor(profile), "Your Brand DNA Report — Black Sheep Creations", profile);
+      BrandHaus.ui.printStyledSection(content, r.accentStyleFor(profile), "Your Brand DNA Report — Curated by Black Sheep Creations", profile, null, effectiveResults.businessName);
     });
 
     var exportHint = ui.el("p", { class: "bh-blueprint__export-hint", text: 'This opens your browser\'s print dialog — choose "Save as PDF" as the destination to download a PDF instead of printing.' });

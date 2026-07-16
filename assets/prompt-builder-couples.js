@@ -29,7 +29,7 @@
   // Randomize caps/exclusions — same rationale/numbers as Character Mode's
   // own groups: Occupation/Height/Body Type excluded outright, Appearance
   // and Styling capped to a focused subset rather than a full sweep.
-  var IDENTITY_RANDOM_EXCLUDE = ["height", "bodyType", "occupationNiche"];
+  var IDENTITY_RANDOM_EXCLUDE = ["height", "size", "bodyType", "occupationNiche"];
   var APPEARANCE_RANDOM_CAP = 5;
   var STYLING_RANDOM_CAP = 3;
   // Couple Dynamic bundles several layers into one flat field set — these
@@ -41,7 +41,7 @@
   // "Couples" or a single either/or style pick.
   var COUPLE_STYLE_FIELDS = ["characterType", "artFinish"];
   var COUPLE_PRESENTATION_FIELDS = ["background", "dynamicSceneEffect", "timeEra", "cameraAngle", "lightingEffects", "framing"];
-  var COUPLE_EXTRAS_FIELDS = ["fantasyElements", "props", "cosplayCharacter"];
+  var COUPLE_EXTRAS_FIELDS = ["fantasyElements", "props", "characterArchetype"];
   var COUPLE_PRESENTATION_RANDOM_CAP = 3;
   var COUPLE_EXTRAS_RANDOM_CAP = 1;
 
@@ -74,7 +74,7 @@
     framing: "Framing",
     fantasyElements: "Fantasy Elements",
     props: "Props",
-    cosplayCharacter: "Cosplay Character",
+    characterArchetype: "Character Archetype",
     relationshipVibe: "Relationship Vibe",
     poseInteraction: "Pose / Interaction",
     coordinationStyle: "Coordination Style",
@@ -86,7 +86,7 @@
   function buildCoupleDynamic() {
     return {
       characterType: PromptHaus.util.makeGroupedField("", lists.characterTypeGroups),
-      artFinish: makeField("", lists.artFinish),
+      artFinish: PromptHaus.util.makeGroupedField("", lists.artFinishGroups),
       background: PromptHaus.util.makeGroupedField("", lists.backgroundGroups),
       dynamicSceneEffect: makeField("", lists.dynamicSceneEffect),
       timeEra: makeField("", lists.timeEra),
@@ -96,10 +96,10 @@
       // nothing that maps to a single default), so that one's left as-is.
       cameraAngle: makeField("front view", lists.cameraAngle),
       lightingEffects: makeField("studio lighting", lists.lightingEffects),
-      framing: makeField("no frame", lists.framing),
+      framing: PromptHaus.util.makeGroupedField("no frame", lists.framingGroups),
       fantasyElements: makeField("", lists.fantasyElements),
-      props: makeField("", lists.props),
-      cosplayCharacter: makeField("none", lists.cosplayCharacter),
+      props: PromptHaus.util.makeGroupedField("", lists.propsGroups),
+      characterArchetype: makeField("", lists.characterArchetype),
       relationshipVibe: makeField("none", RELATIONSHIP_VIBE_OPTIONS),
       poseInteraction: makeField("", POSE_INTERACTION_OPTIONS),
       coordinationStyle: makeField("", COORDINATION_STYLE_OPTIONS),
@@ -116,39 +116,40 @@
         gender: makeField("", lists.humanGender),
         height: makeField("", lists.height),
         bodyType: makeField("", lists.humanBodyType),
-        occupationNiche: makeField("none", lists.occupationNiche),
+        occupationNiche: makeField("", lists.occupationNiche),
       },
       animalIdentity: {
         species: makeField("sheep", lists.species),
-        furFeatherScaleTexture: makeField("", lists.furFeatherScaleTexture),
+        surfaceTexture: makeField("", lists.surfaceTexture),
         ageGroup: makeField("", lists.animalAgeGroup),
         gender: makeField("", lists.animalGender),
-        height: makeField("", lists.height),
+        size: makeField("", lists.animalSize),
         bodyType: makeField("", lists.animalBodyType),
-        occupationNiche: makeField("none", lists.occupationNiche),
+        occupationNiche: makeField("", lists.occupationNiche),
       },
       appearance: {
-        hairColor: makeField("", lists.hairColor),
-        hairStyle: makeField("", lists.hairStyle),
+        hairColor: PromptHaus.util.makeGroupedField("", lists.hairColorGroups),
+        hairStyle: PromptHaus.util.makeGroupedField("", lists.hairStyleGroups),
         eyeColor: makeField("", lists.eyeColor),
-        expression: makeField("none", lists.expression),
-        facialFeatures: makeField("none", lists.facialFeatures),
+        expression: makeField("", lists.expression),
+        facialFeatures: makeField("", lists.facialFeatures),
         eyeSizeShape: makeField("", lists.eyeSizeShape),
         lashIntensity: makeField("", lists.lashIntensity),
         lipStyle: makeField("", lists.lipStyle),
         extraGlamDetails: makeField("", lists.extraGlamDetails),
+        makeup: makeField("", lists.makeup),
+        beard: makeField("", lists.beard),
       },
       styling: {
         outfit: makeField("", lists.outfit),
         shoes: makeField("", lists.shoes),
-        makeup: makeField("", lists.makeup),
         nails: makeField("", lists.nails),
-        beard: makeField("", lists.beard),
         accessories: makeField("", lists.accessories),
-        specialNeeds: makeField("none", lists.specialNeeds),
+        accessories2: makeField("", lists.accessories),
+        mobilityAccessibility: makeField("none", lists.mobilityAccessibility),
         jewelry: makeField("", lists.jewelry),
-        tattoos: makeField("none", lists.tattoos),
-        crownHeadEffects: makeField("none", lists.crownHeadEffects),
+        tattoos: makeField("", lists.tattoos),
+        headwearHeadEffects: PromptHaus.util.makeGroupedField("none", lists.headwearHeadEffectsGroups),
       },
     };
   }
@@ -161,9 +162,10 @@
       category: makeField("", lists.creatureCategories),
       breed: makeField("", []),
       color: makeField("", lists.creatureColors),
-      eyeColor: makeField("", lists.eyeColor),
+      eyeColor: makeField("", lists.companionEyeColor),
+      size: makeField("", lists.animalSize),
       position: makeField("", lists.companionPosition),
-      accessories: makeField("none", lists.companionAccessories),
+      accessories: makeField("", lists.companionAccessories),
     };
   }
 
@@ -240,6 +242,7 @@
       entries.push({ fieldName: "breed", slotIndex: i, label: prefix, field: slot.breed });
       entries.push({ fieldName: "color", slotIndex: i, label: prefix + " Color", field: slot.color });
       entries.push({ fieldName: "eyeColor", slotIndex: i, label: prefix + " Eye Color", field: slot.eyeColor });
+      entries.push({ fieldName: "size", slotIndex: i, label: prefix + " Size", field: slot.size });
       entries.push({ fieldName: "position", slotIndex: i, label: prefix + " Position", field: slot.position });
       entries.push({ fieldName: "accessories", slotIndex: i, label: prefix + " Accessories", field: slot.accessories });
     }
@@ -341,9 +344,10 @@
   function getSharedStyleDNAEntries() {
     var entries = [
       { label: "Holiday", field: PromptHaus.styleDNA.getState().holiday },
-      { label: "Theme", field: PromptHaus.styleDNA.getState().theme },
+      { label: "Creative Theme", field: PromptHaus.styleDNA.getState().theme },
       { label: "Niche", field: PromptHaus.styleDNA.getState().niche },
-      { label: "Mockup View", field: PromptHaus.styleDNA.getState().mockupView },
+      { label: "Target Audience", field: PromptHaus.styleDNA.getState().targetAudience },
+      { label: "Mood", field: PromptHaus.styleDNA.getState().mood },
       { label: "Filter It", field: PromptHaus.styleDNA.getState().filter },
     ];
     entries = entries.concat(PromptHaus.styleDNA.getImageryEntries());
@@ -359,30 +363,92 @@
     return { label: e.label, field: e.field };
   }
 
+  // Animal Mascot fix (mirrors Character Mode's own fix): Hair Style is
+  // redundant once Surface Texture is chosen — Surface Texture's own
+  // options already bake curliness/density into the noun itself ("curly
+  // wool", "shaggy fur"). Hair Color also used to float as a disconnected
+  // comma item with no noun attached, which produced "black curly hair"
+  // instead of "black wool." Composed into Surface Texture's own value
+  // instead (assembly time only; the UI still shows both as separate
+  // editable fields).
+  function composeAnimalMascotAppearance(entries, baseType) {
+    if (baseType !== "animalMascot") return entries;
+    entries = entries.filter(function (e) { return e.fieldName !== "hairStyle"; });
+    var hairColorIndex = -1;
+    var hairColorEntry = null;
+    entries.forEach(function (e, i) {
+      if (e.fieldName === "hairColor") { hairColorEntry = e; hairColorIndex = i; }
+    });
+    if (hairColorEntry) {
+      var hairColorText = PromptHaus.engine.resolveFieldValue(hairColorEntry.field);
+      if (hairColorText) {
+        var surfaceTextureEntry = entries.filter(function (e) { return e.fieldName === "surfaceTexture"; })[0];
+        if (surfaceTextureEntry) {
+          var surfaceTextureText = PromptHaus.engine.resolveFieldValue(surfaceTextureEntry.field);
+          surfaceTextureEntry.field = makeField(surfaceTextureText ? hairColorText + " " + surfaceTextureText : hairColorText);
+        }
+      }
+      entries.splice(hairColorIndex, 1);
+    }
+    return entries;
+  }
+
+  // Character Type/Art Finish carry a full descriptive paragraph (chunk 3)
+  // rather than a short word — previously they rode inside sceneResolved,
+  // which gets appended as one trailing sentence AFTER both Character A
+  // and Character B are already fully described. A paragraph-length style
+  // instruction landing after the fact reads as disconnected from either
+  // person, which is exactly the reported bug ("the art style doesn't
+  // always translate to the characters — one it was only the background").
+  // Pulled into their own intro sentences instead, mirroring Character
+  // Mode's Illustration Style/Art Finish placement, so the style is
+  // established before either person is described.
   function assemblePrompt() {
     var count = parseInt(PromptHaus.styleDNA.getState().variationCount.value, 10) || 4;
-    var sceneEntries = getSceneFieldEntries().map(toEntry);
-    sceneEntries = sceneEntries.concat(getSharedStyleDNAEntries());
-    var sceneResolved = PromptHaus.engine.resolveFields(sceneEntries);
-    var aResolved = PromptHaus.engine.resolveFields(getPersonFieldEntries("A").map(toEntry));
-    var bResolved = PromptHaus.engine.resolveFields(getPersonFieldEntries("B").map(toEntry));
+    var baseType = store.getState().baseType;
+    var sceneEntries = getSceneFieldEntries();
+    var styleEntries = sceneEntries.filter(function (e) { return e.fieldName === "characterType" || e.fieldName === "artFinish"; });
+    var otherSceneEntries = sceneEntries
+      .filter(function (e) { return e.fieldName !== "characterType" && e.fieldName !== "artFinish"; })
+      .map(toEntry)
+      .concat(getSharedStyleDNAEntries());
+    var sceneResolved = PromptHaus.engine.resolveFields(otherSceneEntries);
+
+    var characterTypeEntry = styleEntries.filter(function (e) { return e.fieldName === "characterType"; })[0];
+    var artFinishEntry = styleEntries.filter(function (e) { return e.fieldName === "artFinish"; })[0];
+    var illustrationStyleText = characterTypeEntry
+      ? PromptHaus.engine.resolveFieldValue(PromptHaus.engine.withPromptLookup(characterTypeEntry.field, lists.characterTypePrompts))
+      : "";
+    var artFinishText = artFinishEntry
+      ? PromptHaus.engine.resolveFieldValue(PromptHaus.engine.withPromptLookup(artFinishEntry.field, lists.artFinishPrompts))
+      : "";
+
+    var aResolved = PromptHaus.engine.resolveFields(composeAnimalMascotAppearance(getPersonFieldEntries("A"), baseType).map(toEntry));
+    var bResolved = PromptHaus.engine.resolveFields(composeAnimalMascotAppearance(getPersonFieldEntries("B"), baseType).map(toEntry));
     var companionResolved = PromptHaus.engine.resolveFields(getCompanionFieldEntries().map(toEntry));
 
     var parts = [];
     parts.push(
       "Create " + count + (count === 1 ? " variation" : " variations") + " of a clean, professional couple portrait."
     );
+    var stickerSheetGuard = PromptHaus.engine.stickerSheetGuard(count);
+    if (stickerSheetGuard) parts.push(stickerSheetGuard);
+    if (illustrationStyleText) parts.push("Illustration style: " + illustrationStyleText);
+    if (artFinishText) parts.push("Art finish: " + artFinishText);
     if (aResolved.length) parts.push("Character A: a " + aResolved.map(function (r) { return r.value; }).join(", ") + ".");
     if (bResolved.length) parts.push("Character B: a " + bResolved.map(function (r) { return r.value; }).join(", ") + ".");
     if (companionResolved.length) parts.push("Also include " + companionResolved.map(function (r) { return r.value; }).join(", ") + ".");
     if (sceneResolved.length) parts.push(sceneResolved.map(function (r) { return r.value; }).join(", ") + ".");
 
     var text = parts.filter(Boolean).join(" ");
-    var fragments = aResolved.concat(bResolved).concat(companionResolved).concat(sceneResolved).map(function (r) {
+    var styleResolved = [];
+    if (illustrationStyleText) styleResolved.push({ label: "Illustration Style", value: illustrationStyleText });
+    if (artFinishText) styleResolved.push({ label: "Art Finish", value: artFinishText });
+    var fragments = styleResolved.concat(aResolved).concat(bResolved).concat(companionResolved).concat(sceneResolved).map(function (r) {
       return r.value;
     });
-    var resolved = aResolved
-      .map(function (r) { return { label: "A — " + r.label, value: r.value }; })
+    var resolved = styleResolved
+      .concat(aResolved.map(function (r) { return { label: "A — " + r.label, value: r.value }; }))
       .concat(bResolved.map(function (r) { return { label: "B — " + r.label, value: r.value }; }))
       .concat(companionResolved)
       .concat(sceneResolved);
@@ -431,13 +497,13 @@
         }
       );
       PromptHaus.util.randomizeGroupWithCap(
-        entries.filter(function (e) { return e.groupName === "appearance"; }),
+        entries.filter(function (e) { return e.groupName === "appearance" && e.fieldName !== "beard"; }),
         APPEARANCE_RANDOM_CAP,
         function (fieldName, changes) { updatePersonField(person, "appearance", fieldName, changes); },
         function (fieldName) { updatePersonField(person, "appearance", fieldName, { value: "", customValue: "" }); }
       );
       PromptHaus.util.randomizeGroupWithCap(
-        entries.filter(function (e) { return e.groupName === "styling"; }),
+        entries.filter(function (e) { return e.groupName === "styling" && e.fieldName !== "accessories2"; }),
         STYLING_RANDOM_CAP,
         function (fieldName, changes) { updatePersonField(person, "styling", fieldName, changes); },
         function (fieldName) { updatePersonField(person, "styling", fieldName, { value: "", customValue: "" }); }

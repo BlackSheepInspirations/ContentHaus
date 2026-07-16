@@ -46,13 +46,13 @@
 
   var PERSON_IDENTITY_LABELS = { ethnicity: "Ethnicity", skinTone: "Skin Tone", ageGroup: "Age Group", gender: "Gender" };
   var PERSON_APPEARANCE_LABELS = { hairColor: "Hair Color", hairStyle: "Hair Style", eyeColor: "Eye Color", expression: "Expression", facialFeatures: "Facial Features" };
-  var PERSON_STYLING_LABELS = { outfit: "Outfit", shoes: "Shoes", accessories: "Accessories", specialNeeds: "Special Needs" };
+  var PERSON_STYLING_LABELS = { outfit: "Outfit", shoes: "Shoes", accessories: "Accessories", accessories2: "Accessories 2", mobilityAccessibility: "Mobility & Accessibility" };
 
   var FAMILY_DYNAMIC_LABELS = {
     characterType: "Character Type", artFinish: "Art Finish",
     background: "Background", dynamicSceneEffect: "Scene Effect", timeEra: "Time / Era",
     cameraAngle: "Camera Angle", lightingEffects: "Lighting Effects", framing: "Framing",
-    fantasyElements: "Fantasy Elements", props: "Props", cosplayCharacter: "Cosplay Character",
+    fantasyElements: "Fantasy Elements", props: "Props", characterArchetype: "Character Archetype",
     relationshipVibe: "Relationship Vibe", groupPose: "Group Pose", coordinationStyle: "Coordination Style",
   };
   // Same split/cap pattern as Couples' Couple Dynamic — Presentation-
@@ -60,7 +60,7 @@
   // Style and the 3 group-specific fields stay uncapped (core to what
   // makes this "Friends & Family").
   var FAMILY_PRESENTATION_FIELDS = ["background", "dynamicSceneEffect", "timeEra", "cameraAngle", "lightingEffects", "framing"];
-  var FAMILY_EXTRAS_FIELDS = ["fantasyElements", "props", "cosplayCharacter"];
+  var FAMILY_EXTRAS_FIELDS = ["fantasyElements", "props", "characterArchetype"];
   var FAMILY_PRESENTATION_RANDOM_CAP = 3;
   var FAMILY_EXTRAS_RANDOM_CAP = 1;
   // Same Appearance/Styling randomize caps Character and Couples both use
@@ -92,15 +92,16 @@
       skinTone: makeField("", lists.skinTone),
       ageGroup: makeField("", kind === "adult" ? ADULT_AGE_GROUP_OPTIONS : KID_AGE_GROUP_OPTIONS),
       gender: makeField("", lists.humanGender),
-      hairColor: makeField("", lists.hairColor),
-      hairStyle: makeField("", lists.hairStyle),
+      hairColor: PromptHaus.util.makeGroupedField("", lists.hairColorGroups),
+      hairStyle: PromptHaus.util.makeGroupedField("", lists.hairStyleGroups),
       eyeColor: makeField("", lists.eyeColor),
-      expression: makeField("none", lists.expression),
-      facialFeatures: makeField("none", lists.facialFeatures),
+      expression: makeField("", lists.expression),
+      facialFeatures: makeField("", lists.facialFeatures),
       outfit: makeField("", lists.outfit),
       shoes: makeField("", lists.shoes),
       accessories: makeField("", lists.accessories),
-      specialNeeds: makeField("none", lists.specialNeeds),
+      accessories2: makeField("", lists.accessories),
+      mobilityAccessibility: makeField("none", lists.mobilityAccessibility),
     };
   }
 
@@ -111,9 +112,10 @@
       category: makeField("", lists.creatureCategories),
       breed: makeField("", []),
       color: makeField("", lists.creatureColors),
-      eyeColor: makeField("", lists.eyeColor),
+      eyeColor: makeField("", lists.companionEyeColor),
+      size: makeField("", lists.animalSize),
       position: makeField("", lists.companionPosition),
-      accessories: makeField("none", lists.companionAccessories),
+      accessories: makeField("", lists.companionAccessories),
     };
   }
 
@@ -135,16 +137,16 @@
       },
       familyDynamic: {
         characterType: PromptHaus.util.makeGroupedField("", lists.characterTypeGroups),
-        artFinish: makeField("", lists.artFinish),
+        artFinish: PromptHaus.util.makeGroupedField("", lists.artFinishGroups),
         background: PromptHaus.util.makeGroupedField("", lists.backgroundGroups),
         dynamicSceneEffect: makeField("", lists.dynamicSceneEffect),
         timeEra: makeField("", lists.timeEra),
         cameraAngle: makeField("front view", lists.cameraAngle),
         lightingEffects: makeField("studio lighting", lists.lightingEffects),
-        framing: makeField("no frame", lists.framing),
+        framing: PromptHaus.util.makeGroupedField("no frame", lists.framingGroups),
         fantasyElements: makeField("", lists.fantasyElements),
-        props: makeField("", lists.props),
-        cosplayCharacter: makeField("none", lists.cosplayCharacter),
+        props: PromptHaus.util.makeGroupedField("", lists.propsGroups),
+        characterArchetype: makeField("", lists.characterArchetype),
         relationshipVibe: makeField("none", RELATIONSHIP_VIBE_OPTIONS),
         groupPose: makeField("", GROUP_POSE_OPTIONS),
         coordinationStyle: makeField("", COORDINATION_STYLE_OPTIONS),
@@ -297,6 +299,7 @@
       entries.push({ fieldName: "breed", slotIndex: i, label: prefix, field: slot.breed });
       entries.push({ fieldName: "color", slotIndex: i, label: prefix + " Color", field: slot.color });
       entries.push({ fieldName: "eyeColor", slotIndex: i, label: prefix + " Eye Color", field: slot.eyeColor });
+      entries.push({ fieldName: "size", slotIndex: i, label: prefix + " Size", field: slot.size });
       entries.push({ fieldName: "position", slotIndex: i, label: prefix + " Position", field: slot.position });
       entries.push({ fieldName: "accessories", slotIndex: i, label: prefix + " Accessories", field: slot.accessories });
     }
@@ -327,13 +330,34 @@
       .map(function (fieldName) { return { fieldName: fieldName, label: ADD_TEXT_LABELS[fieldName], field: addText[fieldName] }; });
   }
 
+  // Letter Style/Color Scheme/Text Effects contribute a full descriptive
+  // paragraph to the assembled prompt, not their short dropdown label —
+  // used only here at assembly time, never by the UI renderer (which
+  // reads getAddTextStyleEntries() directly and needs the short label).
+  var TEXT_PARAGRAPH_LOOKUP_BY_FIELD = {
+    letterStyle: textLists.letterStylePrompts,
+    colorScheme: textLists.colorSchemePrompts,
+    textEffects: textLists.textEffectsPrompts,
+  };
+  function withTextParagraphLookup(e) {
+    var lookup = TEXT_PARAGRAPH_LOOKUP_BY_FIELD[e.fieldName];
+    if (!lookup) return { label: e.label, field: e.field };
+    var field = PromptHaus.engine.withPromptLookup(e.field, lookup);
+    // Letter Style's paragraphs carry a literal "<product type>" token
+    // meant to be filled in dynamically, not shipped verbatim.
+    if (e.fieldName === "letterStyle" && field.value && field.value.indexOf("<product type>") !== -1) {
+      field = Object.assign({}, field, { value: field.value.split("<product type>").join(PromptHaus.styleDNA.getProjectTypeValue()) });
+    }
+    return { label: e.label, field: field };
+  }
+
   function buildTextClause() {
     var addText = store.getState().addText;
     if (!addText.include) return "";
     var text = (addText.text.value || "").trim();
     if (!text) return "";
     var descriptors = PromptHaus.engine.resolveFields(
-      getAddTextStyleEntries().map(function (e) { return { label: e.label, field: e.field }; })
+      getAddTextStyleEntries().map(withTextParagraphLookup)
     ).map(function (r) { return r.value; });
     var clause = 'the text "' + text + '"';
     if (descriptors.length) clause += " styled as " + descriptors.join(", ");
@@ -344,17 +368,18 @@
     return { label: e.label, field: e.field };
   }
 
-  // Holiday/Theme/Niche/Mockup View/Filter It/Imagery/Brand Kit/Project
-  // Type/Buffer — folded into one flat list here (rather than each its
-  // own mini-sentence) so they resolve into a single flowing clause, same
-  // pattern as Couples' own getSharedStyleDNAEntries.
+  // Holiday/Creative Theme/Niche/Target Audience/Mood/Filter It/Imagery/
+  // Brand Kit/Project Type/Buffer — folded into one flat list here (rather
+  // than each its own mini-sentence) so they resolve into a single
+  // flowing clause, same pattern as Couples' own getSharedStyleDNAEntries.
   function getSharedStyleDNAEntries() {
     var styleDNAState = PromptHaus.styleDNA.getState();
     var entries = [
       { label: "Holiday", field: styleDNAState.holiday },
-      { label: "Theme", field: styleDNAState.theme },
+      { label: "Creative Theme", field: styleDNAState.theme },
       { label: "Niche", field: styleDNAState.niche },
-      { label: "Mockup View", field: styleDNAState.mockupView },
+      { label: "Target Audience", field: styleDNAState.targetAudience },
+      { label: "Mood", field: styleDNAState.mood },
       { label: "Filter It", field: styleDNAState.filter },
     ];
     entries = entries.concat(PromptHaus.styleDNA.getImageryEntries());
@@ -369,18 +394,43 @@
   // ---------------------------------------------------------------------
   // Assembler
   // ---------------------------------------------------------------------
+  // Character Type/Art Finish carry a full descriptive paragraph (chunk 3)
+  // rather than a short word — previously they rode inside sceneResolved,
+  // appended as one trailing sentence AFTER every Adult/Kid is already
+  // fully described. A paragraph-length style instruction landing after
+  // the fact reads as disconnected from the group, matching the reported
+  // bug ("the art style doesn't always translate to the characters").
+  // Pulled into their own intro sentences instead, mirroring Character
+  // Mode's Illustration Style/Art Finish placement.
   function assemblePrompt() {
     var count = parseInt(PromptHaus.styleDNA.getState().variationCount.value, 10) || 4;
     var state = store.getState();
+
+    var dynamicEntries = getFamilyDynamicFieldEntries();
+    var styleEntries = dynamicEntries.filter(function (e) { return e.fieldName === "characterType" || e.fieldName === "artFinish"; });
+    var characterTypeEntry = styleEntries.filter(function (e) { return e.fieldName === "characterType"; })[0];
+    var artFinishEntry = styleEntries.filter(function (e) { return e.fieldName === "artFinish"; })[0];
+    var illustrationStyleText = characterTypeEntry
+      ? PromptHaus.engine.resolveFieldValue(PromptHaus.engine.withPromptLookup(characterTypeEntry.field, lists.characterTypePrompts))
+      : "";
+    var artFinishText = artFinishEntry
+      ? PromptHaus.engine.resolveFieldValue(PromptHaus.engine.withPromptLookup(artFinishEntry.field, lists.artFinishPrompts))
+      : "";
 
     var parts = [];
     parts.push(
       "Create " + count + (count === 1 ? " variation" : " variations") +
       " of a clean, professional group portrait."
     );
+    var stickerSheetGuard = PromptHaus.engine.stickerSheetGuard(count);
+    if (stickerSheetGuard) parts.push(stickerSheetGuard);
+    if (illustrationStyleText) parts.push("Illustration style: " + illustrationStyleText);
+    if (artFinishText) parts.push("Art finish: " + artFinishText);
 
     var allResolved = [];
     var fragments = [];
+    if (illustrationStyleText) { allResolved.push({ label: "Illustration Style", value: illustrationStyleText }); fragments.push(illustrationStyleText); }
+    if (artFinishText) { allResolved.push({ label: "Art Finish", value: artFinishText }); fragments.push(artFinishText); }
 
     function describePerson(group, label, index) {
       var resolved = PromptHaus.engine.resolveFields(getPersonFieldEntries(group, index).map(toEntry));
@@ -415,7 +465,10 @@
       fragments.push(textClause);
     }
 
-    var sceneEntries = getFamilyDynamicFieldEntries().concat(getSharedStyleDNAEntries());
+    var sceneEntries = dynamicEntries
+      .filter(function (e) { return e.fieldName !== "characterType" && e.fieldName !== "artFinish"; })
+      .map(toEntry)
+      .concat(getSharedStyleDNAEntries());
     var sceneResolved = PromptHaus.engine.resolveFields(sceneEntries);
     if (sceneResolved.length) {
       parts.push(sceneResolved.map(function (r) { return r.value; }).join(", ") + ".");
@@ -459,7 +512,7 @@
       PERSON_APPEARANCE_RANDOM_CAP, apply, clear
     );
     PromptHaus.util.randomizeGroupWithCap(
-      entries.filter(function (e) { return PERSON_STYLING_FIELDS.indexOf(e.fieldName) !== -1; }),
+      entries.filter(function (e) { return PERSON_STYLING_FIELDS.indexOf(e.fieldName) !== -1 && e.fieldName !== "accessories2"; }),
       PERSON_STYLING_RANDOM_CAP, apply, clear
     );
   }
