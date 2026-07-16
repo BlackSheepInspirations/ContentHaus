@@ -1940,22 +1940,14 @@
    one, so the second line ("Powered by...") reads as its own spaced-out
    row instead of crowding the sentence above it. */
 .bh-marketing__wheel-section {
-  max-width: 1040px;
+  max-width: 1080px;
   margin: 8px auto 32px;
   padding: 0 24px;
   text-align: center;
 }
-.bh-marketing__wheel-eyebrow {
-  color: var(--bh-gold-on-light);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-size: 13px;
-  font-weight: 700;
-  margin: 0 0 8px;
-}
-.bh-marketing__wheel-heading {
-  color: var(--bh-black);
-  font-size: 26px;
+.bh-marketing__wheel-intro {
+  color: var(--bh-charcoal);
+  font-size: 16px;
   margin: 0 0 20px;
 }
 .bh-marketing__subheading br {
@@ -3405,19 +3397,36 @@
   font-family: inherit;
   margin: 24px 0;
 }
+.bh-wheel__masthead {
+  text-align: center;
+  margin-bottom: 28px;
+}
+.bh-wheel__masthead-eyebrow {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--bh-gold);
+  margin: 0 0 8px;
+}
+.bh-wheel__masthead-title {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: clamp(26px, 3vw, 34px);
+  font-weight: 600;
+  color: #fff;
+  margin: 0;
+}
 .bh-wheel__top {
-  display: grid;
-  grid-template-columns: 1.05fr 1fr;
-  gap: 32px;
-  align-items: start;
+  display: block;
 }
 .bh-wheel__stage {
   display: flex;
   justify-content: center;
+  margin-bottom: 28px;
 }
 .bh-wheel__svg {
   width: 100%;
-  max-width: 520px;
+  max-width: 760px;
   height: auto;
   overflow: visible;
 }
@@ -3500,12 +3509,19 @@
   fill: rgba(242, 240, 235, 0.55);
 }
 
-/* Detail panel */
+/* Detail panel — full-width now that it sits below the wheel rather than
+   squeezed into a side column; max-width keeps body text at a readable
+   measure instead of stretching edge to edge. Background/border opacity
+   bumped up from the original pass so the card reads as a distinct
+   raised surface against the wheel's own black background instead of
+   blending into it. */
 .bh-wheel__detail {
-  background: rgba(242, 240, 235, 0.04);
-  border: 1px solid rgba(242, 240, 235, 0.12);
+  background: rgba(242, 240, 235, 0.07);
+  border: 1px solid rgba(242, 240, 235, 0.18);
   border-radius: 14px;
-  padding: 26px 28px;
+  padding: 30px 34px;
+  max-width: 900px;
+  margin: 0 auto;
 }
 .bh-wheel__detail-head {
   position: relative;
@@ -3544,9 +3560,9 @@
 .bh-wheel__blurb {
   font-size: 14px;
   line-height: 1.55;
-  color: rgba(242, 240, 235, 0.75);
+  color: rgba(242, 240, 235, 0.88);
   margin: 0;
-  max-width: 46ch;
+  max-width: 60ch;
 }
 .bh-wheel__rule {
   border: none;
@@ -3564,7 +3580,7 @@
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: rgba(242, 240, 235, 0.55);
+  color: rgba(242, 240, 235, 0.65);
   margin: 0 0 10px;
 }
 .bh-wheel__strengths, .bh-wheel__bestfor {
@@ -3579,9 +3595,9 @@
   display: flex;
   align-items: flex-start;
   gap: 6px;
-  font-size: 12.5px;
+  font-size: 13px;
   line-height: 1.4;
-  color: rgba(242, 240, 235, 0.85);
+  color: rgba(242, 240, 235, 0.92);
 }
 .bh-wheel__check {
   width: 13px;
@@ -3610,8 +3626,8 @@
   gap: 14px;
 }
 .bh-wheel__callout {
-  background: rgba(242, 240, 235, 0.04);
-  border: 1px solid rgba(242, 240, 235, 0.1);
+  background: rgba(242, 240, 235, 0.07);
+  border: 1px solid rgba(242, 240, 235, 0.16);
   border-radius: 10px;
   padding: 14px 16px;
 }
@@ -3626,7 +3642,7 @@
 .bh-wheel__callout-body {
   font-size: 12.5px;
   line-height: 1.5;
-  color: rgba(242, 240, 235, 0.8);
+  color: rgba(242, 240, 235, 0.88);
   margin: 0;
 }
 .bh-wheel__callout--quote {
@@ -3696,8 +3712,8 @@
   margin-top: 14px;
 }
 .bh-wheel__card {
-  background: rgba(242, 240, 235, 0.04);
-  border: 1px solid rgba(242, 240, 235, 0.1);
+  background: rgba(242, 240, 235, 0.07);
+  border: 1px solid rgba(242, 240, 235, 0.16);
   border-top: 3px solid var(--card-color, var(--bh-teal));
   border-radius: 10px;
   padding: 14px 10px;

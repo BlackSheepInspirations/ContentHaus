@@ -92,7 +92,10 @@
 
   function mutedColor(hex) {
     var hsl = hexToHsl(hex);
-    return hslToHex(hsl.h, clamp(hsl.s * 0.45, 18, 45), clamp(hsl.l * 0.62 + 14, 22, 34));
+    // Lightness/saturation bumped up from the first pass — against the
+    // wheel's near-black background, the original 22-34% lightness range
+    // read as murky rather than "premium jewel tone."
+    return hslToHex(hsl.h, clamp(hsl.s * 0.55, 28, 52), clamp(hsl.l * 0.68 + 18, 34, 48));
   }
 
   // ---------------------------------------------------------------------
@@ -163,9 +166,19 @@
     var CX = 300, CY = 300, R_OUTER = 268, R_INNER = 96, R_ICON = 182, R_BADGE = 268, R_LABEL = 302;
 
     var root = ui.el("div", { class: "bh-wheel" });
+    var masthead = ui.el("div", { class: "bh-wheel__masthead" }, [
+      ui.el("p", { class: "bh-wheel__masthead-eyebrow", text: "Brand DNA" }),
+      ui.el("h2", { class: "bh-wheel__masthead-title", text: "The Archetype Wheel" }),
+    ]);
+    root.appendChild(masthead);
     var top = ui.el("div", { class: "bh-wheel__top" });
     var stage = ui.el("div", { class: "bh-wheel__stage" });
-    var svg = svgEl("svg", { class: "bh-wheel__svg", viewBox: "0 0 600 600" });
+    // viewBox extends well past the circle itself (0-600) so the external
+    // name/word labels have guaranteed room to render without depending on
+    // a parent container to avoid clipping them — R_LABEL (302) plus label
+    // text width needs roughly 100 units of bleed past the 600-unit circle
+    // on every side.
+    var svg = svgEl("svg", { class: "bh-wheel__svg", viewBox: "-110 -50 820 700" });
     stage.appendChild(svg);
     var detail = ui.el("div", { class: "bh-wheel__detail" });
     top.appendChild(stage);
@@ -304,7 +317,7 @@
         ? ui.el("span", { class: "bh-wheel__pill bh-wheel__pill--match", text: "Your Top Match" })
         : ui.el("span", { class: "bh-wheel__pill", text: (words[name] || "").toUpperCase(), style: "color:" + profile.output.colors.standOut + ";border-color:" + profile.output.colors.standOut + ";" });
 
-      var strengthsList = ui.el("ul", { class: "bh-wheel__strengths" }, (profile.output.strengths || []).map(function (s) {
+      var strengthsList = ui.el("ul", { class: "bh-wheel__strengths" }, (profile.output.strengthTags || []).map(function (s) {
         return ui.el("li", {}, [ui.icon("chevron", "bh-wheel__check"), ui.el("span", { text: s })]);
       }));
 
