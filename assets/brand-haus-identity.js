@@ -28,8 +28,16 @@
     store.setState({ negativePrompt: Object.assign({}, state.negativePrompt, changes) });
   }
 
+  function reset() {
+    store.setState({
+      businessName: makeField("", [], { isFreeText: true }),
+      negativePrompt: makeField("", [], { isFreeText: true }),
+    });
+  }
+
   BrandHaus.identity = Object.assign({}, store, {
     setBusinessName: setBusinessName,
     updateNegativePromptField: updateNegativePromptField,
+    reset: reset,
   });
 })();

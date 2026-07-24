@@ -666,7 +666,7 @@
   padding: 12px 14px;
   border: 1.5px solid var(--pdh-border);
   border-radius: 12px;
-  background: var(--pdh-cream);
+  background: #fff;
   text-align: left;
   cursor: pointer;
 }
@@ -726,9 +726,6 @@
   color: var(--pdh-charcoal);
   opacity: 0.85;
   line-height: 1.4;
-}
-.pdh-generator-panel__back {
-  margin-bottom: 14px;
 }
 .pdh-generator-panel__title {
   display: flex;
@@ -1313,6 +1310,15 @@
   background: transparent;
   border: 1px solid var(--pdh-espresso);
   color: var(--pdh-espresso);
+}
+/* Category-level "back to [category]" button, rendered in the light
+   fields column — .pdh-btn--reset is cream-on-transparent for the dark
+   preview panel and is invisible here, same fix as .pdh-btn--delete above. */
+.pdh-btn--back {
+  background: transparent;
+  border: 1px solid var(--pdh-espresso);
+  color: var(--pdh-espresso);
+  margin-bottom: 14px;
 }
 .pdh-color-swatch-item .pdh-btn--reset {
   border-color: var(--pdh-charcoal);

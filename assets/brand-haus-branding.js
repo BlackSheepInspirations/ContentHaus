@@ -95,6 +95,7 @@
     return {
       tagline: makeField("", [], { isFreeText: true }),
       colors: [],
+      colorDrafts: [],
       headingFont: makeField("", FONT_OPTIONS),
       bodyFont: makeField("", FONT_OPTIONS),
       mood: makeField("", MOOD_OPTIONS),
@@ -118,7 +119,7 @@
   function addColor() {
     var state = store.getState();
     if (state.colors.length >= MAX_COLORS) return;
-    store.setState({ colors: state.colors.concat(["#6B6860"]) });
+    store.setState({ colors: state.colors.concat(["#6B6860"]), colorDrafts: state.colorDrafts.concat(["#6B6860"]) });
   }
   function updateColor(index, hex) {
     var state = store.getState();
@@ -126,9 +127,18 @@
     next[index] = hex;
     store.setState({ colors: next });
   }
+  function updateColorDraft(index, text) {
+    var state = store.getState();
+    var next = state.colorDrafts.slice();
+    next[index] = text;
+    store.setState({ colorDrafts: next });
+  }
   function removeColor(index) {
     var state = store.getState();
-    store.setState({ colors: state.colors.filter(function (_, i) { return i !== index; }) });
+    store.setState({
+      colors: state.colors.filter(function (_, i) { return i !== index; }),
+      colorDrafts: state.colorDrafts.filter(function (_, i) { return i !== index; }),
+    });
   }
 
   function addValue() {
@@ -152,6 +162,7 @@
     var state = store.getState();
     store.setState({
       colors: a.colors.slice(),
+      colorDrafts: a.colors.slice(),
       headingFont: Object.assign({}, state.headingFont, { value: a.headingFont, customValue: "" }),
       bodyFont: Object.assign({}, state.bodyFont, { value: a.bodyFont, customValue: "" }),
       mood: Object.assign({}, state.mood, { value: a.mood, customValue: "" }),
@@ -168,6 +179,7 @@
     var state = store.getState();
     store.setState({
       colors: result.colors.slice(),
+      colorDrafts: result.colors.slice(),
       headingFont: Object.assign({}, state.headingFont, { value: result.headingFont, customValue: "" }),
       bodyFont: Object.assign({}, state.bodyFont, { value: result.bodyFont, customValue: "" }),
       mood: Object.assign({}, state.mood, { value: result.mood, customValue: "" }),
@@ -295,8 +307,10 @@
       title: "Color Palette",
       subtitle: "Pick up to " + MAX_COLORS + " brand colors — shown in a row on the board.",
       colors: state.colors,
+      drafts: state.colorDrafts,
       max: MAX_COLORS,
       onUpdate: function (index, hex) { updateColor(index, hex); BrandHaus.ui.renderApp(); },
+      onDraftChange: function (index, text) { updateColorDraft(index, text); BrandHaus.ui.renderApp(); },
       onAdd: function () { addColor(); BrandHaus.ui.renderApp(); },
       onRemove: function (index) { removeColor(index); BrandHaus.ui.renderApp(); },
     }));

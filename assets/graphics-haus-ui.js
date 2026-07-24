@@ -27,6 +27,11 @@
   var ghKeyCounter = 0;
   var FOCUSABLE_TAGS = { input: true, select: true, textarea: true };
 
+  // Tab bar's single source of truth for "what's showing" — a generator
+  // id, or one of "combined"/"reference"/"collection". Defaulted to the
+  // first registered generator the first time renderAppContent runs.
+  var activeMode = null;
+
   function el(tag, attrs, children) {
     var node = document.createElement(tag);
     Object.keys(attrs || {}).forEach(function (key) {
@@ -109,12 +114,15 @@
   // ---------------------------------------------------------------------
   // Vault snapshot save/restore — same crash-safety pattern as Product
   // Haus (deep-merge onto current defaults, never wholesale-replace).
-  // Every vault key here is "gen:<generatorId>" — there's no broad-mode
-  // shape to branch on, but the prefix is kept for consistency with
-  // Product Haus's own storage format.
+  // A vault key is either "gen:<generatorId>" (a Quick Generator) or a
+  // plain mode name ("combined"/"reference"/"collection") — the latter
+  // group each expose getState()/setState() directly on GraphicsHaus[mode]
+  // the same way GraphicsHaus.styleDNA does, so no generator-store lookup
+  // is needed for them.
   // ---------------------------------------------------------------------
   function getModeStore(mode) {
-    return GraphicsHaus.generators.getGeneratorStore(mode.slice(4));
+    if (mode.indexOf("gen:") === 0) return GraphicsHaus.generators.getGeneratorStore(mode.slice(4));
+    return GraphicsHaus[mode];
   }
 
   function buildVaultSnapshot(mode) {
@@ -157,8 +165,11 @@
     if (snapshot[mode] && store) store.setState(deepMergeSnapshot(store.getState(), snapshot[mode]));
   }
 
+  var SPECIAL_MODE_LABELS = { combined: "Combined", reference: "Image/Prompt Reference", collection: "Collection Builder" };
+
   function modeLabel(mode) {
-    return GraphicsHaus.generators.getGeneratorLabel(mode.slice(4));
+    if (mode.indexOf("gen:") === 0) return GraphicsHaus.generators.getGeneratorLabel(mode.slice(4));
+    return SPECIAL_MODE_LABELS[mode] || mode;
   }
 
   function buildVaultTitle(mode) {
@@ -193,6 +204,7 @@
   // no external dependency.
   // ---------------------------------------------------------------------
   var ICONS = {
+    bufferBox: '<rect x="3" y="3" width="14" height="14" rx="2" stroke-dasharray="3 2.5"/>',
     person: '<circle cx="10" cy="6.5" r="3"/><path d="M4 17c0-3.3 2.7-6 6-6s6 2.7 6 6"/>',
     people: '<circle cx="6.5" cy="6" r="2.2"/><path d="M2.5 17c0-2.7 1.8-4.8 4-4.8s4 2.1 4 4.8"/><circle cx="14" cy="7.3" r="1.8"/><path d="M10.7 17c.3-2.2 1.8-3.9 3.3-3.9s3 1.7 3.3 3.9"/>',
     text: '<path d="M4 4h12M10 4v12"/>',
@@ -271,6 +283,39 @@
     return el("div", { class: "gh-pill-toggle" }, options.map(pillButton));
   }
 
+  // Shared Yes/No pill toggle — used by Image Buffer/Padding (Style DNA
+  // bar), matching Content Haus's own yesNoButton exactly.
+  function yesNoButton(label, isActive, onClick) {
+    var btn = el("button", {
+      type: "button",
+      class: "gh-styledna__yesno-btn" + (isActive ? " is-active" : ""),
+      "aria-pressed": isActive ? "true" : "false",
+      text: label,
+    });
+    btn.addEventListener("click", onClick);
+    return btn;
+  }
+
+  // Two big card-style options side by side (e.g. Image/Prompt Reference's
+  // "Reference an Image" vs "Reference a Prompt" source-type toggle) —
+  // heavier-weight than renderPillToggle, reusing the same
+  // .gh-basetype-toggle CSS this file already ships (ported alongside
+  // everything else but, until now, never wired to real markup).
+  function renderTwoOptionToggle(options) {
+    var buttons = options.map(function (opt) {
+      var btn = el("button", { type: "button", class: "gh-basetype-toggle__btn" + (opt.isActive ? " is-active" : "") }, [
+        icon(opt.icon, "gh-basetype-toggle__icon"),
+        el("span", { class: "gh-basetype-toggle__text" }, [
+          el("span", { class: "gh-basetype-toggle__title", text: opt.title }),
+          el("span", { class: "gh-basetype-toggle__subtitle", text: opt.subtitle || "" }),
+        ]),
+      ]);
+      btn.addEventListener("click", opt.onClick);
+      return btn;
+    });
+    return el("div", { class: "gh-basetype-toggle" }, buttons);
+  }
+
   function renderPresetRow(presets, onApply, labelText) {
     if (!presets || !presets.length) return null;
     var cards = presets.map(function (preset) {
@@ -321,7 +366,7 @@
     var field = entry.field;
     var select = el("select", { class: "gh-field__select" });
     appendSelectOptions(select, field, field.value);
-    select.addEventListener("change", function () { onChange({ value: select.value }); });
+    select.addEventListener("change", function () { onChange({ value: select.value, customValue: "" }); });
     var selectId = "gh-field-" + select.getAttribute("data-gh-key");
     select.id = selectId;
 
@@ -546,23 +591,36 @@
     var variationId = "gh-field-" + variationSelect.getAttribute("data-gh-key");
     variationSelect.id = variationId;
 
-    var holidaySelect = el("select", { class: "gh-field__select" });
-    appendSelectOptions(holidaySelect, state.holiday, state.holiday.value);
-    holidaySelect.addEventListener("change", function () { GraphicsHaus.styleDNA.setHoliday(holidaySelect.value); renderApp(); });
-    var holidayId = "gh-field-" + holidaySelect.getAttribute("data-gh-key");
-    holidaySelect.id = holidayId;
+    var platformSelect = el("select", { class: "gh-field__select" });
+    appendSelectOptions(platformSelect, state.targetPlatform, state.targetPlatform.value);
+    platformSelect.addEventListener("change", function () { GraphicsHaus.styleDNA.setTargetPlatform(platformSelect.value); renderApp(); });
+    var platformId = "gh-field-" + platformSelect.getAttribute("data-gh-key");
+    platformSelect.id = platformId;
 
-    var themeSelect = el("select", { class: "gh-field__select" });
-    appendSelectOptions(themeSelect, state.theme, state.theme.value);
-    themeSelect.addEventListener("change", function () { GraphicsHaus.styleDNA.setTheme(themeSelect.value); renderApp(); });
-    var themeId = "gh-field-" + themeSelect.getAttribute("data-gh-key");
-    themeSelect.id = themeId;
+    var aspectSelect = el("select", { class: "gh-field__select" });
+    state.aspectRatio.options.forEach(function (opt) {
+      var optionNode = el("option", { value: opt, text: opt });
+      if (opt === state.aspectRatio.value) optionNode.selected = true;
+      aspectSelect.appendChild(optionNode);
+    });
+    aspectSelect.addEventListener("change", function () { GraphicsHaus.styleDNA.setAspectRatio(aspectSelect.value); renderApp(); });
+    var aspectId = "gh-field-" + aspectSelect.getAttribute("data-gh-key");
+    aspectSelect.id = aspectId;
 
-    var nicheSelect = el("select", { class: "gh-field__select" });
-    appendSelectOptions(nicheSelect, state.niche, state.niche.value);
-    nicheSelect.addEventListener("change", function () { GraphicsHaus.styleDNA.setNiche(nicheSelect.value); renderApp(); });
-    var nicheId = "gh-field-" + nicheSelect.getAttribute("data-gh-key");
-    nicheSelect.id = nicheId;
+    var bufferToggle = el("div", { class: "gh-styledna__yesno" }, [
+      yesNoButton("Yes", state.addBuffer === true, function () { GraphicsHaus.styleDNA.setAddBuffer(true); renderApp(); }),
+      yesNoButton("No", state.addBuffer !== true, function () { GraphicsHaus.styleDNA.setAddBuffer(false); renderApp(); }),
+    ]);
+    var bufferLabel = labelWithIcon("bufferBox", "Image Buffer/Padding", null, null, "Asks the AI to leave empty space around the edges so nothing gets cropped at the borders.");
+    bufferLabel.id = "gh-label-buffer-padding";
+    bufferToggle.setAttribute("role", "group");
+    bufferToggle.setAttribute("aria-labelledby", bufferLabel.id);
+
+    var outputFormatSelect = el("select", { class: "gh-field__select" });
+    appendSelectOptions(outputFormatSelect, state.outputFormat, state.outputFormat.value);
+    outputFormatSelect.addEventListener("change", function () { GraphicsHaus.styleDNA.setOutputFormat(outputFormatSelect.value); renderApp(); });
+    var outputFormatId = "gh-field-" + outputFormatSelect.getAttribute("data-gh-key");
+    outputFormatSelect.id = outputFormatId;
 
     var negativeTextarea = el("textarea", { class: "gh-field__custom gh-field__freetext gh-styledna__negative-input", rows: "2", placeholder: 'e.g. "jargon, buzzwords, emojis"' });
     negativeTextarea.value = state.negativePrompt.value || "";
@@ -587,9 +645,13 @@
     var children = [
       el("div", { class: "gh-styledna__field" }, [labelWithIcon("shirt", "Business Name", nameId, null, "Set once here — carries into every generator automatically."), nameInput]),
       el("div", { class: "gh-styledna__field" }, [labelWithIcon("sparkle", "Variations", variationId), variationSelect]),
-      el("div", { class: "gh-styledna__field" }, [labelWithIcon("gift", "Holiday", holidayId), holidaySelect]),
-      el("div", { class: "gh-styledna__field" }, [labelWithIcon("sparkle", "Theme", themeId), themeSelect]),
-      el("div", { class: "gh-styledna__field" }, [labelWithIcon("heart", "Niche", nicheId), nicheSelect]),
+      el("div", { class: "gh-styledna__field" }, [labelWithIcon("monitor", "Target Platform", platformId, null, "Formats the copied prompt for this specific AI tool."), platformSelect]),
+      el("div", { class: "gh-styledna__field" }, [labelWithIcon("crop", "Aspect Ratio", aspectId, null, "Only appears in the copied text for Midjourney/Leonardo AI."), aspectSelect]),
+      el("div", { class: "gh-styledna__field" }, [bufferLabel, bufferToggle]),
+      el("div", { class: "gh-styledna__field" }, [
+        labelWithIcon("bufferBox", "Output Format", outputFormatId, null, "A file-level export setting (transparency/format) — independent of any generator's own Background field, which is a scene/content choice, not a file setting. Leave on Default for a plain PNG."),
+        outputFormatSelect,
+      ]),
       el("div", { class: "gh-styledna__field gh-styledna__field--full" }, [
         labelWithIcon("shield", "Negative Prompt — What to Avoid", negativeId),
         el("p", { class: "gh-styledna__negative-subtitle", text: "Applies to every generator, once, at the end of the prompt — comma-separated. Click a suggestion to add it." }),
@@ -598,6 +660,75 @@
       ]),
     ];
     root.appendChild(el("div", { class: "gh-styledna" }, children));
+  }
+
+  // Holiday/Theme/Niche relocated out of the dark Business/Voice DNA bar
+  // into their own boxed section — same "Concept / Creative Direction"
+  // treatment Content Haus uses for its own equivalent fields. Purely a
+  // rendering change: getVoiceEntries() still folds all three into every
+  // assembled prompt exactly as before, unchanged.
+  function renderConceptBox() {
+    var state = GraphicsHaus.styleDNA.getState();
+    return renderFieldGroup(
+      "Concept / Creative Direction",
+      [
+        { label: "Holiday", field: state.holiday },
+        { label: "Creative Theme", field: state.theme },
+        { label: "Niche", field: state.niche },
+      ],
+      function (entry, changes) {
+        var fieldName = entry.label === "Holiday" ? "holiday" : entry.label === "Creative Theme" ? "theme" : "niche";
+        GraphicsHaus.util.updateField(GraphicsHaus.styleDNA, fieldName, changes);
+        renderApp();
+      },
+      "Optional creative direction, shared across every generator."
+    );
+  }
+
+  // ---------------------------------------------------------------------
+  // Tab bar — Content Haus's own 2-row-with-divider pattern (renderTabs/
+  // renderTabRow in prompt-builder-ui.js), ported here as this Haus's
+  // replacement for the old grid-of-cards + per-panel back button: every
+  // generator plus Combined/Image-Prompt-Reference/Collection Builder is
+  // now one click away from any other, so there's nothing to "go back"
+  // from. Row 1 is the 7 generators (in registration order); row 2 is the
+  // 3 cross-generator modes.
+  // ---------------------------------------------------------------------
+  var TAB_INFO_TEXT = {
+    combined: "Pick 2-3 of your own generators below and blend them into one cohesively-styled combined graphic — never pulls from the other Hauses.",
+    reference: "Reference an image (upload + describe it) or a prompt you found elsewhere, and reimagine it in a new style.",
+    collection: "View any of your generators' current prompts side by side, or combine up to 3 of them into one spliced-together prompt.",
+  };
+
+  function renderTabButton(tabId, label, iconName, isActive, onClick) {
+    var btn = el("button", { type: "button", class: "gh-tabs__btn" + (isActive ? " is-active" : "") }, [
+      icon(iconName),
+      el("span", { text: label }),
+    ]);
+    btn.addEventListener("click", onClick);
+    var item = el("span", { class: "gh-tabs__item" }, [btn]);
+    if (TAB_INFO_TEXT[tabId]) item.appendChild(infoIcon(TAB_INFO_TEXT[tabId]));
+    return item;
+  }
+
+  function goToMode(mode) {
+    activeMode = mode;
+    if (GraphicsHaus.generators.getGeneratorDef(mode)) GraphicsHaus.generators.setActiveGenerator(mode);
+    renderApp();
+  }
+
+  function renderTabs(root) {
+    var defs = GraphicsHaus.generators.getAllDefs();
+    var row1 = el("div", { class: "gh-tabs" });
+    defs.forEach(function (def) {
+      row1.appendChild(renderTabButton(def.id, def.label, def.icon || "sparkle", activeMode === def.id, function () { goToMode(def.id); }));
+    });
+    var row2 = el("div", { class: "gh-tabs gh-tabs--row2" }, [
+      renderTabButton("combined", "Combined", "layers", activeMode === "combined", function () { goToMode("combined"); }),
+      renderTabButton("reference", "Image/Prompt Reference", "upload", activeMode === "reference", function () { goToMode("reference"); }),
+      renderTabButton("collection", "Collection Builder", "document", activeMode === "collection", function () { goToMode("collection"); }),
+    ]);
+    root.appendChild(el("div", { class: "gh-tabs-box" }, [row1, row2]));
   }
 
   // ---------------------------------------------------------------------
@@ -679,14 +810,15 @@
   var saveFeedback = null;
 
   function renderPreview(root, assembled, modeApi, mode) {
-    var formatted = GraphicsHaus.engine.formatForPlatform(assembled, GraphicsHaus.styleDNA.getState().negativePrompt.value);
+    var styleDNAState = GraphicsHaus.styleDNA.getState();
+    var formatted = GraphicsHaus.engine.formatForPlatform(assembled, styleDNAState.targetPlatform.value, styleDNAState.aspectRatio.value, styleDNAState.negativePrompt.value, styleDNAState.addBuffer, styleDNAState.outputFormat.value);
     var textarea = el("textarea", { class: "gh-preview__text", readonly: "readonly" });
     textarea.value = formatted;
 
     var actions = renderPreviewActions(
       formatted,
       function () { modeApi.randomize(); renderApp(); },
-      function () { modeApi.reset(); renderApp(); },
+      function () { modeApi.reset(); GraphicsHaus.styleDNA.resetContent(); renderApp(); },
       function () {
         var result = GraphicsHaus.favorites.save(mode, {
           text: formatted,
@@ -848,7 +980,12 @@
       loadBtn.title = "Restores every field in the builder to exactly how it was when this was generated.";
       loadBtn.addEventListener("click", function () {
         loadVaultSnapshot(entry.mode, entry.snapshot);
-        GraphicsHaus.generators.setActiveGenerator(entry.mode.slice(4));
+        if (entry.mode.indexOf("gen:") === 0) {
+          activeMode = entry.mode.slice(4);
+          GraphicsHaus.generators.setActiveGenerator(activeMode);
+        } else {
+          activeMode = entry.mode;
+        }
         renderApp();
       });
     }
@@ -1020,24 +1157,39 @@
     ghKeyCounter = 0;
     root.innerHTML = "";
 
+    if (!activeMode) {
+      var firstDef = GraphicsHaus.generators.getAllDefs()[0];
+      activeMode = firstDef ? firstDef.id : "combined";
+      if (firstDef) GraphicsHaus.generators.setActiveGenerator(activeMode);
+    }
+
     var shell = el("div", { class: "gh-shell" });
     renderBusinessVoiceDNA(shell);
+    renderTabs(shell);
 
     var body = el("div", { class: "gh-body" });
     var left = el("div", { class: "gh-body__fields" });
     var right = el("div", { class: "gh-body__preview" });
 
-    var modeApi = GraphicsHaus.generators;
-    var activeId = modeApi.getActiveGeneratorId();
-    var vaultKey = activeId ? "gen:" + activeId : "generators";
-    left.appendChild(modeApi.renderPanel());
-    renderSelectionsPanel(right, vaultKey, modeApi.getSelectionsByGroup());
-    renderPreview(right, modeApi.assemblePrompt(), modeApi, vaultKey);
-    renderSavedPrompts(right, vaultKey);
-    if (GraphicsHaus.lookLock) GraphicsHaus.lookLock.renderSection(right);
-    if (GraphicsHaus.mascotLock) GraphicsHaus.mascotLock.renderSection(right);
-    if (GraphicsHaus.brandKit) GraphicsHaus.brandKit.renderSection(right);
-    renderRecentLog(right);
+    if (activeMode === "collection") {
+      left.appendChild(GraphicsHaus.collection.renderPanel());
+      if (GraphicsHaus.lookLock) GraphicsHaus.lookLock.renderSection(right);
+      if (GraphicsHaus.mascotLock) GraphicsHaus.mascotLock.renderSection(right);
+      if (GraphicsHaus.brandKit) GraphicsHaus.brandKit.renderSection(right);
+      renderRecentLog(right);
+    } else {
+      var modeApi = GraphicsHaus.generators.getGeneratorDef(activeMode) ? GraphicsHaus.generators : GraphicsHaus[activeMode];
+      var vaultKey = GraphicsHaus.generators.getGeneratorDef(activeMode) ? "gen:" + activeMode : activeMode;
+      left.appendChild(modeApi.renderPanel());
+      left.appendChild(renderConceptBox());
+      renderSelectionsPanel(right, vaultKey, modeApi.getSelectionsByGroup());
+      renderPreview(right, modeApi.assemblePrompt(), modeApi, vaultKey);
+      renderSavedPrompts(right, vaultKey);
+      if (GraphicsHaus.lookLock) GraphicsHaus.lookLock.renderSection(right);
+      if (GraphicsHaus.mascotLock) GraphicsHaus.mascotLock.renderSection(right);
+      if (GraphicsHaus.brandKit) GraphicsHaus.brandKit.renderSection(right);
+      renderRecentLog(right);
+    }
 
     body.appendChild(left);
     body.appendChild(right);
@@ -1088,6 +1240,8 @@
     renderApp: renderApp,
     buildVaultSnapshot: buildVaultSnapshot,
     buildVaultTitle: buildVaultTitle,
+    renderSavedPrompts: renderSavedPrompts,
+    renderTwoOptionToggle: renderTwoOptionToggle,
   };
 
   document.addEventListener("click", function (e) {

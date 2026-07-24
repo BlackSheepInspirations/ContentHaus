@@ -11,12 +11,15 @@
  * preference), same pattern Infographic's own Infographic Type field
  * established, mapping to a dimension/safe-area note via computeExtraTokens.
  *
- * Honesty flag for the owner: the pixel dimensions below (820x312,
- * 2560x1440 / 1546x423 safe area, 1584x396, 1500x500) are the standard
- * specs as commonly documented for each platform, not something I can
- * verify live from here — platforms do revise these from time to time,
- * so worth a quick check against each platform's current help docs
- * before relying on them for a real print/export size.
+ * Dimensions verified via web search against each platform's own help
+ * docs (2026-07-18): Facebook's own Help Center recommends uploading at
+ * 851x315px (loads fastest as sRGB JPG under 100KB), though it renders
+ * at 820x312px on desktop — LinkedIn's Company Page cover upload spec
+ * is 4200x700px (renders at 1128x191px on the page; 1584x396px is the
+ * *personal profile* banner, a different surface). YouTube's 2560x1440
+ * canvas / 1546x423px safe area and X's 1500x500px were already
+ * correct. Pinterest's profile cover is 800x450px. Platforms do still
+ * revise these over time, so a periodic re-check remains worthwhile.
  */
 (function () {
   "use strict";
@@ -29,11 +32,11 @@
   var COLOR_PALETTE_OPTIONS = ["Bold Primary Colors", "Soft Pastels", "Monochrome with One Accent", "Warm Earth Tones", "Cool Blues & Teals", "Black, White & Gold"];
 
   var PLATFORM_DIMENSION_INSTRUCTIONS = {
-    "Facebook Page Cover": "Design at Facebook's cover photo proportions (820x312px on desktop) — keep key content centered, since mobile view crops the edges.",
+    "Facebook Page Cover": "Design at Facebook's recommended upload proportions (851x315px) — keep key content centered, since it displays smaller (820x312px on desktop, 640x360px on mobile) and the profile picture overlaps the bottom-left corner on mobile.",
     "YouTube Channel Banner": "Design at YouTube's channel banner proportions (2560x1440px) — keep all important content within the centered 1546x423px safe area, since different devices crop the outer edges differently.",
-    "LinkedIn Company Banner": "Design at LinkedIn's company page banner proportions (1584x396px), a wide horizontal format.",
+    "LinkedIn Company Banner": "Design at LinkedIn's company page cover upload proportions (4200x700px, rendering at 1128x191px on the page) — a wide, short horizontal format.",
     "Twitter/X Header": "Design at X's profile header proportions (1500x500px) — keep in mind the profile photo overlaps the bottom-left corner.",
-    "Pinterest Profile Cover": "Design in a wide horizontal format suited for a Pinterest profile cover — keep key content centered since the crop varies by device.",
+    "Pinterest Profile Cover": "Design at Pinterest's profile cover proportions (800x450px) — keep key content centered since the crop varies by device.",
   };
 
   var LOCKED_SUFFIX = " Clean, professional composition, no watermarks, high resolution.";

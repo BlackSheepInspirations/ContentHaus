@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Brand Haus — Marketing Page Dev Preview</title>
+<link rel="stylesheet" href="../assets/brand-haus.css" />
+</head>
+<body>
+<!-- Dev-only harness: static mirror of sections/brand-haus-preview.liquid
+     with sample settings/block values, since Liquid can't run outside
+     Shopify. Not part of the shipped theme. -->
+<div class="bh-marketing">
+  <nav class="bh-marketing__toc" aria-label="Page sections">
+    <a href="#bh-marketing-video">Watch the Demo</a>
+    <a href="#bh-marketing-archetypes">The Archetypes</a>
+    <a href="#bh-marketing-features">What You Get</a>
+    <a href="#bh-marketing-faq">FAQ</a>
+    <a href="#" class="bh-marketing__toc-cta">Get Access</a>
+  </nav>
+
+  <div class="bh-marketing__hero">
+    <p class="bh-marketing__eyebrow">Black Sheep Creations &amp; Inspirations</p>
+    <h1 class="bh-marketing__heading">The <span class="bh-heading-accent">Brand</span> Haus</h1>
+    <p class="bh-marketing__tagline">Where You Define Your <span class="bh-heading-accent">Brand DNA Blueprint</span>&trade;</p>
+    <div class="bh-marketing__subheading">Discover who you are as a brand before you create anything.<br>Powered by Black Sheep Creations.</div>
+    <a href="#" class="bh-btn bh-btn--copy bh-marketing__cta">Get Access — $49.00</a>
+  </div>
+
+  <div class="bh-marketing__video" id="bh-marketing-video">
+    <div class="bh-marketing__video-placeholder">Demo video coming soon</div>
+  </div>
+
+  <div class="bh-marketing__wheel-section" id="bh-marketing-archetypes">
+    <p class="bh-marketing__wheel-intro">Every founder lands on one of 11 profiles — explore all of them below.</p>
+    <div id="bh-marketing-wheel"></div>
+    <div id="bh-marketing-wheel-detail" class="bh-wheel-detail-wrap"></div>
+  </div>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      var container = document.getElementById("bh-marketing-wheel");
+      var detail = document.getElementById("bh-marketing-wheel-detail");
+      if (container && window.BrandHaus && window.BrandHaus.wheel) {
+        window.BrandHaus.wheel.render(window.BrandHaus.ui, container, {
+          personalized: false,
+          onSelect: function (name) {
+            if (detail) {
+              detail.innerHTML = "";
+              detail.appendChild(window.BrandHaus.wheel.renderSelectedDetail(window.BrandHaus.ui, name));
+            }
+          },
+        });
+      }
+    });
+  </script>
+
+  <div class="bh-marketing__features" id="bh-marketing-features">
+    <div class="bh-marketing__feature">
+      <h3>The Brand DNA Assessment</h3>
+      <p>30 questions, about 17-25 minutes — uncovers how you naturally think, what you value, and what should show up in your brand because of it.</p>
+    </div>
+    <div class="bh-marketing__feature">
+      <h3>Branding Studio</h3>
+      <p>Colors, fonts, mood, mission, and values on one visual board — see your brand before you commit to it.</p>
+    </div>
+    <div class="bh-marketing__feature">
+      <h3>Logo Studio</h3>
+      <p>A full logo builder — from concept to color and typography direction.</p>
+    </div>
+    <div class="bh-marketing__feature">
+      <h3>Save your favorites</h3>
+      <p>Keep up to 5 saved prompts per studio, ready to copy anytime.</p>
+    </div>
+  </div>
+
+  <div class="bh-marketing__midpage-cta">
+    <p class="bh-marketing__midpage-cta-text">Ready to find your Brand DNA Blueprint&trade;?</p>
+    <a href="#" class="bh-btn bh-btn--copy bh-marketing__cta">Get Access — $49.00</a>
+  </div>
+
+  <div class="bh-marketing__faq-section" id="bh-marketing-faq">
+    <h2 class="bh-marketing__faq-heading">Brand DNA Blueprint&trade; FAQs</h2>
+    <div class="bh-marketing__faq-list">
+      <details class="bh-marketing__faq-item">
+        <summary class="bh-marketing__faq-question">Why should I take the Brand DNA Assessment?</summary>
+        <div class="bh-marketing__faq-answer"><p>Most brand quizzes hand you a generic label and call it done. The Brand DNA Assessment is built on our own framework — 8 Brand Tensions, not borrowed archetype tropes.</p></div>
+      </details>
+      <details class="bh-marketing__faq-item">
+        <summary class="bh-marketing__faq-question">Do I have to pay every time I want to use it?</summary>
+        <div class="bh-marketing__faq-answer"><p>No, once you've purchased access to The Brand Haus you have unlimited access. You can browse all 11 Brand DNA Archetypes for free right here on this page, no assessment required.</p></div>
+      </details>
+    </div>
+  </div>
+
+  <div class="bh-marketing__footer-cta">
+    <a href="#" class="bh-btn bh-btn--copy bh-marketing__cta">Get Access — $49.00</a>
+  </div>
+</div>
+<script>
+  var v = Date.now();
+  [
+    "../assets/brand-haus-util.js",
+    "../assets/brand-haus-branddna.js",
+    "../assets/brand-haus-wheel.js",
+    "../assets/brand-haus-ui.js",
+  ].forEach(function (src) {
+    document.write('<script src="' + src + '?v=' + v + '"></' + 'script>');
+  });
+</script>
+</body>
+</html>

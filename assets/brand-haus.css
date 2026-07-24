@@ -488,21 +488,39 @@
   display: flex;
   gap: 8px;
 }
+/* Unlike the other 3 Hauses' own copy of this rule, Brand Haus has no
+   dark Style DNA bar for this toggle to sit in — every fieldset here is a
+   plain light card, so this stays dark-on-white for real contrast
+   instead of the cream-on-cream the other Hauses' dark-bar version uses. */
 .bh-styledna__yesno-btn {
   flex: 1;
-  border: 1.5px solid var(--bh-border);
+  border: 1.5px solid var(--bh-espresso);
   border-radius: 999px;
   padding: 8px 16px;
-  background: var(--bh-cream);
-  color: var(--bh-black);
+  background: #fff;
+  color: var(--bh-espresso);
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
 }
 .bh-styledna__yesno-btn.is-active {
   background: var(--bh-teal);
-  color: var(--bh-cream);
+  color: #fff;
   border-color: var(--bh-teal);
+}
+.bh-logo-board-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--bh-border);
+}
+.bh-logo-board-toggle-row .bh-styledna__yesno {
+  flex: 0 0 auto;
+  min-width: 140px;
 }
 
 /* Decorative progress stepper — narrates the flow, doesn't gate it */
@@ -1537,6 +1555,15 @@
   border-color: var(--bh-charcoal);
   color: var(--bh-charcoal);
 }
+/* Brand Kit's "Turn Off" button (.bh-saved__item) and the Quick
+   Generators "All Generators" back button (.bh-generator-panel) both
+   sit on the same light cream body background as the cases above —
+   same cream-on-cream invisibility, same fix. */
+.bh-saved__item .bh-btn--reset,
+.bh-generator-panel .bh-btn--reset {
+  border-color: var(--bh-charcoal);
+  color: var(--bh-charcoal);
+}
 .bh-color-row {
   display: flex;
   flex-wrap: wrap;
@@ -1557,6 +1584,11 @@
 }
 .bh-color-hex {
   width: 90px;
+}
+.bh-field__hint {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: var(--bh-gold-on-light);
 }
 .bh-preview__save-feedback {
   margin: 10px 0 0;
@@ -1958,6 +1990,55 @@
 .bh-marketing__cta {
   display: inline-block;
 }
+
+/* Sticky section-jump nav — sits above the hero, pinned to the viewport
+   top once scrolled past, so a long page (wheel + features + FAQ) stays
+   easy to navigate. Horizontal scroll on narrow screens rather than
+   wrapping, so it never grows past one row. */
+.bh-marketing__toc {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  overflow-x: auto;
+  white-space: nowrap;
+  background: rgba(242, 240, 235, 0.96);
+  border-bottom: 1px solid var(--bh-border);
+  padding: 12px 20px;
+  margin: 0 -24px 24px;
+}
+.bh-marketing__toc a {
+  color: var(--bh-charcoal);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  flex: 0 0 auto;
+}
+.bh-marketing__toc a:hover { color: var(--bh-teal); }
+.bh-marketing__toc-cta {
+  margin-left: auto;
+  color: var(--bh-teal) !important;
+}
+
+/* Mid-page conversion prompt, dropped between "What You Get" and the FAQ —
+   the point where someone's browsed the wheel and read the feature list,
+   so interest is highest before the FAQ answers remaining objections. */
+.bh-marketing__midpage-cta {
+  text-align: center;
+  background: rgba(201, 168, 76, 0.12);
+  border: 1px solid var(--bh-border);
+  border-radius: 12px;
+  padding: 28px 24px;
+  margin: 0 0 48px;
+}
+.bh-marketing__midpage-cta-text {
+  font-family: 'Playfair Display', serif;
+  font-size: 19px;
+  color: var(--bh-black);
+  margin: 0 0 16px;
+}
 .bh-marketing__video {
   margin-bottom: 48px;
 }
@@ -2017,6 +2098,58 @@
 .bh-marketing__footer-cta {
   text-align: center;
 }
+
+.bh-marketing__faq-section {
+  margin: 8px 0 48px;
+}
+.bh-marketing__faq-heading {
+  font-family: var(--bh-heading-font, 'Playfair Display', serif);
+  font-size: clamp(22px, 3vw, 28px);
+  color: var(--bh-black);
+  text-align: center;
+  margin: 0 0 24px;
+}
+.bh-marketing__faq-list {
+  max-width: 720px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.bh-marketing__faq-item {
+  border: 1px solid var(--bh-border);
+  border-radius: 12px;
+  background: #fff;
+  padding: 4px 20px;
+}
+.bh-marketing__faq-question {
+  cursor: pointer;
+  list-style: none;
+  padding: 16px 28px 16px 0;
+  font-weight: 600;
+  color: var(--bh-black);
+  position: relative;
+}
+.bh-marketing__faq-question::-webkit-details-marker { display: none; }
+.bh-marketing__faq-question::after {
+  content: "+";
+  position: absolute;
+  right: 0;
+  top: 14px;
+  font-size: 20px;
+  font-weight: 400;
+  color: var(--bh-gold-on-light);
+}
+.bh-marketing__faq-item[open] .bh-marketing__faq-question::after {
+  content: "\2212";
+}
+.bh-marketing__faq-answer {
+  color: var(--bh-charcoal);
+  font-size: 14px;
+  line-height: 1.6;
+  padding-bottom: 18px;
+}
+.bh-marketing__faq-answer p { margin: 0; }
 
 /* Fallback shown in place of the whole builder if a render crashes (e.g.
    loading a Vault/Recent item saved under an older version of the tool
@@ -2268,6 +2401,69 @@
   display: flex;
   justify-content: flex-end;
   margin-top: 24px;
+}
+
+/* FAQ & Help — a standalone overlay view (not a numbered step), reached
+   via a sidebar link under Saved Results. Reuses the welcome step's
+   title/body treatment for visual consistency. */
+.bh-faq__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  background: none;
+  padding: 0;
+  margin-bottom: 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--bh-gold-on-light);
+  cursor: pointer;
+}
+.bh-faq__back .bh-icon {
+  width: 16px;
+  height: 16px;
+  transform: rotate(90deg);
+}
+.bh-faq__list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 8px;
+}
+.bh-faq__item {
+  border: 1px solid var(--bh-border);
+  border-radius: 12px;
+  padding: 4px 20px;
+}
+.bh-faq__question {
+  cursor: pointer;
+  list-style: none;
+  padding: 16px 28px 16px 0;
+  font-weight: 600;
+  color: var(--bh-black);
+  position: relative;
+}
+.bh-faq__question::-webkit-details-marker { display: none; }
+.bh-faq__question::after {
+  content: "+";
+  position: absolute;
+  right: 0;
+  top: 14px;
+  font-size: 20px;
+  font-weight: 400;
+  color: var(--bh-gold-on-light);
+}
+.bh-faq__item[open] .bh-faq__question::after {
+  content: "\2212";
+}
+.bh-faq__answer {
+  color: var(--bh-charcoal);
+  font-size: 15px;
+  line-height: 1.65;
+  margin: 0 0 18px;
+}
+.bh-sidebar__history-toggle.is-active {
+  color: var(--bh-teal);
 }
 
 /* Your Brand DNA — six-chapter narrative (brand-haus-results.js) and
@@ -3380,409 +3576,150 @@
   margin: 0 0 24px;
 }
 
+
 /* -------------------------------------------------------------------- */
-/* Brand DNA Archetype Wheel — a deliberate dark "premium instrument"
-   panel, distinct from the light chapter cards around it (matches the
-   approved reference design rather than the app's usual light theme).
-   Score/percentage elements (.bh-wheel__score) are hidden here and only
-   revealed inside the print window's own stylesheet (see
-   printStyledSection in brand-haus-ui.js) — a % only means something
-   next to one specific founder's real completed assessment. */
+/* Brand DNA Archetype Wheel — light, gold-outlined "premium instrument"
+   panel matching the app's usual light theme. Icon badges are a darker
+   coin-style shade of each wedge's own real Stand-Out color; identity
+   names are upright, stacked two lines, never curved. Score/percentage
+   elements (.bh-wheel__score) are hidden here and only revealed inside
+   the print window's own stylesheet (see printStyledSection in
+   brand-haus-ui.js) — a % only means something next to one specific
+   founder's real completed assessment. */
 /* -------------------------------------------------------------------- */
 .bh-wheel {
-  background: var(--bh-black);
+  background: #fff;
+  border: 1px solid var(--bh-border);
   border-radius: 16px;
   padding: 40px 36px 32px;
-  color: #F2F0EB;
   font-family: inherit;
   margin: 24px 0;
 }
-.bh-wheel__masthead {
-  text-align: center;
-  margin-bottom: 28px;
-}
+.bh-wheel__masthead { text-align: center; margin-bottom: 20px; }
 .bh-wheel__masthead-eyebrow {
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: var(--bh-gold);
+  color: var(--bh-gold-on-light);
   margin: 0 0 8px;
 }
 .bh-wheel__masthead-title {
-  font-family: 'Playfair Display', Georgia, serif;
-  font-size: clamp(26px, 3vw, 34px);
+  font-family: 'Playfair Display', serif;
   font-weight: 600;
-  color: #fff;
+  font-size: clamp(24px, 3vw, 32px);
   margin: 0;
-}
-.bh-wheel__top {
-  display: block;
+  color: var(--bh-black);
 }
 .bh-wheel__stage {
   display: flex;
   justify-content: center;
-  margin-bottom: 28px;
+  margin-bottom: 8px;
 }
 .bh-wheel__svg {
   width: 100%;
-  max-width: 760px;
+  max-width: 640px;
   height: auto;
   overflow: visible;
 }
-.bh-wheel__wedge {
-  cursor: pointer;
-  transition: filter 200ms ease, opacity 200ms ease, transform 200ms ease;
-  transform-box: fill-box;
-  transform-origin: center;
-}
-.bh-wheel__wedge.is-selected {
-  filter: brightness(1.35) saturate(1.4);
-  transform: scale(1.035);
-}
-.bh-wheel__wedge.is-cousin {
-  filter: brightness(1.12);
-}
-.bh-wheel__wedge.is-dimmed {
-  opacity: 0.32;
-}
+.bh-wheel__track { fill: #fff; stroke: var(--bh-gold); stroke-width: 1.5; stroke-opacity: 0.55; }
+.bh-wheel__track-inner { fill: var(--bh-cream); stroke: var(--bh-gold); stroke-width: 1.2; stroke-opacity: 0.55; }
+.bh-wheel__divider { stroke: var(--bh-gold); stroke-width: 1.3; stroke-opacity: 0.5; }
+.bh-wheel__wedge { transition: filter 200ms ease; }
+.bh-wheel--interactive .bh-wheel__wedge { cursor: pointer; }
+.bh-wheel--interactive .bh-wheel__wedge:hover { filter: brightness(1.06); }
+.bh-wheel__wedge.is-selected { filter: brightness(1.1); stroke: #fff; stroke-width: 3; }
 .bh-wheel__icon-badge {
-  width: 44px;
-  height: 44px;
+  width: 42px;
+  height: 42px;
   border-radius: 50%;
-  background: rgba(26, 24, 21, 0.55);
   display: flex;
   align-items: center;
   justify-content: center;
-  pointer-events: none;
+  border: 2px solid rgba(255, 255, 255, 0.6);
 }
-.bh-wheel__icon-badge .bh-icon {
-  width: 22px;
-  height: 22px;
-  color: #F2F0EB;
-}
-.bh-wheel__num-circle {
-  fill: #F2F0EB;
-  stroke: none;
-}
-.bh-wheel__num-text {
-  font-size: 11px;
-  font-weight: 700;
-  fill: var(--bh-black);
-}
-.bh-wheel__label-name {
-  font-family: 'Playfair Display', Georgia, serif;
-  font-size: 14px;
-  font-weight: 600;
-  fill: #F2F0EB;
-}
+.bh-wheel__icon-badge .bh-icon { width: 21px; height: 21px; color: #fff; }
 .bh-wheel__label-word {
-  font-size: 10px;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  font-size: 15px;
+  letter-spacing: 0.03em;
+  fill: rgba(255, 255, 255, 0.95);
+  text-transform: uppercase;
 }
 .bh-wheel__label-score {
   font-size: 10.5px;
   font-weight: 700;
-  fill: rgba(242, 240, 235, 0.6);
-  font-variant-numeric: tabular-nums;
+  fill: rgba(255, 255, 255, 0.85);
 }
-.bh-wheel__hub {
-  fill: var(--bh-black);
-  stroke: var(--bh-teal);
-  stroke-width: 2;
-}
-.bh-wheel__hub-sub {
-  font-size: 10px;
+.bh-wheel__label-name {
+  font-family: 'Playfair Display', serif;
   font-weight: 700;
-  letter-spacing: 0.14em;
-  fill: var(--bh-gold);
+  font-size: 16.5px;
+  letter-spacing: 0.05em;
+  fill: var(--bh-charcoal);
+}
+.bh-wheel__hub { fill: #fff; stroke: rgba(26, 24, 21, 0.1); stroke-width: 1; }
+.bh-wheel__hub-eyebrow {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  fill: var(--bh-gold-on-light);
 }
 .bh-wheel__hub-title {
-  font-family: 'Playfair Display', Georgia, serif;
-  font-size: 17px;
+  font-family: 'Playfair Display', serif;
   font-weight: 600;
-  fill: #F2F0EB;
+  font-size: 29px;
+  fill: var(--bh-black);
 }
-.bh-wheel__hub-hint {
-  font-size: 10px;
-  fill: rgba(242, 240, 235, 0.55);
-}
-
-/* Detail panel — full-width now that it sits below the wheel rather than
-   squeezed into a side column; max-width keeps body text at a readable
-   measure instead of stretching edge to edge. Background/border opacity
-   bumped up from the original pass so the card reads as a distinct
-   raised surface against the wheel's own black background instead of
-   blending into it. */
-.bh-wheel__detail {
-  background: rgba(242, 240, 235, 0.07);
-  border: 1px solid rgba(242, 240, 235, 0.18);
-  border-radius: 14px;
-  padding: 30px 34px;
-  max-width: 900px;
-  margin: 0 auto;
-}
-.bh-wheel__detail-head {
-  position: relative;
-  padding-right: 96px;
-}
-.bh-wheel__pill {
-  display: inline-block;
-  font-size: 10.5px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  padding: 4px 10px;
-  border-radius: 100px;
-  border: 1px solid rgba(242, 240, 235, 0.3);
-  color: rgba(242, 240, 235, 0.85);
-  margin-bottom: 10px;
-}
-.bh-wheel__pill--match {
-  background: var(--bh-teal);
-  border-color: var(--bh-teal);
-  color: #fff;
-}
-.bh-wheel__name {
-  font-family: 'Playfair Display', Georgia, serif;
-  font-size: 26px;
-  font-weight: 600;
-  margin: 0 0 4px;
-  color: #fff;
-}
-.bh-wheel__word {
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  margin: 0 0 12px;
-}
-.bh-wheel__blurb {
-  font-size: 14px;
-  line-height: 1.55;
-  color: rgba(242, 240, 235, 0.88);
-  margin: 0;
-  max-width: 60ch;
-}
-.bh-wheel__rule {
-  border: none;
-  border-top: 1px solid rgba(242, 240, 235, 0.12);
-  margin: 20px 0;
-}
-.bh-wheel__info-row {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 18px;
-  margin-bottom: 20px;
-}
-.bh-wheel__info-label {
-  font-size: 10.5px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: rgba(242, 240, 235, 0.65);
-  margin: 0 0 10px;
-}
-.bh-wheel__strengths, .bh-wheel__bestfor {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.bh-wheel__strengths li, .bh-wheel__bestfor li {
-  display: flex;
-  align-items: flex-start;
-  gap: 6px;
-  font-size: 13px;
-  line-height: 1.4;
-  color: rgba(242, 240, 235, 0.92);
-}
-.bh-wheel__check {
-  width: 13px;
-  height: 13px;
-  flex: none;
-  margin-top: 2px;
-  transform: rotate(90deg);
-  color: var(--bh-teal);
-}
-.bh-wheel__voice-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-.bh-wheel__voice-tag {
-  font-size: 11.5px;
-  font-weight: 600;
-  padding: 4px 10px;
-  border-radius: 100px;
-  border: 1px solid rgba(242, 240, 235, 0.25);
-  color: rgba(242, 240, 235, 0.85);
-}
-.bh-wheel__callout-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
-}
-.bh-wheel__callout {
-  background: rgba(242, 240, 235, 0.07);
-  border: 1px solid rgba(242, 240, 235, 0.16);
-  border-radius: 10px;
-  padding: 14px 16px;
-}
-.bh-wheel__callout-label {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--bh-gold);
-  margin: 0 0 6px;
-}
-.bh-wheel__callout-body {
-  font-size: 12.5px;
-  line-height: 1.5;
-  color: rgba(242, 240, 235, 0.88);
-  margin: 0;
-}
-.bh-wheel__callout--quote {
-  display: flex;
-  align-items: center;
-}
-.bh-wheel__quote {
-  font-size: 13px;
-  font-style: italic;
-  line-height: 1.5;
-  color: rgba(242, 240, 235, 0.85);
-  margin: 0;
-}
-
-/* Alignment ring — print-export only, see .bh-wheel__score below */
-.bh-wheel__ring-wrap {
-  position: absolute;
-  top: 0;
-  right: 0;
-  text-align: center;
-}
-.bh-wheel__ring-track {
-  fill: none;
-  stroke: rgba(242, 240, 235, 0.15);
-  stroke-width: 7;
-}
-.bh-wheel__ring-progress {
-  fill: none;
-  stroke: var(--bh-teal);
-  stroke-width: 7;
-  stroke-linecap: round;
-  transition: stroke-dashoffset 400ms ease;
-}
-.bh-wheel__ring-label {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-.bh-wheel__ring-pct {
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--bh-teal);
-  font-variant-numeric: tabular-nums;
-}
-.bh-wheel__ring-caption {
-  font-size: 8px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: rgba(242, 240, 235, 0.55);
-}
-
-/* Cards row */
+.bh-wheel__hub-word { font-weight: 700; font-size: 28px; letter-spacing: 0.06em; }
+.bh-wheel__hub-alignment { font-size: 13px; font-weight: 700; fill: var(--bh-gold-on-light); }
 .bh-wheel__hint {
   text-align: center;
-  font-size: 12.5px;
-  color: rgba(242, 240, 235, 0.55);
-  margin: 22px 0 6px;
+  font-size: 13px;
+  color: var(--bh-gold-on-light);
+  margin: 12px 0 0;
 }
-.bh-wheel__cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
-  gap: 10px;
-  margin-top: 14px;
-}
-.bh-wheel__card {
-  background: rgba(242, 240, 235, 0.07);
-  border: 1px solid rgba(242, 240, 235, 0.16);
-  border-top: 3px solid var(--card-color, var(--bh-teal));
-  border-radius: 10px;
-  padding: 14px 10px;
+
+/* Selected-archetype blurb, rendered under an interactive wheel on click —
+   see BrandHaus.wheel.renderSelectedDetail (brand-haus-wheel.js). Empty
+   until a first click; no min-height reserved on purpose, so the page
+   doesn't hold open dead space before someone interacts. */
+.bh-wheel-detail-wrap { max-width: 560px; margin: 20px auto 0; }
+.bh-wheel-detail {
+  background: #fff;
+  border: 1px solid var(--bh-border);
+  border-radius: 12px;
+  padding: 20px 24px;
   text-align: center;
-  cursor: pointer;
-  transition: transform 160ms ease, background 160ms ease, opacity 200ms ease;
-  font-family: inherit;
 }
-.bh-wheel__card:hover {
-  transform: translateY(-3px);
-  background: rgba(242, 240, 235, 0.08);
-}
-.bh-wheel__card.is-selected {
-  background: rgba(242, 240, 235, 0.1);
-  box-shadow: 0 0 0 1px var(--card-color, var(--bh-teal)) inset;
-}
-.bh-wheel__card.is-dimmed {
-  opacity: 0.4;
-}
-.bh-wheel__card-icon {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 8px;
-}
-.bh-wheel__card-icon .bh-icon {
-  width: 20px;
-  height: 20px;
-  color: var(--card-color, #F2F0EB);
-}
-.bh-wheel__card-name {
-  font-family: 'Playfair Display', Georgia, serif;
-  font-size: 12.5px;
-  font-weight: 600;
-  color: #F2F0EB;
-  margin: 0 0 3px;
-  line-height: 1.25;
-}
-.bh-wheel__card-word {
-  font-size: 9.5px;
+.bh-wheel-detail__eyebrow {
+  font-family: 'Playfair Display', serif;
   font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  font-size: 17px;
+  margin: 0 0 10px;
+}
+.bh-wheel-detail__northstar {
+  font-style: italic;
+  color: var(--bh-black);
+  font-size: 15px;
+  margin: 0 0 8px;
+}
+.bh-wheel-detail__promise {
+  color: var(--bh-charcoal);
+  font-size: 15px;
+  margin: 0 0 10px;
+}
+.bh-wheel-detail__bestfor {
+  font-size: 13px;
+  color: var(--bh-gold-on-light);
   margin: 0;
 }
-.bh-wheel__card-score {
-  font-size: 11px;
-  font-weight: 700;
-  color: rgba(242, 240, 235, 0.6);
-  margin: 4px 0 0;
-  font-variant-numeric: tabular-nums;
-}
+.bh-wheel-detail__bestfor-label { font-weight: 700; }
 
 /* Score/alignment elements only ever appear inside an exported/print
    document — see the .bh-print-wrap override in printStyledSection. */
-.bh-wheel__score {
-  display: none;
-}
-.bh-wheel__ring-wrap {
-  display: none;
-}
+.bh-wheel__score { display: none; }
 
-@media (max-width: 760px) {
-  .bh-wheel__top {
-    grid-template-columns: 1fr;
-  }
-  .bh-wheel__info-row {
-    grid-template-columns: 1fr;
-  }
-  .bh-wheel__callout-row {
-    grid-template-columns: 1fr;
-  }
+@media (max-width: 640px) {
+  .bh-wheel { padding: 24px 16px 20px; }
 }

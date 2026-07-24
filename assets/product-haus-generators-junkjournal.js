@@ -27,8 +27,26 @@
   var COLOR_PALETTE_OPTIONS = ["Muted Earth Tones", "Dusty Rose & Sage", "Dark Academia Neutrals", "Soft Pastels", "Jewel Tones", "Black & Gold Vintage"];
   var AESTHETIC_MOOD_OPTIONS = ["Dark Academia", "Cottagecore", "Romantic Vintage", "Whimsical Fairy Tale", "Moody Gothic", "Bright Bohemian", "Nostalgic Sepia"];
   var BACKGROUND_TYPE_OPTIONS = ["Aged Parchment Texture", "Distressed Kraft Paper", "Linen Fabric Texture", "Watercolor Wash", "Blank Cream Paper", "Weathered Canvas"];
+  var BLANK_PAGE_VARIATION_OPTIONS = ["1", "2", "3", "4", "5"];
 
   var LOCKED_STYLE_SUFFIX = " Ultra-detailed, painterly rendering with soft blended edges and organic, hand-crafted texture — no harsh digital lines, no modern flat-design elements. Romantic, timeless, and richly layered.";
+
+  // Same "how many matching-but-distinct designs" mechanism the Ebook
+  // Pages generator already proved out — one Blank Page slot in the
+  // bundle picker can ask for 1-5 designs in a single sentence instead
+  // of needing 5 separate always-shown page-type entries.
+  function computeBlankPageTokens(valueMap) {
+    var n = parseInt(valueMap.blankPageVariations, 10) || 1;
+    return {
+      blankPageCountPhrase: n === 1 ? "one BLANK page" : n + " different BLANK pages",
+      blankPageVariationNote:
+        n === 1
+          ? ""
+          : " Keep the same overall art style, color palette, and decorative border/texture family across all " +
+            n +
+            " so they read as one matching set, but vary the border, corner ornament, or accent placement on each one so no two are identical — each is meant to be used as its own separate page, not a repeat of another.",
+    };
+  }
 
   ProductHaus.generatorEngine.registerGenerator({
     id: "junk-journal",
@@ -44,10 +62,13 @@
       { name: "colorPalette", label: "Color Palette", options: COLOR_PALETTE_OPTIONS, defaultValue: COLOR_PALETTE_OPTIONS[0], aesthetic: "palette" },
       { name: "aestheticMood", label: "Aesthetic Mood", options: AESTHETIC_MOOD_OPTIONS, defaultValue: AESTHETIC_MOOD_OPTIONS[0], aesthetic: "mood" },
       { name: "backgroundType", label: "Background Type", options: BACKGROUND_TYPE_OPTIONS, defaultValue: BACKGROUND_TYPE_OPTIONS[0], aesthetic: "texture" },
+      { name: "blankPageVariations", label: "Blank Page Variations (only used if Blank Page is included below)", options: BLANK_PAGE_VARIATION_OPTIONS, defaultValue: BLANK_PAGE_VARIATION_OPTIONS[0] },
     ],
 
-    pageTypesLabel: "Pages to Include (pick up to 4 — leave blank for the full set)",
-    pageTypesCap: 4,
+    computeExtraTokens: computeBlankPageTokens,
+
+    pageTypesLabel: "Pages to Include (pick up to 6 — leave blank for the full set)",
+    pageTypesCap: 6,
     defaultPageTypes: ["cover", "ephemera", "themed-spread", "closing"],
     bundleBlockTitle: "Your Journal Page Set",
     pageTypes: [
@@ -70,6 +91,20 @@
         label: "Themed Spread",
         promptTemplate:
           "Design a junk journal THEMED SPREAD centered around \"{theme}\", featuring {elementsObjects} as the main composition. {artStyle} art style, a {colorPalette} color palette, {backgroundType} as the base surface, evoking a {aestheticMood} mood{holidayClause}.\n\nLayout: one cohesive, richly detailed scene filling the page — the visual centerpiece of the set, meant to be read as a single complete illustration rather than scattered pieces." +
+          LOCKED_STYLE_SUFFIX,
+      },
+      {
+        id: "blankPage",
+        label: "Blank Page",
+        promptTemplate:
+          "Design {blankPageCountPhrase} for the same junk journal set themed around \"{theme}\". {artStyle} art style, a {colorPalette} color palette, {backgroundType} as the base surface, evoking a {aestheticMood} mood{holidayClause}.\n\nLayout: the same decorative border/framing as the rest of the set, with the entire center of the page left completely open and empty — ready for the journal-keeper's own writing or added ephemera. Do not add any placeholder text, lines, or lorem ipsum.{blankPageVariationNote}" +
+          LOCKED_STYLE_SUFFIX,
+      },
+      {
+        id: "notesPage",
+        label: "Notes Page",
+        promptTemplate:
+          "Design a NOTES page for the same junk journal set themed around \"{theme}\". {artStyle} art style, a {colorPalette} color palette, {backgroundType} as the base surface, evoking a {aestheticMood} mood{holidayClause}.\n\nLayout: the same decorative border/framing as the rest of the set, with a small \"Notes\" heading at the top and the rest of the page filled edge-to-edge with even, evenly-spaced horizontal ruled lines for handwriting. No other text, no placeholder content, no lorem ipsum." +
           LOCKED_STYLE_SUFFIX,
       },
       {

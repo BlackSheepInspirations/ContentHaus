@@ -20,8 +20,26 @@
   var ART_STYLE_OPTIONS = ["Soft Watercolor", "Botanical Line Art", "Warm Minimalist", "Vintage Devotional"];
   var COLOR_PALETTE_OPTIONS = ["Soft Pastels", "Warm Neutrals", "Muted Sage & Cream", "Gold & Ivory", "Dusty Rose & Sage"];
   var LAYOUT_STYLE_OPTIONS = ["Text-Focused with Small Accent", "Illustration-Forward with Text Overlay", "Balanced Split Layout"];
+  var BLANK_PAGE_VARIATION_OPTIONS = ["1", "2", "3", "4", "5"];
 
   var LOCKED_SUFFIX = " Standard devotional booklet page proportions, print-ready, clean composition, high resolution, no watermarks.";
+
+  // Same "how many matching-but-distinct designs" mechanism the Ebook
+  // Pages generator already proved out — one Blank Page slot in the
+  // bundle picker can ask for 1-5 designs in a single sentence instead
+  // of needing 5 separate always-shown page-type entries.
+  function computeBlankPageTokens(valueMap) {
+    var n = parseInt(valueMap.blankPageVariations, 10) || 1;
+    return {
+      blankPageCountPhrase: n === 1 ? "one BLANK page" : n + " different BLANK pages",
+      blankPageVariationNote:
+        n === 1
+          ? ""
+          : " Keep the same overall art style, color palette, and decorative border family across all " +
+            n +
+            " so they read as one matching set, but vary the border, corner ornament, or accent placement on each one so no two are identical — each is meant to be used as its own separate page, not a repeat of another.",
+    };
+  }
 
   ProductHaus.generatorEngine.registerGenerator({
     id: "devotional-pages",
@@ -36,10 +54,13 @@
       { name: "artStyle", label: "Art Style", options: ART_STYLE_OPTIONS, defaultValue: ART_STYLE_OPTIONS[0], aesthetic: "artStyle" },
       { name: "colorPalette", label: "Color Palette", options: COLOR_PALETTE_OPTIONS, defaultValue: COLOR_PALETTE_OPTIONS[0], aesthetic: "palette" },
       { name: "layoutStyle", label: "Layout Style", options: LAYOUT_STYLE_OPTIONS, defaultValue: LAYOUT_STYLE_OPTIONS[0] },
+      { name: "blankPageVariations", label: "Blank Page Variations (only used if Blank Page is included below)", options: BLANK_PAGE_VARIATION_OPTIONS, defaultValue: BLANK_PAGE_VARIATION_OPTIONS[0] },
     ],
 
-    pageTypesLabel: "Pages to Include (pick up to 4 — leave blank for the full set)",
-    pageTypesCap: 4,
+    computeExtraTokens: computeBlankPageTokens,
+
+    pageTypesLabel: "Pages to Include (pick up to 6 — leave blank for the full set)",
+    pageTypesCap: 6,
     defaultPageTypes: ["cover", "dailyReading", "reflection", "closing"],
     bundleBlockTitle: "Your Devotional Page Set",
     pageTypes: [
@@ -62,6 +83,20 @@
         label: "Reflection / Journal Prompt Spread",
         promptTemplate:
           "Design a devotional REFLECTION page for the same \"{devotionalTheme}\" booklet, built around {focusMessage}. {artStyle} art style, a {colorPalette} color palette, {layoutStyle}{holidayClause}.\n\nLayout: a soft decorative accent along one edge with generous lined or open space for the reader's own handwritten reflection, quiet and uncluttered." +
+          LOCKED_SUFFIX,
+      },
+      {
+        id: "blankPage",
+        label: "Blank Page",
+        promptTemplate:
+          "Design {blankPageCountPhrase} for the same \"{devotionalTheme}\" devotional booklet. {artStyle} art style, a {colorPalette} color palette{holidayClause}.\n\nLayout: the same decorative border/frame as the rest of the booklet, with the entire center of the page left completely open and empty — ready for the reader to write their own notes. Do not add any placeholder text, lines, or lorem ipsum.{blankPageVariationNote}" +
+          LOCKED_SUFFIX,
+      },
+      {
+        id: "notesPage",
+        label: "Notes Page",
+        promptTemplate:
+          "Design a NOTES page for the same \"{devotionalTheme}\" devotional booklet. {artStyle} art style, a {colorPalette} color palette{holidayClause}.\n\nLayout: the same decorative border/frame as the rest of the booklet, with a small \"Notes\" heading at the top and the rest of the page filled edge-to-edge with even, evenly-spaced horizontal ruled lines for handwriting. No other text, no placeholder content, no lorem ipsum." +
           LOCKED_SUFFIX,
       },
       {

@@ -76,6 +76,35 @@
     },
   ];
 
+  // Fallback content for the category-conditional Page Types capability
+  // (see below) when a def.pageTypesSourceField's resolved value doesn't
+  // match any key in def.pageTypesLibrary — e.g. a custom-typed category
+  // override. References only {pageTypesSourceValue} (always injected by
+  // getFieldValueMap whenever pageTypesSourceField is set), never a
+  // generator-specific field name, so this stays safely reusable by any
+  // future generator that adopts this capability, not just the one that
+  // introduced it.
+  var GENERIC_FALLBACK_PAGE_TYPES = [
+    {
+      id: "fallback-cover",
+      label: "Cover Page",
+      promptTemplate:
+        "Create a printable cover page for a \"{pageTypesSourceValue}\" set, with a bold title area, a strong decorative focal point, and minimal supporting text. Clean, print-ready, 8.5 x 11 inch letter-size page, high resolution, no watermark.",
+    },
+    {
+      id: "fallback-core",
+      label: "Core Content Page",
+      promptTemplate:
+        "Create a printable core content page for a \"{pageTypesSourceValue}\" set, with generous labeled writing sections and clearly organized structure. Clean, print-ready, 8.5 x 11 inch letter-size page, high resolution, no watermark.",
+    },
+    {
+      id: "fallback-closing",
+      label: "Closing Reflection Page",
+      promptTemplate:
+        "Create a printable closing reflection page for a \"{pageTypesSourceValue}\" set, with a short closing prompt and space for a final takeaway. Clean, print-ready, 8.5 x 11 inch letter-size page, high resolution, no watermark.",
+    },
+  ];
+
   var registry = []; // [definition, ...] in registration order
   var stores = {}; // generatorId -> store
   var currentId = null;
@@ -92,7 +121,10 @@
     state._charmIndex = randomIndex((def.charmPool || DEFAULT_CHARM_POOL).length);
     state._dynamicIndex = randomIndex((def.dynamicPool || DEFAULT_DYNAMIC_POOL).length);
     if (def.sectionGroups) state._sections = [];
-    if (def.pageTypes) state._pageTypes = [];
+    if (def.pageTypes || def.pageTypesSourceField) {
+      state._pageTypes = [];
+      state._pageTypesSourceValue = null;
+    }
     if (def.checklistSourceField || def.staticChecklistSections) {
       state._checklistOverrides = {};
       state._checklistSourceValue = null;
@@ -118,13 +150,27 @@
   //     default to basePromptTemplate if not given
   //   charmPool / dynamicPool: optional string arrays, default to the
   //     generic pools above if not given
-  //   sectionGroups/sectionsCap/sectionsLabel/defaultSections: optional —
-  //     adds the grouped/capped Sections multi-select (see Planner Pages)
+  //   sectionGroups/sectionsCap/sectionsLabel/defaultSections/
+  //     sectionsNote: optional — adds the grouped/capped Sections
+  //     multi-select (see Planner Pages). sectionsNote is an optional
+  //     extra line under the selection count (e.g. a density disclaimer
+  //     once the cap is raised past a handful of sections).
   //   pageTypes/pageTypesCap/pageTypesLabel/defaultPageTypes/
   //     bundleBlockTitle: optional — turns this generator into a Page
   //     Bundle (one prompt per selected page type, sharing one Look,
   //     replacing the 3-variation system rather than combining with it).
   //     pageTypes is [{ id, label, promptTemplate }].
+  //   pageTypesSourceField + pageTypesLibrary: optional alternative to a
+  //     static pageTypes array — mirrors checklistSourceField/
+  //     checklistLibrary exactly, but for the Page Types list itself
+  //     rather than a checklist's content. pageTypesSourceField names a
+  //     field (e.g. "journalCategory") whose resolved value looks up
+  //     pageTypesLibrary[value] -> { pageTypes, defaultPageTypes } — so
+  //     which page types are even offered changes with that field (see
+  //     the Journal Page Generator). Falls back to
+  //     GENERIC_FALLBACK_PAGE_TYPES on an unrecognized value (e.g. a
+  //     custom-typed override). pageTypesCap/pageTypesLabel/
+  //     bundleBlockTitle stay generator-level either way.
   //   presets/presetsLabel: optional — [{ name, description, apply }],
   //     apply is { fieldName: value }. For generators with several
   //     independent style-ish dropdowns that are hard to picture in
@@ -172,6 +218,39 @@
     stores[id].setState({ _pageTypes: pageTypeIds });
   }
 
+  function hasPageBundle(def) {
+    return !!(def.pageTypes || def.pageTypesSourceField);
+  }
+
+  // Resolves the active { pageTypes, defaultPageTypes } pair — either the
+  // generator's own static def.pageTypes, or (if def.pageTypesSourceField
+  // is set) whichever entry def.pageTypesLibrary has for that field's
+  // current resolved value, falling back to GENERIC_FALLBACK_PAGE_TYPES
+  // on a miss so the picker never goes empty.
+  function getActivePageTypesEntry(def, state) {
+    if (!def.pageTypesSourceField) {
+      return { pageTypes: def.pageTypes || [], defaultPageTypes: def.defaultPageTypes || [] };
+    }
+    var sourceValue = resolveFieldValue(state[def.pageTypesSourceField]);
+    var entry = def.pageTypesLibrary && def.pageTypesLibrary[sourceValue];
+    if (entry) return entry;
+    return { pageTypes: GENERIC_FALLBACK_PAGE_TYPES, defaultPageTypes: GENERIC_FALLBACK_PAGE_TYPES.map(function (p) { return p.id; }) };
+  }
+
+  // Re-syncs _pageTypes at most once per source-value change (same
+  // one-check-on-render pattern as ensureChecklistSourceSynced) — a new
+  // category's page types are a different id set, so a stale selection
+  // from the old category is cleared rather than silently carried over.
+  function ensurePageTypesSourceSynced(id) {
+    var def = getDef(id);
+    if (!def.pageTypesSourceField) return;
+    var store = getStore(id);
+    var state = store.getState();
+    var sourceValue = resolveFieldValue(state[def.pageTypesSourceField]);
+    if (state._pageTypesSourceValue === sourceValue) return;
+    store.setState({ _pageTypes: [], _pageTypesSourceValue: sourceValue });
+  }
+
   // Optional `def.presets` — [{ name, description, apply: {fieldName: value} }].
   // For generators with several independent style-ish dropdowns (Design
   // Style, Typography, Text Color Mode, ...) that are hard to picture in
@@ -209,9 +288,9 @@
       }
       patch._sections = shuffled.slice(0, cap);
     }
-    if (def.pageTypes) {
+    if (hasPageBundle(def)) {
       var ptCap = def.pageTypesCap || 4;
-      var shuffledIds = def.pageTypes.map(function (pt) { return pt.id; });
+      var shuffledIds = getActivePageTypesEntry(def, state).pageTypes.map(function (pt) { return pt.id; });
       for (var k = shuffledIds.length - 1; k > 0; k--) {
         var m = randomIndex(k + 1);
         var tmp2 = shuffledIds[k]; shuffledIds[k] = shuffledIds[m]; shuffledIds[m] = tmp2;
@@ -412,6 +491,9 @@
     if (def.checklistSourceField || def.staticChecklistSections) {
       map.checklistBlock = buildChecklistBlock(def, state);
     }
+    if (def.pageTypesSourceField) {
+      map.pageTypesSourceValue = resolveFieldValue(state[def.pageTypesSourceField]) || "";
+    }
     if (typeof def.computeExtraTokens === "function") {
       Object.assign(map, def.computeExtraTokens(map));
     }
@@ -465,9 +547,10 @@
     var def = getDef(id);
     var state = getStore(id).getState();
     var valueMap = getFieldValueMap(def, state);
-    var chosenIds = (state._pageTypes && state._pageTypes.length) ? state._pageTypes : (def.defaultPageTypes || []);
+    var entry = getActivePageTypesEntry(def, state);
+    var chosenIds = (state._pageTypes && state._pageTypes.length) ? state._pageTypes : (entry.defaultPageTypes || []);
     return chosenIds.map(function (ptId) {
-      var pt = def.pageTypes.filter(function (p) { return p.id === ptId; })[0];
+      var pt = entry.pageTypes.filter(function (p) { return p.id === ptId; })[0];
       if (!pt) return null;
       return { key: pt.id, label: pt.label, text: substituteTemplate(pt.promptTemplate, valueMap) };
     }).filter(Boolean);
@@ -484,7 +567,7 @@
     var state = getStore(id).getState();
     var resolved = resolveFields(getFieldEntries(def, state));
     var text;
-    if (def.pageTypes) {
+    if (hasPageBundle(def)) {
       var bundleBlocks = assembleBundle(id);
       text = bundleBlocks.length ? bundleBlocks[0].text : "";
     } else {
@@ -505,9 +588,10 @@
     if (def.sectionGroups && state._sections && state._sections.length) {
       items.push({ label: def.sectionsLabel || "Sections", value: state._sections.join(", ") });
     }
-    if (def.pageTypes && state._pageTypes && state._pageTypes.length) {
+    if (hasPageBundle(def) && state._pageTypes && state._pageTypes.length) {
+      var activePageTypes = getActivePageTypesEntry(def, state).pageTypes;
       var chosenLabels = state._pageTypes.map(function (ptId) {
-        var pt = def.pageTypes.filter(function (p) { return p.id === ptId; })[0];
+        var pt = activePageTypes.filter(function (p) { return p.id === ptId; })[0];
         return pt ? pt.label : ptId;
       });
       items.push({ label: def.pageTypesLabel || "Pages", value: chosenLabels.join(", ") });
@@ -530,20 +614,6 @@
   // ---------------------------------------------------------------------
   // UI
   // ---------------------------------------------------------------------
-
-  function renderGrid(onSelect) {
-    var ui = ProductHaus.ui;
-    var cards = registry.map(function (def) {
-      var card = ui.el("button", { type: "button", class: "pdh-generator-card" }, [
-        ui.icon(def.icon || "sparkle"),
-        ui.el("span", { class: "pdh-generator-card__name", text: def.label }),
-        ui.el("span", { class: "pdh-generator-card__description", text: def.description || "" }),
-      ]);
-      card.addEventListener("click", function () { onSelect(def.id); });
-      return card;
-    });
-    return ui.el("div", { class: "pdh-generator-grid" }, cards);
-  }
 
   // Generic "list of labeled prompt blocks, each individually copyable" —
   // shared by the 3-variation system and Page Bundles below.
@@ -606,12 +676,27 @@
     var ui = ProductHaus.ui;
     var chosen = state._pageTypes || [];
     var cap = def.pageTypesCap || 4;
+    var activePageTypes = getActivePageTypesEntry(def, state).pageTypes;
     var wrap = ui.el("fieldset", { class: "pdh-field-group" });
     wrap.appendChild(ui.el("legend", { class: "pdh-field-group__title" }, [ui.icon("layers"), ui.el("span", { text: def.pageTypesLabel || "Pages" })]));
     var subtitleText = chosen.length + " of " + cap + " selected" + (chosen.length === 0 ? " — leave blank and we'll use a solid default set" : "");
     wrap.appendChild(ui.el("p", { class: "pdh-field-group__subtitle", text: subtitleText }));
+
+    // Select All / Clear All — a straight toggle on whether every
+    // currently-offered page type is already chosen, capped defensively
+    // at `cap` (every generator's cap is kept in sync with its own total
+    // page type count, so in practice this selects the full set).
+    var allIds = activePageTypes.map(function (p) { return p.id; });
+    var allSelected = allIds.length > 0 && allIds.every(function (ptId) { return chosen.indexOf(ptId) !== -1; });
+    var selectAllBtn = ui.el("button", { type: "button", class: "pdh-btn pdh-btn--small" }, [ui.el("span", { text: allSelected ? "Clear All" : "Select All" })]);
+    selectAllBtn.addEventListener("click", function () {
+      updatePageTypes(id, allSelected ? [] : allIds.slice(0, cap));
+      ProductHaus.ui.renderApp();
+    });
+    wrap.appendChild(ui.el("div", { class: "pdh-companion__controls" }, [selectAllBtn]));
+
     var row = ui.el("div", { class: "pdh-pill-toggle" });
-    def.pageTypes.forEach(function (pt) {
+    activePageTypes.forEach(function (pt) {
       var isActive = chosen.indexOf(pt.id) !== -1;
       var btn = ui.el("button", { type: "button", class: "pdh-pill-toggle__btn" + (isActive ? " is-active" : "") }, [ui.el("span", { text: pt.label })]);
       btn.disabled = !isActive && chosen.length >= cap;
@@ -641,6 +726,7 @@
     wrap.appendChild(ui.el("legend", { class: "pdh-field-group__title" }, [ui.icon("layers"), ui.el("span", { text: def.sectionsLabel || "Sections" })]));
     var subtitleText = chosen.length + " of " + cap + " selected" + (chosen.length === 0 ? " — leave blank and we'll use a solid default set" : "");
     wrap.appendChild(ui.el("p", { class: "pdh-field-group__subtitle", text: subtitleText }));
+    if (def.sectionsNote) wrap.appendChild(ui.el("p", { class: "pdh-field-group__subtitle", text: def.sectionsNote }));
     (def.sectionGroups || []).forEach(function (group) {
       wrap.appendChild(ui.el("p", { class: "pdh-imagery__category-label", text: group.label }));
       var row = ui.el("div", { class: "pdh-pill-toggle" });
@@ -678,14 +764,11 @@
   function renderGeneratorPanel(id) {
     ensureLookLockApplied(id);
     ensureChecklistSourceSynced(id);
+    ensurePageTypesSourceSynced(id);
     var ui = ProductHaus.ui;
     var def = getDef(id);
     var state = getStore(id).getState();
     var wrap = ui.el("div", { class: "pdh-panel pdh-generator-panel" });
-
-    var backBtn = ui.el("button", { type: "button", class: "pdh-btn pdh-btn--small pdh-btn--reset pdh-generator-panel__back", text: "← All Generators" });
-    backBtn.addEventListener("click", function () { currentId = null; ProductHaus.ui.renderApp(); });
-    wrap.appendChild(backBtn);
 
     wrap.appendChild(ui.el("h3", { class: "pdh-generator-panel__title" }, [ui.icon(def.icon || "sparkle"), ui.el("span", { text: def.label })]));
     if (def.description) wrap.appendChild(ui.el("p", { class: "pdh-generator-panel__description", text: def.description }));
@@ -711,11 +794,11 @@
 
     if (def.sectionGroups) wrap.appendChild(renderSectionsPicker(id, def, state));
 
-    if (def.pageTypes) wrap.appendChild(renderPageTypesPicker(id, def, state));
+    if (hasPageBundle(def)) wrap.appendChild(renderPageTypesPicker(id, def, state));
 
     if (def.checklistSourceField || def.staticChecklistSections) wrap.appendChild(renderChecklistItemsPicker(id, def, state));
 
-    wrap.appendChild(def.pageTypes ? renderBundleBlock(id) : renderVariationsBlock(id));
+    wrap.appendChild(hasPageBundle(def) ? renderBundleBlock(id) : renderVariationsBlock(id));
 
     if (def.secondaryBlockTemplate) {
       var secondaryText = substituteTemplate(def.secondaryBlockTemplate, getFieldValueMap(def, state));
@@ -726,15 +809,13 @@
     return wrap;
   }
 
+  // currentId is always set by the category mini-grid in product-haus-ui.js
+  // before this ever renders — Quick Generators no longer has its own flat
+  // grid-vs-panel toggle now that generators are grouped into categories.
   function renderPanel() {
     var ui = ProductHaus.ui;
     var wrap = ui.el("div", { class: "pdh-panel" });
-    if (!currentId) {
-      wrap.appendChild(ui.el("p", { class: "pdh-generator-grid__intro", text: "Pick a generator below — each one has just a few fields, and works even if you leave everything at its default." }));
-      wrap.appendChild(renderGrid(function (id) { currentId = id; ProductHaus.ui.renderApp(); }));
-    } else {
-      wrap.appendChild(renderGeneratorPanel(currentId));
-    }
+    wrap.appendChild(renderGeneratorPanel(currentId));
     return wrap;
   }
 
@@ -757,5 +838,8 @@
     // the right generator's store through these instead.
     getGeneratorStore: function (id) { return getStore(id); },
     getGeneratorLabel: function (id) { var def = getDef(id); return def ? def.label : id; },
+    // Card metadata (label/description/icon) for a category mini-grid card
+    // in product-haus-ui.js — the plain generator def, read-only.
+    getGeneratorDef: function (id) { return getDef(id); },
   };
 })();

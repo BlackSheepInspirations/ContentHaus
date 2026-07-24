@@ -765,10 +765,31 @@
 .ph-imagery__category-label:first-child {
   margin-top: 0;
 }
+.ph-art-finish__heading {
+  grid-column: 1 / -1;
+  margin: 10px 0 0;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--ph-black);
+}
+.ph-art-finish__heading:first-child {
+  margin-top: 0;
+}
+.ph-art-finish__subtitle {
+  grid-column: 1 / -1;
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: var(--ph-teal);
+}
 .ph-field {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  /* Without this, a grid/flex item's default min-width is content-based —
+     a <select> with a long option string (Color Scheme's multi-word
+     gradient names) forces the whole field, and everything after it, wider
+     than its grid track, bleeding past the panel edge. */
+  min-width: 0;
 }
 .ph-field__label-row {
   display: flex;
@@ -820,6 +841,9 @@
   font-size: 14px;
   background: var(--ph-cream);
   color: var(--ph-black);
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 /* Dropdowns specifically go full pill shape (matches the mockup); free-text
    inputs stay a normal rounded rect — a fully pill-shaped text box looks
@@ -834,6 +858,7 @@
 }
 .ph-color-swatch-row .ph-field__select {
   flex: 1;
+  min-width: 0;
 }
 .ph-color-swatch {
   width: 22px;

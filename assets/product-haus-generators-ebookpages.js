@@ -22,7 +22,7 @@
   var ART_STYLE_OPTIONS = ["Clean Minimalist", "Warm Editorial", "Bold Modern", "Soft Feminine"];
   var COLOR_PALETTE_OPTIONS = ["Soft Neutrals", "Bold Primary Colors", "Warm Earth Tones", "Cool Blues & Teals", "Black, White & Gold"];
   var PAGE_FORMAT_OPTIONS = ["Standard 8.5x11 Portrait", "A4 Portrait", "Square Format"];
-  var BLANK_PAGE_VARIATION_OPTIONS = ["1", "2", "3", "4"];
+  var BLANK_PAGE_VARIATION_OPTIONS = ["1", "2", "3", "4", "5"];
 
   var LOCKED_SUFFIX = " Clean editorial page layout, generous white space, print-and-screen ready, high resolution, no watermarks.";
 
@@ -58,8 +58,8 @@
       };
     },
 
-    pageTypesLabel: "Pages to Include (pick up to 4 — leave blank for the full set)",
-    pageTypesCap: 4,
+    pageTypesLabel: "Pages to Include (pick up to 6 — leave blank for the full set)",
+    pageTypesCap: 6,
     defaultPageTypes: ["cover", "introToc", "contentTemplate", "closing"],
     bundleBlockTitle: "Your Ebook Page Set",
     pageTypes: [
@@ -89,6 +89,13 @@
         label: "Blank / Write-In Page",
         promptTemplate:
           "Design {blankPageCountPhrase} for the same {ebookGenre} ebook about \"{ebookTopic}\". {artStyle} art style, a {colorPalette} color palette, {pageFormat}{holidayClause}.\n\nLayout: a light decorative border or header/footer frame only, with the entire center of the page left open and empty — ready for the buyer to write or type their own text. Do not add any placeholder text, lines, or lorem ipsum.{blankPageVariationNote}" +
+          LOCKED_SUFFIX,
+      },
+      {
+        id: "notesPage",
+        label: "Notes Page",
+        promptTemplate:
+          "Design a NOTES page for the same {ebookGenre} ebook about \"{ebookTopic}\". {artStyle} art style, a {colorPalette} color palette, {pageFormat}{holidayClause}.\n\nLayout: the same light decorative border or header/footer frame as the rest of the set, with a small \"Notes\" heading at the top and the rest of the page filled edge-to-edge with even, evenly-spaced horizontal ruled lines for handwriting. No other text, no placeholder content, no lorem ipsum." +
           LOCKED_SUFFIX,
       },
       {

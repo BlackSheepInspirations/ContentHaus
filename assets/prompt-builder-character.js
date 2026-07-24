@@ -1413,7 +1413,7 @@
   var PRESETS = [
     {
       id: "boyMomChibi",
-      name: "Boy Mom Chibi",
+      name: "Mom Chibi",
       description: "Exaggerated chibi style, hoodie & sweatpants, graffiti wall backdrop.",
       apply: function () {
         setBaseType("human");
@@ -1427,16 +1427,25 @@
     },
     {
       id: "girlMomGlam",
-      name: "Girl Mom Glam",
-      description: "Luxury glam chibi, glam makeup, sparkly confetti backdrop.",
+      name: "Mom Glam Coloring Page",
+      description: "Black-and-white glam coloring page — sparkly makeup accents, confetti backdrop, ready to print and color.",
       apply: function () {
         setBaseType("human");
-        updateNestedField("style", "characterType", { value: "luxury glam chibi", customValue: "" });
-        updateNestedField("style", "artFinish", { value: "candy-coated finish", customValue: "" });
+        // A coloring page needs Character Type set to the dedicated
+        // "coloring book illustration" style (bold clean outlines, open
+        // coloring areas, no shading) and Project Type set to "coloring
+        // page" — that's what actually injects the black-and-white
+        // line-art instruction and switches the suggested aspect ratio.
+        // Art Finish is left empty on purpose: every option in that list
+        // (glossy/candy-coated/airbrushed, etc.) implies color and shading,
+        // which fights a black-and-white coloring page instead of helping it.
+        updateNestedField("style", "characterType", { value: "coloring book illustration", customValue: "" });
+        updateNestedField("style", "artFinish", { value: "", customValue: "" });
         updateNestedField("styling", "outfit", { value: "sparkly mini dress", customValue: "" });
         updateNestedField("appearance", "extraGlamDetails", { value: "under-eye sparkle", customValue: "" });
         updateNestedField("presentation", "background", { value: "sparkly confetti effect", customValue: "" });
         updateNestedField("presentation", "pose", { value: "blowing a kiss", customValue: "" });
+        PromptHaus.styleDNA.setProjectType("coloring page");
         updateNestedField("presentation", "framing", { value: "no frame", customValue: "" });
       },
     },

@@ -12,6 +12,21 @@
 <script src="{{ 'brand-haus-ui.js' | asset_url }}" defer="defer"></script>
 
 <div class="bh-marketing">
+  {% assign has_faq = false %}
+  {% for block in section.blocks %}
+    {% if block.type == 'faq' %}{% assign has_faq = true %}{% endif %}
+  {% endfor %}
+
+  <nav class="bh-marketing__toc" aria-label="Page sections">
+    <a href="#bh-marketing-video">Watch the Demo</a>
+    <a href="#bh-marketing-archetypes">The Archetypes</a>
+    <a href="#bh-marketing-features">What You Get</a>
+    {% if has_faq %}<a href="#bh-marketing-faq">FAQ</a>{% endif %}
+    {% if section.settings.access_product %}
+      <a href="{{ section.settings.access_product.url }}" class="bh-marketing__toc-cta">Get Access</a>
+    {% endif %}
+  </nav>
+
   <div class="bh-marketing__hero">
     <p class="bh-marketing__eyebrow">{{ section.settings.eyebrow }}</p>
     <h1 class="bh-marketing__heading">{{ section.settings.heading | replace: 'Brand', '<span class="bh-heading-accent">Brand</span>' }}</h1>
@@ -24,7 +39,7 @@
     {% endif %}
   </div>
 
-  <div class="bh-marketing__video">
+  <div class="bh-marketing__video" id="bh-marketing-video">
     {% if section.settings.demo_video_url != blank %}
       <div class="bh-marketing__video-embed">
         <iframe
@@ -40,20 +55,30 @@
     {% endif %}
   </div>
 
-  <div class="bh-marketing__wheel-section">
+  <div class="bh-marketing__wheel-section" id="bh-marketing-archetypes">
     <p class="bh-marketing__wheel-intro">Every founder lands on one of 11 profiles — explore all of them below.</p>
     <div id="bh-marketing-wheel"></div>
+    <div id="bh-marketing-wheel-detail" class="bh-wheel-detail-wrap"></div>
   </div>
   <script defer="defer">
     document.addEventListener("DOMContentLoaded", function () {
       var container = document.getElementById("bh-marketing-wheel");
+      var detail = document.getElementById("bh-marketing-wheel-detail");
       if (container && window.BrandHaus && window.BrandHaus.wheel) {
-        window.BrandHaus.wheel.render(window.BrandHaus.ui, container, { personalized: false });
+        window.BrandHaus.wheel.render(window.BrandHaus.ui, container, {
+          personalized: false,
+          onSelect: function (name) {
+            if (detail) {
+              detail.innerHTML = "";
+              detail.appendChild(window.BrandHaus.wheel.renderSelectedDetail(window.BrandHaus.ui, name));
+            }
+          },
+        });
       }
     });
   </script>
 
-  <div class="bh-marketing__features">
+  <div class="bh-marketing__features" id="bh-marketing-features">
     {% for block in section.blocks %}
       {% if block.type == 'feature' %}
         <div class="bh-marketing__feature" {{ block.shopify_attributes }}>
@@ -63,6 +88,31 @@
       {% endif %}
     {% endfor %}
   </div>
+
+  {% if section.settings.access_product %}
+    <div class="bh-marketing__midpage-cta">
+      <p class="bh-marketing__midpage-cta-text">Ready to find your Brand DNA Blueprint&trade;?</p>
+      <a href="{{ section.settings.access_product.url }}" class="bh-btn bh-btn--copy bh-marketing__cta">
+        Get Access{% if section.settings.access_product.price %} — {{ section.settings.access_product.price | money }}{% endif %}
+      </a>
+    </div>
+  {% endif %}
+
+  {% if has_faq %}
+    <div class="bh-marketing__faq-section" id="bh-marketing-faq">
+      <h2 class="bh-marketing__faq-heading">Brand DNA Blueprint&trade; FAQs</h2>
+      <div class="bh-marketing__faq-list">
+        {% for block in section.blocks %}
+          {% if block.type == 'faq' %}
+            <details class="bh-marketing__faq-item" {{ block.shopify_attributes }}>
+              <summary class="bh-marketing__faq-question">{{ block.settings.question }}</summary>
+              <div class="bh-marketing__faq-answer">{{ block.settings.answer }}</div>
+            </details>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
 
   {% if section.settings.access_product %}
     <div class="bh-marketing__footer-cta">
@@ -121,16 +171,31 @@
         { "type": "text", "id": "title", "label": "Title" },
         { "type": "textarea", "id": "description", "label": "Description" }
       ]
+    },
+    {
+      "type": "faq",
+      "name": "FAQ",
+      "settings": [
+        { "type": "text", "id": "question", "label": "Question" },
+        { "type": "richtext", "id": "answer", "label": "Answer" }
+      ]
     }
   ],
   "presets": [
     {
       "name": "Brand Haus Preview",
       "blocks": [
-        { "type": "feature", "settings": { "title": "The Brand DNA Assessment", "description": "21 questions, 12-18 minutes — uncovers how you naturally think, what you value, and what should show up in your brand because of it." } },
+        { "type": "feature", "settings": { "title": "The Brand DNA Assessment", "description": "30 questions, about 17-25 minutes — uncovers how you naturally think, what you value, and what should show up in your brand because of it." } },
         { "type": "feature", "settings": { "title": "Branding Studio", "description": "Colors, fonts, mood, mission, and values on one visual board — see your brand before you commit to it." } },
         { "type": "feature", "settings": { "title": "Logo Studio", "description": "A full logo builder — from concept to color and typography direction." } },
-        { "type": "feature", "settings": { "title": "Save your favorites", "description": "Keep up to 5 saved prompts per studio, ready to copy anytime." } }
+        { "type": "feature", "settings": { "title": "Save your favorites", "description": "Keep up to 5 saved prompts per studio, ready to copy anytime." } },
+        { "type": "faq", "settings": { "question": "Why should I take the Brand DNA Assessment?", "answer": "<p>Most brand quizzes hand you a generic label and call it done. The Brand DNA Assessment is built on our own framework — 8 Brand Tensions, not borrowed archetype tropes — so what comes back is a real reflection of how you already think, what you value, and what's already showing up in your work whether you've named it or not. It's the foundation everything else in the Brand Haus builds on: your colors, fonts, mission, and voice all trace back to this one result.</p>" } },
+        { "type": "faq", "settings": { "question": "What kind of questions does it ask?", "answer": "<p>A guided, 30-question conversation — not multiple-choice trivia. You'll be asked how you naturally make decisions, what you value in how you work, and what you want people to feel when they experience your brand. There are no right answers; every answer just sharpens the picture.</p>" } },
+        { "type": "faq", "settings": { "question": "How is this different from a typical brand archetype quiz?", "answer": "<p>Two things. First, our 11 Brand DNA profiles aren't the standard 12 Jungian archetypes recycled again — they're built from real founder patterns, including ones (like The Trail Forger) added specifically because the standard set didn't cover them. Second, you don't just get a label: you get a real percentage showing how strongly you match, which other profiles are quietly influencing you, and a personalized blend — not a one-size-fits-all page.</p>" } },
+        { "type": "faq", "settings": { "question": "What do I actually get afterward?", "answer": "<p>Your match unlocks the full Brand Haus: a one-page Blueprint Snapshot, a Comprehensive Report, and a 19-guide Brand Playbook covering your tensions, your ideal customer's experience, your visual identity, and your next steps. From there, Branding Studio turns your result into real colors, fonts, and mission language; Logo Studio builds your mark; and Quick Generators produce ready-to-use assets like a Business Card Kit and Media Kit — all pulling from the same real result, nothing re-typed from scratch.</p>" } },
+        { "type": "faq", "settings": { "question": "Do I have to pay every time I want to use it?", "answer": "<p>No, once you've purchased access to The Brand Haus you have unlimited access. You can browse all 11 Brand DNA Archetypes for free right here on this page, no assessment required. The full assessment, your personalized results, and everything in the Brand Haus (Branding Studio, Logo Studio, Quick Generators) come with Get Access, above.</p>" } },
+        { "type": "faq", "settings": { "question": "What should I do after I get my result?", "answer": "<p>Start with your Blueprint Snapshot for the quick version, then move into Branding Studio to lock in your colors, fonts, and mission. From there, Logo Studio and Quick Generators turn that identity into things you can actually use.</p>" } },
+        { "type": "faq", "settings": { "question": "Can I retake it?", "answer": "<p>Yes. Brands evolve, and your Brand DNA can shift as your business does. Retaking the assessment saves a new version automatically, and you can keep up to 3 full results side by side in your Saved Results vault — so you're never stuck choosing between starting over and losing what you had.</p>" } }
       ]
     }
   ]

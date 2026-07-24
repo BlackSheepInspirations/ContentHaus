@@ -195,6 +195,7 @@
   // no external dependency.
   // ---------------------------------------------------------------------
   var ICONS = {
+    bufferBox: '<rect x="3" y="3" width="14" height="14" rx="2" stroke-dasharray="3 2.5"/>',
     person: '<circle cx="10" cy="6.5" r="3"/><path d="M4 17c0-3.3 2.7-6 6-6s6 2.7 6 6"/>',
     people: '<circle cx="6.5" cy="6" r="2.2"/><path d="M2.5 17c0-2.7 1.8-4.8 4-4.8s4 2.1 4 4.8"/><circle cx="14" cy="7.3" r="1.8"/><path d="M10.7 17c.3-2.2 1.8-3.9 3.3-3.9s3 1.7 3.3 3.9"/>',
     text: '<path d="M4 4h12M10 4v12"/>',
@@ -273,6 +274,19 @@
     return el("div", { class: "mh-pill-toggle" }, options.map(pillButton));
   }
 
+  // Shared Yes/No pill toggle — used by Image Buffer/Padding (Style DNA
+  // bar), matching Content Haus's own yesNoButton exactly.
+  function yesNoButton(label, isActive, onClick) {
+    var btn = el("button", {
+      type: "button",
+      class: "mh-styledna__yesno-btn" + (isActive ? " is-active" : ""),
+      "aria-pressed": isActive ? "true" : "false",
+      text: label,
+    });
+    btn.addEventListener("click", onClick);
+    return btn;
+  }
+
   function renderPresetRow(presets, onApply, labelText) {
     if (!presets || !presets.length) return null;
     var cards = presets.map(function (preset) {
@@ -323,7 +337,7 @@
     var field = entry.field;
     var select = el("select", { class: "mh-field__select" });
     appendSelectOptions(select, field, field.value);
-    select.addEventListener("change", function () { onChange({ value: select.value }); });
+    select.addEventListener("change", function () { onChange({ value: select.value, customValue: "" }); });
     var selectId = "mh-field-" + select.getAttribute("data-mh-key");
     select.id = selectId;
 
@@ -578,23 +592,36 @@
     var variationId = "mh-field-" + variationSelect.getAttribute("data-mh-key");
     variationSelect.id = variationId;
 
-    var holidaySelect = el("select", { class: "mh-field__select" });
-    appendSelectOptions(holidaySelect, state.holiday, state.holiday.value);
-    holidaySelect.addEventListener("change", function () { MarketingHaus.styleDNA.setHoliday(holidaySelect.value); renderApp(); });
-    var holidayId = "mh-field-" + holidaySelect.getAttribute("data-mh-key");
-    holidaySelect.id = holidayId;
+    var platformSelect = el("select", { class: "mh-field__select" });
+    appendSelectOptions(platformSelect, state.targetPlatform, state.targetPlatform.value);
+    platformSelect.addEventListener("change", function () { MarketingHaus.styleDNA.setTargetPlatform(platformSelect.value); renderApp(); });
+    var platformId = "mh-field-" + platformSelect.getAttribute("data-mh-key");
+    platformSelect.id = platformId;
 
-    var themeSelect = el("select", { class: "mh-field__select" });
-    appendSelectOptions(themeSelect, state.theme, state.theme.value);
-    themeSelect.addEventListener("change", function () { MarketingHaus.styleDNA.setTheme(themeSelect.value); renderApp(); });
-    var themeId = "mh-field-" + themeSelect.getAttribute("data-mh-key");
-    themeSelect.id = themeId;
+    var aspectSelect = el("select", { class: "mh-field__select" });
+    state.aspectRatio.options.forEach(function (opt) {
+      var optionNode = el("option", { value: opt, text: opt });
+      if (opt === state.aspectRatio.value) optionNode.selected = true;
+      aspectSelect.appendChild(optionNode);
+    });
+    aspectSelect.addEventListener("change", function () { MarketingHaus.styleDNA.setAspectRatio(aspectSelect.value); renderApp(); });
+    var aspectId = "mh-field-" + aspectSelect.getAttribute("data-mh-key");
+    aspectSelect.id = aspectId;
 
-    var nicheSelect = el("select", { class: "mh-field__select" });
-    appendSelectOptions(nicheSelect, state.niche, state.niche.value);
-    nicheSelect.addEventListener("change", function () { MarketingHaus.styleDNA.setNiche(nicheSelect.value); renderApp(); });
-    var nicheId = "mh-field-" + nicheSelect.getAttribute("data-mh-key");
-    nicheSelect.id = nicheId;
+    var bufferToggle = el("div", { class: "mh-styledna__yesno" }, [
+      yesNoButton("Yes", state.addBuffer === true, function () { MarketingHaus.styleDNA.setAddBuffer(true); renderApp(); }),
+      yesNoButton("No", state.addBuffer !== true, function () { MarketingHaus.styleDNA.setAddBuffer(false); renderApp(); }),
+    ]);
+    var bufferLabel = labelWithIcon("bufferBox", "Image Buffer/Padding", null, null, "Asks the AI to leave empty space around the edges so nothing gets cropped at the borders.");
+    bufferLabel.id = "mh-label-buffer-padding";
+    bufferToggle.setAttribute("role", "group");
+    bufferToggle.setAttribute("aria-labelledby", bufferLabel.id);
+
+    var outputFormatSelect = el("select", { class: "mh-field__select" });
+    appendSelectOptions(outputFormatSelect, state.outputFormat, state.outputFormat.value);
+    outputFormatSelect.addEventListener("change", function () { MarketingHaus.styleDNA.setOutputFormat(outputFormatSelect.value); renderApp(); });
+    var outputFormatId = "mh-field-" + outputFormatSelect.getAttribute("data-mh-key");
+    outputFormatSelect.id = outputFormatId;
 
     var negativeTextarea = el("textarea", { class: "mh-field__custom mh-field__freetext mh-styledna__negative-input", rows: "2", placeholder: 'e.g. "jargon, buzzwords, emojis"' });
     negativeTextarea.value = state.negativePrompt.value || "";
@@ -622,9 +649,15 @@
       el("div", { class: "mh-styledna__field" }, [labelWithIcon("people", "Audience", audienceId, null, "Who you're talking to — the more specific, the better the copy."), audienceInput]),
       el("div", { class: "mh-styledna__field" }, [labelWithIcon("monitor", "Reading Level", readingId), readingSelect]),
       el("div", { class: "mh-styledna__field" }, [labelWithIcon("sparkle", "Variations", variationId), variationSelect]),
-      el("div", { class: "mh-styledna__field" }, [labelWithIcon("gift", "Holiday", holidayId), holidaySelect]),
-      el("div", { class: "mh-styledna__field" }, [labelWithIcon("sparkle", "Theme", themeId), themeSelect]),
-      el("div", { class: "mh-styledna__field" }, [labelWithIcon("heart", "Niche", nicheId), nicheSelect]),
+      el("div", { class: "mh-styledna__field" }, [labelWithIcon("monitor", "Target Platform", platformId, null, "Formats the copied prompt for this specific AI tool."), platformSelect]),
+      el("div", { class: "mh-styledna__field" }, [labelWithIcon("crop", "Aspect Ratio", aspectId, null, "Only appears in the copied text for Midjourney/Leonardo AI."), aspectSelect]),
+      el("div", { class: "mh-styledna__field" }, [
+        bufferLabel, bufferToggle,
+      ]),
+      el("div", { class: "mh-styledna__field" }, [
+        labelWithIcon("bufferBox", "Output Format", outputFormatId, null, "A file-level export setting (transparency/format) — independent of any generator's own Background field, which is a scene/content choice, not a file setting. Leave on Default for a plain PNG."),
+        outputFormatSelect,
+      ]),
       el("div", { class: "mh-styledna__field mh-styledna__field--full" }, [
         labelWithIcon("shield", "Negative Prompt — What to Avoid", negativeId),
         el("p", { class: "mh-styledna__negative-subtitle", text: "Applies to every studio, once, at the end of the prompt — comma-separated. Click a suggestion to add it." }),
@@ -633,6 +666,29 @@
       ]),
     ];
     root.appendChild(el("div", { class: "mh-styledna" }, children));
+  }
+
+  // Holiday/Theme/Niche relocated out of the dark Business/Voice DNA bar
+  // into their own boxed section — same "Concept / Creative Direction"
+  // treatment Content Haus uses for its own equivalent fields. Purely a
+  // rendering change: getVoiceEntries() still folds all three into every
+  // assembled prompt exactly as before, unchanged.
+  function renderConceptBox() {
+    var state = MarketingHaus.styleDNA.getState();
+    return renderFieldGroup(
+      "Concept / Creative Direction",
+      [
+        { label: "Holiday", field: state.holiday },
+        { label: "Creative Theme", field: state.theme },
+        { label: "Niche", field: state.niche },
+      ],
+      function (entry, changes) {
+        var fieldName = entry.label === "Holiday" ? "holiday" : entry.label === "Creative Theme" ? "theme" : "niche";
+        MarketingHaus.util.updateField(MarketingHaus.styleDNA, fieldName, changes);
+        renderApp();
+      },
+      "Optional creative direction, shared across every studio."
+    );
   }
 
   // ---------------------------------------------------------------------
@@ -714,14 +770,15 @@
   var saveFeedback = null;
 
   function renderPreview(root, assembled, modeApi, mode) {
-    var formatted = MarketingHaus.engine.formatForPlatform(assembled, MarketingHaus.styleDNA.getState().negativePrompt.value);
+    var styleDNAState = MarketingHaus.styleDNA.getState();
+    var formatted = MarketingHaus.engine.formatForPlatform(assembled, styleDNAState.targetPlatform.value, styleDNAState.aspectRatio.value, styleDNAState.negativePrompt.value, styleDNAState.addBuffer, styleDNAState.outputFormat.value);
     var textarea = el("textarea", { class: "mh-preview__text", readonly: "readonly" });
     textarea.value = formatted;
 
     var actions = renderPreviewActions(
       formatted,
       function () { modeApi.randomize(); renderApp(); },
-      function () { modeApi.reset(); renderApp(); },
+      function () { modeApi.reset(); MarketingHaus.styleDNA.resetContent(); renderApp(); },
       function () {
         var result = MarketingHaus.favorites.save(mode, {
           text: formatted,
@@ -1109,6 +1166,7 @@
       ? "gen:" + modeApi.getActiveGeneratorId() : activeMode;
     if (modeApi && typeof modeApi.renderPanel === "function") {
       left.appendChild(modeApi.renderPanel());
+      left.appendChild(renderConceptBox());
       renderSelectionsPanel(right, vaultKey, modeApi.getSelectionsByGroup());
       renderPreview(right, modeApi.assemblePrompt(), modeApi, vaultKey);
       renderSavedPrompts(right, vaultKey);

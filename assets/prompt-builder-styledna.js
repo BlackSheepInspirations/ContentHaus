@@ -206,6 +206,12 @@
 
   var ASPECT_RATIO_OPTIONS = ["1:1", "4:5", "9:16", "16:9"];
 
+  // File-level export setting — independent of any mode's own decorative
+  // Background field (a scene/content choice). Default is a deliberate
+  // no-op so every existing prompt reads exactly as before until someone
+  // actually opens this dropdown.
+  var OUTPUT_FORMAT_OPTIONS = ["Default (PNG)", "PNG — Transparent Background", "JPG — Solid Background"];
+
   // "ChatGPT/DALL·E" renamed to "ChatGPT (GPT Image)" — DALL-E 2/3 were
   // retired by OpenAI in May 2026, replaced by GPT Image 2 as ChatGPT's
   // built-in image model, so the old label was actively wrong, not just
@@ -613,6 +619,7 @@
       { auto: true }
     ),
     targetPlatform: PromptHaus.util.makeField("ChatGPT (GPT Image)", PromptHaus.util.sortAlpha(TARGET_PLATFORM_OPTIONS)),
+    outputFormat: PromptHaus.util.makeField(OUTPUT_FORMAT_OPTIONS[0], OUTPUT_FORMAT_OPTIONS),
     // Shared across every mode (Character/Text/Couples/Combined) — how many
     // AI-generated variations the assembled prompt asks for.
     variationCount: PromptHaus.util.makeField("2", ["1", "2", "3", "4"]),
@@ -697,6 +704,10 @@
 
   function setAddBuffer(enabled) {
     store.setState({ addBuffer: enabled });
+  }
+
+  function setOutputFormat(newValue) {
+    PromptHaus.util.updateField(store, "outputFormat", { value: newValue });
   }
 
   function setFilter(newValue) {
@@ -886,6 +897,7 @@
     setTargetAudience: setTargetAudience,
     setMood: setMood,
     setAddBuffer: setAddBuffer,
+    setOutputFormat: setOutputFormat,
     getBufferEntry: getBufferEntry,
     getProjectTypeEntry: getProjectTypeEntry,
     getProjectTypeValue: getProjectTypeValue,

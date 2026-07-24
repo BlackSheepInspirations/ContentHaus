@@ -126,6 +126,7 @@
   // ---------------------------------------------------------------------
   var expandedMascotId = null;
   var renamingMascotId = null;
+  var mascotLockExpanded = false;
 
   function renderMascotFields(mascot) {
     var ui = GraphicsHaus.ui;
@@ -207,7 +208,9 @@
     if (!mascots.length) {
       list.appendChild(ui.el("p", { class: "gh-saved__empty", text: "No mascots yet — create one below, then use the Mascot Generator to render it in as many poses as you need." }));
     } else {
-      mascots.forEach(function (mascot) { list.appendChild(renderMascotCard(mascot, !!activeMascot && activeMascot.id === mascot.id)); });
+      // Collapsed by default to just the active mascot (or the first one if none is active).
+      var visible = mascotLockExpanded ? mascots : [mascots[activeMascot ? mascots.indexOf(activeMascot) : 0] || mascots[0]];
+      visible.forEach(function (mascot) { list.appendChild(renderMascotCard(mascot, !!activeMascot && activeMascot.id === mascot.id)); });
     }
 
     var createRow;
@@ -223,8 +226,17 @@
       createRow = ui.el("p", { class: "gh-field-group__subtitle", text: "You have " + MAX_MASCOTS + "/" + MAX_MASCOTS + " mascots — delete one to create another." });
     }
 
+    var headerChildren = [ui.el("h3", { class: "gh-saved__title" }, [ui.icon("person"), ui.el("span", { text: "Mascot Lock (" + mascots.length + "/" + MAX_MASCOTS + ")" })])];
+    if (mascots.length > 1) {
+      var toggleBtn = ui.el("button", { type: "button", class: "gh-faq__toggle" }, [
+        ui.icon(mascotLockExpanded ? "eyeOff" : "eye"),
+        ui.el("span", { text: mascotLockExpanded ? "Hide" : "Show full list" }),
+      ]);
+      toggleBtn.addEventListener("click", function () { mascotLockExpanded = !mascotLockExpanded; GraphicsHaus.ui.renderApp(); });
+      headerChildren.push(toggleBtn);
+    }
     root.appendChild(ui.el("div", { class: "gh-saved" }, [
-      ui.el("h3", { class: "gh-saved__title" }, [ui.icon("person"), ui.el("span", { text: "Mascot Lock (" + mascots.length + "/" + MAX_MASCOTS + ")" })]),
+      ui.el("div", { class: "gh-faq__header" }, headerChildren),
       ui.el("p", { class: "gh-field-group__subtitle", text: "Set your mascot's species, traits, palette, style, and personality once — the active mascot's identity carries into every pose the Mascot Generator creates, so it always stays recognizable." }),
       list,
       createRow,

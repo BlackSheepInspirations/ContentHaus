@@ -7,7 +7,7 @@
           "type": "feature",
           "settings": {
             "title": "The Brand DNA Assessment",
-            "description": "21 questions, 12-18 minutes — uncovers how you naturally think, what you value, and what should show up in your brand because of it."
+            "description": "30 questions, about 17-25 minutes — uncovers how you naturally think, what you value, and what should show up in your brand because of it."
           }
         },
         "feature_2": {
@@ -30,9 +30,58 @@
             "title": "Save your favorites",
             "description": "Keep up to 5 saved prompts per studio, ready to copy anytime."
           }
+        },
+        "faq_1": {
+          "type": "faq",
+          "settings": {
+            "question": "Why should I take the Brand DNA Assessment?",
+            "answer": "<p>Most brand quizzes hand you a generic label and call it done. The Brand DNA Assessment is built on our own framework — 8 Brand Tensions, not borrowed archetype tropes — so what comes back is a real reflection of how you already think, what you value, and what's already showing up in your work whether you've named it or not. It's the foundation everything else in the Brand Haus builds on: your colors, fonts, mission, and voice all trace back to this one result.</p>"
+          }
+        },
+        "faq_2": {
+          "type": "faq",
+          "settings": {
+            "question": "What kind of questions does it ask?",
+            "answer": "<p>A guided, 30-question conversation — not multiple-choice trivia. You'll be asked how you naturally make decisions, what you value in how you work, and what you want people to feel when they experience your brand. There are no right answers; every answer just sharpens the picture.</p>"
+          }
+        },
+        "faq_3": {
+          "type": "faq",
+          "settings": {
+            "question": "How is this different from a typical brand archetype quiz?",
+            "answer": "<p>Two things. First, our 11 Brand DNA profiles aren't the standard 12 Jungian archetypes recycled again — they're built from real founder patterns, including ones (like The Trail Forger) added specifically because the standard set didn't cover them. Second, you don't just get a label: you get a real percentage showing how strongly you match, which other profiles are quietly influencing you, and a personalized blend — not a one-size-fits-all page.</p>"
+          }
+        },
+        "faq_4": {
+          "type": "faq",
+          "settings": {
+            "question": "What do I actually get afterward?",
+            "answer": "<p>Your match unlocks the full Brand Haus: a one-page Blueprint Snapshot, a Comprehensive Report, and a 19-guide Brand Playbook covering your tensions, your ideal customer's experience, your visual identity, and your next steps. From there, Branding Studio turns your result into real colors, fonts, and mission language; Logo Studio builds your mark; and Quick Generators produce ready-to-use assets like a Business Card Kit and Media Kit — all pulling from the same real result, nothing re-typed from scratch.</p>"
+          }
+        },
+        "faq_5": {
+          "type": "faq",
+          "settings": {
+            "question": "Do I have to pay every time I want to use it?",
+            "answer": "<p>No, once you've purchased access to The Brand Haus you have unlimited access. You can browse all 11 Brand DNA Archetypes for free right here on this page, no assessment required. The full assessment, your personalized results, and everything in the Brand Haus (Branding Studio, Logo Studio, Quick Generators) come with Get Access, above.</p>"
+          }
+        },
+        "faq_6": {
+          "type": "faq",
+          "settings": {
+            "question": "What should I do after I get my result?",
+            "answer": "<p>Start with your Blueprint Snapshot for the quick version, then move into Branding Studio to lock in your colors, fonts, and mission. From there, Logo Studio and Quick Generators turn that identity into things you can actually use.</p>"
+          }
+        },
+        "faq_7": {
+          "type": "faq",
+          "settings": {
+            "question": "Can I retake it?",
+            "answer": "<p>Yes. Brands evolve, and your Brand DNA can shift as your business does. Retaking the assessment saves a new version automatically, and you can keep up to 3 full results side by side in your Saved Results vault — so you're never stuck choosing between starting over and losing what you had.</p>"
+          }
         }
       },
-      "block_order": ["feature_1", "feature_2", "feature_3", "feature_4"]
+      "block_order": ["feature_1", "feature_2", "feature_3", "feature_4", "faq_1", "faq_2", "faq_3", "faq_4", "faq_5", "faq_6", "faq_7"]
     }
   },
   "order": ["main"]

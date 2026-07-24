@@ -380,14 +380,12 @@
         ".bh-print-wrap .bh-font-pairing-row__chevron{display:none;}" +
         // The Archetype Wheel's percentages only mean something next to a
         // real founder's real completed assessment — never in the generic
-        // in-app/marketing browse-all-11 view. Both `.bh-wheel__score` and
-        // `.bh-wheel__ring-wrap` are always in the DOM (computed from real
-        // data) but hidden by default; this is the one place they surface.
-        // display:unset (not a hardcoded value) since these hide/reveal
-        // both SVG text (wants inline) and HTML <p>/<div> elements (wants
-        // block) with one rule — unset restores each element's own
-        // natural default rendering instead of forcing one value on both.
-        ".bh-print-wrap .bh-wheel__score,.bh-print-wrap .bh-wheel__ring-wrap{display:unset;}" +
+        // in-app/marketing browse-all-11 view. `.bh-wheel__score` elements
+        // are always in the DOM (computed from real data) but hidden by
+        // default; this is the one place they surface. display:unset (not
+        // a hardcoded value) since these hide/reveal both SVG text (wants
+        // inline) and HTML elements (wants block) with one rule.
+        ".bh-print-wrap .bh-wheel__score{display:unset;}" +
         "@media print{body{padding:0.3in;}}" +
         (isEpicCover ? buildEpicCoverCss(profile) : "") +
       "</style></head><body>" +
@@ -547,6 +545,13 @@
     crown: '<path d="M3.5 15.5 3 7l4 3 3-5 3 5 4-3-.5 8.5Z"/><path d="M3.5 15.5h13"/>',
     gem: '<path d="M5 8 10 3l5 5-5 9-5-9Z"/><path d="M5 8h10M7.5 8 10 3l2.5 5M7.5 8 10 17M12.5 8 10 17"/>',
     peak: '<path d="M2 16 8 6l3 4 2-3 5 9H2Z"/><path d="M13 3v4l2.5-1L13 5"/>',
+    // Added for the Archetype Wheel's coin-style icon badges.
+    target: '<circle cx="10" cy="10" r="7"/><circle cx="10" cy="10" r="3.5"/><circle cx="10" cy="10" r=".6" fill="currentColor" stroke="none"/>',
+    brush: '<path d="M13 3 8.5 7.5M6 15.5c-1.4 1.4-3.4.6-3.4.6s-.8-2 .6-3.4L11 5l3 3-7.7 7.5Z"/><path d="M13 3l4 4"/>',
+    paperplane: '<path d="M17 3 3 9.5l5.5 2L11 17l2-5.5L17 3Z"/><path d="M8.5 11.5 13 8"/>',
+    flame: '<path d="M10 2s4 3.2 4 7.2A4 4 0 0 1 6 9.2C6 7 7.5 5.8 7.5 5.8c-.2 1.2.5 2 .5 2C8 5.5 10 4.5 10 2Z"/><path d="M10 18a4.5 4.5 0 0 0 4.5-4.5c0-1.6-1-2.6-1-2.6.1 1-.5 1.6-.5 1.6C13.2 10.8 12 9.8 12 9.8c.3 3.4-2 4.2-2 4.2s-2.3-.8-2-4.2c0 0-1.2 1-.9 2.7 0 0-.6-.6-.5-1.6 0 0-1 1-1 2.6A4.5 4.5 0 0 0 10 18Z"/>',
+    // Added for the sidebar FAQ & Help link.
+    help: '<circle cx="10" cy="10" r="7.5"/><path d="M7.7 7.7a2.3 2.3 0 1 1 3.3 2c-.7.4-1 .9-1 1.7"/><circle cx="10" cy="14" r=".7" fill="currentColor" stroke="none"/>',
   };
 
   var TITLE_ICONS = {
@@ -590,6 +595,21 @@
       return btn;
     }
     return el("div", { class: "bh-pill-toggle" }, options.map(pillButton));
+  }
+
+  // Shared Yes/No pill toggle — matching the same yesNoButton pattern
+  // already used for Image Buffer/Padding and Output Format in the other
+  // 4 Hauses, for any Brand Haus feature that needs a visible on/off
+  // toggle rather than a plain checkbox (e.g. Logo Studio's Logo Board).
+  function yesNoButton(label, isActive, onClick) {
+    var btn = el("button", {
+      type: "button",
+      class: "bh-styledna__yesno-btn" + (isActive ? " is-active" : ""),
+      "aria-pressed": isActive ? "true" : "false",
+      text: label,
+    });
+    btn.addEventListener("click", onClick);
+    return btn;
   }
 
   function renderPresetRow(presets, onApply, labelText) {
@@ -642,7 +662,7 @@
     var field = entry.field;
     var select = el("select", { class: "bh-field__select" });
     appendSelectOptions(select, field, field.value);
-    select.addEventListener("change", function () { onChange({ value: select.value }); });
+    select.addEventListener("change", function () { onChange({ value: select.value, customValue: "" }); });
     var selectId = "bh-field-" + select.getAttribute("data-bh-key");
     select.id = selectId;
 
@@ -754,25 +774,50 @@
   // variable-length list of them). Reuses the exact same swatch/hex/
   // Change markup and CSS classes so both read as one consistent picker
   // pattern app-wide rather than two different-looking color controls.
+  // `value` only ever holds a CONFIRMED complete hex (what the prompt and
+  // the swatch preview both read); `draftText` holds whatever's literally
+  // typed in the textbox right now, including mid-edit/incomplete strings.
+  // Splitting these two was the fix for a real bug: rendering the swatch
+  // straight off the in-progress raw text meant it reset to a flat gray
+  // placeholder on every keystroke until the exact instant a complete hex
+  // was typed — reading as "manually typing a color doesn't work" even
+  // though it eventually did. Now the swatch simply holds its last
+  // confirmed color until a new one validates, and the textbox is free to
+  // show whatever's being typed without fighting the render.
   function renderSingleColorField(entry, onChange) {
     var value = entry.field.value || "";
+    var draftText = entry.field.draftText !== undefined ? entry.field.draftText : value;
     var swatchInput = el("input", { type: "color" });
     swatchInput.value = HEX_PATTERN.test(value) ? value : "#6B6860";
     var hexInput = el("input", { type: "text", class: "bh-field__custom bh-color-hex", placeholder: "#000000" });
-    hexInput.value = value;
+    hexInput.value = draftText;
     swatchInput.addEventListener("input", function () {
       hexInput.value = swatchInput.value;
-      onChange({ value: swatchInput.value });
+      onChange({ value: swatchInput.value, draftText: swatchInput.value });
     });
     hexInput.addEventListener("input", function () {
-      if (HEX_PATTERN.test(hexInput.value)) swatchInput.value = hexInput.value;
-      onChange({ value: hexInput.value });
+      var raw = hexInput.value;
+      var changes = { draftText: raw };
+      if (HEX_PATTERN.test(raw)) changes.value = raw;
+      onChange(changes);
     });
     var changeBtn = el("button", { type: "button", class: "bh-btn bh-btn--small bh-btn--reset", text: "Change" });
     changeBtn.addEventListener("click", function () { swatchInput.click(); });
+
+    // Include-in-prompt checkbox, same pattern as free-text fields — lets
+    // a founder set a color (e.g. from an applied Brand Kit) without it
+    // automatically counting toward "too many colors" in the assembled
+    // prompt unless they actually want it there.
+    var labelRowChildren = [el("label", { class: "bh-field__label", text: entry.label })];
+    var includeCheckbox = el("input", { type: "checkbox", class: "bh-field__checkbox" });
+    includeCheckbox.checked = entry.field.includeInPrompt !== false;
+    includeCheckbox.addEventListener("change", function () { onChange({ includeInPrompt: includeCheckbox.checked }); });
+    labelRowChildren.push(el("label", { class: "bh-field__include" }, [includeCheckbox, el("span", { text: "Include in prompt" })]));
+
     return el("div", { class: "bh-field" }, [
-      el("div", { class: "bh-field__label-row" }, [el("label", { class: "bh-field__label", text: entry.label })]),
+      el("div", { class: "bh-field__label-row" }, labelRowChildren),
       el("div", { class: "bh-color-swatch-item" }, [swatchInput, hexInput, changeBtn]),
+      el("p", { class: "bh-field__hint", text: 'Click "Change" to pick visually, or type a complete 6-digit hex code (e.g. #2188BC) to preview it directly.' }),
     ]);
   }
 
@@ -781,18 +826,27 @@
     wrap.appendChild(el("legend", { class: "bh-field-group__title" }, [icon("palette"), el("span", { text: options.title })]));
     if (options.subtitle) wrap.appendChild(el("p", { class: "bh-field-group__subtitle", text: options.subtitle }));
     var row = el("div", { class: "bh-color-row" });
+    var drafts = options.drafts || [];
     options.colors.forEach(function (hex, index) {
+      // Same value/draftText split as renderSingleColorField's fix, applied
+      // here too: the swatch only ever reads the last CONFIRMED hex
+      // (`hex`), while the textbox shows whatever's currently typed
+      // (`draftText`) — without this split, an in-progress incomplete hex
+      // flips the swatch to a flat gray placeholder on every keystroke.
+      var draftText = drafts[index] !== undefined ? drafts[index] : (hex || "");
       var swatchInput = el("input", { type: "color" });
       swatchInput.value = HEX_PATTERN.test(hex) ? hex : "#6B6860";
       var hexInput = el("input", { type: "text", class: "bh-field__custom bh-color-hex", placeholder: "#000000" });
-      hexInput.value = hex || "";
+      hexInput.value = draftText;
       swatchInput.addEventListener("input", function () {
         hexInput.value = swatchInput.value;
+        if (options.onDraftChange) options.onDraftChange(index, swatchInput.value);
         options.onUpdate(index, swatchInput.value);
       });
       hexInput.addEventListener("input", function () {
-        if (HEX_PATTERN.test(hexInput.value)) swatchInput.value = hexInput.value;
-        options.onUpdate(index, hexInput.value);
+        var raw = hexInput.value;
+        if (options.onDraftChange) options.onDraftChange(index, raw);
+        if (HEX_PATTERN.test(raw)) options.onUpdate(index, raw);
       });
       // The swatch itself IS the color-wheel trigger (clicking it opens
       // the native picker), but nothing about a small native color input
@@ -1017,7 +1071,7 @@
     var actions = renderPreviewActions(
       formatted,
       function () { modeApi.randomize(); renderApp(); },
-      function () { modeApi.reset(); renderApp(); },
+      function () { modeApi.reset(); BrandHaus.identity.reset(); renderApp(); },
       function () {
         var result = BrandHaus.favorites.save(mode, {
           text: formatted,
@@ -1333,23 +1387,32 @@
   // ---------------------------------------------------------------------
   // Sidebar wizard + step router
   // ---------------------------------------------------------------------
-  var STEPS = ["welcome", "conversation", "brandDNA", "blueprint", "brandingStudio"];
+  var STEPS = ["archetypeGuide", "welcome", "conversation", "brandDNA", "blueprint", "pathIntake", "brandingStudio"];
   var STEP_LABELS = {
+    archetypeGuide: "The Archetype Guide",
     welcome: "Welcome",
     conversation: "Brand DNA Assessment",
     brandDNA: "Your Brand DNA",
+    pathIntake: "Find Your Direction",
     brandingStudio: "Branding Studio",
     blueprint: "Your Blueprint",
   };
   var STEP_ICONS = {
+    archetypeGuide: "compass",
     welcome: "sparkle",
     conversation: "bulb",
     brandDNA: "layers",
+    pathIntake: "peak",
     brandingStudio: "palette",
     blueprint: "document",
   };
 
-  var activeStep = "welcome";
+  var activeStep = "archetypeGuide";
+  // A standalone overlay view, not a numbered step — set true by the
+  // sidebar's "FAQ & Help" link, set false by its own back button. Checked
+  // at the top of renderStepContent so it can interrupt any step without
+  // disturbing activeStep (closing it returns you exactly where you were).
+  var showFaq = false;
   var brandingSubMode = "branding"; // "branding" | "logo" | "quickGenerators" — sub-nav within the Branding Studio step
   var lastAutoAppliedResults = null;
   var historyPanelOpen = false;
@@ -1418,6 +1481,7 @@
     if (historyBlock) innerChildren.push(historyBlock);
     var savedResultsBlock = renderSavedResultsBlock();
     if (savedResultsBlock) innerChildren.push(savedResultsBlock);
+    innerChildren.push(renderFaqSidebarLink());
 
     root.appendChild(el("nav", { class: "bh-sidebar", "aria-label": "Brand Haus steps" }, [
       el("div", { class: "bh-sidebar__inner" }, innerChildren),
@@ -1661,6 +1725,105 @@
     ]);
   }
 
+  var FAQ_ITEMS = [
+    {
+      q: "What is The Archetype Guide, and do I have to start there?",
+      a: "The Archetype Guide is the very first thing you'll see — a chance to click through all 11 Brand DNA Archetypes and get a feel for each one before you answer a single question, so you know what you're working toward. It's just a preview, not a quiz — nothing you click there affects your actual result, and you can always revisit it later from the sidebar.",
+    },
+    {
+      q: "Why should I take the Brand DNA Assessment?",
+      a: "Most brand quizzes hand you a generic label and call it done. The Brand DNA Assessment is built on our own framework — 8 Brand Tensions, not borrowed archetype tropes — so what comes back is a real reflection of how you already think, what you value, and what's already showing up in your work whether you've named it or not. It's the foundation everything else in the Brand Haus builds on: your colors, fonts, mission, and voice all trace back to this one result.",
+    },
+    {
+      q: "What kind of questions does it ask?",
+      a: "A guided, 30-question conversation — not multiple-choice trivia. You'll be asked how you naturally make decisions, what you value in how you work, and what you want people to feel when they experience your brand. There are no right answers; every answer just sharpens the picture.",
+    },
+    {
+      q: "How is this different from a typical brand archetype quiz?",
+      a: "Two things. First, our 11 Brand DNA profiles aren't the standard 12 Jungian archetypes recycled again — they're built from real founder patterns, including ones (like The Trail Forger) added specifically because the standard set didn't cover them. Second, you don't just get a label: you get a real percentage showing how strongly you match, which other profiles are quietly influencing you, and a personalized blend — not a one-size-fits-all page.",
+    },
+    {
+      q: "What do I actually get with the Brand Haus?",
+      a: "Your match unlocks a one-page Blueprint Snapshot, a Comprehensive Report, and a 19-guide Brand Playbook covering your tensions, your ideal customer's experience, your visual identity, and your next steps. From there, Find Your Direction helps you turn that result into a real next move; Branding Studio turns it into real colors, fonts, and mission language; Logo Studio builds your mark; and Quick Generators produce ready-to-use assets like a Business Card Kit and Media Kit — all pulling from the same real result, nothing re-typed from scratch.",
+    },
+    {
+      q: "What is Find Your Direction, and is it required?",
+      a: "Find Your Direction is a short, optional intake that sits right before Branding Studio. It asks a handful of questions tailored to one of two paths — building your own personal brand as a creator/influencer, or building a brand around a specific niche product idea — and turns your answers into a ready-to-paste brief for Frank, your AI Business Partner in the Idea Haus, so you can start a real back-and-forth about what to actually build. It doesn't change your Blueprint or gate anything else in the Brand Haus — skip it any time and come back to it later from the sidebar.",
+    },
+    {
+      q: "Who is Frank, and how do I talk to him?",
+      a: "Frank is your AI Business Partner, living in a custom GPT called the Idea Haus. Your Brand Haus purchase includes access to him. Find Your Direction's brief is built specifically to hand to Frank — copy it, open the Idea Haus link on the completion screen, and paste it in to start the conversation.",
+    },
+    {
+      q: "Do I have to pay again to keep using this?",
+      a: "No — once you've purchased access to The Brand Haus, you have unlimited access to everything: the Brand DNA Assessment, Find Your Direction, Branding Studio, Logo Studio, and Quick Generators, with no extra fees.",
+    },
+    {
+      q: "What should I do after I get my result?",
+      a: "Start with your Blueprint Snapshot for the quick version. If you're still figuring out what to actually create, Find Your Direction can turn your result into a starting brief for Frank. From there, move into Branding Studio to lock in your colors, fonts, and mission — Logo Studio and Quick Generators turn that identity into things you can actually use.",
+    },
+    {
+      q: "Can I retake it?",
+      a: "Yes. Brands evolve, and your Brand DNA can shift as your business does. Retaking the assessment saves a new version automatically, and you can keep up to 3 full results side by side in your Saved Results vault — so you're never stuck choosing between starting over and losing what you had.",
+    },
+  ];
+
+  function renderFaqView() {
+    var backBtn = el("button", { type: "button", class: "bh-faq__back" }, [icon("chevron"), el("span", { text: "Back" })]);
+    backBtn.addEventListener("click", function () { showFaq = false; renderApp(); scrollShellToTop(); });
+    var items = FAQ_ITEMS.map(function (item) {
+      return el("details", { class: "bh-faq__item" }, [
+        el("summary", { class: "bh-faq__question", text: item.q }),
+        el("p", { class: "bh-faq__answer", text: item.a }),
+      ]);
+    });
+    return el("div", { class: "bh-founder-interview bh-founder-interview--welcome bh-faq" }, [
+      backBtn,
+      el("h2", { class: "bh-founder-interview__welcome-title" }, [
+        icon("help"),
+        el("span", { text: "FAQ & " }),
+        el("span", { class: "bh-heading-accent", text: "Help" }),
+      ]),
+      el("div", { class: "bh-faq__list" }, items),
+    ]);
+  }
+
+  function renderFaqSidebarLink() {
+    var toggle = el("button", { type: "button", class: "bh-sidebar__history-toggle" + (showFaq ? " is-active" : "") }, [
+      icon("help", "bh-sidebar__substep-icon"),
+      el("span", { text: "FAQ & Help" }),
+    ]);
+    toggle.addEventListener("click", function () { showFaq = true; renderApp(); scrollShellToTop(); });
+    return el("div", { class: "bh-sidebar__history" }, [toggle]);
+  }
+
+  function renderArchetypeGuideStep() {
+    var continueBtn = el("button", { type: "button", class: "bh-btn bh-btn--teal bh-btn--large" }, [icon("lightning"), el("span", { text: "Continue" })]);
+    continueBtn.addEventListener("click", function () { activeStep = "welcome"; renderApp(); scrollShellToTop(); });
+    var wheelMount = el("div", {});
+    var detailMount = el("div", { class: "bh-wheel-detail-wrap" });
+    if (BrandHaus.wheel) {
+      BrandHaus.wheel.render(BrandHaus.ui, wheelMount, {
+        personalized: false,
+        onSelect: function (name) {
+          detailMount.innerHTML = "";
+          detailMount.appendChild(BrandHaus.wheel.renderSelectedDetail(BrandHaus.ui, name));
+        },
+      });
+    }
+    return el("div", { class: "bh-founder-interview bh-founder-interview--welcome" }, [
+      el("h2", { class: "bh-founder-interview__welcome-title" }, [
+        icon("compass"),
+        el("span", { text: "A Guide to the " }),
+        el("span", { class: "bh-heading-accent", text: "11 Brand DNA Archetypes" }),
+      ]),
+      el("p", { class: "bh-founder-interview__welcome-body", text: "Every founder who completes this assessment lands on one of 11 brand identities. Before you begin, take a look at all of them — click any archetype below to see its name and one-word identity." }),
+      wheelMount,
+      detailMount,
+      el("div", { class: "bh-founder-interview__welcome-actions" }, [continueBtn]),
+    ]);
+  }
+
   function renderWelcomeStep() {
     var beginBtn = el("button", { type: "button", class: "bh-btn bh-btn--teal bh-btn--large" }, [icon("lightning"), el("span", { text: "Begin" })]);
     beginBtn.addEventListener("click", function () { activeStep = "conversation"; renderApp(); scrollShellToTop(); });
@@ -1747,6 +1910,10 @@
       renderPreview(right, modeApi.assemblePrompt(), modeApi, vaultKey);
       renderSavedPrompts(right, vaultKey);
     }
+    // Business Card Kit/Media Kit both read the active Brand Kit live via
+    // their own computeExtraTokens — without this, there's no visible way
+    // to see/switch which kit (if any) is currently feeding them.
+    if (BrandHaus.brandKit) BrandHaus.brandKit.renderSection(right, "quickGenerators");
     renderRecentLog(right);
     body.appendChild(left);
     body.appendChild(right);
@@ -1785,6 +1952,14 @@
   }
 
   function renderStepContent(root) {
+    if (showFaq) {
+      root.appendChild(renderFaqView());
+      return;
+    }
+    if (activeStep === "archetypeGuide") {
+      root.appendChild(renderArchetypeGuideStep());
+      return;
+    }
     if (activeStep === "welcome") {
       root.appendChild(renderWelcomeStep());
       return;
@@ -1798,6 +1973,14 @@
         root.appendChild(BrandHaus.results.renderStep3());
       } else {
         root.appendChild(el("p", { class: "bh-coming-soon", text: "Your Brand DNA is coming soon — complete the Brand DNA Assessment first." }));
+      }
+      return;
+    }
+    if (activeStep === "pathIntake") {
+      if (BrandHaus.pathIntake && typeof BrandHaus.pathIntake.renderFull === "function") {
+        root.appendChild(BrandHaus.pathIntake.renderFull());
+      } else {
+        root.appendChild(el("p", { class: "bh-coming-soon", text: "Find Your Direction is coming soon." }));
       }
       return;
     }
@@ -1855,6 +2038,7 @@
     infoIcon: infoIcon,
     labelWithIcon: labelWithIcon,
     renderPillToggle: renderPillToggle,
+    yesNoButton: yesNoButton,
     renderPresetRow: renderPresetRow,
     appendSelectOptions: appendSelectOptions,
     fieldHasValue: fieldHasValue,

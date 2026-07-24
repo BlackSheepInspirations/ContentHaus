@@ -275,6 +275,7 @@
   // ---------------------------------------------------------------------
   var expandedKitId = null;
   var renamingKitId = null;
+  var brandKitExpanded = false;
   var newKitNameDraft = "";
 
   function renderKitFields(kit) {
@@ -366,7 +367,9 @@
     if (!kits.length) {
       list.appendChild(ui.el("p", { class: "mh-saved__empty", text: "No Brand Kits yet — create one below to give every studio brand context automatically." }));
     } else {
-      kits.forEach(function (kit) { list.appendChild(renderKitCard(kit, !!activeKit && activeKit.id === kit.id)); });
+      // Collapsed by default to just the active kit (or the first one if none is active).
+      var visible = brandKitExpanded ? kits : [kits[activeKit ? kits.indexOf(activeKit) : 0] || kits[0]];
+      visible.forEach(function (kit) { list.appendChild(renderKitCard(kit, !!activeKit && activeKit.id === kit.id)); });
     }
 
     var createRow = ui.el("div", {});
@@ -382,8 +385,17 @@
       createRow = ui.el("p", { class: "mh-field-group__subtitle", text: "You have " + MAX_OWN_KITS + "/" + MAX_OWN_KITS + " of your own Brand Kits — delete one to create another." });
     }
 
+    var headerChildren = [ui.el("h3", { class: "mh-saved__title" }, [ui.icon("palette"), ui.el("span", { text: "Brand Kit (" + kits.length + "/" + MAX_KITS + ")" })])];
+    if (kits.length > 1) {
+      var toggleBtn = ui.el("button", { type: "button", class: "mh-faq__toggle" }, [
+        ui.icon(brandKitExpanded ? "eyeOff" : "eye"),
+        ui.el("span", { text: brandKitExpanded ? "Hide" : "Show full list" }),
+      ]);
+      toggleBtn.addEventListener("click", function () { brandKitExpanded = !brandKitExpanded; MarketingHaus.ui.renderApp(); });
+      headerChildren.push(toggleBtn);
+    }
     root.appendChild(ui.el("div", { class: "mh-saved" }, [
-      ui.el("h3", { class: "mh-saved__title" }, [ui.icon("palette"), ui.el("span", { text: "Brand Kit (" + kits.length + "/" + MAX_KITS + ")" })]),
+      ui.el("div", { class: "mh-faq__header" }, headerChildren),
       ui.el("p", { class: "mh-field-group__subtitle", text: "Set colors, fonts, mood, voice, and values once — the active kit automatically informs every studio's output. Up to " + MAX_OWN_KITS + " of your own here, plus up to " + MAX_SYNCED_KITS + " synced in from your Brand DNA Blueprint™ if you have Brand Haus too." }),
       list,
       createRow,

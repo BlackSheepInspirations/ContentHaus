@@ -188,16 +188,32 @@
   // ---------------------------------------------------------------------
   var expandedKitId = null;
   var renamingKitId = null;
+  var brandKitExpanded = false;
+
+  // Purely ephemeral (not persisted with the kit) draft-text cache for the
+  // color hex textboxes, keyed by kit id — same value/draftText split fix
+  // as Logo Studio's renderSingleColorField and Branding Studio's own
+  // color palette, so an in-progress incomplete hex doesn't flip the
+  // swatch to a flat gray placeholder on every keystroke. Module-level so
+  // it survives the full renderApp() re-render every keystroke triggers.
+  var kitColorDrafts = {};
 
   function renderKitFields(kit) {
     var ui = BrandHaus.ui;
     var fieldsWrap = ui.el("div", { class: "bh-field-group__fields" });
+    var drafts = kitColorDrafts[kit.id] || kit.fields.colors.slice();
 
     fieldsWrap.appendChild(ui.renderColorPickerList({
-      title: "Colors", subtitle: "Up to " + MAX_COLORS + ".", colors: kit.fields.colors, max: MAX_COLORS,
+      title: "Colors", subtitle: "Up to " + MAX_COLORS + ".", colors: kit.fields.colors, drafts: drafts, max: MAX_COLORS,
       onUpdate: function (i, hex) { var next = kit.fields.colors.slice(); next[i] = hex; updateKitColors(kit.id, next); BrandHaus.ui.renderApp(); },
-      onAdd: function () { updateKitColors(kit.id, kit.fields.colors.concat(["#6B6860"])); BrandHaus.ui.renderApp(); },
-      onRemove: function (i) { updateKitColors(kit.id, kit.fields.colors.filter(function (_, idx) { return idx !== i; })); BrandHaus.ui.renderApp(); },
+      onDraftChange: function (i, text) {
+        var next = (kitColorDrafts[kit.id] || kit.fields.colors.slice()).slice();
+        next[i] = text;
+        kitColorDrafts[kit.id] = next;
+        BrandHaus.ui.renderApp();
+      },
+      onAdd: function () { delete kitColorDrafts[kit.id]; updateKitColors(kit.id, kit.fields.colors.concat(["#6B6860"])); BrandHaus.ui.renderApp(); },
+      onRemove: function (i) { delete kitColorDrafts[kit.id]; updateKitColors(kit.id, kit.fields.colors.filter(function (_, idx) { return idx !== i; })); BrandHaus.ui.renderApp(); },
     }));
 
     fieldsWrap.appendChild(ui.el("div", { class: "bh-field-group__fields" }, [
@@ -246,14 +262,19 @@
     });
   }
 
-  // Logo Studio has no mood/voice/values/mission concept and only 4
-  // named color roles (not a free-length palette) — apply what maps
-  // cleanly (first 4 saved colors, heading/body font) and leave the rest
-  // of its own fields (logo type, iconography, etc.) untouched.
+  // Logo Studio has no mood/voice/values/mission concept, but it does
+  // have the same 6 named color roles Brand DNA itself uses (see
+  // brand-haus-logo.js's color state) — apply every saved color that
+  // maps cleanly (up to 6, by position) plus heading/body font, and
+  // leave the rest of Logo Studio's own fields (logo type, iconography,
+  // etc.) untouched. Also called automatically (not just from this
+  // panel's own "Set Active" button) — see maybeAutoApplyBrandKit in
+  // brand-haus-logo.js, which calls this the first time Logo Studio is
+  // opened with an active kit and its own Colors/Typography still blank.
   function applyKitToLogo(kit) {
     if (!BrandHaus.logo) return;
     var colors = (kit.fields.colors || []).filter(Boolean);
-    ["primary", "secondary", "accent", "neutral"].forEach(function (role, i) {
+    ["primary", "secondary", "accent", "neutral", "support", "standOut"].forEach(function (role, i) {
       if (colors[i]) BrandHaus.logo.updateColorField(role, { value: colors[i] });
     });
     var headingFont = resolved(kit.fields.headingFont);
@@ -287,7 +308,13 @@
       var turningOn = !isActive;
       setActiveKit(turningOn ? kit.id : null);
       if (turningOn) {
-        if (mode === "logo") applyKitToLogo(kit); else applyKitToBranding(kit);
+        // Quick Generators has no Branding/Logo Studio fields of its own
+        // to push a kit's colors/fonts into — Business Card Kit/Media Kit
+        // both read the active kit live via their own computeExtraTokens,
+        // so setActiveKit's pointer update above is all they need. Only
+        // apply into an actual field store when one exists.
+        if (mode === "logo") applyKitToLogo(kit);
+        else if (mode === "branding") applyKitToBranding(kit);
       }
       BrandHaus.ui.renderApp();
     });
@@ -326,7 +353,9 @@
     if (!kits.length) {
       list.appendChild(ui.el("p", { class: "bh-saved__empty", text: "No Brand Kits yet — save your assessment match or create one below." }));
     } else {
-      kits.forEach(function (kit) { list.appendChild(renderKitCard(kit, !!activeKit && activeKit.id === kit.id, mode)); });
+      // Collapsed by default to just the active kit (or the first one if none is active).
+      var visible = brandKitExpanded ? kits : [kits[activeKit ? kits.indexOf(activeKit) : 0] || kits[0]];
+      visible.forEach(function (kit) { list.appendChild(renderKitCard(kit, !!activeKit && activeKit.id === kit.id, mode)); });
     }
 
     var fromAssessmentRow = renderSaveFromAssessmentRow();
@@ -344,8 +373,17 @@
       createRow = ui.el("p", { class: "bh-field-group__subtitle", text: "You have " + MAX_KITS + "/" + MAX_KITS + " Brand Kits — delete one to create another." });
     }
 
+    var headerChildren = [ui.el("h3", { class: "bh-saved__title" }, [ui.icon("palette"), ui.el("span", { text: "Brand Kit (" + kits.length + "/" + MAX_KITS + ")" })])];
+    if (kits.length > 1) {
+      var toggleBtn = ui.el("button", { type: "button", class: "bh-faq__toggle" }, [
+        ui.icon(brandKitExpanded ? "eyeOff" : "eye"),
+        ui.el("span", { text: brandKitExpanded ? "Hide" : "Show full list" }),
+      ]);
+      toggleBtn.addEventListener("click", function () { brandKitExpanded = !brandKitExpanded; BrandHaus.ui.renderApp(); });
+      headerChildren.push(toggleBtn);
+    }
     var children = [
-      ui.el("h3", { class: "bh-saved__title" }, [ui.icon("palette"), ui.el("span", { text: "Brand Kit (" + kits.length + "/" + MAX_KITS + ")" })]),
+      ui.el("div", { class: "bh-faq__header" }, headerChildren),
       ui.el("p", { class: "bh-field-group__subtitle", text: "Up to " + MAX_KITS + " saved identities — these also appear in Marketing Haus's own Brand Kit if you have access there. \"Set Active\" loads a kit's colors and fonts straight into this studio's fields." }),
       list,
     ];
@@ -365,6 +403,7 @@
     deleteKit: deleteKit,
     renameKit: renameKit,
     setActiveKit: setActiveKit,
+    applyKitToLogo: applyKitToLogo,
     renderSection: renderSection,
   };
 })();

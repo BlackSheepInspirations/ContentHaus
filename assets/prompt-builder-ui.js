@@ -368,7 +368,7 @@
   // renderFieldGroup call site already has on hand; a title with no entry
   // here just renders without an icon rather than erroring.
   var TITLE_ICONS = {
-    "Style": "sparkle", "Human Identity": "person", "Animal Identity": "paw",
+    "Character Style - Pick one core look": "sparkle", "Human Identity": "person", "Animal Identity": "paw",
     "Character Identity - Animal Mode": "paw",
     "Appearance": "sparkle", "Styling": "shirt", "Presentation": "monitor",
     "Extras": "sparkle", "Companion Details": "paw", "Couple Dynamic": "heart", "Friends & Family Dynamic": "people",
@@ -632,7 +632,12 @@
     var select = el("select", { class: "ph-field__select" });
     appendSelectOptions(select, field, field.value);
     select.addEventListener("change", function () {
-      onChange({ value: select.value });
+      // A previously-typed custom value otherwise silently keeps winning —
+      // resolveFieldValue checks customValue first — so picking a new
+      // dropdown option would appear to do nothing until the custom text
+      // was manually cleared first. Picking from the dropdown should always
+      // take immediate, visible effect.
+      onChange({ value: select.value, customValue: "" });
     });
     var selectId = "ph-field-" + select.getAttribute("data-ph-key");
     select.id = selectId;
@@ -994,6 +999,8 @@
       })
     );
     if (artFinishEntry) {
+      fieldsContainer.appendChild(el("p", { class: "ph-art-finish__heading", text: "Art Finish" }));
+      fieldsContainer.appendChild(el("p", { class: "ph-art-finish__subtitle", text: "The material/rendering finish — pick one core finish rather than stacking several." }));
       fieldsContainer.appendChild(
         renderGroupedPillField(artFinishStateKey, artFinishEntry, ART_FINISH_BUCKET_ICONS, artFinishOnChange)
       );
@@ -1048,7 +1055,7 @@
     var select = el("select", { class: "ph-field__select" });
     appendSelectOptions(select, field, field.value);
     select.addEventListener("change", function () {
-      onChange({ value: select.value });
+      onChange({ value: select.value, customValue: "" });
     });
     var selectId = "ph-field-" + select.getAttribute("data-ph-key");
     select.id = selectId;
@@ -1263,12 +1270,12 @@
     if (!combinedMode) {
       panel.appendChild(
         renderPillFieldGroup(
-          "Style",
+          "Character Style - Pick one core look",
           "character.characterType",
           { label: "Character Type", field: state.style.characterType },
           CHARACTER_TYPE_BUCKET_ICONS,
           function (entry, changes) { character.updateNestedField("style", "characterType", changes); renderApp(); },
-          "The overall art style — pick one core look rather than stacking several."
+          "The overall art style for this character."
         )
       );
       panel.appendChild(
@@ -1500,12 +1507,12 @@
 
     panel.appendChild(
       renderPillFieldGroup(
-        "Style",
+        "Character Style - Pick one core look",
         "couples.characterType",
         { label: "Character Type", field: state.coupleDynamic.characterType },
         CHARACTER_TYPE_BUCKET_ICONS,
         function (changesEntry, changes) { handleDynamicChange({ fieldName: "characterType" }, changes); },
-        "The overall art style — shared by both people, pick one core look rather than stacking several."
+        "The overall art style — shared by both people."
       )
     );
     panel.appendChild(
@@ -1590,12 +1597,12 @@
 
     panel.appendChild(
       renderPillFieldGroup(
-        "Style",
+        "Character Style - Pick one core look",
         "family.characterType",
         { label: "Character Type", field: state.familyDynamic.characterType },
         CHARACTER_TYPE_BUCKET_ICONS,
         function (changesEntry, changes) { handleDynamicChange({ fieldName: "characterType" }, changes); },
-        "The overall art style — shared by the whole group, pick one core look rather than stacking several."
+        "The overall art style — shared by the whole group."
       )
     );
     panel.appendChild(
@@ -1845,7 +1852,8 @@
       assembled,
       platform,
       styleDNAState.aspectRatio.value,
-      buildCombinedNegativePrompt()
+      buildCombinedNegativePrompt(),
+      styleDNAState.outputFormat.value
     );
 
     var textarea = el("textarea", { class: "ph-preview__text", readonly: "readonly" });
@@ -2354,10 +2362,10 @@
     var platform = styleDNAState.targetPlatform.value;
     if (mode === "combined") {
       var combinedAssembled = PromptHaus.combined.assembleUnifiedPrompt();
-      return PromptHaus.engine.formatForPlatform(combinedAssembled, platform, styleDNAState.aspectRatio.value, buildCombinedNegativePrompt());
+      return PromptHaus.engine.formatForPlatform(combinedAssembled, platform, styleDNAState.aspectRatio.value, buildCombinedNegativePrompt(), styleDNAState.outputFormat.value);
     }
     var assembled = PromptHaus[mode].assemblePrompt();
-    return PromptHaus.engine.formatForPlatform(assembled, platform, styleDNAState.aspectRatio.value, buildCombinedNegativePrompt());
+    return PromptHaus.engine.formatForPlatform(assembled, platform, styleDNAState.aspectRatio.value, buildCombinedNegativePrompt(), styleDNAState.outputFormat.value);
   }
 
   function renderCollectionPanel() {
@@ -2583,12 +2591,12 @@
 
     panel.appendChild(
       renderPillFieldGroup(
-        "Style",
+        "Character Style - Pick one core look",
         "animals.characterType",
         { label: "Character Type", field: state.style.characterType },
         CHARACTER_TYPE_BUCKET_ICONS,
         function (entry, changes) { animals.updateStyleField("characterType", changes); renderApp(); },
-        "The overall illustration style — pick one core look rather than stacking several."
+        "The overall illustration style for this animal."
       )
     );
     panel.appendChild(
@@ -3066,7 +3074,8 @@
       assembled,
       platform,
       styleDNAState.aspectRatio.value,
-      buildCombinedNegativePrompt()
+      buildCombinedNegativePrompt(),
+      styleDNAState.outputFormat.value
     );
 
     var textarea = el("textarea", { class: "ph-preview__text", readonly: "readonly" });
@@ -3464,27 +3473,22 @@
     var kits = PromptHaus.brandKit.getAllKits();
     var activeKit = PromptHaus.brandKit.getActiveKit();
 
-    var toggleBtn = el("button", { type: "button", class: "ph-faq__toggle" }, [
-      icon(brandKitExpanded ? "eyeOff" : "eye"),
-      el("span", { text: brandKitExpanded ? "Hide" : "Show" }),
-    ]);
-    toggleBtn.addEventListener("click", function () {
-      brandKitExpanded = !brandKitExpanded;
-      renderApp();
-    });
-
     var titleText = "My HAUS Style — Brand Kit (" + kits.length + "/" + PromptHaus.brandKit.MAX_KITS + ")" + (activeKit ? " — " + activeKit.name + " active" : "");
-    var section = el("div", { class: "ph-brandkit" }, [
-      el("div", { class: "ph-faq__header" }, [
-        el("h3", { class: "ph-saved__title" }, [icon("brandKit"), el("span", { text: titleText })]),
-        toggleBtn,
-      ]),
-    ]);
-
-    if (!brandKitExpanded) {
-      root.appendChild(section);
-      return;
+    var headerChildren = [el("h3", { class: "ph-saved__title" }, [icon("brandKit"), el("span", { text: titleText })])];
+    if (kits.length > 1) {
+      var toggleBtn = el("button", { type: "button", class: "ph-faq__toggle" }, [
+        icon(brandKitExpanded ? "eyeOff" : "eye"),
+        el("span", { text: brandKitExpanded ? "Hide" : "Show full list" }),
+      ]);
+      toggleBtn.addEventListener("click", function () {
+        brandKitExpanded = !brandKitExpanded;
+        renderApp();
+      });
+      headerChildren.push(toggleBtn);
     }
+    var section = el("div", { class: "ph-brandkit" }, [
+      el("div", { class: "ph-faq__header" }, headerChildren),
+    ]);
 
     section.appendChild(
       el("p", {
@@ -3496,10 +3500,13 @@
 
     if (!kits.length) {
       section.appendChild(el("p", { class: "ph-saved__empty", text: 'Your Brand Kit vault is empty — create one below.' }));
+    } else {
+      // Collapsed by default to just the active kit (or the first one if none is active).
+      var visibleKits = brandKitExpanded ? kits : [kits[activeKit ? kits.indexOf(activeKit) : 0] || kits[0]];
+      visibleKits.forEach(function (kit) {
+        section.appendChild(renderBrandKitCard(kit, !!activeKit && activeKit.id === kit.id));
+      });
     }
-    kits.forEach(function (kit) {
-      section.appendChild(renderBrandKitCard(kit, !!activeKit && activeKit.id === kit.id));
-    });
 
     if (kits.length < PromptHaus.brandKit.MAX_KITS) {
       var nameInput = el("input", { type: "text", class: "ph-brandkit__new-input", placeholder: "New Brand Kit name…" });
@@ -3846,6 +3853,14 @@
       renderApp();
     });
 
+    var outputFormatSelect = el("select", { class: "ph-field__select" });
+    outputFormatSelect.id = "ph-field-" + outputFormatSelect.getAttribute("data-ph-key");
+    appendSelectOptions(outputFormatSelect, styleDNAState.outputFormat, styleDNAState.outputFormat.value);
+    outputFormatSelect.addEventListener("change", function () {
+      PromptHaus.styleDNA.setOutputFormat(outputFormatSelect.value);
+      renderApp();
+    });
+
     var bufferToggle = el("div", { class: "ph-styledna__yesno" }, [
       yesNoButton("Yes", styleDNAState.addBuffer === true, function () {
         PromptHaus.styleDNA.setAddBuffer(true);
@@ -3863,6 +3878,10 @@
     bufferToggle.setAttribute("aria-labelledby", bufferLabel.id);
     var bufferField = el("div", { class: "ph-styledna__field" }, [bufferLabel, bufferToggle]);
     bufferField.title = bufferHelp;
+
+    var outputFormatHelp = "A file-level export setting (transparency/format) — independent of this mode's own Background field, which is a scene/content choice, not a file setting. Leave on Default for a plain PNG.";
+    var outputFormatField = el("div", { class: "ph-styledna__field" }, [labelWithIcon("crop", "Output Format", outputFormatSelect.id, null, outputFormatHelp), outputFormatSelect]);
+    outputFormatField.title = outputFormatHelp;
 
     var projectHelp = "What you're making — also auto-suggests a matching Aspect Ratio below.";
     var projectField = el("div", { class: "ph-styledna__field" }, [labelWithIcon("shirt", "Project Type", projectSelect.id, null, projectHelp), projectSelect]);
@@ -3898,6 +3917,7 @@
         platformField,
         variationField,
         bufferField,
+        outputFormatField,
         renderNegativePromptField(),
       ];
     }

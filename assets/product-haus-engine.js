@@ -70,10 +70,11 @@
 
   // ---------------------------------------------------------------------
   // Platform formatter layer — one extra function on top of the
-  // assembler above, not a rebuild of the field data. Product Haus's
-  // "platform" is the marketing channel (Instagram, Email, etc.) rather
-  // than an AI image generator, but the shape is identical: reformat the
-  // same assembled text differently depending on where it's headed.
+  // assembler above, not a rebuild of the field data. Verbatim port of
+  // Content Haus's own formatForPlatform (prompt-builder-engine.js):
+  // tag-style for Midjourney/Leonardo AI (comma tags + --ar/--no),
+  // simplified for Kittl/Ideogram/Flux, plain sentence + "Avoid: ..."
+  // suffix for everything else (including no platform selected).
   // ---------------------------------------------------------------------
 
   // Splits a freeform "no jargon, no exclamation points" string into
@@ -87,9 +88,53 @@
       .filter(Boolean);
   }
 
-  function formatForPlatform(assembled, negativePrompt) {
-    var negativeItems = cleanNegativeItems(negativePrompt);
+  var PLATFORM_GROUP = {
+    "Midjourney": "tag", "Leonardo AI": "tag",
+    "Kittl": "simplified", "Ideogram": "simplified", "Flux": "simplified",
+  };
+
+  // File-level export setting — independent of any generator's own
+  // decorative Background field (a scene/content choice). Folded in at
+  // this same generic layer as Buffer, for the same reason: it needs to
+  // reach every broad Studio and every narrow generator uniformly.
+  var OUTPUT_FORMAT_PHRASES = {
+    "PNG — Transparent Background": "PNG file format with a fully transparent background (alpha channel), isolating the subject cleanly with no background fill",
+    "JPG — Solid Background": "JPG file format with a solid, fully opaque background and no transparency",
+  };
+
+  function toTagStyle(assembled, aspectRatio, negativeItems, bufferClause, outputFormatPhrase) {
+    var tags = assembled.fragments.join(", ").split(",").map(function (t) { return t.trim(); }).filter(Boolean);
+    if (bufferClause) tags.push(bufferClause);
+    if (outputFormatPhrase) tags.push(outputFormatPhrase);
+    var param = aspectRatio ? "--ar " + aspectRatio : "";
+    var negative = negativeItems.length ? "--no " + negativeItems.join(", ") : "";
+    return [tags.join(", "), param, negative].filter(Boolean).join(" ");
+  }
+
+  function toSimplifiedStyle(assembled, negativeItems, bufferClause, outputFormatPhrase) {
     var text = assembled.text;
+    if (bufferClause) text += " Include a " + bufferClause + ".";
+    if (outputFormatPhrase) text += " Export as a " + outputFormatPhrase + ".";
+    if (negativeItems.length) text += " Avoid: " + negativeItems.join(", ") + ".";
+    return text;
+  }
+
+  // (assembled, platform, aspectRatio, negativePrompt, addBuffer,
+  // outputFormat) — both Buffer and Output Format are folded in
+  // generically here (rather than woven into each mode/generator's own
+  // assembled sentence, the way Content Haus does it) so they reach every
+  // broad Studio *and* every narrow generator uniformly, without editing
+  // dozens of individual generator template files.
+  function formatForPlatform(assembled, platform, aspectRatio, negativePrompt, addBuffer, outputFormat) {
+    var group = PLATFORM_GROUP[platform] || "sentence";
+    var negativeItems = cleanNegativeItems(negativePrompt);
+    var bufferClause = addBuffer ? "buffer of empty space around the edges so nothing gets cropped at the borders" : "";
+    var outputFormatPhrase = OUTPUT_FORMAT_PHRASES[outputFormat] || "";
+    if (group === "tag") return toTagStyle(assembled, aspectRatio, negativeItems, bufferClause, outputFormatPhrase);
+    if (group === "simplified") return toSimplifiedStyle(assembled, negativeItems, bufferClause, outputFormatPhrase);
+    var text = assembled.text;
+    if (bufferClause) text += " Include a " + bufferClause + ".";
+    if (outputFormatPhrase) text += " Export as a " + outputFormatPhrase + ".";
     if (negativeItems.length) text += " Avoid: " + negativeItems.join(", ") + ".";
     return text;
   }

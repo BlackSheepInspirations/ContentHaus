@@ -191,6 +191,8 @@
     return ui.el("div", { class: "pdh-saved__item" + (isActive ? " pdh-collection__item--combined" : ""), style: isActive ? "border-color: var(--pdh-espresso);" : "" }, children);
   }
 
+  var lookLockExpanded = false;
+
   function renderSection(root) {
     var ui = ProductHaus.ui;
     var looks = getAllLooks();
@@ -200,7 +202,12 @@
     if (!looks.length) {
       list.appendChild(ui.el("p", { class: "pdh-saved__empty", text: "No Looks yet — build a generator result you love, then click \"Lock This Look\" below its fields, or create one here." }));
     } else {
-      looks.forEach(function (look) { list.appendChild(renderLookCard(look, !!activeLook && activeLook.id === look.id)); });
+      // Collapsed by default to just the active Look (or the first one if
+      // none is active) — same "collapsed, Show full list" pattern as Your
+      // Vault/Recently Generated, so this section doesn't dump every saved
+      // Look on-screen at once.
+      var visible = lookLockExpanded ? looks : [looks[activeLook ? looks.indexOf(activeLook) : 0] || looks[0]];
+      visible.forEach(function (look) { list.appendChild(renderLookCard(look, !!activeLook && activeLook.id === look.id)); });
     }
 
     var createRow;
@@ -216,8 +223,18 @@
       createRow = ui.el("p", { class: "pdh-field-group__subtitle", text: "You have " + MAX_LOOKS + "/" + MAX_LOOKS + " Looks — delete one to create another." });
     }
 
+    var headerChildren = [ui.el("h3", { class: "pdh-saved__title" }, [ui.icon("palette"), ui.el("span", { text: "Look Lock (" + looks.length + "/" + MAX_LOOKS + ")" })])];
+    if (looks.length > 1) {
+      var toggleBtn = ui.el("button", { type: "button", class: "pdh-faq__toggle" }, [
+        ui.icon(lookLockExpanded ? "eyeOff" : "eye"),
+        ui.el("span", { text: lookLockExpanded ? "Hide" : "Show full list" }),
+      ]);
+      toggleBtn.addEventListener("click", function () { lookLockExpanded = !lookLockExpanded; ProductHaus.ui.renderApp(); });
+      headerChildren.push(toggleBtn);
+    }
+
     root.appendChild(ui.el("div", { class: "pdh-saved" }, [
-      ui.el("h3", { class: "pdh-saved__title" }, [ui.icon("palette"), ui.el("span", { text: "Look Lock (" + looks.length + "/" + MAX_LOOKS + ")" })]),
+      ui.el("div", { class: "pdh-faq__header" }, headerChildren),
       ui.el("p", { class: "pdh-field-group__subtitle", text: "Lock one generator's art style, palette, mood, and texture, then every other generator's matching fields pick it up automatically — the fix for a second page not matching the first." }),
       list,
       createRow,

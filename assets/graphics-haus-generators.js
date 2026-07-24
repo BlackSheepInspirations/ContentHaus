@@ -399,20 +399,6 @@
   // UI
   // ---------------------------------------------------------------------
 
-  function renderGrid(onSelect) {
-    var ui = GraphicsHaus.ui;
-    var cards = registry.map(function (def) {
-      var card = ui.el("button", { type: "button", class: "gh-generator-card" }, [
-        ui.icon(def.icon || "sparkle"),
-        ui.el("span", { class: "gh-generator-card__name", text: def.label }),
-        ui.el("span", { class: "gh-generator-card__description", text: def.description || "" }),
-      ]);
-      card.addEventListener("click", function () { onSelect(def.id); });
-      return card;
-    });
-    return ui.el("div", { class: "gh-generator-grid" }, cards);
-  }
-
   // Generic "list of labeled prompt blocks, each individually copyable" —
   // shared by the 3-variation system and Page Bundles below.
   function renderLabeledBlocksSection(titleText, blocks) {
@@ -550,10 +536,6 @@
     var state = getStore(id).getState();
     var wrap = ui.el("div", { class: "gh-panel gh-generator-panel" });
 
-    var backBtn = ui.el("button", { type: "button", class: "gh-btn gh-btn--small gh-btn--reset gh-generator-panel__back", text: "← All Generators" });
-    backBtn.addEventListener("click", function () { currentId = null; GraphicsHaus.ui.renderApp(); });
-    wrap.appendChild(backBtn);
-
     wrap.appendChild(ui.el("h3", { class: "gh-generator-panel__title" }, [ui.icon(def.icon || "sparkle"), ui.el("span", { text: def.label })]));
     if (def.description) wrap.appendChild(ui.el("p", { class: "gh-generator-panel__description", text: def.description }));
 
@@ -584,16 +566,12 @@
     return wrap;
   }
 
+  // Tab-bar-first now (graphics-haus-ui.js's renderTabs sets currentId
+  // before this is ever called) — no grid step, no in-panel back button.
   function renderPanel() {
     var ui = GraphicsHaus.ui;
-    var wrap = ui.el("div", { class: "gh-panel" });
-    if (!currentId) {
-      wrap.appendChild(ui.el("p", { class: "gh-generator-grid__intro", text: "Pick a generator below — each one has just a few fields, and works even if you leave everything at its default." }));
-      wrap.appendChild(renderGrid(function (id) { currentId = id; GraphicsHaus.ui.renderApp(); }));
-    } else {
-      wrap.appendChild(renderGeneratorPanel(currentId));
-    }
-    return wrap;
+    if (!currentId) return ui.el("div", { class: "gh-panel" });
+    return renderGeneratorPanel(currentId);
   }
 
   GraphicsHaus.generatorEngine = {
@@ -615,5 +593,12 @@
     // the right generator's store through these instead.
     getGeneratorStore: function (id) { return getStore(id); },
     getGeneratorLabel: function (id) { var def = getDef(id); return def ? def.label : id; },
+    // Used by the tab bar (graphics-haus-ui.js) and by Combined/Collection
+    // Builder (graphics-haus-combined.js/graphics-haus-collection.js) to
+    // read any generator's own def/label/live-assembled-prompt by id
+    // without going through the currently-active one.
+    getGeneratorDef: function (id) { return getDef(id); },
+    getAllDefs: function () { return registry.slice(); },
+    assemblePromptForId: function (id) { return assemblePromptForModeApi(id); },
   };
 })();

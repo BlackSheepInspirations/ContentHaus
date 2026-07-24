@@ -41,6 +41,7 @@
   var PERSONALITY_OPTIONS = [
     "minimal/clean", "bold/aggressive", "elegant/luxury", "playful/fun",
     "spiritual/calm", "futuristic/digital", "vintage/retro",
+    "hand-crafted artisanal", "timeless-classic",
   ];
 
   var ICONOGRAPHY_OPTIONS = [
@@ -48,11 +49,18 @@
     "monogram integration", "geometric shapes", "nature-based forms", "minimal line icon",
   ];
 
-  var LAYOUT_OPTIONS = ["centered", "horizontal lockup", "stacked", "badge", "circular seal", "negative-space"];
+  // Layout used to be a third, separately-pickable field alongside Lockup
+  // Relationship and Container — but its own options ("horizontal lockup",
+  // "stacked", "badge", "circular seal") just restated the other two in
+  // different words, and could actively contradict them (e.g. Layout=
+  // "circular seal" + Container="square badge"). Folded away: Lockup
+  // Relationship covers icon/text arrangement, Container covers the
+  // shape/frame treatment (including the one genuinely distinct Layout
+  // option, negative-space, added below).
   var LOCKUP_RELATIONSHIP_OPTIONS = ["icon above text", "icon left of text", "text only", "icon only", "tagline below name"];
   var CONTAINER_OPTIONS = [
     "contained in a circle badge", "contained in a shield badge",
-    "contained in a square badge", "free-standing (no container)",
+    "contained in a square badge", "free-standing (no container)", "negative-space design",
   ];
 
   var BACKGROUND_OPTIONS = ["transparent", "white", "dark/black"];
@@ -64,14 +72,19 @@
   ];
 
   var DIMENSIONAL_OPTIONS = ["flat", "dimensional / 3d"];
-  var OUTPUT_VARIATIONS_OPTIONS = ["1 concept", "3 concepts", "5 concepts", "logo system set (primary + simplified icon/submark)"];
+  // "logo system set (primary + simplified icon/submark)" used to live
+  // here as a 4th option — it only ever prepended a phrase to the same
+  // single sentence, hoping the AI inferred a system from wording alone.
+  // The Logo Board toggle below replaces it with the real thing: actual
+  // separate labeled prompts, not a hint stapled onto one image.
+  var OUTPUT_VARIATIONS_OPTIONS = ["1 concept", "3 concepts", "5 concepts"];
 
-  var ARCHETYPE_OPTIONS = [
-    "the hero", "the creator", "the rebel", "the sage", "the caregiver",
-    "the explorer", "the ruler", "the innocent", "the jester", "the lover",
-    "the everyman", "the magician",
-  ];
-  var STYLE_ERA_OPTIONS = ["modern-minimal", "70s-retro", "hand-crafted artisanal", "techy-geometric", "timeless-classic"];
+  // Real Brand DNA profile names (not the generic 12 Jungian archetypes
+  // this list used to hardcode) — reuses the canonical WHEEL_ORDER list
+  // from brand-haus-branddna.js (already loaded by this point in every
+  // script-load order this file ships in) so it can never drift out of
+  // sync with the actual 11 profiles.
+  var ARCHETYPE_OPTIONS = BrandHaus.brandDNA.WHEEL_ORDER.slice();
 
   var GRADIENT_OPTIONS = sortAlpha(["none", "subtle two-tone gradient", "vibrant multi-color gradient", "metallic sheen", "duotone"]);
   var COLOR_MOOD_OPTIONS = sortAlpha(["warm", "cool", "monochrome", "high contrast", "pastel", "jewel-tone", "earthy and muted", "vibrant and saturated"]);
@@ -82,13 +95,19 @@
 
   var CANVAS_FORMAT_PHRASE = { "square (1:1)": "square format", "landscape / horizontal": "landscape format", "portrait / vertical": "portrait format" };
 
-  var CANVAS_FORMAT_SUGGESTIONS = {
-    "horizontal lockup": "landscape / horizontal", "icon left of text": "landscape / horizontal",
-    stacked: "portrait / vertical", badge: "square (1:1)", "circular seal": "square (1:1)",
-    centered: "square (1:1)", "icon only": "square (1:1)",
+  // Container's badge shapes take precedence (a badge is almost always
+  // square-canvas regardless of what's inside it); Lockup Relationship is
+  // the fallback signal once there's no container shape driving it.
+  var CANVAS_FORMAT_SUGGESTIONS_BY_CONTAINER = {
+    "contained in a circle badge": "square (1:1)", "contained in a shield badge": "square (1:1)",
+    "contained in a square badge": "square (1:1)",
   };
-  function suggestedCanvasFormat(layout, lockupRelationship) {
-    return CANVAS_FORMAT_SUGGESTIONS[layout] || CANVAS_FORMAT_SUGGESTIONS[lockupRelationship] || "square (1:1)";
+  var CANVAS_FORMAT_SUGGESTIONS_BY_LOCKUP = {
+    "icon left of text": "landscape / horizontal", "text only": "landscape / horizontal",
+    "tagline below name": "portrait / vertical", "icon above text": "square (1:1)", "icon only": "square (1:1)",
+  };
+  function suggestedCanvasFormat(lockupRelationship, container) {
+    return CANVAS_FORMAT_SUGGESTIONS_BY_CONTAINER[container] || CANVAS_FORMAT_SUGGESTIONS_BY_LOCKUP[lockupRelationship] || "square (1:1)";
   }
 
   var INDUSTRY_CLICHE_MAP = {
@@ -131,30 +150,37 @@
       logoType: makeField("", LOGO_TYPE_OPTIONS),
       industry: makeField("", INDUSTRY_OPTIONS),
       personality: makeField("", PERSONALITY_OPTIONS),
+      // 6 named roles, matching the same Primary/Secondary/Accent/Neutral/
+      // Support/Stand-Out vocabulary Brand DNA profiles and Brand Kit
+      // already use elsewhere — not a Logo-Studio-specific set, so a
+      // Brand Kit's saved palette maps onto this one-to-one (see
+      // maybeAutoApplyBrandKit below).
       color: {
         primary: makeField("", [], { isColorPicker: true }),
         secondary: makeField("", [], { isColorPicker: true }),
         accent: makeField("", [], { isColorPicker: true }),
         neutral: makeField("", [], { isColorPicker: true }),
+        support: makeField("", [], { isColorPicker: true }),
+        standOut: makeField("", [], { isColorPicker: true }),
         gradient: makeField("", GRADIENT_OPTIONS),
         mood: makeField("", COLOR_MOOD_OPTIONS),
       },
       typography: {
         primaryFont: makeField("", FONT_STYLE_OPTIONS),
         secondaryFont: makeField("", FONT_STYLE_OPTIONS),
-        accentFont: makeField("", FONT_STYLE_OPTIONS),
       },
       iconography: makeField("", ICONOGRAPHY_OPTIONS),
       composition: {
-        layout: makeField("", LAYOUT_OPTIONS),
         lockup: makeField("", LOCKUP_RELATIONSHIP_OPTIONS),
         container: makeField("", CONTAINER_OPTIONS),
       },
       noTextSymbolOnly: false,
-      brandName: makeField("", [], { isFreeText: true }),
-      initials: makeField("", [], { isFreeText: true }),
-      tagline: makeField("", [], { isFreeText: true }),
-      brandStory: makeField("", [], { isFreeText: true }),
+      // includeInPrompt starts false for both — text only reaches the
+      // prompt once explicitly opted into via the checkbox, not just by
+      // having something typed (or, for Brand Name, inherited from the
+      // shared Business Name below).
+      brandName: makeField("", [], { isFreeText: true, includeInPrompt: false }),
+      initials: makeField("", [], { isFreeText: true, includeInPrompt: false }),
       background: makeField("transparent", BACKGROUND_OPTIONS),
       canvasFormat: makeField("square (1:1)", CANVAS_FORMAT_OPTIONS, { auto: true }),
       colorConstraint: makeField("", COLOR_CONSTRAINT_OPTIONS),
@@ -163,9 +189,92 @@
       negativeConstraints: { noMockups: true, noGradients: true, noShadows: true, no3d: true, avoidComplexity: true },
       archetype: makeField("", ARCHETYPE_OPTIONS),
       symbolMeaning: makeField("", [], { isFreeText: true }),
-      styleEra: makeField("", STYLE_ERA_OPTIONS),
       competitorAvoidance: makeField("", [], { isFreeText: true }),
+      // Off by default — single-logo mode (today's existing behavior) is
+      // still the default; this only replaces Output Variations, it
+      // doesn't add to it (5 pieces × 3 concepts would be 15 blocks).
+      logoBoard: false,
+      // "separate" = 5 individually-copyable prompts (existing behavior,
+      // each piece gets the AI's full attention). "combined" = one prompt
+      // asking the AI to compose all 5 onto a single presentation-board
+      // image, closer to a real brand identity sheet — at the cost of
+      // small labels/layout being up to the AI's own judgment, and quality
+      // per piece typically dropping a bit since it's splitting attention
+      // across everything in one generation instead of one focused pass.
+      boardMode: "separate",
     };
+  }
+
+  // The 5 pieces a Logo Board generates, in order. Every piece shares the
+  // same Foundation/Colors/Typography/Iconography fields already set in
+  // the panel — only the icon/text arrangement, color constraint, and one
+  // trailing instruction sentence change per piece. `opts` is read by
+  // buildMainSentenceParts below.
+  var LOGO_BOARD_PIECES = [
+    { key: "primary", label: "Primary Logo", opts: {} },
+    {
+      key: "secondary", label: "Secondary / Simplified Icon",
+      opts: { forceIconOnly: true, extraInstruction: "A simplified icon-only version of the same mark, with no text — suitable as a standalone submark or social avatar." },
+    },
+    {
+      key: "wordmark", label: "Wordmark-Only Version",
+      opts: { forceTextOnly: true, extraInstruction: "A clean wordmark-only version using just the brand name and/or initials in the chosen typography, with no icon or symbol." },
+    },
+    {
+      key: "favicon", label: "Favicon / Small-Size Version",
+      opts: { forceIconOnly: true, extraInstruction: "An extremely simplified, high-contrast icon version optimized for very small sizes (favicon, app icon, social avatar) — bold shapes only, no fine detail, must stay recognizable at 16x16px." },
+    },
+    {
+      key: "singleColor", label: "Single-Color Version",
+      opts: { forceSingleColor: true, extraInstruction: "A single-color (one ink) version suitable for stamps, embroidery, or one-color print — same composition, no gradients or multiple colors." },
+    },
+  ];
+
+  function toggleLogoBoard(enabled) {
+    store.setState({ logoBoard: enabled });
+  }
+
+  function setBoardMode(mode) {
+    store.setState({ boardMode: mode });
+  }
+
+  // One-shot-per-completed-assessment auto-fill, same object-identity
+  // guard used elsewhere in Brand Haus (see brand-haus-ui.js's
+  // maybeAutoApplyAssessment): only overwrites Archetype when it's still
+  // blank, so a manual override never gets silently clobbered, but a
+  // retake (a genuinely new results object) gets one fresh chance to fill
+  // it in again.
+  var lastAutoAppliedArchetypeResults = null;
+  function maybeAutoApplyArchetype() {
+    var results = BrandHaus.founderInterview && BrandHaus.founderInterview.getState().results;
+    if (!results || results === lastAutoAppliedArchetypeResults) return;
+    lastAutoAppliedArchetypeResults = results;
+    if (!resolved(store.getState().archetype)) {
+      updateField("archetype", { value: results.match.best.profile.name, customValue: "" });
+    }
+  }
+
+  // Same one-shot-per-change idea, keyed on the active Brand Kit's id
+  // rather than a results object (Brand Kit has no completed/uncompleted
+  // state the way an assessment does). Only actually applies anything if
+  // Logo Studio's own Colors AND Typography are still completely blank —
+  // checked via each field's raw .value, not resolved() (which would
+  // treat an intentionally-unchecked "Include in prompt" color as "still
+  // blank" and re-fill over a real choice). Manually clicking "Set
+  // Active" in the Brand Kit panel still works exactly as before and can
+  // always be used to re-apply later.
+  var lastAutoAppliedKitId = null;
+  function maybeAutoApplyBrandKit() {
+    var brandKit = BrandHaus.brandKit;
+    if (!brandKit) return;
+    var kit = brandKit.getActiveKit();
+    if (!kit || kit.id === lastAutoAppliedKitId) return;
+    lastAutoAppliedKitId = kit.id;
+    var state = store.getState();
+    var colorRoles = ["primary", "secondary", "accent", "neutral", "support", "standOut"];
+    var colorsBlank = colorRoles.every(function (role) { return !state.color[role].value; });
+    var fontsBlank = !state.typography.primaryFont.value && !state.typography.secondaryFont.value;
+    if (colorsBlank && fontsBlank) brandKit.applyKitToLogo(kit);
   }
 
   var store = BrandHaus.util.createStore(buildInitialState());
@@ -197,11 +306,11 @@
     var composition = Object.assign({}, state.composition);
     composition[fieldName] = Object.assign({}, composition[fieldName], changes);
     var patch = { composition: composition };
-    if (state.canvasFormat.auto && (fieldName === "layout" || fieldName === "lockup")) {
+    if (state.canvasFormat.auto && (fieldName === "lockup" || fieldName === "container")) {
       patch.canvasFormat = Object.assign({}, state.canvasFormat, {
         value: suggestedCanvasFormat(
-          fieldName === "layout" ? changes.value : composition.layout.value,
-          fieldName === "lockup" ? changes.value : composition.lockup.value
+          fieldName === "lockup" ? changes.value : composition.lockup.value,
+          fieldName === "container" ? changes.value : composition.container.value
         ),
       });
     }
@@ -240,74 +349,73 @@
     return items;
   }
 
+  // The shared Business Name fallback only kicks in once Brand Name's own
+  // "Include in prompt" checkbox is actually checked — otherwise leaving
+  // this field untouched (the common case, since the name already lives
+  // in the Identity bar) would silently pull it into the prompt anyway,
+  // exactly the auto-include behavior this field is meant to avoid now.
   function effectiveBrandName(state) {
+    if (state.brandName.includeInPrompt === false) return "";
     return resolved(state.brandName) || BrandHaus.engine.resolveFieldValue(BrandHaus.identity.getState().businessName);
   }
 
-  function assemblePrompt() {
-    var state = store.getState();
+  // The shared core every prompt (single-logo mode, and every Logo Board
+  // piece) builds from — same field reads either way, just optionally
+  // overridden per `opts`:
+  //  - forceIconOnly: suppress text entirely (Secondary/Favicon pieces)
+  //  - forceTextOnly: suppress the icon entirely (Wordmark piece)
+  //  - forceSingleColor: swap Color Constraint to 1-color and drop the
+  //    named hex colors (a single-color version has nothing to do with
+  //    the multi-color palette)
+  //  - extraInstruction: one trailing sentence specific to that piece
+  function buildMainSentenceParts(state, opts) {
+    opts = opts || {};
     var parts = [];
-    var fragments = [];
+    function add(text) { if (text) parts.push(text); }
 
-    function add(text) {
-      if (!text) return;
-      parts.push(text);
-      fragments.push(text);
-    }
+    var lockupVal = opts.forceTextOnly ? "text only" : (opts.forceIconOnly ? "icon only" : resolved(state.composition.lockup));
+    add([resolved(state.logoType), lockupVal, resolved(state.composition.container)].filter(Boolean).join(", "));
 
-    var outputVariations = resolved(state.outputVariations);
-    var intro = outputVariations ? "Generate " + outputVariations + ":" : "";
-
-    var story = resolved(state.brandStory);
-    if (story) add(story);
-
-    add(
-      [resolved(state.logoType), resolved(state.composition.layout), resolved(state.composition.lockup), resolved(state.composition.container)]
-        .filter(Boolean)
-        .join(", ")
-    );
-
-    var iconBits = [resolved(state.iconography)];
-    if (state.tier === "pro") {
-      var meaning = resolved(state.symbolMeaning);
-      if (meaning) iconBits.push("symbolizing " + meaning);
+    var iconBits = [];
+    if (!opts.forceTextOnly) {
+      iconBits.push(resolved(state.iconography));
+      if (state.tier === "pro") {
+        var meaning = resolved(state.symbolMeaning);
+        if (meaning) iconBits.push("symbolizing " + meaning);
+      }
     }
     add(iconBits.filter(Boolean).join(", "));
 
     var brandName = effectiveBrandName(state);
     var initials = resolved(state.initials);
-    var tagline = resolved(state.tagline);
-    var hasText = !state.noTextSymbolOnly && !!(brandName || initials);
+    var hasText = opts.forceIconOnly ? false : (!state.noTextSymbolOnly && !!(brandName || initials));
 
     if (hasText) {
-      add(
-        [resolved(state.typography.primaryFont), resolved(state.typography.secondaryFont), resolved(state.typography.accentFont)]
-          .filter(Boolean)
-          .join(", ")
-      );
+      add([resolved(state.typography.primaryFont), resolved(state.typography.secondaryFont)].filter(Boolean).join(", "));
     }
 
     var dominant = [];
     if (resolved(state.personality)) dominant.push(resolved(state.personality));
     if (resolved(state.industry)) dominant.push(resolved(state.industry) + " industry");
-    if (state.tier === "pro" && resolved(state.styleEra)) dominant.push(resolved(state.styleEra));
     if (state.tier === "pro" && resolved(state.archetype)) dominant.push(resolved(state.archetype) + " archetype");
     dominant = dominant.slice(0, 3);
     if (dominant.length) add(dominant.join(", ") + " aesthetic");
 
-    add(
-      [
-        resolved(state.colorConstraint),
+    var colorConstraintVal = opts.forceSingleColor ? "1-color only (stamp-ready)" : resolved(state.colorConstraint);
+    var colorParts = [colorConstraintVal];
+    if (!opts.forceSingleColor) {
+      colorParts.push(
         resolved(state.color.primary) && "primary color " + resolved(state.color.primary),
         resolved(state.color.secondary) && "secondary color " + resolved(state.color.secondary),
         resolved(state.color.accent) && "accent color " + resolved(state.color.accent),
         resolved(state.color.neutral) && "neutral/base color " + resolved(state.color.neutral),
+        resolved(state.color.support) && "support color " + resolved(state.color.support),
+        resolved(state.color.standOut) && "stand-out color " + resolved(state.color.standOut),
         resolved(state.color.gradient) && resolved(state.color.gradient).toLowerCase() !== "none" && resolved(state.color.gradient) + " style",
-        resolved(state.color.mood) && resolved(state.color.mood) + " color mood",
-      ]
-        .filter(Boolean)
-        .join(", ")
-    );
+        resolved(state.color.mood) && resolved(state.color.mood) + " color mood"
+      );
+    }
+    add(colorParts.filter(Boolean).join(", "));
 
     var dimensional = resolved(state.dimensional);
     if (dimensional) add(dimensional === "flat" ? "flat design" : "dimensional 3d treatment");
@@ -315,21 +423,16 @@
     add(CANVAS_FORMAT_PHRASE[resolved(state.canvasFormat)] || "");
 
     if (state.tier === "lite") add(LITE_TIER_PHRASE);
+    if (opts.extraInstruction) add(opts.extraInstruction);
 
+    return { parts: parts, hasText: hasText, brandName: brandName, initials: initials };
+  }
+
+  function buildTrailingSentences(state, built) {
     var textLockSentences = [];
-    if (hasText) {
-      if (brandName) {
-        textLockSentences.push('The exact text must read: "' + brandName + '" in full, with no changes or paraphrasing.');
-        fragments.push('the text "' + brandName + '"');
-      }
-      if (initials) {
-        textLockSentences.push('The exact initials must read: "' + initials + '" in full, with no changes or paraphrasing.');
-        fragments.push('the initials "' + initials + '"');
-      }
-      if (tagline) {
-        textLockSentences.push('The exact tagline must read: "' + tagline + '" in full.');
-        fragments.push('the tagline "' + tagline + '"');
-      }
+    if (built.hasText) {
+      if (built.brandName) textLockSentences.push('The exact text must read: "' + built.brandName + '" in full, with no changes or paraphrasing.');
+      if (built.initials) textLockSentences.push('The exact initials must read: "' + built.initials + '" in full, with no changes or paraphrasing.');
       textLockSentences.push(TEXT_FAILURE_FALLBACK);
     }
 
@@ -339,18 +442,121 @@
     var negativeItems = getNegativeConstraintItems();
     var negativeSentence = negativeItems.length ? "Avoid: " + negativeItems.join(", ") + "." : "";
 
-    var trademark = TRADEMARK_LINE;
-    if (resolved(state.useMode) === USE_MODE_OPTIONS[1]) trademark += RESALE_TRADEMARK_NOTE;
-    var autoAppend = [QUALITY_CONSTRAINTS_BLOCK, trademark, TRADEMARK_DISCLAIMER].join(" ");
+    // QUALITY_CONSTRAINTS_BLOCK and TRADEMARK_LINE are genuine image-
+    // generation instructions (avoid these shapes, don't recreate that
+    // mark), so they stay in the actual prompt. TRADEMARK_DISCLAIMER and
+    // RESALE_TRADEMARK_NOTE are pure user-facing legal notices with
+    // nothing for an image model to act on — those live only in the UI
+    // callout at the bottom of the panel (see renderPanel), never copied
+    // into the prompt itself.
+    var autoAppend = [QUALITY_CONSTRAINTS_BLOCK, TRADEMARK_LINE].join(" ");
 
-    var mainSentence = parts.filter(Boolean).join(", ") + ".";
-    var text = [intro, mainSentence]
-      .concat(textLockSentences)
-      .concat([backgroundSentence, negativeSentence, autoAppend])
-      .filter(Boolean)
-      .join(" ");
+    return textLockSentences.concat([backgroundSentence, negativeSentence, autoAppend]);
+  }
+
+  function assemblePrompt() {
+    var state = store.getState();
+    if (state.logoBoard) {
+      var board = assembleLogoBoard(state);
+      var first = board.length ? board[0] : { text: "" };
+      return { text: first.text, fragments: [] };
+    }
+
+    var built = buildMainSentenceParts(state, {});
+    var fragments = built.parts.slice();
+    if (built.brandName) fragments.push('the text "' + built.brandName + '"');
+    if (built.initials) fragments.push('the initials "' + built.initials + '"');
+
+    var outputVariations = resolved(state.outputVariations);
+    var intro = outputVariations ? "Generate " + outputVariations + ":" : "";
+    var mainSentence = built.parts.filter(Boolean).join(", ") + ".";
+    var text = [intro, mainSentence].concat(buildTrailingSentences(state, built)).filter(Boolean).join(" ");
 
     return { text: text, fragments: fragments };
+  }
+
+  // A Logo Board = the same field set, assembled 5 times with different
+  // icon/text-arrangement and color-constraint overrides — see
+  // LOGO_BOARD_PIECES. The Wordmark piece is skipped entirely when
+  // there's no actual brand name/initials to build a wordmark from
+  // (symbol-only mode, or both text fields left un-included).
+  function assembleLogoBoard(state) {
+    if (state.boardMode === "combined") return [assembleLogoBoardCombined(state, false)];
+    if (state.boardMode === "combinedIdentity") return [assembleLogoBoardCombined(state, true)];
+    return LOGO_BOARD_PIECES.map(function (piece) {
+      var built = buildMainSentenceParts(state, piece.opts);
+      if (piece.opts.forceTextOnly && !built.hasText) return null;
+      var mainSentence = built.parts.filter(Boolean).join(", ") + ".";
+      var text = [mainSentence].concat(buildTrailingSentences(state, built)).filter(Boolean).join(" ");
+      return { key: piece.key, label: piece.label, text: text };
+    }).filter(Boolean);
+  }
+
+  // Pulls a short written brand-identity summary from Branding Studio
+  // (mission, core values, brand voice, mood) plus Logo Studio's own
+  // Personality/Industry/Archetype fields — read defensively since
+  // Branding Studio is a separate module Logo Studio doesn't otherwise
+  // depend on. Used only by the "Combined + Brand Identity" board mode,
+  // to give the AI explicit "who this brand is" context up front rather
+  // than relying on style/color adjectives alone to imply it.
+  function buildBrandIdentitySummary(state) {
+    var lines = [];
+    var name = effectiveBrandName(state);
+    if (name) lines.push('Brand: "' + name + '"');
+    var branding = BrandHaus.branding && BrandHaus.branding.getState ? BrandHaus.branding.getState() : null;
+    if (branding) {
+      var mission = resolved(branding.mission);
+      if (mission) lines.push("Mission: " + mission);
+      var values = (branding.coreValues || []).map(function (v) { return (v || "").trim(); }).filter(Boolean);
+      if (values.length) lines.push("Core Values: " + values.join(", "));
+      var voice = resolved(branding.brandVoice);
+      if (voice) lines.push("Brand Voice: " + voice);
+      var mood = resolved(branding.mood);
+      if (mood) lines.push("Brand Mood: " + mood);
+    }
+    if (state.tier === "pro" && resolved(state.archetype)) lines.push("Brand Archetype: " + resolved(state.archetype));
+    if (resolved(state.personality)) lines.push("Personality: " + resolved(state.personality));
+    if (resolved(state.industry)) lines.push("Industry: " + resolved(state.industry));
+    return lines;
+  }
+
+  // One prompt asking the AI to compose all 5 Logo Board pieces onto a
+  // single presentation-board image, instead of 5 separate generations —
+  // each piece's own descriptive line feeds into one numbered list, and
+  // the shared trailing sentences (text lock, background, negative
+  // constraints, quality/trademark) are stated once for the whole board
+  // rather than repeated per piece. When includeIdentity is true, a short
+  // written Brand Identity block (mission/values/voice/archetype) is
+  // stated up front, blending the fuller brand context into the board
+  // request rather than just the logo pieces alone.
+  function assembleLogoBoardCombined(state, includeIdentity) {
+    var pieceLines = LOGO_BOARD_PIECES.map(function (piece) {
+      var built = buildMainSentenceParts(state, piece.opts);
+      if (piece.opts.forceTextOnly && !built.hasText) return null;
+      var sentence = built.parts.filter(Boolean).join(", ");
+      return piece.label + " — " + sentence + ".";
+    }).filter(Boolean).map(function (line, i) {
+      return (i + 1) + ". " + line;
+    });
+
+    var sharedBuilt = buildMainSentenceParts(state, {});
+    var trailing = buildTrailingSentences(state, sharedBuilt).filter(Boolean).join(" ");
+
+    var identityBlock = "";
+    if (includeIdentity) {
+      var summaryLines = buildBrandIdentitySummary(state);
+      if (summaryLines.length) identityBlock = "Brand Identity:\n" + summaryLines.join("\n") + "\n\n";
+    }
+
+    var boardIntro = includeIdentity
+      ? "Using the brand identity above, design a single brand identity / logo showcase board on one canvas, presenting all of the following logo variations clearly separated and individually labeled in a clean grid layout, consistent with that identity:"
+      : "Design a single brand identity / logo showcase board on one canvas, presenting all of the following logo variations clearly separated and individually labeled in a clean grid layout:";
+
+    var text = identityBlock + boardIntro + "\n\n" +
+      pieceLines.join("\n") +
+      "\n\nArrange every piece on one organized presentation sheet with clear visual separation and a small label under each piece identifying it — not overlapping or crowded. " + trailing;
+
+    return { key: includeIdentity ? "combinedIdentity" : "combined", label: includeIdentity ? "Combined Board + Brand Identity" : "Combined Identity Board", text: text };
   }
 
   function randomize() {
@@ -363,7 +569,6 @@
     updateField("industry", { value: randomPick(state.industry), customValue: "" });
     updateField("personality", { value: randomPick(state.personality), customValue: "" });
     updateField("iconography", { value: randomPick(state.iconography), customValue: "" });
-    updateCompositionField("layout", { value: randomPick(state.composition.layout), customValue: "" });
     updateCompositionField("lockup", { value: randomPick(state.composition.lockup), customValue: "" });
     updateCompositionField("container", { value: randomPick(state.composition.container), customValue: "" });
     updateField("colorConstraint", { value: randomPick(state.colorConstraint), customValue: "" });
@@ -371,13 +576,11 @@
     // (see buildInitialState) — they're an exact hex pick, and there's no
     // sensible "random hex" to land Randomize on that wouldn't just be
     // arbitrary noise, so those two are deliberately left alone here.
-    if (!state.noTextSymbolOnly && (resolved(state.brandName) || resolved(state.initials))) {
+    if (!state.noTextSymbolOnly && (effectiveBrandName(state) || resolved(state.initials))) {
       updateTypographyField("primaryFont", { value: randomPick(state.typography.primaryFont), customValue: "" });
-      updateTypographyField("accentFont", { value: randomPick(state.typography.accentFont), customValue: "" });
     }
     if (state.tier === "pro") {
       updateField("archetype", { value: randomPick(state.archetype), customValue: "" });
-      updateField("styleEra", { value: randomPick(state.styleEra), customValue: "" });
     }
   }
 
@@ -399,7 +602,6 @@
 
     var composition = resolveFields([
       { label: "Iconography", field: state.iconography },
-      { label: "Layout", field: state.composition.layout },
       { label: "Lockup", field: state.composition.lockup },
       { label: "Container", field: state.composition.container },
     ]);
@@ -410,6 +612,8 @@
       { label: "Secondary Color", field: state.color.secondary },
       { label: "Accent Color", field: state.color.accent },
       { label: "Neutral/Base Color", field: state.color.neutral },
+      { label: "Support Color", field: state.color.support },
+      { label: "Stand-Out Color", field: state.color.standOut },
       { label: "Gradient Style", field: state.color.gradient },
       { label: "Color Mood", field: state.color.mood },
     ]);
@@ -418,24 +622,27 @@
     var typography = resolveFields([
       { label: "Primary Font", field: state.typography.primaryFont },
       { label: "Secondary Font", field: state.typography.secondaryFont },
-      { label: "Accent Font", field: state.typography.accentFont },
     ]);
     if (typography.length) groups.push({ title: "Typography", items: typography });
 
-    var colorFormat = resolveFields([
+    var colorFormatEntries = [
       { label: "Color Constraint", field: state.colorConstraint },
       { label: "Dimensional Treatment", field: state.dimensional },
       { label: "Background", field: state.background },
       { label: "Canvas Format", field: state.canvasFormat },
-      { label: "Output", field: state.outputVariations },
-    ]);
+    ];
+    if (!state.logoBoard) colorFormatEntries.push({ label: "Output", field: state.outputVariations });
+    var colorFormat = resolveFields(colorFormatEntries);
+    if (state.logoBoard) {
+      var boardOutputLabel = state.boardMode === "combinedIdentity" ? "Logo Board (1 combined image + brand identity)"
+        : state.boardMode === "combined" ? "Logo Board (1 combined image)"
+        : "Logo Board (5 pieces)";
+      colorFormat.push({ label: "Output", value: boardOutputLabel });
+    }
     if (colorFormat.length) groups.push({ title: "Color & Format", items: colorFormat });
 
     if (state.tier === "pro") {
-      var proMode = resolveFields([
-        { label: "Archetype", field: state.archetype },
-        { label: "Style Era", field: state.styleEra },
-      ]);
+      var proMode = resolveFields([{ label: "Archetype", field: state.archetype }]);
       if (proMode.length) groups.push({ title: "Pro Mode", items: proMode });
     }
     return groups;
@@ -466,7 +673,7 @@
       ui.el("legend", { class: "bh-field-group__title" }, [ui.icon("sparkle"), ui.el("span", { text: "Mode" })]),
       ui.el("p", {
         class: "bh-field-group__subtitle",
-        text: "Standard is the normal field set. Lite keeps every field but asks the AI for a simpler design. Pro reveals strategist-level controls (Archetype, Style Era, Symbol Meaning, Competitor Avoidance) below.",
+        text: "Standard is the normal field set. Lite keeps every field but asks the AI for a simpler design. Pro reveals strategist-level controls (Archetype, Symbol Meaning, Competitor Avoidance) below.",
       }),
       toggle,
     ]);
@@ -498,20 +705,12 @@
       children.push(
         renderCallout("text", "AI struggles with text — the more words in the image, the higher the chance of misspelling or garbling. For the cleanest result, consider the symbol-only toggle above, then add your brand name yourself in a design tool. If you do include text, keep it short."),
         renderTextFieldWithInclude(
-          { fieldName: "brandName", label: "Brand Name" + (businessName ? " (defaults to \"" + businessName + "\" if left blank)" : ""), field: state.brandName, placeholder: businessName || "" },
+          { fieldName: "brandName", label: "Brand Name" + (businessName ? " (defaults to \"" + businessName + "\" if left blank and included)" : ""), field: state.brandName, placeholder: businessName || "" },
           function (changes) { updateField("brandName", changes); BrandHaus.ui.renderApp(); }
         ),
-        renderTextFieldWithInclude({ fieldName: "initials", label: "Initials (up to 3)", field: state.initials }, function (changes) { updateField("initials", changes); BrandHaus.ui.renderApp(); }),
-        renderTextFieldWithInclude({ fieldName: "tagline", label: "Tagline (optional)", field: state.tagline }, function (changes) { updateField("tagline", changes); BrandHaus.ui.renderApp(); })
+        renderTextFieldWithInclude({ fieldName: "initials", label: "Initials (up to 3)", field: state.initials }, function (changes) { updateField("initials", changes); BrandHaus.ui.renderApp(); })
       );
     }
-
-    children.push(
-      renderTextFieldWithInclude(
-        { fieldName: "brandStory", label: "Brand Story — in your own words, what does this brand do and how should it feel?", field: state.brandStory },
-        function (changes) { updateField("brandStory", changes); BrandHaus.ui.renderApp(); }
-      )
-    );
 
     return BrandHaus.ui.el("fieldset", { class: "bh-field-group" }, children);
   }
@@ -540,32 +739,184 @@
 
   function renderProModeSection(state) {
     var ui = BrandHaus.ui;
-    var entries = [
-      { label: "Brand Archetype", field: state.archetype },
-      { label: "Style Era", field: state.styleEra },
-    ];
+    maybeAutoApplyArchetype();
+    state = store.getState();
+    var entries = [{ label: "Brand Archetype", field: state.archetype }];
     var fieldsContainer = ui.renderPlainFieldRow(entries, function (entry, changes) {
-      if (entry.label === "Brand Archetype") updateField("archetype", changes);
-      else updateField("styleEra", changes);
+      updateField("archetype", changes);
       BrandHaus.ui.renderApp();
     });
 
     var symbolMeaningField = ui.renderFreeTextField({ label: "Symbol Meaning — what should this logo represent emotionally?", field: state.symbolMeaning }, function (changes) { updateField("symbolMeaning", changes); BrandHaus.ui.renderApp(); });
-    var competitorField = ui.renderFreeTextField({ label: "Competitor-Style Avoidance", field: state.competitorAvoidance }, function (changes) { updateField("competitorAvoidance", changes); BrandHaus.ui.renderApp(); });
+
+    // Competitor field rendered with no label of its own (empty string) so
+    // the section title below reads as one real heading instead of a
+    // duplicate — the explanation and the field sit right beneath it.
+    var competitorField = ui.renderFreeTextField({ label: "", field: state.competitorAvoidance }, function (changes) { updateField("competitorAvoidance", changes); BrandHaus.ui.renderApp(); });
 
     return ui.el("fieldset", { class: "bh-field-group" }, [
       ui.el("legend", { class: "bh-field-group__title" }, [ui.icon("sparkle"), ui.el("span", { text: "Pro Mode" })]),
-      ui.el("p", { class: "bh-field-group__subtitle", text: "Archetype drives emotional shape language (e.g. The Ruler → strong symmetry; The Creator → expressive/asymmetric)." }),
+      ui.el("p", { class: "bh-field-group__subtitle", text: "Archetype auto-fills from your completed Brand DNA Assessment and drives emotional shape language (e.g. The Quiet Authority → strong symmetry; The Free Spirit → expressive/asymmetric). Change it here if you want a different archetype's shape language for this logo specifically." }),
       fieldsContainer,
       symbolMeaningField,
+      ui.el("p", { class: "bh-field__label", text: "Competitor-Style Avoidance" }),
       ui.el("p", { class: "bh-field-group__subtitle", text: 'Describe the competitor style you want to avoid in your own words — e.g. "avoid a single swoosh" or "avoid bitten-fruit minimalism." Don\'t name an actual brand: naming one can pull the AI toward it instead of away.' }),
       competitorField,
       ui.el("p", { class: "bh-logo-inline-disclaimer", text: "Describing a style to avoid is not the same as clearing a trademark. Avoid recreating any specific company's protected logo, symbol, or likeness — even loosely — and verify trademark/copyright independently before commercial use." }),
     ]);
   }
 
+  // Hand-rolled (not ui.renderFieldGroup) purely so the Output row can
+  // disappear entirely once Logo Board is on (toggled from the Foundation
+  // box now) — a board replaces "how many concepts," it doesn't combine
+  // with it (5 pieces × 3 concepts would be 15 blocks).
+  function renderColorFormatSection(state) {
+    var ui = BrandHaus.ui;
+    var entries = [
+      { label: "Color Constraint", field: state.colorConstraint },
+      { label: "Dimensional Treatment", field: state.dimensional },
+      { label: "Background", field: state.background },
+      { label: "Canvas Format", field: state.canvasFormat },
+    ];
+    if (!state.logoBoard) entries.push({ label: "Output", field: state.outputVariations });
+
+    var fieldsContainer = ui.renderPlainFieldRow(entries, function (entry, changes) {
+      if (entry.label === "Color Constraint") updateField("colorConstraint", changes);
+      else if (entry.label === "Dimensional Treatment") updateField("dimensional", changes);
+      else if (entry.label === "Background") updateField("background", changes);
+      else if (entry.label === "Canvas Format") store.setState({ canvasFormat: Object.assign({}, state.canvasFormat, changes, { auto: false }) });
+      else updateField("outputVariations", changes);
+      BrandHaus.ui.renderApp();
+    });
+
+    return ui.el("fieldset", { class: "bh-field-group" }, [
+      ui.el("legend", { class: "bh-field-group__title" }, [ui.icon("palette"), ui.el("span", { text: "Color & Format" })]),
+      ui.el("p", { class: "bh-field-group__subtitle", text: "How many colors the mark can use, flat vs. dimensional, background, and canvas shape." }),
+      fieldsContainer,
+    ]);
+  }
+
+  // Hand-rolled (not ui.renderFieldGroup) so the Logo Board toggle can live
+  // in this same fieldset, right after the fields it actually affects —
+  // moved here from Color & Format (where it was a small, easy-to-miss
+  // checkbox at the very bottom of a long page) since Foundation is the
+  // first substantive box in the panel, and this is a foundational
+  // "what am I even generating" choice, not a color/format detail.
+  function renderFoundationSection(state) {
+    var ui = BrandHaus.ui;
+    var entries = [
+      { label: "Logo Type", field: state.logoType },
+      { label: "Industry / Context", field: state.industry },
+      { label: "Brand Personality", field: state.personality },
+    ];
+    var fieldsContainer = ui.renderPlainFieldRow(entries, function (entry, changes) {
+      if (entry.label === "Logo Type") updateField("logoType", changes);
+      else if (entry.label === "Industry / Context") updateField("industry", changes);
+      else updateField("personality", changes);
+      BrandHaus.ui.renderApp();
+    });
+
+    var boardToggle = ui.el("div", { class: "bh-styledna__yesno" }, [
+      ui.yesNoButton("Yes", state.logoBoard === true, function () { toggleLogoBoard(true); BrandHaus.ui.renderApp(); }),
+      ui.yesNoButton("No", state.logoBoard !== true, function () { toggleLogoBoard(false); BrandHaus.ui.renderApp(); }),
+    ]);
+    var boardLabel = ui.labelWithIcon(
+      "layers",
+      "Generate as a Logo Board",
+      null,
+      null,
+      "5 separate pieces — Primary Logo, Secondary/Simplified Icon, Wordmark-Only, Favicon/Small-Size, Single-Color — instead of picking an Output count in Color & Format below."
+    );
+    boardLabel.id = "bh-label-logo-board";
+    boardToggle.setAttribute("role", "group");
+    boardToggle.setAttribute("aria-labelledby", boardLabel.id);
+    var boardRow = ui.el("div", { class: "bh-logo-board-toggle-row" }, [boardLabel, boardToggle]);
+
+    var children = [
+      ui.el("legend", { class: "bh-field-group__title" }, [ui.icon("logoMark"), ui.el("span", { text: "Foundation" })]),
+      ui.el("p", { class: "bh-field-group__subtitle", text: "The foundation every other choice builds on." }),
+      fieldsContainer,
+      boardRow,
+    ];
+
+    // Only shown once the board itself is on — 3 ways to generate it:
+    // 5 separate generations (each piece gets the AI's full attention),
+    // 1 combined image (closer to a real presentation sheet, at the cost
+    // of the AI splitting attention across every piece in one generation),
+    // or 1 combined image that also states the brand's mission/values/
+    // voice/archetype up front, so the AI has explicit "who this brand
+    // is" context rather than relying on style/color words alone.
+    if (state.logoBoard) {
+      var modeToggle = ui.el("div", { class: "bh-styledna__yesno" }, [
+        ui.yesNoButton("Separate Prompts", state.boardMode === "separate", function () { setBoardMode("separate"); BrandHaus.ui.renderApp(); }),
+        ui.yesNoButton("One Combined Image", state.boardMode === "combined", function () { setBoardMode("combined"); BrandHaus.ui.renderApp(); }),
+        ui.yesNoButton("Combined + Brand Identity", state.boardMode === "combinedIdentity", function () { setBoardMode("combinedIdentity"); BrandHaus.ui.renderApp(); }),
+      ]);
+      var modeLabel = ui.labelWithIcon(
+        "layers",
+        "Board Format",
+        null,
+        null,
+        "Separate Prompts generates each of the 5 pieces on its own, with full quality per piece. One Combined Image asks the AI to lay out all 5 on a single presentation-board image in one generation. Combined + Brand Identity does the same, plus states your mission, core values, brand voice, and archetype up front from Branding Studio so the board reflects the fuller brand, not just the logo fields. Either combined option means the AI is splitting attention across every piece in one generation, so per-piece quality and label placement are less predictable than Separate Prompts — and none of these include physical mockups, sub-brand lockups, or a color/type specimen strip like a full designed brand board."
+      );
+      modeLabel.id = "bh-label-board-mode";
+      modeToggle.setAttribute("role", "group");
+      modeToggle.setAttribute("aria-labelledby", modeLabel.id);
+      children.push(ui.el("div", { class: "bh-logo-board-toggle-row" }, [modeLabel, modeToggle]));
+    }
+
+    return ui.el("fieldset", { class: "bh-field-group" }, children);
+  }
+
+  var logoBoardSaveFeedback = null;
+
+  // Same "one Vault slot for the whole set, per-piece Copy buttons handle
+  // individual pieces" pattern Business Card Kit/Media Kit already use —
+  // reuses the same BrandHaus.ui helpers (copyTextToClipboard,
+  // buildVaultTitle/buildVaultSnapshot) rather than inventing a second
+  // save mechanism for Logo Studio specifically.
+  function renderLogoBoardBlock(state) {
+    var ui = BrandHaus.ui;
+    var blocks = assembleLogoBoard(state);
+    var wrap = ui.el("div", { class: "bh-generator-variations" });
+    wrap.appendChild(ui.el("h4", { class: "bh-generator-variations__title" }, [ui.icon("layers"), ui.el("span", { text: "Your Logo Board" })]));
+
+    blocks.forEach(function (block) {
+      var copyBtn = ui.el("button", { type: "button", class: "bh-btn bh-btn--small bh-btn--copy", text: "Copy" });
+      copyBtn.addEventListener("click", function () {
+        ui.copyTextToClipboard(block.text, function (ok) {
+          copyBtn.textContent = ok ? "Copied!" : "Copy failed";
+          setTimeout(function () { copyBtn.textContent = "Copy"; }, 1500);
+        });
+      });
+      wrap.appendChild(ui.el("div", { class: "bh-generator-variation" }, [
+        ui.el("div", { class: "bh-generator-variation__header" }, [
+          ui.el("span", { class: "bh-generator-variation__label", text: block.label }),
+          copyBtn,
+        ]),
+        ui.el("p", { class: "bh-generator-variation__text", text: block.text }),
+      ]));
+    });
+
+    var saveBtn = ui.el("button", { type: "button", class: "bh-btn bh-btn--small bh-btn--save", text: "Save Whole Board to Vault" });
+    saveBtn.addEventListener("click", function () {
+      var combined = blocks.map(function (b) { return b.label.toUpperCase() + "\n\n" + b.text; }).join("\n\n" + "—".repeat(24) + "\n\n");
+      var title = ui.buildVaultTitle("logo") + " (" + blocks.length + "-piece Logo Board)";
+      var result = BrandHaus.favorites.save("logo", { text: combined, title: title, snapshot: ui.buildVaultSnapshot("logo") });
+      logoBoardSaveFeedback = result.ok ? "Saved!" : result.reason;
+      BrandHaus.ui.renderApp();
+      setTimeout(function () { logoBoardSaveFeedback = null; BrandHaus.ui.renderApp(); }, 2500);
+    });
+    var row = ui.el("div", { class: "bh-companion__controls" }, [saveBtn]);
+    if (logoBoardSaveFeedback) row.appendChild(ui.el("span", { style: "color: var(--bh-teal); font-weight: 600; font-size: 13px;", text: logoBoardSaveFeedback }));
+    wrap.appendChild(row);
+
+    return wrap;
+  }
+
   function renderPanel() {
     var ui = BrandHaus.ui;
+    maybeAutoApplyBrandKit();
     var state = store.getState();
     var panel = ui.el("div", { class: "bh-panel bh-panel--logo" });
 
@@ -579,27 +930,16 @@
 
     panel.appendChild(ui.renderFieldGroup("Use Mode", [{ label: "Who is this logo for?", field: state.useMode }], function (entry, changes) { updateField("useMode", changes); BrandHaus.ui.renderApp(); }, "Doesn't change the visual output — only how strongly the trademark guidance below is worded."));
 
-    panel.appendChild(ui.renderFieldGroup("Foundation", [
-      { label: "Logo Type", field: state.logoType },
-      { label: "Industry / Context", field: state.industry },
-      { label: "Brand Personality", field: state.personality },
-    ], function (entry, changes) {
-      if (entry.label === "Logo Type") updateField("logoType", changes);
-      else if (entry.label === "Industry / Context") updateField("industry", changes);
-      else updateField("personality", changes);
-      BrandHaus.ui.renderApp();
-    }, "The foundation every other choice builds on."));
+    panel.appendChild(renderFoundationSection(state));
 
     panel.appendChild(ui.renderFieldGroup("Composition & Lockup", [
-      { label: "Layout", field: state.composition.layout },
       { label: "Icon/Text Relationship", field: state.composition.lockup },
       { label: "Container", field: state.composition.container },
     ], function (entry, changes) {
-      if (entry.label === "Layout") updateCompositionField("layout", changes);
-      else if (entry.label === "Icon/Text Relationship") updateCompositionField("lockup", changes);
+      if (entry.label === "Icon/Text Relationship") updateCompositionField("lockup", changes);
       else updateCompositionField("container", changes);
       BrandHaus.ui.renderApp();
-    }, "Lockup relationship is the #1 thing that makes a logo read as intentional instead of thrown-together. Also drives Canvas Format's auto-suggestion below."));
+    }, "Icon/Text Relationship is the #1 thing that makes a logo read as intentional instead of thrown-together. Both fields drive Canvas Format's auto-suggestion below."));
 
     panel.appendChild(renderTextSection(state));
 
@@ -610,44 +950,36 @@
       { label: "Secondary Color", field: state.color.secondary },
       { label: "Accent Color", field: state.color.accent },
       { label: "Neutral/Base Color", field: state.color.neutral },
+      { label: "Support Color", field: state.color.support },
+      { label: "Stand-Out Color", field: state.color.standOut },
       { label: "Gradient Style", field: state.color.gradient },
       { label: "Color Mood", field: state.color.mood },
     ], function (entry, changes) {
-      var map = { "Primary Color": "primary", "Secondary Color": "secondary", "Accent Color": "accent", "Neutral/Base Color": "neutral", "Gradient Style": "gradient", "Color Mood": "mood" };
+      var map = { "Primary Color": "primary", "Secondary Color": "secondary", "Accent Color": "accent", "Neutral/Base Color": "neutral", "Support Color": "support", "Stand-Out Color": "standOut", "Gradient Style": "gradient", "Color Mood": "mood" };
       updateColorField(map[entry.label], changes);
       BrandHaus.ui.renderApp();
-    }, "Pick each color from the wheel or paste an exact hex code. Gradient Style and Color Mood are separate style descriptors, not literal colors, so those stay as dropdowns."));
+    }, "All 6 auto-fill from your active Brand Kit the first time you open Logo Studio (still fully editable). Pick each from the wheel or paste an exact hex code, and use \"Include in prompt\" to leave any of the 6 out without clearing it."));
+
+    panel.appendChild(renderColorFormatSection(state));
 
     panel.appendChild(ui.renderFieldGroup("Typography", [
       { label: "Primary Font", field: state.typography.primaryFont },
       { label: "Secondary Font", field: state.typography.secondaryFont },
-      { label: "Accent Font", field: state.typography.accentFont },
     ], function (entry, changes) {
-      var map = { "Primary Font": "primaryFont", "Secondary Font": "secondaryFont", "Accent Font": "accentFont" };
+      var map = { "Primary Font": "primaryFont", "Secondary Font": "secondaryFont" };
       updateTypographyField(map[entry.label], changes);
       BrandHaus.ui.renderApp();
     }, "Only matters once there's actual text — Brand Name and/or Initials above."));
-
-    panel.appendChild(ui.renderFieldGroup("Color & Format", [
-      { label: "Color Constraint", field: state.colorConstraint },
-      { label: "Dimensional Treatment", field: state.dimensional },
-      { label: "Background", field: state.background },
-      { label: "Canvas Format", field: state.canvasFormat },
-      { label: "Output", field: state.outputVariations },
-    ], function (entry, changes) {
-      if (entry.label === "Color Constraint") updateField("colorConstraint", changes);
-      else if (entry.label === "Dimensional Treatment") updateField("dimensional", changes);
-      else if (entry.label === "Background") updateField("background", changes);
-      else if (entry.label === "Canvas Format") store.setState({ canvasFormat: Object.assign({}, state.canvasFormat, changes, { auto: false }) });
-      else updateField("outputVariations", changes);
-      BrandHaus.ui.renderApp();
-    }, "How many colors the mark can use, flat vs. dimensional, background, canvas shape, and how many concepts to generate."));
 
     panel.appendChild(renderNegativeConstraints(state));
 
     if (state.tier === "pro") panel.appendChild(renderProModeSection(state));
 
-    panel.appendChild(renderCallout("shield", "This tool helps you avoid obvious risks, but it does not perform a trademark check. Before using a logo commercially — especially one you plan to sell to others — verify trademark and copyright independently. This is not legal advice."));
+    if (state.logoBoard) panel.appendChild(renderLogoBoardBlock(state));
+
+    var trademarkCalloutText = "This tool helps you avoid obvious risks, but it does not perform a trademark check. Before using a logo commercially — especially one you plan to sell to others — verify trademark and copyright independently. " + TRADEMARK_DISCLAIMER;
+    if (resolved(state.useMode) === USE_MODE_OPTIONS[1]) trademarkCalloutText += RESALE_TRADEMARK_NOTE;
+    panel.appendChild(renderCallout("shield", trademarkCalloutText));
 
     return panel;
   }
@@ -660,8 +992,10 @@
     updateCompositionField: updateCompositionField,
     setTier: setTier,
     toggleNoTextSymbolOnly: toggleNoTextSymbolOnly,
+    toggleLogoBoard: toggleLogoBoard,
     updateNegativeConstraint: updateNegativeConstraint,
     assemblePrompt: assemblePrompt,
+    assembleLogoBoard: assembleLogoBoard,
     randomize: randomize,
     reset: reset,
     getSelectionsByGroup: getSelectionsByGroup,

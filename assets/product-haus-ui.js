@@ -173,7 +173,7 @@
 
   function modeLabel(mode) {
     if (mode.indexOf("gen:") === 0) return ProductHaus.generators.getGeneratorLabel(mode.slice(4));
-    return MODE_LABELS[mode] || mode;
+    return BROAD_MODE_LABELS[mode] || mode;
   }
 
   function buildVaultTitle(mode) {
@@ -208,6 +208,7 @@
   // no external dependency.
   // ---------------------------------------------------------------------
   var ICONS = {
+    bufferBox: '<rect x="3" y="3" width="14" height="14" rx="2" stroke-dasharray="3 2.5"/>',
     person: '<circle cx="10" cy="6.5" r="3"/><path d="M4 17c0-3.3 2.7-6 6-6s6 2.7 6 6"/>',
     people: '<circle cx="6.5" cy="6" r="2.2"/><path d="M2.5 17c0-2.7 1.8-4.8 4-4.8s4 2.1 4 4.8"/><circle cx="14" cy="7.3" r="1.8"/><path d="M10.7 17c.3-2.2 1.8-3.9 3.3-3.9s3 1.7 3.3 3.9"/>',
     text: '<path d="M4 4h12M10 4v12"/>',
@@ -286,6 +287,19 @@
     return el("div", { class: "pdh-pill-toggle" }, options.map(pillButton));
   }
 
+  // Shared Yes/No pill toggle — used by Image Buffer/Padding (Style DNA
+  // bar), matching Content Haus's own yesNoButton exactly.
+  function yesNoButton(label, isActive, onClick) {
+    var btn = el("button", {
+      type: "button",
+      class: "pdh-styledna__yesno-btn" + (isActive ? " is-active" : ""),
+      "aria-pressed": isActive ? "true" : "false",
+      text: label,
+    });
+    btn.addEventListener("click", onClick);
+    return btn;
+  }
+
   function renderPresetRow(presets, onApply, labelText) {
     if (!presets || !presets.length) return null;
     var cards = presets.map(function (preset) {
@@ -336,7 +350,7 @@
     var field = entry.field;
     var select = el("select", { class: "pdh-field__select" });
     appendSelectOptions(select, field, field.value);
-    select.addEventListener("change", function () { onChange({ value: select.value }); });
+    select.addEventListener("change", function () { onChange({ value: select.value, customValue: "" }); });
     var selectId = "pdh-field-" + select.getAttribute("data-pdh-key");
     select.id = selectId;
 
@@ -596,23 +610,36 @@
     var variationId = "pdh-field-" + variationSelect.getAttribute("data-pdh-key");
     variationSelect.id = variationId;
 
-    var holidaySelect = el("select", { class: "pdh-field__select" });
-    appendSelectOptions(holidaySelect, state.holiday, state.holiday.value);
-    holidaySelect.addEventListener("change", function () { ProductHaus.styleDNA.setHoliday(holidaySelect.value); renderApp(); });
-    var holidayId = "pdh-field-" + holidaySelect.getAttribute("data-pdh-key");
-    holidaySelect.id = holidayId;
+    var platformSelect = el("select", { class: "pdh-field__select" });
+    appendSelectOptions(platformSelect, state.targetPlatform, state.targetPlatform.value);
+    platformSelect.addEventListener("change", function () { ProductHaus.styleDNA.setTargetPlatform(platformSelect.value); renderApp(); });
+    var platformId = "pdh-field-" + platformSelect.getAttribute("data-pdh-key");
+    platformSelect.id = platformId;
 
-    var themeSelect = el("select", { class: "pdh-field__select" });
-    appendSelectOptions(themeSelect, state.theme, state.theme.value);
-    themeSelect.addEventListener("change", function () { ProductHaus.styleDNA.setTheme(themeSelect.value); renderApp(); });
-    var themeId = "pdh-field-" + themeSelect.getAttribute("data-pdh-key");
-    themeSelect.id = themeId;
+    var aspectSelect = el("select", { class: "pdh-field__select" });
+    state.aspectRatio.options.forEach(function (opt) {
+      var optionNode = el("option", { value: opt, text: opt });
+      if (opt === state.aspectRatio.value) optionNode.selected = true;
+      aspectSelect.appendChild(optionNode);
+    });
+    aspectSelect.addEventListener("change", function () { ProductHaus.styleDNA.setAspectRatio(aspectSelect.value); renderApp(); });
+    var aspectId = "pdh-field-" + aspectSelect.getAttribute("data-pdh-key");
+    aspectSelect.id = aspectId;
 
-    var nicheSelect = el("select", { class: "pdh-field__select" });
-    appendSelectOptions(nicheSelect, state.niche, state.niche.value);
-    nicheSelect.addEventListener("change", function () { ProductHaus.styleDNA.setNiche(nicheSelect.value); renderApp(); });
-    var nicheId = "pdh-field-" + nicheSelect.getAttribute("data-pdh-key");
-    nicheSelect.id = nicheId;
+    var bufferToggle = el("div", { class: "pdh-styledna__yesno" }, [
+      yesNoButton("Yes", state.addBuffer === true, function () { ProductHaus.styleDNA.setAddBuffer(true); renderApp(); }),
+      yesNoButton("No", state.addBuffer !== true, function () { ProductHaus.styleDNA.setAddBuffer(false); renderApp(); }),
+    ]);
+    var bufferLabel = labelWithIcon("bufferBox", "Image Buffer/Padding", null, null, "Asks the AI to leave empty space around the edges so nothing gets cropped at the borders.");
+    bufferLabel.id = "pdh-label-buffer-padding";
+    bufferToggle.setAttribute("role", "group");
+    bufferToggle.setAttribute("aria-labelledby", bufferLabel.id);
+
+    var outputFormatSelect = el("select", { class: "pdh-field__select" });
+    appendSelectOptions(outputFormatSelect, state.outputFormat, state.outputFormat.value);
+    outputFormatSelect.addEventListener("change", function () { ProductHaus.styleDNA.setOutputFormat(outputFormatSelect.value); renderApp(); });
+    var outputFormatId = "pdh-field-" + outputFormatSelect.getAttribute("data-pdh-key");
+    outputFormatSelect.id = outputFormatId;
 
     var negativeTextarea = el("textarea", { class: "pdh-field__custom pdh-field__freetext pdh-styledna__negative-input", rows: "2", placeholder: 'e.g. "jargon, buzzwords, emojis"' });
     negativeTextarea.value = state.negativePrompt.value || "";
@@ -646,9 +673,13 @@
     }
     children.push(
       el("div", { class: "pdh-styledna__field" }, [labelWithIcon("sparkle", "Variations", variationId), variationSelect]),
-      el("div", { class: "pdh-styledna__field" }, [labelWithIcon("gift", "Holiday", holidayId), holidaySelect]),
-      el("div", { class: "pdh-styledna__field" }, [labelWithIcon("sparkle", "Theme", themeId), themeSelect]),
-      el("div", { class: "pdh-styledna__field" }, [labelWithIcon("heart", "Niche", nicheId), nicheSelect]),
+      el("div", { class: "pdh-styledna__field" }, [labelWithIcon("monitor", "Target Platform", platformId, null, "Formats the copied prompt for this specific AI tool."), platformSelect]),
+      el("div", { class: "pdh-styledna__field" }, [labelWithIcon("crop", "Aspect Ratio", aspectId, null, "Only appears in the copied text for Midjourney/Leonardo AI."), aspectSelect]),
+      el("div", { class: "pdh-styledna__field" }, [bufferLabel, bufferToggle]),
+      el("div", { class: "pdh-styledna__field" }, [
+        labelWithIcon("bufferBox", "Output Format", outputFormatId, null, "A file-level export setting (transparency/format) — independent of any generator's own Background field, which is a scene/content choice, not a file setting. Leave on Default for a plain PNG."),
+        outputFormatSelect,
+      ]),
       el("div", { class: "pdh-styledna__field pdh-styledna__field--full" }, [
         labelWithIcon("shield", "Negative Prompt — What to Avoid", negativeId),
         el("p", { class: "pdh-styledna__negative-subtitle", text: "Applies to every studio, once, at the end of the prompt — comma-separated. Click a suggestion to add it." }),
@@ -657,6 +688,29 @@
       ])
     );
     root.appendChild(el("div", { class: "pdh-styledna" }, children));
+  }
+
+  // Holiday/Theme/Niche relocated out of the dark Business/Voice DNA bar
+  // into their own boxed section — same "Concept / Creative Direction"
+  // treatment Content Haus uses for its own equivalent fields. Purely a
+  // rendering change: getVoiceEntries() still folds all three into every
+  // assembled prompt exactly as before, unchanged.
+  function renderConceptBox() {
+    var state = ProductHaus.styleDNA.getState();
+    return renderFieldGroup(
+      "Concept / Creative Direction",
+      [
+        { label: "Holiday", field: state.holiday },
+        { label: "Creative Theme", field: state.theme },
+        { label: "Niche", field: state.niche },
+      ],
+      function (entry, changes) {
+        var fieldName = entry.label === "Holiday" ? "holiday" : entry.label === "Creative Theme" ? "theme" : "niche";
+        ProductHaus.util.updateField(ProductHaus.styleDNA, fieldName, changes);
+        renderApp();
+      },
+      "Optional creative direction, shared across every studio."
+    );
   }
 
   // ---------------------------------------------------------------------
@@ -738,14 +792,15 @@
   var saveFeedback = null;
 
   function renderPreview(root, assembled, modeApi, mode) {
-    var formatted = ProductHaus.engine.formatForPlatform(assembled, ProductHaus.styleDNA.getState().negativePrompt.value);
+    var styleDNAState = ProductHaus.styleDNA.getState();
+    var formatted = ProductHaus.engine.formatForPlatform(assembled, styleDNAState.targetPlatform.value, styleDNAState.aspectRatio.value, styleDNAState.negativePrompt.value, styleDNAState.addBuffer, styleDNAState.outputFormat.value);
     var textarea = el("textarea", { class: "pdh-preview__text", readonly: "readonly" });
     textarea.value = formatted;
 
     var actions = renderPreviewActions(
       formatted,
       function () { modeApi.randomize(); renderApp(); },
-      function () { modeApi.reset(); renderApp(); },
+      function () { modeApi.reset(); ProductHaus.styleDNA.resetContent(); renderApp(); },
       function () {
         var result = ProductHaus.favorites.save(mode, {
           text: formatted,
@@ -1046,40 +1101,154 @@
   }
 
   // ---------------------------------------------------------------------
-  // Tabs + shell
+  // Categories + tabs + shell
+  //
+  // A category groups one or more "items" — each either a broad Studio
+  // (type: "mode") or a narrow Quick Generator (type: "generator", by
+  // id). A single-item category opens straight into that item's panel
+  // (no grid step); a multi-item category shows a small grid of its own
+  // items first (reusing the same .pdh-generator-grid/.pdh-generator-card
+  // CSS the old flat Quick Generators grid used). activeMode stays the
+  // one source of truth for "what's actually rendering" — categories are
+  // a pure navigation/grouping layer on top, not a second state machine.
   // ---------------------------------------------------------------------
-  var MODES = ["invitations", "devotional", "generators"];
-  var MODE_LABELS = {
-    invitations: "Invitations & Stationery Studio", devotional: "Devotional & Motivation Card Studio",
-    generators: "Quick Generators",
-  };
-  var MODE_ICONS = {
-    invitations: "gift", devotional: "heart",
-    generators: "sparkle",
-  };
-  var BUILT_MODES = {
-    invitations: true, devotional: true,
-    generators: true,
+  var BROAD_MODE_LABELS = {
+    invitations: "Cards & Invitations",
+    stationery: "Stationery",
+    devotional: "Devotional & Motivation Card Studio",
   };
 
+  var CATEGORIES = [
+    {
+      id: "cardsInvitations", label: "Cards & Invitations", icon: "gift",
+      items: [{ type: "mode", mode: "invitations", label: BROAD_MODE_LABELS.invitations, description: "Wedding, birthday, baby shower, and other invitations — wording plus visual style in one prompt.", icon: "gift" }],
+    },
+    {
+      id: "stationeryDevotionals", label: "Stationery & Devotionals", icon: "document",
+      items: [
+        { type: "mode", mode: "stationery", label: BROAD_MODE_LABELS.stationery, description: "Business note cards and change-of-address cards — wording plus visual style in one prompt.", icon: "document" },
+        { type: "generator", id: "devotional-pages" },
+      ],
+    },
+    {
+      id: "journals", label: "Journals", icon: "layers",
+      items: [
+        { type: "generator", id: "journal-pages" },
+        { type: "generator", id: "junk-journal" },
+      ],
+    },
+    {
+      id: "plannersChecklists", label: "Planners & Checklists", icon: "monitor",
+      items: [
+        { type: "generator", id: "planner-pages" },
+        { type: "generator", id: "event-checklist" },
+        { type: "generator", id: "event-vendor-checklist" },
+      ],
+    },
+    {
+      id: "ebookPages", label: "eBook Pages", icon: "download",
+      items: [{ type: "generator", id: "ebook-pages" }],
+    },
+    {
+      id: "devotionalCards", label: "Devotional & Motivation Cards", icon: "heart",
+      items: [
+        { type: "mode", mode: "devotional", label: BROAD_MODE_LABELS.devotional, description: "Scripture, affirmation, prayer, and motivational quote cards — single cards or full decks.", icon: "heart" },
+        { type: "generator", id: "prayer-cards" },
+      ],
+    },
+    {
+      id: "wallArt", label: "Wall Art", icon: "crop",
+      items: [
+        { type: "generator", id: "retro-wall-art" },
+        { type: "generator", id: "quote-wall-art" },
+      ],
+    },
+    {
+      id: "activitiesLearning", label: "Activities & Learning Pages", icon: "shuffle",
+      items: [
+        { type: "generator", id: "coloring-page" },
+        { type: "generator", id: "kids-worksheet" },
+        { type: "generator", id: "coloring-book" },
+        { type: "generator", id: "activity-book" },
+        { type: "generator", id: "adult-coloring-page" },
+        { type: "generator", id: "learning-cards" },
+      ],
+    },
+  ];
+
   var activeMode = "invitations";
+  // Set while a multi-item category's own mini-grid is showing (no item
+  // picked yet this visit); cleared the moment an item is opened.
+  var pendingCategoryId = null;
+
+  function findCategoryForActiveMode() {
+    for (var i = 0; i < CATEGORIES.length; i++) {
+      var items = CATEGORIES[i].items;
+      for (var j = 0; j < items.length; j++) {
+        var item = items[j];
+        if (item.type === "mode" && item.mode === activeMode) return CATEGORIES[i];
+        if (item.type === "generator" && activeMode === "generators" && ProductHaus.generators.getActiveGeneratorId() === item.id) return CATEGORIES[i];
+      }
+    }
+    return null;
+  }
+
+  function openItem(item) {
+    pendingCategoryId = null;
+    if (item.type === "mode") {
+      activeMode = item.mode;
+    } else {
+      ProductHaus.generators.setActiveGenerator(item.id);
+      activeMode = "generators";
+    }
+  }
+
+  function getItemMeta(item) {
+    if (item.type === "mode") return { label: item.label, description: item.description, icon: item.icon };
+    var def = ProductHaus.generators.getGeneratorDef(item.id);
+    return { label: def ? def.label : item.id, description: def ? def.description : "", icon: def ? def.icon : "sparkle" };
+  }
 
   function renderTabs(root) {
     var row = el("div", { class: "pdh-tabs" });
-    MODES.forEach(function (mode) {
-      var isBuilt = BUILT_MODES[mode];
-      var btn = el("button", {
-        type: "button",
-        class: "pdh-tabs__btn" + (mode === activeMode ? " is-active" : "") + (!isBuilt ? " is-disabled" : ""),
-      }, [icon(MODE_ICONS[mode]), el("span", { text: MODE_LABELS[mode] + (!isBuilt ? " (coming soon)" : "") })]);
-      if (isBuilt) {
-        btn.addEventListener("click", function () { activeMode = mode; renderApp(); });
-      } else {
-        btn.disabled = true;
-      }
+    var activeCategory = pendingCategoryId ? null : findCategoryForActiveMode();
+    CATEGORIES.forEach(function (cat) {
+      var isActive = cat.id === pendingCategoryId || cat === activeCategory;
+      var btn = el("button", { type: "button", class: "pdh-tabs__btn" + (isActive ? " is-active" : "") }, [icon(cat.icon), el("span", { text: cat.label })]);
+      btn.addEventListener("click", function () {
+        if (cat.items.length === 1) {
+          openItem(cat.items[0]);
+        } else {
+          pendingCategoryId = cat.id;
+        }
+        renderApp();
+      });
       row.appendChild(el("span", { class: "pdh-tabs__item" }, [btn]));
     });
     root.appendChild(el("div", { class: "pdh-tabs-box" }, [row]));
+  }
+
+  function renderCategoryMiniGrid(cat) {
+    var wrap = el("div", { class: "pdh-panel" });
+    wrap.appendChild(el("p", { class: "pdh-generator-grid__intro", text: "Pick one below — each works even if you leave everything at its default." }));
+    var cards = cat.items.map(function (item) {
+      var meta = getItemMeta(item);
+      var card = el("button", { type: "button", class: "pdh-generator-card" }, [
+        icon(meta.icon || "sparkle"),
+        el("span", { class: "pdh-generator-card__name", text: meta.label }),
+        el("span", { class: "pdh-generator-card__description", text: meta.description || "" }),
+      ]);
+      card.addEventListener("click", function () { openItem(item); renderApp(); });
+      return card;
+    });
+    wrap.appendChild(el("div", { class: "pdh-generator-grid" }, cards));
+    return wrap;
+  }
+
+  function renderBackButton(cat) {
+    var backBtn = el("button", { type: "button", class: "pdh-btn pdh-btn--small pdh-btn--back", text: "← Back to " + cat.label });
+    backBtn.addEventListener("click", function () { pendingCategoryId = cat.id; renderApp(); });
+    return backBtn;
   }
 
   function renderApp() {
@@ -1118,7 +1287,7 @@
     root.innerHTML = "";
 
     var shell = el("div", { class: "pdh-shell" });
-    shell.appendChild(el("p", { class: "pdh-mode-select-label", text: "Select the Studio" }));
+    shell.appendChild(el("p", { class: "pdh-mode-select-label", text: "Select a Category" }));
     renderTabs(shell);
     renderBusinessVoiceDNA(shell, activeMode === "generators");
 
@@ -1126,25 +1295,34 @@
     var left = el("div", { class: "pdh-body__fields" });
     var right = el("div", { class: "pdh-body__preview" });
 
-    var modeApi = ProductHaus[activeMode];
-    // Quick Generators is one mode holding many small generators — each
-    // needs its own Vault/Recent Log bucket, not one shared "generators"
-    // bucket, so the favorites key is the active generator's own id
-    // rather than the literal mode name once one is selected.
-    var vaultKey = (activeMode === "generators" && modeApi && typeof modeApi.getActiveGeneratorId === "function" && modeApi.getActiveGeneratorId())
-      ? "gen:" + modeApi.getActiveGeneratorId()
-      : activeMode;
-    if (modeApi && typeof modeApi.renderPanel === "function") {
-      left.appendChild(modeApi.renderPanel());
-      renderSelectionsPanel(right, vaultKey, modeApi.getSelectionsByGroup());
-      renderPreview(right, modeApi.assemblePrompt(), modeApi, vaultKey);
-      renderSavedPrompts(right, vaultKey);
+    var pendingCategory = pendingCategoryId ? CATEGORIES.filter(function (c) { return c.id === pendingCategoryId; })[0] : null;
+
+    if (pendingCategory) {
+      left.appendChild(renderCategoryMiniGrid(pendingCategory));
     } else {
-      left.appendChild(el("p", { class: "pdh-coming-soon", text: (MODE_LABELS[activeMode] || activeMode) + " is coming soon." }));
+      var activeCategory = findCategoryForActiveMode();
+      var modeApi = ProductHaus[activeMode];
+      // Quick Generators is one mode holding many small generators — each
+      // needs its own Vault/Recent Log bucket, not one shared "generators"
+      // bucket, so the favorites key is the active generator's own id
+      // rather than the literal mode name once one is selected.
+      var vaultKey = (activeMode === "generators" && modeApi && typeof modeApi.getActiveGeneratorId === "function" && modeApi.getActiveGeneratorId())
+        ? "gen:" + modeApi.getActiveGeneratorId()
+        : activeMode;
+      if (activeCategory && activeCategory.items.length > 1) left.appendChild(renderBackButton(activeCategory));
+      if (modeApi && typeof modeApi.renderPanel === "function") {
+        left.appendChild(renderConceptBox());
+        left.appendChild(modeApi.renderPanel());
+        renderSelectionsPanel(right, vaultKey, modeApi.getSelectionsByGroup());
+        renderPreview(right, modeApi.assemblePrompt(), modeApi, vaultKey);
+        renderSavedPrompts(right, vaultKey);
+      } else {
+        left.appendChild(el("p", { class: "pdh-coming-soon", text: "This is coming soon." }));
+      }
+      if (activeMode === "generators" && ProductHaus.lookLock) ProductHaus.lookLock.renderSection(right);
+      if (ProductHaus.brandKit) ProductHaus.brandKit.renderSection(right);
+      renderRecentLog(right);
     }
-    if (activeMode === "generators" && ProductHaus.lookLock) ProductHaus.lookLock.renderSection(right);
-    if (ProductHaus.brandKit) ProductHaus.brandKit.renderSection(right);
-    renderRecentLog(right);
 
     body.appendChild(left);
     body.appendChild(right);

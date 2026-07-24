@@ -129,7 +129,18 @@
       .filter(Boolean);
   }
 
-  function toTagStyle(assembled, aspectRatio, negativeItems) {
+  // Independent of any mode's own decorative "Background" field (a scene
+  // choice, e.g. "sparkly confetti effect") — this is a file-level export
+  // setting, so a shopper can ask for a splatter-paint decorative
+  // background AND a transparent PNG file at the same time. Default is a
+  // deliberate no-op (nothing appended) so every existing prompt is
+  // unaffected until someone actually opens this dropdown.
+  var OUTPUT_FORMAT_CLAUSES = {
+    "PNG — Transparent Background": "Export as a PNG file with a fully transparent background (alpha channel) — isolate the subject cleanly with no background fill, ready for print-on-demand use like t-shirts or stickers.",
+    "JPG — Solid Background": "Export as a JPG file with a solid, fully opaque background — no transparency.",
+  };
+
+  function toTagStyle(assembled, aspectRatio, negativeItems, outputFormatClause) {
     var tags = assembled.fragments
       .join(", ")
       .split(",")
@@ -137,6 +148,7 @@
         return t.trim();
       })
       .filter(Boolean);
+    if (outputFormatClause) tags.push(outputFormatClause);
     var param = aspectRatio ? "--ar " + aspectRatio : "";
     // Midjourney's own native negative-prompt flag — reused as-is for the
     // other tag-style platform (Leonardo AI) too, since neither has a
@@ -145,8 +157,9 @@
     return [tags.join(", "), param, negative].filter(Boolean).join(" ");
   }
 
-  function toSimplifiedStyle(assembled, negativeItems) {
+  function toSimplifiedStyle(assembled, negativeItems, outputFormatClause) {
     var base = assembled.text.replace(/\s*Aspect ratio:.*$/i, "").trim();
+    if (outputFormatClause) base += " " + outputFormatClause;
     if (negativeItems.length) base += " Avoid: " + negativeItems.join(", ") + ".";
     return base;
   }
@@ -156,12 +169,17 @@
   // (same field, same platform-aware formatting, on every mode) — kept
   // out of assembled.fragments entirely so it never gets swept into
   // Combined's cross-module weaving or randomized like a normal descriptor.
-  function formatForPlatform(assembled, platform, aspectRatio, negativePrompt) {
+  // outputFormat is handled the same way, at this same formatting layer,
+  // rather than threaded through every mode's own assemblePrompt (unlike
+  // Buffer/Padding, which predates this layer and is baked in per-mode).
+  function formatForPlatform(assembled, platform, aspectRatio, negativePrompt, outputFormat) {
     var group = PLATFORM_GROUP[platform] || "sentence";
     var negativeItems = cleanNegativeItems(negativePrompt);
-    if (group === "tag") return toTagStyle(assembled, aspectRatio, negativeItems);
-    if (group === "simplified") return toSimplifiedStyle(assembled, negativeItems);
+    var outputFormatClause = OUTPUT_FORMAT_CLAUSES[outputFormat] || "";
+    if (group === "tag") return toTagStyle(assembled, aspectRatio, negativeItems, outputFormatClause);
+    if (group === "simplified") return toSimplifiedStyle(assembled, negativeItems, outputFormatClause);
     var text = assembled.text;
+    if (outputFormatClause) text += " " + outputFormatClause;
     if (negativeItems.length) text += " Avoid: " + negativeItems.join(", ") + ".";
     return text;
   }
@@ -170,11 +188,19 @@
   // is frequently read by image-generation AI tools as an instruction to
   // composite the N variants into ONE image (a grid/sticker-sheet/mood
   // board) rather than produce N separate standalone images — a reported
-  // bug confirmed via screenshot evidence. Nothing to guard against with
-  // only 1 variation.
+  // bug confirmed via screenshot evidence. Strengthened a second time after
+  // the owner reported the combined-image behavior persisting across
+  // several different AI models even with the original wording present —
+  // this version reframes it as N separate generation requests (not just
+  // "N images") and names the specific combined-layout patterns seen in
+  // practice (contact sheet, side-by-side comparison). This is a wording
+  // strengthening, not a guaranteed fix — the tool only ever produces one
+  // block of prompt text, so whether the receiving AI actually honors it
+  // is ultimately up to that tool. Nothing to guard against with only 1
+  // variation.
   function stickerSheetGuard(count) {
     if (!count || count <= 1) return "";
-    return "Create each variation as its own complete, separate image — never combine multiple variations into a single grid, collage, comparison sheet, or sticker sheet.";
+    return "Treat this as " + count + " separate, individual generation requests, not one combined image. Produce " + count + " completely separate images — never combine them into a single grid, collage, contact sheet, side-by-side comparison, or sticker sheet, and never show multiple variations, poses, or angles within one frame.";
   }
 
   PromptHaus.engine = {

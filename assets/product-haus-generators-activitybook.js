@@ -22,7 +22,11 @@
   var COLOR_PALETTE_OPTIONS = ["Bright & Playful", "Soft Pastels", "Primary Colors", "Warm Earth Tones"];
   var AGE_RANGE_OPTIONS = ["Toddler (ages 2-4)", "Early Elementary (ages 5-7)", "Elementary (ages 8-10)"];
 
-  var LOCKED_SUFFIX = " Clean, print-ready page layout, clear black outlines where applicable, high resolution, no watermarks.";
+  // Most of this book's pages (maze, word search) aren't "coloring
+  // regions" at all, so this is worded to only ever constrain areas that
+  // actually exist (the cover illustration, the dot-to-dot outline, the
+  // matching groups) rather than claim every page needs one.
+  var LOCKED_SUFFIX = " Clean, print-ready page layout, clear black outlines where applicable, high resolution, no watermarks. Any illustrated or outlined areas must use fully enclosed, closed lines with no open gaps.";
 
   ProductHaus.generatorEngine.registerGenerator({
     id: "activity-book",

@@ -341,6 +341,7 @@
 
     return ui.el("section", { class: "bh-chapter" }, [
       chapterHeading(ui, "layers", "What We Discovered", "Your Brand Tensions show where you naturally land between two poles. Your Founder DNA shows what motivates you — grouped into four clusters so the pattern is easier to read at a glance."),
+      renderFounderFingerprint(ui, results),
       ui.el("p", { class: "bh-chapter__section-title", text: "Your 8 Brand Tensions™" }),
       ui.el("div", { class: "bh-tension-grid" }, tensionSliders),
       ui.el("p", { class: "bh-chapter__section-title", text: "Your Founder DNA™" }),

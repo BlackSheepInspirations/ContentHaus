@@ -76,6 +76,22 @@
     "bookworm/reading", "gardening", "cooking/foodie", "crafting/diy", "sneakerhead", "car enthusiast",
   ]);
 
+  // "How this gets output" settings, same category as Variations — not
+  // tied to any one project-type driver the way Prompt Haus's Aspect
+  // Ratio auto-follows Project Type, since Graphics Haus generators
+  // already have their own local size/format fields instead of one
+  // shared Project Type concept.
+  var TARGET_PLATFORM_OPTIONS = sortAlpha([
+    "Midjourney", "ChatGPT (GPT Image)", "Kittl", "Ideogram", "OpenArt", "Leonardo AI", "Adobe Firefly", "Flux",
+  ]);
+  var ASPECT_RATIO_OPTIONS = ["1:1", "4:5", "9:16", "16:9"];
+
+  // File-level export setting — independent of any generator's own
+  // decorative Background field (a scene/content choice). Default is a
+  // deliberate no-op so every existing prompt reads exactly as before
+  // until someone actually opens this dropdown.
+  var OUTPUT_FORMAT_OPTIONS = ["Default (PNG)", "PNG — Transparent Background", "JPG — Solid Background"];
+
   var store = GraphicsHaus.util.createStore({
     businessName: makeField("", [], { isFreeText: true }),
     tone: makeField("", TONE_OPTIONS),
@@ -86,6 +102,10 @@
     theme: makeField("", THEME_OPTIONS),
     niche: makeField("", NICHE_OPTIONS),
     negativePrompt: makeField("", [], { isFreeText: true }),
+    targetPlatform: makeField("ChatGPT (GPT Image)", TARGET_PLATFORM_OPTIONS),
+    aspectRatio: makeField("1:1", ASPECT_RATIO_OPTIONS),
+    outputFormat: makeField(OUTPUT_FORMAT_OPTIONS[0], OUTPUT_FORMAT_OPTIONS),
+    addBuffer: true,
   });
 
   function setBusinessName(value) {
@@ -115,6 +135,19 @@
   function updateNegativePromptField(changes) {
     var state = store.getState();
     store.setState({ negativePrompt: Object.assign({}, state.negativePrompt, changes) });
+  }
+  function setTargetPlatform(value) {
+    GraphicsHaus.util.updateField(store, "targetPlatform", { value: value, customValue: "" });
+  }
+  function setAspectRatio(value) {
+    GraphicsHaus.util.updateField(store, "aspectRatio", { value: value, customValue: "" });
+  }
+  function setAddBuffer(enabled) {
+    store.setState({ addBuffer: enabled });
+  }
+
+  function setOutputFormat(newValue) {
+    GraphicsHaus.util.updateField(store, "outputFormat", { value: newValue, customValue: "" });
   }
 
   // Business/Voice entries — folded into every mode's assembler the same
@@ -163,6 +196,7 @@
   // content" someone wants cleared out, same reasoning Prompt Haus uses.
   function resetContent() {
     store.setState({
+      businessName: makeField("", [], { isFreeText: true }),
       tone: makeField("", TONE_OPTIONS),
       holiday: GraphicsHaus.util.makeGroupedField("", HOLIDAY_GROUPS),
       theme: makeField("", THEME_OPTIONS),
@@ -181,6 +215,10 @@
     setTheme: setTheme,
     setNiche: setNiche,
     updateNegativePromptField: updateNegativePromptField,
+    setTargetPlatform: setTargetPlatform,
+    setAspectRatio: setAspectRatio,
+    setAddBuffer: setAddBuffer,
+    setOutputFormat: setOutputFormat,
     getVoiceEntries: getVoiceEntries,
     randomizeContent: randomizeContent,
     resetContent: resetContent,

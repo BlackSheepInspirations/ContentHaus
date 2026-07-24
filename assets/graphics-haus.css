@@ -469,6 +469,55 @@
   line-height: 1.5;
 }
 
+/* Tab bar — replaces the old grid-of-cards nav. Row 1 is the 7
+   generators, row 2 is Combined/Image-Prompt-Reference/Collection
+   Builder, both inside one bordered box (ported from Content Haus's own
+   .ph-tabs-box pattern). */
+.gh-tabs-box {
+  border: 1px solid var(--gh-border);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 20px;
+  background: rgba(255, 255, 255, 0.5);
+}
+.gh-tabs {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.gh-tabs--row2 {
+  margin-top: 12px;
+}
+.gh-tabs__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+}
+.gh-tabs__item .gh-info {
+  margin-left: -10px;
+}
+.gh-tabs__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: 2px solid transparent;
+  border-radius: 999px;
+  padding: 10px 18px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--gh-espresso);
+  cursor: pointer;
+}
+.gh-tabs__btn.is-active {
+  background: var(--gh-teal);
+  color: #fff;
+  border-color: var(--gh-teal);
+}
+.gh-tabs__btn.is-active .gh-icon {
+  color: #fff;
+}
+
 /* Divider between the process stepper / tips / mode-select sections at the
    top of the shell. */
 .gh-section-divider {
