@@ -1081,20 +1081,20 @@
   // ---------------------------------------------------------------------
   // Tabs + shell
   // ---------------------------------------------------------------------
-  var MODES = ["mockup", "social", "adcopy", "email", "sales", "testimonial", "generators"];
+  var MODES = ["mockup", "social", "adcopy", "email", "sales", "testimonial", "customerintel", "generators"];
   var MODE_LABELS = {
     mockup: "Mockup Studio", social: "Social Media Studio",
     adcopy: "Ad Copy & Creative Studio", email: "Email Studio", sales: "Sales & Landing Page Studio",
-    testimonial: "Testimonial & Social Proof Formatter", generators: "Quick Generators",
+    testimonial: "Testimonial & Social Proof Formatter", customerintel: "Customer Intelligence Studio", generators: "Quick Generators",
   };
   var MODE_ICONS = {
     mockup: "shirt", social: "layers",
     adcopy: "lightning", email: "mail", sales: "monitor",
-    testimonial: "people", generators: "sparkle",
+    testimonial: "people", customerintel: "person", generators: "sparkle",
   };
   var BUILT_MODES = {
     mockup: true, social: true,
-    adcopy: true, email: true, sales: true, testimonial: true, generators: true,
+    adcopy: true, email: true, sales: true, testimonial: true, customerintel: true, generators: true,
   };
 
   var activeMode = "mockup";
@@ -1174,6 +1174,7 @@
       left.appendChild(el("p", { class: "mh-coming-soon", text: (MODE_LABELS[activeMode] || activeMode) + " is coming soon." }));
     }
     if (activeMode === "generators" && MarketingHaus.lookLock) MarketingHaus.lookLock.renderSection(right);
+    if (activeMode === "customerintel" && MarketingHaus.customerProfiles) MarketingHaus.customerProfiles.renderSection(right);
     if (MarketingHaus.brandKit) MarketingHaus.brandKit.renderSection(right);
     renderRecentLog(right);
 
@@ -1225,6 +1226,11 @@
     renderApp: renderApp,
     buildVaultSnapshot: buildVaultSnapshot,
     buildVaultTitle: buildVaultTitle,
+    // Pre-existing gap, fixed in passing: marketing-haus-generators.js's
+    // Page Bundle/Variations Copy buttons call ui.copyTextToClipboard —
+    // it was defined above but never exported, so every one of those
+    // Copy buttons (on every generator, not just new ones) would throw.
+    copyTextToClipboard: copyTextToClipboard,
   };
 
   document.addEventListener("click", function (e) {

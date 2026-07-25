@@ -405,7 +405,11 @@
 
   function renderGrid(onSelect) {
     var ui = MarketingHaus.ui;
-    var cards = registry.map(function (def) {
+    // `hideFromGrid` — for a generator given its own top-level Studio tab
+    // (see MarketingHaus.customerIntel/customerintel.js): it's still
+    // registered here so pageTypes/computeExtraTokens/etc. all work, but
+    // shouldn't ALSO appear as a duplicate entry point in this grid.
+    var cards = registry.filter(function (def) { return !def.hideFromGrid; }).map(function (def) {
       var card = ui.el("button", { type: "button", class: "mh-generator-card" }, [
         ui.icon(def.icon || "sparkle"),
         ui.el("span", { class: "mh-generator-card__name", text: def.label }),
@@ -547,16 +551,23 @@
     return ui.el("div", { class: "mh-companion__controls" }, [btn]);
   }
 
-  function renderGeneratorPanel(id) {
+  function renderGeneratorPanel(id, opts) {
     ensureLookLockApplied(id);
     var ui = MarketingHaus.ui;
     var def = getDef(id);
     var state = getStore(id).getState();
     var wrap = ui.el("div", { class: "mh-panel mh-generator-panel" });
 
-    var backBtn = ui.el("button", { type: "button", class: "mh-btn mh-btn--small mh-btn--reset mh-generator-panel__back", text: "← All Generators" });
-    backBtn.addEventListener("click", function () { currentId = null; MarketingHaus.ui.renderApp(); });
-    wrap.appendChild(backBtn);
+    // Suppressed for generators given their own top-level Studio tab (see
+    // MarketingHaus.customerIntel) — there's no shared grid for "back" to
+    // return to, and the grid's own `currentId` is a single module-level
+    // variable shared across every generator, so a generator living
+    // outside the Quick Generators tab must never touch it.
+    if (!opts || !opts.hideBackButton) {
+      var backBtn = ui.el("button", { type: "button", class: "mh-btn mh-btn--small mh-btn--reset mh-generator-panel__back", text: "← All Generators" });
+      backBtn.addEventListener("click", function () { currentId = null; MarketingHaus.ui.renderApp(); });
+      wrap.appendChild(backBtn);
+    }
 
     wrap.appendChild(ui.el("h3", { class: "mh-generator-panel__title" }, [ui.icon(def.icon || "sparkle"), ui.el("span", { text: def.label })]));
     if (def.description) wrap.appendChild(ui.el("p", { class: "mh-generator-panel__description", text: def.description }));
@@ -619,5 +630,17 @@
     // the right generator's store through these instead.
     getGeneratorStore: function (id) { return getStore(id); },
     getGeneratorLabel: function (id) { var def = getDef(id); return def ? def.label : id; },
+    // By-id variants, bypassing the shared `currentId` entirely — for a
+    // generator given its own top-level Studio tab (one generator, no
+    // grid) rather than living inside the shared Quick Generators grid.
+    // Using the plain (non-"ById") functions above for that would
+    // silently hijack whatever generator the Quick Generators tab had
+    // open, since `currentId` is one module-level variable shared by
+    // both. See MarketingHaus.customerIntel for the adapter that uses these.
+    renderGeneratorPanelById: function (id) { return renderGeneratorPanel(id, { hideBackButton: true }); },
+    assemblePromptForId: function (id) { return assemblePromptForModeApi(id); },
+    getSelectionsByGroupForId: function (id) { return getSelectionsByGroupForId(id); },
+    randomizeGeneratorById: function (id) { randomizeGenerator(id); },
+    resetGeneratorById: function (id) { resetGenerator(id); },
   };
 })();
