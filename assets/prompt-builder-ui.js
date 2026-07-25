@@ -3127,6 +3127,81 @@
     root.appendChild(el("div", { class: "ph-preview" }, previewChildren));
   }
 
+  // Generate Image — Reference Mode only (Content Haus; Graphics Haus gets
+  // its own copy once this is verified). Deliberately not folded into the
+  // shared renderPreview above, which every mode uses — same reasoning as
+  // the Video Motion Prompt companion section elsewhere in this file: this
+  // is a Reference-Mode-specific capability, not a generic one every mode
+  // should carry. Calls PromptHaus.reference.generateImage(), which posts
+  // to our own Netlify Function (never a direct client-side API call).
+  function renderGenerateImageSection(root) {
+    var reference = PromptHaus.reference;
+    var state = reference.getState();
+
+    var card = el("div", { class: "ph-generate-image" });
+    card.appendChild(
+      el("h3", { class: "ph-generate-image__title" }, [icon("image"), el("span", { text: "Generate an Image" })])
+    );
+    card.appendChild(
+      el("p", {
+        class: "ph-generate-image__subtitle",
+        text: "Turn the prompt above into an actual image, powered by Google's Gemini AI — the text prompt above still works on its own in any other AI image tool.",
+      })
+    );
+
+    var generateBtn = el("button", { type: "button", class: "ph-btn ph-btn--generate-image" }, [
+      icon("sparkle"),
+      el("span", { text: state.isGeneratingImage ? "Generating…" : "Generate Image" }),
+    ]);
+    generateBtn.disabled = !!state.isGeneratingImage;
+    generateBtn.addEventListener("click", function () {
+      reference.generateImage();
+      renderApp();
+    });
+    card.appendChild(generateBtn);
+
+    if (state.generateImageError) {
+      card.appendChild(el("p", { class: "ph-generate-image__error", text: state.generateImageError }));
+    }
+
+    if (state.generatedImage) {
+      var resultWrap = el("div", { class: "ph-generate-image__result" });
+      resultWrap.appendChild(
+        el("img", { class: "ph-generate-image__img", src: state.generatedImage, alt: "AI-generated image created from your prompt" })
+      );
+
+      var downloadLink = el("a", {
+        class: "ph-btn ph-btn--small ph-btn--export",
+        href: state.generatedImage,
+        download: "generated-image.png",
+        text: "Download",
+      });
+      var clearBtn = el("button", { type: "button", class: "ph-btn ph-btn--small ph-btn--delete" }, [el("span", { text: "Clear" })]);
+      clearBtn.addEventListener("click", function () {
+        reference.clearGeneratedImage();
+        renderApp();
+      });
+      var resultActions = el("div", { class: "ph-generate-image__result-actions" }, [downloadLink, clearBtn]);
+      resultWrap.appendChild(resultActions);
+
+      resultWrap.appendChild(
+        el("p", { class: "ph-generate-image__disclaimer" }, [
+          el("span", { text: "*Image generated using Google's Gemini AI. " }),
+          el("a", {
+            href: "https://ai.google.dev/gemini-api/terms",
+            target: "_blank",
+            rel: "noopener noreferrer",
+            text: "See Gemini's terms & data policies →",
+          }),
+        ])
+      );
+
+      card.appendChild(resultWrap);
+    }
+
+    root.appendChild(card);
+  }
+
   // "Saved Prompts" — below the Live Prompt Preview, per mode (5 slots
   // each). Each entry keeps its own Copy/Delete so a saved prompt is
   // useful without needing to regenerate the fields that made it.
@@ -4308,6 +4383,7 @@
       left.appendChild(renderReferencePanel());
       renderSelectionsPanel(right, activeMode, PromptHaus.reference.getSelectionsByGroup());
       renderPreview(right, PromptHaus.reference.assemblePrompt(), PromptHaus.reference, activeMode);
+      renderGenerateImageSection(right);
       renderSavedPrompts(right, activeMode);
     } else if (activeMode === "animals") {
       left.appendChild(renderAnimalsPanel());

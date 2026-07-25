@@ -5,16 +5,21 @@
  * lists), and prompt-builder-text.js (reuses its Letter Style/Color
  * Scheme/Text Case/Text Effects lists).
  *
- * Not automatic image analysis — that requires a vision-capable AI model
- * and a backend to call it, neither of which this static, client-side
- * theme has. The uploaded image is a pure visual reference for the
- * shopper: it's read into the browser for preview only, never uploaded or
- * analyzed anywhere. What actually builds the prompt is the shopper's own
- * typed description of that reference, which this mode then layers the
- * same production-specific finishing details onto that every other mode
- * already gets (Style Adjustment, optional Text, plus the shared Style
- * DNA bar) — the details a generic "describe this image" answer from a
- * general AI tool wouldn't think to include.
+ * The uploaded image is a pure visual reference for typing a description
+ * from — it's read into the browser for preview only, and the assembled
+ * text prompt never contains it. What actually builds the prompt is the
+ * shopper's own typed description of that reference, which this mode then
+ * layers the same production-specific finishing details onto that every
+ * other mode already gets (Style Adjustment, optional Text, plus the
+ * shared Style DNA bar).
+ *
+ * Generate Image (below) is a separate, opt-in capability: it sends the
+ * assembled prompt text — and, only when the shopper explicitly clicks
+ * that button, the reference photo itself — to our own Netlify Function
+ * (netlify/functions/generate-reference-image.js), which calls Google's
+ * Gemini image model server-side and returns a generated image. Nothing
+ * leaves the browser unless/until that button is clicked; the description
+ * workflow above is completely unaffected either way.
  */
 (function () {
   "use strict";
@@ -80,10 +85,25 @@
         textCase: makeField("", textLists.textCase),
         textEffects: PromptHaus.util.makeGroupedField("", textLists.textEffectsGroups),
       },
+      // Generate Image — data URL of the last generated image, or null.
+      // Never persisted to the Vault/Recent Log (too large for
+      // localStorage at scale) and never randomized/reset by anything
+      // except explicitly clicking Generate again or Clear.
+      generatedImage: null,
+      isGeneratingImage: false,
+      generateImageError: "",
     };
   }
 
   var store = PromptHaus.util.createStore(buildInitialState());
+
+  // Set this to the deployed Netlify site's URL once it exists (e.g.
+  // "https://black-sheep-generators.netlify.app") — left blank until then
+  // so Generate Image shows a clear setup message instead of a silent
+  // network failure. Kept local to this file rather than a shared config,
+  // matching this codebase's "verbatim port, never shared" convention —
+  // Graphics Haus's own copy of this constant is set independently.
+  var NETLIFY_FUNCTION_BASE_URL = "";
 
   function setImage(dataUrl, name) {
     store.setState({ image: dataUrl, imageName: name || "" });
@@ -91,6 +111,56 @@
 
   function clearImage() {
     store.setState({ image: null, imageName: "" });
+  }
+
+  function clearGeneratedImage() {
+    store.setState({ generatedImage: null, generateImageError: "" });
+  }
+
+  // Sends the already-assembled prompt text (never the tag/platform-
+  // formatted variant — Gemini isn't Midjourney and wouldn't understand
+  // "--ar 1:1 --no clutter" syntax) plus, only on the image branch with a
+  // photo uploaded, that photo's data URL. Gemini's image model reads and
+  // generates from the reference photo in the same call, so no separate
+  // vision-analysis step is needed.
+  function generateImage() {
+    if (!NETLIFY_FUNCTION_BASE_URL) {
+      store.setState({ generateImageError: "Image generation isn't connected yet — this needs a Netlify site URL configured first." });
+      return;
+    }
+    var state = store.getState();
+    var promptText = assemblePrompt().text;
+    if (!promptText) {
+      store.setState({ generateImageError: "Add a description (or adjust your style choices) before generating an image." });
+      return;
+    }
+    store.setState({ isGeneratingImage: true, generateImageError: "", generatedImage: null });
+
+    var payload = { prompt: promptText };
+    if (state.sourceType === "image" && state.image) payload.image = state.image;
+
+    fetch(NETLIFY_FUNCTION_BASE_URL + "/.netlify/functions/generate-reference-image", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    })
+      .then(function (res) {
+        return res.json().then(function (data) {
+          return { ok: res.ok, data: data };
+        });
+      })
+      .then(function (result) {
+        if (!result.ok) {
+          store.setState({ isGeneratingImage: false, generateImageError: (result.data && result.data.error) || "Image generation failed. Please try again." });
+        } else {
+          store.setState({ isGeneratingImage: false, generatedImage: result.data.image, generateImageError: "" });
+        }
+        if (PromptHaus.ui && typeof PromptHaus.ui.renderApp === "function") PromptHaus.ui.renderApp();
+      })
+      .catch(function () {
+        store.setState({ isGeneratingImage: false, generateImageError: "Could not reach the image generator. Please check your connection and try again." });
+        if (PromptHaus.ui && typeof PromptHaus.ui.renderApp === "function") PromptHaus.ui.renderApp();
+      });
   }
 
   function updateDescription(changes) {
@@ -433,6 +503,8 @@
   PromptHaus.reference = Object.assign({}, store, {
     setImage: setImage,
     clearImage: clearImage,
+    generateImage: generateImage,
+    clearGeneratedImage: clearGeneratedImage,
     updateDescription: updateDescription,
     setSourceType: setSourceType,
     updatePromptReference: updatePromptReference,
