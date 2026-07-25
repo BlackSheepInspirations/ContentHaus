@@ -97,13 +97,12 @@
 
   var store = PromptHaus.util.createStore(buildInitialState());
 
-  // Set this to the deployed Netlify site's URL once it exists (e.g.
-  // "https://black-sheep-generators.netlify.app") — left blank until then
-  // so Generate Image shows a clear setup message instead of a silent
-  // network failure. Kept local to this file rather than a shared config,
-  // matching this codebase's "verbatim port, never shared" convention —
-  // Graphics Haus's own copy of this constant is set independently.
-  var NETLIFY_FUNCTION_BASE_URL = "";
+  // Deployed Netlify site (ContentHaus repo, deployed as "contenthausen"
+  // since "contenthaus" was already taken). Kept local to this file rather
+  // than a shared config, matching this codebase's "verbatim port, never
+  // shared" convention — Graphics Haus's own copy of this constant is set
+  // independently when that mode is ported.
+  var NETLIFY_FUNCTION_BASE_URL = "https://contenthausen.netlify.app";
 
   function setImage(dataUrl, name) {
     store.setState({ image: dataUrl, imageName: name || "" });
