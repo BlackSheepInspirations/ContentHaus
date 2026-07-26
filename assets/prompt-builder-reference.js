@@ -128,7 +128,7 @@
       return;
     }
     var state = store.getState();
-    var promptText = assemblePrompt().text;
+    var promptText = assemblePrompt(1).text;
     if (!promptText) {
       store.setState({ generateImageError: "Add a description (or adjust your style choices) before generating an image." });
       return;
@@ -265,8 +265,17 @@
     return clause;
   }
 
-  function assemblePrompt() {
-    var count = parseInt(PromptHaus.styleDNA.getState().variationCount.value, 10) || 4;
+  // countOverride: used by generateImage() below to force a single-image
+  // prompt regardless of the Variations dropdown. That dropdown's "Create N
+  // variations... never combine into one grid" phrasing is meant for a
+  // multi-turn AI chat tool asked to produce several images across a
+  // conversation — a single Gemini generateContent call only ever returns
+  // one image, so sending it "produce N separate images" confuses it into
+  // returning no image at all instead of one. Every other caller (the
+  // pasted/copied text prompt) is unaffected since they call this with no
+  // argument.
+  function assemblePrompt(countOverride) {
+    var count = countOverride || parseInt(PromptHaus.styleDNA.getState().variationCount.value, 10) || 4;
     var entries = [];
 
     // Image branch: the shopper's own typed description of an uploaded
