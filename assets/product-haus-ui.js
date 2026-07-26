@@ -645,6 +645,7 @@
     negativeTextarea.value = state.negativePrompt.value || "";
     negativeTextarea.addEventListener("input", function () {
       ProductHaus.styleDNA.updateNegativePromptField({ value: negativeTextarea.value });
+      renderApp();
     });
     var negativeId = "pdh-field-" + negativeTextarea.getAttribute("data-pdh-key");
     negativeTextarea.id = negativeId;
@@ -660,6 +661,24 @@
       });
       chips.appendChild(chip);
     });
+
+    var negativeFieldChildren = [
+      labelWithIcon("shield", "Negative Prompt — What to Avoid", negativeId),
+      el("p", { class: "pdh-styledna__negative-subtitle", text: "Applies to every studio, once, at the end of the prompt — comma-separated. Click a suggestion to add it." }),
+      negativeTextarea,
+      chips,
+    ];
+    // Scoped to just this field — the mode's own Reset wipes every
+    // selection in that mode too, not just this list. Only shown once
+    // there's something to clear.
+    if ((state.negativePrompt.value || "").trim()) {
+      var negativeClearBtn = el("button", { type: "button", class: "pdh-btn pdh-btn--small pdh-btn--reset pdh-styledna__negative-clear" }, [el("span", { text: "Clear Negative Prompt" })]);
+      negativeClearBtn.addEventListener("click", function () {
+        ProductHaus.styleDNA.updateNegativePromptField({ value: "" });
+        renderApp();
+      });
+      negativeFieldChildren.push(negativeClearBtn);
+    }
 
     var children = [
       el("div", { class: "pdh-styledna__field" }, [labelWithIcon("shirt", "Business Name", nameId, null, "Set once here — carries into every studio automatically."), nameInput]),
@@ -680,12 +699,7 @@
         labelWithIcon("bufferBox", "Output Format", outputFormatId, null, "A file-level export setting (transparency/format) — independent of any generator's own Background field, which is a scene/content choice, not a file setting. Leave on Default for a plain PNG."),
         outputFormatSelect,
       ]),
-      el("div", { class: "pdh-styledna__field pdh-styledna__field--full" }, [
-        labelWithIcon("shield", "Negative Prompt — What to Avoid", negativeId),
-        el("p", { class: "pdh-styledna__negative-subtitle", text: "Applies to every studio, once, at the end of the prompt — comma-separated. Click a suggestion to add it." }),
-        negativeTextarea,
-        chips,
-      ])
+      el("div", { class: "pdh-styledna__field pdh-styledna__field--full" }, negativeFieldChildren)
     );
     root.appendChild(el("div", { class: "pdh-styledna" }, children));
   }

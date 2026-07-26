@@ -122,6 +122,9 @@
   border-color: var(--gh-gold);
   color: var(--gh-gold);
 }
+.gh-styledna__negative-clear {
+  margin-top: 8px;
+}
 .gh-styledna .gh-field__label {
   color: var(--gh-cream);
   font-size: 12px;
@@ -1365,6 +1368,69 @@
   flex-shrink: 0;
   color: #B91C1C;
   margin-top: 1px;
+}
+
+/* Generate an Image — Reference Mode's own opt-in image-generation card,
+   between the dark Live Prompt Preview and the light Saved Prompts card.
+   Light card treatment (not dark like .gh-preview) so it reads as its own
+   distinct step, not a continuation of the prompt box. */
+.gh-generate-image {
+  background: #fff;
+  border: 1px solid var(--gh-border);
+  border-radius: 12px;
+  padding: 18px;
+  margin-top: 16px;
+}
+.gh-generate-image__title {
+  font-size: 16px;
+  margin: 0 0 4px;
+  color: var(--gh-espresso);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.gh-generate-image__subtitle {
+  margin: 0 0 12px;
+  font-size: 12px;
+  color: var(--gh-espresso);
+  opacity: 0.75;
+}
+.gh-btn--generate-image {
+  background: var(--gh-teal);
+  color: #fff;
+}
+.gh-generate-image__error {
+  margin: 10px 0 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #B91C1C;
+}
+.gh-generate-image__result {
+  margin-top: 16px;
+}
+.gh-generate-image__img {
+  display: block;
+  width: 100%;
+  max-width: 420px;
+  border-radius: 8px;
+  border: 1px solid var(--gh-border);
+  margin: 0 auto;
+}
+.gh-generate-image__result-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+  justify-content: center;
+}
+.gh-generate-image__disclaimer {
+  margin: 10px 0 0;
+  font-size: 11px;
+  color: var(--gh-espresso);
+  opacity: 0.7;
+  text-align: center;
+}
+.gh-generate-image__disclaimer a {
+  color: var(--gh-teal);
 }
 
 /* Saved Prompts — below the Live Prompt Preview */

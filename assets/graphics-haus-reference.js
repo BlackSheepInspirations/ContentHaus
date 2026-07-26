@@ -56,10 +56,23 @@
       reimaginedStyle: makeField("", REIMAGINED_STYLE_OPTIONS),
       background: makeField(BACKGROUND_OPTIONS[0], BACKGROUND_OPTIONS),
       sceneEffect: makeField(SCENE_EFFECT_OPTIONS[0], SCENE_EFFECT_OPTIONS),
+      // Generate Image — same Netlify Function Content Haus's own Reference
+      // Mode uses (see prompt-builder-reference.js); never persisted to the
+      // Vault/Recent Log, never touched by Randomize/Reset except explicitly
+      // clicking Generate again or Clear.
+      generatedImage: null,
+      isGeneratingImage: false,
+      generateImageError: "",
     };
   }
 
   var store = createStore(buildInitialState());
+
+  // Same deployed Netlify site Content Haus's Reference Mode uses — one
+  // function serves every Haus that references it, no per-Haus deploy
+  // needed. Kept local to this file rather than a shared config, matching
+  // this codebase's "verbatim port, never shared" convention.
+  var NETLIFY_FUNCTION_BASE_URL = "https://contenthausen.netlify.app";
 
   function setSourceType(type) {
     store.setState({ sourceType: type === "prompt" ? "prompt" : "image" });
@@ -80,6 +93,56 @@
   }
   function clearImage() {
     store.setState({ image: null, imageName: "" });
+  }
+
+  function clearGeneratedImage() {
+    store.setState({ generatedImage: null, generateImageError: "" });
+  }
+
+  // Sends the assembled prompt text (this mode's own assemblePrompt() never
+  // includes a "Create N variations" instruction the way Content Haus's
+  // does, so there's no multi-image phrasing to strip here) plus, only on
+  // the image branch with a photo uploaded, that photo's data URL. Gemini's
+  // image model reads and generates from the reference photo in the same
+  // call, so no separate vision-analysis step is needed.
+  function generateImage() {
+    if (!NETLIFY_FUNCTION_BASE_URL) {
+      store.setState({ generateImageError: "Image generation isn't connected yet — this needs a Netlify site URL configured first." });
+      return;
+    }
+    var state = store.getState();
+    var promptText = assemblePrompt().text;
+    if (!promptText) {
+      store.setState({ generateImageError: "Add a description (or adjust your style choices) before generating an image." });
+      return;
+    }
+    store.setState({ isGeneratingImage: true, generateImageError: "", generatedImage: null });
+
+    var payload = { prompt: promptText };
+    if (state.sourceType === "image" && state.image) payload.image = state.image;
+
+    fetch(NETLIFY_FUNCTION_BASE_URL + "/.netlify/functions/generate-reference-image", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    })
+      .then(function (res) {
+        return res.json().then(function (data) {
+          return { ok: res.ok, data: data };
+        });
+      })
+      .then(function (result) {
+        if (!result.ok) {
+          store.setState({ isGeneratingImage: false, generateImageError: (result.data && result.data.error) || "Image generation failed. Please try again." });
+        } else {
+          store.setState({ isGeneratingImage: false, generatedImage: result.data.image, generateImageError: "" });
+        }
+        if (GraphicsHaus.ui && typeof GraphicsHaus.ui.renderApp === "function") GraphicsHaus.ui.renderApp();
+      })
+      .catch(function () {
+        store.setState({ isGeneratingImage: false, generateImageError: "Could not reach the image generator. Please check your connection and try again." });
+        if (GraphicsHaus.ui && typeof GraphicsHaus.ui.renderApp === "function") GraphicsHaus.ui.renderApp();
+      });
   }
 
   function activeSourceText() {
@@ -279,10 +342,83 @@
     return wrap;
   }
 
+  // Generate Image — called directly by graphics-haus-ui.js's mode dispatch
+  // (activeMode === "reference"), not folded into the generic renderPreview
+  // every mode shares, same reasoning as Content Haus's own version: this is
+  // a Reference-Mode-specific capability, not a generic one every mode
+  // should carry.
+  function renderGenerateImageSection(root) {
+    var ui = GraphicsHaus.ui;
+    var state = store.getState();
+
+    var card = ui.el("div", { class: "gh-generate-image" });
+    card.appendChild(
+      ui.el("h3", { class: "gh-generate-image__title" }, [ui.icon("image"), ui.el("span", { text: "Generate an Image" })])
+    );
+    card.appendChild(
+      ui.el("p", {
+        class: "gh-generate-image__subtitle",
+        text: "Turn the prompt above into an actual image, powered by Google's Gemini AI — the text prompt above still works on its own in any other AI image tool.",
+      })
+    );
+
+    var generateBtn = ui.el("button", { type: "button", class: "gh-btn gh-btn--generate-image" }, [
+      ui.icon("sparkle"),
+      ui.el("span", { text: state.isGeneratingImage ? "Generating…" : "Generate Image" }),
+    ]);
+    generateBtn.disabled = !!state.isGeneratingImage;
+    generateBtn.addEventListener("click", function () {
+      generateImage();
+      GraphicsHaus.ui.renderApp();
+    });
+    card.appendChild(generateBtn);
+
+    if (state.generateImageError) {
+      card.appendChild(ui.el("p", { class: "gh-generate-image__error", text: state.generateImageError }));
+    }
+
+    if (state.generatedImage) {
+      var resultWrap = ui.el("div", { class: "gh-generate-image__result" });
+      resultWrap.appendChild(
+        ui.el("img", { class: "gh-generate-image__img", src: state.generatedImage, alt: "AI-generated image created from your prompt" })
+      );
+
+      var downloadLink = ui.el("a", {
+        class: "gh-btn gh-btn--small gh-btn--export",
+        href: state.generatedImage,
+        download: "generated-image.png",
+        text: "Download",
+      });
+      var clearBtn = ui.el("button", { type: "button", class: "gh-btn gh-btn--small gh-btn--delete" }, [ui.el("span", { text: "Clear" })]);
+      clearBtn.addEventListener("click", function () {
+        clearGeneratedImage();
+        GraphicsHaus.ui.renderApp();
+      });
+      resultWrap.appendChild(ui.el("div", { class: "gh-generate-image__result-actions" }, [downloadLink, clearBtn]));
+
+      resultWrap.appendChild(
+        ui.el("p", { class: "gh-generate-image__disclaimer" }, [
+          ui.el("span", { text: "*Image generated using Google's Gemini AI. " }),
+          ui.el("a", {
+            href: "https://ai.google.dev/gemini-api/terms",
+            target: "_blank",
+            rel: "noopener noreferrer",
+            text: "See Gemini's terms & data policies →",
+          }),
+        ])
+      );
+
+      card.appendChild(resultWrap);
+    }
+
+    root.appendChild(card);
+  }
+
   GraphicsHaus.reference = {
     getState: store.getState,
     setState: store.setState,
     renderPanel: renderPanel,
+    renderGenerateImageSection: renderGenerateImageSection,
     getSelectionsByGroup: getSelectionsByGroup,
     assemblePrompt: assemblePrompt,
     randomize: randomize,

@@ -383,6 +383,9 @@
   border-color: var(--bh-gold);
   color: var(--bh-gold);
 }
+.bh-styledna__negative-clear {
+  margin-top: 8px;
+}
 .bh-styledna .bh-field__label {
   color: var(--bh-cream);
   font-size: 12px;

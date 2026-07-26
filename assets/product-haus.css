@@ -178,6 +178,9 @@
   border-color: var(--pdh-gold);
   color: var(--pdh-gold);
 }
+.pdh-styledna__negative-clear {
+  margin-top: 8px;
+}
 .pdh-styledna .pdh-field__label {
   color: var(--pdh-cream);
   font-size: 12px;

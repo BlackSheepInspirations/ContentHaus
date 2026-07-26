@@ -626,6 +626,7 @@
     negativeTextarea.value = state.negativePrompt.value || "";
     negativeTextarea.addEventListener("input", function () {
       GraphicsHaus.styleDNA.updateNegativePromptField({ value: negativeTextarea.value });
+      renderApp();
     });
     var negativeId = "gh-field-" + negativeTextarea.getAttribute("data-gh-key");
     negativeTextarea.id = negativeId;
@@ -642,6 +643,24 @@
       chips.appendChild(chip);
     });
 
+    var negativeFieldChildren = [
+      labelWithIcon("shield", "Negative Prompt — What to Avoid", negativeId),
+      el("p", { class: "gh-styledna__negative-subtitle", text: "Applies to every generator, once, at the end of the prompt — comma-separated. Click a suggestion to add it." }),
+      negativeTextarea,
+      chips,
+    ];
+    // Scoped to just this field — the mode's own Reset wipes every
+    // selection in that mode too, not just this list. Only shown once
+    // there's something to clear.
+    if ((state.negativePrompt.value || "").trim()) {
+      var negativeClearBtn = el("button", { type: "button", class: "gh-btn gh-btn--small gh-btn--reset gh-styledna__negative-clear" }, [el("span", { text: "Clear Negative Prompt" })]);
+      negativeClearBtn.addEventListener("click", function () {
+        GraphicsHaus.styleDNA.updateNegativePromptField({ value: "" });
+        renderApp();
+      });
+      negativeFieldChildren.push(negativeClearBtn);
+    }
+
     var children = [
       el("div", { class: "gh-styledna__field" }, [labelWithIcon("shirt", "Business Name", nameId, null, "Set once here — carries into every generator automatically."), nameInput]),
       el("div", { class: "gh-styledna__field" }, [labelWithIcon("sparkle", "Variations", variationId), variationSelect]),
@@ -652,12 +671,7 @@
         labelWithIcon("bufferBox", "Output Format", outputFormatId, null, "A file-level export setting (transparency/format) — independent of any generator's own Background field, which is a scene/content choice, not a file setting. Leave on Default for a plain PNG."),
         outputFormatSelect,
       ]),
-      el("div", { class: "gh-styledna__field gh-styledna__field--full" }, [
-        labelWithIcon("shield", "Negative Prompt — What to Avoid", negativeId),
-        el("p", { class: "gh-styledna__negative-subtitle", text: "Applies to every generator, once, at the end of the prompt — comma-separated. Click a suggestion to add it." }),
-        negativeTextarea,
-        chips,
-      ]),
+      el("div", { class: "gh-styledna__field gh-styledna__field--full" }, negativeFieldChildren),
     ];
     root.appendChild(el("div", { class: "gh-styledna" }, children));
   }
@@ -1184,6 +1198,7 @@
       left.appendChild(renderConceptBox());
       renderSelectionsPanel(right, vaultKey, modeApi.getSelectionsByGroup());
       renderPreview(right, modeApi.assemblePrompt(), modeApi, vaultKey);
+      if (activeMode === "reference" && GraphicsHaus.reference.renderGenerateImageSection) GraphicsHaus.reference.renderGenerateImageSection(right);
       renderSavedPrompts(right, vaultKey);
       if (GraphicsHaus.lookLock) GraphicsHaus.lookLock.renderSection(right);
       if (GraphicsHaus.mascotLock) GraphicsHaus.mascotLock.renderSection(right);

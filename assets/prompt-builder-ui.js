@@ -4032,7 +4032,7 @@
       chips.appendChild(chip);
     });
 
-    var field = el("div", { class: "ph-styledna__field ph-styledna__field--full" }, [
+    var fieldChildren = [
       labelWithIcon("shield", "Negative Prompt — What to Avoid", textareaId),
       el("p", {
         class: "ph-styledna__negative-subtitle",
@@ -4040,7 +4040,21 @@
       }),
       textarea,
       chips,
-    ]);
+    ];
+    // Scoped to just this field — clicking the mode's own Reset wipes every
+    // selection in that mode too, which isn't what someone reaching for "get
+    // rid of what I typed here" wants. Only shown once there's something to
+    // clear.
+    if ((negativeState.value || "").trim()) {
+      var clearBtn = el("button", { type: "button", class: "ph-btn ph-btn--small ph-btn--reset ph-styledna__negative-clear" }, [el("span", { text: "Clear Negative Prompt" })]);
+      clearBtn.addEventListener("click", function () {
+        PromptHaus.styleDNA.updateNegativePrompt({ value: "" });
+        renderApp();
+      });
+      fieldChildren.push(clearBtn);
+    }
+
+    var field = el("div", { class: "ph-styledna__field ph-styledna__field--full" }, fieldChildren);
     return field;
   }
 

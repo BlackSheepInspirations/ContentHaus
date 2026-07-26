@@ -957,6 +957,7 @@
     negativeTextarea.value = state.negativePrompt.value || "";
     negativeTextarea.addEventListener("input", function () {
       BrandHaus.identity.updateNegativePromptField({ value: negativeTextarea.value });
+      renderApp();
     });
     var negativeId = "bh-field-" + negativeTextarea.getAttribute("data-bh-key");
     negativeTextarea.id = negativeId;
@@ -973,14 +974,27 @@
       chips.appendChild(chip);
     });
 
+    var negativeFieldChildren = [
+      labelWithIcon("shield", "Negative Prompt — What to Avoid", negativeId),
+      el("p", { class: "bh-styledna__negative-subtitle", text: "Applies to every studio, once, at the end of the prompt — comma-separated. Click a suggestion to add it." }),
+      negativeTextarea,
+      chips,
+    ];
+    // Scoped to just this field — the mode's own Reset wipes every
+    // selection in that mode too, not just this list. Only shown once
+    // there's something to clear.
+    if ((state.negativePrompt.value || "").trim()) {
+      var negativeClearBtn = el("button", { type: "button", class: "bh-btn bh-btn--small bh-btn--reset bh-styledna__negative-clear" }, [el("span", { text: "Clear Negative Prompt" })]);
+      negativeClearBtn.addEventListener("click", function () {
+        BrandHaus.identity.updateNegativePromptField({ value: "" });
+        renderApp();
+      });
+      negativeFieldChildren.push(negativeClearBtn);
+    }
+
     var children = [
       el("div", { class: "bh-styledna__field" }, [labelWithIcon("shirt", "Business Name", nameId, null, "Set once here — carries into Branding Studio and Logo Studio automatically."), nameInput]),
-      el("div", { class: "bh-styledna__field bh-styledna__field--full" }, [
-        labelWithIcon("shield", "Negative Prompt — What to Avoid", negativeId),
-        el("p", { class: "bh-styledna__negative-subtitle", text: "Applies to every studio, once, at the end of the prompt — comma-separated. Click a suggestion to add it." }),
-        negativeTextarea,
-        chips,
-      ]),
+      el("div", { class: "bh-styledna__field bh-styledna__field--full" }, negativeFieldChildren),
     ];
     root.appendChild(el("div", { class: "bh-styledna" }, children));
   }

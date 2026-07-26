@@ -186,6 +186,9 @@
   border-color: var(--mh-gold);
   color: var(--mh-gold);
 }
+.mh-styledna__negative-clear {
+  margin-top: 8px;
+}
 .mh-styledna .mh-field__label {
   color: var(--mh-cream);
   font-size: 12px;
