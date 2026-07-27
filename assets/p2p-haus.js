@@ -1610,8 +1610,9 @@ function celebrate() {
 // normal flow on error or on the stacked (<=980px) layout.
 function initStickyRail() {
   const rail = document.querySelector(".build-rail");
+  const pinned = document.querySelector(".build-rail__pinned");
   const layout = document.querySelector(".build-layout");
-  if (!rail || !layout) return;
+  if (!rail || !pinned || !layout) return;
 
   const RAIL_WIDTH = 320; // matches .build-layout's grid track
   let ticking = false;
@@ -1623,10 +1624,11 @@ function initStickyRail() {
   };
 
   const clearPin = () => {
-    rail.style.position = "";
-    rail.style.top = "";
-    rail.style.left = "";
-    rail.style.width = "";
+    pinned.style.position = "";
+    pinned.style.top = "";
+    pinned.style.left = "";
+    pinned.style.width = "";
+    rail.style.paddingTop = "";
   };
 
   const update = () => {
@@ -1637,20 +1639,19 @@ function initStickyRail() {
         return;
       }
       const off = stickyOffset();
-      const lr = layout.getBoundingClientRect();
-      const railH = rail.offsetHeight;
+      const railRect = rail.getBoundingClientRect();
 
-      if (lr.top >= off || railH >= lr.height) {
-        rail.style.position = "static";
-        rail.style.top = "";
-        rail.style.left = "";
-        rail.style.width = "";
+      if (railRect.top >= off) {
+        clearPin();
       } else {
-        const top = Math.min(off, lr.bottom - railH); // don't ride past the form's bottom
-        rail.style.position = "fixed";
-        rail.style.top = top + "px";
-        rail.style.left = Math.round(lr.right - RAIL_WIDTH) + "px";
-        rail.style.width = RAIL_WIDTH + "px";
+        // Pin only the progress widget; reserve its height with padding on the
+        // rail so the scrolling extras block below doesn't jump up.
+        const pinnedH = pinned.offsetHeight;
+        pinned.style.position = "fixed";
+        pinned.style.top = off + "px";
+        pinned.style.left = Math.round(railRect.right - RAIL_WIDTH) + "px";
+        pinned.style.width = RAIL_WIDTH + "px";
+        rail.style.paddingTop = pinnedH + "px";
       }
     } catch (err) {
       clearPin();
@@ -3820,11 +3821,8 @@ function updateBuildRail() {
       </div>
       <p class="rail-progress__msg">${escapeHtml(msg)}</p>
     </div>
-    <div class="rail-badges" aria-label="Achievements">${badgeHtml}</div>
-    <details class="rail-essentials">
-      <summary class="rail-essentials__summary">Essentials · ${essentialsDone}/${essentials.length}</summary>
-      <div class="rail-checklist">${checklist}</div>
-    </details>`;
+    <div class="rail-checklist rail-journey">${checklist}</div>
+    <div class="rail-badges" aria-label="Achievements">${badgeHtml}</div>`;
 
   // Celebrate crossing into 100% readiness. The `=== false` guard is
   // init-safe: on first render celebratedReady is undefined, so a restored

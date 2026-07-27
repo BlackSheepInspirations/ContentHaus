@@ -29,7 +29,7 @@
 {{ 'p2p-haus.css' | asset_url | stylesheet_tag }}
 
 {% if p2p_access %}
-  <div id="p2p-haus-app" class="p2p-app" data-section-id="{{ section.id }}" style="--rail-sticky-top: {{ section.settings.sticky_offset | default: 96 }}px;">
+  <div id="p2p-haus-app" class="p2p-app" data-section-id="{{ section.id }}" style="--rail-sticky-top: {{ section.settings.sticky_offset | default: 150 }}px;">
     <a class="skip-link" href="#mainContent">
         Skip to main content
       </a>
@@ -2317,23 +2317,28 @@
         </form>
 
           <aside class="build-rail" aria-label="Build summary">
-            <div class="build-rail__inner">
-              <p class="build-rail__eyebrow">Your pack</p>
-              <div id="railReadiness" class="build-rail__readiness"></div>
-              <button
-                id="railGenerateBtn"
-                type="button"
-                class="build-rail__generate"
-              >
-                Generate my pack
-              </button>
-              <p
-                id="railStatus"
-                class="build-rail__status"
-                role="status"
-                aria-live="polite"
-              ></p>
+            <div class="build-rail__pinned">
+              <div class="build-rail__card">
+                <p class="build-rail__eyebrow">Your pack</p>
+                <div id="railReadiness" class="build-rail__readiness"></div>
+                <button
+                  id="railGenerateBtn"
+                  type="button"
+                  class="build-rail__generate"
+                >
+                  Generate my pack
+                </button>
+                <p
+                  id="railStatus"
+                  class="build-rail__status"
+                  role="status"
+                  aria-live="polite"
+                ></p>
+              </div>
+            </div>
 
+            <div class="build-rail__extras">
+              <div class="build-rail__card">
               <div id="railBrandKit" class="rail-brandkit" hidden></div>
 
               <details class="rail-panel">
@@ -2363,6 +2368,7 @@
               <button id="railClearAllBtn" type="button" class="rail-clear-all">
                 Clear all &amp; start over
               </button>
+              </div>
             </div>
           </aside>
         </div>
@@ -2938,8 +2944,8 @@
       "type": "range",
       "id": "sticky_offset",
       "label": "Sticky rail top offset",
-      "min": 0, "max": 200, "step": 4, "unit": "px", "default": 96,
-      "info": "Space above the sticky \"Your Pack\" rail so it clears your sticky theme header. Increase if the rail hides under the header."
+      "min": 0, "max": 320, "step": 4, "unit": "px", "default": 150,
+      "info": "Space above the sticky \"Your Pack\" progress widget so it clears your sticky theme banner/header. Increase if the widget hides under the banner (try 200-260 for a tall banner)."
     },
     { "type": "header", "content": "Locked-state copy" },
     {
