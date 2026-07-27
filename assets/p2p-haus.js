@@ -2214,6 +2214,7 @@ function handleKnownButtonIds(button) {
     savePackageBtn: saveFinalPackage,
     saveFinalPromptBtn: saveFinalPackage,
     downloadAllBtn: downloadAllOutputs,
+    copyAllBtn: copyAllOutputs,
     printKitBtn: printLaunchKit,
     importBrandDnaBtn: () => importBrandDna(readValue("brandDnaInput")),
     loadBrandKitBtn: loadBrandKit,
@@ -5801,6 +5802,23 @@ function buildFullExport() {
   });
 
   return parts.join("\n");
+}
+
+// One-click: copy the entire launch pack (all outputs) to the clipboard.
+async function copyAllOutputs() {
+  if (!getOutputValue("finalPromptPackage").trim()) {
+    showToast("Generate your prompts before copying.", "warning");
+    return;
+  }
+
+  const copied = await copyTextToClipboard(buildFullExport());
+
+  showToast(
+    copied
+      ? "Copied your full launch pack to the clipboard."
+      : "Couldn't copy automatically — try Download Everything instead.",
+    copied ? "success" : "warning"
+  );
 }
 
 function downloadAllOutputs() {
