@@ -10,9 +10,17 @@
 <link href="https://api.fontshare.com/v2/css?f[]=general-sans@600,700,800&f[]=switzer@400,500,600,700&display=swap" rel="stylesheet">
 {{ 'p2p-haus.css' | asset_url | stylesheet_tag }}
 
+{% comment %} Case-insensitive tag match — see note in p2p-haus.liquid. {% endcomment %}
 {% assign p2p_owns = false %}
-{% if customer and customer.tags contains section.settings.access_tag %}
-  {% assign p2p_owns = true %}
+{% assign p2p_wanted = section.settings.access_tag | strip | downcase %}
+{% if customer %}
+  {% for p2p_t in customer.tags %}
+    {% assign p2p_t_norm = p2p_t | strip | downcase %}
+    {% if p2p_t_norm == p2p_wanted %}
+      {% assign p2p_owns = true %}
+      {% break %}
+    {% endif %}
+  {% endfor %}
 {% endif %}
 
 <div class="p2p-preview">

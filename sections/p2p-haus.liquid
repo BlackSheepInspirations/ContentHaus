@@ -12,9 +12,19 @@
   p2p-haus.css, so nothing leaks into (or in from) the theme.
 {% endcomment %}
 
+{% comment %} Case-insensitive tag match — Shopify doesn't reliably preserve
+   tag case between the customer record and this comparison, and Liquid
+   `contains` is case-sensitive, so compare both sides downcased/stripped. {% endcomment %}
 {% assign p2p_access = false %}
-{% if customer and customer.tags contains section.settings.access_tag %}
-  {% assign p2p_access = true %}
+{% assign p2p_wanted = section.settings.access_tag | strip | downcase %}
+{% if customer %}
+  {% for p2p_t in customer.tags %}
+    {% assign p2p_t_norm = p2p_t | strip | downcase %}
+    {% if p2p_t_norm == p2p_wanted %}
+      {% assign p2p_access = true %}
+      {% break %}
+    {% endif %}
+  {% endfor %}
 {% endif %}
 {% if request.design_mode %}
   {% assign p2p_access = true %}
