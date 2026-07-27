@@ -2178,6 +2178,7 @@ function handleKnownButtonIds(button) {
     clearAllBtn: requestClearAll,
     newProjectBtn: requestClearAll,
     railClearAllBtn: requestClearAll,
+    recommendPackBtn: applyRecommendedPack,
     randomizeBtn: randomizeAllUnlockedFields,
     randomizeAllBtn: randomizeAllUnlockedFields,
     refreshReviewBtn: updateIngredientReview,
@@ -2433,6 +2434,41 @@ function updateRecommendedGenerators() {
     card.classList.toggle("is-recommended", isRecommended);
     card.title = isRecommended ? "Recommended for your product type" : "";
   });
+}
+
+// One-click starter pack: select the top recommended generators for the
+// chosen product type (dispatches change so the normal selection flow runs).
+function applyRecommendedPack() {
+  const type = readValue("productType");
+  const recommended = RECOMMENDED_BY_TYPE[type] || [];
+
+  if (!recommended.length) {
+    showToast("Pick a product type first — then I'll recommend a pack.", "warning");
+    const typeField = getElement("productType");
+    if (typeField && typeField.scrollIntoView) {
+      typeField.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+    return;
+  }
+
+  const pick = new Set(recommended.slice(0, MAX_SELECTED_GENERATORS));
+  const boxes = getGeneratorCheckboxes();
+
+  // Uncheck anything not in the pack, then check the picks.
+  boxes.forEach((cb) => {
+    if (!pick.has(resolveGeneratorKey(cb)) && cb.checked) {
+      cb.checked = false;
+      cb.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+  });
+  boxes.forEach((cb) => {
+    if (pick.has(resolveGeneratorKey(cb)) && !cb.checked) {
+      cb.checked = true;
+      cb.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+  });
+
+  showToast(`Built a starter pack of ${pick.size} — tweak it any time.`, "success");
 }
 
 

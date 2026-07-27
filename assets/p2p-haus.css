@@ -1566,6 +1566,42 @@
   color: var(--color-text-muted);
 }
 
+/* One-click recommended starter pack */
+#p2p-haus-app .starter-pack {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 0 0 18px;
+}
+
+#p2p-haus-app .starter-pack__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 11px 18px;
+  border-radius: var(--radius-pill);
+  border: 1px solid transparent;
+  background: linear-gradient(135deg, var(--color-primary-bright), var(--color-primary));
+  color: var(--on-accent);
+  font-weight: 700;
+  font-size: 0.92rem;
+  cursor: pointer;
+  box-shadow: var(--shadow-small);
+  transition: filter 0.14s ease, transform 0.14s ease;
+}
+
+#p2p-haus-app .starter-pack__btn:hover {
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+}
+
+#p2p-haus-app .starter-pack__hint {
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+  max-width: 42ch;
+}
+
 #p2p-haus-app .form-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
