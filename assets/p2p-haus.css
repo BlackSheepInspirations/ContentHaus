@@ -1024,6 +1024,90 @@
 }
 
 /* Collapsible rail panels: selections, vault, recently generated */
+/* ---------- Your Pack: progress to perfection ---------- */
+#p2p-haus-app .rail-progress {
+  margin-bottom: 14px;
+  padding: 14px 14px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-medium);
+  background: var(--color-surface);
+}
+
+#p2p-haus-app .rail-progress__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+#p2p-haus-app .rail-progress__label {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  font-weight: 600;
+}
+
+#p2p-haus-app .rail-progress__pct {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.2rem;
+  color: var(--color-primary);
+}
+
+#p2p-haus-app .rail-progress__track {
+  margin: 8px 0;
+  height: 8px;
+  border-radius: var(--radius-pill);
+  background: var(--color-primary-soft);
+  overflow: hidden;
+}
+
+#p2p-haus-app .rail-progress__fill {
+  height: 100%;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(90deg, var(--color-primary), var(--color-primary-bright));
+  transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+#p2p-haus-app .rail-progress.is-complete .rail-progress__fill {
+  background: linear-gradient(90deg, var(--color-primary-bright), var(--color-gold));
+}
+
+#p2p-haus-app .rail-progress.is-complete .rail-progress__pct { color: var(--color-gold);
+}
+
+#p2p-haus-app .rail-progress__msg {
+  margin: 0;
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+#p2p-haus-app .rail-checklist { display: grid; gap: 4px;
+}
+
+#p2p-haus-app .rail-clear-all {
+  width: 100%;
+  margin-top: 12px;
+  padding: 9px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.14s ease, color 0.14s ease, background 0.14s ease;
+}
+
+#p2p-haus-app .rail-clear-all:hover {
+  border-color: var(--color-error);
+  color: var(--color-error);
+  background: var(--color-error-soft);
+}
+
 #p2p-haus-app .rail-panel {
   margin-top: 14px;
   border-top: 1px solid var(--color-border);

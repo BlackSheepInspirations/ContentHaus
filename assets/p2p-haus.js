@@ -2013,6 +2013,7 @@ function handleKnownButtonIds(button) {
     railGenerateBtn: generatePromptOptions,
     clearAllBtn: requestClearAll,
     newProjectBtn: requestClearAll,
+    railClearAllBtn: requestClearAll,
     randomizeBtn: randomizeAllUnlockedFields,
     randomizeAllBtn: randomizeAllUnlockedFields,
     refreshReviewBtn: updateIngredientReview,
@@ -3313,19 +3314,36 @@ function updateBuildRail() {
   ];
 
   const done = items.filter((item) => item[1]).length;
+  const pct = Math.round((done / items.length) * 100);
+  const msg =
+    pct === 100 ? "Perfection — generate your pack! 👑"
+    : pct >= 70 ? "Almost launch-ready 🚀"
+    : pct >= 40 ? "Building momentum 🔥"
+    : pct > 0 ? "Nice start — keep going 🌱"
+    : "Let's build your pack ✨";
 
-  container.innerHTML = items
+  const checklist = items
     .map(
       ([label, ok]) => `
         <div class="rail-item ${ok ? "is-done" : ""}">
-          <span class="rail-item__mark" aria-hidden="true">${
-            ok ? "✓" : ""
-          }</span>
+          <span class="rail-item__mark" aria-hidden="true">${ok ? "✓" : ""}</span>
           <span>${escapeHtml(label)}</span>
-        </div>
-      `
+        </div>`
     )
     .join("");
+
+  container.innerHTML = `
+    <div class="rail-progress ${pct === 100 ? "is-complete" : ""}">
+      <div class="rail-progress__head">
+        <span class="rail-progress__label">Progress to perfection</span>
+        <span class="rail-progress__pct">${pct}%</span>
+      </div>
+      <div class="rail-progress__track">
+        <div class="rail-progress__fill" style="width:${pct}%"></div>
+      </div>
+      <p class="rail-progress__msg">${msg}</p>
+    </div>
+    <div class="rail-checklist">${checklist}</div>`;
 
   const status = getElement("railStatus");
 
