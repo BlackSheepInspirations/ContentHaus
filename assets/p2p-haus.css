@@ -1845,6 +1845,67 @@
 
 #p2p-haus-app .generator-group h3 {
   margin: 0 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
+/* Generator card: name + "what you'll receive" guidance */
+#p2p-haus-app .generator-card__text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+#p2p-haus-app .generator-card__name {
+  font-weight: 650;
+  line-height: 1.25;
+}
+
+#p2p-haus-app .generator-card__delivers {
+  font-size: 0.74rem;
+  line-height: 1.35;
+  color: var(--color-text-muted);
+}
+
+/* ⓘ info icon — enhanced details on sections & categories */
+#p2p-haus-app .info-i {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  flex: none;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  font-weight: 700;
+  font-style: normal;
+  line-height: 1;
+  cursor: help;
+  vertical-align: middle;
+  transition: border-color 0.14s ease, color 0.14s ease, background 0.14s ease;
+}
+
+#p2p-haus-app .info-i:hover,
+#p2p-haus-app .info-i:focus-visible {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background: var(--color-primary-soft);
+}
+
+#p2p-haus-app .section-heading h2 {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  flex-wrap: wrap;
 }
 
 #p2p-haus-app .generator-grid {

@@ -1397,6 +1397,135 @@ const appState = {
    3. INITIALIZATION
    ========================================================= */
 
+/* =========================================================
+   GENERATOR GUIDANCE + INFO ICONS
+   "What you'll receive" per generator, plus ⓘ tooltips on
+   generator categories and form sections.
+   ========================================================= */
+
+const GENERATOR_DELIVERS = {
+  "product-description": "A paste-ready product description — headline, summary, and persuasive body copy.",
+  "product-listing": "A full marketplace listing — title, bullet points, description, and tags.",
+  "sales-page": "A conversion-focused sales-page section — headline, story, benefits, and CTA.",
+  "social-post": "Platform-ready social posts with captions and calls to action.",
+  "hooks-captions": "Scroll-stopping hooks plus matching captions, ready to post.",
+  "pinterest-pin": "A Pinterest pin concept — title, description, and image direction.",
+  "seo-copy": "Search-optimized copy with your keywords woven in naturally.",
+  "tags-hashtags": "A ready list of marketplace tags and social hashtags.",
+  "geo-optimization": "AI-search copy + Q&A so ChatGPT, Gemini & co. recommend and cite you.",
+  "product-mockup": "An image-generator prompt for a clean, professional product mockup.",
+  "product-ad": "An image-generator prompt for a conversion-focused ad graphic.",
+  "promotional-flyer": "An image-generator prompt for a polished promotional flyer.",
+  "lead-magnet-cover": "An image-generator prompt for a high-value lead-magnet cover.",
+  "notebook-cover": "A print-ready image prompt for a notebook or journal cover.",
+  "infographic": "An image-generator prompt for a clear, educational infographic.",
+  "creative-direction": "A full creative brief — mood, color, type, and visual direction.",
+  "hero-banner": "A website hero image prompt plus a matching headline and subcopy.",
+  "video-motion": "A motion-graphic or short-video generation prompt.",
+  "short-video-script": "A complete short-form video script — hook, scenes, and caption.",
+  "voiceover-script": "A natural voiceover script, timed for your promo.",
+  "product-demo": "A step-by-step product demonstration video plan.",
+  "launch-campaign": "A coordinated, multi-channel launch campaign plan.",
+  "launch-carousel": "A slide-by-slide launch carousel, ready to design.",
+  "launch-announcement": "A compelling launch-day announcement post.",
+  "b-roll": "A practical B-roll shot list for your video.",
+  "cinematic-reveal": "A cinematic product-reveal image/video prompt.",
+  "landing-page": "A focused, conversion-ready landing page.",
+  "promotional-email": "A persuasive promotional email — subject line through CTA.",
+  "offer-summary": "A clear, persuasive summary of your offer.",
+  "pricing-positioning": "Copy that frames your price so it feels worth it.",
+  "content-series": "A multi-post content series planned around your launch.",
+  "listing-image": "An image-generator prompt for a marketplace listing photo.",
+  "lifestyle-image": "An image-generator prompt for a lifestyle photo — your product in a real setting.",
+  "product-video-ad": "A short product-ad video generation prompt.",
+  "launch-teaser": "A suspense-building teaser prompt for your launch."
+};
+
+const GENERATOR_CATEGORY_INFO = {
+  "sales-copy": "The words that sell — descriptions, listings, sales pages, emails, and offer copy.",
+  "social": "Get found and get scrolling — posts, hooks, pins, SEO, tags, and AI-search copy.",
+  "launch": "Everything for launch day — campaigns, carousels, announcements, and teasers.",
+  "design": "Ready-to-run image prompts — mockups, ads, covers, infographics, and lifestyle photos.",
+  "video": "Motion and voice — video scripts, voiceover, motion graphics, B-roll, and reveals."
+};
+
+const SECTION_INFO = {
+  productSectionTitle: "The core facts about what you're selling. These stay consistent across every prompt you generate.",
+  audienceSectionTitle: "Who it's for and the before → after transformation — this makes your copy land with the right person.",
+  pricingSectionTitle: "How price is handled in your copy, including whether to mention a number at all.",
+  brandSectionTitle: "Your voice, look, and words to use or avoid — so everything sounds like you. Load a Brand DNA Blueprint™ to auto-fill it.",
+  deliverySectionTitle: "How your prompts are packaged and which AI platform they're tuned for.",
+  validationSectionTitle: "A quick check that you've added the essentials before you generate.",
+  resultsSectionTitle: "Your generated prompts and premium outputs — copy, launch plan, media, and more."
+};
+
+// Fallback guidance from a generator's goal if it isn't in the map above.
+function deliversFromGoal(key) {
+  const goal = GENERATOR_DEFINITIONS[key] && GENERATOR_DEFINITIONS[key].goal;
+  if (!goal) return "";
+  const stripped = goal.replace(
+    /^(Create|Write|Build|Plan|Summarize|Position|Optimize|Turn)\s+(a |an |the )?/i,
+    ""
+  );
+  return stripped.charAt(0).toUpperCase() + stripped.slice(1) + ".";
+}
+
+function infoIconHtml(text) {
+  return `<button type="button" class="info-i" aria-label="More info" title="${escapeHtml(
+    text
+  )}">i</button>`;
+}
+
+function annotateGenerators() {
+  document.querySelectorAll(".generator-card").forEach((card) => {
+    if (card.dataset.annotated === "true") {
+      return;
+    }
+
+    const input = card.querySelector("input[data-generator-key]");
+    const nameSpan = card.querySelector("span");
+
+    if (!input || !nameSpan) {
+      return;
+    }
+
+    const key = input.dataset.generatorKey;
+    const info = GENERATOR_DELIVERS[key] || deliversFromGoal(key);
+
+    if (info && !card.querySelector(".generator-card__delivers")) {
+      const col = document.createElement("span");
+      col.className = "generator-card__text";
+      nameSpan.classList.add("generator-card__name");
+      nameSpan.replaceWith(col);
+      col.appendChild(nameSpan);
+
+      const sub = document.createElement("span");
+      sub.className = "generator-card__delivers";
+      sub.textContent = info;
+      col.appendChild(sub);
+    }
+
+    card.dataset.annotated = "true";
+  });
+
+  document.querySelectorAll(".generator-group").forEach((group) => {
+    const h3 = group.querySelector("h3");
+    const cat = group.dataset.generatorCategory;
+
+    if (h3 && cat && GENERATOR_CATEGORY_INFO[cat] && !h3.querySelector(".info-i")) {
+      h3.insertAdjacentHTML("beforeend", " " + infoIconHtml(GENERATOR_CATEGORY_INFO[cat]));
+    }
+  });
+
+  Object.keys(SECTION_INFO).forEach((id) => {
+    const heading = getElement(id);
+
+    if (heading && !heading.querySelector(".info-i")) {
+      heading.insertAdjacentHTML("beforeend", " " + infoIconHtml(SECTION_INFO[id]));
+    }
+  });
+}
+
 function initializeApplication() {
   normalizeGeneratorCheckboxes();
   initializeGeneratorSettings();
@@ -1409,6 +1538,7 @@ function initializeApplication() {
   updateValidationSummary();
   updateGeneratedVisibility();
   enhanceSelectsAsPills();
+  annotateGenerators();
   initPremiumTabs();
   initJourney();
   initHeroVideo();
