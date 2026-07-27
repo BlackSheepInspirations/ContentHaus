@@ -1,0 +1,2460 @@
+/* ============================================================
+   The Prompt to Profit Haus — scoped stylesheet.
+   Generated from the standalone css/style.css, scoped under
+   #p2p-haus-app so nothing leaks into the Shopify theme (and the
+   theme can't leak in). "Black Opal" palette: emerald + opal fire.
+   Do not hand-edit — regenerate from the standalone via scope-css.js.
+   ============================================================ */
+/* =========================================================
+   1. DESIGN TOKENS
+   ========================================================= */
+#p2p-haus-app,
+.p2p-locked,
+.p2p-preview {
+  /* Brand — "Black Opal": emerald profit-fire on a warm family cream.
+     Emerald does the everyday UI work; the opal fire (--opal-fire) is held
+     back for the crown-jewel moments — hero, wordmark, signature accents. */
+  --color-primary: #1e8e5a;
+  --color-primary-bright: #27ae6e;
+  --color-secondary: #101613;      /* opal-black body tone */
+  --color-accent: #1e8e5a;
+  --on-accent: #ffffff;
+
+  /* Gold — the metal the jewel is set in (shared family gold) */
+  --color-gold: #c9a84c;
+  --color-gold-ink: #3d3105;
+
+  /* Opal fire — sequences every sibling Haus accent across a dark stone:
+     emerald → teal → blue → violet → magenta → gold. The Profit Haus is
+     the jewel that holds the whole family's light. */
+  --opal-fire: linear-gradient(100deg, #27ae6e 0%, #0d7377 20%, #2563eb 42%, #5b3c8c 60%, #d6336c 80%, #c9a84c 100%);
+  --opal-black: #101613;
+  --opal-black-deep: #0a0f0c;
+
+  --color-background: #f2f0eb;     /* family cream */
+  --color-surface: #ffffff;
+  --color-surface-soft: #f7f5ef;
+
+  --color-text: #1a1815;           /* family black */
+  --color-text-muted: #6b655c;
+  --color-border: #e4e0d6;
+  --color-border-strong: #d3cdbf;
+
+  --color-success: #1f9d57;
+  --color-warning: #b4791f;
+  --color-error: #c6432e;
+
+  --color-primary-soft: #e6f2ea;
+  --color-success-soft: #e7f5ec;
+  --color-warning-soft: #fbf1dc;
+  --color-error-soft: #fbeae6;
+
+  --shadow-small: 0 1px 2px rgba(15, 31, 29, 0.06), 0 4px 14px rgba(15, 31, 29, 0.06);
+  --shadow-medium: 0 12px 34px rgba(15, 31, 29, 0.12);
+  --shadow-large: 0 24px 60px rgba(15, 31, 29, 0.16);
+
+  --radius-small: 8px;
+  --radius-medium: 14px;
+  --radius-large: 22px;
+  --radius-pill: 999px;
+
+  --content-width: 1180px;
+
+  /* Type — confident grotesk display, clean body, precise mono */
+  --font-display: "General Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-body: "Switzer", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, monospace;
+}
+
+/* Dark theme, auto-applied by OS preference (token-level, so every component
+   that reads the tokens follows along). A future in-app toggle can override
+   this via a [data-theme] block. */
+@media (prefers-color-scheme: dark) {
+  #p2p-haus-app,
+.p2p-locked,
+.p2p-preview {
+    --color-primary: #2ec27e;
+    --color-primary-bright: #45d98f;
+    --color-secondary: #0a0f0c;
+    --color-accent: #2ec27e;
+    --on-accent: #05130c;
+
+    --color-gold: #d8bd6a;
+    --color-gold-ink: #241c04;
+
+    --color-background: #0b0f0d;
+    --color-surface: #121815;
+    --color-surface-soft: #0e1310;
+
+    --color-text: #ecf1ee;
+    --color-text-muted: #98a29c;
+    --color-border: #23302a;
+    --color-border-strong: #2d3c34;
+
+    --color-success: #37c77d;
+    --color-warning: #e0a94a;
+    --color-error: #ee6b54;
+
+    --color-primary-soft: #12211a;
+    --color-success-soft: #10241b;
+    --color-warning-soft: #241d10;
+    --color-error-soft: #26140f;
+
+    --shadow-small: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --shadow-medium: 0 12px 34px rgba(0, 0, 0, 0.5);
+    --shadow-large: 0 24px 60px rgba(0, 0, 0, 0.55);
+  }
+
+}
+
+/* =========================================================
+   2. RESET AND BASE
+   ========================================================= */
+#p2p-haus-app,
+#p2p-haus-app *,
+#p2p-haus-app *::before,
+#p2p-haus-app *::after {
+  box-sizing: border-box;
+}
+
+#p2p-haus-app {
+  scroll-behavior: smooth;
+}
+
+#p2p-haus-app {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(30, 142, 90, 0.08),
+      transparent 34%
+    ),
+    var(--color-background);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+#p2p-haus-app h1,
+#p2p-haus-app h2,
+#p2p-haus-app h3 {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+}
+
+#p2p-haus-app button,
+#p2p-haus-app input,
+#p2p-haus-app select,
+#p2p-haus-app textarea {
+  font: inherit;
+}
+
+#p2p-haus-app button {
+  cursor: pointer;
+}
+
+#p2p-haus-app button:disabled,
+#p2p-haus-app input:disabled,
+#p2p-haus-app select:disabled,
+#p2p-haus-app textarea:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
+}
+
+#p2p-haus-app img {
+  display: block;
+  max-width: 100%;
+}
+
+#p2p-haus-app [hidden] {
+  display: none !important;
+}
+
+/* =========================================================
+   3. ACCESSIBILITY
+   ========================================================= */
+#p2p-haus-app .skip-link {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 2000;
+  transform: translateY(-180%);
+  border-radius: var(--radius-small);
+  background: var(--color-secondary);
+  color: #ffffff;
+  padding: 10px 14px;
+  text-decoration: none;
+}
+
+#p2p-haus-app .skip-link:focus {
+  transform: translateY(0);
+}
+
+#p2p-haus-app button:focus-visible,
+#p2p-haus-app input:focus-visible,
+#p2p-haus-app select:focus-visible,
+#p2p-haus-app textarea:focus-visible,
+#p2p-haus-app a:focus-visible,
+#p2p-haus-app summary:focus-visible,
+#p2p-haus-app .pill:focus-visible {
+  outline: 3px solid rgba(30, 142, 90, 0.45);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #p2p-haus-app,
+#p2p-haus-app *,
+#p2p-haus-app *::before,
+#p2p-haus-app *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+
+}
+
+/* =========================================================
+   4. HEADER
+   ========================================================= */
+/* ---------- Marquee hero ---------- */
+#p2p-haus-app .site-header {
+  position: relative;
+  padding: clamp(40px, 6vw, 76px) 24px clamp(36px, 5vw, 60px);
+  background:
+    radial-gradient(60% 90% at 12% -10%, rgba(39, 174, 110, 0.30), transparent 55%),
+    radial-gradient(55% 85% at 90% 4%, rgba(37, 99, 235, 0.22), transparent 55%),
+    radial-gradient(55% 80% at 62% 112%, rgba(214, 51, 108, 0.18), transparent 55%),
+    radial-gradient(45% 70% at 34% 118%, rgba(91, 60, 140, 0.18), transparent 55%),
+    linear-gradient(150deg, #0a0f0c 0%, #101613 46%, #0c1310 100%);
+  color: #e8f3ee;
+  overflow: hidden;
+}
+
+/* dot texture */
+#p2p-haus-app .site-header::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1.5px);
+  background-size: 22px 22px;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* opal fire — a slow living shimmer of every sibling accent, drifting
+   across the stone. mix-blend screen makes it glow on the dark body;
+   killed entirely under prefers-reduced-motion by the global rule. */
+#p2p-haus-app .site-header::after {
+  content: "";
+  position: absolute;
+  inset: -60%;
+  z-index: 0;
+  background: var(--opal-fire);
+  background-size: 220% 220%;
+  opacity: 0.14;
+  mix-blend-mode: screen;
+  filter: blur(48px);
+  pointer-events: none;
+  animation: p2p-opalDrift 16s ease-in-out infinite;
+}
+
+@keyframes p2p-opalDrift {
+  0%,
+  100% {
+    transform: translate3d(-5%, -3%, 0) rotate(0deg);
+    background-position: 0% 50%;
+  }
+  50% {
+    transform: translate3d(5%, 3%, 0) rotate(4deg);
+    background-position: 100% 50%;
+  }
+}
+
+#p2p-haus-app .site-header__bar {
+  position: relative;
+  z-index: 1;
+  width: min(100%, var(--content-width));
+  margin: 0 auto;
+  padding-bottom: clamp(24px, 4vw, 40px);
+}
+
+#p2p-haus-app .site-header__family {
+  display: block;
+  margin-bottom: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #7fe3b8;
+}
+
+#p2p-haus-app .wordmark {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(1.5rem, 2.8vw, 2rem);
+  letter-spacing: -0.02em;
+  color: #ffffff;
+}
+
+#p2p-haus-app .wordmark__tag {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #7fe3b8;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 3px 9px;
+  border-radius: var(--radius-pill);
+}
+
+#p2p-haus-app .site-header__content {
+  position: relative;
+  z-index: 1;
+  width: min(100%, var(--content-width));
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: clamp(28px, 4vw, 56px);
+  align-items: center;
+}
+
+/* Project actions — one clean row across the bottom of the marquee */
+#p2p-haus-app .site-header__actions {
+  position: relative;
+  z-index: 1;
+  width: min(100%, var(--content-width));
+  margin: clamp(26px, 4vw, 44px) auto 0;
+  padding-top: 22px;
+  border-top: 1px solid rgba(255, 255, 255, 0.16);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+#p2p-haus-app .pa-sep {
+  width: 1px;
+  height: 24px;
+  background: rgba(255, 255, 255, 0.22);
+}
+
+#p2p-haus-app .marquee__intro { min-width: 0;
+}
+
+#p2p-haus-app .eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 16px;
+  color: #7fe3b8;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+#p2p-haus-app .eyebrow::before {
+  content: "";
+  width: 30px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--opal-fire);
+}
+
+#p2p-haus-app .site-header h1 {
+  margin: 0;
+  max-width: 16ch;
+  font-size: clamp(2.4rem, 5.4vw, 4.4rem);
+  font-weight: 800;
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+
+/* The accent word carries the opal fire — the crown-jewel signature. */
+#p2p-haus-app .site-header h1 .accent {
+  background: var(--opal-fire);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  animation: p2p-opalText 11s ease-in-out infinite;
+}
+
+@keyframes p2p-opalText {
+  0%,
+  100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+#p2p-haus-app .site-header__description {
+  max-width: 46ch;
+  margin: 20px 0 0;
+  color: #c9e6d8;
+  font-size: 1.08rem;
+}
+
+#p2p-haus-app .project-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 0;
+}
+
+#p2p-haus-app .project-actions button {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 10px 16px;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  background: rgba(255, 255, 255, 0.08);
+  color: #eaf6f3;
+  transition: background 0.14s ease, border-color 0.14s ease, transform 0.14s ease;
+}
+
+#p2p-haus-app .project-actions button:not(#newProjectBtn):hover {
+  background: rgba(201, 168, 76, 0.20);
+  border-color: var(--color-gold);
+  color: #e3cd86;
+  transform: translateY(-1px);
+}
+
+#p2p-haus-app .project-actions button#newProjectBtn {
+  background: var(--color-primary-bright);
+  border-color: transparent;
+  color: #04211e;
+  font-weight: 700;
+}
+
+#p2p-haus-app .project-actions button#newProjectBtn:hover { filter: brightness(1.06);
+}
+
+#p2p-haus-app .site-header .status-message {
+  display: inline-block;
+  margin: 0 0 0 auto;
+  padding: 8px 15px;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.1);
+  color: #eaf6f3;
+  font-size: 0.86rem;
+}
+
+@media (max-width: 680px) {
+  #p2p-haus-app .site-header__actions .status-message {
+    margin: 4px 0 0;
+  }
+
+}
+
+/* ---------- Video-instruction slot ---------- */
+#p2p-haus-app .marquee__media { min-width: 0;
+}
+
+#p2p-haus-app .video-frame {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius-large);
+  overflow: hidden;
+  background: #06302d;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: var(--shadow-large);
+}
+
+#p2p-haus-app .video-frame__player {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  background: #06302d;
+}
+
+#p2p-haus-app .video-frame__placeholder {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  gap: 4px;
+  padding: 24px;
+  background:
+    radial-gradient(circle at 50% 38%, rgba(30, 142, 90, 0.28), transparent 70%),
+    #06302d;
+}
+
+#p2p-haus-app .video-frame__play {
+  width: 62px;
+  height: 62px;
+  margin: 0 auto 10px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  padding-left: 4px;
+  font-size: 1.4rem;
+  color: var(--color-gold-ink);
+  background: var(--color-gold);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+#p2p-haus-app .video-frame__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: #eaf6f3;
+}
+
+#p2p-haus-app .video-frame__note {
+  margin: 0;
+  font-size: 0.82rem;
+  color: #a9cfc9;
+}
+
+#p2p-haus-app .video-frame__note code {
+  font-family: var(--font-mono);
+  background: rgba(255, 255, 255, 0.1);
+  padding: 1px 6px;
+  border-radius: 6px;
+}
+
+#p2p-haus-app .video-frame__caption {
+  margin: 12px 2px 0;
+  font-size: 0.85rem;
+  color: #bfe0db;
+}
+
+@media (max-width: 820px) {
+  #p2p-haus-app .site-header__content { grid-template-columns: 1fr;
+  }
+
+}
+
+/* ---------- Ticker under the hero ---------- */
+#p2p-haus-app .ticker {
+  overflow: hidden;
+  background: var(--color-secondary);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid var(--color-border);
+}
+
+#p2p-haus-app .ticker__track {
+  display: flex;
+  width: max-content;
+  animation: p2p-ticker-scroll 42s linear infinite;
+}
+
+#p2p-haus-app .ticker:hover .ticker__track {
+  animation-play-state: paused;
+}
+
+#p2p-haus-app .ticker__set {
+  display: flex;
+  align-items: center;
+  flex: none;
+}
+
+#p2p-haus-app .ticker__item {
+  display: inline-flex;
+  align-items: center;
+  padding: 11px 0;
+  margin: 0 26px;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+  color: #dcefeb;
+  white-space: nowrap;
+}
+
+#p2p-haus-app .ticker__item::before {
+  content: "\25C6";
+  margin-right: 26px;
+  color: var(--color-gold);
+  font-size: 0.6rem;
+}
+
+@keyframes p2p-ticker-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #p2p-haus-app .ticker__track { animation: none; transform: translateX(0);
+  }
+
+}
+
+/* ---------- Back-to-top button ---------- */
+#p2p-haus-app .back-to-top {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 1400;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 0;
+  padding: 11px 16px;
+  border-radius: var(--radius-pill);
+  border: 1px solid transparent;
+  background: var(--color-primary);
+  color: var(--on-accent);
+  font-weight: 650;
+  font-size: 0.85rem;
+  box-shadow: var(--shadow-medium);
+  opacity: 0;
+  transform: translateY(12px);
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease, background 0.16s ease;
+}
+
+#p2p-haus-app .back-to-top.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+#p2p-haus-app .back-to-top:hover {
+  background: color-mix(in srgb, var(--color-primary) 88%, #000);
+  transform: translateY(-1px);
+}
+
+/* =========================================================
+   5. MAIN LAYOUT
+   ========================================================= */
+#p2p-haus-app .main-content {
+  width: min(calc(100% - 32px), var(--content-width));
+  margin: 32px auto 72px;
+}
+
+/* ---------- Quick-start presets ---------- */
+#p2p-haus-app .quickstart {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 28px;
+  padding: 16px 20px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-large);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-small);
+}
+
+#p2p-haus-app .quickstart__label {
+  margin-right: 4px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+#p2p-haus-app .quickstart button {
+  min-height: 0;
+  padding: 9px 15px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-strong);
+  color: var(--color-text);
+}
+
+#p2p-haus-app .quickstart button:hover {
+  border-color: var(--color-gold);
+  background: color-mix(in srgb, var(--color-gold) 12%, var(--color-surface));
+  color: var(--color-text);
+}
+
+#p2p-haus-app .quickstart__sep {
+  width: 1px;
+  height: 24px;
+  background: var(--color-border-strong);
+  margin: 0 2px;
+}
+
+#p2p-haus-app .quickstart__sample {
+  background: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+  color: var(--on-accent) !important;
+}
+
+#p2p-haus-app .quickstart__sample:hover {
+  filter: brightness(1.05);
+  color: var(--on-accent) !important;
+}
+
+/* ---------- Brand mode + Brand DNA import ---------- */
+#p2p-haus-app .brand-setup {
+  margin: -6px 0 28px;
+}
+
+#p2p-haus-app .mode-toggle {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+#p2p-haus-app .mode-toggle__label {
+  margin-right: 4px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+#p2p-haus-app .mode-btn {
+  min-height: 0;
+  padding: 8px 15px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-strong);
+  color: var(--color-text);
+}
+
+#p2p-haus-app .mode-btn:hover {
+  border-color: var(--color-gold);
+  background: color-mix(in srgb, var(--color-gold) 12%, var(--color-surface));
+}
+
+#p2p-haus-app .mode-btn.is-active,
+#p2p-haus-app .mode-btn.is-active:hover {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--on-accent);
+}
+
+#p2p-haus-app .load-kit-btn {
+  min-height: 0;
+  padding: 8px 15px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  border-radius: var(--radius-pill);
+  background: var(--color-primary);
+  border: 1px solid var(--color-primary);
+  color: var(--on-accent);
+}
+
+#p2p-haus-app .load-kit-btn::before { content: "\1F9EC\00a0\00a0";
+}
+
+#p2p-haus-app .load-kit-btn:hover { filter: brightness(1.05);
+}
+
+#p2p-haus-app .brand-import > summary {
+  cursor: pointer;
+  list-style: none;
+  font-size: 0.88rem;
+  font-weight: 650;
+  color: var(--color-primary);
+  padding: 4px 0;
+}
+
+#p2p-haus-app .brand-import > summary::-webkit-details-marker { display: none;
+}
+
+#p2p-haus-app .brand-import > summary::before { content: "\1F9EC\00a0\00a0";
+}
+
+#p2p-haus-app .brand-import__body {
+  margin-top: 10px;
+  max-width: 620px;
+  padding: 16px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-medium);
+  background: var(--color-surface);
+}
+
+#p2p-haus-app .brand-import__body textarea {
+  min-height: 110px;
+  margin: 10px 0;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+}
+
+/* ---------- Start-here journey ---------- */
+#p2p-haus-app .journey {
+  margin-bottom: 28px;
+  padding: clamp(24px, 4vw, 40px);
+  border: 1px solid var(--color-border);
+  border-top: 3px solid var(--color-gold);
+  border-radius: var(--radius-large);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-small);
+}
+
+#p2p-haus-app .journey__head { max-width: 64ch; margin-bottom: 22px;
+}
+
+#p2p-haus-app .journey__eyebrow {
+  margin: 0 0 10px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-primary);
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+}
+
+#p2p-haus-app .journey__eyebrow::before { content: ""; width: 22px; height: 2px; border-radius: 2px; background: var(--color-gold);
+}
+
+#p2p-haus-app .journey__title { font-size: clamp(1.8rem, 4vw, 2.6rem); font-weight: 800; letter-spacing: -0.03em;
+}
+
+#p2p-haus-app .journey__title span { color: var(--color-gold);
+}
+
+#p2p-haus-app .journey__equation { margin: 12px 0 0; font-family: var(--font-mono); font-size: clamp(0.85rem, 2vw, 1.02rem); letter-spacing: 0.03em; color: var(--color-text-muted);
+}
+
+#p2p-haus-app .journey__equation b { color: var(--color-primary); font-weight: 700;
+}
+
+#p2p-haus-app .journey__equation .journey__gold { color: var(--color-gold); font-weight: 700;
+}
+
+#p2p-haus-app .journey__lede { margin: 14px 0 0; color: var(--color-text-muted); font-size: 1.02rem;
+}
+
+#p2p-haus-app .journey__trail { position: relative; margin: 0 0 18px;
+}
+
+#p2p-haus-app .journey__trail::before { content: ""; position: absolute; left: 19px; top: 8px; bottom: 8px; width: 2px; background: linear-gradient(var(--color-primary), var(--color-gold)); opacity: 0.3;
+}
+
+#p2p-haus-app .jstop { width: 100%; display: flex; align-items: center; gap: 14px; background: transparent; border: 0; padding: 9px 0; cursor: pointer; text-align: left; font: inherit; color: inherit; min-height: 0;
+}
+
+#p2p-haus-app .jstop:hover .jstop__title { color: var(--color-primary);
+}
+
+#p2p-haus-app .jstop__dot { flex: none; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; font-family: var(--font-mono); font-weight: 700; font-size: 0.9rem; background: var(--color-surface); color: var(--color-primary); border: 2px solid var(--color-primary); position: relative; z-index: 1; transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+
+#p2p-haus-app .jstop[aria-expanded="true"] .jstop__dot { background: var(--color-primary); color: var(--on-accent); transform: scale(1.08);
+}
+
+#p2p-haus-app .jstop.is-dest .jstop__dot { border-color: var(--color-gold); color: var(--color-gold);
+}
+
+#p2p-haus-app .jstop.is-dest[aria-expanded="true"] .jstop__dot { background: var(--color-gold); color: var(--color-gold-ink);
+}
+
+#p2p-haus-app .jstop__title { font-weight: 700; font-size: 1.1rem; letter-spacing: -0.01em; flex: 1;
+}
+
+#p2p-haus-app .jstop__time { font-family: var(--font-mono); font-size: 0.64rem; color: var(--color-text-muted); background: var(--color-surface-soft); border: 1px solid var(--color-border); padding: 2px 8px; border-radius: var(--radius-pill);
+}
+
+#p2p-haus-app .jstop__chev { flex: none; color: var(--color-text-muted); font-size: 1.4rem; line-height: 1; transition: transform 0.25s ease;
+}
+
+#p2p-haus-app .jstop[aria-expanded="true"] .jstop__chev { transform: rotate(45deg); color: var(--color-primary);
+}
+
+#p2p-haus-app .jstop__body { overflow: hidden; max-height: 0; transition: max-height 0.35s ease;
+}
+
+#p2p-haus-app .jstop__inner { margin: 0 0 6px 54px; padding: 14px 18px; background: var(--color-surface-soft); border: 1px solid var(--color-border); border-radius: var(--radius-medium);
+}
+
+#p2p-haus-app .jstop.is-dest .jstop__inner { background: color-mix(in srgb, var(--color-gold) 12%, var(--color-surface)); border-color: color-mix(in srgb, var(--color-gold) 35%, var(--color-border));
+}
+
+#p2p-haus-app .jstop__inner p { color: var(--color-text-muted); font-size: 0.95rem;
+}
+
+#p2p-haus-app .jachieve { margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--color-border-strong);
+}
+
+#p2p-haus-app .jachieve b { color: var(--color-gold);
+}
+
+#p2p-haus-app .journey__kit { border-top: 1px solid var(--color-border); padding-top: 4px;
+}
+
+#p2p-haus-app .journey__kit-summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; cursor: pointer; list-style: none; padding: 14px 2px; font-weight: 650;
+}
+
+#p2p-haus-app .journey__kit-summary::-webkit-details-marker { display: none;
+}
+
+#p2p-haus-app .journey__kit-chev { color: var(--color-primary); font-size: 1.35rem; line-height: 1; transition: transform 0.25s ease;
+}
+
+#p2p-haus-app .journey__kit[open] .journey__kit-chev { transform: rotate(45deg);
+}
+
+#p2p-haus-app .journey__kit-body { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 8px 0 4px;
+}
+
+#p2p-haus-app .jflip { border: 0; background: transparent; padding: 0; cursor: pointer; font: inherit; color: inherit; perspective: 1000px; min-height: 148px; text-align: left;
+}
+
+#p2p-haus-app .jflip__inner { position: relative; display: block; width: 100%; min-height: 148px; transition: transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1); transform-style: preserve-3d;
+}
+
+#p2p-haus-app .jflip.is-flipped .jflip__inner { transform: rotateY(180deg);
+}
+
+#p2p-haus-app .jflip__face { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; border-radius: var(--radius-medium); padding: 16px; display: flex; flex-direction: column;
+}
+
+#p2p-haus-app .jflip__front { background: var(--color-surface-soft); border: 1px solid var(--color-border);
+}
+
+#p2p-haus-app .jflip__front h4 { margin: 0; font-size: 0.98rem; font-weight: 700;
+}
+
+#p2p-haus-app .jflip__front .jwhat { color: var(--color-text-muted); font-size: 0.85rem; margin: 6px 0 0; flex: 1;
+}
+
+#p2p-haus-app .jflip__front .jcue { margin-top: 8px; font-family: var(--font-mono); font-size: 0.64rem; letter-spacing: 0.05em; color: var(--color-primary);
+}
+
+#p2p-haus-app .jflip__back { background: linear-gradient(145deg, var(--color-primary), #0f6a44 130%); color: #eaf6f3; border: 1px solid var(--color-primary); transform: rotateY(180deg); justify-content: center;
+}
+
+#p2p-haus-app .jflip__back .jplabel { font-family: var(--font-mono); font-size: 0.64rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--color-gold);
+}
+
+#p2p-haus-app .jflip__back p { margin: 8px 0 0; font-size: 1rem; font-weight: 550;
+}
+
+@media (max-width: 820px) {
+  #p2p-haus-app .journey__kit-body { grid-template-columns: 1fr 1fr;
+  }
+
+}
+
+@media (max-width: 520px) {
+  #p2p-haus-app .journey__kit-body { grid-template-columns: 1fr;
+  }
+
+  #p2p-haus-app .jstop__title { font-size: 1rem;
+  }
+
+}
+
+/* ---------- Build layout + sticky Generate rail ---------- */
+#p2p-haus-app .build-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 28px;
+  align-items: start;
+}
+
+#p2p-haus-app .build-rail {
+  position: sticky;
+  top: 20px;
+}
+
+#p2p-haus-app .build-rail__inner {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-large);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-medium);
+  padding: 22px;
+}
+
+#p2p-haus-app .build-rail__eyebrow {
+  margin: 0 0 14px;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-primary);
+}
+
+#p2p-haus-app .build-rail__readiness {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+#p2p-haus-app .rail-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.92rem;
+  color: var(--color-text-muted);
+}
+
+#p2p-haus-app .rail-item__mark {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1.5px solid var(--color-border-strong);
+  font-size: 0.72rem;
+  color: var(--on-accent);
+}
+
+#p2p-haus-app .rail-item.is-done {
+  color: var(--color-text);
+  font-weight: 550;
+}
+
+#p2p-haus-app .rail-item.is-done .rail-item__mark {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+#p2p-haus-app .build-rail__generate {
+  width: 100%;
+  min-height: 48px;
+  font-size: 1rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-bright));
+  box-shadow: 0 10px 26px rgba(11, 94, 89, 0.28);
+}
+
+#p2p-haus-app .build-rail__generate:hover {
+  filter: brightness(1.05);
+  transform: translateY(-1px);
+}
+
+#p2p-haus-app .build-rail__status {
+  margin: 12px 0 0;
+  text-align: center;
+  font-size: 0.84rem;
+  color: var(--color-text-muted);
+}
+
+/* Collapsible rail panels: selections, vault, recently generated */
+#p2p-haus-app .rail-panel {
+  margin-top: 14px;
+  border-top: 1px solid var(--color-border);
+}
+
+#p2p-haus-app .rail-panel__summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  cursor: pointer;
+  list-style: none;
+  padding: 12px 2px 8px;
+  font-weight: 650;
+  font-size: 0.92rem;
+}
+
+#p2p-haus-app .rail-panel__summary::-webkit-details-marker { display: none;
+}
+
+#p2p-haus-app .rail-panel__count {
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+#p2p-haus-app .rail-panel__chev {
+  flex: none;
+  color: var(--color-primary);
+  font-size: 1.2rem;
+  line-height: 1;
+  transition: transform 0.2s ease;
+}
+
+#p2p-haus-app .rail-panel[open] .rail-panel__chev { transform: rotate(45deg);
+}
+
+#p2p-haus-app .rail-panel__body { padding: 2px 0 6px;
+}
+
+#p2p-haus-app .rail-item-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+#p2p-haus-app .rail-item-row:last-of-type { border-bottom: 0;
+}
+
+#p2p-haus-app .rail-item-main { flex: 1; min-width: 0;
+}
+
+#p2p-haus-app .rail-item-name { font-size: 0.86rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+#p2p-haus-app .rail-item-date { font-family: var(--font-mono); font-size: 0.7rem; color: var(--color-text-muted);
+}
+
+#p2p-haus-app .rail-mini-btn {
+  min-height: 0;
+  flex: none;
+  padding: 5px 10px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-strong);
+  color: var(--color-primary);
+}
+
+#p2p-haus-app .rail-mini-btn:hover {
+  border-color: var(--color-gold);
+  background: color-mix(in srgb, var(--color-gold) 12%, var(--color-surface));
+  color: var(--color-text);
+}
+
+#p2p-haus-app .rail-mini-btn--x { padding: 5px 9px; color: var(--color-error);
+}
+
+#p2p-haus-app .rail-clear { margin-top: 10px; width: 100%;
+}
+
+#p2p-haus-app .rail-empty {
+  margin: 4px 0;
+  font-size: 0.84rem;
+  font-style: italic;
+  color: var(--color-text-muted);
+}
+
+@media (max-width: 980px) {
+  #p2p-haus-app .build-layout {
+    grid-template-columns: 1fr;
+  }
+
+  #p2p-haus-app .build-rail {
+    position: static;
+  }
+
+  #p2p-haus-app .build-rail__inner {
+    box-shadow: var(--shadow-small);
+  }
+
+}
+
+/* ---------- Phase dividers (the 3-phase spine) ---------- */
+#p2p-haus-app .phase-divider {
+  margin: 44px 0 20px;
+  padding: 24px 28px;
+  border: 1px solid var(--color-border);
+  border-left: 4px solid var(--color-primary);
+  border-radius: var(--radius-large);
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--color-primary) 10%, var(--color-surface)),
+      var(--color-surface) 60%
+    );
+}
+
+#p2p-haus-app .phase-divider:first-child {
+  margin-top: 8px;
+}
+
+#p2p-haus-app .phase-divider__num {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0 0 6px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-primary);
+}
+
+#p2p-haus-app .phase-divider__num::before {
+  content: "";
+  width: 20px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--color-gold);
+}
+
+#p2p-haus-app .phase-divider__title {
+  margin: 0;
+  font-size: clamp(1.55rem, 3.2vw, 2.2rem);
+  line-height: 1.1;
+}
+
+#p2p-haus-app .phase-divider__desc {
+  max-width: 60ch;
+  margin: 8px 0 0;
+  color: var(--color-text-muted);
+  font-size: 1.02rem;
+}
+
+#p2p-haus-app .form-section {
+  margin-bottom: 24px;
+  padding: 28px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-large);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-small);
+}
+
+/* ---------- Collapsible "Advanced" sections ---------- */
+#p2p-haus-app .form-section--advanced {
+  padding: 0;
+  overflow: hidden;
+}
+
+#p2p-haus-app .advanced-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 22px 28px;
+  cursor: pointer;
+  list-style: none;
+}
+
+#p2p-haus-app .advanced-summary::-webkit-details-marker {
+  display: none;
+}
+
+#p2p-haus-app .advanced-summary__label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+#p2p-haus-app .advanced-summary__title {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+#p2p-haus-app .advanced-summary__chev {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid var(--color-border-strong);
+  color: var(--color-primary);
+  font-size: 1.3rem;
+  line-height: 1;
+  transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+
+#p2p-haus-app .advanced-summary:hover .advanced-summary__chev {
+  background: var(--color-primary-soft);
+  border-color: var(--color-primary);
+}
+
+#p2p-haus-app .form-section--advanced[open] .advanced-summary {
+  border-bottom: 1px solid var(--color-border);
+}
+
+#p2p-haus-app .form-section--advanced[open] .advanced-summary__chev {
+  transform: rotate(45deg);
+}
+
+#p2p-haus-app .advanced-body {
+  padding: 24px 28px 28px;
+}
+
+#p2p-haus-app .advanced-body > .section-description {
+  margin-top: 0;
+}
+
+/* Ingredient review body (populated by JS) */
+#p2p-haus-app .ingredient-review {
+  display: grid;
+  gap: 16px;
+}
+
+#p2p-haus-app .review-block h4 {
+  margin: 0 0 6px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-primary);
+}
+
+#p2p-haus-app .review-block ul {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--color-text-muted);
+}
+
+#p2p-haus-app .review-block li {
+  margin: 4px 0;
+}
+
+#p2p-haus-app .section-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 10px;
+}
+
+#p2p-haus-app .section-heading h2 {
+  margin: 0;
+  font-size: clamp(1.45rem, 3vw, 2rem);
+  line-height: 1.2;
+}
+
+#p2p-haus-app .section-number {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0 0 6px;
+  color: var(--color-primary);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+#p2p-haus-app .section-number::before {
+  content: "";
+  width: 18px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--color-gold);
+}
+
+#p2p-haus-app .section-description {
+  margin: 0 0 24px;
+  color: var(--color-text-muted);
+}
+
+#p2p-haus-app .form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+#p2p-haus-app .field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+#p2p-haus-app .field-group--full {
+  grid-column: 1 / -1;
+}
+
+/* =========================================================
+   6. TYPOGRAPHY AND HELPER TEXT
+   ========================================================= */
+#p2p-haus-app h1,
+#p2p-haus-app h2,
+#p2p-haus-app h3 {
+  color: inherit;
+}
+
+#p2p-haus-app h3 {
+  line-height: 1.3;
+}
+
+#p2p-haus-app label {
+  color: var(--color-text);
+  font-weight: 700;
+}
+
+#p2p-haus-app .field-note,
+#p2p-haus-app .empty-state {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.92rem;
+}
+
+#p2p-haus-app .empty-state {
+  font-style: italic;
+}
+
+#p2p-haus-app .status-message {
+  border-radius: var(--radius-small);
+  background: var(--color-surface-soft);
+  color: var(--color-text);
+  padding: 12px 14px;
+}
+
+/* =========================================================
+   7. FORM CONTROLS
+   ========================================================= */
+#p2p-haus-app input,
+#p2p-haus-app select,
+#p2p-haus-app textarea {
+  width: 100%;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-medium);
+  background: var(--color-surface);
+  color: var(--color-text);
+  padding: 12px 14px;
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    background-color 0.18s ease;
+}
+
+#p2p-haus-app input:hover,
+#p2p-haus-app select:hover,
+#p2p-haus-app textarea:hover {
+  border-color: var(--color-border-strong);
+}
+
+#p2p-haus-app input:focus,
+#p2p-haus-app select:focus,
+#p2p-haus-app textarea:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 4px rgba(30, 142, 90, 0.11);
+  outline: none;
+}
+
+#p2p-haus-app textarea {
+  min-height: 110px;
+  resize: vertical;
+}
+
+#p2p-haus-app select[multiple] {
+  min-height: 150px;
+}
+
+#p2p-haus-app input[readonly],
+#p2p-haus-app textarea[readonly] {
+  background: var(--color-surface-soft);
+}
+
+/* ---------- Pill-select (enhanced <select>) ---------- */
+#p2p-haus-app .pill-native-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+#p2p-haus-app .pill-select {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+#p2p-haus-app .pill {
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 550;
+  line-height: 1.2;
+  cursor: pointer;
+  padding: 9px 15px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-surface);
+  color: var(--color-text);
+  transition: background 0.13s ease, border-color 0.13s ease, color 0.13s ease, box-shadow 0.13s ease;
+}
+
+#p2p-haus-app .pill:hover {
+  border-color: var(--color-gold);
+  background: color-mix(in srgb, var(--color-gold) 14%, var(--color-surface));
+  color: var(--color-text);
+}
+
+#p2p-haus-app .pill[aria-pressed="true"] {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--on-accent);
+  box-shadow: var(--shadow-small);
+}
+
+#p2p-haus-app .pill[aria-pressed="true"]:hover {
+  color: var(--on-accent);
+}
+
+/* Multi-select pills get a check so "pick a few" reads clearly */
+#p2p-haus-app .pill-select--multi .pill[aria-pressed="true"]::before {
+  content: "\2713\00a0";
+  font-weight: 700;
+}
+
+#p2p-haus-app .pill:focus-visible {
+  outline: 3px solid rgba(30, 142, 90, 0.35);
+  outline-offset: 2px;
+}
+
+#p2p-haus-app input[type="file"] {
+  padding: 10px;
+  background: var(--color-surface-soft);
+}
+
+#p2p-haus-app input[type="file"]::file-selector-button {
+  margin-right: 12px;
+  border: 0;
+  border-radius: var(--radius-small);
+  background: var(--color-primary-soft);
+  color: var(--color-secondary);
+  padding: 9px 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+#p2p-haus-app .lock-control,
+#p2p-haus-app .checkbox-line {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  font-weight: 600;
+}
+
+#p2p-haus-app .lock-control input,
+#p2p-haus-app .checkbox-line input {
+  width: auto;
+  margin-top: 5px;
+}
+
+#p2p-haus-app .is-locked {
+  background: var(--color-primary-soft);
+  border-color: var(--color-border-strong);
+}
+
+/* =========================================================
+   8. BUTTONS
+   ========================================================= */
+#p2p-haus-app button {
+  min-height: 42px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-pill);
+  background: var(--color-primary);
+  color: var(--on-accent);
+  padding: 11px 18px;
+  font-family: var(--font-body);
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  transition:
+    transform 0.16s ease,
+    background-color 0.16s ease,
+    box-shadow 0.16s ease,
+    border-color 0.16s ease,
+    color 0.16s ease;
+}
+
+#p2p-haus-app button:hover {
+  background: color-mix(in srgb, var(--color-primary) 88%, #000);
+  box-shadow: var(--shadow-small);
+  transform: translateY(-1px);
+}
+
+#p2p-haus-app button:active {
+  transform: translateY(0);
+}
+
+/* Secondary / ghost buttons inside section and output headers */
+#p2p-haus-app .section-heading button,
+#p2p-haus-app .output-heading button {
+  min-height: 36px;
+  background: var(--color-surface);
+  border-color: var(--color-border-strong);
+  color: var(--color-primary);
+  padding: 8px 14px;
+  font-weight: 600;
+}
+
+#p2p-haus-app .section-heading button:hover,
+#p2p-haus-app .output-heading button:hover {
+  background: var(--color-primary-soft);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+#p2p-haus-app #generateBtn {
+  min-width: 240px;
+  font-size: 1.02rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-bright));
+  box-shadow: 0 10px 26px rgba(11, 94, 89, 0.28);
+}
+
+#p2p-haus-app #generateBtn:hover {
+  filter: brightness(1.05);
+  transform: translateY(-1px);
+  box-shadow: 0 14px 32px rgba(11, 94, 89, 0.34);
+}
+
+#p2p-haus-app #clearAllBtn {
+  background: var(--color-surface);
+  border: 1px solid color-mix(in srgb, var(--color-error) 45%, var(--color-border));
+  color: var(--color-error);
+}
+
+#p2p-haus-app #clearAllBtn:hover {
+  background: var(--color-error-soft);
+  border-color: var(--color-error);
+}
+
+#p2p-haus-app .action-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+/* =========================================================
+   9. GENERATOR LIBRARY
+   ========================================================= */
+#p2p-haus-app .generator-group {
+  margin-top: 28px;
+}
+
+#p2p-haus-app .generator-group h3 {
+  margin: 0 0 12px;
+}
+
+#p2p-haus-app .generator-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+#p2p-haus-app .generator-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 68px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-medium);
+  background: var(--color-surface-soft);
+  padding: 14px;
+  cursor: pointer;
+  transition:
+    border-color 0.18s ease,
+    background-color 0.18s ease,
+    transform 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+#p2p-haus-app .generator-card:hover {
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-small);
+  transform: translateY(-2px);
+}
+
+#p2p-haus-app .generator-card input {
+  width: auto;
+  flex: 0 0 auto;
+}
+
+#p2p-haus-app .generator-card:has(input:checked) {
+  border-color: var(--color-primary);
+  background: var(--color-primary-soft);
+  box-shadow: 0 0 0 2px rgba(30, 142, 90, 0.12);
+}
+
+#p2p-haus-app .generator-card:has(input:disabled) {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+#p2p-haus-app .generator-card.is-recommended {
+  border-color: color-mix(in srgb, var(--color-gold) 55%, var(--color-border));
+}
+
+#p2p-haus-app .generator-card.is-recommended::after {
+  content: "\2605 Pick";
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--color-gold-ink);
+  background: var(--color-gold);
+  padding: 2px 7px;
+  border-radius: var(--radius-pill);
+}
+
+#p2p-haus-app .selection-count {
+  margin: 0;
+  border-radius: 999px;
+  background: var(--color-primary-soft);
+  color: var(--color-secondary);
+  padding: 8px 12px;
+  font-weight: 800;
+}
+
+#p2p-haus-app .validation-message {
+  margin: 18px 0 0;
+  color: var(--color-text-muted);
+}
+
+/* =========================================================
+   10. GENERATOR CONFIGURATION
+   ========================================================= */
+#p2p-haus-app .generator-panels {
+  display: grid;
+  gap: 14px;
+  margin-top: 24px;
+}
+
+#p2p-haus-app .generator-panel {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-medium);
+  background: var(--color-surface-soft);
+  overflow: hidden;
+}
+
+#p2p-haus-app .generator-panel__heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  border-radius: 0;
+  background: var(--color-surface-soft);
+  color: var(--color-text);
+  text-align: left;
+}
+
+#p2p-haus-app .generator-panel__heading:hover {
+  background: var(--color-primary-soft);
+}
+
+#p2p-haus-app .generator-panel__content {
+  border-top: 1px solid var(--color-border);
+  background: var(--color-surface);
+  padding: 18px;
+}
+
+/* =========================================================
+   11. COMBINATION CONTROLS
+   ========================================================= */
+#p2p-haus-app .combination-controls {
+  margin-top: 24px;
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-medium);
+  background: var(--color-surface-soft);
+  padding: 20px;
+}
+
+#p2p-haus-app .combination-controls h3 {
+  margin-top: 0;
+}
+
+#p2p-haus-app .combination-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(180px, 260px);
+  align-items: center;
+  gap: 14px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+#p2p-haus-app .combination-item:last-child {
+  border-bottom: 0;
+}
+
+/* =========================================================
+   12. INGREDIENT REVIEW
+   ========================================================= */
+#p2p-haus-app .review-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+#p2p-haus-app .review-grid article {
+  min-height: 150px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-medium);
+  background: var(--color-surface-soft);
+  padding: 18px;
+}
+
+#p2p-haus-app .review-grid article:last-child {
+  grid-column: 1 / -1;
+}
+
+#p2p-haus-app .review-grid h3 {
+  margin-top: 0;
+}
+
+/* =========================================================
+   13. VALIDATION AND STATUS STATES
+   ========================================================= */
+#p2p-haus-app .validation-summary {
+  border-left: 5px solid var(--color-warning);
+  border-radius: var(--radius-small);
+  background: var(--color-warning-soft);
+  color: var(--color-warning);
+  padding: 14px 16px;
+}
+
+#p2p-haus-app .validation-summary.is-valid {
+  border-left-color: var(--color-success);
+  background: var(--color-success-soft);
+  color: var(--color-success);
+}
+
+#p2p-haus-app .validation-summary.is-invalid {
+  border-left-color: var(--color-error);
+  background: var(--color-error-soft);
+  color: var(--color-error);
+}
+
+#p2p-haus-app .is-error {
+  border-color: var(--color-error) !important;
+  box-shadow: 0 0 0 3px rgba(180, 35, 24, 0.12);
+}
+
+#p2p-haus-app .is-warning {
+  border-color: var(--color-warning) !important;
+}
+
+#p2p-haus-app .is-success {
+  border-color: var(--color-success) !important;
+}
+
+#p2p-haus-app .is-update-needed {
+  border-color: var(--color-warning);
+}
+
+/* =========================================================
+   14. RESULTS AND OUTPUTS
+   ========================================================= */
+#p2p-haus-app #resultsSection,
+#p2p-haus-app #promptAssemblySection {
+  border-color: var(--color-border);
+  box-shadow: var(--shadow-medium);
+}
+
+#p2p-haus-app #generatorOptionsOutput {
+  display: grid;
+  gap: 24px;
+}
+
+#p2p-haus-app .generator-output-group {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-large);
+  background: var(--color-surface);
+  padding: 20px;
+}
+
+#p2p-haus-app .generator-output-group > .output-heading h3 {
+  font-size: 1.15rem;
+}
+
+#p2p-haus-app .generator-output-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 14px;
+  margin-top: 14px;
+}
+
+#p2p-haus-app .output-card {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-medium);
+  background: var(--color-surface-soft);
+  padding: 16px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+#p2p-haus-app .output-card:hover {
+  border-color: var(--color-border-strong);
+}
+
+#p2p-haus-app .output-card.is-selected {
+  border-color: var(--color-primary);
+  background: var(--color-primary-soft);
+  box-shadow: 0 0 0 2px rgba(30, 142, 90, 0.14);
+}
+
+#p2p-haus-app .output-card textarea {
+  margin-top: 10px;
+  min-height: 200px;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  line-height: 1.6;
+  background: var(--color-surface);
+}
+
+#p2p-haus-app .output-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+#p2p-haus-app .output-heading h3 {
+  margin: 0;
+}
+
+/* Quality score */
+#p2p-haus-app .quality-result {
+  margin-top: 22px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-medium);
+  background: var(--color-surface);
+  padding: 18px 20px;
+}
+
+#p2p-haus-app .quality-result.is-success {
+  border-color: color-mix(in srgb, var(--color-success) 40%, var(--color-border));
+}
+
+#p2p-haus-app .quality-result.is-warning {
+  border-color: color-mix(in srgb, var(--color-warning) 40%, var(--color-border));
+}
+
+#p2p-haus-app .quality-result.is-error {
+  border-color: color-mix(in srgb, var(--color-error) 40%, var(--color-border));
+}
+
+#p2p-haus-app .quality-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+#p2p-haus-app .quality-head h3 {
+  margin: 0;
+}
+
+#p2p-haus-app .quality-score {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 1.4rem;
+  color: var(--color-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+#p2p-haus-app .quality-bar {
+  height: 8px;
+  margin: 12px 0 16px;
+  border-radius: var(--radius-pill);
+  background: var(--color-border);
+  overflow: hidden;
+}
+
+#p2p-haus-app .quality-bar > span {
+  display: block;
+  height: 100%;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(90deg, var(--color-primary), var(--color-primary-bright));
+  transition: width 0.4s ease;
+}
+
+#p2p-haus-app .quality-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+#p2p-haus-app .quality-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--color-text-muted);
+  font-size: 0.92rem;
+}
+
+#p2p-haus-app .quality-list li.is-pass {
+  color: var(--color-text);
+}
+
+#p2p-haus-app .quality-mark {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  font-size: 0.72rem;
+  color: #ffffff;
+}
+
+#p2p-haus-app .quality-list li.is-pass .quality-mark {
+  background: var(--color-success);
+}
+
+#p2p-haus-app .quality-list li.is-todo .quality-mark {
+  background: var(--color-warning);
+}
+
+#p2p-haus-app #promptAssemblySection article {
+  margin-bottom: 24px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-medium);
+  background: var(--color-surface-soft);
+  padding: 18px;
+}
+
+#p2p-haus-app #promptAssemblySection textarea {
+  min-height: 280px;
+  background: var(--color-surface);
+}
+
+/* =========================================================
+   14b. PREMIUM OUTPUT MODULES
+   ========================================================= */
+#p2p-haus-app .premium-section {
+  border-top: 3px solid var(--color-gold);
+  box-shadow: var(--shadow-medium);
+}
+
+#p2p-haus-app .premium-section .section-number {
+  color: var(--color-primary);
+}
+
+#p2p-haus-app .premium-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 4px 0 22px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+#p2p-haus-app .premium-tab {
+  min-height: 40px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-strong);
+  color: var(--color-text);
+  border-radius: var(--radius-pill);
+  padding: 9px 18px;
+  font-weight: 600;
+}
+
+#p2p-haus-app .premium-tab:hover {
+  border-color: var(--color-gold);
+  background: color-mix(in srgb, var(--color-gold) 12%, var(--color-surface));
+  color: var(--color-text);
+}
+
+#p2p-haus-app .premium-tab.is-active,
+#p2p-haus-app .premium-tab.is-active:hover {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--on-accent);
+}
+
+#p2p-haus-app .premium-panel .field-note {
+  margin: 0 0 12px;
+}
+
+#p2p-haus-app .premium-output {
+  min-height: 360px;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  line-height: 1.65;
+  background: var(--color-surface-soft);
+}
+
+@media (max-width: 720px) {
+  #p2p-haus-app .premium-tabs {
+    gap: 6px;
+  }
+
+  #p2p-haus-app .premium-tab {
+    flex: 1 1 calc(50% - 6px);
+    padding: 9px 10px;
+    text-align: center;
+  }
+
+}
+
+/* =========================================================
+   15. TOAST
+   ========================================================= */
+#p2p-haus-app .toast {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 1500;
+  max-width: min(360px, calc(100% - 40px));
+  border-radius: var(--radius-small);
+  background: var(--color-secondary);
+  color: #ffffff;
+  padding: 14px 16px;
+  box-shadow: var(--shadow-medium);
+}
+
+#p2p-haus-app .toast.is-success {
+  background: var(--color-success);
+}
+
+#p2p-haus-app .toast.is-warning {
+  background: var(--color-warning);
+}
+
+#p2p-haus-app .toast.is-error {
+  background: var(--color-error);
+}
+
+/* =========================================================
+   16. MODAL
+   ========================================================= */
+#p2p-haus-app .modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1600;
+  display: grid;
+  place-items: center;
+  background: rgba(6, 32, 29, 0.72);
+  padding: 20px;
+}
+
+#p2p-haus-app .modal__content {
+  width: min(100%, 520px);
+  border-radius: var(--radius-large);
+  background: var(--color-surface);
+  padding: 26px;
+  box-shadow: var(--shadow-medium);
+}
+
+#p2p-haus-app .modal__content h2 {
+  margin-top: 0;
+}
+
+#p2p-haus-app .modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+#p2p-haus-app #modalCancelBtn {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-strong);
+  color: var(--color-text);
+}
+
+#p2p-haus-app #modalCancelBtn:hover {
+  background: var(--color-surface-soft);
+  border-color: var(--color-primary);
+}
+
+/* =========================================================
+   17. FOOTER
+   ========================================================= */
+#p2p-haus-app .site-footer {
+  padding: 28px 24px;
+  background: var(--color-secondary);
+  color: #eaf6f3;
+  text-align: center;
+}
+
+#p2p-haus-app .site-footer p {
+  margin: 0;
+}
+
+/* =========================================================
+   18. TABLET
+   ========================================================= */
+@media (max-width: 900px) {
+  #p2p-haus-app .generator-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  #p2p-haus-app .project-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  #p2p-haus-app .combination-item {
+    grid-template-columns: 1fr;
+  }
+
+}
+
+/* =========================================================
+   19. MOBILE
+   ========================================================= */
+@media (max-width: 720px) {
+  #p2p-haus-app .site-header {
+    padding: 34px 18px 28px;
+  }
+
+  #p2p-haus-app .main-content {
+    width: min(calc(100% - 20px), var(--content-width));
+    margin-top: 18px;
+  }
+
+  #p2p-haus-app .form-section {
+    padding: 20px;
+    border-radius: var(--radius-medium);
+  }
+
+  #p2p-haus-app .form-grid,
+#p2p-haus-app .review-grid,
+#p2p-haus-app .generator-grid,
+#p2p-haus-app .project-actions {
+    grid-template-columns: 1fr;
+  }
+
+  #p2p-haus-app .field-group--full,
+#p2p-haus-app .review-grid article:last-child {
+    grid-column: auto;
+  }
+
+  #p2p-haus-app .section-heading {
+    flex-direction: column;
+  }
+
+  #p2p-haus-app .section-heading button,
+#p2p-haus-app .action-row button,
+#p2p-haus-app .modal__actions button,
+#p2p-haus-app .output-heading button {
+    width: 100%;
+  }
+
+  #p2p-haus-app .action-row,
+#p2p-haus-app .modal__actions,
+#p2p-haus-app .output-heading {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  #p2p-haus-app .generator-card {
+    min-height: 62px;
+  }
+
+  #p2p-haus-app .toast {
+    right: 10px;
+    bottom: 10px;
+    max-width: calc(100% - 20px);
+  }
+
+}
+
+/* =========================================================
+   20. REDUCED MOTION
+   ========================================================= */
+@media (prefers-reduced-motion: reduce) {
+  #p2p-haus-app,
+#p2p-haus-app *,
+#p2p-haus-app *::before,
+#p2p-haus-app *::after {
+    scroll-behavior: auto !important;
+    transition: none !important;
+    animation: none !important;
+  }
+
+}
+
+
+
+/* =========================================================
+   LOCKED STATE + PREVIEW PAGE  (Shopify-only, hand-authored)
+   ========================================================= */
+
+.p2p-locked,
+.p2p-preview__hero {
+  position: relative;
+  overflow: hidden;
+  max-width: var(--content-width);
+  margin: 24px auto;
+  padding: clamp(48px, 8vw, 104px) clamp(24px, 5vw, 72px);
+  border-radius: var(--radius-large);
+  background:
+    radial-gradient(60% 90% at 12% -10%, rgba(39, 174, 110, 0.30), transparent 55%),
+    radial-gradient(55% 85% at 88% 6%, rgba(37, 99, 235, 0.22), transparent 55%),
+    radial-gradient(55% 80% at 62% 112%, rgba(214, 51, 108, 0.18), transparent 55%),
+    radial-gradient(45% 70% at 34% 118%, rgba(91, 60, 140, 0.18), transparent 55%),
+    linear-gradient(150deg, #0a0f0c 0%, #101613 46%, #0c1310 100%);
+  color: #e8f3ee;
+  text-align: center;
+  font-family: var(--font-body);
+}
+
+.p2p-locked::after,
+.p2p-preview__hero::after {
+  content: "";
+  position: absolute;
+  inset: -60%;
+  z-index: 0;
+  background: var(--opal-fire);
+  background-size: 220% 220%;
+  opacity: 0.14;
+  mix-blend-mode: screen;
+  filter: blur(48px);
+  pointer-events: none;
+  animation: p2p-opalDrift 16s ease-in-out infinite;
+}
+
+.p2p-locked > *,
+.p2p-preview__hero > * { position: relative; z-index: 1; }
+
+.p2p-locked__family,
+.p2p-preview__eyebrow {
+  display: block;
+  margin: 0 0 14px;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #7fe3b8;
+}
+
+.p2p-locked__heading,
+.p2p-preview__heading {
+  margin: 0 auto;
+  max-width: 20ch;
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 5vw, 3.4rem);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+.p2p-locked__heading .accent,
+.p2p-preview__heading .accent {
+  background: var(--opal-fire);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  animation: p2p-opalText 11s ease-in-out infinite;
+}
+
+.p2p-locked__body,
+.p2p-preview__sub {
+  max-width: 54ch;
+  margin: 18px auto 0;
+  color: #c9e6d8;
+  font-size: 1.08rem;
+  line-height: 1.6;
+}
+
+.p2p-locked__actions,
+.p2p-preview__actions {
+  margin-top: 32px;
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.p2p-locked__btn,
+.p2p-preview__btn {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 0.98rem;
+  padding: 14px 26px;
+  border-radius: var(--radius-pill);
+  text-decoration: none;
+  transition: transform 0.14s ease, filter 0.14s ease, border-color 0.14s ease, color 0.14s ease;
+}
+
+.p2p-locked__btn--get,
+.p2p-preview__btn--get {
+  background: linear-gradient(135deg, #27ae6e, #1e8e5a);
+  color: #ffffff;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.12), 0 14px 30px rgba(30, 142, 90, 0.35);
+}
+
+.p2p-locked__btn--get:hover,
+.p2p-preview__btn--get:hover { transform: translateY(-1px); filter: brightness(1.05); }
+
+.p2p-locked__btn--learn,
+.p2p-preview__btn--learn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  color: #e8f3ee;
+}
+
+.p2p-locked__btn--learn:hover,
+.p2p-preview__btn--learn:hover { border-color: var(--color-gold); color: #e3cd86; }
+
+/* Preview "what's inside" grid — lives on the family cream page body */
+.p2p-preview {
+  font-family: var(--font-body);
+  color: var(--color-text);
+  background:
+    radial-gradient(circle at top left, rgba(30, 142, 90, 0.08), transparent 34%),
+    var(--color-background);
+  padding-bottom: clamp(48px, 8vw, 96px);
+}
+
+.p2p-preview__grid {
+  width: min(100%, var(--content-width));
+  margin: clamp(32px, 5vw, 56px) auto 0;
+  padding: 0 clamp(20px, 4vw, 40px);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 18px;
+}
+
+.p2p-preview__card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-medium);
+  padding: 24px;
+  box-shadow: var(--shadow-small);
+}
+
+.p2p-preview__card h3 {
+  margin: 0 0 8px;
+  font-family: var(--font-display);
+  font-size: 1.12rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.p2p-preview__card p {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.96rem;
+  line-height: 1.55;
+}
+
+.p2p-preview__card::before {
+  content: "";
+  display: block;
+  width: 34px;
+  height: 3px;
+  border-radius: 3px;
+  margin-bottom: 14px;
+  background: var(--opal-fire);
+}

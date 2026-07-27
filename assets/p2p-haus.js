@@ -1,0 +1,5904 @@
+"use strict";
+
+/* =========================================================
+   THE PROMPT TO PROFIT HAUS
+   Complete application behavior — Shopify-embedded build.
+   Generated from the standalone js/script.js. The only embed
+   deltas vs. standalone: no history.scrollRestoration override
+   (don't fight the theme's scroll), and a readyState-guarded
+   init so it also boots when the theme editor injects the
+   section after DOMContentLoaded has already fired.
+   ========================================================= */
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initializeApplication);
+} else {
+  // Document already parsed — a deferred script runs at readyState
+  // "interactive", and a theme-editor AJAX re-render arrives at "complete".
+  // Defer to a macrotask so THIS file finishes evaluating its own top-level
+  // const/let (the pill registry etc., declared further down) before init
+  // touches them; calling it synchronously here would hit the temporal dead
+  // zone ("Cannot access 'pillSelectRegistry' before initialization").
+  setTimeout(initializeApplication, 0);
+}
+
+
+/* =========================================================
+   1. APPLICATION CONFIGURATION
+   ========================================================= */
+
+const APP_STORAGE_KEYS = {
+  project: "promptToProfit.currentProject",
+  productProfiles: "promptToProfit.productProfiles",
+  brandProfiles: "promptToProfit.brandProfiles",
+  savedPackages: "promptToProfit.savedPackages",
+  recentGenerations: "promptToProfit.recentGenerations"
+};
+
+const MAX_SELECTED_GENERATORS = 4;
+
+const GENERATOR_DEFINITIONS = {
+  "product-description": {
+    label: "Product Description",
+    category: "Sales Copy",
+    goal: "Write a persuasive product description",
+    fields: [
+      {
+        key: "length",
+        label: "Description Length",
+        type: "select",
+        options: ["Short", "Medium", "Detailed"],
+        defaultValue: "Medium"
+      },
+      {
+        key: "structure",
+        label: "Description Structure",
+        type: "select",
+        options: [
+          "Benefit-led paragraphs",
+          "Headline, summary, and bullets",
+          "Problem, solution, and benefits"
+        ],
+        defaultValue: "Headline, summary, and bullets"
+      },
+      {
+        key: "cta",
+        label: "Call to Action",
+        type: "text",
+        defaultValue: "Encourage the buyer to purchase now"
+      }
+    ]
+  },
+
+  "product-listing": {
+    label: "Product Listing",
+    category: "Sales Copy",
+    goal: "Create a complete marketplace-ready product listing",
+    fields: [
+      {
+        key: "marketplace",
+        label: "Marketplace",
+        type: "select",
+        options: ["Etsy", "Shopify", "Amazon", "General Marketplace"],
+        defaultValue: "General Marketplace"
+      },
+      {
+        key: "format",
+        label: "Listing Format",
+        type: "select",
+        options: [
+          "Title, description, and bullets",
+          "SEO title and full listing",
+          "Conversion-focused listing"
+        ],
+        defaultValue: "SEO title and full listing"
+      },
+      {
+        key: "keywordFocus",
+        label: "Keyword Focus",
+        type: "text",
+        defaultValue: "Use natural buyer-search language"
+      }
+    ]
+  },
+
+  "sales-page": {
+    label: "Sales Page",
+    category: "Sales Copy",
+    goal: "Create a conversion-focused sales page",
+    fields: [
+      {
+        key: "pageLength",
+        label: "Page Length",
+        type: "select",
+        options: ["Short-form", "Standard", "Long-form"],
+        defaultValue: "Standard"
+      },
+      {
+        key: "framework",
+        label: "Sales Structure",
+        type: "select",
+        options: [
+          "Problem, agitation, solution",
+          "Benefits, proof, offer",
+          "Story, value, action"
+        ],
+        defaultValue: "Benefits, proof, offer"
+      },
+      {
+        key: "cta",
+        label: "Primary Action",
+        type: "text",
+        defaultValue: "Purchase the product"
+      }
+    ]
+  },
+
+  "social-post": {
+    label: "Social Posts",
+    category: "Social Content",
+    goal: "Create platform-ready promotional social posts",
+    fields: [
+      {
+        key: "platform",
+        label: "Social Platform",
+        type: "select",
+        options: [
+          "Instagram",
+          "Facebook",
+          "LinkedIn",
+          "Threads",
+          "Multi-platform"
+        ],
+        defaultValue: "Multi-platform"
+      },
+      {
+        key: "postStyle",
+        label: "Post Style",
+        type: "select",
+        options: [
+          "Educational",
+          "Promotional",
+          "Story-led",
+          "Community-focused"
+        ],
+        defaultValue: "Promotional"
+      },
+      {
+        key: "cta",
+        label: "Call to Action",
+        type: "text",
+        defaultValue: "Invite the audience to learn more"
+      }
+    ]
+  },
+
+  "hooks-captions": {
+    label: "Hooks & Captions",
+    category: "Social Content",
+    goal: "Create attention-grabbing hooks and supporting captions",
+    fields: [
+      {
+        key: "hookStyle",
+        label: "Hook Style",
+        type: "select",
+        options: [
+          "Curiosity",
+          "Problem-aware",
+          "Bold statement",
+          "Transformation",
+          "Contrarian"
+        ],
+        defaultValue: "Curiosity"
+      },
+      {
+        key: "captionLength",
+        label: "Caption Length",
+        type: "select",
+        options: ["Short", "Medium", "Long"],
+        defaultValue: "Medium"
+      },
+      {
+        key: "cta",
+        label: "Caption Action",
+        type: "text",
+        defaultValue: "Prompt the viewer to comment, save, or click"
+      }
+    ]
+  },
+
+  tiktok: {
+    label: "TikTok",
+    category: "Social Content",
+    goal: "Create a TikTok concept with hook, scenes, and caption",
+    fields: [
+      {
+        key: "videoLength",
+        label: "Video Length",
+        type: "select",
+        options: ["15 seconds", "30 seconds", "45 seconds", "60 seconds"],
+        defaultValue: "30 seconds"
+      },
+      {
+        key: "presentation",
+        label: "Presentation Style",
+        type: "select",
+        options: [
+          "Faceless",
+          "Talking head",
+          "Product demonstration",
+          "Text-led"
+        ],
+        defaultValue: "Faceless"
+      },
+      {
+        key: "opening",
+        label: "Opening Style",
+        type: "select",
+        options: [
+          "Immediate visual hook",
+          "Spoken hook",
+          "Problem scenario",
+          "Before-and-after"
+        ],
+        defaultValue: "Immediate visual hook"
+      }
+    ]
+  },
+
+  "pinterest-pin": {
+    label: "Pinterest",
+    category: "Social Content",
+    goal: "Create a Pinterest pin concept, title, and description",
+    fields: [
+      {
+        key: "pinType",
+        label: "Pin Type",
+        type: "select",
+        options: [
+          "Product pin",
+          "Educational pin",
+          "List-style pin",
+          "Promotional pin"
+        ],
+        defaultValue: "Product pin"
+      },
+      {
+        key: "orientation",
+        label: "Orientation",
+        type: "select",
+        options: ["Vertical 2:3", "Long vertical", "Square"],
+        defaultValue: "Vertical 2:3"
+      },
+      {
+        key: "overlay",
+        label: "Overlay Text Direction",
+        type: "text",
+        defaultValue: "Use one clear, benefit-led headline"
+      }
+    ]
+  },
+
+  "seo-copy": {
+    label: "SEO",
+    category: "Discovery",
+    goal: "Create search-focused SEO copy",
+    fields: [
+      {
+        key: "asset",
+        label: "SEO Asset",
+        type: "select",
+        options: [
+          "Product page",
+          "Blog post",
+          "Marketplace listing",
+          "Landing page"
+        ],
+        defaultValue: "Product page"
+      },
+      {
+        key: "intent",
+        label: "Search Intent",
+        type: "select",
+        options: ["Commercial", "Transactional", "Informational"],
+        defaultValue: "Commercial"
+      },
+      {
+        key: "location",
+        label: "Location or Market",
+        type: "text",
+        defaultValue: "Broad English-speaking market"
+      }
+    ]
+  },
+
+  "tags-hashtags": {
+    label: "Tags",
+    category: "Discovery",
+    goal: "Create relevant marketplace and social discovery tags",
+    fields: [
+      {
+        key: "tagType",
+        label: "Tag Type",
+        type: "select",
+        options: [
+          "Marketplace tags",
+          "Social hashtags",
+          "Search keyword phrases",
+          "Mixed discovery terms"
+        ],
+        defaultValue: "Mixed discovery terms"
+      },
+      {
+        key: "count",
+        label: "Number of Tags",
+        type: "select",
+        options: ["10", "13", "20", "30"],
+        defaultValue: "13"
+      },
+      {
+        key: "specificity",
+        label: "Keyword Specificity",
+        type: "select",
+        options: ["Broad", "Balanced", "Long-tail"],
+        defaultValue: "Balanced"
+      }
+    ]
+  },
+
+  "geo-optimization": {
+    label: "GEO / AI Search",
+    category: "Discovery",
+    goal: "Optimize the product so AI answer engines recommend and cite it",
+    fields: [
+      {
+        key: "engine",
+        label: "AI Answer Engine",
+        type: "select",
+        options: [
+          "ChatGPT / GPT search",
+          "Perplexity",
+          "Google AI Overviews",
+          "Gemini",
+          "All AI answer engines"
+        ],
+        defaultValue: "All AI answer engines"
+      },
+      {
+        key: "asset",
+        label: "Content to Optimize",
+        type: "select",
+        options: [
+          "Product page",
+          "Marketplace listing",
+          "FAQ / Q&A block",
+          "Comparison / best-of content",
+          "About / brand page"
+        ],
+        defaultValue: "Product page"
+      },
+      {
+        key: "format",
+        label: "Output Format",
+        type: "select",
+        options: [
+          "Answer-ready copy",
+          "FAQ Q&A pairs",
+          "Citation-friendly fact sheet",
+          "Structured-data notes"
+        ],
+        defaultValue: "Answer-ready copy"
+      },
+      {
+        key: "queries",
+        label: "Buyer Questions to Win",
+        type: "text",
+        defaultValue: "The questions buyers ask an AI before choosing"
+      }
+    ]
+  },
+
+  "product-mockup": {
+    label: "Product Mockups",
+    category: "Visual Creation",
+    goal: "Create a professional product mockup image prompt",
+    fields: [
+      {
+        key: "setting",
+        label: "Mockup Setting",
+        type: "select",
+        options: [
+          "Clean studio",
+          "Lifestyle scene",
+          "Flat lay",
+          "Retail display",
+          "Editorial setup"
+        ],
+        defaultValue: "Lifestyle scene"
+      },
+      {
+        key: "camera",
+        label: "Camera Angle",
+        type: "select",
+        options: [
+          "Front view",
+          "Three-quarter view",
+          "Top-down",
+          "Close-up",
+          "Eye-level"
+        ],
+        defaultValue: "Three-quarter view"
+      },
+      {
+        key: "lighting",
+        label: "Lighting",
+        type: "select",
+        options: [
+          "Soft natural light",
+          "Bright studio light",
+          "Warm ambient light",
+          "Dramatic directional light"
+        ],
+        defaultValue: "Soft natural light"
+      }
+    ]
+  },
+
+  "product-ad": {
+    label: "Advertisement Graphics",
+    category: "Visual Creation",
+    goal: "Create a conversion-focused advertisement graphic prompt",
+    fields: [
+      {
+        key: "placement",
+        label: "Ad Placement",
+        type: "select",
+        options: [
+          "Instagram feed",
+          "Instagram story",
+          "Facebook feed",
+          "Pinterest",
+          "Website banner"
+        ],
+        defaultValue: "Instagram feed"
+      },
+      {
+        key: "objective",
+        label: "Ad Objective",
+        type: "select",
+        options: [
+          "Product awareness",
+          "Direct sale",
+          "Lead generation",
+          "Launch announcement"
+        ],
+        defaultValue: "Direct sale"
+      },
+      {
+        key: "headline",
+        label: "Ad Headline Direction",
+        type: "text",
+        defaultValue: "Use a concise, benefit-led headline"
+      }
+    ]
+  },
+
+  "promotional-flyer": {
+    label: "Flyers",
+    category: "Visual Creation",
+    goal: "Create a professional promotional flyer prompt",
+    fields: [
+      {
+        key: "flyerUse",
+        label: "Flyer Use",
+        type: "select",
+        options: [
+          "Product promotion",
+          "Event promotion",
+          "Service offer",
+          "Launch announcement"
+        ],
+        defaultValue: "Product promotion"
+      },
+      {
+        key: "format",
+        label: "Flyer Format",
+        type: "select",
+        options: ["Portrait", "Square", "Landscape"],
+        defaultValue: "Portrait"
+      },
+      {
+        key: "informationDensity",
+        label: "Information Density",
+        type: "select",
+        options: ["Minimal", "Balanced", "Detailed"],
+        defaultValue: "Balanced"
+      }
+    ]
+  },
+
+  "lead-magnet-cover": {
+    label: "Lead Magnet Covers",
+    category: "Visual Creation",
+    goal: "Create a high-value lead magnet cover prompt",
+    fields: [
+      {
+        key: "assetType",
+        label: "Lead Magnet Type",
+        type: "select",
+        options: [
+          "Guide",
+          "Checklist",
+          "Workbook",
+          "Template pack",
+          "Mini course"
+        ],
+        defaultValue: "Guide"
+      },
+      {
+        key: "coverStyle",
+        label: "Cover Style",
+        type: "select",
+        options: [
+          "Clean professional",
+          "Bold modern",
+          "Editorial",
+          "Minimal premium"
+        ],
+        defaultValue: "Clean professional"
+      },
+      {
+        key: "titleTreatment",
+        label: "Title Treatment",
+        type: "text",
+        defaultValue: "Use a large, highly readable title"
+      }
+    ]
+  },
+
+  "notebook-cover": {
+    label: "Notebook Covers",
+    category: "Visual Creation",
+    goal: "Create a print-ready notebook cover prompt",
+    fields: [
+      {
+        key: "coverStyle",
+        label: "Cover Style",
+        type: "select",
+        options: [
+          "Typography-led",
+          "Pattern-based",
+          "Illustrated",
+          "Minimal",
+          "Luxury"
+        ],
+        defaultValue: "Typography-led"
+      },
+      {
+        key: "trim",
+        label: "Cover Format",
+        type: "select",
+        options: ["Front cover", "Full wrap", "Square cover"],
+        defaultValue: "Front cover"
+      },
+      {
+        key: "coverText",
+        label: "Exact Cover Text",
+        type: "text",
+        defaultValue: ""
+      }
+    ]
+  },
+
+  "infographic": {
+    label: "Infographics",
+    category: "Visual Creation",
+    goal: "Create a clear, educational infographic prompt",
+    fields: [
+      {
+        key: "structure",
+        label: "Infographic Structure",
+        type: "select",
+        options: [
+          "Step-by-step",
+          "Comparison",
+          "Checklist",
+          "Statistics",
+          "Process diagram"
+        ],
+        defaultValue: "Step-by-step"
+      },
+      {
+        key: "density",
+        label: "Content Density",
+        type: "select",
+        options: ["Simple", "Balanced", "Detailed"],
+        defaultValue: "Balanced"
+      },
+      {
+        key: "orientation",
+        label: "Orientation",
+        type: "select",
+        options: ["Vertical", "Square", "Landscape"],
+        defaultValue: "Vertical"
+      }
+    ]
+  },
+
+  "creative-direction": {
+    label: "Creative Direction",
+    category: "Strategy",
+    goal: "Create a complete visual and creative direction brief",
+    fields: [
+      {
+        key: "campaignType",
+        label: "Creative Project",
+        type: "select",
+        options: [
+          "Product launch",
+          "Brand campaign",
+          "Seasonal campaign",
+          "Content series",
+          "Evergreen promotion"
+        ],
+        defaultValue: "Product launch"
+      },
+      {
+        key: "detailLevel",
+        label: "Brief Detail",
+        type: "select",
+        options: ["Concise", "Standard", "Comprehensive"],
+        defaultValue: "Standard"
+      },
+      {
+        key: "deliverableFocus",
+        label: "Deliverable Focus",
+        type: "text",
+        defaultValue: "Create one cohesive direction across all assets"
+      }
+    ]
+  },
+
+  "hero-banner": {
+    label: "Hero Banner",
+    category: "Visual Creation",
+    goal: "Create a website hero banner image and copy prompt",
+    fields: [
+      {
+        key: "layout",
+        label: "Banner Layout",
+        type: "select",
+        options: [
+          "Product left, text right",
+          "Text left, product right",
+          "Centered composition",
+          "Full-bleed image"
+        ],
+        defaultValue: "Text left, product right"
+      },
+      {
+        key: "objective",
+        label: "Banner Objective",
+        type: "select",
+        options: [
+          "Introduce product",
+          "Promote offer",
+          "Announce launch",
+          "Capture leads"
+        ],
+        defaultValue: "Introduce product"
+      },
+      {
+        key: "cta",
+        label: "Button Text Direction",
+        type: "text",
+        defaultValue: "Use one clear action button"
+      }
+    ]
+  },
+
+  "video-motion": {
+    label: "Video & Motion Graphics",
+    category: "Video",
+    goal: "Create a motion graphic or short video generation prompt",
+    fields: [
+      {
+        key: "duration",
+        label: "Duration",
+        type: "select",
+        options: ["5 seconds", "10 seconds", "15 seconds", "30 seconds"],
+        defaultValue: "10 seconds"
+      },
+      {
+        key: "motionStyle",
+        label: "Motion Style",
+        type: "select",
+        options: [
+          "Smooth product animation",
+          "Kinetic typography",
+          "Cinematic movement",
+          "Fast social edit"
+        ],
+        defaultValue: "Smooth product animation"
+      },
+      {
+        key: "aspectRatio",
+        label: "Aspect Ratio",
+        type: "select",
+        options: ["9:16", "1:1", "16:9", "4:5"],
+        defaultValue: "9:16"
+      }
+    ]
+  },
+
+  "short-video-script": {
+    label: "Short-Form Video Scripts",
+    category: "Video",
+    goal: "Create a complete short-form video script",
+    fields: [
+      {
+        key: "duration",
+        label: "Script Length",
+        type: "select",
+        options: ["15 seconds", "30 seconds", "45 seconds", "60 seconds"],
+        defaultValue: "30 seconds"
+      },
+      {
+        key: "scriptStyle",
+        label: "Script Style",
+        type: "select",
+        options: [
+          "Direct response",
+          "Educational",
+          "Story-led",
+          "Demonstration",
+          "Problem and solution"
+        ],
+        defaultValue: "Direct response"
+      },
+      {
+        key: "sceneDetail",
+        label: "Scene Detail",
+        type: "select",
+        options: ["Simple", "Standard", "Shot-by-shot"],
+        defaultValue: "Shot-by-shot"
+      }
+    ]
+  },
+
+  "voiceover-script": {
+    label: "Voiceover Scripts",
+    category: "Video",
+    goal: "Create a natural promotional voiceover script",
+    fields: [
+      {
+        key: "duration",
+        label: "Voiceover Length",
+        type: "select",
+        options: ["15 seconds", "30 seconds", "45 seconds", "60 seconds"],
+        defaultValue: "30 seconds"
+      },
+      {
+        key: "delivery",
+        label: "Delivery Style",
+        type: "select",
+        options: [
+          "Warm and conversational",
+          "Energetic",
+          "Professional",
+          "Calm and premium"
+        ],
+        defaultValue: "Warm and conversational"
+      },
+      {
+        key: "speaker",
+        label: "Speaker Perspective",
+        type: "select",
+        options: ["Brand voice", "Customer voice", "Creator voice"],
+        defaultValue: "Brand voice"
+      }
+    ]
+  },
+
+  "product-demo": {
+    label: "Product Demo",
+    category: "Video",
+    goal: "Create a product demonstration video plan",
+    fields: [
+      {
+        key: "demoType",
+        label: "Demo Type",
+        type: "select",
+        options: [
+          "How it works",
+          "Before and after",
+          "Feature walkthrough",
+          "Use-case demonstration"
+        ],
+        defaultValue: "Feature walkthrough"
+      },
+      {
+        key: "duration",
+        label: "Demo Length",
+        type: "select",
+        options: ["15 seconds", "30 seconds", "60 seconds", "90 seconds"],
+        defaultValue: "30 seconds"
+      },
+      {
+        key: "format",
+        label: "Production Format",
+        type: "select",
+        options: [
+          "Faceless",
+          "Hands-only",
+          "Presenter-led",
+          "Screen recording"
+        ],
+        defaultValue: "Faceless"
+      }
+    ]
+  },
+
+  "launch-campaign": {
+    label: "Launch Campaign",
+    category: "Launch",
+    goal: "Create a coordinated product launch campaign",
+    fields: [
+      {
+        key: "launchLength",
+        label: "Campaign Length",
+        type: "select",
+        options: ["3 days", "5 days", "7 days", "14 days"],
+        defaultValue: "7 days"
+      },
+      {
+        key: "launchStage",
+        label: "Launch Stage",
+        type: "select",
+        options: [
+          "Pre-launch",
+          "Launch week",
+          "Post-launch",
+          "Full campaign"
+        ],
+        defaultValue: "Full campaign"
+      },
+      {
+        key: "channel",
+        label: "Primary Channel",
+        type: "select",
+        options: [
+          "Instagram",
+          "TikTok",
+          "Email",
+          "Pinterest",
+          "Multi-channel"
+        ],
+        defaultValue: "Multi-channel"
+      }
+    ]
+  },
+
+  "launch-carousel": {
+    label: "Carousel Launch",
+    category: "Launch",
+    goal: "Create a slide-by-slide product launch carousel",
+    fields: [
+      {
+        key: "slideCount",
+        label: "Number of Slides",
+        type: "select",
+        options: ["5", "7", "8", "10"],
+        defaultValue: "7"
+      },
+      {
+        key: "carouselStyle",
+        label: "Carousel Style",
+        type: "select",
+        options: [
+          "Problem to solution",
+          "Feature breakdown",
+          "Story-led launch",
+          "Educational launch"
+        ],
+        defaultValue: "Problem to solution"
+      },
+      {
+        key: "finalAction",
+        label: "Final Slide Action",
+        type: "text",
+        defaultValue: "Invite the viewer to purchase or learn more"
+      }
+    ]
+  },
+
+  "launch-announcement": {
+    label: "Launch Announcement",
+    category: "Launch",
+    goal: "Create a compelling product launch announcement",
+    fields: [
+      {
+        key: "channel",
+        label: "Announcement Channel",
+        type: "select",
+        options: [
+          "Social post",
+          "Email",
+          "Website",
+          "Press-style announcement"
+        ],
+        defaultValue: "Social post"
+      },
+      {
+        key: "energy",
+        label: "Announcement Energy",
+        type: "select",
+        options: ["Excited", "Premium", "Warm", "Bold"],
+        defaultValue: "Excited"
+      },
+      {
+        key: "cta",
+        label: "Launch Action",
+        type: "text",
+        defaultValue: "Direct the audience to view the product"
+      }
+    ]
+  },
+
+  "b-roll": {
+    label: "B-Roll",
+    category: "Video",
+    goal: "Create a practical B-roll shot list",
+    fields: [
+      {
+        key: "shotCount",
+        label: "Number of Shots",
+        type: "select",
+        options: ["5", "8", "10", "15"],
+        defaultValue: "8"
+      },
+      {
+        key: "setting",
+        label: "Filming Setting",
+        type: "select",
+        options: [
+          "Studio",
+          "Home lifestyle",
+          "Workspace",
+          "Outdoor",
+          "Retail environment"
+        ],
+        defaultValue: "Home lifestyle"
+      },
+      {
+        key: "shotStyle",
+        label: "Shot Style",
+        type: "select",
+        options: [
+          "Clean product detail",
+          "Cinematic",
+          "Casual creator",
+          "Fast-paced social"
+        ],
+        defaultValue: "Clean product detail"
+      }
+    ]
+  },
+
+  "cinematic-reveal": {
+    label: "Cinematic Reveal",
+    category: "Video",
+    goal: "Create a cinematic product reveal prompt",
+    fields: [
+      {
+        key: "duration",
+        label: "Reveal Length",
+        type: "select",
+        options: ["5 seconds", "10 seconds", "15 seconds", "30 seconds"],
+        defaultValue: "10 seconds"
+      },
+      {
+        key: "revealStyle",
+        label: "Reveal Style",
+        type: "select",
+        options: [
+          "Slow luxury reveal",
+          "Dramatic light reveal",
+          "Fast energetic reveal",
+          "Minimal studio reveal"
+        ],
+        defaultValue: "Slow luxury reveal"
+      },
+      {
+        key: "cameraMotion",
+        label: "Camera Motion",
+        type: "select",
+        options: [
+          "Slow push-in",
+          "Orbit",
+          "Macro pull-back",
+          "Top-down transition"
+        ],
+        defaultValue: "Slow push-in"
+      }
+    ]
+  },
+
+  "landing-page": {
+    label: "Landing Page",
+    category: "Sales Copy",
+    goal: "Create a focused, conversion-ready landing page",
+    fields: [
+      {
+        key: "pageType",
+        label: "Landing Page Type",
+        type: "select",
+        options: [
+          "Product landing page",
+          "Lead capture page",
+          "Waitlist page",
+          "Webinar registration page",
+          "Coming soon page"
+        ],
+        defaultValue: "Product landing page"
+      },
+      {
+        key: "sections",
+        label: "Page Sections",
+        type: "select",
+        options: [
+          "Hero, benefits, and action",
+          "Hero, proof, offer, and action",
+          "Long-form with questions answered",
+          "Minimal single-offer page"
+        ],
+        defaultValue: "Hero, proof, offer, and action"
+      },
+      {
+        key: "cta",
+        label: "Primary Action",
+        type: "text",
+        defaultValue: "Drive visitors to one clear action"
+      }
+    ]
+  },
+
+  "promotional-email": {
+    label: "Promotional Email",
+    category: "Sales Copy",
+    goal: "Write a persuasive promotional email",
+    fields: [
+      {
+        key: "emailType",
+        label: "Email Type",
+        type: "select",
+        options: [
+          "Sales announcement",
+          "Limited-time offer",
+          "Product launch",
+          "Restock alert",
+          "Last-chance reminder"
+        ],
+        defaultValue: "Limited-time offer"
+      },
+      {
+        key: "length",
+        label: "Email Length",
+        type: "select",
+        options: ["Short", "Medium", "Detailed"],
+        defaultValue: "Medium"
+      },
+      {
+        key: "cta",
+        label: "Call to Action",
+        type: "text",
+        defaultValue: "Encourage the reader to buy now"
+      }
+    ]
+  },
+
+  "offer-summary": {
+    label: "Offer Summary",
+    category: "Sales Copy",
+    goal: "Summarize the offer clearly and persuasively",
+    fields: [
+      {
+        key: "format",
+        label: "Summary Format",
+        type: "select",
+        options: [
+          "Bullet summary",
+          "Short paragraph",
+          "Headline and bullets",
+          "Comparison layout"
+        ],
+        defaultValue: "Headline and bullets"
+      },
+      {
+        key: "emphasis",
+        label: "What to Emphasize",
+        type: "select",
+        options: [
+          "Value and savings",
+          "Transformation",
+          "Bonuses and extras",
+          "Urgency and scarcity"
+        ],
+        defaultValue: "Value and savings"
+      },
+      {
+        key: "cta",
+        label: "Next Step",
+        type: "text",
+        defaultValue: "Make the next step obvious"
+      }
+    ]
+  },
+
+  "pricing-positioning": {
+    label: "Pricing Positioning",
+    category: "Sales Copy",
+    goal: "Position the price so it feels worth it",
+    fields: [
+      {
+        key: "strategy",
+        label: "Positioning Strategy",
+        type: "select",
+        options: [
+          "Value stacking",
+          "Cost-per-use framing",
+          "Comparison anchoring",
+          "Bonus justification",
+          "Payment framing"
+        ],
+        defaultValue: "Value stacking"
+      },
+      {
+        key: "tone",
+        label: "Positioning Tone",
+        type: "select",
+        options: [
+          "Confident",
+          "Reassuring",
+          "Premium",
+          "Straightforward"
+        ],
+        defaultValue: "Confident"
+      },
+      {
+        key: "priceHandling",
+        label: "Price Handling",
+        type: "text",
+        defaultValue: "Present the price as a clear investment"
+      }
+    ]
+  },
+
+  "content-series": {
+    label: "Content Series",
+    category: "Launch",
+    goal: "Plan a multi-post promotional content series",
+    fields: [
+      {
+        key: "postCount",
+        label: "Number of Posts",
+        type: "select",
+        options: ["3 posts", "5 posts", "7 posts", "10 posts"],
+        defaultValue: "5 posts"
+      },
+      {
+        key: "seriesStyle",
+        label: "Series Style",
+        type: "select",
+        options: [
+          "Educational series",
+          "Story-driven series",
+          "Behind-the-scenes series",
+          "Countdown series"
+        ],
+        defaultValue: "Educational series"
+      },
+      {
+        key: "channel",
+        label: "Primary Channel",
+        type: "select",
+        options: [
+          "Instagram",
+          "TikTok",
+          "Email",
+          "Pinterest",
+          "Multi-channel"
+        ],
+        defaultValue: "Multi-channel"
+      }
+    ]
+  },
+
+  "listing-image": {
+    label: "Listing Image",
+    category: "Visual Creation",
+    goal: "Create a marketplace listing image prompt",
+    fields: [
+      {
+        key: "imageType",
+        label: "Image Type",
+        type: "select",
+        options: [
+          "Main listing image",
+          "Feature callout image",
+          "Size or scale image",
+          "What's included image",
+          "How-to image"
+        ],
+        defaultValue: "Main listing image"
+      },
+      {
+        key: "background",
+        label: "Background",
+        type: "select",
+        options: [
+          "Clean white",
+          "Soft neutral",
+          "Lifestyle scene",
+          "Branded color",
+          "Subtle gradient"
+        ],
+        defaultValue: "Clean white"
+      },
+      {
+        key: "textOverlay",
+        label: "Text Overlay",
+        type: "select",
+        options: [
+          "No text",
+          "Minimal label",
+          "Feature callouts",
+          "Full information"
+        ],
+        defaultValue: "Minimal label"
+      }
+    ]
+  },
+
+  "lifestyle-image": {
+    label: "Lifestyle Image",
+    category: "Visual Creation",
+    goal: "Create a lifestyle product image prompt",
+    fields: [
+      {
+        key: "scene",
+        label: "Scene",
+        type: "select",
+        options: [
+          "Home interior",
+          "Workspace",
+          "Outdoor",
+          "In-use close-up",
+          "Styled flat lay"
+        ],
+        defaultValue: "Home interior"
+      },
+      {
+        key: "mood",
+        label: "Mood",
+        type: "select",
+        options: [
+          "Warm and inviting",
+          "Bright and fresh",
+          "Calm and premium",
+          "Energetic and vibrant"
+        ],
+        defaultValue: "Warm and inviting"
+      },
+      {
+        key: "subject",
+        label: "Subject Focus",
+        type: "select",
+        options: [
+          "Product only",
+          "Product in hands",
+          "Product with props",
+          "Product in context"
+        ],
+        defaultValue: "Product with props"
+      }
+    ]
+  },
+
+  "product-video-ad": {
+    label: "Product Video Ad",
+    category: "Video",
+    goal: "Create a short product advertisement video prompt",
+    fields: [
+      {
+        key: "duration",
+        label: "Ad Length",
+        type: "select",
+        options: ["15 seconds", "30 seconds", "45 seconds", "60 seconds"],
+        defaultValue: "30 seconds"
+      },
+      {
+        key: "adAngle",
+        label: "Ad Angle",
+        type: "select",
+        options: [
+          "Problem and solution",
+          "Feature showcase",
+          "Testimonial style",
+          "Fast promo cuts"
+        ],
+        defaultValue: "Problem and solution"
+      },
+      {
+        key: "format",
+        label: "Production Format",
+        type: "select",
+        options: [
+          "Faceless",
+          "Talking head",
+          "Product demonstration",
+          "Text-led"
+        ],
+        defaultValue: "Faceless"
+      }
+    ]
+  },
+
+  "launch-teaser": {
+    label: "Launch Teaser",
+    category: "Video",
+    goal: "Create a suspense-building launch teaser prompt",
+    fields: [
+      {
+        key: "duration",
+        label: "Teaser Length",
+        type: "select",
+        options: ["5 seconds", "10 seconds", "15 seconds", "30 seconds"],
+        defaultValue: "10 seconds"
+      },
+      {
+        key: "teaserStyle",
+        label: "Teaser Style",
+        type: "select",
+        options: [
+          "Mysterious reveal",
+          "Countdown",
+          "Sneak peek",
+          "Coming soon"
+        ],
+        defaultValue: "Sneak peek"
+      },
+      {
+        key: "aspectRatio",
+        label: "Aspect Ratio",
+        type: "select",
+        options: ["9:16", "1:1", "16:9", "4:5"],
+        defaultValue: "9:16"
+      }
+    ]
+  }
+};
+
+/* =========================================================
+   2. APPLICATION STATE
+   ========================================================= */
+
+const appState = {
+  selectedGenerators: [],
+  generatorSettings: {},
+  generatedOptions: {},
+  selectedOptions: {},
+  lastGeneratedSignature: "",
+  modalAction: null,
+  activeAccordion: null,
+  isGenerating: false,
+  premiumOutputs: {},
+  brandMode: "product"
+};
+
+
+/* =========================================================
+   3. INITIALIZATION
+   ========================================================= */
+
+function initializeApplication() {
+  normalizeGeneratorCheckboxes();
+  initializeGeneratorSettings();
+  bindGlobalEvents();
+  restoreCurrentProject();
+  synchronizeSelectedGenerators();
+  renderGeneratorPanels();
+  updateSelectionLimit();
+  updateIngredientReview();
+  updateValidationSummary();
+  updateGeneratedVisibility();
+  enhanceSelectsAsPills();
+  initPremiumTabs();
+  initJourney();
+  initHeroVideo();
+  initBackToTop();
+  renderVault();
+  renderRecent();
+  updateModeToggle();
+  checkBrandKitVault();
+  window.scrollTo(0, 0);
+}
+
+// Floating "back to top" button that appears once the user scrolls down.
+function initBackToTop() {
+  const button = getElement("backToTop");
+
+  if (!button) {
+    return;
+  }
+
+  const toggle = () => {
+    button.classList.toggle("is-visible", window.scrollY > 500);
+  };
+
+  window.addEventListener("scroll", toggle, { passive: true });
+  button.addEventListener("click", () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+
+  toggle();
+}
+
+// Start-here journey: tap a trail stop to reveal it, flip a card for the payoff.
+function initJourney() {
+  document.querySelectorAll("[data-jstop]").forEach((stop) => {
+    stop.addEventListener("click", () => {
+      const isOpen = stop.getAttribute("aria-expanded") === "true";
+      stop.setAttribute("aria-expanded", String(!isOpen));
+
+      const body = document.getElementById(stop.getAttribute("aria-controls"));
+      if (body) {
+        body.style.maxHeight = isOpen ? "0px" : `${body.scrollHeight + 24}px`;
+      }
+    });
+  });
+
+  document.querySelectorAll("[data-jflip]").forEach((card) => {
+    card.setAttribute("aria-pressed", "false");
+    card.addEventListener("click", () => {
+      const flipped = card.classList.toggle("is-flipped");
+      card.setAttribute("aria-pressed", String(flipped));
+    });
+  });
+}
+
+// Links each premium tab to its panel for screen readers.
+function initPremiumTabs() {
+  document.querySelectorAll(".premium-tab").forEach((tab) => {
+    const key = tab.dataset.premiumTab;
+    const panel = document.querySelector(`[data-premium-panel="${key}"]`);
+
+    if (!panel) {
+      return;
+    }
+
+    panel.id = panel.id || `premiumPanel-${key}`;
+    panel.setAttribute("role", "tabpanel");
+    panel.setAttribute("tabindex", "0");
+    tab.setAttribute("aria-controls", panel.id);
+  });
+}
+
+
+/* =========================================================
+   PILL-SELECT ENHANCEMENT
+   Turns single-choice <select> controls into tap-to-choose
+   pill groups. The native <select> stays in the DOM as the
+   value holder, so all existing read/write/validate/restore/
+   randomize logic keeps working through it unchanged.
+   ========================================================= */
+
+const pillSelectRegistry = [];
+
+function enhanceSelectsAsPills() {
+  const denylist = new Set(["generatorCategoryFilter"]);
+
+  document
+    .querySelectorAll("#generatorForm select")
+    .forEach((select) => {
+      if (denylist.has(select.id)) {
+        return;
+      }
+
+      setupPillSelect(select);
+    });
+}
+
+function setupPillSelect(select) {
+  if (select.dataset.pillsReady === "true") {
+    return;
+  }
+
+  select.dataset.pillsReady = "true";
+
+  const isMulti = select.multiple;
+  const maxChoices = isMulti ? getPillMaxChoices(select) : 0;
+
+  const group = document.createElement("div");
+  group.className = isMulti ? "pill-select pill-select--multi" : "pill-select";
+  group.setAttribute("role", "group");
+
+  const label = select.id
+    ? document.querySelector(`label[for="${CSS.escape(select.id)}"]`)
+    : null;
+
+  if (label) {
+    group.setAttribute("aria-label", label.textContent.trim());
+  }
+
+  Array.from(select.options)
+    .filter((option) => option.value !== "")
+    .forEach((option) => {
+      const pill = document.createElement("button");
+      pill.type = "button";
+      pill.className = "pill";
+      pill.textContent = option.textContent.trim();
+      pill.dataset.value = option.value;
+
+      pill.addEventListener("click", () => {
+        if (isMulti) {
+          const selecting = !option.selected;
+
+          if (
+            selecting &&
+            maxChoices > 0 &&
+            countSelectedOptions(select) >= maxChoices
+          ) {
+            nudge(pill);
+            showToast(
+              `Choose up to ${maxChoices} for ${
+                group.getAttribute("aria-label") || "this option"
+              }.`,
+              "warning"
+            );
+            return;
+          }
+
+          option.selected = selecting;
+        } else {
+          select.value = option.value;
+        }
+
+        select.dispatchEvent(new Event("change", { bubbles: true }));
+        syncPillGroup(select, group);
+      });
+
+      group.appendChild(pill);
+    });
+
+  // Keep the native select for its value, but take it out of the tab order
+  // and the accessibility tree — the pills are now the control.
+  select.classList.add("pill-native-hidden");
+  select.setAttribute("tabindex", "-1");
+  select.setAttribute("aria-hidden", "true");
+  select.insertAdjacentElement("afterend", group);
+
+  select.addEventListener("change", () => syncPillGroup(select, group));
+  syncPillGroup(select, group);
+
+  pillSelectRegistry.push({ select, group });
+}
+
+function syncPillGroup(select, group) {
+  const isMulti = select.multiple;
+
+  group.querySelectorAll(".pill").forEach((pill) => {
+    let pressed;
+
+    if (isMulti) {
+      const option = Array.from(select.options).find(
+        (candidate) => candidate.value === pill.dataset.value
+      );
+      pressed = Boolean(option && option.selected);
+    } else {
+      pressed = pill.dataset.value === select.value;
+    }
+
+    pill.setAttribute("aria-pressed", String(pressed));
+  });
+}
+
+function countSelectedOptions(select) {
+  return Array.from(select.options).filter((option) => option.selected).length;
+}
+
+// Reads a "select up to three / up to 3" hint near a multi-select to cap it.
+function getPillMaxChoices(select) {
+  const scope = select.closest(".field-group") || select.parentElement;
+  const text = scope ? scope.textContent : "";
+  const match = /up to (\w+)/i.exec(text);
+
+  if (!match) {
+    return 0;
+  }
+
+  const words = { one: 1, two: 2, three: 3, four: 4, five: 5, six: 6 };
+  const numeric = Number.parseInt(match[1], 10);
+
+  return Number.isNaN(numeric)
+    ? words[match[1].toLowerCase()] || 0
+    : numeric;
+}
+
+function nudge(element) {
+  if (typeof element.animate !== "function") {
+    return;
+  }
+
+  element.animate(
+    [
+      { transform: "translateX(0)" },
+      { transform: "translateX(-4px)" },
+      { transform: "translateX(4px)" },
+      { transform: "translateX(0)" }
+    ],
+    { duration: 180 }
+  );
+}
+
+// Re-sync every pill group from its select. Call after any code path that
+// changes select values without a user click (restore, clear, load profile).
+function syncAllPillSelects() {
+  pillSelectRegistry.forEach(({ select, group }) => {
+    if (group.isConnected) {
+      syncPillGroup(select, group);
+    }
+  });
+}
+
+// Shows a tidy placeholder in the hero video frame until a real
+// assets/how-to.mp4 is added, then reveals the player automatically.
+function initHeroVideo() {
+  const video = getElement("howToVideo");
+  const placeholder = getElement("howToPlaceholder");
+
+  if (!video || !placeholder) {
+    return;
+  }
+
+  const showPlaceholder = () => {
+    video.hidden = true;
+    placeholder.hidden = false;
+  };
+
+  const showVideo = () => {
+    placeholder.hidden = true;
+    video.hidden = false;
+  };
+
+  video.addEventListener("loadeddata", showVideo);
+  video.addEventListener("error", showPlaceholder, true);
+
+  const source = video.querySelector("source");
+  if (source) {
+    source.addEventListener("error", showPlaceholder);
+  }
+
+  // Fallback for browsers that don't surface a <source> error: if nothing
+  // has loaded shortly after init, assume the file isn't there yet.
+  window.setTimeout(() => {
+    if (video.readyState === 0 && !video.videoWidth) {
+      showPlaceholder();
+    }
+  }, 1200);
+}
+
+
+/* =========================================================
+   4. ELEMENT HELPERS
+   ========================================================= */
+
+function getElement(id) {
+  return document.getElementById(id);
+}
+
+function getGeneratorCheckboxes() {
+  const explicitCheckboxes = Array.from(
+    document.querySelectorAll(
+      'input[type="checkbox"][data-generator], input[type="checkbox"][data-generator-id], input[type="checkbox"][data-generator-key]'
+    )
+  );
+
+  if (explicitCheckboxes.length > 0) {
+    return explicitCheckboxes;
+  }
+
+  return Array.from(
+    document.querySelectorAll(".generator-card input[type='checkbox']")
+  );
+}
+
+function normalizeGeneratorCheckboxes() {
+  getGeneratorCheckboxes().forEach((checkbox) => {
+    const key = resolveGeneratorKey(checkbox);
+
+    if (!key) {
+      return;
+    }
+
+    checkbox.dataset.generator = key;
+    checkbox.value = key;
+  });
+}
+
+function resolveGeneratorKey(checkbox) {
+  const explicitKey =
+    checkbox.dataset.generatorKey ||
+    checkbox.dataset.generator ||
+    checkbox.dataset.generatorId ||
+    checkbox.value ||
+    "";
+
+  const normalizedExplicit = normalizeKey(explicitKey);
+
+  if (GENERATOR_DEFINITIONS[normalizedExplicit]) {
+    return normalizedExplicit;
+  }
+
+  const card = checkbox.closest(".generator-card");
+  const visibleText = card?.textContent?.trim() || checkbox.name || checkbox.id;
+  const normalizedText = normalizeKey(visibleText);
+
+  const aliasMap = {
+    "product-description": "product-description",
+    "product-listing": "product-listing",
+    "sales-page": "sales-page",
+    "social-posts": "social-posts",
+    "hooks-captions": "hooks-captions",
+    "hooks-and-captions": "hooks-captions",
+    tiktok: "tiktok",
+    pinterest: "pinterest",
+    seo: "seo",
+    tags: "tags",
+    "product-mockups": "product-mockups",
+    "advertisement-graphics": "ads",
+    advertisements: "ads",
+    ads: "ads",
+    flyers: "flyers",
+    "lead-magnet-covers": "lead-magnet-covers",
+    "notebook-covers": "notebook-covers",
+    infographics: "infographics",
+    "creative-direction": "creative-direction",
+    "hero-banner": "hero-banner",
+    "video-motion": "video-motion",
+    "video-and-motion-graphics": "video-motion",
+    "short-form-video-scripts": "video-scripts",
+    "video-scripts": "video-scripts",
+    "voiceover-scripts": "voiceover",
+    voiceover: "voiceover",
+    "product-demo": "product-demo",
+    "launch-campaign": "launch-campaign",
+    "carousel-launch": "carousel",
+    carousel: "carousel",
+    "launch-announcement": "launch-announcement",
+    "b-roll": "b-roll",
+    "cinematic-reveal": "cinematic-reveal"
+  };
+
+  return aliasMap[normalizedText] || "";
+}
+
+function normalizeKey(value) {
+  return String(value)
+    .trim()
+    .toLowerCase()
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function initializeGeneratorSettings() {
+  Object.entries(GENERATOR_DEFINITIONS).forEach(([key, definition]) => {
+    if (!appState.generatorSettings[key]) {
+      appState.generatorSettings[key] = {};
+    }
+
+    definition.fields.forEach((field) => {
+      if (appState.generatorSettings[key][field.key] === undefined) {
+        appState.generatorSettings[key][field.key] =
+          field.defaultValue ?? "";
+      }
+    });
+  });
+}
+
+
+/* =========================================================
+   5. EVENT BINDING
+   ========================================================= */
+
+function bindGlobalEvents() {
+  document.addEventListener("change", handleDocumentChange);
+  document.addEventListener("input", handleDocumentInput);
+  document.addEventListener("click", handleDocumentClick);
+  document.addEventListener("keydown", handleDocumentKeydown);
+
+  const form = getElement("generatorForm");
+
+  if (form) {
+    form.addEventListener("submit", handleFormSubmit);
+  }
+
+  window.addEventListener("beforeunload", saveCurrentProject);
+}
+
+function handleDocumentChange(event) {
+  const target = event.target;
+
+  if (!(target instanceof HTMLElement)) {
+    return;
+  }
+
+  if (
+    target.matches(
+      'input[type="checkbox"][data-generator], input[type="checkbox"][data-generator-id], .generator-card input[type="checkbox"]'
+    )
+  ) {
+    handleGeneratorSelection(target);
+    return;
+  }
+
+  if (target.matches("[data-generator-setting]")) {
+    updateGeneratorSetting(target);
+  }
+
+  if (target.matches("[data-lock-target]")) {
+    updateLockState(target);
+  }
+
+  if (target.matches("[data-option-select]")) {
+    handleGeneratedOptionSelection(target);
+  }
+
+  markResultsOutdated();
+  updateIngredientReview();
+  updateValidationSummary();
+  saveCurrentProject();
+}
+
+function handleDocumentInput(event) {
+  const target = event.target;
+
+  if (!(target instanceof HTMLElement)) {
+    return;
+  }
+
+  if (target.matches("[data-generator-setting]")) {
+    updateGeneratorSetting(target);
+  }
+
+  markResultsOutdated();
+  updateIngredientReview();
+  updateValidationSummary();
+  saveCurrentProject();
+}
+
+function handleDocumentClick(event) {
+  const button = event.target.closest("button");
+
+  if (!button) {
+    return;
+  }
+
+  // Buttons that declare their target/category directly on the element,
+  // rather than through a data-action name.
+  if (button.dataset.outputTarget) {
+    copyOutput(button.dataset.outputTarget);
+    return;
+  }
+
+  if (button.dataset.premiumTab) {
+    handlePremiumTab(button);
+    return;
+  }
+
+  if (button.dataset.preset) {
+    applyPreset(button.dataset.preset);
+    return;
+  }
+
+  if (button.dataset.mode) {
+    setBrandMode(button.dataset.mode);
+    return;
+  }
+
+  if (button.dataset.clearCategory) {
+    requestClearCategory(button.dataset.clearCategory);
+    return;
+  }
+
+  if (button.dataset.randomizeCategory) {
+    randomizeCategory(button.dataset.randomizeCategory);
+    return;
+  }
+
+  const action = button.dataset.action || "";
+
+  switch (action) {
+    case "toggle-generator-panel":
+      toggleGeneratorPanel(button);
+      break;
+
+    case "randomize-category":
+      randomizeCategory(button.dataset.category || "");
+      break;
+
+    case "randomize-all":
+      randomizeAllUnlockedFields();
+      break;
+
+    case "clear-category":
+      requestClearCategory(button.dataset.category || "");
+      break;
+
+    case "copy-output":
+      copyOutput(button.dataset.target || "");
+      break;
+
+    case "select-output":
+      selectGeneratedOption(
+        button.dataset.generator || "",
+        Number(button.dataset.optionIndex)
+      );
+      break;
+
+    case "create-variations":
+      createAdditionalVariations(button.dataset.generator || "");
+      break;
+
+    case "save-package":
+      saveFinalPackage();
+      break;
+
+    case "copy-stored":
+      copyStoredItem(button.dataset.store, button.dataset.storeId);
+      break;
+
+    case "delete-stored":
+      deleteVaultItem(button.dataset.storeId);
+      break;
+
+    case "clear-vault":
+      clearVault();
+      break;
+
+    case "clear-recent":
+      clearRecent();
+      break;
+
+    case "save-project":
+      saveProjectWithFeedback();
+      break;
+
+    case "load-project":
+      restoreCurrentProject(true);
+      break;
+
+    case "save-product-profile":
+      saveProductProfile();
+      break;
+
+    case "save-brand-profile":
+      saveBrandProfile();
+      break;
+
+    case "apply-product-profile":
+      applySavedProfile("product");
+      break;
+
+    case "apply-brand-profile":
+      applySavedProfile("brand");
+      break;
+
+    case "confirm-modal":
+      confirmModalAction();
+      break;
+
+    case "cancel-modal":
+      closeModal();
+      break;
+
+    default:
+      handleKnownButtonIds(button);
+      break;
+  }
+}
+
+function handleKnownButtonIds(button) {
+  const buttonId = button.id;
+
+  const actionMap = {
+    generateBtn: generatePromptOptions,
+    railGenerateBtn: generatePromptOptions,
+    clearAllBtn: requestClearAll,
+    newProjectBtn: requestClearAll,
+    randomizeBtn: randomizeAllUnlockedFields,
+    randomizeAllBtn: randomizeAllUnlockedFields,
+    refreshReviewBtn: updateIngredientReview,
+    saveProjectBtn: saveProjectWithFeedback,
+    loadProjectBtn: () => restoreCurrentProject(true),
+    saveProductProfileBtn: saveProductProfile,
+    applyProductProfileBtn: () => applySavedProfile("product"),
+    loadProductProfileBtn: () => applySavedProfile("product"),
+    saveBrandProfileBtn: saveBrandProfile,
+    applyBrandProfileBtn: () => applySavedProfile("brand"),
+    loadBrandProfileBtn: () => applySavedProfile("brand"),
+    savePackageBtn: saveFinalPackage,
+    saveFinalPromptBtn: saveFinalPackage,
+    downloadAllBtn: downloadAllOutputs,
+    printKitBtn: printLaunchKit,
+    importBrandDnaBtn: () => importBrandDna(readValue("brandDnaInput")),
+    loadBrandKitBtn: loadBrandKit,
+    modalConfirmBtn: confirmModalAction,
+    modalCancelBtn: closeModal
+  };
+
+  if (actionMap[buttonId]) {
+    actionMap[buttonId]();
+  }
+}
+
+function handleDocumentKeydown(event) {
+  if (event.key === "Escape" && isModalOpen()) {
+    closeModal();
+  }
+
+  if (
+    event.key === "Enter" &&
+    event.target.matches("[data-generator-panel-heading]")
+  ) {
+    event.preventDefault();
+    toggleGeneratorPanel(event.target);
+  }
+}
+
+function handleFormSubmit(event) {
+  event.preventDefault();
+  generatePromptOptions();
+}
+
+
+/* =========================================================
+   6. GENERATOR SELECTION
+   ========================================================= */
+
+function handleGeneratorSelection(checkbox) {
+  const key = resolveGeneratorKey(checkbox);
+
+  if (!key) {
+    return;
+  }
+
+  const currentlySelected = getGeneratorCheckboxes().filter(
+    (item) => item.checked
+  );
+
+  if (
+    checkbox.checked &&
+    currentlySelected.length > MAX_SELECTED_GENERATORS
+  ) {
+    checkbox.checked = false;
+    showToast(
+      `Choose up to ${MAX_SELECTED_GENERATORS} generators at one time.`,
+      "warning"
+    );
+    return;
+  }
+
+  synchronizeSelectedGenerators();
+  renderGeneratorPanels();
+  updateSelectionLimit();
+  updateIngredientReview();
+  updateValidationSummary();
+  markResultsOutdated();
+  saveCurrentProject();
+}
+
+function synchronizeSelectedGenerators() {
+  appState.selectedGenerators = getGeneratorCheckboxes()
+    .filter((checkbox) => checkbox.checked)
+    .map(resolveGeneratorKey)
+    .filter((key) => Boolean(GENERATOR_DEFINITIONS[key]));
+}
+
+function updateSelectionLimit() {
+  const checkboxes = getGeneratorCheckboxes();
+  const count = appState.selectedGenerators.length;
+  const limitReached = count >= MAX_SELECTED_GENERATORS;
+
+  checkboxes.forEach((checkbox) => {
+    const key = resolveGeneratorKey(checkbox);
+
+    checkbox.disabled =
+      limitReached &&
+      !checkbox.checked &&
+      !appState.selectedGenerators.includes(key);
+
+    const card = checkbox.closest(".generator-card");
+
+    if (card) {
+      card.setAttribute(
+        "aria-disabled",
+        checkbox.disabled ? "true" : "false"
+      );
+    }
+  });
+
+  const countElements = [
+    getElement("selectionCount"),
+    getElement("generatorSelectionCount"),
+    document.querySelector(".selection-count")
+  ].filter(Boolean);
+
+  countElements.forEach((element) => {
+    element.textContent = `${count} of ${MAX_SELECTED_GENERATORS} selected`;
+  });
+
+  const message = getElement("generatorSelectionMessage");
+
+  if (message) {
+    message.textContent =
+      count === 0
+        ? "Select at least one generator."
+        : count === MAX_SELECTED_GENERATORS
+          ? "Maximum selection reached."
+          : `You may select ${MAX_SELECTED_GENERATORS - count} more.`;
+  }
+}
+
+
+/* =========================================================
+   6b. STARTER PRESETS + SAMPLE
+   ========================================================= */
+
+const PRESETS = {
+  etsy: {
+    fields: { productType: "digital-product", marketingGoal: "listing", pricingTier: "affordable" },
+    multiFields: { salesPlatform: ["etsy"] },
+    generators: ["product-listing", "seo-copy", "tags-hashtags", "pinterest-pin"]
+  },
+  course: {
+    fields: { productType: "course", marketingGoal: "launch", pricingTier: "premium" },
+    generators: ["sales-page", "promotional-email", "social-post", "launch-carousel"]
+  },
+  shopify: {
+    fields: { productType: "physical-product", marketingGoal: "conversion", pricingTier: "mid-range" },
+    generators: ["product-description", "product-ad", "social-post", "geo-optimization"]
+  },
+  service: {
+    fields: { productType: "service", marketingGoal: "lead-generation", pricingTier: "premium" },
+    generators: ["sales-page", "hooks-captions", "social-post", "promotional-email"]
+  },
+  sample: {
+    fields: {
+      productName: "Focus Planner",
+      productType: "digital-product",
+      productDescription:
+        "A minimalist daily planner PDF that helps busy solopreneurs pick their top 3 priorities, time-block the day, and actually finish what matters.",
+      targetAudience: "Busy solopreneurs and small-business owners who feel scattered",
+      buyerProblem: "They feel overwhelmed and end each day unsure what they actually got done",
+      buyerOutcome: "Calm, focused days where the important work finally gets finished",
+      marketingGoal: "launch",
+      pricingTier: "affordable",
+      currentPrice: "19"
+    },
+    multiFields: { brandTone: ["professional", "calm"], visualStyle: ["minimal"] },
+    generators: ["product-listing", "social-post", "product-mockup", "launch-announcement"],
+    generate: true
+  }
+};
+
+function applyPreset(key) {
+  const preset = PRESETS[key];
+
+  if (!preset) {
+    return;
+  }
+
+  Object.entries(preset.fields || {}).forEach(([id, value]) => {
+    if (value != null) {
+      writeValue(id, value);
+    }
+  });
+
+  Object.entries(preset.multiFields || {}).forEach(([id, values]) => {
+    const select = getElement(id);
+    if (select) {
+      Array.from(select.options).forEach((option) => {
+        option.selected = values.includes(option.value);
+      });
+    }
+  });
+
+  const wanted = (preset.generators || []).slice(0, MAX_SELECTED_GENERATORS);
+  getGeneratorCheckboxes().forEach((checkbox) => {
+    checkbox.checked = wanted.includes(resolveGeneratorKey(checkbox));
+  });
+
+  synchronizeSelectedGenerators();
+  renderGeneratorPanels();
+  updateSelectionLimit();
+  syncAllPillSelects();
+  updateIngredientReview();
+  updateValidationSummary();
+  markResultsOutdated();
+  saveCurrentProject();
+
+  if (preset.generate) {
+    showToast("Sample loaded — generating your kit...", "success");
+    generatePromptOptions();
+    return;
+  }
+
+  showToast("Preset applied — add your details, then generate.", "success");
+
+  const section = getElement("productSection");
+  if (section) {
+    section.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+}
+
+// Highlights the creators most worth picking for the chosen product type.
+const RECOMMENDED_BY_TYPE = {
+  "digital-product": ["product-listing", "seo-copy", "tags-hashtags", "pinterest-pin", "social-post", "geo-optimization"],
+  "pod-product": ["product-listing", "product-mockup", "pinterest-pin", "social-post", "tags-hashtags"],
+  course: ["sales-page", "promotional-email", "social-post", "launch-carousel", "hooks-captions"],
+  membership: ["sales-page", "promotional-email", "social-post", "launch-carousel"],
+  "lead-magnet": ["lead-magnet-cover", "sales-page", "social-post", "promotional-email"],
+  "physical-product": ["product-description", "product-ad", "product-mockup", "lifestyle-image", "social-post", "geo-optimization"],
+  service: ["sales-page", "hooks-captions", "social-post", "promotional-email", "creative-direction"],
+  "productized-service": ["sales-page", "hooks-captions", "social-post", "promotional-email"],
+  bundle: ["product-listing", "sales-page", "social-post", "launch-carousel"],
+  "image-asset": ["product-mockup", "listing-image", "pinterest-pin", "tags-hashtags", "social-post"]
+};
+
+function updateRecommendedGenerators() {
+  const type = readValue("productType");
+  const recommended = new Set(RECOMMENDED_BY_TYPE[type] || []);
+
+  getGeneratorCheckboxes().forEach((checkbox) => {
+    const card = checkbox.closest(".generator-card");
+
+    if (!card) {
+      return;
+    }
+
+    const isRecommended = recommended.has(resolveGeneratorKey(checkbox));
+    card.classList.toggle("is-recommended", isRecommended);
+    card.title = isRecommended ? "Recommended for your product type" : "";
+  });
+}
+
+
+/* =========================================================
+   6c. BRAND MODE + BRAND DNA BRIDGE (from Brand Haus)
+   ========================================================= */
+
+function setBrandMode(mode) {
+  appState.brandMode = mode === "creator" ? "creator" : "product";
+  updateModeToggle();
+  markResultsOutdated();
+  saveCurrentProject();
+}
+
+function updateModeToggle() {
+  document.querySelectorAll(".mode-btn").forEach((button) => {
+    const active = button.dataset.mode === appState.brandMode;
+    button.classList.toggle("is-active", active);
+    button.setAttribute("aria-pressed", String(active));
+  });
+}
+
+// Selects up to three matching options in a multi-select from a free-text
+// value (e.g. "Warm, Friendly, Calm"), and keeps the raw text in the custom
+// field so nothing is lost.
+function matchIntoMultiSelect(selectId, customId, rawValue) {
+  const select = getElement(selectId);
+
+  if (!select || !rawValue) {
+    return;
+  }
+
+  const tokens = String(rawValue)
+    .toLowerCase()
+    .split(/[,;/]|\band\b/)
+    .map((token) => token.trim())
+    .filter(Boolean);
+
+  let chosen = 0;
+
+  Array.from(select.options).forEach((option) => {
+    const label = option.textContent.trim().toLowerCase();
+    const value = option.value.toLowerCase();
+    const hit =
+      chosen < 3 &&
+      tokens.some(
+        (token) =>
+          token &&
+          (label.includes(token) ||
+            token.includes(label) ||
+            value.includes(token.replace(/\s+/g, "-")))
+      );
+
+    option.selected = hit;
+    if (hit) {
+      chosen += 1;
+    }
+  });
+
+  if (customId) {
+    writeValue(customId, rawValue);
+  }
+}
+
+function importBrandDna(text) {
+  const raw = String(text || "").trim();
+
+  if (!raw) {
+    showToast("Paste your Brand DNA block first.", "warning");
+    return;
+  }
+
+  const field = (label) => {
+    const match = new RegExp(
+      "^\\s*" + label + "\\s*[:\\-]\\s*(.+)$",
+      "im"
+    ).exec(raw);
+    return match ? match[1].trim() : "";
+  };
+
+  const tone = field("brand tone") || field("tone") || field("voice");
+  const visual = field("visual style") || field("visual") || field("aesthetic");
+  const keywords = field("keywords") || field("brand keywords");
+  const avoid = field("avoid") || field("words to avoid");
+  const colors = field("colors") || field("color");
+  const mode = (field("mode") || field("direction")).toLowerCase();
+
+  let filled = 0;
+
+  if (tone) {
+    matchIntoMultiSelect("brandTone", "brandToneCustom", tone);
+    filled += 1;
+  }
+  if (visual) {
+    matchIntoMultiSelect("visualStyle", "visualStyleCustom", visual);
+    filled += 1;
+  }
+  if (keywords) {
+    writeValue("wordsToInclude", keywords);
+    filled += 1;
+  }
+  if (avoid) {
+    writeValue("wordsToAvoid", avoid);
+    filled += 1;
+  }
+  if (colors) {
+    writeValue("colorDirection", "brand-colors");
+    filled += 1;
+  }
+  if (mode) {
+    setBrandMode(/(brand|creator|influencer|i am)/.test(mode) ? "creator" : "product");
+    filled += 1;
+  }
+
+  syncAllPillSelects();
+  updateIngredientReview();
+  updateValidationSummary();
+  markResultsOutdated();
+  saveCurrentProject();
+
+  if (filled > 0) {
+    showToast(
+      `Imported your Brand DNA — ${filled} field${filled === 1 ? "" : "s"} filled.`,
+      "success"
+    );
+  } else {
+    showToast(
+      "Couldn't read that — paste the Brand DNA block from Brand Haus.",
+      "warning"
+    );
+  }
+}
+
+// Reads the shared, read-only Brand Kit vault that Brand Haus mirrors on every
+// save. Empty until P2P is co-located on the same Shopify domain, then it lights
+// up automatically. Never writes to the vault (keeps it live, not a stale copy).
+function readBrandKitVault() {
+  try {
+    const parsed = JSON.parse(
+      localStorage.getItem("blackSheepBrandKitVault") || "{}"
+    );
+    return Array.isArray(parsed.brandHausKits) ? parsed.brandHausKits : [];
+  } catch {
+    return [];
+  }
+}
+
+function checkBrandKitVault() {
+  const button = getElement("loadBrandKitBtn");
+
+  if (!button) {
+    return;
+  }
+
+  const kits = readBrandKitVault();
+
+  if (kits.length > 0) {
+    button.hidden = false;
+    button.textContent = `Load your Brand Kit (${kits.length})`;
+  } else {
+    button.hidden = true;
+  }
+}
+
+function loadBrandKit() {
+  const kits = readBrandKitVault();
+
+  if (kits.length === 0) {
+    showToast("No Brand Kit found from Brand Haus yet.", "warning");
+    return;
+  }
+
+  const kit = kits
+    .slice()
+    .sort((a, b) => String(b.savedAt).localeCompare(String(a.savedAt)))[0];
+
+  let filled = 0;
+
+  if (kit.voice) {
+    matchIntoMultiSelect("brandTone", "brandToneCustom", kit.voice);
+    filled += 1;
+  }
+  if (kit.mood) {
+    matchIntoMultiSelect("visualStyle", "visualStyleCustom", kit.mood);
+    filled += 1;
+  }
+  if (Array.isArray(kit.coreValues) && kit.coreValues.length) {
+    writeValue("wordsToInclude", kit.coreValues.join(", "));
+    filled += 1;
+  }
+  if (Array.isArray(kit.colors) && kit.colors.length) {
+    writeValue("colorDirection", "brand-colors");
+    filled += 1;
+  }
+
+  syncAllPillSelects();
+  updateIngredientReview();
+  updateValidationSummary();
+  markResultsOutdated();
+  saveCurrentProject();
+
+  showToast(
+    filled > 0
+      ? `Loaded "${kit.name || "your Brand Kit"}" from Brand Haus — ${filled} field${
+          filled === 1 ? "" : "s"
+        } filled.`
+      : "That Brand Kit had nothing to map.",
+    filled > 0 ? "success" : "warning"
+  );
+}
+
+
+/* =========================================================
+   7. GENERATOR CONFIGURATION PANELS
+   ========================================================= */
+
+function renderGeneratorPanels() {
+  const container =
+    getElement("generatorPanels") ||
+    document.querySelector(".generator-panels");
+
+  if (!container) {
+    return;
+  }
+
+  if (appState.selectedGenerators.length === 0) {
+    container.innerHTML = `
+      <p class="empty-state">
+        Select generators above to open their individual configuration panels.
+      </p>
+    `;
+    return;
+  }
+
+  container.innerHTML = appState.selectedGenerators
+    .map((generatorKey, index) =>
+      createGeneratorPanelMarkup(generatorKey, index)
+    )
+    .join("");
+
+  if (
+    !appState.activeAccordion ||
+    !appState.selectedGenerators.includes(appState.activeAccordion)
+  ) {
+    appState.activeAccordion = appState.selectedGenerators[0];
+  }
+
+  applyAccordionState();
+}
+
+function createGeneratorPanelMarkup(generatorKey, index) {
+  const definition = GENERATOR_DEFINITIONS[generatorKey];
+  const settings = appState.generatorSettings[generatorKey] || {};
+  const contentId = `generator-panel-content-${generatorKey}`;
+  const headingId = `generator-panel-heading-${generatorKey}`;
+
+  return `
+    <article class="generator-panel" data-generator-panel="${escapeHtml(generatorKey)}">
+      <button
+        type="button"
+        class="generator-panel__heading"
+        id="${headingId}"
+        data-action="toggle-generator-panel"
+        data-generator="${escapeHtml(generatorKey)}"
+        data-generator-panel-heading
+        aria-expanded="${index === 0 ? "true" : "false"}"
+        aria-controls="${contentId}"
+      >
+        <span>
+          <strong>${escapeHtml(definition.label)}</strong>
+          <span class="field-note">${escapeHtml(definition.category)}</span>
+        </span>
+        <span aria-hidden="true" data-accordion-symbol>+</span>
+      </button>
+
+      <div
+        class="generator-panel__content"
+        id="${contentId}"
+        role="region"
+        aria-labelledby="${headingId}"
+      >
+        <div class="form-grid">
+          ${definition.fields
+            .map((field) =>
+              createGeneratorFieldMarkup(
+                generatorKey,
+                field,
+                settings[field.key]
+              )
+            )
+            .join("")}
+
+          <div class="field-group field-group--full">
+            <label for="generator-${generatorKey}-instructions">
+              Additional Instructions
+            </label>
+            <textarea
+              id="generator-${generatorKey}-instructions"
+              data-generator-setting="${escapeHtml(generatorKey)}"
+              data-setting-key="additionalInstructions"
+              placeholder="Add any details unique to this generator."
+            >${escapeHtml(settings.additionalInstructions || "")}</textarea>
+          </div>
+        </div>
+      </div>
+    </article>
+  `;
+}
+
+function createGeneratorFieldMarkup(generatorKey, field, currentValue) {
+  const fieldId = `generator-${generatorKey}-${field.key}`;
+  const safeValue = currentValue ?? "";
+
+  if (field.type === "select") {
+    return `
+      <div class="field-group">
+        <label for="${fieldId}">${escapeHtml(field.label)}</label>
+        <select
+          id="${fieldId}"
+          data-generator-setting="${escapeHtml(generatorKey)}"
+          data-setting-key="${escapeHtml(field.key)}"
+        >
+          ${field.options
+            .map(
+              (option) => `
+                <option
+                  value="${escapeHtml(option)}"
+                  ${option === safeValue ? "selected" : ""}
+                >
+                  ${escapeHtml(option)}
+                </option>
+              `
+            )
+            .join("")}
+        </select>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="field-group">
+      <label for="${fieldId}">${escapeHtml(field.label)}</label>
+      <input
+        type="text"
+        id="${fieldId}"
+        value="${escapeHtml(safeValue)}"
+        data-generator-setting="${escapeHtml(generatorKey)}"
+        data-setting-key="${escapeHtml(field.key)}"
+      >
+    </div>
+  `;
+}
+
+function toggleGeneratorPanel(button) {
+  const generatorKey = button.dataset.generator;
+
+  if (!generatorKey) {
+    return;
+  }
+
+  appState.activeAccordion =
+    appState.activeAccordion === generatorKey ? null : generatorKey;
+
+  applyAccordionState();
+}
+
+function applyAccordionState() {
+  document
+    .querySelectorAll("[data-generator-panel]")
+    .forEach((panel) => {
+      const generatorKey = panel.dataset.generatorPanel;
+      const heading = panel.querySelector("[data-generator-panel-heading]");
+      const content = panel.querySelector(".generator-panel__content");
+      const symbol = panel.querySelector("[data-accordion-symbol]");
+      const isOpen = appState.activeAccordion === generatorKey;
+
+      if (heading) {
+        heading.setAttribute("aria-expanded", String(isOpen));
+      }
+
+      if (content) {
+        content.hidden = !isOpen;
+      }
+
+      if (symbol) {
+        symbol.textContent = isOpen ? "−" : "+";
+      }
+    });
+}
+
+function updateGeneratorSetting(control) {
+  const generatorKey = control.dataset.generatorSetting;
+  const settingKey = control.dataset.settingKey;
+
+  if (!generatorKey || !settingKey) {
+    return;
+  }
+
+  if (!appState.generatorSettings[generatorKey]) {
+    appState.generatorSettings[generatorKey] = {};
+  }
+
+  appState.generatorSettings[generatorKey][settingKey] =
+    control.value.trim();
+}
+
+
+/* =========================================================
+   8. LOCKS AND RANDOMIZATION
+   ========================================================= */
+
+function updateLockState(lockControl) {
+  const targetId = lockControl.dataset.lockTarget;
+  const target = getElement(targetId);
+
+  if (!target) {
+    return;
+  }
+
+  const isLocked = lockControl.checked;
+
+  target.dataset.locked = String(isLocked);
+  target.classList.toggle("is-locked", isLocked);
+  target.setAttribute("aria-readonly", String(isLocked));
+}
+
+function isFieldLocked(field) {
+  if (!field) {
+    return false;
+  }
+
+  if (field.dataset.locked === "true") {
+    return true;
+  }
+
+  const lock = document.querySelector(
+    `[data-lock-target="${CSS.escape(field.id)}"]`
+  );
+
+  return Boolean(lock?.checked);
+}
+
+function randomizeCategory(categoryName) {
+  const category = document.querySelector(
+    `[data-category="${CSS.escape(categoryName)}"]`
+  );
+
+  if (!category) {
+    showToast("That category could not be found.", "error");
+    return;
+  }
+
+  const fields = Array.from(
+    category.querySelectorAll("input, select, textarea")
+  ).filter(isRandomizableField);
+
+  const changedCount = randomizeFields(fields);
+  completeRandomization(changedCount);
+}
+
+function randomizeAllUnlockedFields() {
+  const fields = Array.from(
+    document.querySelectorAll(
+      "#generatorForm input, #generatorForm select, #generatorForm textarea"
+    )
+  ).filter(isRandomizableField);
+
+  const changedCount = randomizeFields(fields);
+  completeRandomization(changedCount);
+}
+
+function isRandomizableField(field) {
+  if (
+    field.disabled ||
+    isFieldLocked(field) ||
+    field.type === "file" ||
+    field.type === "checkbox" ||
+    field.type === "radio" ||
+    field.readOnly
+  ) {
+    return false;
+  }
+
+  // Randomize only touches creative "flavor" choices: the per-generator
+  // option dropdowns and any field that explicitly opts in with
+  // data-random-options. Core product, audience, pricing, and brand inputs
+  // are intentionally excluded, so Randomize can never blank a required field
+  // or change the facts the user actually entered about their product.
+  if (field.matches("[data-random-options]")) {
+    return true;
+  }
+
+  return (
+    field.tagName === "SELECT" &&
+    field.matches("[data-generator-setting]")
+  );
+}
+
+function randomizeFields(fields) {
+  let changedCount = 0;
+
+  fields.forEach((field) => {
+    const explicitOptions = parseRandomOptions(field);
+
+    if (explicitOptions.length > 0) {
+      field.value = randomItem(explicitOptions);
+      field.dispatchEvent(new Event("change", { bubbles: true }));
+      changedCount += 1;
+      return;
+    }
+
+    if (field.matches("[data-generator-setting]")) {
+      if (randomizeGeneratorSettingField(field)) {
+        changedCount += 1;
+      }
+    }
+  });
+
+  return changedCount;
+}
+
+function parseRandomOptions(field) {
+  const rawOptions = field.dataset.randomOptions;
+
+  if (!rawOptions) {
+    return [];
+  }
+
+  try {
+    const parsed = JSON.parse(rawOptions);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return rawOptions
+      .split("|")
+      .map((item) => item.trim())
+      .filter(Boolean);
+  }
+}
+
+function randomizeGeneratorSettingField(field) {
+  if (field.tagName === "SELECT") {
+    const options = Array.from(field.options).filter(
+      (option) => !option.disabled && option.value
+    );
+
+    if (options.length > 0) {
+      field.value = randomItem(options).value;
+      updateGeneratorSetting(field);
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function completeRandomization(changedCount = 0) {
+  markResultsOutdated();
+  updateIngredientReview();
+  updateValidationSummary();
+  saveCurrentProject();
+
+  if (changedCount > 0) {
+    showToast(
+      `Randomized ${changedCount} creative option${
+        changedCount === 1 ? "" : "s"
+      }.`,
+      "success"
+    );
+  } else {
+    showToast(
+      "Select a generator first — randomize only changes the creative options inside generator panels.",
+      "warning"
+    );
+  }
+}
+
+function randomItem(items) {
+  return items[Math.floor(Math.random() * items.length)];
+}
+
+
+/* =========================================================
+   9. CLEAR ACTIONS AND MODAL
+   ========================================================= */
+
+function requestClearAll() {
+  openConfirmationModal(
+    "Clear all information?",
+    "This removes the current inputs, selections, configurations, and generated results.",
+    clearAllData
+  );
+}
+
+function requestClearCategory(categoryName) {
+  const category = document.querySelector(
+    `[data-category="${CSS.escape(categoryName)}"]`
+  );
+
+  if (!category) {
+    showToast("That category could not be found.", "error");
+    return;
+  }
+
+  openConfirmationModal(
+    "Clear this category?",
+    "Unlocked information in this category will be removed.",
+    () => clearCategory(category)
+  );
+}
+
+function clearCategory(category) {
+  const controls = category.querySelectorAll(
+    "input, select, textarea"
+  );
+
+  controls.forEach((control) => {
+    if (isFieldLocked(control)) {
+      return;
+    }
+
+    resetControl(control);
+  });
+
+  markResultsOutdated();
+  updateIngredientReview();
+  updateValidationSummary();
+  syncAllPillSelects();
+  saveCurrentProject();
+  closeModal();
+  showToast("Category cleared.", "success");
+}
+
+function clearAllData() {
+  const form = getElement("generatorForm");
+
+  if (form) {
+    form.reset();
+  }
+
+  getGeneratorCheckboxes().forEach((checkbox) => {
+    checkbox.checked = false;
+    checkbox.disabled = false;
+  });
+
+  Object.keys(appState.generatorSettings).forEach((generatorKey) => {
+    appState.generatorSettings[generatorKey] = {};
+
+    GENERATOR_DEFINITIONS[generatorKey].fields.forEach((field) => {
+      appState.generatorSettings[generatorKey][field.key] =
+        field.defaultValue ?? "";
+    });
+  });
+
+  appState.selectedGenerators = [];
+  appState.generatedOptions = {};
+  appState.selectedOptions = {};
+  appState.lastGeneratedSignature = "";
+  appState.activeAccordion = null;
+
+  localStorage.removeItem(APP_STORAGE_KEYS.project);
+
+  clearOutputElements();
+  renderGeneratorPanels();
+  updateSelectionLimit();
+  updateIngredientReview();
+  updateValidationSummary();
+  syncAllPillSelects();
+  updateGeneratedVisibility();
+  closeModal();
+  showToast("All information was cleared.", "success");
+}
+
+function resetControl(control) {
+  if (control.type === "checkbox" || control.type === "radio") {
+    control.checked = false;
+    return;
+  }
+
+  if (control.tagName === "SELECT") {
+    control.selectedIndex = 0;
+    return;
+  }
+
+  control.value = "";
+}
+
+function openConfirmationModal(title, message, action) {
+  const modal =
+    getElement("confirmationModal") ||
+    document.querySelector(".modal");
+
+  if (!modal) {
+    const confirmed = window.confirm(`${title}\n\n${message}`);
+
+    if (confirmed) {
+      action();
+    }
+
+    return;
+  }
+
+  const titleElement =
+    getElement("modalTitle") ||
+    modal.querySelector("h2");
+
+  const messageElement =
+    getElement("modalMessage") ||
+    modal.querySelector("p");
+
+  if (titleElement) {
+    titleElement.textContent = title;
+  }
+
+  if (messageElement) {
+    messageElement.textContent = message;
+  }
+
+  appState.modalAction = action;
+  modal.hidden = false;
+  modal.setAttribute("aria-hidden", "false");
+  document.body.style.overflow = "hidden";
+
+  const focusTarget =
+    getElement("modalCancelBtn") ||
+    modal.querySelector("button");
+
+  focusTarget?.focus();
+}
+
+function confirmModalAction() {
+  const action = appState.modalAction;
+  appState.modalAction = null;
+
+  if (typeof action === "function") {
+    action();
+  }
+
+  closeModal();
+}
+
+function closeModal() {
+  const modal =
+    getElement("confirmationModal") ||
+    document.querySelector(".modal");
+
+  if (!modal) {
+    return;
+  }
+
+  modal.hidden = true;
+  modal.setAttribute("aria-hidden", "true");
+  document.body.style.overflow = "";
+  appState.modalAction = null;
+}
+
+function isModalOpen() {
+  const modal =
+    getElement("confirmationModal") ||
+    document.querySelector(".modal");
+
+  return Boolean(modal && !modal.hidden);
+}
+
+
+/* =========================================================
+   10. DATA COLLECTION
+   ========================================================= */
+
+function collectProjectData() {
+  return {
+    product: {
+      name: readValue("productName"),
+      type: readValue("productType"),
+      description: readValue("productDescription"),
+      features: readValue("productFeatures"),
+      benefits: readValue("productBenefits"),
+      format: readValue("productFormat")
+    },
+
+    audience: {
+      targetAudience: readValue("targetAudience"),
+      customerProblem: readValue("buyerProblem"),
+      desiredOutcome: readValue("buyerOutcome"),
+      marketingGoal: readValue("marketingGoal"),
+      buyerMotivation: readValue("buyerMotivation")
+    },
+
+    pricing: {
+      currentPrice: readValue("currentPrice"),
+      pricingTier: readValue("pricingTier"),
+      offerType: readValue("offerType"),
+      pricingUsage: readValue("pricingUsage"),
+      offerDetails: readValue("pricingCustom")
+    },
+
+    brand: {
+      brandName: readValue("brandName"),
+      brandTone: readValue("brandTone"),
+      visualStyle: readValue("visualStyle"),
+      colorDirection: readValue("colorDirection"),
+      typographyDirection: readValue("typographyDirection"),
+      brandKeywords: readValue("wordsToInclude"),
+      wordsToAvoid: readValue("wordsToAvoid")
+    },
+
+    reference: {
+      usage: readValue("referenceImagePurpose"),
+      notes: readValue("referenceImageInstructions"),
+      fileName: getElement("referenceImageUpload")?.files?.[0]?.name || ""
+    },
+
+    delivery: {
+      aiPlatform: readValue("aiPlatform"),
+      deliveryMode: readValue("deliveryMode") || "separate",
+      optionCount: clampNumber(readValue("optionCount"), 1, 5, 3),
+      exactText: readValue("exactText"),
+      globalInstructions: readValue("globalInstructions")
+    },
+
+    // Readable labels for select values, resolved once here and used when
+    // building prompts and the ingredient review so output never shows raw
+    // slugs like "digital-product". Raw values above stay intact for saving,
+    // restoring, and validation.
+    display: {
+      productType: readSelectLabel("productType"),
+      marketingGoal: readSelectLabel("marketingGoal"),
+      buyerMotivation: readSelectLabel("buyerMotivation"),
+      pricingTier:
+        readValue("pricingTier") === "none"
+          ? ""
+          : readSelectLabel("pricingTier"),
+      offerType: readSelectLabel("offerType"),
+      pricingUsage: readSelectLabel("pricingUsage"),
+      brandTone: readSelectLabel("brandTone"),
+      visualStyle: readSelectLabel("visualStyle"),
+      colorDirection: readSelectLabel("colorDirection"),
+      typographyDirection: readSelectLabel("typographyDirection"),
+      referencePurpose: readSelectLabel("referenceImagePurpose"),
+      aiPlatform: readSelectLabel("aiPlatform") || "Any AI platform",
+      deliveryMode: readSelectLabel("deliveryMode")
+    },
+
+    brandMode: appState.brandMode,
+    selectedGenerators: [...appState.selectedGenerators],
+    generatorSettings: structuredCloneSafe(appState.generatorSettings),
+    timestamp: new Date().toISOString()
+  };
+}
+
+function readValue(id) {
+  const element = getElement(id);
+
+  if (!element) {
+    return "";
+  }
+
+  if (element.type === "checkbox") {
+    return element.checked;
+  }
+
+  if (element.multiple) {
+    return Array.from(element.selectedOptions)
+      .map((option) => option.value)
+      .join(", ");
+  }
+
+  return String(element.value || "").trim();
+}
+
+// Returns the human-readable label of a select's chosen option (e.g.
+// "Digital product" instead of the raw value "digital-product"), so generated
+// prompts read naturally. Returns "" when the select is on an empty/placeholder
+// value, which keeps required-field validation working.
+function readSelectLabel(id) {
+  const element = getElement(id);
+
+  if (!element || element.tagName !== "SELECT") {
+    return readValue(id);
+  }
+
+  if (element.multiple) {
+    return Array.from(element.selectedOptions)
+      .map((option) => option.textContent.trim())
+      .join(", ");
+  }
+
+  if (!element.value) {
+    return "";
+  }
+
+  const option = element.options[element.selectedIndex];
+  return option ? option.textContent.trim() : "";
+}
+
+function writeValue(id, value) {
+  const element = getElement(id);
+
+  if (!element || value === undefined || value === null) {
+    return;
+  }
+
+  if (element.type === "checkbox") {
+    element.checked = Boolean(value);
+    return;
+  }
+
+  // Multi-selects hold a comma-joined value; setting .value directly would
+  // collapse the selection, so re-select each option instead.
+  if (element.tagName === "SELECT" && element.multiple) {
+    const wanted = String(value)
+      .split(",")
+      .map((part) => part.trim())
+      .filter(Boolean);
+
+    Array.from(element.options).forEach((option) => {
+      option.selected = wanted.includes(option.value);
+    });
+
+    return;
+  }
+
+  element.value = value;
+}
+
+function clampNumber(value, minimum, maximum, fallback) {
+  const number = Number.parseInt(value, 10);
+
+  if (Number.isNaN(number)) {
+    return fallback;
+  }
+
+  return Math.min(maximum, Math.max(minimum, number));
+}
+
+function structuredCloneSafe(value) {
+  if (typeof structuredClone === "function") {
+    return structuredClone(value);
+  }
+
+  return JSON.parse(JSON.stringify(value));
+}
+
+
+/* =========================================================
+   11. VALIDATION
+   ========================================================= */
+
+function validateProject(data = collectProjectData()) {
+  const errors = [];
+
+  clearFieldErrors();
+
+  if (!data.product.name) {
+    errors.push({
+      fieldId: "productName",
+      message: "Enter a product name."
+    });
+  }
+
+  if (!data.product.type) {
+    errors.push({
+      fieldId: "productType",
+      message: "Choose a product type."
+    });
+  }
+
+  if (!data.product.description) {
+    errors.push({
+      fieldId: "productDescription",
+      message: "Add a product description."
+    });
+  }
+
+  if (!data.audience.targetAudience) {
+    errors.push({
+      fieldId: "targetAudience",
+      message: "Describe the target audience."
+    });
+  }
+
+  if (!data.brand.brandTone) {
+    errors.push({
+      fieldId: "brandTone",
+      message: "Choose or enter a brand tone."
+    });
+  }
+
+  if (!data.brand.visualStyle) {
+    errors.push({
+      fieldId: "visualStyle",
+      message: "Choose or enter a visual style."
+    });
+  }
+
+  if (data.selectedGenerators.length === 0) {
+    errors.push({
+      fieldId: "",
+      message: "Select at least one generator."
+    });
+  }
+
+  if (data.selectedGenerators.length > MAX_SELECTED_GENERATORS) {
+    errors.push({
+      fieldId: "",
+      message: `Choose no more than ${MAX_SELECTED_GENERATORS} generators.`
+    });
+  }
+
+  errors.forEach((error) => {
+    if (error.fieldId) {
+      markFieldError(error.fieldId);
+    }
+  });
+
+  return {
+    isValid: errors.length === 0,
+    errors
+  };
+}
+
+// Keeps the sticky rail's readiness checklist and status in sync.
+function updateBuildRail() {
+  const container = getElement("railReadiness");
+
+  if (!container) {
+    return;
+  }
+
+  const data = collectProjectData();
+
+  const items = [
+    ["Product name", Boolean(data.product.name)],
+    ["Product type", Boolean(data.product.type)],
+    ["Description", Boolean(data.product.description)],
+    ["Audience", Boolean(data.audience.targetAudience)],
+    ["Brand tone", Boolean(data.brand.brandTone)],
+    ["Visual style", Boolean(data.brand.visualStyle)],
+    [
+      `Generators (${data.selectedGenerators.length}/${MAX_SELECTED_GENERATORS})`,
+      data.selectedGenerators.length > 0
+    ]
+  ];
+
+  const done = items.filter((item) => item[1]).length;
+
+  container.innerHTML = items
+    .map(
+      ([label, ok]) => `
+        <div class="rail-item ${ok ? "is-done" : ""}">
+          <span class="rail-item__mark" aria-hidden="true">${
+            ok ? "✓" : ""
+          }</span>
+          <span>${escapeHtml(label)}</span>
+        </div>
+      `
+    )
+    .join("");
+
+  const status = getElement("railStatus");
+
+  if (status) {
+    status.textContent =
+      done === items.length
+        ? "Everything's ready — generate your pack."
+        : `${done} of ${items.length} essentials added`;
+  }
+
+  const railSelections = getElement("railSelections");
+
+  if (railSelections) {
+    railSelections.innerHTML = selectionsSummaryHtml(data);
+  }
+}
+
+function markFieldError(fieldId) {
+  const field = getElement(fieldId);
+
+  if (!field) {
+    return;
+  }
+
+  field.classList.add("is-error");
+  field.setAttribute("aria-invalid", "true");
+}
+
+function clearFieldErrors() {
+  document.querySelectorAll(".is-error").forEach((element) => {
+    element.classList.remove("is-error");
+    element.removeAttribute("aria-invalid");
+  });
+}
+
+function updateValidationSummary() {
+  updateBuildRail();
+  updateRecommendedGenerators();
+
+  const summary = getElement("validationSummary");
+
+  if (!summary) {
+    return;
+  }
+
+  const result = validateProject();
+
+  summary.classList.remove("is-valid", "is-invalid");
+
+  if (result.isValid) {
+    summary.classList.add("is-valid");
+    summary.textContent = "Your information is ready to generate.";
+    return;
+  }
+
+  summary.classList.add("is-invalid");
+  summary.textContent =
+    "Complete the required fields, then generate your prompts.";
+}
+
+function focusFirstValidationError(errors) {
+  const firstFieldError = errors.find((error) => error.fieldId);
+
+  if (firstFieldError) {
+    const field = getElement(firstFieldError.fieldId);
+    field?.focus();
+    field?.scrollIntoView({
+      behavior: "smooth",
+      block: "center"
+    });
+    return;
+  }
+
+  const library =
+    getElement("generatorLibrarySection") ||
+    document.querySelector("[data-section='generator-library']");
+
+  library?.scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  });
+}
+
+
+/* =========================================================
+   12. INGREDIENT REVIEW
+   ========================================================= */
+
+// Shared "what you've selected" summary, used by the ingredient review and
+// the live brief in the sticky rail.
+function selectionsSummaryHtml(data) {
+  const groups = [
+    [
+      "Product",
+      [
+        ["Name", data.product.name],
+        ["Type", data.display.productType],
+        ["Description", data.product.description],
+        ["Features", data.product.features],
+        ["Benefits", data.product.benefits]
+      ]
+    ],
+    [
+      "Audience",
+      [
+        ["Audience", data.audience.targetAudience],
+        ["Problem", data.audience.customerProblem],
+        ["Outcome", data.audience.desiredOutcome],
+        ["Goal", data.display.marketingGoal],
+        ["Motivation", data.display.buyerMotivation]
+      ]
+    ],
+    [
+      "Pricing",
+      [
+        ["Price", formatPrice(data.pricing.currentPrice)],
+        ["Tier", data.display.pricingTier],
+        ["Offer", data.display.offerType],
+        ["Pricing use", data.display.pricingUsage]
+      ]
+    ],
+    [
+      "Brand",
+      [
+        ["Tone", data.display.brandTone],
+        ["Visual", data.display.visualStyle],
+        ["Color", data.display.colorDirection],
+        ["Type", data.display.typographyDirection],
+        ["Keywords", data.brand.brandKeywords],
+        ["Avoid", data.brand.wordsToAvoid]
+      ]
+    ],
+    [
+      "Creating",
+      data.selectedGenerators.map((key) => [
+        "",
+        GENERATOR_DEFINITIONS[key]?.label || key
+      ])
+    ],
+    [
+      "Delivery",
+      [
+        ["Platform", data.display.aiPlatform],
+        ["Format", data.display.deliveryMode],
+        ["Options", `${data.delivery.optionCount}`]
+      ]
+    ]
+  ];
+
+  const blocks = groups
+    .map(([title, pairs]) => {
+      const items = pairs.filter(
+        ([, value]) => value && String(value).trim()
+      );
+
+      if (items.length === 0) {
+        return "";
+      }
+
+      return `<div class="review-block"><h4>${escapeHtml(title)}</h4><ul>${items
+        .map(
+          ([label, value]) =>
+            `<li>${
+              label ? `<b>${escapeHtml(label)}:</b> ` : ""
+            }${escapeHtml(String(value))}</li>`
+        )
+        .join("")}</ul></div>`;
+    })
+    .filter(Boolean)
+    .join("");
+
+  return (
+    blocks ||
+    '<p class="empty-state">Fill in your details to see them here.</p>'
+  );
+}
+
+function updateIngredientReview() {
+  const container = getElement("ingredientReview");
+
+  if (container) {
+    container.innerHTML = selectionsSummaryHtml(collectProjectData());
+  }
+}
+
+
+/* =========================================================
+   12b. VAULT + RECENTLY GENERATED (sticky rail)
+   ========================================================= */
+
+function renderVault() {
+  const container = getElement("railVault");
+  const count = getElement("railVaultCount");
+
+  if (!container) {
+    return;
+  }
+
+  const items = readStorageArray(APP_STORAGE_KEYS.savedPackages);
+
+  if (count) {
+    count.textContent = `(${items.length})`;
+  }
+
+  container.innerHTML = items.length
+    ? items.map((item) => renderStoredRow(item, "vault")).join("") +
+      '<button type="button" class="rail-mini-btn rail-clear" data-action="clear-vault">Clear vault</button>'
+    : '<p class="rail-empty">Empty &mdash; use &ldquo;Save to Vault&rdquo; after you generate.</p>';
+}
+
+function renderRecent() {
+  const container = getElement("railRecent");
+  const count = getElement("railRecentCount");
+
+  if (!container) {
+    return;
+  }
+
+  const items = readStorageArray(APP_STORAGE_KEYS.recentGenerations);
+
+  if (count) {
+    count.textContent = `(${items.length})`;
+  }
+
+  container.innerHTML = items.length
+    ? items.map((item) => renderStoredRow(item, "recent")).join("") +
+      '<button type="button" class="rail-mini-btn rail-clear" data-action="clear-recent">Clear list</button>'
+    : '<p class="rail-empty">Nothing generated yet.</p>';
+}
+
+function renderStoredRow(item, store) {
+  const date = new Date(item.savedAt);
+  const when = Number.isNaN(date.getTime()) ? "" : date.toLocaleDateString();
+
+  return `
+    <div class="rail-item-row">
+      <div class="rail-item-main">
+        <div class="rail-item-name">${escapeHtml(item.productName || "Untitled")}</div>
+        <div class="rail-item-date">${escapeHtml(when)}</div>
+      </div>
+      <button type="button" class="rail-mini-btn" data-action="copy-stored" data-store="${store}" data-store-id="${escapeHtml(item.id)}">Copy</button>
+      ${
+        store === "vault"
+          ? `<button type="button" class="rail-mini-btn rail-mini-btn--x" data-action="delete-stored" data-store-id="${escapeHtml(item.id)}" aria-label="Remove from vault">&times;</button>`
+          : ""
+      }
+    </div>
+  `;
+}
+
+function getStoredItem(store, id) {
+  const key =
+    store === "vault"
+      ? APP_STORAGE_KEYS.savedPackages
+      : APP_STORAGE_KEYS.recentGenerations;
+
+  return readStorageArray(key).find((item) => item.id === id);
+}
+
+async function copyStoredItem(store, id) {
+  const item = getStoredItem(store, id);
+
+  if (!item || !item.content) {
+    showToast("There is nothing to copy.", "warning");
+    return;
+  }
+
+  const copied = await copyTextToClipboard(item.content);
+  showToast(
+    copied ? "Copied to your clipboard." : "Couldn't copy automatically.",
+    copied ? "success" : "warning"
+  );
+}
+
+function deleteVaultItem(id) {
+  const items = readStorageArray(APP_STORAGE_KEYS.savedPackages).filter(
+    (item) => item.id !== id
+  );
+
+  localStorage.setItem(
+    APP_STORAGE_KEYS.savedPackages,
+    JSON.stringify(items)
+  );
+
+  renderVault();
+  showToast("Removed from your vault.", "success");
+}
+
+function clearVault() {
+  localStorage.removeItem(APP_STORAGE_KEYS.savedPackages);
+  renderVault();
+  showToast("Vault cleared.", "success");
+}
+
+function clearRecent() {
+  localStorage.removeItem(APP_STORAGE_KEYS.recentGenerations);
+  renderRecent();
+  showToast("Recent list cleared.", "success");
+}
+
+function addRecentGeneration() {
+  const content = buildFullExport();
+
+  const items = readStorageArray(APP_STORAGE_KEYS.recentGenerations);
+
+  items.unshift({
+    id: createId(),
+    productName: readValue("productName") || "Untitled Product",
+    savedAt: new Date().toISOString(),
+    content
+  });
+
+  localStorage.setItem(
+    APP_STORAGE_KEYS.recentGenerations,
+    JSON.stringify(items.slice(0, 10))
+  );
+
+  renderRecent();
+}
+
+function formatPrice(value) {
+  if (!value) {
+    return "";
+  }
+
+  const cleanedValue = String(value).replace(/[$,\s]/g, "");
+  const number = Number(cleanedValue);
+
+  if (Number.isNaN(number)) {
+    return value;
+  }
+
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD"
+  }).format(number);
+}
+
+
+/* =========================================================
+   13. PROMPT GENERATION
+   ========================================================= */
+
+async function generatePromptOptions() {
+  if (appState.isGenerating) {
+    return;
+  }
+
+  const data = collectProjectData();
+  const validation = validateProject(data);
+
+  updateValidationSummary();
+
+  if (!validation.isValid) {
+    const message = validation.errors
+      .map((error) => error.message)
+      .join(" ");
+
+    showToast(message, "error");
+    focusFirstValidationError(validation.errors);
+    return;
+  }
+
+  setGeneratingState(true);
+
+  await delay(350);
+
+  appState.generatedOptions = {};
+  appState.selectedOptions = {};
+
+  data.selectedGenerators.forEach((generatorKey) => {
+    appState.generatedOptions[generatorKey] =
+      createGeneratorOptions(generatorKey, data);
+
+    appState.selectedOptions[generatorKey] = 0;
+  });
+
+  appState.lastGeneratedSignature = createProjectSignature(data);
+
+  renderGeneratedOptions();
+  assembleAllOutputs(data);
+  generatePremiumOutputs(data);
+  renderQualityResult(data);
+  updateGeneratedVisibility();
+  setGeneratingState(false);
+  saveCurrentProject();
+  addRecentGeneration();
+
+  const resultsSection = getElement("resultsSection");
+
+  resultsSection?.scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  });
+
+  showToast("Your prompt options are ready.", "success");
+}
+
+function createGeneratorOptions(generatorKey, data) {
+  const count = data.delivery.optionCount;
+
+  return Array.from({ length: count }, (_, index) =>
+    buildPrompt(generatorKey, data, index)
+  );
+}
+
+function buildPrompt(generatorKey, data, variationIndex) {
+  const definition = GENERATOR_DEFINITIONS[generatorKey];
+  const settings = data.generatorSettings[generatorKey] || {};
+  const variation = getVariationDirection(variationIndex);
+  const ingredients = buildSharedIngredients(data);
+  const generatorInstructions = buildGeneratorInstructions(
+    generatorKey,
+    settings
+  );
+  const referenceInstructions = buildReferenceInstructions(
+    data.reference,
+    data.display.referencePurpose
+  );
+  const exactTextInstructions = buildExactTextInstructions(
+    data.delivery.exactText
+  );
+  const platformInstructions = buildPlatformInstructions(
+    data.display.aiPlatform
+  );
+  const outputRequirements = buildOutputRequirements(
+    generatorKey,
+    data,
+    variation
+  );
+
+  return [
+    `${definition.goal} for "${data.product.name}".`,
+    "",
+    `Product and business context:`,
+    ingredients,
+    "",
+    `Generator direction:`,
+    generatorInstructions,
+    "",
+    `Creative variation:`,
+    variation,
+    "",
+    referenceInstructions,
+    exactTextInstructions,
+    platformInstructions,
+    outputRequirements,
+    data.delivery.globalInstructions
+      ? `Additional instructions: ${data.delivery.globalInstructions}`
+      : "",
+    "",
+    "Return a polished, specific, commercially useful result. Avoid filler, vague claims, unsupported guarantees, copied brand language, and unnecessary repetition."
+  ]
+    .filter(Boolean)
+    .join("\n");
+}
+
+function buildSharedIngredients(data) {
+  const lines = [
+    `Product name: ${data.product.name}`,
+    `Product type: ${data.display.productType || data.product.type}`,
+    `Product description: ${data.product.description}`,
+    data.product.features
+      ? `Key features: ${data.product.features}`
+      : "",
+    data.product.benefits
+      ? `Primary benefits: ${data.product.benefits}`
+      : "",
+    data.product.format
+      ? `Product format or delivery: ${data.product.format}`
+      : "",
+    `Target audience: ${data.audience.targetAudience}`,
+    data.audience.customerProblem
+      ? `Customer problem: ${data.audience.customerProblem}`
+      : "",
+    data.audience.desiredOutcome
+      ? `Desired outcome: ${data.audience.desiredOutcome}`
+      : "",
+    data.display.marketingGoal
+      ? `Marketing goal: ${data.display.marketingGoal}`
+      : "",
+    data.display.buyerMotivation
+      ? `Buyer motivation: ${data.display.buyerMotivation}`
+      : "",
+    data.pricing.currentPrice
+      ? `Current price: ${formatPrice(data.pricing.currentPrice)}`
+      : "",
+    data.display.pricingTier
+      ? `Pricing position: ${data.display.pricingTier}`
+      : "",
+    data.display.offerType
+      ? `Offer type: ${data.display.offerType}`
+      : "",
+    data.display.pricingUsage
+      ? `Pricing instruction: ${data.display.pricingUsage}`
+      : "",
+    data.pricing.offerDetails
+      ? `Offer details: ${data.pricing.offerDetails}`
+      : "",
+    data.brand.brandName
+      ? `Brand name: ${data.brand.brandName}`
+      : "",
+    `Brand tone: ${data.display.brandTone || data.brand.brandTone}`,
+    `Visual style: ${data.display.visualStyle || data.brand.visualStyle}`,
+    data.display.colorDirection
+      ? `Color direction: ${data.display.colorDirection}`
+      : "",
+    data.display.typographyDirection
+      ? `Typography direction: ${data.display.typographyDirection}`
+      : "",
+    data.brand.brandKeywords
+      ? `Brand keywords: ${data.brand.brandKeywords}`
+      : "",
+    data.brand.wordsToAvoid
+      ? `Words and phrases to avoid: ${data.brand.wordsToAvoid}`
+      : ""
+  ];
+
+  return lines.filter(Boolean).map((line) => `- ${line}`).join("\n");
+}
+
+function buildGeneratorInstructions(generatorKey, settings) {
+  const definition = GENERATOR_DEFINITIONS[generatorKey];
+  const fieldLines = definition.fields.map((field) => {
+    const value = settings[field.key] || field.defaultValue || "";
+    return `- ${field.label}: ${value || "Use professional judgment"}`;
+  });
+
+  if (settings.additionalInstructions) {
+    fieldLines.push(
+      `- Additional instructions: ${settings.additionalInstructions}`
+    );
+  }
+
+  return fieldLines.join("\n");
+}
+
+function buildReferenceInstructions(reference, purposeLabel) {
+  const usage = purposeLabel || reference.usage;
+
+  if (!reference.fileName && !reference.notes && !usage) {
+    return "Reference image: No reference image was provided. Create an original direction without imitating protected work.";
+  }
+
+  return [
+    "Reference image guidance:",
+    reference.fileName
+      ? `- Uploaded file: ${reference.fileName}`
+      : "",
+    usage
+      ? `- Approved use: ${usage}`
+      : "",
+    reference.notes
+      ? `- Observations to use: ${reference.notes}`
+      : "",
+    "- Borrow only general qualities such as mood, composition, color relationship, or level of polish.",
+    "- Do not reproduce logos, characters, branded trade dress, distinctive artwork, or a recognizable person's likeness without permission."
+  ]
+    .filter(Boolean)
+    .join("\n");
+}
+
+function buildExactTextInstructions(exactText) {
+  if (!exactText) {
+    return "";
+  }
+
+  return `Exact wording requirement: The exact text must read: "${exactText}" in full, with no changes, additions, paraphrasing, or repeated copies.`;
+}
+
+function buildPlatformInstructions(platform) {
+  return `Optimize the final prompt for ${platform || "any AI platform"}. Use plain language that another AI tool can follow without hidden assumptions.`;
+}
+
+function buildOutputRequirements(generatorKey, data, variation) {
+  const visualGenerators = new Set([
+    "product-mockup",
+    "product-ad",
+    "promotional-flyer",
+    "lead-magnet-cover",
+    "notebook-cover",
+    "infographic",
+    "listing-image",
+    "lifestyle-image",
+    "hero-banner",
+    "video-motion",
+    "cinematic-reveal"
+  ]);
+
+  const videoGenerators = new Set([
+    "tiktok",
+    "video-motion",
+    "short-video-script",
+    "voiceover-script",
+    "product-video-ad",
+    "product-demo",
+    "launch-teaser",
+    "b-roll",
+    "cinematic-reveal"
+  ]);
+
+  const launchGenerators = new Set([
+    "launch-campaign",
+    "launch-carousel",
+    "content-series",
+    "launch-announcement"
+  ]);
+
+  const geoGenerators = new Set(["geo-optimization"]);
+
+  const requirements = [
+    "Output requirements:",
+    `- Use the ${variation.toLowerCase()} direction consistently.`,
+    "- Keep the product, audience, brand tone, pricing position, and goal aligned.",
+    "- Make the result specific enough to use with minimal editing."
+  ];
+
+  if (visualGenerators.has(generatorKey)) {
+    requirements.push(
+      "- Describe the focal point, composition, background, lighting, color treatment, typography placement when relevant, and intended canvas orientation.",
+      "- Protect thumbnail readability and commercial usability.",
+      "- Do not add unrequested text, watermarks, logos, or mockup labels."
+    );
+  }
+
+  if (videoGenerators.has(generatorKey)) {
+    requirements.push(
+      "- Include a clear opening hook, visual progression, pacing, and closing action.",
+      "- Keep scene directions practical enough to film or generate."
+    );
+  }
+
+  if (launchGenerators.has(generatorKey)) {
+    requirements.push(
+      "- Build a clear sequence from awareness to interest to action.",
+      "- Avoid repeating the same message in every asset."
+    );
+  }
+
+  if (geoGenerators.has(generatorKey)) {
+    requirements.push(
+      "- Write so AI answer engines (ChatGPT, Perplexity, Gemini, Google AI Overviews) can quote it directly.",
+      "- Lead with a clear, factual one-line answer, then the supporting specifics.",
+      "- Include concrete attributes: what it is, who it's for, price range, key benefits, and how it compares.",
+      "- Add the natural-language questions buyers ask an AI, each with a concise, citable answer.",
+      "- Avoid hype and unverifiable claims — answer engines skip fluff and reward specificity."
+    );
+  }
+
+  if (data.display.pricingUsage) {
+    requirements.push(
+      `- Follow this pricing rule exactly: ${data.display.pricingUsage}.`
+    );
+  }
+
+  return requirements.join("\n");
+}
+
+function getVariationDirection(index) {
+  const variations = [
+    "Lead with the buyer's clearest practical benefit",
+    "Use a more emotional and transformation-focused angle",
+    "Use a polished, premium, authority-led angle",
+    "Use a direct, high-energy conversion angle",
+    "Use a simple, beginner-friendly educational angle"
+  ];
+
+  return variations[index % variations.length];
+}
+
+function createProjectSignature(data) {
+  return JSON.stringify({
+    product: data.product,
+    audience: data.audience,
+    pricing: data.pricing,
+    brand: data.brand,
+    reference: data.reference,
+    delivery: data.delivery,
+    selectedGenerators: data.selectedGenerators,
+    generatorSettings: data.generatorSettings
+  });
+}
+
+
+/* =========================================================
+   14. GENERATED OPTION RENDERING
+   ========================================================= */
+
+function renderGeneratedOptions() {
+  const container = getElement("generatorOptionsOutput");
+
+  if (!container) {
+    return;
+  }
+
+  container.innerHTML = appState.selectedGenerators
+    .map((generatorKey) => {
+      const definition = GENERATOR_DEFINITIONS[generatorKey];
+      const options = appState.generatedOptions[generatorKey] || [];
+
+      return `
+        <section class="generator-output-group" data-output-generator="${escapeHtml(generatorKey)}">
+          <div class="output-heading">
+            <h3>${escapeHtml(definition.label)}</h3>
+            <button
+              type="button"
+              data-action="create-variations"
+              data-generator="${escapeHtml(generatorKey)}"
+            >
+              Create Variations
+            </button>
+          </div>
+
+          <div class="generator-output-options">
+            ${options
+              .map((prompt, index) =>
+                createOutputCardMarkup(generatorKey, prompt, index)
+              )
+              .join("")}
+          </div>
+        </section>
+      `;
+    })
+    .join("");
+}
+
+function createOutputCardMarkup(generatorKey, prompt, index) {
+  const optionId = `generated-${generatorKey}-${index}`;
+  const isSelected =
+    appState.selectedOptions[generatorKey] === index;
+
+  return `
+    <article class="output-card ${isSelected ? "is-selected" : ""}">
+      <div class="output-heading">
+        <h3>Option ${index + 1}</h3>
+
+        <div class="action-row">
+          <button
+            type="button"
+            data-action="select-output"
+            data-generator="${escapeHtml(generatorKey)}"
+            data-option-index="${index}"
+            aria-pressed="${isSelected ? "true" : "false"}"
+          >
+            ${isSelected ? "Selected" : "Use This Option"}
+          </button>
+
+          <button
+            type="button"
+            data-action="copy-output"
+            data-target="${optionId}"
+          >
+            Copy
+          </button>
+        </div>
+      </div>
+
+      <textarea
+        id="${optionId}"
+        readonly
+        aria-label="${escapeHtml(
+          `${GENERATOR_DEFINITIONS[generatorKey].label} option ${index + 1}`
+        )}"
+      >${escapeHtml(prompt)}</textarea>
+    </article>
+  `;
+}
+
+function handleGeneratedOptionSelection(control) {
+  const generatorKey = control.dataset.generator;
+  const optionIndex = Number(control.value);
+
+  selectGeneratedOption(generatorKey, optionIndex);
+}
+
+function selectGeneratedOption(generatorKey, optionIndex) {
+  const options = appState.generatedOptions[generatorKey];
+
+  if (!options || !options[optionIndex]) {
+    return;
+  }
+
+  appState.selectedOptions[generatorKey] = optionIndex;
+
+  renderGeneratedOptions();
+  assembleAllOutputs(collectProjectData());
+  saveCurrentProject();
+  showToast("Prompt option selected.", "success");
+}
+
+function createAdditionalVariations(generatorKey) {
+  const data = collectProjectData();
+  const currentOptions = appState.generatedOptions[generatorKey] || [];
+  const requestedCount = data.delivery.optionCount;
+
+  const additionalOptions = Array.from(
+    { length: requestedCount },
+    (_, index) =>
+      buildPrompt(
+        generatorKey,
+        data,
+        currentOptions.length + index
+      )
+  );
+
+  appState.generatedOptions[generatorKey] = [
+    ...currentOptions,
+    ...additionalOptions
+  ];
+
+  renderGeneratedOptions();
+  assembleAllOutputs(data);
+  saveCurrentProject();
+  showToast("Additional variations created.", "success");
+}
+
+
+/* =========================================================
+   15. OUTPUT ASSEMBLY
+   ========================================================= */
+
+function assembleAllOutputs(data) {
+  const selectedPrompts = appState.selectedGenerators
+    .map((generatorKey) => {
+      const options = appState.generatedOptions[generatorKey] || [];
+      const selectedIndex =
+        appState.selectedOptions[generatorKey] ?? 0;
+      const prompt = options[selectedIndex];
+
+      if (!prompt) {
+        return null;
+      }
+
+      return {
+        generatorKey,
+        label: GENERATOR_DEFINITIONS[generatorKey].label,
+        prompt
+      };
+    })
+    .filter(Boolean);
+
+  const standaloneOutput =
+    selectedPrompts.length === 1
+      ? selectedPrompts[0].prompt
+      : selectedPrompts
+          .map(
+            (item) =>
+              `${item.label.toUpperCase()}\n\n${item.prompt}`
+          )
+          .join("\n\n");
+
+  const separateOutput = selectedPrompts
+    .map(
+      (item, index) =>
+        `PROMPT ${index + 1}: ${item.label}\n\n${item.prompt}`
+    )
+    .join("\n\n----------------------------------------\n\n");
+
+  const combinedOutput = buildCombinedPrompt(data, selectedPrompts);
+  const hybridOutput = buildHybridPrompt(data, selectedPrompts);
+
+  // Write each format into its own textarea/list and reveal the ones that
+  // have content. (The visible textarea IDs end in "Text"; the "...Output"
+  // IDs are the surrounding <article> wrappers.)
+  setOutputText("standalonePromptOutput", "standalonePromptText", standaloneOutput);
+  setOutputText("combinedPromptOutput", "combinedPromptText", combinedOutput);
+  setOutputText("hybridPromptOutput", "hybridPromptText", hybridOutput);
+  renderSeparatePromptList(selectedPrompts);
+
+  const modeValue = normalizeKey(data.delivery.deliveryMode);
+  const finalByMode = {
+    single: standaloneOutput,
+    separate: separateOutput,
+    combined: combinedOutput,
+    both: combinedOutput,
+    hybrid: hybridOutput
+  };
+  const finalPackage = finalByMode[modeValue] || separateOutput;
+
+  setOutputValue("finalPromptPackage", finalPackage);
+}
+
+// Fills an output textarea and shows its wrapper article only when it has
+// content, so empty format boxes stay hidden.
+function setOutputText(articleId, textareaId, value) {
+  setOutputValue(textareaId, value);
+
+  const article = getElement(articleId);
+
+  if (article) {
+    article.hidden = !value;
+  }
+}
+
+function renderSeparatePromptList(selectedPrompts) {
+  const article = getElement("separatePromptsOutput");
+  const list = getElement("separatePromptList");
+
+  if (!list) {
+    return;
+  }
+
+  if (selectedPrompts.length === 0) {
+    list.innerHTML =
+      '<p class="empty-state">Separate prompts will appear here.</p>';
+
+    if (article) {
+      article.hidden = true;
+    }
+
+    return;
+  }
+
+  list.innerHTML = selectedPrompts
+    .map((item, index) => {
+      const textId = `separatePromptText-${index}`;
+      return `
+        <div class="output-card">
+          <div class="output-heading">
+            <h3>Prompt ${index + 1}: ${escapeHtml(item.label)}</h3>
+            <button type="button" data-output-target="${textId}">Copy</button>
+          </div>
+          <textarea id="${textId}" rows="16" readonly>${escapeHtml(item.prompt)}</textarea>
+        </div>
+      `;
+    })
+    .join("");
+
+  if (article) {
+    article.hidden = false;
+  }
+}
+
+function buildCombinedPrompt(data, selectedPrompts) {
+  if (selectedPrompts.length === 0) {
+    return "";
+  }
+
+  return [
+    `Create a coordinated prompt package for "${data.product.name}".`,
+    "",
+    "The package must contain the following deliverables in this order:",
+    selectedPrompts
+      .map(
+        (item, index) =>
+          `${index + 1}. ${item.label}`
+      )
+      .join("\n"),
+    "",
+    "Use one shared product position, audience, brand tone, visual direction, and offer strategy across every deliverable. Keep each deliverable distinct and avoid repeating identical wording.",
+    "",
+    "DELIVERABLE INSTRUCTIONS",
+    "",
+    selectedPrompts
+      .map(
+        (item, index) =>
+          `${index + 1}. ${item.label.toUpperCase()}\n${item.prompt}`
+      )
+      .join("\n\n")
+  ].join("\n");
+}
+
+function buildHybridPrompt(data, selectedPrompts) {
+  if (selectedPrompts.length === 0) {
+    return "";
+  }
+
+  const overview = [
+    `PROJECT OVERVIEW`,
+    `Product: ${data.product.name}`,
+    `Audience: ${data.audience.targetAudience}`,
+    `Goal: ${data.display.marketingGoal || "Create commercially useful assets"}`,
+    `Brand tone: ${data.display.brandTone || data.brand.brandTone}`,
+    `Visual style: ${data.display.visualStyle || data.brand.visualStyle}`,
+    `Platform: ${data.display.aiPlatform}`
+  ].join("\n");
+
+  const separatePrompts = selectedPrompts
+    .map(
+      (item, index) =>
+        `PROMPT ${index + 1}: ${item.label}\n\n${item.prompt}`
+    )
+    .join("\n\n----------------------------------------\n\n");
+
+  return `${overview}\n\n${separatePrompts}`;
+}
+
+function setOutputValue(id, value) {
+  const element = getElement(id);
+
+  if (!element) {
+    return;
+  }
+
+  if (
+    element instanceof HTMLTextAreaElement ||
+    element instanceof HTMLInputElement
+  ) {
+    element.value = value;
+  } else {
+    element.textContent = value;
+  }
+}
+
+function getOutputValue(id) {
+  const element = getElement(id);
+
+  if (!element) {
+    return "";
+  }
+
+  if (
+    element instanceof HTMLTextAreaElement ||
+    element instanceof HTMLInputElement
+  ) {
+    return element.value;
+  }
+
+  return element.textContent || "";
+}
+
+function clearOutputElements() {
+  ["standalonePromptText", "combinedPromptText", "hybridPromptText", "finalPromptPackage"].forEach(
+    (id) => setOutputValue(id, "")
+  );
+
+  ["standalonePromptOutput", "separatePromptsOutput", "combinedPromptOutput", "hybridPromptOutput"].forEach(
+    (id) => {
+      const article = getElement(id);
+      if (article) {
+        article.hidden = true;
+      }
+    }
+  );
+
+  renderSeparatePromptList([]);
+
+  [
+    "premiumAdPackageText",
+    "premiumLaunchPlanText",
+    "premiumCalendarText",
+    "premiumSunoText",
+    "premiumVideoText",
+    "premiumVoiceText",
+    "premiumMarketingText",
+    "premiumGptText",
+    "premiumAnimateText"
+  ].forEach((id) => setOutputValue(id, ""));
+  appState.premiumOutputs = {};
+
+  const optionContainer = getElement("generatorOptionsOutput");
+
+  if (optionContainer) {
+    optionContainer.innerHTML = "";
+  }
+
+  const qualityResult = getElement("qualityResult");
+
+  if (qualityResult) {
+    qualityResult.innerHTML = "";
+  }
+}
+
+
+/* =========================================================
+   15b. PREMIUM OUTPUT MODULES
+   Suno music, video script, marketing campaign, custom GPT.
+   Each builds a complete, copy-ready deliverable from the
+   same project inputs.
+   ========================================================= */
+
+function generatePremiumOutputs(data) {
+  appState.premiumOutputs = {
+    adpackage: buildFullAdPackage(data),
+    launchplan: buildLaunchPlan(data),
+    calendar: build30DayCalendar(data),
+    suno: buildSunoPrompt(data),
+    video: buildVideoScriptPrompt(data),
+    voice: buildVoiceoverScript(data),
+    marketing: buildMarketingPrompt(data),
+    gpt: buildCustomGptConfig(data),
+    animate: buildPhotoAnimationPrompt(data)
+  };
+
+  renderPremiumOutputs(appState.premiumOutputs);
+}
+
+function renderPremiumOutputs(outputs) {
+  const targets = {
+    adpackage: "premiumAdPackageText",
+    launchplan: "premiumLaunchPlanText",
+    calendar: "premiumCalendarText",
+    suno: "premiumSunoText",
+    video: "premiumVideoText",
+    voice: "premiumVoiceText",
+    marketing: "premiumMarketingText",
+    gpt: "premiumGptText",
+    animate: "premiumAnimateText"
+  };
+
+  Object.entries(targets).forEach(([key, id]) => {
+    setOutputValue(id, (outputs && outputs[key]) || "");
+  });
+}
+
+function handlePremiumTab(button) {
+  const key = button.dataset.premiumTab;
+
+  document.querySelectorAll(".premium-tab").forEach((tab) => {
+    const active = tab === button;
+    tab.classList.toggle("is-active", active);
+    tab.setAttribute("aria-selected", String(active));
+  });
+
+  document.querySelectorAll("[data-premium-panel]").forEach((panel) => {
+    const active = panel.dataset.premiumPanel === key;
+    panel.hidden = !active;
+    panel.classList.toggle("is-active", active);
+  });
+}
+
+// Normalizes project data into safe, readable fields for the builders,
+// with sensible fallbacks so an output is never empty or broken.
+function premiumData(data) {
+  return {
+    name: data.product.name || "your product",
+    type: data.display.productType || data.product.type || "product",
+    description: data.product.description || "",
+    features: data.product.features || "",
+    benefits: data.product.benefits || "",
+    audience: data.audience.targetAudience || "your ideal customer",
+    problem: data.audience.customerProblem || "",
+    outcome: data.audience.desiredOutcome || "",
+    goal: data.display.marketingGoal || "grow sales",
+    motivation: data.display.buyerMotivation || "",
+    price: data.pricing.currentPrice ? formatPrice(data.pricing.currentPrice) : "",
+    tier: data.display.pricingTier || "",
+    offer: data.display.offerType || "",
+    pricingUsage: data.display.pricingUsage || "",
+    brand: data.brand.brandName || data.product.name || "the brand",
+    tone: data.display.brandTone || "professional",
+    toneFirst: (data.display.brandTone || "professional").split(",")[0].trim(),
+    visual: data.display.visualStyle || "clean and modern",
+    keywords: data.brand.brandKeywords || "",
+    avoid: data.brand.wordsToAvoid || "",
+    platform: data.display.aiPlatform || "any AI platform"
+  };
+}
+
+function lowerText(value) {
+  return String(value || "").trim().toLowerCase();
+}
+
+function lowerFirst(value) {
+  const text = String(value || "").trim();
+  return text.charAt(0).toLowerCase() + text.slice(1);
+}
+
+function premiumFirstClause(value) {
+  return String(value || "").split(/[.,;\n]/)[0].trim();
+}
+
+function sunoStyleFromTone(tone) {
+  const t = lowerText(tone);
+
+  if (t.includes("bold") || t.includes("energetic")) {
+    return {
+      genre: "high-energy pop anthem",
+      tempo: "128 BPM",
+      instr: "driving drums, big synth stabs, punchy bass",
+      vocal: "powerful, confident lead vocal"
+    };
+  }
+
+  if (t.includes("premium") || t.includes("luxur") || t.includes("calm")) {
+    return {
+      genre: "cinematic downtempo pop",
+      tempo: "90 BPM",
+      instr: "lush strings, deep sub bass, soft piano",
+      vocal: "smooth, soulful lead vocal"
+    };
+  }
+
+  if (t.includes("play")) {
+    return {
+      genre: "bouncy indie pop",
+      tempo: "120 BPM",
+      instr: "ukulele, hand claps, bright synth",
+      vocal: "cheerful, upbeat vocal"
+    };
+  }
+
+  if (t.includes("friend") || t.includes("warm") || t.includes("convers")) {
+    return {
+      genre: "warm acoustic pop",
+      tempo: "104 BPM",
+      instr: "acoustic guitar, light percussion, claps",
+      vocal: "warm, inviting vocal"
+    };
+  }
+
+  if (t.includes("educat")) {
+    return {
+      genre: "clean modern pop",
+      tempo: "108 BPM",
+      instr: "electric piano, soft beat, subtle synth",
+      vocal: "clear, friendly vocal"
+    };
+  }
+
+  return {
+    genre: "polished commercial pop",
+    tempo: "110 BPM",
+    instr: "electric piano, warm synth pads, steady beat",
+    vocal: "clear, confident lead vocal"
+  };
+}
+
+function premiumHashtags(d) {
+  const source = [d.type, d.audience, d.keywords, d.goal].join(" ");
+  const words = source
+    .toLowerCase()
+    .replace(/[^a-z0-9 ]/g, " ")
+    .split(/\s+/)
+    .filter((word) => word.length > 3);
+
+  const unique = [...new Set(words)].slice(0, 6).map((word) => `#${word}`);
+  const branded = `#${d.name.toLowerCase().replace(/[^a-z0-9]/g, "")}`;
+
+  return [branded, ...unique].slice(0, 7).join(" ");
+}
+
+function buildSunoPrompt(data) {
+  const d = premiumData(data);
+  const style = sunoStyleFromTone(d.toneFirst);
+  const outcome = d.outcome || "getting the result they wanted";
+
+  return [
+    "MUSIC PROMPTS — SUNO AI",
+    `For: ${d.name} (${d.type})`,
+    "",
+    "Two ready options. Use Option A for a branded song, Option B for background music under a video or ad.",
+    "",
+    "==================================================",
+    "OPTION A — FULL BRANDED SONG (with lyrics)",
+    "==================================================",
+    'In Suno, paste STYLE into "Style of Music", TITLE into the title field, and LYRICS into the lyrics field. Keep "Instrumental" OFF.',
+    "",
+    "STYLE:",
+    `${style.genre}, ${style.tempo}, ${style.instr}, ${style.vocal}, radio-ready commercial production, catchy and memorable`,
+    "",
+    "TITLE:",
+    `${d.name} (Made For You)`,
+    "",
+    "LYRICS:",
+    "[Intro]",
+    `Yeah... ${d.name}... here we go`,
+    "",
+    "[Verse 1]",
+    `${capitalize(d.audience)}, I see you clear`,
+    "Carrying the weight, know it all too well",
+    "Then something shifted, a whole new view",
+    `${d.name} came through, made it feel brand new`,
+    "",
+    "[Pre-Chorus]",
+    "No more waiting, no more doubt",
+    "This right here is what it's all about",
+    "",
+    "[Chorus]",
+    `${d.name}, lighting up the way`,
+    `${capitalize(outcome)}, starting today`,
+    "Feel it rising, feel it true",
+    `${d.name}, made for you`,
+    "",
+    "[Verse 2]",
+    d.benefits
+      ? capitalize(premiumFirstClause(d.benefits))
+      : "Everything you need, right in your hands",
+    `Built for ${lowerText(d.audience)}, meeting the demand`,
+    d.keywords
+      ? `${capitalize(premiumFirstClause(d.keywords))}, nothing in the way`
+      : "Simple and clear, nothing in the way",
+    "A better tomorrow, starting from today",
+    "",
+    "[Chorus]",
+    `${d.name}, lighting up the way`,
+    `${capitalize(outcome)}, starting today`,
+    "Feel it rising, feel it true",
+    `${d.name}, made for you`,
+    "",
+    "[Bridge]",
+    "When you're ready to grow (ready to grow)",
+    `${d.name}'s the way to go (way to go)`,
+    "",
+    "[Outro]",
+    `${d.name}... made for you`,
+    `${d.brand}... breaking through`,
+    "",
+    "==================================================",
+    "OPTION B — INSTRUMENTAL BACKGROUND TRACK (for a video or ad)",
+    "==================================================",
+    "Use this when music plays UNDER a voiceover — no vocals to compete. In Suno, turn 'Instrumental' ON and paste STYLE only.",
+    "",
+    "STYLE:",
+    `${style.genre} instrumental, ${style.tempo}, ${style.instr}, no vocals, clean minimal mix that leaves space for a voiceover, loopable, commercial background bed`,
+    "",
+    "STRUCTURE (aim for ~35s to match the video):",
+    "- 0:00-0:03  soft intro (a single instrument or light pad)",
+    "- 0:03-0:25  steady, low rhythmic bed (keep it under the voice)",
+    "- 0:25-0:33  gentle lift for the call to action",
+    "- 0:33-0:35  clean, resolved ending"
+  ].join("\n");
+}
+
+// One scene model shared by the video script (visual) and the voiceover
+// script (spoken), so the two always line up beat-for-beat.
+function videoScenes(d) {
+  const cta = d.offer ? `Grab the ${lowerText(d.offer)} now` : `Get ${d.name} today`;
+
+  return [
+    {
+      label: "Hook",
+      time: "0:00-0:03",
+      onscreen: d.problem
+        ? capitalize(premiumFirstClause(d.problem)) + "?"
+        : "Struggling with your " + lowerText(d.type) + "?",
+      vo: `If you're ${lowerText(d.audience)}, stop scrolling — this changes everything.`,
+      shot: "Fast punch-in on face or product with a bold text overlay."
+    },
+    {
+      label: "Problem",
+      time: "0:03-0:09",
+      onscreen: "",
+      vo: d.problem
+        ? "You know the feeling: " + lowerText(d.problem) + "."
+        : "Most options overpromise and underdeliver.",
+      shot: "Quick b-roll of the frustration / the 'before'."
+    },
+    {
+      label: "Solution",
+      time: "0:09-0:20",
+      onscreen: "Meet " + d.name,
+      vo: `${d.name} is a ${lowerText(d.type)} that ${
+        d.outcome ? lowerText(d.outcome) : "gets you real results, fast"
+      }.${d.benefits ? " " + capitalize(premiumFirstClause(d.benefits)) + "." : ""}`,
+      shot: "Clean hero shots of the product in use."
+    },
+    {
+      label: "Proof",
+      time: "0:20-0:29",
+      onscreen: "",
+      vo: `${
+        d.keywords ? "It's " + lowerText(d.keywords) + "." : "It's simple, and it just works."
+      } Made for ${lowerText(d.audience)}.`,
+      shot: "Fast feature montage / results / testimonial-style clip."
+    },
+    {
+      label: "Call to action",
+      time: "0:29-0:35",
+      onscreen: cta,
+      vo: `${cta}. Link in bio.`,
+      shot: "Product with a button overlay and a confident smile."
+    }
+  ];
+}
+
+function buildVideoScriptPrompt(data) {
+  const d = premiumData(data);
+  const scenes = videoScenes(d);
+
+  const lines = [
+    "SHORT-FORM VIDEO SCRIPT (visuals)",
+    `Product: ${d.name} (${d.type})  |  Audience: ${d.audience}  |  Tone: ${d.tone}`,
+    "Length: ~35 seconds  |  Format: vertical 9:16 (TikTok / Reels / Shorts)",
+    "",
+    "HOW TO USE: This is what happens on screen. The spoken words are in the separate VOICEOVER SCRIPT tab — the timings match.",
+    ""
+  ];
+
+  scenes.forEach((scene) => {
+    lines.push(`${scene.label.toUpperCase()} — ${scene.time}`);
+    if (scene.onscreen) {
+      lines.push(`[On-screen] ${scene.onscreen}`);
+    }
+    lines.push(`[Shot] ${scene.shot}`, "");
+  });
+
+  lines.push("SHOT LIST:");
+  scenes.forEach((scene, index) => {
+    lines.push(`${index + 1}. ${scene.label} (${scene.time}) — ${scene.shot}`);
+  });
+
+  lines.push(
+    "",
+    "CAPTION:",
+    `${capitalize(
+      d.outcome || "The " + d.type + " " + d.audience + " actually needs"
+    )} — meet ${d.name}. ${d.price ? "From " + d.price + "." : ""}`.trim(),
+    "",
+    "HASHTAGS:",
+    premiumHashtags(d)
+  );
+
+  return lines.join("\n");
+}
+
+function buildVoiceoverScript(data) {
+  const d = premiumData(data);
+  const scenes = videoScenes(d);
+
+  const lines = [
+    "VOICEOVER SCRIPT",
+    `Product: ${d.name}  |  Audience: ${d.audience}  |  Deliver in a ${d.tone} voice`,
+    "Length: ~35 seconds  |  Timings match the Video Script scenes",
+    "",
+    "HOW TO USE: Record it yourself, or paste into a voice AI (ElevenLabs, Play.ht, or your video tool's voiceover).",
+    ""
+  ];
+
+  scenes.forEach((scene) => {
+    lines.push(`[${scene.time}] (${scene.label}) "${scene.vo}"`);
+  });
+
+  lines.push(
+    "",
+    "DELIVERY NOTES:",
+    `- Voice & tone: ${d.tone}.`,
+    "- Pace: energetic in the hook, steady in the middle, confident on the call to action.",
+    `- Emphasize: "${d.name}"${d.outcome ? ' and "' + lowerText(d.outcome) + '"' : ""}.`,
+    "- Take a short breath before the final line.",
+    d.avoid ? `- Never say: ${d.avoid}.` : null,
+    "",
+    "FULL SCRIPT (one paragraph, for text-to-speech):",
+    scenes.map((scene) => scene.vo).join(" ")
+  );
+
+  return lines.filter((line) => line !== null).join("\n");
+}
+
+function buildMarketingPrompt(data) {
+  const d = premiumData(data);
+
+  const brief = [
+    `- Product: ${d.name} (${d.type})`,
+    d.description ? `- What it is: ${d.description}` : "",
+    `- Target audience: ${d.audience}`,
+    d.problem ? `- Problem it solves: ${d.problem}` : "",
+    d.outcome ? `- Desired outcome: ${d.outcome}` : "",
+    d.benefits ? `- Key benefits: ${d.benefits}` : "",
+    `- Marketing goal: ${d.goal}`,
+    d.offer ? `- Offer type: ${d.offer}` : "",
+    d.price ? `- Price: ${d.price}` : "",
+    `- Brand tone: ${d.tone}`,
+    d.keywords ? `- Brand keywords: ${d.keywords}` : "",
+    d.avoid ? `- Words to avoid: ${d.avoid}` : ""
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+  const priceRule = d.pricingUsage ? ` Pricing rule: ${d.pricingUsage}.` : "";
+
+  return [
+    "MARKETING CAMPAIGN PROMPT",
+    "",
+    `HOW TO USE: Paste this whole block into ${d.platform}. It will produce a complete, launch-ready campaign.`,
+    "",
+    `You are a senior direct-response marketer. Using the brief below, write a complete, launch-ready campaign for "${d.name}". Match the ${d.tone} tone exactly${d.avoid ? ", and never use these words: " + d.avoid : ""}.${priceRule}`,
+    "",
+    "BRIEF:",
+    brief,
+    "",
+    "PRODUCE ALL OF THE FOLLOWING, fully written and ready to publish:",
+    "",
+    "1) FIVE HEADLINE OPTIONS — punchy, benefit-led, under 10 words each.",
+    "2) LAUNCH EMAIL — subject line, preview text, a 150-220 word body, and one clear call to action.",
+    "3) THREE SOCIAL POSTS — one educational, one story-led, one promotional. Each with a hook, body, CTA, and 5 hashtags.",
+    "4) ONE PAID AD — primary text (max 125 words), headline (max 40 characters), and description (max 30 words).",
+    "5) THREE SUBJECT-LINE VARIATIONS for A/B testing (curiosity, benefit, urgency).",
+    "6) A 2-LINE SMS / DM BLAST with a {link} placeholder.",
+    "",
+    `RULES: Speak directly to ${d.audience}. Lead with the transformation (${d.outcome || "the result they want"}), not the features. Be specific and human — no clichés, no hype, no false claims. End every asset with one clear action.`
+  ].join("\n");
+}
+
+function buildCustomGptConfig(data) {
+  const d = premiumData(data);
+  const gptName = `${d.name} Assistant`;
+
+  return [
+    "CUSTOM GPT CONFIGURATION",
+    'Build it in ChatGPT: Explore GPTs > Create. Paste each block into the matching field.',
+    "",
+    "==================================================",
+    "NAME",
+    "==================================================",
+    gptName,
+    "",
+    "==================================================",
+    "DESCRIPTION (short, shown under the name)",
+    "==================================================",
+    `Your on-demand expert for ${d.name} — helping ${d.audience} ${
+      d.outcome ? "achieve " + lowerText(d.outcome) : "get results"
+    } with a ${lowerText(d.type)}.`,
+    "",
+    "==================================================",
+    'INSTRUCTIONS (paste into the "Instructions" field)',
+    "==================================================",
+    "ROLE",
+    `You are ${gptName}, a specialized assistant for ${d.name}.`,
+    `${d.name} is a ${lowerText(d.type)}${
+      d.description ? " — " + lowerFirst(premiumFirstClause(d.description)) : ""
+    }. You help ${d.audience}.`,
+    "",
+    "GOALS & RESPONSIBILITIES",
+    `- Help users understand and get the most from ${d.name}.`,
+    `- Move every user toward this outcome: ${d.outcome || "a successful result"}.`,
+    `- Solve this core problem: ${d.problem || "the user's main challenge"}.`,
+    `- Support the wider goal of ${d.goal}.`,
+    "",
+    "TONE & PERSONALITY",
+    `- Voice: ${d.tone}.`,
+    "- Sound like a knowledgeable, friendly expert — clear, encouraging, never condescending.",
+    d.keywords ? `- Reflect these brand qualities: ${d.keywords}.` : null,
+    d.avoid ? `- Never use these words or phrases: ${d.avoid}.` : null,
+    "",
+    "BEHAVIOR & RESPONSE GUIDELINES",
+    "- Ask one clarifying question when a request is ambiguous.",
+    "- Give complete, step-by-step, immediately usable answers.",
+    "- Use short paragraphs, headers, and bullets for readability.",
+    `- Tailor examples to ${d.audience}.`,
+    "- End with a helpful next step or an offer to go deeper.",
+    "",
+    "RULES & LIMITATIONS",
+    `- Stay on topic: ${d.name} and closely related help for ${d.audience}.`,
+    "- Never invent facts, prices, or features. If unsure, say so and ask.",
+    "- Do not give legal, medical, or financial advice.",
+    "- Make no guarantees or unverifiable claims.",
+    `- Hold the ${d.tone} tone even when correcting or declining.`,
+    "",
+    "BEST PRACTICES FOR USING THIS GPT",
+    "- Tell it who you are and what you're trying to achieve.",
+    "- Share context (your audience, your goal) for tailored answers.",
+    "- Ask for formats you can use directly (scripts, checklists, copy).",
+    "",
+    "==================================================",
+    "SUGGESTED KNOWLEDGE FILES TO UPLOAD",
+    "==================================================",
+    `- Product overview / one-pager for ${d.name} (features, benefits, use cases).`,
+    "- FAQ document (common questions with approved answers).",
+    `- Brand voice guide (tone: ${d.tone}${d.avoid ? "; avoid: " + d.avoid : ""}).`,
+    `- Pricing & offers sheet${d.price ? " (current price: " + d.price + ")" : ""}.`,
+    "- Example outputs / templates you want it to match.",
+    `- Customer personas for ${d.audience}.`,
+    "",
+    "==================================================",
+    "CONVERSATION STARTERS",
+    "==================================================",
+    `1. How can ${d.name} help me ${d.outcome ? lowerText(d.outcome) : "get started"}?`,
+    `2. Give me a quick-start plan for ${lowerText(d.type)} success.`,
+    `3. Help me solve: ${d.problem || "my biggest challenge"}.`,
+    `4. Write me something I can use today for ${d.name}.`,
+    "",
+    "==================================================",
+    "SUGGESTED WELCOME MESSAGE",
+    "==================================================",
+    `Hi! I'm your ${d.name} assistant. Tell me what you're working on and I'll help you ${
+      d.outcome ? "reach " + lowerText(d.outcome) : "get results"
+    }, step by step. Where would you like to start?`,
+    "",
+    "==================================================",
+    "TESTING CHECKLIST (run before you publish)",
+    "==================================================",
+    `[ ] Stays on topic and in the ${d.tone} tone.`,
+    "[ ] Asks a clarifying question when input is vague.",
+    "[ ] Produces complete, usable answers (not outlines).",
+    "[ ] Never invents prices, features, or guarantees.",
+    "[ ] Handles an off-topic request gracefully.",
+    "[ ] Each conversation starter returns a strong, on-brand answer.",
+    `[ ] The welcome message sounds like ${d.brand}.`,
+    d.avoid ? `[ ] Avoids all restricted words (${d.avoid}).` : null
+  ]
+    .filter((line) => line !== null)
+    .join("\n");
+}
+
+function animationStyleFromVisual(visual, tone) {
+  const v = lowerText(`${visual} ${tone}`);
+
+  if (v.includes("luxur") || v.includes("premium")) {
+    return {
+      camera: "slow cinematic orbit",
+      motion: "a soft light sweep across the surface and a gentle depth-of-field shift",
+      loop: "elegant and premium"
+    };
+  }
+
+  if (v.includes("bold") || v.includes("energetic") || v.includes("commercial")) {
+    return {
+      camera: "punchy dolly-in",
+      motion: "a quick light flare and crisp moving reflections",
+      loop: "high-energy"
+    };
+  }
+
+  if (v.includes("play")) {
+    return {
+      camera: "bouncy zoom",
+      motion: "playful sparkles and a light color shimmer",
+      loop: "fun and upbeat"
+    };
+  }
+
+  if (v.includes("organic") || v.includes("natural") || v.includes("soft")) {
+    return {
+      camera: "slow drifting push-in",
+      motion: "gentle natural light drift and subtle ambient movement",
+      loop: "calm and natural"
+    };
+  }
+
+  return {
+    camera: "slow push-in",
+    motion: "subtle parallax and a soft light drift",
+    loop: "clean and premium"
+  };
+}
+
+// Stitches the visual script, voiceover, background music, and captions into
+// one coordinated, ready-to-hand-off ad brief.
+function buildFullAdPackage(data) {
+  const d = premiumData(data);
+  const scenes = videoScenes(d);
+  const style = sunoStyleFromTone(d.toneFirst);
+
+  const concept = `${capitalize(d.audience)} struggle with ${
+    d.problem ? lowerText(d.problem) : "the usual options"
+  } — ${d.name} gives them ${
+    d.outcome ? lowerText(d.outcome) : "a better result"
+  }.`;
+
+  const lines = [
+    "FULL AD PACKAGE",
+    `Product: ${d.name} (${d.type})  |  Audience: ${d.audience}  |  Tone: ${d.tone}`,
+    "Format: ~35-second vertical 9:16 ad  |  TikTok / Reels / Shorts",
+    "",
+    "CONCEPT:",
+    concept,
+    "",
+    "==================================================",
+    "SCENE-BY-SCENE (visual + voice together)",
+    "==================================================",
+    ""
+  ];
+
+  scenes.forEach((scene) => {
+    lines.push(`[${scene.time}]  ${scene.label.toUpperCase()}`);
+    if (scene.onscreen) {
+      lines.push(`  On-screen: ${scene.onscreen}`);
+    }
+    lines.push(`  Voiceover: "${scene.vo}"`);
+    lines.push(`  Shot: ${scene.shot}`, "");
+  });
+
+  lines.push(
+    "==================================================",
+    "MUSIC — instrumental background bed",
+    "==================================================",
+    `Style: ${style.genre} instrumental, ${style.tempo}, ${style.instr}, no vocals, kept low under the voice, loopable.`,
+    "Arc: soft intro -> steady low bed -> gentle lift on the CTA -> clean end.",
+    "In Suno: turn 'Instrumental' ON and paste the Style line above.",
+    "",
+    "==================================================",
+    "CAPTION & HASHTAGS",
+    "==================================================",
+    `Caption: ${capitalize(
+      d.outcome || "The " + d.type + " " + d.audience + " actually needs"
+    )} — meet ${d.name}.${d.price ? " From " + d.price + "." : ""}`,
+    `Hashtags: ${premiumHashtags(d)}`,
+    "",
+    "==================================================",
+    "PRODUCTION CHECKLIST",
+    "==================================================",
+    "[ ] Film or generate the shots in order (see scenes above).",
+    "[ ] Record the voiceover, or generate it with a voice AI (ElevenLabs / Play.ht).",
+    "[ ] Generate the instrumental track in Suno (Instrumental ON).",
+    "[ ] Layer it: video + voiceover on top + music low underneath.",
+    "[ ] Add the on-screen text and a clear CTA card at the end.",
+    "[ ] Export 9:16 and post with the caption + hashtags."
+  );
+
+  return lines.join("\n");
+}
+
+function kitPick(picks, keywords, fallback) {
+  const matches = picks.filter((p) =>
+    keywords.some((k) => p.toLowerCase().includes(k))
+  );
+  return matches.length ? matches.join(", ") : fallback;
+}
+
+function buildLaunchPlan(data) {
+  const d = premiumData(data);
+  const creator = appState.brandMode === "creator";
+  const picks = data.selectedGenerators.map(
+    (key) => GENERATOR_DEFINITIONS[key]?.label || key
+  );
+  const has = (word) => picks.some((p) => p.toLowerCase().includes(word));
+  const kit = picks.length ? picks.join(", ") : "your generated assets";
+
+  return [
+    `THE PROFIT PATH — LAUNCH PLAN for ${d.name}`,
+    `${creator ? "Mode: You are the brand (creator-led)" : "Mode: Product / niche"}  |  Goal: ${d.goal}  |  Platform: ${d.platform}`,
+    `Your kit: ${kit}`,
+    "",
+    "The PROFIT Path is the 6-phase launch method: Prime, Reveal, Offer, Flood, Ignite, Tend. Follow it in order — shift the dates to fit you.",
+    "",
+    "== P - PRIME (earn trust before you sell) ==",
+    creator
+      ? "Days 1-3: Show up as YOU. Share your story, your point of view, and helpful takes to build the audience that will buy. Open a waitlist."
+      : "Days 1-3: Warm up your niche with pure value — helpful tips, no pitch. Open a waitlist so early fans can raise their hand.",
+    `Use: ${kitPick(picks, ["social", "hook", "content"], "social posts + hooks")}`,
+    "",
+    "== R - REVEAL (open the loop) ==",
+    "Day 4: Tease that something's coming — a \"launching soon\" post and a short teaser. Point everyone to the waitlist.",
+    `Use: ${kitPick(picks, ["teaser", "announcement"], "a teaser + announcement")}`,
+    "",
+    "== O - OFFER (show the transformation) ==",
+    "Days 5-7: Reveal what it is and who it's for. Lead with the before-to-after, show proof, and spell out exactly what they get.",
+    `Use: ${kitPick(picks, ["sales", "video", "email"], "a sales page + a value email")}`,
+    "",
+    "== F - FLOOD (go live everywhere) ==",
+    `Day 8 (GO LIVE): Publish the ${
+      has("listing") || has("description") ? "listing / product page" : "product page"
+    } and send the launch email. Post the announcement across every channel at once.`,
+    `Use: ${kitPick(picks, ["listing", "description", "ad", "announcement", "carousel"], "your listing + ad + announcement")}`,
+    "",
+    "== I - IGNITE (urgency + momentum) ==",
+    "Days 9-10: Add urgency — a bonus, a deadline, and social proof. Send a \"closing soon\" email and post last-call reminders.",
+    "Use: an urgency email + last-call posts",
+    "",
+    "== T - TEND (nurture + make it evergreen) ==",
+    creator
+      ? "Days 11+: Thank buyers, gather testimonials, and keep showing up. Turn your best launch content into evergreen posts, and save this project for your next drop."
+      : "Days 11+: Thank buyers, request reviews, and turn your winners into evergreen content. Save this project so your next product launches in minutes.",
+    has("gpt")
+      ? "Use: a follow-up email + reviews + your Custom GPT to keep answering buyers"
+      : "Use: a follow-up email + review request + evergreen social",
+    "",
+    "PROFIT PATH CHECKLIST:",
+    "[ ] Prime - value/story posts + waitlist live",
+    "[ ] Reveal - teaser posted",
+    "[ ] Offer - sales page + email ready",
+    "[ ] Flood - product live + announced everywhere",
+    "[ ] Ignite - urgency + last-call planned",
+    "[ ] Tend - follow-up + testimonials + saved for next time",
+    d.pricingUsage ? `[ ] Pricing rule followed: ${d.pricingUsage}` : null
+  ]
+    .filter((line) => line !== null)
+    .join("\n");
+}
+
+function build30DayCalendar(data) {
+  const d = premiumData(data);
+
+  const themes = [
+    "Educational — teach one quick win related to your product",
+    "Story — why you made it, or the problem it solves",
+    "Promo — a direct call to buy, leading with the outcome",
+    "Social proof — a result, review, or testimonial",
+    "Behind the scenes — how it's made or used",
+    "Engagement — ask your audience a question",
+    "Value bomb — a free tip they can use today"
+  ];
+
+  const lines = [
+    `30-DAY CONTENT CALENDAR — ${d.name}`,
+    `Audience: ${d.audience}  |  Tone: ${d.tone}`,
+    "",
+    "HOW TO USE: One idea per day. Rotate the themes so your feed stays fresh, and pull the actual copy from your generated Social / Hooks assets.",
+    ""
+  ];
+
+  for (let day = 1; day <= 30; day += 1) {
+    lines.push(`Day ${String(day).padStart(2, "0")}: ${themes[(day - 1) % themes.length]}.`);
+    if (day % 7 === 0) {
+      lines.push("");
+    }
+  }
+
+  lines.push(
+    "",
+    "TIP: Batch a whole week in one sitting, and repost your best performers a month later."
+  );
+
+  return lines.join("\n");
+}
+
+function buildPhotoAnimationPrompt(data) {
+  const d = premiumData(data);
+  const s = animationStyleFromVisual(d.visual, d.toneFirst);
+
+  return [
+    "PHOTO -> ANIMATION & VIDEO",
+    `For: ${d.name} (${d.type})  |  Visual style: ${d.visual}  |  Tone: ${d.tone}`,
+    "",
+    "HOW TO USE: Open an image-to-video tool (Runway Gen-3, Kling, Luma Dream Machine, Pika, or Sora). Upload your product photo, then paste the matching prompt below.",
+    "",
+    "----------------------------------------",
+    "1) ANIMATION PROMPT (subtle cinemagraph, 3-4s loop):",
+    `Animate this photo of ${d.name}. Keep the product razor-sharp, centered, and unchanged. Add ${s.motion}, with a ${s.camera}. Photoreal, ${d.visual} aesthetic, seamless 3-4 second loop. Do not add text or logos and do not distort the product. Keep it ${s.loop}.`,
+    "",
+    "2) SHORT HERO-VIDEO PROMPT (5-8s):",
+    `Create a 6-second cinematic product video from this image of ${d.name}. Camera: ${s.camera}. Motion: ${s.motion}. Mood: ${d.tone}. Lighting: soft, directional, commercial. End on a clean, well-lit hero frame. Vertical 9:16, high detail, ${d.visual} style. No warping, no added text.`,
+    "",
+    "----------------------------------------",
+    "CAMERA & MOTION OPTIONS (swap in to taste):",
+    "- Slow push-in — builds focus on the product.",
+    "- Slow orbit — shows form and a premium feel.",
+    "- Parallax drift — adds depth without moving the product.",
+    "- Macro pull-back — reveal from a detail out to the full product.",
+    "",
+    "RECOMMENDED SETTINGS:",
+    "- Tools: Runway Gen-3, Kling 1.5, Luma Dream Machine, Pika, Sora",
+    "- Aspect ratio: 9:16 for Reels / TikTok / Shorts (1:1 for feed)",
+    "- Duration: 3-8 seconds",
+    "- Motion strength: low to medium (keeps the product clean)",
+    d.keywords ? `- Keep the mood aligned with: ${d.keywords}.` : null
+  ]
+    .filter((line) => line !== null)
+    .join("\n");
+}
+
+
+/* =========================================================
+   16. QUALITY REVIEW
+   ========================================================= */
+
+function renderQualityResult(data) {
+  const container = getElement("qualityResult");
+
+  if (!container) {
+    return;
+  }
+
+  const checks = [
+    {
+      label: "Clear product",
+      passed: Boolean(
+        data.product.name && data.product.description
+      )
+    },
+    {
+      label: "Defined audience",
+      passed: Boolean(data.audience.targetAudience)
+    },
+    {
+      label: "Brand direction",
+      passed: Boolean(
+        data.brand.brandTone && data.brand.visualStyle
+      )
+    },
+    {
+      label: "Commercial goal",
+      passed: Boolean(
+        data.audience.marketingGoal ||
+          data.pricing.offerType
+      )
+    },
+    {
+      label: "Generator direction",
+      passed: data.selectedGenerators.every((key) =>
+        Boolean(appState.generatorSettings[key])
+      )
+    }
+  ];
+
+  const passedCount = checks.filter((check) => check.passed).length;
+  const score = Math.round(
+    (passedCount / checks.length) * 100
+  );
+
+  const status =
+    score === 100
+      ? "Ready"
+      : score >= 80
+        ? "Strong"
+        : score >= 60
+          ? "Needs Review"
+          : "Incomplete";
+
+  container.className = "quality-result";
+
+  if (score >= 80) {
+    container.classList.add("is-success");
+  } else if (score >= 60) {
+    container.classList.add("is-warning");
+  } else {
+    container.classList.add("is-error");
+  }
+
+  container.innerHTML = `
+    <div class="quality-head">
+      <h3>Prompt quality: ${escapeHtml(status)}</h3>
+      <span class="quality-score">${score}%</span>
+    </div>
+    <div class="quality-bar"><span style="width: ${score}%"></span></div>
+    <ul class="quality-list">
+      ${checks
+        .map(
+          (check) => `
+            <li class="${check.passed ? "is-pass" : "is-todo"}">
+              <span class="quality-mark" aria-hidden="true">${
+                check.passed ? "✓" : "!"
+              }</span>
+              <span>${escapeHtml(check.label)}</span>
+            </li>
+          `
+        )
+        .join("")}
+    </ul>
+  `;
+}
+
+
+/* =========================================================
+   17. COPY AND SAVE
+   ========================================================= */
+
+async function copyOutput(targetId) {
+  const text = getOutputValue(targetId);
+
+  if (!text.trim()) {
+    showToast("There is no generated content to copy.", "warning");
+    return;
+  }
+
+  const copied = await copyTextToClipboard(text);
+
+  if (copied) {
+    showToast("Copied to your clipboard.", "success");
+  } else {
+    showToast(
+      `Couldn't copy automatically — the text is selected, press ${
+        isAppleDevice() ? "Cmd" : "Ctrl"
+      }+C.`,
+      "warning"
+    );
+  }
+}
+
+// Copies text reliably across contexts: the async Clipboard API where it's
+// allowed (HTTPS), falling back to a focused, selected textarea + execCommand
+// for local file:// use. Returns true only when the copy actually happened.
+async function copyTextToClipboard(text) {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch {
+      // Permission/context blocked it — fall through to the manual method.
+    }
+  }
+
+  return legacyCopy(text);
+}
+
+function legacyCopy(text) {
+  const textarea = document.createElement("textarea");
+  textarea.value = text;
+  textarea.setAttribute("readonly", "");
+  textarea.style.position = "fixed";
+  textarea.style.top = "0";
+  textarea.style.left = "0";
+  textarea.style.width = "1px";
+  textarea.style.height = "1px";
+  textarea.style.padding = "0";
+  textarea.style.opacity = "0";
+  document.body.appendChild(textarea);
+
+  const selection = document.getSelection();
+  const savedRange =
+    selection && selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
+
+  textarea.focus();
+  textarea.select();
+
+  if (typeof textarea.setSelectionRange === "function") {
+    textarea.setSelectionRange(0, text.length);
+  }
+
+  let copied = false;
+
+  try {
+    copied = document.execCommand("copy");
+  } catch {
+    copied = false;
+  }
+
+  textarea.remove();
+
+  if (savedRange && selection) {
+    selection.removeAllRanges();
+    selection.addRange(savedRange);
+  }
+
+  return copied;
+}
+
+function isAppleDevice() {
+  const platform = navigator.platform || navigator.userAgent || "";
+  return /mac|iphone|ipad|ipod/i.test(platform);
+}
+
+function saveFinalPackage() {
+  const packageText = getOutputValue("finalPromptPackage");
+
+  if (!packageText.trim()) {
+    showToast("Generate a prompt package before saving.", "warning");
+    return;
+  }
+
+  const savedPackages = readStorageArray(
+    APP_STORAGE_KEYS.savedPackages
+  );
+
+  savedPackages.unshift({
+    id: createId(),
+    productName: readValue("productName") || "Untitled Product",
+    deliveryMode: readValue("deliveryMode"),
+    content: buildFullExport(),
+    savedAt: new Date().toISOString()
+  });
+
+  localStorage.setItem(
+    APP_STORAGE_KEYS.savedPackages,
+    JSON.stringify(savedPackages.slice(0, 25))
+  );
+
+  renderVault();
+  showToast("Saved to your vault.", "success");
+}
+
+// Assembles the final package plus every premium module into one document.
+function buildFullExport() {
+  const productName = readValue("productName") || "Untitled Product";
+
+  const parts = [
+    "PROMPT TO PROFIT — FULL EXPORT",
+    `Product: ${productName}`,
+    `Generated: ${new Date().toLocaleString()}`,
+    "",
+    "========================================",
+    "FINAL PROMPT PACKAGE",
+    "========================================",
+    getOutputValue("finalPromptPackage") || "(none)"
+  ];
+
+  const premium = appState.premiumOutputs || {};
+
+  [
+    ["FULL AD PACKAGE", premium.adpackage],
+    ["7-DAY LAUNCH PLAN", premium.launchplan],
+    ["30-DAY CONTENT CALENDAR", premium.calendar],
+    ["MUSIC PROMPTS (SUNO)", premium.suno],
+    ["VIDEO SCRIPT", premium.video],
+    ["VOICEOVER SCRIPT", premium.voice],
+    ["MARKETING CAMPAIGN PROMPT", premium.marketing],
+    ["CUSTOM GPT BUILDER", premium.gpt],
+    ["PHOTO ANIMATION & VIDEO", premium.animate]
+  ].forEach(([title, content]) => {
+    if (content) {
+      parts.push(
+        "",
+        "========================================",
+        title,
+        "========================================",
+        content
+      );
+    }
+  });
+
+  return parts.join("\n");
+}
+
+function downloadAllOutputs() {
+  if (!getOutputValue("finalPromptPackage").trim()) {
+    showToast("Generate your prompts before downloading.", "warning");
+    return;
+  }
+
+  const blob = new Blob([buildFullExport()], {
+    type: "text/plain;charset=utf-8"
+  });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+
+  const safeName = (readValue("productName") || "prompt-pack")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+  link.href = url;
+  link.download = `${safeName || "prompt-pack"}-prompts.txt`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+
+  showToast("Downloaded your full prompt pack.", "success");
+}
+
+// Opens a clean printable page of the full kit so the browser's "Save as PDF"
+// produces a tidy document (printing the textareas directly clips content).
+function printLaunchKit() {
+  if (!getOutputValue("finalPromptPackage").trim()) {
+    showToast("Generate your prompts before printing.", "warning");
+    return;
+  }
+
+  const printWindow = window.open("", "_blank");
+
+  if (!printWindow) {
+    showToast("Allow pop-ups to print or save as PDF.", "warning");
+    return;
+  }
+
+  const title = readValue("productName") || "Launch Kit";
+  const when = new Date().toLocaleDateString();
+  const doc = printWindow.document;
+
+  doc.write(
+    "<!doctype html><html><head><meta charset='utf-8'><title>" +
+      escapeHtml(`Prompt to Profit — ${title}`) +
+      "</title><style>" +
+      "@page{margin:28px;}" +
+      "*{box-sizing:border-box;}" +
+      "body{margin:0;color:#12201f;font-family:system-ui,-apple-system,'Segoe UI',sans-serif;}" +
+      ".brandbar{background:linear-gradient(135deg,#0e3b38,#0b5e59 60%,#0a6e67);color:#eaf6f3;padding:26px 40px;}" +
+      ".wm{font-size:24px;font-weight:800;letter-spacing:-.02em;}" +
+      ".wm b{color:#e6b955;}" +
+      ".meta{margin-top:6px;color:#bfe0db;font-size:13px;}" +
+      ".content{padding:26px 40px;}" +
+      "pre{font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:11.5px;line-height:1.6;white-space:pre-wrap;word-wrap:break-word;margin:0;}" +
+      ".foot{padding:14px 40px 30px;color:#8a9b97;font-size:11px;}" +
+      "</style></head><body>" +
+      "<div class='brandbar'><div class='wm'>Prompt to <b>Profit</b></div>" +
+      `<div class='meta'>Launch Kit &nbsp;&middot;&nbsp; ${escapeHtml(title)} &nbsp;&middot;&nbsp; ${escapeHtml(when)}</div></div>` +
+      `<div class='content'><pre>${escapeHtml(buildFullExport())}</pre></div>` +
+      "<div class='foot'>Generated with Prompt to Profit</div>" +
+      "</body></html>"
+  );
+
+  doc.close();
+  printWindow.focus();
+  printWindow.print();
+
+  showToast("Opened a printable version — choose 'Save as PDF'.", "success");
+}
+
+
+/* =========================================================
+   18. PROJECT PERSISTENCE
+   ========================================================= */
+
+function saveCurrentProject() {
+  try {
+    const project = {
+      data: collectProjectData(),
+      generatedOptions: appState.generatedOptions,
+      selectedOptions: appState.selectedOptions,
+      premiumOutputs: appState.premiumOutputs,
+      lastGeneratedSignature: appState.lastGeneratedSignature
+    };
+
+    localStorage.setItem(
+      APP_STORAGE_KEYS.project,
+      JSON.stringify(project)
+    );
+  } catch {
+    /* Local persistence is helpful but not required to continue. */
+  }
+}
+
+function saveProjectWithFeedback() {
+  saveCurrentProject();
+  showToast("Project saved on this device.", "success");
+}
+
+function restoreCurrentProject(showFeedback = false) {
+  const stored = localStorage.getItem(APP_STORAGE_KEYS.project);
+
+  if (!stored) {
+    if (showFeedback) {
+      showToast("No saved project was found.", "warning");
+    }
+
+    return;
+  }
+
+  try {
+    const project = JSON.parse(stored);
+    const data = project.data || project;
+
+    restoreProjectFields(data);
+
+    appState.generatorSettings = {
+      ...appState.generatorSettings,
+      ...(data.generatorSettings || {})
+    };
+
+    appState.generatedOptions = project.generatedOptions || {};
+    appState.selectedOptions = project.selectedOptions || {};
+    appState.premiumOutputs = project.premiumOutputs || {};
+    appState.brandMode = data.brandMode === "creator" ? "creator" : "product";
+    appState.lastGeneratedSignature =
+      project.lastGeneratedSignature || "";
+
+    initializeGeneratorSettings();
+    synchronizeSelectedGenerators();
+    renderGeneratorPanels();
+    updateSelectionLimit();
+    updateIngredientReview();
+    updateValidationSummary();
+    syncAllPillSelects();
+    updateModeToggle();
+
+    if (Object.keys(appState.generatedOptions).length > 0) {
+      renderGeneratedOptions();
+      assembleAllOutputs(collectProjectData());
+      renderQualityResult(collectProjectData());
+      renderPremiumOutputs(appState.premiumOutputs);
+    }
+
+    updateGeneratedVisibility();
+
+    if (showFeedback) {
+      showToast("Saved project loaded.", "success");
+    }
+  } catch {
+    if (showFeedback) {
+      showToast("The saved project could not be loaded.", "error");
+    }
+  }
+}
+
+function restoreProjectFields(data) {
+  const mappings = {
+    productName: data.product?.name,
+    productType: data.product?.type,
+    productDescription: data.product?.description,
+    productFeatures: data.product?.features,
+    productBenefits: data.product?.benefits,
+    productFormat: data.product?.format,
+
+    targetAudience: data.audience?.targetAudience,
+    buyerProblem: data.audience?.customerProblem,
+    buyerOutcome: data.audience?.desiredOutcome,
+    marketingGoal: data.audience?.marketingGoal,
+    buyerMotivation: data.audience?.buyerMotivation,
+
+    currentPrice: data.pricing?.currentPrice,
+    pricingTier: data.pricing?.pricingTier,
+    offerType: data.pricing?.offerType,
+    pricingUsage: data.pricing?.pricingUsage,
+    pricingCustom: data.pricing?.offerDetails,
+
+    brandTone: data.brand?.brandTone,
+    visualStyle: data.brand?.visualStyle,
+    colorDirection: data.brand?.colorDirection,
+    typographyDirection: data.brand?.typographyDirection,
+    wordsToInclude: data.brand?.brandKeywords,
+    wordsToAvoid: data.brand?.wordsToAvoid,
+
+    referenceImagePurpose: data.reference?.usage,
+    referenceImageInstructions: data.reference?.notes,
+
+    aiPlatform: data.delivery?.aiPlatform,
+    deliveryMode: data.delivery?.deliveryMode,
+    optionCount: data.delivery?.optionCount,
+    exactText: data.delivery?.exactText,
+    globalInstructions: data.delivery?.globalInstructions
+  };
+
+  Object.entries(mappings).forEach(([id, value]) => {
+    writeValue(id, value);
+  });
+
+  const selectedGenerators = data.selectedGenerators || [];
+
+  getGeneratorCheckboxes().forEach((checkbox) => {
+    const key = resolveGeneratorKey(checkbox);
+    checkbox.checked = selectedGenerators.includes(key);
+  });
+}
+
+
+/* =========================================================
+   19. PRODUCT AND BRAND PROFILES
+   ========================================================= */
+
+function saveProductProfile() {
+  const data = collectProjectData();
+  const profileName = window.prompt(
+    "Name this product profile:",
+    data.product.name || "Product Profile"
+  );
+
+  if (!profileName?.trim()) {
+    return;
+  }
+
+  const profiles = readStorageArray(
+    APP_STORAGE_KEYS.productProfiles
+  );
+
+  profiles.push({
+    id: createId(),
+    name: profileName.trim(),
+    product: data.product,
+    audience: data.audience,
+    pricing: data.pricing
+  });
+
+  localStorage.setItem(
+    APP_STORAGE_KEYS.productProfiles,
+    JSON.stringify(profiles)
+  );
+
+  showToast("Product profile saved.", "success");
+}
+
+function saveBrandProfile() {
+  const data = collectProjectData();
+  const profileName = window.prompt(
+    "Name this brand profile:",
+    data.brand.brandName || "Brand Profile"
+  );
+
+  if (!profileName?.trim()) {
+    return;
+  }
+
+  const profiles = readStorageArray(
+    APP_STORAGE_KEYS.brandProfiles
+  );
+
+  profiles.push({
+    id: createId(),
+    name: profileName.trim(),
+    brand: data.brand
+  });
+
+  localStorage.setItem(
+    APP_STORAGE_KEYS.brandProfiles,
+    JSON.stringify(profiles)
+  );
+
+  showToast("Brand profile saved.", "success");
+}
+
+function applySavedProfile(type) {
+  const storageKey =
+    type === "product"
+      ? APP_STORAGE_KEYS.productProfiles
+      : APP_STORAGE_KEYS.brandProfiles;
+
+  const profiles = readStorageArray(storageKey);
+
+  if (profiles.length === 0) {
+    showToast(`No saved ${type} profiles were found.`, "warning");
+    return;
+  }
+
+  const names = profiles
+    .map((profile, index) => `${index + 1}. ${profile.name}`)
+    .join("\n");
+
+  const choice = window.prompt(
+    `Choose a ${type} profile by number:\n\n${names}`
+  );
+
+  const index = Number.parseInt(choice, 10) - 1;
+  const selectedProfile = profiles[index];
+
+  if (!selectedProfile) {
+    showToast("No profile was applied.", "warning");
+    return;
+  }
+
+  if (type === "product") {
+    restoreProjectFields({
+      product: selectedProfile.product,
+      audience: selectedProfile.audience,
+      pricing: selectedProfile.pricing
+    });
+  } else {
+    restoreProjectFields({
+      brand: selectedProfile.brand
+    });
+  }
+
+  markResultsOutdated();
+  updateIngredientReview();
+  updateValidationSummary();
+  syncAllPillSelects();
+  saveCurrentProject();
+  showToast(`${capitalize(type)} profile applied.`, "success");
+}
+
+
+/* =========================================================
+   20. GENERATED VISIBILITY AND UPDATE STATE
+   ========================================================= */
+
+function updateGeneratedVisibility() {
+  const hasResults =
+    Object.keys(appState.generatedOptions).length > 0;
+
+  const resultsSection = getElement("resultsSection");
+  const promptAssemblySection =
+    getElement("promptAssemblySection");
+  const premiumSection = getElement("premiumSection");
+
+  if (resultsSection) {
+    resultsSection.hidden = !hasResults;
+  }
+
+  if (promptAssemblySection) {
+    promptAssemblySection.hidden = !hasResults;
+  }
+
+  if (premiumSection) {
+    premiumSection.hidden = !hasResults;
+  }
+}
+
+function markResultsOutdated() {
+  if (!appState.lastGeneratedSignature) {
+    return;
+  }
+
+  const currentSignature = createProjectSignature(
+    collectProjectData()
+  );
+
+  const updateNeeded =
+    currentSignature !== appState.lastGeneratedSignature;
+
+  const resultsSection = getElement("resultsSection");
+  const promptAssemblySection =
+    getElement("promptAssemblySection");
+
+  resultsSection?.classList.toggle(
+    "is-update-needed",
+    updateNeeded
+  );
+
+  promptAssemblySection?.classList.toggle(
+    "is-update-needed",
+    updateNeeded
+  );
+
+  const status =
+    getElement("generationStatus") ||
+    getElement("resultsStatus");
+
+  if (status) {
+    status.textContent = updateNeeded
+      ? "Your inputs changed. Generate again to update the results."
+      : "Your prompt options are ready.";
+  }
+}
+
+function setGeneratingState(isGenerating) {
+  appState.isGenerating = isGenerating;
+
+  const button = getElement("generateBtn");
+
+  if (!button) {
+    return;
+  }
+
+  button.disabled = isGenerating;
+  button.setAttribute(
+    "aria-busy",
+    isGenerating ? "true" : "false"
+  );
+
+  if (!button.dataset.originalLabel) {
+    button.dataset.originalLabel =
+      button.textContent.trim() || "Generate Prompt Options";
+  }
+
+  button.textContent = isGenerating
+    ? "Generating..."
+    : button.dataset.originalLabel;
+}
+
+
+/* =========================================================
+   21. TOASTS
+   ========================================================= */
+
+function showToast(message, type = "success") {
+  const toast =
+    getElement("appToast") ||
+    document.querySelector(".toast");
+
+  if (!toast) {
+    return;
+  }
+
+  toast.classList.remove(
+    "is-success",
+    "is-warning",
+    "is-error"
+  );
+
+  toast.classList.add(`is-${type}`);
+  toast.textContent = message;
+  toast.hidden = false;
+  toast.setAttribute("role", type === "error" ? "alert" : "status");
+
+  window.clearTimeout(showToast.timeoutId);
+
+  showToast.timeoutId = window.setTimeout(() => {
+    toast.hidden = true;
+  }, 3200);
+}
+
+
+/* =========================================================
+   22. UTILITIES
+   ========================================================= */
+
+function readStorageArray(key) {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(key) || "[]");
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function createId() {
+  if (crypto?.randomUUID) {
+    return crypto.randomUUID();
+  }
+
+  return `${Date.now()}-${Math.random()
+    .toString(16)
+    .slice(2)}`;
+}
+
+function delay(milliseconds) {
+  return new Promise((resolve) => {
+    window.setTimeout(resolve, milliseconds);
+  });
+}
+
+function capitalize(value) {
+  const text = String(value || "");
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}

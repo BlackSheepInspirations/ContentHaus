@@ -1,0 +1,98 @@
+{% comment %}
+  The Prompt to Profit Haus — preview / marketing page (ungated).
+  Shown to everyone at /pages/p2p-haus-preview. Owners get an "Open the
+  Haus" button; everyone else gets the Access Pass CTA. Styles are the
+  scoped p2p-haus.css (opal language), so this shares the crown-jewel look
+  without loading the full app.
+{% endcomment %}
+
+<link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+<link href="https://api.fontshare.com/v2/css?f[]=general-sans@600,700,800&f[]=switzer@400,500,600,700&display=swap" rel="stylesheet">
+{{ 'p2p-haus.css' | asset_url | stylesheet_tag }}
+
+{% assign p2p_owns = false %}
+{% if customer and customer.tags contains section.settings.access_tag %}
+  {% assign p2p_owns = true %}
+{% endif %}
+
+<div class="p2p-preview">
+  <div class="p2p-preview__hero">
+    <span class="p2p-preview__eyebrow">Black Sheep Creations &amp; Inspirations · Prompt to Profit Haus</span>
+    <h2 class="p2p-preview__heading">Turn what you sell into launch-ready <span class="accent">Profit</span>.</h2>
+    <p class="p2p-preview__sub">
+      Describe your product once. The Prompt to Profit Haus writes your copy, social,
+      images, video, and a day-by-day PROFIT Path launch plan — all tuned to your brand.
+      It's the crown jewel of the Hausen: the final step that turns everything you've
+      built into a launch.
+    </p>
+    <div class="p2p-preview__actions">
+      {% if p2p_owns and section.settings.tool_url != blank %}
+        <a class="p2p-preview__btn p2p-preview__btn--get" href="{{ section.settings.tool_url }}">Open the Haus</a>
+      {% elsif section.settings.access_product %}
+        <a class="p2p-preview__btn p2p-preview__btn--get" href="{{ section.settings.access_product.url }}">
+          Get the Access Pass{% if section.settings.access_product.price %} — {{ section.settings.access_product.price | money }}{% endif %}
+        </a>
+      {% endif %}
+      {% if section.settings.tool_url != blank and p2p_owns == false %}
+        <a class="p2p-preview__btn p2p-preview__btn--learn" href="{{ section.settings.tool_url }}">Preview the tool</a>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="p2p-preview__grid">
+    <div class="p2p-preview__card">
+      <h3>On-brand prompts, instantly</h3>
+      <p>Describe your product once and get copy, image, and video prompts tuned to your brand voice and each platform — ready to paste into any AI tool.</p>
+    </div>
+    <div class="p2p-preview__card">
+      <h3>The PROFIT Path plan</h3>
+      <p>A day-by-day launch calendar built on our proprietary six-phase framework: Prime, Reveal, Offer, Flood, Ignite, Tend.</p>
+    </div>
+    <div class="p2p-preview__card">
+      <h3>Full ad packages</h3>
+      <p>Headlines, primary text, hooks, and calls-to-action for every channel — a complete, paste-ready ad set in seconds.</p>
+    </div>
+    <div class="p2p-preview__card">
+      <h3>Video, voice &amp; music</h3>
+      <p>Video scripts, voiceover copy, scene direction, and music-generator prompts so your promo comes together end to end.</p>
+    </div>
+    <div class="p2p-preview__card">
+      <h3>Your Brand DNA, carried in</h3>
+      <p>Pull your saved Brand Kit straight from the Brand Haus — colors, voice, and values applied automatically across everything you make.</p>
+    </div>
+    <div class="p2p-preview__card">
+      <h3>Save, reuse, export</h3>
+      <p>Your Vault keeps every generation, and you can export the whole launch kit as one branded pack whenever you're ready.</p>
+    </div>
+  </div>
+</div>
+
+{% render 'haus-links', current: 'p2p-haus' %}
+
+{% schema %}
+{
+  "name": "Prompt to Profit Haus — Preview",
+  "settings": [
+    {
+      "type": "text",
+      "id": "access_tag",
+      "label": "Access tag",
+      "default": "P2P-haus-access",
+      "info": "Same tag as the tool section — used to show owners an Open button instead of the Access Pass CTA."
+    },
+    {
+      "type": "product",
+      "id": "access_product",
+      "label": "Access Pass product",
+      "info": "The product the Get Access button points to."
+    },
+    {
+      "type": "url",
+      "id": "tool_url",
+      "label": "Tool page URL",
+      "info": "Where owners are sent to open the Haus (e.g. /pages/p2p-haus)."
+    }
+  ],
+  "presets": [{ "name": "Prompt to Profit Haus — Preview" }]
+}
+{% endschema %}

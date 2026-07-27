@@ -12,7 +12,7 @@
 
   Usage: {% render 'haus-links', current: 'brand-haus' %}
   `current` excludes that one entry — a product doesn't link to itself.
-  Valid values: 'brand-haus', 'content-haus', 'marketing-haus',
+  Valid values: 'p2p-haus', 'brand-haus', 'content-haus', 'marketing-haus',
   'product-haus', 'graphics-haus', 'idea-haus-gpt', 'curriculum-haus',
   'curriculum-haus-gpt'.
 {% endcomment %}
@@ -21,6 +21,14 @@
 <div class="haus-links">
   <p class="haus-links__label">Haus Tools</p>
   <div class="haus-links__row">
+    {% unless haus_current == 'p2p-haus' %}
+      {% if customer and customer.tags contains 'P2P-haus-access' %}
+        <a href="/pages/p2p-haus" class="haus-links__pill haus-links__pill--crown">Prompt to Profit Haus</a>
+      {% else %}
+        <a href="/pages/p2p-haus-preview" class="haus-links__pill haus-links__pill--crown">Prompt to Profit Haus</a>
+      {% endif %}
+    {% endunless %}
+
     {% unless haus_current == 'content-haus' %}
       {% if customer and customer.tags contains 'prompt-haus-access' %}
         <a href="/pages/content-haus" class="haus-links__pill">Content Haus</a>
@@ -125,5 +133,22 @@
   }
   .haus-links__pill--soon {
     opacity: 0.6;
+  }
+  /* The crown jewel — a small black-opal gem dot before the label. */
+  .haus-links__pill--crown {
+    border-color: rgba(30, 142, 90, 0.45);
+    font-weight: 700;
+  }
+  .haus-links__pill--crown::before {
+    content: "";
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: linear-gradient(100deg, #27ae6e, #0d7377 35%, #2563eb 55%, #5b3c8c 72%, #d6336c 88%, #c9a84c);
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.06);
+  }
+  .haus-links__pill--crown:hover {
+    border-color: rgba(30, 142, 90, 0.75);
+    background: rgba(30, 142, 90, 0.05);
   }
 </style>
