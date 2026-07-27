@@ -2257,6 +2257,11 @@
 
 #p2p-haus-app .output-heading h3 {
   margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.3rem;
+  font-weight: 700;
 }
 
 /* Quality score */

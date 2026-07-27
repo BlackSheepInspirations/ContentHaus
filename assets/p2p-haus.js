@@ -1459,6 +1459,18 @@ const SECTION_INFO = {
   resultsSectionTitle: "Your generated prompts and premium outputs — copy, launch plan, media, and more."
 };
 
+const PREMIUM_INFO = {
+  adpackage: "A complete ad set — headlines, primary text, hooks, and CTAs for every channel, ready to paste.",
+  launchplan: "Your day-by-day PROFIT Path launch brief — product, customer, offer, and what to produce in each of the 6 phases.",
+  calendar: "A 30-day content calendar — a post idea and angle for every day, built around your launch.",
+  suno: "A music-generator prompt (for Suno) — genre, mood, tempo, and structure to score your promo.",
+  video: "A complete short-form video script — hook, scene-by-scene beats, and caption.",
+  voice: "A natural voiceover script, timed and ready to record or feed to an AI voice.",
+  marketing: "A full marketing campaign prompt — positioning, channels, and messaging in one brief.",
+  gpt: "A ready-to-paste setup to build your own Custom GPT that answers buyers in your voice.",
+  animate: "A still-photo prompt to create your product image, then animation and hero-video prompts to bring it to life."
+};
+
 // Fallback guidance from a generator's goal if it isn't in the map above.
 function deliversFromGoal(key) {
   const goal = GENERATOR_DEFINITIONS[key] && GENERATOR_DEFINITIONS[key].goal;
@@ -1522,6 +1534,15 @@ function annotateGenerators() {
 
     if (heading && !heading.querySelector(".info-i")) {
       heading.insertAdjacentHTML("beforeend", " " + infoIconHtml(SECTION_INFO[id]));
+    }
+  });
+
+  document.querySelectorAll(".premium-panel").forEach((panel) => {
+    const key = panel.dataset.premiumPanel;
+    const h3 = panel.querySelector("h3");
+
+    if (h3 && key && PREMIUM_INFO[key] && !h3.querySelector(".info-i")) {
+      h3.insertAdjacentHTML("beforeend", " " + infoIconHtml(PREMIUM_INFO[key]));
     }
   });
 }
