@@ -1879,6 +1879,7 @@
 
 /* ⓘ info icon — enhanced details on sections & categories */
 #p2p-haus-app .info-i {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1905,6 +1906,30 @@
   border-color: var(--color-primary);
   color: var(--color-primary);
   background: var(--color-primary-soft);
+}
+
+#p2p-haus-app .info-pop {
+  position: absolute;
+  z-index: 60;
+  top: calc(100% + 8px);
+  left: 0;
+  width: max-content;
+  max-width: 240px;
+  padding: 9px 12px;
+  border-radius: var(--radius-small);
+  background: var(--color-secondary);
+  color: #f2f0eb;
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 500;
+  font-style: normal;
+  line-height: 1.4;
+  letter-spacing: normal;
+  text-transform: none;
+  white-space: normal;
+  text-align: left;
+  box-shadow: var(--shadow-medium);
+  cursor: default;
 }
 
 #p2p-haus-app .section-heading h2 {

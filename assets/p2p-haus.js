@@ -1526,6 +1526,30 @@ function annotateGenerators() {
   });
 }
 
+// Make ⓘ icons tap-friendly: native title only shows on hover (no touch),
+// so on click show a small popover with the same text (toggles / dismisses).
+function initInfoPopovers() {
+  document.addEventListener("click", (event) => {
+    const icon = event.target.closest(".info-i");
+    const openPop = document.querySelector(".info-pop");
+    const clickedOpenIcon = openPop && icon && icon.contains(openPop);
+
+    document.querySelectorAll(".info-pop").forEach((pop) => pop.remove());
+
+    if (!icon || clickedOpenIcon) {
+      return;
+    }
+
+    const text = icon.getAttribute("title");
+    if (!text) return;
+
+    const pop = document.createElement("span");
+    pop.className = "info-pop";
+    pop.textContent = text;
+    icon.appendChild(pop);
+  });
+}
+
 function initializeApplication() {
   normalizeGeneratorCheckboxes();
   initializeGeneratorSettings();
@@ -1539,6 +1563,7 @@ function initializeApplication() {
   updateGeneratedVisibility();
   enhanceSelectsAsPills();
   annotateGenerators();
+  initInfoPopovers();
   initPremiumTabs();
   initJourney();
   initHeroVideo();
