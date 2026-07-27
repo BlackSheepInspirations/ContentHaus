@@ -954,6 +954,20 @@
   background: var(--color-surface);
   box-shadow: var(--shadow-medium);
   padding: 22px;
+  /* Cap the pinned card to the viewport and scroll its own content, so the
+     readiness score stays visible even when the rail is taller than the
+     screen. Reset when the layout stacks (mobile) below. */
+  max-height: calc(100vh - var(--rail-sticky-top, 20px) - 28px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+#p2p-haus-app .build-rail__inner::-webkit-scrollbar { width: 8px;
+}
+
+#p2p-haus-app .build-rail__inner::-webkit-scrollbar-thumb {
+  background: var(--color-border-strong);
+  border-radius: var(--radius-pill);
 }
 
 #p2p-haus-app .build-rail__eyebrow {
@@ -1460,6 +1474,8 @@
 
   #p2p-haus-app .build-rail__inner {
     box-shadow: var(--shadow-small);
+    max-height: none;
+    overflow: visible;
   }
 
 }

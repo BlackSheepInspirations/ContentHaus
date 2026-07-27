@@ -3717,10 +3717,10 @@ function updateBuildRail() {
   );
 
   const badges = [
-    ["🎨", "Brand-Aligned", "Set brand tone + visual style, or load a Brand Kit", Boolean((data.brand.brandTone && data.brand.visualStyle) || activeBrandKit())],
-    ["📖", "Story-Ready", "Fill the before (problem) and after (outcome)", Boolean(data.audience.customerProblem && data.audience.desiredOutcome)],
-    ["⭐", "Differentiated", "Add your unique selling point", Boolean(data.brand.uniqueSelling)],
-    ["📅", "Launch-Timed", "Set launch channels and a target date", Boolean(data.audience.launchChannels && data.audience.launchDate)],
+    ["🎨", "Brand-Aligned", "In the Brand section: set brand tone + visual style (or load a Brand Kit)", Boolean((data.brand.brandTone && data.brand.visualStyle) || activeBrandKit())],
+    ["📖", "Story-Ready", "In the Audience section: fill the before (problem) + after (outcome)", Boolean(data.audience.customerProblem && data.audience.desiredOutcome)],
+    ["⭐", "Differentiated", "In the Brand section: add 'What makes it different?' (your USP)", Boolean(data.brand.uniqueSelling)],
+    ["📅", "Launch-Timed", "In the Audience section: set 'Launch channels' + 'Target launch date'", Boolean(data.audience.launchChannels && data.audience.launchDate)],
     ["🎁", "Full Kit", "Select all four generators", data.selectedGenerators.length >= MAX_SELECTED_GENERATORS],
     ["🚀", "Launched", "Generate your pack at least once", hasGenerated]
   ];
