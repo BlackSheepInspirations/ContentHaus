@@ -325,7 +325,7 @@ function buildLiquid() {
 {{ 'p2p-haus.css' | asset_url | stylesheet_tag }}
 
 {% if p2p_access %}
-  <div id="p2p-haus-app" class="p2p-app" data-section-id="{{ section.id }}" style="--rail-sticky-top: {{ section.settings.sticky_offset | default: 150 }}px;">
+  <div id="p2p-haus-app" class="p2p-app" data-section-id="{{ section.id }}" style="--rail-sticky-top: {{ section.settings.sticky_offset | default: 152 }}px;">
 ${indented}
   </div>
 
@@ -379,7 +379,7 @@ ${indented}
       "type": "range",
       "id": "sticky_offset",
       "label": "Sticky rail top offset",
-      "min": 0, "max": 320, "step": 4, "unit": "px", "default": 150,
+      "min": 0, "max": 320, "step": 4, "unit": "px", "default": 152,
       "info": "Space above the sticky \\"Your Pack\\" progress widget so it clears your sticky theme banner/header. Increase if the widget hides under the banner (try 200-260 for a tall banner)."
     },
     { "type": "header", "content": "Locked-state copy" },
