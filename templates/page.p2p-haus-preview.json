@@ -1,0 +1,8 @@
+{
+  "sections": {
+    "main": {
+      "type": "p2p-haus-preview"
+    }
+  },
+  "order": ["main"]
+}

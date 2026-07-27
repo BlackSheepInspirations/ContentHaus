@@ -231,21 +231,36 @@ the sibling pattern, and that's on purpose:**
 **Handles / product (owner-confirmed):** tool page `/pages/p2p-haus`,
 preview `/pages/p2p-haus-preview`, product `/products/p2p-access-pass`.
 
+**Files that go live (7 + 2 templates):** `assets/p2p-haus.css`,
+`assets/p2p-haus.js`, `assets/how-to.mp4`, `assets/how-to-poster.jpg`,
+`sections/p2p-haus.liquid`, `sections/p2p-haus-preview.liquid`,
+`snippets/haus-links.liquid`, **and — required, easy to forget —**
+`templates/page.p2p-haus.json` + `templates/page.p2p-haus-preview.json`.
+Each is `{ "sections": { "main": { "type": "<section>" } }, "order": ["main"] }`.
+Without the page templates, the section never appears in a page's "Theme
+template" dropdown in Admin, so there's nothing to assign. Every sibling has
+its own `page.<haus>.json` pair — match that.
+
+Shopify gotcha hit during this port: **section schema `name` max is 25 chars.**
+Preview is `"P2P Haus Preview"` (main is `"Prompt to Profit Haus"`, 21).
+
 **Deploy (follows §1's two-hop exactly):**
 
-1. Sync the 5 files (same relative paths) into
-   `/Users/blacksheepcreations/BSC-BSI-Store-theme`, and add the tutorial
-   video assets `assets/how-to.mp4` + `assets/how-to-poster.jpg` (the section
-   references them via `asset_url`; until present the video box just shows a
-   poster).
-2. From that folder: `shopify theme push --theme 186593542462 --allow-live`.
+1. Sync all of the above (same relative paths) into
+   `/Users/blacksheepcreations/BSC-BSI-Store-theme`. The video box shows the
+   `how-to.mp4` poster until the owner swaps in their real clip.
+2. From that folder:
+   `shopify theme push --store blacksheepcreationsllc.myshopify.com --theme 186593542462 --allow-live --only <each file>`
+   (`--only` scopes the push so the stale/partial theme copy can't clobber
+   other live files).
 
-**Then in Shopify Admin:**
+**Then in Shopify Admin (owner-only, UI):**
 
-- On `/pages/p2p-haus` add section *"Prompt to Profit Haus"* → set Access
-  product = `p2p-access-pass`, learn-more URL = `/pages/p2p-haus-preview`.
-- On `/pages/p2p-haus-preview` add *"Prompt to Profit Haus — Preview"* → set
-  Access product + tool URL = `/pages/p2p-haus`.
+- Page `/pages/p2p-haus` → **Theme template** dropdown → select **`p2p-haus`**
+  → Save. Then *Customize* → set the section's Access product =
+  `p2p-access-pass`, learn-more URL = `/pages/p2p-haus-preview`.
+- Page `/pages/p2p-haus-preview` → **Theme template** → **`p2p-haus-preview`**
+  → Save. Then *Customize* → Access product + tool URL = `/pages/p2p-haus`.
 - Shopify Flow: *Order paid* on the Access Pass → add customer tag
   `P2P-haus-access` (exact case). Model on
   `docs/product-haus-access-control-setup.md`.
