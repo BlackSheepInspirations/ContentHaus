@@ -31,7 +31,10 @@ const APP_STORAGE_KEYS = {
   recentGenerations: "promptToProfit.recentGenerations"
 };
 
-const MAX_SELECTED_GENERATORS = 4;
+const MAX_SELECTED_GENERATORS = 10;
+// A "stacked kit" for the gamification badge/score — decoupled from the hard
+// limit so raising the limit doesn't make the badge unreachable.
+const FULL_KIT_SIZE = 4;
 
 const GENERATOR_DEFINITIONS = {
   "product-description": {
@@ -1483,9 +1486,10 @@ function deliversFromGoal(key) {
 }
 
 function infoIconHtml(text) {
-  return `<button type="button" class="info-i" aria-label="More info" title="${escapeHtml(
+  // A span (not a button) so heading/button CSS rules don't override its size.
+  return `<span class="info-i" role="button" tabindex="0" aria-label="More info" title="${escapeHtml(
     text
-  )}">i</button>`;
+  )}">i</span>`;
 }
 
 function annotateGenerators() {
@@ -1599,6 +1603,72 @@ function celebrate() {
   setTimeout(() => layer.remove(), 4400);
 }
 
+// JS-driven sticky for the "Your Pack" rail. position:sticky can silently
+// break inside some Shopify theme wrappers (an ancestor with overflow or a
+// transform), so pin the rail with position:fixed over its reserved 320px
+// grid column instead — which survives those wrappers. Degrades safely to
+// normal flow on error or on the stacked (<=980px) layout.
+function initStickyRail() {
+  const rail = document.querySelector(".build-rail");
+  const layout = document.querySelector(".build-layout");
+  if (!rail || !layout) return;
+
+  const RAIL_WIDTH = 320; // matches .build-layout's grid track
+  let ticking = false;
+
+  const stickyOffset = () => {
+    const host = document.getElementById("p2p-haus-app") || document.documentElement;
+    const n = parseInt(getComputedStyle(host).getPropertyValue("--rail-sticky-top"), 10);
+    return Number.isFinite(n) ? n : 20;
+  };
+
+  const clearPin = () => {
+    rail.style.position = "";
+    rail.style.top = "";
+    rail.style.left = "";
+    rail.style.width = "";
+  };
+
+  const update = () => {
+    ticking = false;
+    try {
+      if (window.innerWidth <= 980) {
+        clearPin();
+        return;
+      }
+      const off = stickyOffset();
+      const lr = layout.getBoundingClientRect();
+      const railH = rail.offsetHeight;
+
+      if (lr.top >= off || railH >= lr.height) {
+        rail.style.position = "static";
+        rail.style.top = "";
+        rail.style.left = "";
+        rail.style.width = "";
+      } else {
+        const top = Math.min(off, lr.bottom - railH); // don't ride past the form's bottom
+        rail.style.position = "fixed";
+        rail.style.top = top + "px";
+        rail.style.left = Math.round(lr.right - RAIL_WIDTH) + "px";
+        rail.style.width = RAIL_WIDTH + "px";
+      }
+    } catch (err) {
+      clearPin();
+    }
+  };
+
+  const onScroll = () => {
+    if (!ticking) {
+      ticking = true;
+      requestAnimationFrame(update);
+    }
+  };
+
+  window.addEventListener("scroll", onScroll, { passive: true });
+  window.addEventListener("resize", update, { passive: true });
+  update();
+}
+
 function initializeApplication() {
   normalizeGeneratorCheckboxes();
   initializeGeneratorSettings();
@@ -1613,6 +1683,7 @@ function initializeApplication() {
   enhanceSelectsAsPills();
   annotateGenerators();
   initInfoPopovers();
+  initStickyRail();
   initPremiumTabs();
   initJourney();
   initHeroVideo();
@@ -3659,7 +3730,7 @@ function updateBuildRail() {
     ["Brand tone", Boolean(data.brand.brandTone), 9, true],
     ["Visual style", Boolean(data.brand.visualStyle), 9, true],
     [
-      `Generators (${data.selectedGenerators.length}/${MAX_SELECTED_GENERATORS})`,
+      `Generators picked (${data.selectedGenerators.length})`,
       data.selectedGenerators.length > 0,
       9,
       true
@@ -3669,7 +3740,7 @@ function updateBuildRail() {
     ["The 'after' (outcome)", Boolean(data.audience.desiredOutcome), 6, false],
     ["Launch channels", Boolean(data.audience.launchChannels), 6, false],
     ["Launch date", Boolean(data.audience.launchDate), 5, false],
-    ["Full 4-generator kit", data.selectedGenerators.length >= MAX_SELECTED_GENERATORS, 6, false],
+    [`A stacked kit (${FULL_KIT_SIZE}+ generators)`, data.selectedGenerators.length >= FULL_KIT_SIZE, 6, false],
     // Bonus path (capped at 100) — a loaded Brand Kit can cover a missed item,
     // so Crown is reachable with or without Brand Haus.
     ["Brand Kit loaded", Boolean(activeBrandKit()), 6, false]
@@ -3721,7 +3792,7 @@ function updateBuildRail() {
     ["📖", "Story-Ready", "In the Audience section: fill the before (problem) + after (outcome)", Boolean(data.audience.customerProblem && data.audience.desiredOutcome)],
     ["⭐", "Differentiated", "In the Brand section: add 'What makes it different?' (your USP)", Boolean(data.brand.uniqueSelling)],
     ["📅", "Launch-Timed", "In the Audience section: set 'Launch channels' + 'Target launch date'", Boolean(data.audience.launchChannels && data.audience.launchDate)],
-    ["🎁", "Full Kit", "Select all four generators", data.selectedGenerators.length >= MAX_SELECTED_GENERATORS],
+    ["🎁", "Stacked Kit", `Pick ${FULL_KIT_SIZE} or more generators`, data.selectedGenerators.length >= FULL_KIT_SIZE],
     ["🚀", "Launched", "Generate your pack at least once", hasGenerated]
   ];
 
@@ -4439,6 +4510,12 @@ function getVariationDirection(index) {
   return variations[index % variations.length];
 }
 
+// Short, memorable label for each variation so options aren't just "Option 1".
+function getVariationLabel(index) {
+  const labels = ["Benefit-led", "Emotional", "Premium", "High-energy", "Educational"];
+  return labels[index % labels.length];
+}
+
 function createProjectSignature(data) {
   return JSON.stringify({
     product: data.product,
@@ -4503,7 +4580,7 @@ function createOutputCardMarkup(generatorKey, prompt, index) {
   return `
     <article class="output-card ${isSelected ? "is-selected" : ""}">
       <div class="output-heading">
-        <h3>Option ${index + 1}</h3>
+        <h3>${escapeHtml(GENERATOR_DEFINITIONS[generatorKey] ? GENERATOR_DEFINITIONS[generatorKey].label : generatorKey)} <span class="output-card__angle">· ${escapeHtml(getVariationLabel(index))} angle</span></h3>
 
         <div class="action-row">
           <button

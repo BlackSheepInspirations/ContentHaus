@@ -1682,6 +1682,12 @@
   color: var(--color-text-muted);
 }
 
+#p2p-haus-app .output-card__angle {
+  font-weight: 500;
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+}
+
 /* One-click recommended starter pack */
 #p2p-haus-app .starter-pack {
   display: flex;
@@ -2049,20 +2055,20 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 18px;
-  height: 18px;
+  width: 15px;
+  height: 15px;
   flex: none;
   padding: 0;
   border-radius: 50%;
-  border: 1px solid var(--color-border-strong);
-  background: var(--color-surface);
-  color: var(--color-text-muted);
-  font-family: var(--font-mono);
-  font-size: 0.66rem;
+  border: 1px solid var(--color-gold);
+  background: transparent;
+  color: var(--color-gold);
+  font-family: var(--font-body);
+  font-size: 10px;
   font-weight: 700;
-  font-style: normal;
+  font-style: italic;
   line-height: 1;
-  cursor: help;
+  cursor: pointer;
   vertical-align: middle;
   transition: border-color 0.14s ease, color 0.14s ease, background 0.14s ease;
 }
