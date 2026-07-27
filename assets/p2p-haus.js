@@ -3070,7 +3070,8 @@ function collectProjectData() {
       colorDirection: readValue("colorDirection"),
       typographyDirection: readValue("typographyDirection"),
       brandKeywords: readValue("wordsToInclude"),
-      wordsToAvoid: readValue("wordsToAvoid")
+      wordsToAvoid: readValue("wordsToAvoid"),
+      uniqueSelling: readValue("uniqueSelling")
     },
 
     reference: {
@@ -4470,6 +4471,7 @@ function premiumData(data) {
     visual: data.display.visualStyle || "clean and modern",
     keywords: data.brand.brandKeywords || "",
     avoid: data.brand.wordsToAvoid || "",
+    usp: data.brand.uniqueSelling || "",
     platform: data.display.aiPlatform || "any AI platform"
   };
 }
@@ -5034,53 +5036,98 @@ function buildLaunchPlan(data) {
   const has = (word) => picks.some((p) => p.toLowerCase().includes(word));
   const kit = picks.length ? picks.join(", ") : "your generated assets";
 
+  // Fill helper: use captured value, else a clearly-labeled placeholder so the
+  // receiving AI never has to stop and ask — it fills the blank instead.
+  const fill = (val, hint) =>
+    val && String(val).trim() ? String(val).trim() : `[COMPLETE: ${hint}]`;
+
   return [
-    `THE PROFIT PATH — LAUNCH PLAN for ${d.name}`,
-    `${creator ? "Mode: You are the brand (creator-led)" : "Mode: Product / niche"}  |  Goal: ${d.goal}  |  Platform: ${d.platform}`,
-    `Your kit: ${kit}`,
+    `THE PROFIT PATH — LAUNCH BRIEF: ${d.name}`,
     "",
-    "The PROFIT Path is the 6-phase launch method: Prime, Reveal, Offer, Flood, Ignite, Tend. Follow it in order — shift the dates to fit you.",
+    "INSTRUCTIONS FOR THE AI:",
+    "Using the brief below, produce every deliverable listed under \"PRODUCE THESE ASSETS\" by working the 6-phase PROFIT Path in order. Do not ask clarifying questions — where a line is marked [COMPLETE], insert a clearly-labeled placeholder the reader can swap in. Never invent testimonials, reviews, results, or statistics; if proof would help and none is provided, describe the kind of proof to gather instead. Keep every asset in the brand voice below.",
     "",
-    "== P - PRIME (earn trust before you sell) ==",
+    "— THE PRODUCT —",
+    `Name: ${d.name}`,
+    `Type: ${d.type}`,
+    `What it is: ${fill(d.description, "one-paragraph description of the product")}`,
+    `What's included: ${fill(d.features, "the contents / inclusions")}`,
+    `Key benefits: ${fill(d.benefits, "the top 3 benefits")}`,
+    "",
+    "— THE CUSTOMER —",
+    `Who it's for: ${d.audience}`,
+    `Where they are now (before): ${fill(d.problem, "the problem or frustration they have today")}`,
+    `The transformation (after): ${fill(d.outcome, "the result they get with your product")}`,
+    d.motivation ? `Why they buy: ${d.motivation}` : null,
+    "",
+    "— POSITIONING —",
+    `What makes it different (USP): ${fill(d.usp, "the one reason to choose this over every alternative")}`,
+    `Brand voice: ${d.tone}`,
+    `Visual style: ${d.visual}`,
+    d.keywords ? `Words to weave in: ${d.keywords}` : null,
+    d.avoid ? `Words to avoid: ${d.avoid}` : null,
+    "",
+    "— THE OFFER —",
+    `Price handling: ${d.pricingUsage || "mention the value, not a specific number"}`,
+    d.price ? `Price: ${d.price}` : null,
+    d.offer ? `Offer type: ${d.offer}` : null,
+    "",
+    "— LAUNCH SETUP —",
+    `Sell on: ${d.platform}`,
+    "Channels: [COMPLETE: the channels you'll post on — e.g. Instagram, TikTok, Pinterest, email list]",
+    "Go-live date: [COMPLETE: choose your launch day (Day 8 below) and shift the other days around it]",
+    `Launch goal: ${d.goal}`,
+    "",
+    "— THE PROFIT PATH (run in order; the dates are a movable template) —",
+    "",
+    "P · PRIME — earn trust before you sell",
     creator
-      ? "Days 1-3: Show up as YOU. Share your story, your point of view, and helpful takes to build the audience that will buy. Open a waitlist."
-      : "Days 1-3: Warm up your niche with pure value — helpful tips, no pitch. Open a waitlist so early fans can raise their hand.",
-    `Use: ${kitPick(picks, ["social", "hook", "content"], "social posts + hooks")}`,
+      ? "Days 1-3: Show up as YOU — your story, POV, and helpful takes on the problem above to build the audience that will buy. Open a waitlist."
+      : "Days 1-3: Warm up your niche with pure value tied to the problem above — helpful tips, no pitch. Open a waitlist so early fans can raise their hand.",
+    `Produce: ${kitPick(picks, ["social", "hook", "content"], "3-5 value posts + a waitlist invite")}`,
     "",
-    "== R - REVEAL (open the loop) ==",
+    "R · REVEAL — open the loop",
     "Day 4: Tease that something's coming — a \"launching soon\" post and a short teaser. Point everyone to the waitlist.",
-    `Use: ${kitPick(picks, ["teaser", "announcement"], "a teaser + announcement")}`,
+    `Produce: ${kitPick(picks, ["teaser", "announcement"], "a teaser post + announcement")}`,
     "",
-    "== O - OFFER (show the transformation) ==",
-    "Days 5-7: Reveal what it is and who it's for. Lead with the before-to-after, show proof, and spell out exactly what they get.",
-    `Use: ${kitPick(picks, ["sales", "video", "email"], "a sales page + a value email")}`,
+    "O · OFFER — show the transformation",
+    "Days 5-7: Reveal what it is and who it's for. Lead with the before→after above and spell out exactly what they get.",
+    `Produce: ${kitPick(picks, ["sales", "landing", "email"], "a sales/landing page + a value email")}`,
     "",
-    "== F - FLOOD (go live everywhere) ==",
+    "F · FLOOD — go live everywhere",
     `Day 8 (GO LIVE): Publish the ${
       has("listing") || has("description") ? "listing / product page" : "product page"
     } and send the launch email. Post the announcement across every channel at once.`,
-    `Use: ${kitPick(picks, ["listing", "description", "ad", "announcement", "carousel"], "your listing + ad + announcement")}`,
+    `Produce: ${kitPick(picks, ["listing", "description", "ad", "graphic", "announcement", "carousel"], "your product page + ad graphic + announcement")}`,
     "",
-    "== I - IGNITE (urgency + momentum) ==",
-    "Days 9-10: Add urgency — a bonus, a deadline, and social proof. Send a \"closing soon\" email and post last-call reminders.",
-    "Use: an urgency email + last-call posts",
+    "I · IGNITE — urgency + momentum",
+    "Days 9-10: Add an honest reason to act now — a launch bonus, an expiring intro offer, or a genuine deadline (never invent scarcity). Send a \"closing soon\" email and last-call posts.",
+    "Produce: an urgency email + last-call posts",
     "",
-    "== T - TEND (nurture + make it evergreen) ==",
+    "T · TEND — nurture + make it evergreen",
     creator
-      ? "Days 11+: Thank buyers, gather testimonials, and keep showing up. Turn your best launch content into evergreen posts, and save this project for your next drop."
-      : "Days 11+: Thank buyers, request reviews, and turn your winners into evergreen content. Save this project so your next product launches in minutes.",
+      ? "Days 11+: Thank buyers, gather real testimonials, keep showing up, and turn your best launch content into evergreen posts. Save this project for your next drop."
+      : "Days 11+: Thank buyers, request reviews, and turn your winners into evergreen content. Save this project so your next launch takes minutes.",
     has("gpt")
-      ? "Use: a follow-up email + reviews + your Custom GPT to keep answering buyers"
-      : "Use: a follow-up email + review request + evergreen social",
+      ? "Produce: a follow-up email + review request + your Custom GPT to keep answering buyers"
+      : "Produce: a follow-up email + review request + evergreen social",
+    "",
+    "PRODUCE THESE ASSETS (your kit):",
+    picks.length ? "• " + picks.join("\n• ") : "• [COMPLETE: add generators to your kit]",
+    "Also plan (produce if it's in your kit, otherwise outline): waitlist invite, teaser, sales/landing page, launch email, urgency email, follow-up + review request, evergreen posts.",
+    "",
+    "RULES:",
+    d.pricingUsage ? `• Pricing: ${d.pricingUsage}` : "• Pricing: mention the value, not a specific number.",
+    "• Never invent testimonials, reviews, results, or statistics.",
+    "• Every asset stays in the brand voice above.",
     "",
     "PROFIT PATH CHECKLIST:",
-    "[ ] Prime - value/story posts + waitlist live",
-    "[ ] Reveal - teaser posted",
-    "[ ] Offer - sales page + email ready",
-    "[ ] Flood - product live + announced everywhere",
-    "[ ] Ignite - urgency + last-call planned",
-    "[ ] Tend - follow-up + testimonials + saved for next time",
-    d.pricingUsage ? `[ ] Pricing rule followed: ${d.pricingUsage}` : null
+    "[ ] Prime — value/story posts + waitlist live",
+    "[ ] Reveal — teaser posted",
+    "[ ] Offer — sales/landing page + email ready",
+    "[ ] Flood — product live + announced everywhere",
+    "[ ] Ignite — honest urgency + last-call planned",
+    "[ ] Tend — follow-up + testimonials + saved for next time"
   ]
     .filter((line) => line !== null)
     .join("\n");
