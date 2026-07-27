@@ -1571,6 +1571,34 @@ function initInfoPopovers() {
   });
 }
 
+// Confetti burst for milestone moments (100% readiness, first generate).
+// Appends inside #p2p-haus-app when embedded (so the scoped CSS applies),
+// else document.body. Skipped under prefers-reduced-motion.
+function celebrate() {
+  if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    return;
+  }
+
+  const host = document.getElementById("p2p-haus-app") || document.body;
+  const colors = ["#27ae6e", "#0d7377", "#2563eb", "#5b3c8c", "#d6336c", "#c9a84c"];
+  const layer = document.createElement("div");
+  layer.className = "confetti-layer";
+
+  for (let i = 0; i < 60; i += 1) {
+    const piece = document.createElement("span");
+    piece.className = "confetti-piece";
+    piece.style.left = Math.random() * 100 + "vw";
+    piece.style.background = colors[i % colors.length];
+    piece.style.animationDelay = Math.random() * 0.5 + "s";
+    piece.style.animationDuration = 2 + Math.random() * 1.6 + "s";
+    piece.style.setProperty("--spin", Math.round(Math.random() * 720 + 360) + "deg");
+    layer.appendChild(piece);
+  }
+
+  host.appendChild(layer);
+  setTimeout(() => layer.remove(), 4400);
+}
+
 function initializeApplication() {
   normalizeGeneratorCheckboxes();
   initializeGeneratorSettings();
@@ -3621,29 +3649,60 @@ function updateBuildRail() {
 
   const data = collectProjectData();
 
-  const items = [
-    ["Product name", Boolean(data.product.name)],
-    ["Product type", Boolean(data.product.type)],
-    ["Description", Boolean(data.product.description)],
-    ["Audience", Boolean(data.audience.targetAudience)],
-    ["Brand tone", Boolean(data.brand.brandTone)],
-    ["Visual style", Boolean(data.brand.visualStyle)],
+  // --- Launch Readiness: essentials (must-haves) + strength bonuses ---
+  // [label, met, points, isEssential]
+  const model = [
+    ["Product name", Boolean(data.product.name), 9, true],
+    ["Product type", Boolean(data.product.type), 9, true],
+    ["Description", Boolean(data.product.description), 9, true],
+    ["Audience", Boolean(data.audience.targetAudience), 9, true],
+    ["Brand tone", Boolean(data.brand.brandTone), 9, true],
+    ["Visual style", Boolean(data.brand.visualStyle), 9, true],
     [
       `Generators (${data.selectedGenerators.length}/${MAX_SELECTED_GENERATORS})`,
-      data.selectedGenerators.length > 0
-    ]
+      data.selectedGenerators.length > 0,
+      9,
+      true
+    ],
+    ["A unique selling point", Boolean(data.brand.uniqueSelling), 8, false],
+    ["The 'before' (problem)", Boolean(data.audience.customerProblem), 6, false],
+    ["The 'after' (outcome)", Boolean(data.audience.desiredOutcome), 6, false],
+    ["Launch channels", Boolean(data.audience.launchChannels), 6, false],
+    ["Launch date", Boolean(data.audience.launchDate), 5, false],
+    ["Full 4-generator kit", data.selectedGenerators.length >= MAX_SELECTED_GENERATORS, 6, false],
+    // Bonus path (capped at 100) — a loaded Brand Kit can cover a missed item,
+    // so Crown is reachable with or without Brand Haus.
+    ["Brand Kit loaded", Boolean(activeBrandKit()), 6, false]
   ];
 
-  const done = items.filter((item) => item[1]).length;
-  const pct = Math.round((done / items.length) * 100);
-  const msg =
-    pct === 100 ? "Perfection — generate your pack! 👑"
-    : pct >= 70 ? "Almost launch-ready 🚀"
-    : pct >= 40 ? "Building momentum 🔥"
-    : pct > 0 ? "Nice start — keep going 🌱"
-    : "Let's build your pack ✨";
+  const score = Math.min(
+    100,
+    model.reduce((total, entry) => total + (entry[1] ? entry[2] : 0), 0)
+  );
 
-  const checklist = items
+  const tier =
+    score >= 100
+      ? { name: "Crown", icon: "👑" }
+      : score >= 85
+        ? { name: "Pro", icon: "💎" }
+        : score >= 60
+          ? { name: "Launcher", icon: "🚀" }
+          : score >= 30
+            ? { name: "Builder", icon: "🔨" }
+            : { name: "Spark", icon: "✨" };
+
+  const nextUp = model.find((entry) => !entry[1]);
+  const msg =
+    score >= 100
+      ? "Launch-ready — you've maxed it out! 👑"
+      : nextUp
+        ? `Add ${nextUp[0].toLowerCase().replace(/\s*\(.*\)/, "")} to climb higher.`
+        : "Looking sharp — generate your pack.";
+
+  const essentials = model.filter((entry) => entry[3]);
+  const essentialsDone = essentials.filter((entry) => entry[1]).length;
+
+  const checklist = essentials
     .map(
       ([label, ok]) => `
         <div class="rail-item ${ok ? "is-done" : ""}">
@@ -3653,26 +3712,69 @@ function updateBuildRail() {
     )
     .join("");
 
+  const hasGenerated = Boolean(
+    ((getElement("finalPromptPackage") || {}).value || "").trim()
+  );
+
+  const badges = [
+    ["🎨", "Brand-Aligned", "Set brand tone + visual style, or load a Brand Kit", Boolean((data.brand.brandTone && data.brand.visualStyle) || activeBrandKit())],
+    ["📖", "Story-Ready", "Fill the before (problem) and after (outcome)", Boolean(data.audience.customerProblem && data.audience.desiredOutcome)],
+    ["⭐", "Differentiated", "Add your unique selling point", Boolean(data.brand.uniqueSelling)],
+    ["📅", "Launch-Timed", "Set launch channels and a target date", Boolean(data.audience.launchChannels && data.audience.launchDate)],
+    ["🎁", "Full Kit", "Select all four generators", data.selectedGenerators.length >= MAX_SELECTED_GENERATORS],
+    ["🚀", "Launched", "Generate your pack at least once", hasGenerated]
+  ];
+
+  const badgeHtml = badges
+    .map(
+      ([icon, name, how, earned]) => `
+        <span class="rail-badge ${earned ? "is-earned" : ""}" title="${escapeHtml(
+        earned ? name + " — earned!" : "Locked: " + how
+      )}">
+          <span class="rail-badge__icon" aria-hidden="true">${icon}</span>
+          <span class="rail-badge__name">${escapeHtml(name)}</span>
+        </span>`
+    )
+    .join("");
+
   container.innerHTML = `
-    <div class="rail-progress ${pct === 100 ? "is-complete" : ""}">
+    <div class="rail-progress ${score >= 100 ? "is-complete" : ""}">
       <div class="rail-progress__head">
-        <span class="rail-progress__label">Progress to perfection</span>
-        <span class="rail-progress__pct">${pct}%</span>
+        <span class="rail-progress__label">Launch Readiness</span>
+        <span class="rail-progress__tier">${tier.icon} ${escapeHtml(tier.name)}</span>
       </div>
+      <div class="rail-progress__pct">${score}<span class="rail-progress__pctmax">/100</span></div>
       <div class="rail-progress__track">
-        <div class="rail-progress__fill" style="width:${pct}%"></div>
+        <div class="rail-progress__fill" style="width:${score}%"></div>
       </div>
-      <p class="rail-progress__msg">${msg}</p>
+      <p class="rail-progress__msg">${escapeHtml(msg)}</p>
     </div>
-    <div class="rail-checklist">${checklist}</div>`;
+    <div class="rail-badges" aria-label="Achievements">${badgeHtml}</div>
+    <details class="rail-essentials">
+      <summary class="rail-essentials__summary">Essentials · ${essentialsDone}/${essentials.length}</summary>
+      <div class="rail-checklist">${checklist}</div>
+    </details>`;
+
+  // Celebrate crossing into 100% readiness. The `=== false` guard is
+  // init-safe: on first render celebratedReady is undefined, so a restored
+  // complete project doesn't fire confetti on load. Generate-confetti is
+  // fired from generatePromptOptions instead (a real user action).
+  if (score >= 100) {
+    if (appState.celebratedReady === false) {
+      celebrate();
+    }
+    appState.celebratedReady = true;
+  } else {
+    appState.celebratedReady = false;
+  }
 
   const status = getElement("railStatus");
 
   if (status) {
     status.textContent =
-      done === items.length
-        ? "Everything's ready — generate your pack."
-        : `${done} of ${items.length} essentials added`;
+      score >= 100
+        ? "Launch-ready — generate your pack."
+        : `${score}/100 · ${tier.name} tier`;
   }
 
   const railSelections = getElement("railSelections");
@@ -4052,6 +4154,8 @@ async function generatePromptOptions() {
   setGeneratingState(false);
   saveCurrentProject();
   addRecentGeneration();
+  updateBuildRail();
+  celebrate();
 
   const resultsSection = getElement("resultsSection");
 
