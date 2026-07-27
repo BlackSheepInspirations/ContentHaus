@@ -1560,6 +1560,12 @@
   color: var(--color-text-muted);
 }
 
+#p2p-haus-app .field-hint-inline {
+  font-weight: 500;
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+}
+
 #p2p-haus-app .form-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
