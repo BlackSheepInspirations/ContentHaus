@@ -1908,6 +1908,11 @@ function handleDocumentClick(event) {
     return;
   }
 
+  if (button.dataset.brandkitId) {
+    setActiveBrandKit(button.dataset.brandkitId);
+    return;
+  }
+
   if (button.dataset.randomizeCategory) {
     randomizeCategory(button.dataset.randomizeCategory);
     return;
@@ -1930,6 +1935,10 @@ function handleDocumentClick(event) {
 
     case "clear-category":
       requestClearCategory(button.dataset.category || "");
+      break;
+
+    case "load-brandkit":
+      loadBrandKit();
       break;
 
     case "copy-output":
@@ -2417,33 +2426,45 @@ function readBrandKitVault() {
 }
 
 function checkBrandKitVault() {
+  const kits = readBrandKitVault();
   const button = getElement("loadBrandKitBtn");
 
-  if (!button) {
-    return;
+  if (button) {
+    if (kits.length > 0) {
+      button.hidden = false;
+      button.textContent = `Load your Brand Kit (${kits.length})`;
+    } else {
+      button.hidden = true;
+    }
   }
 
-  const kits = readBrandKitVault();
-
-  if (kits.length > 0) {
-    button.hidden = false;
-    button.textContent = `Load your Brand Kit (${kits.length})`;
-  } else {
-    button.hidden = true;
-  }
+  renderRailBrandKit();
 }
 
-function loadBrandKit() {
+// The active kit: the one the user last switched to, else the most recent.
+function activeBrandKit() {
   const kits = readBrandKitVault();
+  if (!kits.length) return null;
+  if (appState.activeBrandKitId) {
+    const found = kits.find((k) => k.id === appState.activeBrandKitId);
+    if (found) return found;
+  }
+  return kits
+    .slice()
+    .sort((a, b) => String(b.savedAt).localeCompare(String(a.savedAt)))[0];
+}
 
-  if (kits.length === 0) {
+function setActiveBrandKit(id) {
+  appState.activeBrandKitId = id;
+  renderRailBrandKit(true);
+}
+
+// Map one kit's flattened fields into the form (voice/mood/values/colors).
+function applyBrandKit(kit) {
+  if (!kit) {
     showToast("No Brand Kit found from Brand Haus yet.", "warning");
     return;
   }
-
-  const kit = kits
-    .slice()
-    .sort((a, b) => String(b.savedAt).localeCompare(String(a.savedAt)))[0];
 
   let filled = 0;
 
@@ -2478,6 +2499,91 @@ function loadBrandKit() {
       : "That Brand Kit had nothing to map.",
     filled > 0 ? "success" : "warning"
   );
+}
+
+function loadBrandKit() {
+  applyBrandKit(activeBrandKit());
+}
+
+// Active Brand Kit panel in the Your Pack rail: name + up-to-3 switcher +
+// an expandable view of the kit's items (colors, fonts, voice, mood, values).
+function renderRailBrandKit(expand) {
+  const panel = getElement("railBrandKit");
+  if (!panel) return;
+
+  const kits = readBrandKitVault();
+  if (!kits.length) {
+    panel.hidden = true;
+    panel.innerHTML = "";
+    return;
+  }
+
+  panel.hidden = false;
+  const active = activeBrandKit();
+  const sorted = kits
+    .slice()
+    .sort((a, b) => String(b.savedAt).localeCompare(String(a.savedAt)))
+    .slice(0, 3);
+
+  const chips =
+    sorted.length > 1
+      ? `<div class="rail-bk__chips">${sorted
+          .map(
+            (k) =>
+              `<button type="button" class="rail-bk__chip ${
+                k.id === active.id ? "is-active" : ""
+              }" data-brandkit-id="${escapeHtml(String(k.id))}">${escapeHtml(
+                k.name || "Kit"
+              )}</button>`
+          )
+          .join("")}</div>`
+      : "";
+
+  const swatches =
+    Array.isArray(active.colors) && active.colors.length
+      ? `<div class="rail-bk__swatches">${active.colors
+          .slice(0, 8)
+          .map(
+            (c) =>
+              `<span class="rail-bk__swatch" style="background:${escapeHtml(
+                String(c)
+              )}" title="${escapeHtml(String(c))}"></span>`
+          )
+          .join("")}</div>`
+      : "";
+
+  const row = (label, val) =>
+    val && String(val).trim()
+      ? `<div class="rail-bk__row"><span class="rail-bk__k">${label}</span><span class="rail-bk__v">${escapeHtml(
+          String(val)
+        )}</span></div>`
+      : "";
+
+  const fonts = [active.headingFont, active.bodyFont].filter(Boolean).join(" / ");
+  const values = Array.isArray(active.coreValues) ? active.coreValues.join(", ") : "";
+
+  panel.innerHTML = `
+    <div class="rail-bk__head">
+      <span class="rail-bk__eyebrow">Active Brand Kit</span>
+      <span class="rail-bk__count">${kits.length} in vault</span>
+    </div>
+    ${chips}
+    <details class="rail-bk__card" ${expand ? "open" : ""}>
+      <summary class="rail-bk__summary">
+        <span class="rail-bk__dot" aria-hidden="true"></span>
+        <span class="rail-bk__name">${escapeHtml(active.name || "Your Brand Kit")}</span>
+        <span class="rail-bk__chev" aria-hidden="true">+</span>
+      </summary>
+      <div class="rail-bk__body">
+        ${swatches}
+        ${row("Voice", active.voice)}
+        ${row("Mood", active.mood)}
+        ${fonts ? row("Fonts", fonts) : ""}
+        ${row("Values", values)}
+        ${row("Mission", active.mission)}
+        <button type="button" class="rail-bk__load" data-action="load-brandkit">Load into form</button>
+      </div>
+    </details>`;
 }
 
 

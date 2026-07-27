@@ -1024,6 +1024,155 @@
 }
 
 /* Collapsible rail panels: selections, vault, recently generated */
+/* ---------- Your Pack: active Brand Kit ---------- */
+#p2p-haus-app .rail-brandkit {
+  margin-bottom: 14px;
+  padding: 12px 14px 14px;
+  border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-gold);
+  border-radius: var(--radius-medium);
+  background: var(--color-surface);
+}
+
+#p2p-haus-app .rail-bk__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+#p2p-haus-app .rail-bk__eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  font-weight: 600;
+}
+
+#p2p-haus-app .rail-bk__count {
+  font-size: 0.68rem;
+  color: var(--color-text-muted);
+}
+
+#p2p-haus-app .rail-bk__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+#p2p-haus-app .rail-bk__chip {
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 0.74rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.14s ease, color 0.14s ease, background 0.14s ease;
+}
+
+#p2p-haus-app .rail-bk__chip.is-active {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background: var(--color-primary-soft);
+}
+
+#p2p-haus-app .rail-bk__card { border: 0;
+}
+
+#p2p-haus-app .rail-bk__summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  list-style: none;
+  padding: 6px 0;
+}
+
+#p2p-haus-app .rail-bk__summary::-webkit-details-marker { display: none;
+}
+
+#p2p-haus-app .rail-bk__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex: none;
+  background: var(--color-gold);
+}
+
+#p2p-haus-app .rail-bk__name {
+  flex: 1;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.98rem;
+}
+
+#p2p-haus-app .rail-bk__chev {
+  color: var(--color-text-muted);
+  font-size: 1rem;
+  transition: transform 0.2s ease;
+}
+
+#p2p-haus-app .rail-bk__card[open] .rail-bk__chev { transform: rotate(45deg);
+}
+
+#p2p-haus-app .rail-bk__body {
+  padding-top: 8px;
+  display: grid;
+  gap: 6px;
+}
+
+#p2p-haus-app .rail-bk__swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 4px;
+}
+
+#p2p-haus-app .rail-bk__swatch {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  border: 1px solid var(--color-border);
+}
+
+#p2p-haus-app .rail-bk__row {
+  display: flex;
+  gap: 8px;
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+#p2p-haus-app .rail-bk__k {
+  flex: none;
+  min-width: 52px;
+  color: var(--color-text-muted);
+  font-weight: 600;
+}
+
+#p2p-haus-app .rail-bk__v { color: var(--color-text);
+}
+
+#p2p-haus-app .rail-bk__load {
+  margin-top: 6px;
+  padding: 8px 14px;
+  border-radius: var(--radius-pill);
+  border: 1px solid transparent;
+  background: var(--color-primary);
+  color: var(--on-accent);
+  font-size: 0.82rem;
+  font-weight: 650;
+  cursor: pointer;
+  transition: filter 0.14s ease;
+}
+
+#p2p-haus-app .rail-bk__load:hover { filter: brightness(1.06);
+}
+
 /* ---------- Your Pack: progress to perfection ---------- */
 #p2p-haus-app .rail-progress {
   margin-bottom: 14px;
