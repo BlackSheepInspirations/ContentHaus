@@ -466,11 +466,8 @@
   // in the middle of a list of short phrases. Pulled into their own intro
   // sentences instead, mirroring Character Mode's placement.
   function assemblePrompt() {
-    var count = parseInt(PromptHaus.styleDNA.getState().variationCount.value, 10) || 4;
     var styleResolved = PromptHaus.engine.resolveFields(buildStyleItEntries());
-    var introParts = ["Create " + count + (count === 1 ? " variation" : " variations") + " of a clean, professional graphic."];
-    var stickerSheetGuard = PromptHaus.engine.stickerSheetGuard(count);
-    if (stickerSheetGuard) introParts.push(stickerSheetGuard);
+    var introParts = ["Create a clean, professional graphic."];
     styleResolved.forEach(function (r) {
       var prefix = r.label === "Character Type" ? "Illustration style" : r.label === "Art Finish" ? "Art finish" : r.label;
       introParts.push(prefix + ": " + r.value + (/[.!?]$/.test(r.value) ? "" : "."));

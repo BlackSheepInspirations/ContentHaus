@@ -7,7 +7,7 @@
  * Infographic Type is a dropdown-only field (no freeform) since it's a
  * structural choice, not a style preference — each type maps to its own
  * layout instruction via computeExtraTokens, same *_INSTRUCTIONS lookup
- * pattern Product Haus's Quote Wall Art Generator established for its
+ * pattern Project Haus's Quote Wall Art Generator established for its
  * own Text Color Mode field.
  */
 (function () {

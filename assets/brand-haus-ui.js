@@ -421,7 +421,7 @@
   // ("branding"/"logo"), but Quick Generators has no such namespace per
   // generator — its vault key is "gen:<id>" instead, routed through
   // BrandHaus.generators' own per-generator store lookup. Same "gen:"
-  // prefix convention Product Haus/Marketing Haus/Graphics Haus already
+  // prefix convention Project Haus/Marketing Haus/Graphics Haus already
   // use for their own Quick Generators tabs.
   function getModeStore(mode) {
     if (mode.indexOf("gen:") === 0) return BrandHaus.generators.getGeneratorStore(mode.slice(4));

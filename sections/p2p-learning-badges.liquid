@@ -1,0 +1,184 @@
+{% comment %}
+  Purpose 2 Profit — Badges & Progress. Each badge is a block (icon, colour,
+  requirement, earned toggle). Grouped by the "Family" field. Earned state is
+  manual for now; wire to customer progress/tags later.
+{% endcomment %}
+
+{{ 'p2p-badges.css' | asset_url | stylesheet_tag }}
+
+{%- assign earned_count = 0 -%}
+{%- for block in section.blocks -%}{%- if block.settings.earned -%}{%- assign earned_count = earned_count | plus: 1 -%}{%- endif -%}{%- endfor -%}
+{%- assign total = section.blocks.size -%}
+{%- assign pct = 0 -%}
+{%- if total > 0 -%}{%- assign pct = earned_count | times: 100 | divided_by: total -%}{%- endif -%}
+
+<div id="p2pb">
+  <div class="bwrap">
+    <div class="top">
+      <div>
+        <div class="eyebrow">{{ section.settings.eyebrow | default: 'Your Progress' }}</div>
+        <h1>{{ section.settings.title | default: 'Badges & Milestones' }}</h1>
+        <div class="sub">{{ section.settings.subtitle | default: 'Every badge is earned. Proof you kept going, not stickers you collected.' }}</div>
+      </div>
+      <div class="hstats">
+        <div class="hstat"><b>{{ section.settings.stat_points | default: '0' }}</b><small>Points</small></div>
+        <div class="hstat"><b>{{ earned_count }}</b><small>Badges</small></div>
+        <div class="hstat"><b class="p2pb-streak">{{ section.settings.stat_streak | default: '0' }}</b><small>Streak</small></div>
+        <div class="hstat"><b>{{ section.settings.stat_level | default: '1' }}</b><small>Level</small></div>
+      </div>
+    </div>
+
+    <div class="summary" style="--p:{{ pct }}">
+      <div class="ring"><b>{{ earned_count }}/{{ total }}</b></div>
+      <div class="txt"><b>{{ earned_count }} of {{ total }} badges earned</b><div>{{ total | minus: earned_count }} more to unlock — keep climbing the trail.</div></div>
+    </div>
+
+    {%- assign cur_group = '__none__' -%}
+    {%- for block in section.blocks -%}
+      {%- assign g = block.settings.group | default: 'Badges' -%}
+      {%- if g != cur_group -%}
+        {%- unless forloop.first -%}</div></div>{%- endunless -%}
+        <div class="section"><h2>{{ g }}</h2><div class="grid">
+        {%- assign cur_group = g -%}
+      {%- endif -%}
+
+      <div class="badge {% if block.settings.earned %}earned{% else %}locked{% endif %} {{ block.settings.color | default: 'c-gold' }}"{{ block.shopify_attributes }}>
+        <div class="medal">
+          <svg viewBox="0 0 24 24">
+            {%- case block.settings.icon -%}
+              {%- when 'flag' -%}<path d="M6 21V4M6 4c4-2 8 2 12 0v7c-4 2-8-2-12 0"/>
+              {%- when 'compass' -%}<circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2.2 4.8-4.8 2.2 2.2-4.8z"/>
+              {%- when 'lighthouse' -%}<path d="M9.5 21h5M10 21l1-8M14 21l-1-8M10 13h4M10.2 13l.8-4h2l.8 4M12 4v2M8.5 7L7 6M15.5 7L17 6"/>
+              {%- when 'anchor' -%}<circle cx="12" cy="5" r="2.3"/><path d="M12 7.3V21M6 12.5H4.2A7.8 7.8 0 0 0 19.8 12.5H18M6 12.5l-1.8 1.6M18 12.5l1.8 1.6"/>
+              {%- when 'sprout' -%}<path d="M12 21v-8M12 13c0-3 2.6-5.2 6-5 .2 3.4-2 5.2-6 5zM12 13C12 10.4 9.4 8.6 6 8.8c-.2 3.4 2 5 6 4.2z"/>
+              {%- when 'roots' -%}<path d="M12 3v9M9 6l3-3 3 3M12 12c-2 1.6-2.4 4.4-4.5 6M12 12c2 1.6 2.4 4.4 4.5 6M12 12v6"/>
+              {%- when 'mind' -%}<path d="M9.2 4.6A2.5 2.5 0 0 0 6.8 7 2.5 2.5 0 0 0 5.4 11.4 2.5 2.5 0 0 0 7 16a2.3 2.3 0 0 0 2.4 2.1 1.9 1.9 0 0 0 2.3-1.9V6.4a1.9 1.9 0 0 0-2.5-1.8z"/><path d="M14.8 4.6A2.5 2.5 0 0 1 17.2 7a2.5 2.5 0 0 1 1.4 4.4A2.5 2.5 0 0 1 17 16a2.3 2.3 0 0 1-2.4 2.1 1.9 1.9 0 0 1-2.3-1.9"/><path d="M7.5 8.6h1.6M7.5 12h1.6M16.5 8.6h-1.6M16.5 12h-1.6"/>
+              {%- when 'star' -%}<path d="M12 3l2.6 6 6.4.5-4.9 4.2 1.6 6.3L12 16.7 5.7 20l1.6-6.3L2.4 9.5 8.8 9z"/>
+              {%- when 'heart' -%}<path d="M12 20s-7-4.4-9-8.8A4.4 4.4 0 0 1 12 8a4.4 4.4 0 0 1 9 3.2C19 15.6 12 20 12 20z"/>
+              {%- when 'flame' -%}<path d="M12 3s5 3.6 5 9a5 5 0 0 1-10 0c0-2 1-3.4 2.2-4.4C9 9 10 10 11 10c0-2.8-1-4.6 1-7z"/>
+              {%- when 'crown' -%}<path d="M4 8l3.2 9h9.6L20 8l-5 4-3-6.5L9 12z"/>
+              {%- when 'butterfly' -%}<path d="M12 5v13M12 8.5C9 3.5 3.5 5.5 4 10s5.5 6.5 8 3M12 8.5C15 3.5 20.5 5.5 20 10s-5.5 6.5-8 3"/>
+              {%- when 'trophy' -%}<path d="M8 4h8v4.5a4 4 0 0 1-8 0zM8 6H5v1a3 3 0 0 0 3 3M16 6h3v1a3 3 0 0 1-3 3M10 15.5h4M9 20h6M12 12.5V15.5"/>
+              {%- when 'boat' -%}<path d="M12 3v10"/><path d="M12 5l5.5 7.5H12z"/><path d="M4 15.5h16l-2.2 4.5H6.2z"/>
+              {%- when 'pen' -%}<path d="M4 20h4L18.6 9.4a2 2 0 0 0-2.8-2.8L4 18v2z"/><path d="M14 8l3 3"/>
+              {%- when 'fingerprint' -%}<path d="M2 12C2 6.5 6.5 2 12 2a10 10 0 0 1 8 4"/><path d="M5 19.5C5.5 18 6 15 6 12c0-.7.12-1.37.34-2"/><path d="M17.29 21c.12-.6.43-2.3.5-3"/><path d="M12 10a2 2 0 0 0-2 2c0 1-.1 2.5-.26 4"/><path d="M8.65 22c.21-.66.45-1.32.57-2"/><path d="M14 13.1c0 2.4 0 6.4-1 8.9"/><path d="M9 6.8a6 6 0 0 1 9 5.2v2"/>
+              {%- when 'shootingstar' -%}<path d="M9.5 6Q9.5 12 15.5 12Q9.5 12 9.5 18Q9.5 12 3.5 12Q9.5 12 9.5 6z"/><path d="M17.5 2.8Q17.5 6 20.7 6Q17.5 6 17.5 9.2Q17.5 6 14.3 6Q17.5 6 17.5 2.8z"/><path d="M17 13.9Q17 16.5 19.6 16.5Q17 16.5 17 19.1Q17 16.5 14.4 16.5Q17 16.5 17 13.9z"/>
+              {%- when 'notepad' -%}<rect x="4.5" y="4" width="11" height="16" rx="1.5"/><path d="M7.5 8h5M7.5 11h5M7.5 14h3"/><path d="M20 8.2l-6.2 6.2-2.3.7.7-2.3 6.2-6.2a1.1 1.1 0 0 1 1.6 1.6z"/>
+              {%- when 'grad' -%}<path d="M12 4L2 9l10 5 10-5z"/><path d="M22 9v4"/><path d="M6 11.5v4c0 1.5 2.7 2.7 6 2.7s6-1.2 6-2.7v-4"/>
+              {%- when 'magnifier' -%}<circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5 5"/>
+              {%- when 'seal' -%}<circle cx="12" cy="9" r="6"/><path d="M8.5 14L7 21l5-2.7L17 21l-1.5-7"/><circle cx="12" cy="9" r="2.4"/>
+              {%- when 'comeback' -%}<path d="M20 12a8 8 0 1 1-2.34-5.66"/><path d="M20 4v4h-4"/>
+              {%- else -%}<circle cx="12" cy="12" r="8"/>
+            {%- endcase -%}
+          </svg>
+          {%- if block.settings.earned -%}<span class="spark"></span>{%- else -%}<span class="lock">🔒</span>{%- endif -%}
+        </div>
+        <div class="name">{{ block.settings.name }}</div>
+        <div class="req">{{ block.settings.req }}</div>
+      </div>
+
+      {%- if forloop.last -%}</div></div>{%- endif -%}
+    {%- endfor -%}
+
+    {%- if total == 0 -%}<p class="sub" style="margin-top:24px;">Add badges in the theme editor.</p>{%- endif -%}
+  </div>
+
+  <div id="p2pb-toast">
+    <canvas class="pbt-canvas"></canvas>
+    <div class="pbt-card">
+      <div class="pbt-medal"></div>
+      <div class="pbt-eyebrow">✦ Badge Unlocked ✦</div>
+      <div class="pbt-name"></div>
+      <div class="pbt-req"></div>
+      <button class="pbt-btn" type="button">Awesome</button>
+    </div>
+  </div>
+</div>
+
+<script src="{{ 'p2p-progress.js' | asset_url }}" defer></script>
+<script src="{{ 'p2p-badges.js' | asset_url }}" defer></script>
+
+{% schema %}
+{
+  "name": "P2P Badges & Progress",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Your Progress" },
+    { "type": "text", "id": "title", "label": "Title", "default": "Badges & Milestones" },
+    { "type": "textarea", "id": "subtitle", "label": "Subtitle", "default": "Every badge is earned. Proof you kept going, not stickers you collected." },
+    { "type": "header", "content": "Stats (placeholder)" },
+    { "type": "text", "id": "stat_points", "label": "Points", "default": "0" },
+    { "type": "text", "id": "stat_streak", "label": "Streak", "default": "0" },
+    { "type": "text", "id": "stat_level", "label": "Level", "default": "1" }
+  ],
+  "blocks": [
+    {
+      "type": "badge",
+      "name": "Badge",
+      "settings": [
+        { "type": "text", "id": "group", "label": "Family (section header)", "default": "Journey Milestones" },
+        { "type": "text", "id": "name", "label": "Badge name", "default": "New Badge" },
+        { "type": "text", "id": "req", "label": "How it's earned", "default": "Complete the requirement" },
+        { "type": "select", "id": "icon", "label": "Icon", "default": "star",
+          "options": [
+            {"value":"flag","label":"Flag"},{"value":"compass","label":"Compass"},{"value":"lighthouse","label":"Lighthouse"},
+            {"value":"anchor","label":"Anchor (RAFT)"},{"value":"sprout","label":"Sprout (GROWS)"},{"value":"roots","label":"Roots (ROOTED)"},
+            {"value":"mind","label":"Brain"},{"value":"star","label":"Star"},{"value":"heart","label":"Heart"},
+            {"value":"flame","label":"Flame"},{"value":"crown","label":"Crown"},{"value":"butterfly","label":"Butterfly"},{"value":"trophy","label":"Trophy"},
+            {"value":"boat","label":"Boat / Sail"},{"value":"pen","label":"Pen / Journal"},{"value":"fingerprint","label":"Fingerprint"},
+            {"value":"shootingstar","label":"Star Cluster"},{"value":"notepad","label":"Notepad"},{"value":"grad","label":"Graduation Cap"},
+            {"value":"magnifier","label":"Magnifier (explore)"},{"value":"seal","label":"Award Seal (certified)"},{"value":"comeback","label":"Comeback (return arrow)"}
+          ]
+        },
+        { "type": "select", "id": "color", "label": "Colour", "default": "c-gold",
+          "options": [
+            {"value":"c-gold","label":"Gold"},{"value":"c-em","label":"Emerald"},{"value":"c-pu","label":"Purple"},{"value":"c-pk","label":"Pink"},{"value":"c-te","label":"Teal"}
+          ]
+        },
+        { "type": "checkbox", "id": "earned", "label": "Earned", "default": false }
+      ]
+    }
+  ],
+  "presets": [
+    { "name": "P2P Badges & Progress",
+      "blocks": [
+        { "type": "badge", "settings": { "group": "Journey Milestones", "name": "Set Sail", "req": "Start your journey", "icon": "boat", "color": "c-te", "earned": true } },
+        { "type": "badge", "settings": { "group": "Journey Milestones", "name": "First Steps", "req": "Complete your first course", "icon": "flag", "color": "c-gold", "earned": true } },
+        { "type": "badge", "settings": { "group": "Journey Milestones", "name": "First Win", "req": "Bank your first quick win", "icon": "trophy", "color": "c-gold", "earned": true } },
+        { "type": "badge", "settings": { "group": "Journey Milestones", "name": "Finding Your Current", "req": "Complete 3 courses", "icon": "compass", "color": "c-te", "earned": true } },
+        { "type": "badge", "settings": { "group": "Journey Milestones", "name": "Reached Freedom", "req": "Complete every course", "icon": "shootingstar", "color": "c-gold", "earned": false } },
+        { "type": "badge", "settings": { "group": "Framework Masteries", "name": "RAFT Master", "req": "Finish the RAFT leg", "icon": "anchor", "color": "c-em", "earned": true } },
+        { "type": "badge", "settings": { "group": "Framework Masteries", "name": "GROWS Master", "req": "Finish the GROWS leg", "icon": "sprout", "color": "c-em", "earned": false } },
+        { "type": "badge", "settings": { "group": "Framework Masteries", "name": "ROOTED Master", "req": "Finish the ROOTED leg", "icon": "roots", "color": "c-em", "earned": false } },
+        { "type": "badge", "settings": { "group": "Habits & Wins", "name": "Founder Fingerprint", "req": "Complete your Brand DNA Blueprint", "icon": "fingerprint", "color": "c-gold", "earned": true } },
+        { "type": "badge", "settings": { "group": "Habits & Wins", "name": "First Reflection", "req": "Write your first journal entry", "icon": "pen", "color": "c-pu", "earned": true } },
+        { "type": "badge", "settings": { "group": "Habits & Wins", "name": "Journal Keeper", "req": "Write 10 journal entries", "icon": "notepad", "color": "c-pu", "earned": false } },
+        { "type": "badge", "settings": { "group": "Habits & Wins", "name": "Journal Devotee", "req": "Write 15 journal entries", "icon": "notepad", "color": "c-pu", "earned": false } },
+        { "type": "badge", "settings": { "group": "Habits & Wins", "name": "Trail Explorer", "req": "Open the RAFT, GROWS & ROOTED signs", "icon": "magnifier", "color": "c-te", "earned": false } },
+        { "type": "badge", "settings": { "group": "Habits & Wins", "name": "Certified", "req": "Download your first certificate", "icon": "seal", "color": "c-gold", "earned": false } },
+        { "type": "badge", "settings": { "group": "Habits & Wins", "name": "Comeback", "req": "Restart a streak after it breaks", "icon": "comeback", "color": "c-em", "earned": false } },
+        { "type": "badge", "settings": { "group": "Mindset Check", "name": "Mindset I", "req": "Complete your 1st Mindset course", "icon": "mind", "color": "c-te", "earned": true } },
+        { "type": "badge", "settings": { "group": "Mindset Check", "name": "Mindset II", "req": "Complete your 2nd Mindset course", "icon": "mind", "color": "c-te", "earned": false } },
+        { "type": "badge", "settings": { "group": "Mindset Check", "name": "Clear Mind", "req": "Complete all Mindset courses", "icon": "mind", "color": "c-gold", "earned": false } },
+        { "type": "badge", "settings": { "group": "Purpose Check", "name": "Purpose I", "req": "Complete your 1st Purpose course", "icon": "star", "color": "c-pu", "earned": false } },
+        { "type": "badge", "settings": { "group": "Purpose Check", "name": "Purpose II", "req": "Complete your 2nd Purpose course", "icon": "star", "color": "c-pu", "earned": false } },
+        { "type": "badge", "settings": { "group": "Purpose Check", "name": "True Purpose", "req": "Complete all Purpose courses", "icon": "star", "color": "c-gold", "earned": false } },
+        { "type": "badge", "settings": { "group": "Heart Check", "name": "Heart I", "req": "Complete your 1st Heart course", "icon": "heart", "color": "c-pk", "earned": false } },
+        { "type": "badge", "settings": { "group": "Heart Check", "name": "Heart II", "req": "Complete your 2nd Heart course", "icon": "heart", "color": "c-pk", "earned": false } },
+        { "type": "badge", "settings": { "group": "Heart Check", "name": "Open Heart", "req": "Complete all Heart courses", "icon": "heart", "color": "c-gold", "earned": false } },
+        { "type": "badge", "settings": { "group": "Streaks", "name": "5-Day Streak", "req": "5 days in a row", "icon": "flame", "color": "c-te", "earned": true } },
+        { "type": "badge", "settings": { "group": "Streaks", "name": "10-Day Streak", "req": "10 days in a row", "icon": "flame", "color": "c-em", "earned": true } },
+        { "type": "badge", "settings": { "group": "Streaks", "name": "15-Day Streak", "req": "15 days in a row", "icon": "flame", "color": "c-gold", "earned": false } },
+        { "type": "badge", "settings": { "group": "Streaks", "name": "20-Day Streak", "req": "20 days in a row", "icon": "flame", "color": "c-gold", "earned": false } },
+        { "type": "badge", "settings": { "group": "Streaks", "name": "25-Day Streak", "req": "25 days in a row", "icon": "flame", "color": "c-pu", "earned": false } },
+        { "type": "badge", "settings": { "group": "Streaks", "name": "50-Day Streak", "req": "50 days in a row", "icon": "flame", "color": "c-pk", "earned": false } },
+        { "type": "badge", "settings": { "group": "Streaks", "name": "75-Day Streak", "req": "75 days in a row", "icon": "flame", "color": "c-pk", "earned": false } },
+        { "type": "badge", "settings": { "group": "Streaks", "name": "100-Day Streak", "req": "100 days in a row", "icon": "flame", "color": "c-gold", "earned": false } },
+        { "type": "badge", "settings": { "group": "Streaks", "name": "125-Day Streak", "req": "125 days in a row", "icon": "flame", "color": "c-pu", "earned": false } },
+        { "type": "badge", "settings": { "group": "Streaks", "name": "150-Day Streak", "req": "150 days in a row", "icon": "flame", "color": "c-gold", "earned": false } },
+        { "type": "badge", "settings": { "group": "Special", "name": "Founder", "req": "Founder's Pass holder", "icon": "crown", "color": "c-gold", "earned": true } },
+        { "type": "badge", "settings": { "group": "Special", "name": "Masterclass", "req": "Join a live masterclass", "icon": "grad", "color": "c-pu", "earned": false } }
+      ]
+    }
+  ]
+}
+{% endschema %}

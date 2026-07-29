@@ -2,7 +2,7 @@
 
 Standing reference for whoever (or whichever Claude Code session) is building
 the Prompt 2 Profit (P2P) Launch System and needs to know how it plugs into
-the existing 5 Hausen (Content/Prompt Haus, Product Haus, Graphics Haus,
+the existing 5 Hausen (Content/Prompt Haus, Project Haus, Graphics Haus,
 Marketing Haus, Brand Haus). Written so it can be handed to a *different*
 Claude Code session that doesn't share this conversation's context — point it
 at this file (or paste it in) instead of re-deriving these facts from scratch.
@@ -57,7 +57,7 @@ read-only via one shared `localStorage` key. Confirmed directly from source:
 | Brand Haus | `brandHausBrandKits` | **Writes** the shared vault on every save |
 | Marketing Haus | `marketingHausBrandKits` | Reads shared vault (read-only) |
 | Graphics Haus | `graphicsHausBrandKits` | Reads shared vault (read-only) |
-| Product Haus | `productHausBrandKits` | Reads shared vault (read-only) |
+| Project Haus | `productHausBrandKits` | Reads shared vault (read-only) |
 | Content/Prompt Haus | `promptHausBrandKits` | Does **not** participate |
 
 Shared key: **`blackSheepBrandKitVault`**, shape:
@@ -87,7 +87,7 @@ shape) every time its own `brandHausBrandKits` is saved — see
 `writeSharedVault()` in `assets/brand-haus-brandkit.js`. Every consumer Haus
 reads it read-only and maps it into its own local field shape — see
 `readSyncedKits()` in `assets/marketing-haus-brandkit.js` (or the Graphics/
-Product Haus equivalents — same pattern, verbatim-ported).
+Project Haus equivalents — same pattern, verbatim-ported).
 
 **For P2P**: read `blackSheepBrandKitVault` the same read-only way. Don't
 write to it (that would make Brand Haus not the single source of truth
@@ -114,7 +114,7 @@ Each Haus then has one unique accent color, oddly still all named
 | Haus | CSS prefix | Accent (`--*-espresso`) |
 |---|---|---|
 | Content/Prompt Haus | `ph-` | `#3C2A21` (brown) |
-| Product Haus | `pdh-` | `#2563EB` (blue) |
+| Project Haus | `pdh-` | `#2563EB` (blue) |
 | Graphics Haus | `gh-` | `#5B3C8C` (purple) |
 | Marketing Haus | `mh-` | `#D6336C` (pink/magenta) |
 | Brand Haus | `bh-` | `#0D7377` (teal — same as its own base teal; overridden dynamically per matched brand-archetype profile elsewhere in Brand Haus) |
@@ -152,7 +152,7 @@ own one-time-purchase access product — see
 `docs/product-haus-access-control-setup.md` for the exact Shopify Admin
 checklist (product → Flow → two pages → section settings → test). P2P should
 get its own access tag (e.g. `p2p-haus-access`) and its own Flow/product,
-completely independent of the other 4 — same reasoning as why Product Haus's
+completely independent of the other 4 — same reasoning as why Project Haus's
 tag is separate from Marketing Haus's: a customer can own any subset
 independently.
 

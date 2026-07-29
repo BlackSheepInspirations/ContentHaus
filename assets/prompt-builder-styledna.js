@@ -146,7 +146,7 @@
   // ---------------------------------------------------------------------
   // Regrouped into 4 categories and trimmed to art/creative-content
   // formats only — marketing/packaging/ad formats (beauty packaging,
-  // Instagram ad, flyer, etc.) moved out to Product Haus/Marketing Haus/
+  // Instagram ad, flyer, etc.) moved out to Project Haus/Marketing Haus/
   // Graphics Haus, which now own that territory. Alphabetized within
   // each group, per the standing house rule for every grouped dropdown.
   var PROJECT_TYPE_GROUPS = [

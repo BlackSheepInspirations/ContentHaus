@@ -1,5 +1,5 @@
 /**
- * The AI Creator's Product Haus — Saved Prompts (Favorites)
+ * The AI Creator's Project Haus — Saved Prompts (Favorites)
  * No dependencies on the other modules; pure localStorage wrapper.
  *
  * Direct port of Prompt Haus's own PromptHaus.favorites — same client-

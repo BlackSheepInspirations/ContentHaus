@@ -1,5 +1,5 @@
 /**
- * The AI Creator's Product Haus — Junk Journal Generator
+ * The AI Creator's Project Haus — Junk Journal Generator
  * Depends on product-haus-util.js, product-haus-engine.js,
  * product-haus-styledna.js, and product-haus-generators.js (all must
  * load first — this file just registers itself with that engine).

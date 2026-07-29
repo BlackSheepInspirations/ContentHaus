@@ -404,7 +404,6 @@
   // Mode's Illustration Style/Art Finish placement, so the style is
   // established before either person is described.
   function assemblePrompt() {
-    var count = parseInt(PromptHaus.styleDNA.getState().variationCount.value, 10) || 4;
     var baseType = store.getState().baseType;
     var sceneEntries = getSceneFieldEntries();
     var styleEntries = sceneEntries.filter(function (e) { return e.fieldName === "characterType" || e.fieldName === "artFinish"; });
@@ -428,11 +427,7 @@
     var companionResolved = PromptHaus.engine.resolveFields(getCompanionFieldEntries().map(toEntry));
 
     var parts = [];
-    parts.push(
-      "Create " + count + (count === 1 ? " variation" : " variations") + " of a clean, professional couple portrait."
-    );
-    var stickerSheetGuard = PromptHaus.engine.stickerSheetGuard(count);
-    if (stickerSheetGuard) parts.push(stickerSheetGuard);
+    parts.push("Create a clean, professional couple portrait.");
     if (illustrationStyleText) parts.push("Illustration style: " + illustrationStyleText);
     if (artFinishText) parts.push("Art finish: " + artFinishText);
     if (aResolved.length) parts.push("Character A: a " + aResolved.map(function (r) { return r.value; }).join(", ") + ".");

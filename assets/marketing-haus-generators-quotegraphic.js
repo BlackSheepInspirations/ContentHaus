@@ -5,7 +5,7 @@
  * load first — this file just registers itself with that engine).
  *
  * Named "Quote Graphic Generator" rather than "Quote Wall Art" on
- * purpose — Product Haus already has its own Quote Wall Art Generator
+ * purpose — Project Haus already has its own Quote Wall Art Generator
  * (a sellable print product). This one is the same underlying mechanic
  * for a different market: a shareable social/marketing graphic, not
  * wall art. Each Haus keeps its own copy per the established

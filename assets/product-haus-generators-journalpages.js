@@ -1,5 +1,5 @@
 /**
- * The AI Creator's Product Haus — Journal Page Generator
+ * The AI Creator's Project Haus — Journal Page Generator
  * Depends on product-haus-util.js, product-haus-engine.js, and
  * product-haus-generators.js (must load first — this file just
  * registers itself with that engine, and is the first generator to use

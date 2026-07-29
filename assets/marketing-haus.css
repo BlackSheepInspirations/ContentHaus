@@ -1386,6 +1386,37 @@
   color: var(--mh-charcoal);
   line-height: 1.5;
 }
+.mh-generator-chatgpt-multi {
+  margin-top: 20px;
+  padding: 14px;
+  border: 1px dashed var(--mh-teal);
+  border-radius: 10px;
+  background: #fff;
+}
+.mh-generator-chatgpt-multi__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  margin: 0 0 8px;
+  color: var(--mh-teal);
+}
+.mh-generator-chatgpt-multi__note {
+  margin: 0 0 10px;
+  font-size: 12px;
+  color: var(--mh-charcoal);
+  opacity: 0.85;
+}
+.mh-generator-chatgpt-multi__actions {
+  margin-bottom: 8px;
+}
+.mh-generator-chatgpt-multi__text {
+  margin: 0;
+  font-size: 13px;
+  color: var(--mh-charcoal);
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
 
 /* Saved Prompts — below the Live Prompt Preview */
 .mh-saved {
@@ -1835,6 +1866,24 @@
 }
 .mh-checklist__item .mh-icon {
   color: var(--mh-gold);
+}
+.mh-checklist__freeform {
+  margin-top: 12px;
+  display: block;
+}
+.mh-video-preview {
+  margin-top: 14px;
+  padding: 14px;
+  border: 1px dashed var(--mh-teal);
+  border-radius: 10px;
+  background: #fff;
+}
+.mh-video-preview__text {
+  margin: 0 0 10px;
+  font-size: 13px;
+  color: var(--mh-charcoal);
+  line-height: 1.5;
+  white-space: pre-wrap;
 }
 .mh-collection__item {
   background: rgba(255, 255, 255, 0.06);

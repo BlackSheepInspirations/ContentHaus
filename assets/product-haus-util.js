@@ -1,5 +1,5 @@
 /**
- * The AI Creator's Product Haus — shared store/field utilities
+ * The AI Creator's Project Haus — shared store/field utilities
  * Loaded first. Establishes window.ProductHaus and the tiny store/field
  * utilities that every other product-haus-*.js module reuses.
  *

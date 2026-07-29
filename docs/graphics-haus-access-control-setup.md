@@ -4,7 +4,7 @@ Code side is done: the tool page checks `customer.tags contains "graphics-haus-a
 and shows a locked state with a buy button when that tag is missing (see
 `sections/graphics-haus.liquid`). This tag is completely separate from every
 sibling Haus's own access tag (Prompt Haus/Content Haus's `prompt-haus-access`,
-Marketing Haus's `marketing-haus-access`, Product Haus's `product-haus-access`,
+Marketing Haus's `marketing-haus-access`, Project Haus's `product-haus-access`,
 Brand Haus's `brand-haus-access`), so a customer can own any of them
 independently. The pieces below all happen in Shopify Admin, not in theme
 code — this is the checklist to wire them up.

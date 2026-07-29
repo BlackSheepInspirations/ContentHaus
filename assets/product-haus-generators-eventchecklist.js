@@ -1,5 +1,5 @@
 /**
- * The AI Creator's Product Haus — Event Checklist Generator
+ * The AI Creator's Project Haus — Event Checklist Generator
  * Depends on product-haus-util.js, product-haus-engine.js,
  * product-haus-checklists-eventchecklist.js, and
  * product-haus-generators.js (all must load first — this file just

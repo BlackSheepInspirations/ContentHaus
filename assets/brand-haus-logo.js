@@ -467,10 +467,16 @@
     if (built.brandName) fragments.push('the text "' + built.brandName + '"');
     if (built.initials) fragments.push('the initials "' + built.initials + '"');
 
-    var outputVariations = resolved(state.outputVariations);
-    var intro = outputVariations ? "Generate " + outputVariations + ":" : "";
+    // outputVariations ("1/3/5 concepts") is intentionally not woven into
+    // the copied prompt text as "Generate N concepts:" — a single text
+    // prompt telling an AI tool to produce several concepts at once is
+    // frequently rendered as one combined comparison sheet instead of
+    // several separate images (the same bug fixed across every other
+    // mode/generator in this app). The field is informational: it tells
+    // you how many times to run this same prompt, not an instruction sent
+    // to the AI.
     var mainSentence = built.parts.filter(Boolean).join(", ") + ".";
-    var text = [intro, mainSentence].concat(buildTrailingSentences(state, built)).filter(Boolean).join(" ");
+    var text = [mainSentence].concat(buildTrailingSentences(state, built)).filter(Boolean).join(" ");
 
     return { text: text, fragments: fragments };
   }

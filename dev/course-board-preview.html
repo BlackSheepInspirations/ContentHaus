@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Course Haus — Journey Board Prototype</title>
+<style>
+  :root{
+    --opal-emerald:#27ae6e; --opal-teal:#0d7377; --opal-blue:#2563eb;
+    --opal-purple:#5b3c8c; --opal-pink:#d6336c; --gold:#c9a84c;
+    --ink:#0a0f0c; --ink2:#0c1310; --panel:rgba(10,20,24,.55);
+    --stroke:rgba(255,255,255,.10); --text:#eaf6f3; --muted:#9fb4ad;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    font-family:"Georgia","Times New Roman",serif;
+    color:var(--text); background:var(--ink);
+    min-height:100vh; -webkit-font-smoothing:antialiased;
+  }
+  .board{position:relative; max-width:1024px; margin:0 auto; overflow:hidden;
+    background:
+      radial-gradient(60% 55% at 15% 8%, rgba(39,174,110,.22), transparent 60%),
+      radial-gradient(50% 45% at 85% 4%, rgba(37,99,235,.20), transparent 60%),
+      radial-gradient(55% 40% at 55% 0%, rgba(91,60,140,.20), transparent 60%),
+      radial-gradient(70% 50% at 30% 100%, rgba(13,115,119,.18), transparent 60%),
+      linear-gradient(180deg,#071a20 0%, #0a1512 42%, #0a0f0c 100%);
+  }
+  /* aurora ribbons */
+  .aurora{position:absolute; inset:0 0 auto 0; height:340px; pointer-events:none; opacity:.75; mix-blend-mode:screen;}
+  .aurora span{position:absolute; left:-20%; width:140%; height:120px; filter:blur(28px); border-radius:50%;
+    background:linear-gradient(90deg,transparent, var(--opal-emerald), var(--opal-teal), var(--opal-purple), transparent);
+    animation:drift 14s ease-in-out infinite;}
+  .aurora span:nth-child(2){top:70px; height:90px; opacity:.7;
+    background:linear-gradient(90deg,transparent, var(--opal-purple), var(--opal-blue), var(--opal-emerald), transparent);
+    animation-duration:19s; animation-direction:reverse;}
+  .aurora span:nth-child(3){top:140px; height:70px; opacity:.55;
+    background:linear-gradient(90deg,transparent, var(--opal-teal), var(--opal-emerald), transparent);
+    animation-duration:23s;}
+  @keyframes drift{0%,100%{transform:translate3d(-4%,0,0) skewY(-3deg);}50%{transform:translate3d(4%,12px,0) skewY(2deg);}}
+  .stars{position:absolute; inset:0; pointer-events:none;
+    background-image:radial-gradient(rgba(255,255,255,.5) 1px, transparent 1.4px);
+    background-size:46px 46px; opacity:.10;}
+
+  /* top bar */
+  .hud{position:relative; z-index:5; display:flex; justify-content:space-between; align-items:center;
+    gap:14px; padding:16px 22px; flex-wrap:wrap;}
+  .nav{display:flex; gap:20px; align-items:center; background:var(--panel); border:1px solid var(--stroke);
+    padding:10px 18px; border-radius:16px; backdrop-filter:blur(6px);}
+  .nav a{display:flex; flex-direction:column; align-items:center; gap:3px; text-decoration:none;
+    color:var(--muted); font:600 10px/1 system-ui; letter-spacing:.14em; text-transform:uppercase;}
+  .nav a .ic{font-size:17px; line-height:1;}
+  .nav a.on{color:var(--gold);}
+  .stats{display:flex; gap:8px; align-items:center; background:var(--panel); border:1px solid var(--stroke);
+    padding:8px 10px; border-radius:16px; backdrop-filter:blur(6px);}
+  .stat{display:flex; flex-direction:column; align-items:center; padding:2px 12px; min-width:56px;}
+  .stat b{font:700 18px/1 system-ui; color:var(--text); display:flex; align-items:center; gap:5px;}
+  .stat small{font:600 8px/1 system-ui; letter-spacing:.16em; color:var(--muted); margin-top:4px; text-transform:uppercase;}
+  .stat .dot{font-size:14px;}
+  .lvl{display:flex; flex-direction:column; align-items:center; gap:4px; margin-left:2px;}
+  .lvl .av{width:44px; height:44px; border-radius:50%; border:2px solid var(--gold);
+    background:radial-gradient(circle at 40% 35%, #d9b86a, #7a5f22); box-shadow:0 0 14px rgba(201,168,76,.5);}
+  .lvl small{font:700 8px/1 system-ui; letter-spacing:.1em; color:var(--gold); border:1px solid rgba(201,168,76,.4);
+    padding:3px 7px; border-radius:20px; background:rgba(201,168,76,.08);}
+
+  /* title */
+  .head{position:relative; z-index:5; padding:8px 30px 0;}
+  .head h1{font-size:clamp(38px,7vw,64px); font-weight:700; letter-spacing:-.5px; line-height:.98;}
+  .head h1 .two{background:linear-gradient(100deg,var(--gold),var(--opal-emerald) 55%,var(--opal-blue));
+    -webkit-background-clip:text; background-clip:text; color:transparent; padding:0 .1em;}
+  .head .eyebrow{font:700 12px/1 system-ui; letter-spacing:.34em; text-transform:uppercase; color:var(--gold); margin-bottom:6px;}
+  .head p{color:var(--muted); font-size:15px; margin-top:10px; max-width:420px; font-family:system-ui;}
+
+  /* map canvas */
+  .map{position:relative; z-index:4; height:1520px; margin-top:6px;}
+  .trail{position:absolute; inset:0; width:100%; height:100%;}
+  .start{position:absolute; left:9%; top:14.5%; text-align:center; z-index:6;
+    font:700 12px/1.3 system-ui; letter-spacing:.22em; text-transform:uppercase; color:var(--opal-emerald);}
+  .start .arr{display:block; font-size:20px; margin-top:4px; animation:bob 1.8s ease-in-out infinite;}
+  @keyframes bob{0%,100%{transform:translateY(0);}50%{transform:translateY(6px);}}
+
+  /* nodes */
+  .node{position:absolute; z-index:6; width:168px; transform:translate(-50%,-50%);
+    cursor:pointer; text-align:center; transition:transform .18s ease;}
+  .node:hover{transform:translate(-50%,-50%) scale(1.045);}
+  .node .card{position:relative; border-radius:18px; overflow:hidden; border:2px solid rgba(255,255,255,.14);
+    background:#0c1410; box-shadow:0 18px 40px rgba(0,0,0,.55);}
+  .node .thumb{height:118px; background-size:cover; background-position:center; position:relative;}
+  .node .thumb::after{content:""; position:absolute; inset:0; background:linear-gradient(180deg,transparent 40%, rgba(6,12,10,.9));}
+  .node .num{position:absolute; top:-16px; left:50%; transform:translateX(-50%); z-index:3;
+    width:38px; height:38px; border-radius:50%; display:grid; place-items:center;
+    font:700 18px/1 system-ui; color:#06120e; background:linear-gradient(145deg,#dff6ec,#8fd8bd);
+    border:3px solid #0a0f0c; box-shadow:0 0 0 2px rgba(39,174,110,.6);}
+  .node .title{position:relative; z-index:3; padding:0 10px 14px; margin-top:-30px; font-size:17px; line-height:1.15;}
+
+  /* halo ring under node */
+  .node .halo{position:absolute; left:50%; bottom:-14px; transform:translateX(-50%);
+    width:150px; height:34px; border-radius:50%; filter:blur(2px); z-index:1;}
+
+  /* states */
+  .node.done .num{background:linear-gradient(145deg,#f4e2a6,var(--gold)); box-shadow:0 0 0 2px rgba(201,168,76,.7);}
+  .node.done .card{border-color:rgba(201,168,76,.75); box-shadow:0 0 26px rgba(201,168,76,.35),0 18px 40px rgba(0,0,0,.55);}
+  .node.done .halo{background:radial-gradient(ellipse,rgba(201,168,76,.55),transparent 70%);}
+  .node.done .badge{position:absolute; top:8px; right:8px; z-index:4; width:26px; height:26px; border-radius:50%;
+    background:var(--gold); color:#0a0f0c; display:grid; place-items:center; font-size:15px; box-shadow:0 0 12px rgba(201,168,76,.8);}
+
+  .node.active .card{border-color:rgba(39,174,110,.9); box-shadow:0 0 30px rgba(39,174,110,.5),0 18px 40px rgba(0,0,0,.55);
+    animation:pulse 2.4s ease-in-out infinite;}
+  .node.active .halo{background:radial-gradient(ellipse,rgba(39,174,110,.6),transparent 70%);}
+  @keyframes pulse{0%,100%{box-shadow:0 0 24px rgba(39,174,110,.4),0 18px 40px rgba(0,0,0,.55);}50%{box-shadow:0 0 40px rgba(39,174,110,.7),0 18px 40px rgba(0,0,0,.55);}}
+  .node.active .tag{position:absolute; bottom:-30px; left:50%; transform:translateX(-50%);
+    font:700 10px/1 system-ui; letter-spacing:.16em; text-transform:uppercase; color:var(--opal-emerald); white-space:nowrap;}
+
+  .node.progress .ring{position:absolute; top:-20px; left:50%; transform:translateX(-50%); z-index:4;
+    width:46px; height:46px; border-radius:50%;
+    background:conic-gradient(var(--opal-emerald) 0turn 0.6turn, rgba(255,255,255,.12) 0.6turn 1turn);
+    display:grid; place-items:center;}
+  .node.progress .ring::before{content:""; width:36px; height:36px; border-radius:50%; background:#0a0f0c;}
+  .node.progress .ring b{position:absolute; font:700 11px/1 system-ui; color:var(--text);}
+  .node.progress .card{border-color:rgba(37,99,235,.7); box-shadow:0 0 22px rgba(37,99,235,.32),0 18px 40px rgba(0,0,0,.55);}
+  .node.progress .halo{background:radial-gradient(ellipse,rgba(37,99,235,.5),transparent 70%);}
+
+  .node.locked{filter:saturate(.35);}
+  .node.locked .card{border-color:rgba(255,255,255,.10); opacity:.72;}
+  .node.locked .thumb{filter:grayscale(.7) brightness(.6);}
+  .node.locked .num{background:linear-gradient(145deg,#7d8b86,#4a534f); box-shadow:0 0 0 2px rgba(255,255,255,.12); color:#dfe7e4;}
+  .node.locked .lock{position:absolute; top:50%; left:50%; transform:translate(-50%,-64%); z-index:4; font-size:30px; filter:drop-shadow(0 2px 6px #000);}
+  .node.locked .halo{background:radial-gradient(ellipse,rgba(255,255,255,.10),transparent 70%);}
+  .node.locked .tag{position:absolute; bottom:-28px; left:50%; transform:translateX(-50%);
+    font:700 9px/1 system-ui; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); white-space:nowrap;}
+
+  /* side signpost / note cards */
+  .note{position:absolute; z-index:6; width:200px; background:var(--panel); border:1px solid var(--stroke);
+    border-radius:16px; padding:14px 16px; backdrop-filter:blur(6px); font-family:system-ui;}
+  .note .k{font:700 11px/1 system-ui; letter-spacing:.18em; text-transform:uppercase; color:var(--gold); margin-bottom:8px;}
+  .note .row{display:flex; gap:9px; font-size:12.5px; color:var(--text); margin:5px 0; align-items:center;}
+  .note .row b{width:20px; height:20px; border-radius:6px; display:grid; place-items:center; flex:none;
+    font:700 11px/1 system-ui; color:#06120e; background:linear-gradient(145deg,#dff6ec,#8fd8bd);}
+  .note.tip{width:180px;}
+  .note.tip .k{color:var(--opal-emerald);} .note.tip p{font-size:12.5px; color:var(--muted); line-height:1.4;}
+  .note.tip.warm .k{color:var(--gold);}
+
+  .continue{position:relative; z-index:5; text-align:center; padding:6px 0 40px;
+    font:700 12px/1 system-ui; letter-spacing:.28em; text-transform:uppercase; color:var(--opal-teal);}
+  .continue .chev{display:block; font-size:22px; margin-top:8px; animation:bob 1.8s ease-in-out infinite; color:var(--muted);}
+
+  .hint{position:fixed; left:50%; bottom:18px; transform:translateX(-50%); z-index:30;
+    background:#0c1410; border:1px solid var(--stroke); color:var(--text); padding:11px 18px; border-radius:12px;
+    font:600 13px/1 system-ui; box-shadow:0 12px 30px rgba(0,0,0,.5); opacity:0; transition:opacity .25s; pointer-events:none;}
+  .hint.show{opacity:1;}
+</style>
+</head>
+<body>
+<div class="board">
+  <div class="aurora"><span></span><span></span><span></span></div>
+  <div class="stars"></div>
+
+  <!-- TOP HUD -->
+  <div class="hud">
+    <nav class="nav">
+      <a class="on"><span class="ic">🗺️</span>Journey</a>
+      <a><span class="ic">📈</span>Progress</a>
+      <a><span class="ic">🎁</span>Bonuses</a>
+      <a><span class="ic">⭐</span>Milestones</a>
+      <a><span class="ic">📓</span>Journal</a>
+    </nav>
+    <div class="stats">
+      <div class="stat"><b><span class="dot">⭐</span>1250</b><small>Points</small></div>
+      <div class="stat"><b><span class="dot">💎</span>5</b><small>Badges</small></div>
+      <div class="stat"><b><span class="dot">🔥</span>3</b><small>Streak</small></div>
+      <div class="lvl"><div class="av"></div><small>Level 12</small></div>
+    </div>
+  </div>
+
+  <!-- TITLE -->
+  <div class="head">
+    <div class="eyebrow">Black Sheep Creations &amp; Inspirations</div>
+    <h1>Prompt<span class="two">2</span>Profit</h1>
+    <p>Complete each course. Level up your craft. Unlock your next win — your path, your pace.</p>
+  </div>
+
+  <!-- MAP -->
+  <div class="map">
+    <!-- winding trail: dashed round stones follow the curve -->
+    <svg class="trail" viewBox="0 0 1024 1520" preserveAspectRatio="none" aria-hidden="true">
+      <defs>
+        <linearGradient id="stone" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#8fe3c4"/><stop offset=".5" stop-color="#5ec8e0"/>
+          <stop offset="1" stop-color="#9d7fd6"/>
+        </linearGradient>
+        <filter id="glow"><feGaussianBlur stdDeviation="5" result="b"/>
+          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      </defs>
+      <path d="M 150 250 C 340 300, 470 340, 690 430 S 470 560, 360 660
+               S 470 820, 540 900 S 760 1000, 720 1120 S 420 1230, 300 1330 S 430 1440, 512 1500"
+            fill="none" stroke="url(#stone)" stroke-width="15"
+            stroke-linecap="round" stroke-dasharray="2 26" filter="url(#glow)" opacity=".95"/>
+    </svg>
+
+    <div class="start">Start Here<span class="arr">↓</span></div>
+
+    <!-- NODE 1 — complete -->
+    <div class="node done" style="left:14.5%; top:16.5%" data-title="Relieve the Overwhelm" data-state="Completed">
+      <div class="num">1</div>
+      <div class="card"><div class="badge">✓</div>
+        <div class="thumb" style="background:radial-gradient(circle at 50% 30%,#1b4a6b,#0a1c2e)"></div>
+        <div class="title">Relieve the Overwhelm</div></div>
+      <div class="halo"></div>
+    </div>
+
+    <!-- NODE 2 — complete -->
+    <div class="node done" style="left:67%; top:28.5%" data-title="Act Fast Now" data-state="Completed">
+      <div class="num">2</div>
+      <div class="card"><div class="badge">✓</div>
+        <div class="thumb" style="background:radial-gradient(circle at 50% 30%,#3a2a5a,#140a24)"></div>
+        <div class="title">Act Fast Now</div></div>
+      <div class="halo"></div>
+    </div>
+
+    <!-- NODE 3 — active/available -->
+    <div class="node active" style="left:35%; top:43.5%" data-title="Quick Wins That Count" data-state="Ready to start">
+      <div class="num">3</div>
+      <div class="card">
+        <div class="thumb" style="background:radial-gradient(circle at 50% 35%,#6b5a1e,#2a2109)"></div>
+        <div class="title">Quick Wins That Count</div></div>
+      <div class="halo"></div>
+      <div class="tag">▶ Start course</div>
+    </div>
+
+    <!-- NODE 4 — in progress -->
+    <div class="node progress" style="left:53%; top:59%" data-title="Ground Zero Clarity" data-state="60% complete">
+      <div class="ring"><b>60%</b></div>
+      <div class="card">
+        <div class="thumb" style="background:radial-gradient(circle at 50% 40%,#7a3a1e,#2a1409)"></div>
+        <div class="title">Ground Zero Clarity</div></div>
+      <div class="halo"></div>
+    </div>
+
+    <!-- NODE 5 — locked -->
+    <div class="node locked" style="left:70.5%; top:74%" data-title="Scale &amp; Systemize" data-state="Locked — unlock with Founder's Pass">
+      <div class="num">5</div>
+      <div class="card"><div class="lock">🔒</div>
+        <div class="thumb" style="background:radial-gradient(circle at 50% 40%,#2c3a44,#0e161c)"></div>
+        <div class="title">Scale &amp; Systemize</div></div>
+      <div class="halo"></div>
+      <div class="tag">Locked · Unlock</div>
+    </div>
+
+    <!-- NODE 6 — locked -->
+    <div class="node locked" style="left:29%; top:88%" data-title="Sell On Repeat" data-state="Locked — unlock with Founder's Pass">
+      <div class="num">6</div>
+      <div class="card"><div class="lock">🔒</div>
+        <div class="thumb" style="background:radial-gradient(circle at 50% 40%,#243a30,#0c1712)"></div>
+        <div class="title">Sell On Repeat</div></div>
+      <div class="halo"></div>
+      <div class="tag">Locked · Unlock</div>
+    </div>
+
+    <!-- side notes / signposts -->
+    <div class="note" style="right:5%; top:11%">
+      <div class="k">◈ RAFT</div>
+      <div class="row"><b>R</b> Relieve</div>
+      <div class="row"><b>A</b> Act Fast</div>
+      <div class="row"><b>F</b> Foundation</div>
+      <div class="row"><b>T</b> Traction</div>
+    </div>
+    <div class="note" style="left:5%; top:45%">
+      <div class="k">◈ GROWS</div>
+      <div class="row"><b>G</b> Ground Zero</div>
+      <div class="row"><b>R</b> Roadmap</div>
+      <div class="row"><b>O</b> Ownership</div>
+      <div class="row"><b>W</b> Windows</div>
+      <div class="row"><b>S</b> Success</div>
+    </div>
+    <div class="note tip" style="left:6%; top:73%">
+      <div class="k">◈ Mindset Check</div>
+      <p>Progress over perfection.</p>
+    </div>
+    <div class="note tip warm" style="right:6%; top:60%">
+      <div class="k">♥ Remember</div>
+      <p>Your future self is counting on you.</p>
+    </div>
+  </div>
+
+  <div class="continue">The Journey Continues<span class="chev">⌄</span></div>
+</div>
+
+<div class="hint" id="hint"></div>
+<script>
+  var hint=document.getElementById('hint'),t;
+  document.querySelectorAll('.node').forEach(function(n){
+    n.addEventListener('click',function(){
+      var locked=n.classList.contains('locked');
+      hint.textContent=(locked?'🔒 ':'▶ ')+n.dataset.title+' — '+n.dataset.state+(locked?' (opens paywall)':' (launches course-player)');
+      hint.classList.add('show'); clearTimeout(t); t=setTimeout(function(){hint.classList.remove('show');},2600);
+    });
+  });
+</script>
+</body>
+</html>

@@ -1,4 +1,4 @@
-# Access Control Setup — The AI Creator's Product Haus
+# Access Control Setup — The AI Creator's Project Haus
 
 Code side is done: the tool page checks `customer.tags contains "product-haus-access"`
 and shows a locked state with a buy button when that tag is missing (see
@@ -12,7 +12,7 @@ code — this is the checklist to wire them up.
 
 Admin → Products → Add product.
 
-- **Title**: e.g. "The AI Creator's Product Haus — Access Pass"
+- **Title**: e.g. "The AI Creator's Project Haus — Access Pass"
 - **Price**: your one-time-purchase price
 - **Shipping**: uncheck "This is a physical product" — it's digital, no
   shipping needed
@@ -48,15 +48,15 @@ left on whichever page it was duplicated from.
 
 ## 4. Configure both sections in the Theme Editor
 
-On the tool page, click into the "Product Haus Builder" section and set:
+On the tool page, click into the "Project Haus Builder" section and set:
 
 - **Access tag** — leave as `product-haus-access` unless you changed the
   Flow's tag in step 2
 - **Access product** — pick the product from step 1
-- **Learn more link** — point this at the Product Haus Preview page from step 3
+- **Learn more link** — point this at the Project Haus Preview page from step 3
 - **Locked state heading/body** — edit the copy if you want
 
-On the marketing page, click into the "Product Haus Preview" section and set:
+On the marketing page, click into the "Project Haus Preview" section and set:
 
 - **Access product** — same product as above
 - **Demo video embed URL** — optional, can leave blank for now ("Demo video

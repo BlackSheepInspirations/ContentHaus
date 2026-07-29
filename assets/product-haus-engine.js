@@ -1,10 +1,10 @@
 /**
- * The AI Creator's Product Haus — Prompt Assembly Engine
+ * The AI Creator's Project Haus — Prompt Assembly Engine
  * Depends on product-haus-util.js (must load first).
  *
  * Direct port of Prompt Haus's own PromptHaus.engine — generic across
  * every mode: field resolution rule, the sentence assembler, and the
- * platform formatter layer. Product Haus's own modes call into this
+ * platform formatter layer. Project Haus's own modes call into this
  * with their own field lists, same as Prompt Haus's modes do.
  */
 (function () {
@@ -50,7 +50,7 @@
   }
 
   // Single polished sentence-style prompt — the assembler style every
-  // Product Haus mode uses (no meta-instruction/"Maintain vs Vary" style
+  // Project Haus mode uses (no meta-instruction/"Maintain vs Vary" style
   // needed here the way Prompt Haus's Text Mode has one).
   function buildSentence(config) {
     var resolved = resolveFields(config.fieldEntries);

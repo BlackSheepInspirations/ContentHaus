@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Progress &amp; Badges</title>
+<style>
+  :root{--gold:#d8b45a; --gold-bright:#f4e2a6; --emerald:#27ae6e; --purple:#8f6fd6; --teal:#39c5c0;
+    --text:#eef6f3; --muted:#9fb3ad; --panel:rgba(12,22,28,.82); --stroke:rgba(255,255,255,.10); --gstroke:rgba(216,180,90,.28);}
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{font-family:system-ui,-apple-system,sans-serif; color:var(--text); min-height:100vh; padding:28px 22px 60px;
+    background:radial-gradient(45% 40% at 12% 6%, rgba(39,174,110,.13), transparent 60%),
+      radial-gradient(40% 38% at 88% 12%, rgba(143,111,214,.12), transparent 60%),
+      radial-gradient(50% 45% at 70% 100%, rgba(13,115,119,.13), transparent 60%),
+      linear-gradient(180deg,#0a1311,#0a0f0c);}
+  .wrap{max-width:960px; margin:0 auto;}
+
+  .top{display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:8px;}
+  .eyebrow{font:700 12px/1 system-ui; letter-spacing:.3em; text-transform:uppercase; color:var(--gold);}
+  h1{font:700 34px/1 Georgia,serif; margin:6px 0 4px;}
+  .sub{color:var(--muted); font-size:14px;}
+  .hstats{display:flex; gap:8px; align-items:center; background:var(--panel); border:1px solid var(--gstroke);
+    padding:10px 12px; border-radius:16px;}
+  .hstat{display:flex; flex-direction:column; align-items:center; padding:2px 14px;}
+  .hstat b{font:800 20px/1 system-ui; color:var(--gold-bright);}
+  .hstat small{font:700 8px/1 system-ui; letter-spacing:.14em; color:var(--muted); margin-top:5px; text-transform:uppercase;}
+
+  .summary{display:flex; align-items:center; gap:14px; margin:22px 0 6px; padding:16px 20px; border-radius:16px;
+    background:var(--panel); border:1px solid var(--stroke);}
+  .summary .ring{width:56px; height:56px; border-radius:50%; flex:none; display:grid; place-items:center;
+    background:conic-gradient(var(--gold) calc(var(--p)*1%), rgba(255,255,255,.12) 0);}
+  .summary .ring::before{content:""; width:44px; height:44px; border-radius:50%; background:#0b1512; position:absolute;}
+  .summary .ring b{position:relative; font:800 14px/1 system-ui; color:var(--gold-bright);}
+  .summary .txt b{font:800 16px/1.2 system-ui;} .summary .txt div{color:var(--muted); font-size:13px; margin-top:3px;}
+
+  .section{margin-top:30px;}
+  .section h2{font:700 15px/1 system-ui; letter-spacing:.02em; margin-bottom:2px; color:var(--text);}
+  .section p{color:var(--muted); font-size:12.5px; margin-bottom:16px;}
+  .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:16px;}
+
+  .badge{text-align:center; padding:16px 10px; border-radius:16px; background:rgba(255,255,255,.02); border:1px solid var(--stroke);}
+  .medal{position:relative; width:92px; height:92px; margin:0 auto 12px; border-radius:50%; display:grid; place-items:center;
+    background:radial-gradient(circle at 40% 32%,#16242a,#0a1216); border:3px solid rgba(255,255,255,.12);}
+  .medal svg{width:42px; height:42px; fill:none; stroke:#7f8f8a; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round;}
+  .badge .name{font:700 13px/1.2 system-ui; color:#cdddd6;}
+  .badge .req{font:500 11px/1.3 system-ui; color:var(--muted); margin-top:5px;}
+
+  .badge.earned .medal{border-color:var(--c); box-shadow:0 0 26px var(--g), inset 0 0 16px rgba(255,255,255,.06);
+    background:radial-gradient(circle at 40% 30%,#1c2b31,#0a1216);}
+  .badge.earned .medal svg{stroke:var(--c); filter:drop-shadow(0 0 5px var(--g));}
+  .badge.earned .name{color:var(--text);}
+  .badge.earned .medal .spark{position:absolute; inset:-3px; border-radius:50%; pointer-events:none;
+    box-shadow:0 0 0 1px rgba(255,255,255,.06); animation:pulse 2.6s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{box-shadow:0 0 18px var(--g);}50%{box-shadow:0 0 30px var(--g);}}
+
+  .badge.locked{opacity:.72;}
+  .badge.locked .medal{filter:grayscale(.6) brightness(.8);}
+  .badge.locked .lock{position:absolute; bottom:-3px; right:-3px; width:26px; height:26px; border-radius:50%;
+    background:#0c1418; border:2px solid rgba(255,255,255,.18); display:grid; place-items:center; font-size:12px; color:#c7d4cf;}
+
+  .c-gold{--c:#f4e2a6; --g:rgba(216,180,90,.5);}
+  .c-em{--c:#5fd39a; --g:rgba(39,174,110,.5);}
+  .c-pu{--c:#c9b2ff; --g:rgba(143,111,214,.55);}
+  .c-pk{--c:#ff9ec7; --g:rgba(214,51,108,.5);}
+  .c-te{--c:#8ff0e0; --g:rgba(57,197,192,.5);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="top">
+    <div>
+      <div class="eyebrow">Your Progress</div>
+      <h1>Badges &amp; Milestones</h1>
+      <div class="sub">Every badge is earned. Proof you kept going, not stickers you collected.</div>
+    </div>
+    <div class="hstats">
+      <div class="hstat"><b>1250</b><small>Points</small></div>
+      <div class="hstat"><b>7</b><small>Badges</small></div>
+      <div class="hstat"><b>3</b><small>Streak</small></div>
+      <div class="hstat"><b>12</b><small>Level</small></div>
+    </div>
+  </div>
+
+  <div class="summary" style="--p:54">
+    <div class="ring"><b>7/13</b></div>
+    <div class="txt"><b>7 of 13 badges earned</b><div>6 more to unlock — keep climbing the trail.</div></div>
+  </div>
+
+  <!-- sections rendered by JS -->
+  <div id="sections"></div>
+
+  <div id="p2pb-toast"><canvas class="pbt-canvas"></canvas><div class="pbt-card"><div class="pbt-medal"></div><div class="pbt-eyebrow">✦ Badge Unlocked ✦</div><div class="pbt-name"></div><div class="pbt-req"></div><button class="pbt-btn">Awesome</button></div></div>
+  <style>
+    #p2pb-toast{position:fixed;inset:0;z-index:80;display:none;align-items:center;justify-content:center;background:rgba(3,7,12,.72);backdrop-filter:blur(4px);padding:24px;font-family:system-ui,sans-serif;}
+    #p2pb-toast.show{display:flex;}
+    #p2pb-toast .pbt-canvas{position:absolute;inset:0;z-index:0;pointer-events:none;}
+    #p2pb-toast .pbt-card{position:relative;z-index:1;text-align:center;max-width:340px;width:100%;padding:34px 28px;border-radius:22px;background:linear-gradient(180deg,#0f1c24,#0a141a);border:1px solid rgba(216,180,90,.4);box-shadow:0 24px 70px rgba(0,0,0,.6);animation:pbt-in .45s cubic-bezier(.2,.9,.3,1.3);}
+    @keyframes pbt-in{0%{transform:scale(.8) translateY(12px);opacity:0;}100%{transform:none;opacity:1;}}
+    #p2pb-toast .pbt-medal{position:relative;width:96px;height:96px;margin:0 auto 16px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 40% 30%,#1c2b31,#0a1216);border:3px solid var(--c,#f4e2a6);box-shadow:0 0 32px var(--g,rgba(216,180,90,.6));animation:pbt-glow 1.8s ease-in-out infinite;}
+    @keyframes pbt-glow{0%,100%{box-shadow:0 0 22px var(--g,rgba(216,180,90,.5));}50%{box-shadow:0 0 40px var(--g,rgba(216,180,90,.8));}}
+    #p2pb-toast .pbt-medal svg{width:46px;height:46px;fill:none;stroke:var(--c,#f4e2a6);stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 6px var(--g,rgba(216,180,90,.6)));}
+    #p2pb-toast .pbt-eyebrow{font:700 11px/1 system-ui;letter-spacing:.24em;text-transform:uppercase;color:#8ff0c8;margin-bottom:8px;}
+    #p2pb-toast .pbt-name{font:700 24px/1.1 Georgia,serif;color:#eef6f3;margin-bottom:6px;}
+    #p2pb-toast .pbt-req{font:400 13px/1.4 system-ui;color:#9fb3ad;margin-bottom:20px;}
+    #p2pb-toast .pbt-btn{cursor:pointer;border:0;padding:12px 26px;border-radius:12px;font:800 13px/1 system-ui;color:#06120e;background:linear-gradient(145deg,#f4e2a6,#d8b45a);}
+  </style>
+
+</div>
+
+<script>
+var ICON={
+  flag:'<path d="M6 21V4M6 4c4-2 8 2 12 0v7c-4 2-8-2-12 0"/>',
+  compass:'<circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2.2 4.8-4.8 2.2 2.2-4.8z"/>',
+  lighthouse:'<path d="M9.5 21h5M10 21l1-8M14 21l-1-8M10 13h4M10.2 13l.8-4h2l.8 4M12 4v2M8.5 7L7 6M15.5 7L17 6"/>',
+  anchor:'<circle cx="12" cy="5" r="2.3"/><path d="M12 7.3V21M6 12.5H4.2A7.8 7.8 0 0 0 19.8 12.5H18M6 12.5l-1.8 1.6M18 12.5l1.8 1.6"/>',
+  sprout:'<path d="M12 21v-8M12 13c0-3 2.6-5.2 6-5 .2 3.4-2 5.2-6 5zM12 13C12 10.4 9.4 8.6 6 8.8c-.2 3.4 2 5 6 4.2z"/>',
+  roots:'<path d="M12 3v9M9 6l3-3 3 3M12 12c-2 1.6-2.4 4.4-4.5 6M12 12c2 1.6 2.4 4.4 4.5 6M12 12v6"/>',
+  mind:'<path d="M9.2 4.6A2.5 2.5 0 0 0 6.8 7 2.5 2.5 0 0 0 5.4 11.4 2.5 2.5 0 0 0 7 16a2.3 2.3 0 0 0 2.4 2.1 1.9 1.9 0 0 0 2.3-1.9V6.4a1.9 1.9 0 0 0-2.5-1.8z"/><path d="M14.8 4.6A2.5 2.5 0 0 1 17.2 7a2.5 2.5 0 0 1 1.4 4.4A2.5 2.5 0 0 1 17 16a2.3 2.3 0 0 1-2.4 2.1 1.9 1.9 0 0 1-2.3-1.9"/><path d="M7.5 8.6h1.6M7.5 12h1.6M16.5 8.6h-1.6M16.5 12h-1.6"/>',
+  star:'<path d="M12 3l2.6 6 6.4.5-4.9 4.2 1.6 6.3L12 16.7 5.7 20l1.6-6.3L2.4 9.5 8.8 9z"/>',
+  heart:'<path d="M12 20s-7-4.4-9-8.8A4.4 4.4 0 0 1 12 8a4.4 4.4 0 0 1 9 3.2C19 15.6 12 20 12 20z"/>',
+  flame:'<path d="M12 3s5 3.6 5 9a5 5 0 0 1-10 0c0-2 1-3.4 2.2-4.4C9 9 10 10 11 10c0-2.8-1-4.6 1-7z"/>',
+  crown:'<path d="M4 8l3.2 9h9.6L20 8l-5 4-3-6.5L9 12z"/>',
+  trophy:'<path d="M8 4h8v4.5a4 4 0 0 1-8 0zM8 6H5v1a3 3 0 0 0 3 3M16 6h3v1a3 3 0 0 1-3 3M10 15.5h4M9 20h6M12 12.5V15.5"/>',
+  boat:'<path d="M12 3v10"/><path d="M12 5l5.5 7.5H12z"/><path d="M4 15.5h16l-2.2 4.5H6.2z"/>',
+  pen:'<path d="M4 20h4L18.6 9.4a2 2 0 0 0-2.8-2.8L4 18v2z"/><path d="M14 8l3 3"/>',
+  fingerprint:'<path d="M2 12C2 6.5 6.5 2 12 2a10 10 0 0 1 8 4"/><path d="M5 19.5C5.5 18 6 15 6 12c0-.7.12-1.37.34-2"/><path d="M17.29 21c.12-.6.43-2.3.5-3"/><path d="M12 10a2 2 0 0 0-2 2c0 1-.1 2.5-.26 4"/><path d="M8.65 22c.21-.66.45-1.32.57-2"/><path d="M14 13.1c0 2.4 0 6.4-1 8.9"/><path d="M9 6.8a6 6 0 0 1 9 5.2v2"/>',
+  shootingstar:'<path d="M9.5 6Q9.5 12 15.5 12Q9.5 12 9.5 18Q9.5 12 3.5 12Q9.5 12 9.5 6z"/><path d="M17.5 2.8Q17.5 6 20.7 6Q17.5 6 17.5 9.2Q17.5 6 14.3 6Q17.5 6 17.5 2.8z"/><path d="M17 13.9Q17 16.5 19.6 16.5Q17 16.5 17 19.1Q17 16.5 14.4 16.5Q17 16.5 17 13.9z"/>',
+  notepad:'<rect x="4.5" y="4" width="11" height="16" rx="1.5"/><path d="M7.5 8h5M7.5 11h5M7.5 14h3"/><path d="M20 8.2l-6.2 6.2-2.3.7.7-2.3 6.2-6.2a1.1 1.1 0 0 1 1.6 1.6z"/>',
+  grad:'<path d="M12 4L2 9l10 5 10-5z"/><path d="M22 9v4"/><path d="M6 11.5v4c0 1.5 2.7 2.7 6 2.7s6-1.2 6-2.7v-4"/>',
+  magnifier:'<circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5 5"/>',
+  seal:'<circle cx="12" cy="9" r="6"/><path d="M8.5 14L7 21l5-2.7L17 21l-1.5-7"/><circle cx="12" cy="9" r="2.4"/>',
+  comeback:'<path d="M20 12a8 8 0 1 1-2.34-5.66"/><path d="M20 4v4h-4"/>'
+};
+var DATA=[
+  {h:'Journey Milestones', d:'The big markers of your climb from shore to freedom.', b:[
+    {n:'Set Sail', r:'Start your journey', i:'boat', c:'c-te', e:1},
+    {n:'First Steps', r:'Complete your first course', i:'flag', c:'c-gold', e:1},
+    {n:'First Win', r:'Bank your first quick win', i:'trophy', c:'c-gold', e:1},
+    {n:'Finding Your Current', r:'Complete 3 courses', i:'compass', c:'c-te', e:1},
+    {n:'Reached Freedom', r:'Complete every course', i:'shootingstar', c:'c-gold', e:0}
+  ]},
+  {h:'Framework Masteries', d:'Earned for finishing each leg of the method.', b:[
+    {n:'RAFT Master', r:'Finish the RAFT leg', i:'anchor', c:'c-em', e:1},
+    {n:'GROWS Master', r:'Finish the GROWS leg', i:'sprout', c:'c-em', e:0},
+    {n:'ROOTED Master', r:'Finish the ROOTED leg', i:'roots', c:'c-em', e:0}
+  ]},
+  {h:'Habits &amp; Wins', d:"Wins that aren't tied to any one course.", b:[
+    {n:'Founder Fingerprint', r:'Complete your Brand DNA Blueprint', i:'fingerprint', c:'c-gold', e:1},
+    {n:'First Reflection', r:'Write your first journal entry', i:'pen', c:'c-pu', e:1},
+    {n:'Journal Keeper', r:'Write 10 journal entries', i:'notepad', c:'c-pu', e:0},
+    {n:'Journal Devotee', r:'Write 15 journal entries', i:'notepad', c:'c-pu', e:0},
+    {n:'Trail Explorer', r:'Open the RAFT, GROWS &amp; ROOTED signs', i:'magnifier', c:'c-te', e:0},
+    {n:'Certified', r:'Download your first certificate', i:'seal', c:'c-gold', e:0},
+    {n:'Comeback', r:'Restart a streak after it breaks', i:'comeback', c:'c-em', e:0}
+  ]},
+  {h:'Mindset Check', d:'Keep your head right for the climb.', b:[
+    {n:'Mindset I', r:'Complete your 1st Mindset course', i:'mind', c:'c-te', e:1},
+    {n:'Mindset II', r:'Complete your 2nd Mindset course', i:'mind', c:'c-te', e:0},
+    {n:'Clear Mind', r:'Complete all Mindset courses', i:'mind', c:'c-gold', e:0}
+  ]},
+  {h:'Purpose Check', d:'Reconnect with your why.', b:[
+    {n:'Purpose I', r:'Complete your 1st Purpose course', i:'star', c:'c-pu', e:0},
+    {n:'Purpose II', r:'Complete your 2nd Purpose course', i:'star', c:'c-pu', e:0},
+    {n:'True Purpose', r:'Complete all Purpose courses', i:'star', c:'c-gold', e:0}
+  ]},
+  {h:'Heart Check', d:'Check in with your heart.', b:[
+    {n:'Heart I', r:'Complete your 1st Heart course', i:'heart', c:'c-pk', e:0},
+    {n:'Heart II', r:'Complete your 2nd Heart course', i:'heart', c:'c-pk', e:0},
+    {n:'Open Heart', r:'Complete all Heart courses', i:'heart', c:'c-gold', e:0}
+  ]},
+  {h:'Streaks', d:'Show up, day after day. Your pace is your pace.', b:[
+    {n:'5-Day Streak', r:'5 days in a row', i:'flame', c:'c-te', e:1},
+    {n:'10-Day Streak', r:'10 days in a row', i:'flame', c:'c-em', e:1},
+    {n:'15-Day Streak', r:'15 days in a row', i:'flame', c:'c-gold', e:0},
+    {n:'20-Day Streak', r:'20 days in a row', i:'flame', c:'c-gold', e:0},
+    {n:'25-Day Streak', r:'25 days in a row', i:'flame', c:'c-pu', e:0},
+    {n:'50-Day Streak', r:'50 days in a row', i:'flame', c:'c-pk', e:0},
+    {n:'75-Day Streak', r:'75 days in a row', i:'flame', c:'c-pk', e:0},
+    {n:'100-Day Streak', r:'100 days in a row', i:'flame', c:'c-gold', e:0},
+    {n:'125-Day Streak', r:'125 days in a row', i:'flame', c:'c-pu', e:0},
+    {n:'150-Day Streak', r:'150 days in a row', i:'flame', c:'c-gold', e:0}
+  ]},
+  {h:'Special', d:'Rare marks of status.', b:[
+    {n:'Founder', r:"Founder's Pass holder", i:'crown', c:'c-gold', e:1},
+    {n:'Masterclass', r:'Join a live masterclass', i:'grad', c:'c-pu', e:0}
+  ]}
+];
+
+var out='';
+DATA.forEach(function(sec){
+  out+='<div class="section"><h2>'+sec.h+'</h2><p>'+sec.d+'</p><div class="grid">';
+  sec.b.forEach(function(b){
+    out+='<div class="badge '+(b.e?'earned ':'locked ')+b.c+'"><div class="medal">'
+      +'<svg viewBox="0 0 24 24">'+ICON[b.i]+'</svg>'
+      +(b.e?'<span class="spark"></span>':'<span class="lock">🔒</span>')
+      +'</div><div class="name">'+b.n+'</div><div class="req">'+b.r+'</div></div>';
+  });
+  out+='</div></div>';
+});
+document.getElementById('sections').innerHTML=out;
+
+// live summary from the data
+var allB=DATA.reduce(function(a,s){return a.concat(s.b);},[]);
+var earned=allB.filter(function(b){return b.e;}).length, total=allB.length, pct=Math.round(earned/total*100);
+var sm=document.querySelector('.summary');
+sm.style.setProperty('--p',pct);
+sm.querySelector('.ring b').textContent=earned+'/'+total;
+sm.querySelector('.txt b').textContent=earned+' of '+total+' badges earned';
+sm.querySelector('.txt div').textContent=(total-earned)+' more to unlock — keep climbing the trail.';
+var hb=document.querySelectorAll('.hstat b'); if(hb[1]) hb[1].textContent=earned;
+
+// ---- badge-unlock popup ----
+function showBadgeToast(medalHTML,name,req,colorClass){
+  var t=document.getElementById('p2pb-toast');
+  var m=t.querySelector('.pbt-medal'); m.className='pbt-medal '+(colorClass||'');
+  m.innerHTML=medalHTML;
+  t.querySelector('.pbt-name').textContent=name;
+  t.querySelector('.pbt-req').textContent=req;
+  t.classList.add('show');
+  requestAnimationFrame(pbtBurst);
+  t.querySelector('.pbt-btn').onclick=function(){ t.classList.remove('show'); };
+  t.onclick=function(e){ if(e.target===t) t.classList.remove('show'); };
+}
+function pbtBurst(){
+  var t=document.getElementById('p2pb-toast'), cv=t.querySelector('.pbt-canvas'); if(!cv) return;
+  var DPR=Math.min(devicePixelRatio||1,2), ctx=cv.getContext('2d');
+  var W=cv.width=t.clientWidth*DPR, H=cv.height=t.clientHeight*DPR; cv.style.width=t.clientWidth+'px'; cv.style.height=t.clientHeight+'px';
+  var cx=W/2, cy=H*0.42, COL=['#27ae6e','#39c5c0','#2563eb','#8f6fd6','#d6336c','#f4e2a6'], P=[];
+  for(var i=0;i<90;i++){
+    var a=Math.random()*6.283, sp=(2.5+Math.random()*7)*DPR, ty=Math.random()<0.55?'confetti':(Math.random()<0.6?'star':'twinkle');
+    P.push({x:cx,y:cy,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-3.5*DPR,g:0.13*DPR,rot:Math.random()*6.28,vr:(Math.random()-.5)*.35,
+      size:(ty==='twinkle'?1.6:4+Math.random()*4)*DPR,color:COL[(Math.random()*COL.length)|0],type:ty,ph:Math.random()*6.28,life:1});
+  }
+  var start=performance.now();
+  (function frame(now){
+    var alive=false; ctx.clearRect(0,0,W,H);
+    for(var i=0;i<P.length;i++){var p=P[i]; if(p.life<=0)continue; alive=true;
+      p.vy+=p.g; p.x+=p.vx; p.y+=p.vy; p.vx*=0.99; p.rot+=p.vr; p.ph+=0.25; p.life-=0.012;
+      ctx.globalAlpha=Math.max(0,p.life);
+      if(p.type==='confetti'){ ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.rot);ctx.fillStyle=p.color;ctx.fillRect(-p.size/2,-p.size*0.35,p.size,p.size*0.7);ctx.restore(); }
+      else if(p.type==='star'){ ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.rot);ctx.fillStyle=p.color;ctx.shadowColor=p.color;ctx.shadowBlur=6*DPR;var r=p.size;ctx.beginPath();ctx.moveTo(0,-r);ctx.quadraticCurveTo(0,0,r,0);ctx.quadraticCurveTo(0,0,0,r);ctx.quadraticCurveTo(0,0,-r,0);ctx.quadraticCurveTo(0,0,0,-r);ctx.fill();ctx.restore(); }
+      else { ctx.globalAlpha=Math.max(0,p.life)*(0.35+0.65*Math.abs(Math.sin(p.ph)));ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(p.x,p.y,p.size,0,6.28);ctx.fill(); }
+    }
+    ctx.globalAlpha=1;
+    if(alive && now-start<2400) requestAnimationFrame(frame); else ctx.clearRect(0,0,W,H);
+  })(start);
+}
+// DEMO: pop one unlock ~0.8s after load so you can see the moment
+setTimeout(function(){
+  var el=document.querySelector('.badge.earned');
+  if(el) showBadgeToast(el.querySelector('.medal svg').outerHTML, el.querySelector('.name').textContent, el.querySelector('.req').textContent, (el.className.match(/c-[a-z]+/)||[''])[0]);
+},800);
+</script>
+</body>
+</html>

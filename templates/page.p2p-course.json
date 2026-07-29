@@ -1,0 +1,21 @@
+{
+  "sections": {
+    "main": {
+      "type": "p2p-learning-player",
+      "settings": {
+        "course_kicker": "Course 3",
+        "course_title": "Quick Wins That Count",
+        "course_handle": "quick-wins",
+        "back_url": "/pages/p2p-learning"
+      },
+      "blocks": {
+        "l1": { "type": "lesson", "settings": { "title": "Welcome to the Factory", "video_label": "Watch: intro", "body": "<p>Welcome! This quick lesson sets the stage. Watch the intro, then move on.</p>" } },
+        "l2": { "type": "lesson", "settings": { "title": "Your Builder Profile", "video_label": "Watch: profile setup", "body": "<p>Set up your builder profile so everything you create is tuned to your brand and voice.</p>", "link_1_label": "Open the Brand Haus", "link_1_url": "/pages/brand-haus", "link_1_tag": "HAUS" } },
+        "l3": { "type": "lesson", "settings": { "title": "Download & Setup", "video_label": "Watch: 8 min · download & setup", "body": "<p><strong>VERY IMPORTANT:</strong> download the workflow and watch the video above.</p>", "link_1_label": "Open the Prompt-to-Profit OS", "link_1_url": "/pages/p2p-haus", "link_1_tag": "P2P OS", "link_2_label": "Launch the Marketing Haus GPT", "link_2_url": "/pages/marketing-haus", "link_2_tag": "GPT" } },
+        "l4": { "type": "lesson", "settings": { "title": "The Game Plan (IMPORTANT)", "video_label": "Watch: the plan", "body": "<p>Here's how it all fits together — your path from zero product to finished product.</p>", "link_1_label": "I'm ready. Let's sell my product.", "link_1_url": "/pages/marketing-haus", "link_1_tag": "GPT" } }
+      },
+      "block_order": ["l1", "l2", "l3", "l4"]
+    }
+  },
+  "order": ["main"]
+}

@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Course Complete — Celebration</title>
+<style>
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  body{font-family:"Georgia",serif; overflow:hidden; background:#000;}
+
+  /* moving aurora on black */
+  .aurora{position:fixed; inset:0; z-index:1; overflow:hidden; background:#000;}
+  .aurora .rib{position:absolute; left:-30%; width:160%; height:42%; filter:blur(72px); opacity:.55; mix-blend-mode:screen;}
+  .aurora .a{top:2%;  background:linear-gradient(90deg,transparent,#1e8e5a,#27ae6e,#0d7377,transparent); animation:au1 13s ease-in-out infinite;}
+  .aurora .b{top:20%; background:linear-gradient(90deg,transparent,#2563eb,#8f6fd6,#39c5c0,transparent); animation:au2 17s ease-in-out infinite; opacity:.5;}
+  .aurora .c{top:40%; background:linear-gradient(90deg,transparent,#27ae6e,#0d7377,#5b3c8c,transparent); animation:au3 21s ease-in-out infinite;}
+  .aurora .d{top:60%; background:linear-gradient(90deg,transparent,#5b3c8c,#d6336c,#1e8e5a,transparent); animation:au1 25s ease-in-out infinite reverse; opacity:.34;}
+  @keyframes au1{0%,100%{transform:translate(-7%,0) skewY(-5deg);}50%{transform:translate(7%,4%) skewY(4deg);}}
+  @keyframes au2{0%,100%{transform:translate(6%,0) skewY(4deg);}50%{transform:translate(-6%,5%) skewY(-3deg);}}
+  @keyframes au3{0%,100%{transform:translate(-4%,2%) skewY(-3deg);}50%{transform:translate(5%,-3%) skewY(5deg);}}
+
+  canvas{position:fixed; inset:0; z-index:2; pointer-events:none;}
+  .stage{position:fixed; inset:0; z-index:3; display:flex; align-items:center; justify-content:center; padding:24px;}
+  .card{max-width:420px; width:100%; text-align:center; padding:34px 30px;
+    background:linear-gradient(180deg, rgba(10,18,24,.82), rgba(6,12,10,.86));
+    border:1px solid rgba(216,180,90,.4); border-radius:22px;
+    box-shadow:0 24px 70px rgba(0,0,0,.6), 0 0 60px rgba(201,168,76,.22); backdrop-filter:blur(4px);}
+  .card .k{font:700 12px/1 system-ui; letter-spacing:.26em; text-transform:uppercase; color:#8ff0c8; margin-bottom:10px;}
+  .card h1{font-size:38px; line-height:1.02; margin-bottom:8px;
+    background:linear-gradient(100deg,#f4e2a6,#8f6fd6 42%,#39c5c0 72%,#27ae6e);
+    -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .card p{font:400 14.5px/1.5 system-ui; color:#cfe0da; margin-bottom:22px;}
+  .btns{display:flex; gap:10px; justify-content:center; flex-wrap:wrap;}
+  .btn{cursor:pointer; border:0; padding:12px 20px; border-radius:12px; font:700 13px/1 system-ui; letter-spacing:.03em;}
+  .btn.gold{color:#06120e; background:linear-gradient(145deg,#f4e2a6,#d8b45a);}
+  .btn.ghost{color:#dfeee8; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.16);}
+</style>
+</head>
+<body>
+<div class="aurora"><div class="rib a"></div><div class="rib b"></div><div class="rib c"></div><div class="rib d"></div></div>
+<canvas id="cv"></canvas>
+<div class="stage">
+  <div class="card">
+    <div class="k">Achievement Unlocked</div>
+    <h1>Course Complete!</h1>
+    <p>You finished <b>Quick Wins That Count</b>. Your certificate is ready — and the trail lights up ahead.</p>
+    <div class="btns">
+      <button class="btn gold" onclick="burst()">🎉 Replay celebration</button>
+      <button class="btn ghost" onclick="burst()">View certificate</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var cv=document.getElementById('cv'), ctx=cv.getContext('2d'), W,H,DPR;
+function size(){DPR=Math.min(devicePixelRatio||1,2); W=cv.width=innerWidth*DPR; H=cv.height=innerHeight*DPR; cv.style.width=innerWidth+'px'; cv.style.height=innerHeight+'px';}
+size(); addEventListener('resize',size);
+
+var GREENS=['#3fae5a','#6cbf3f','#2e8b57','#8fce4a','#248a4a','#57b86a'];
+var SPARKCOL=['#ffffff','#ffffff','#f6d868','#8ff0e0','#8ff0e0','#c77dff','#ff9ec7'];
+var P=[], SP=[], spawnUntil=0;
+
+function rnd(a,b){return a+Math.random()*(b-a);}
+function pick(a){return a[(Math.random()*a.length)|0];}
+
+function makeSparkle(){return {x:rnd(0,W), y:rnd(0,H), vx:rnd(-0.25,0.25)*DPR, vy:rnd(-0.25,0.25)*DPR,
+  r:rnd(1.1,2.6)*DPR, t:rnd(0,6.28), tw:rnd(2.5,5), col:pick(SPARKCOL), base:rnd(0.4,0.9)};}
+for(var i=0;i<80;i++) SP.push(makeSparkle());
+
+function spawn(type){
+  var s=DPR;
+  if(type==='leaf'){ P.push({type:type, x:rnd(0,W), y:-30*s, vy:rnd(0.7,1.9)*s, sway:rnd(0.6,1.6), amp:rnd(0.5,1.6)*s,
+      rot:rnd(0,6.28), vr:rnd(-0.04,0.04), size:rnd(9,17)*s, t:rnd(0,6.28), color:pick(GREENS)});
+  } else { P.push({type:type, x:rnd(0,W), y:H+30*s, vy:rnd(0.5,1.3)*s, sway:rnd(0.7,1.5), amp:rnd(0.8,2.2)*s,
+      rot:rnd(-0.3,0.3), size:rnd(13,22)*s, t:rnd(0,6.28), phase:rnd(0,6.28), flap:rnd(0.18,0.30), hue:rnd(180,305)}); }
+}
+function burst(){ spawnUntil=performance.now()+2600; if(!running){running=true; requestAnimationFrame(loop);} }
+
+function ell(x,y,rx,ry){ctx.beginPath();ctx.ellipse(x,y,rx,ry,0,0,6.2832);ctx.fill();}
+
+function drawSparkle(s){
+  ctx.save();
+  var g=ctx.createRadialGradient(s.x,s.y,0,s.x,s.y,s.r*3.4);
+  g.addColorStop(0,s.col); g.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.globalAlpha=s.a*0.8; ctx.fillStyle=g;
+  ctx.beginPath(); ctx.arc(s.x,s.y,s.r*3.4,0,6.28); ctx.fill();
+  ctx.globalAlpha=Math.min(1,s.a*1.2); ctx.fillStyle='#fff';
+  ctx.beginPath(); ctx.arc(s.x,s.y,s.r*0.7,0,6.28); ctx.fill();
+  ctx.restore();
+}
+function drawLeaf(p){
+  ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot); var r=p.size;
+  ctx.fillStyle=p.color; ctx.globalAlpha=0.92;
+  ctx.beginPath(); ctx.moveTo(0,-r);
+  ctx.bezierCurveTo(r*0.85,-r*0.35, r*0.85,r*0.4, 0,r);
+  ctx.bezierCurveTo(-r*0.85,r*0.4, -r*0.85,-r*0.35, 0,-r); ctx.fill();
+  ctx.strokeStyle='rgba(0,0,0,.22)'; ctx.lineWidth=Math.max(1,r*0.06);
+  ctx.beginPath(); ctx.moveTo(0,-r*0.9); ctx.lineTo(0,r*0.9); ctx.stroke();
+  ctx.restore();
+}
+function irid(p,shift){
+  var h=(p.hue+shift+p.t*30)%360;
+  var g=ctx.createLinearGradient(-p.size,-p.size,p.size,p.size);
+  g.addColorStop(0,'hsla('+h+',92%,72%,0.92)');
+  g.addColorStop(0.5,'hsla('+((h+55)%360)+',96%,82%,0.9)');
+  g.addColorStop(1,'hsla('+((h+130)%360)+',90%,70%,0.92)');
+  return g;
+}
+function drawButterfly(p){
+  var flap=0.30+0.70*Math.abs(Math.sin(p.phase)); var s=p.size;
+  ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot+Math.sin(p.t)*0.12);
+  ctx.globalAlpha=0.94; ctx.fillStyle=irid(p,0);
+  for(var side=-1; side<=1; side+=2){ ctx.save(); ctx.scale(side*flap,1);
+    ell(s*0.55,-s*0.28,s*0.62,s*0.5); ell(s*0.42,s*0.34,s*0.44,s*0.36); ctx.restore(); }
+  ctx.fillStyle='#241d30'; ell(0,0,s*0.10,s*0.62);
+  ctx.strokeStyle='#241d30'; ctx.lineWidth=s*0.05;
+  ctx.beginPath(); ctx.moveTo(0,-s*0.5); ctx.lineTo(-s*0.2,-s*0.72);
+  ctx.moveTo(0,-s*0.5); ctx.lineTo(s*0.2,-s*0.72); ctx.stroke();
+  ctx.restore();
+}
+function drawDragonfly(p){
+  var flap=0.55+0.45*Math.sin(p.phase*1.7); var s=p.size;
+  ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot+Math.sin(p.t*1.2)*0.14);
+  ctx.globalAlpha=0.8; ctx.fillStyle=irid(p,40);
+  ctx.save(); ctx.scale(1,flap);
+  ell(-s*0.75,-s*0.12,s*0.92,s*0.15); ell(s*0.75,-s*0.12,s*0.92,s*0.15);
+  ell(-s*0.62,s*0.16,s*0.78,s*0.12);  ell(s*0.62,s*0.16,s*0.78,s*0.12); ctx.restore();
+  ctx.globalAlpha=0.95; ctx.fillStyle='#1f6b52'; ell(0,s*0.28,s*0.10,s*0.95);
+  ctx.fillStyle='#39c5c0'; ell(0,-s*0.34,s*0.17,s*0.17);
+  ctx.restore();
+}
+
+var running=true;
+function loop(now){
+  ctx.clearRect(0,0,W,H);
+  // ambient sparkles (always drifting + twinkling)
+  for(var i=0;i<SP.length;i++){ var s=SP[i]; s.t+=0.016; s.x+=s.vx; s.y+=s.vy;
+    if(s.x< -10)s.x=W+10; if(s.x>W+10)s.x=-10; if(s.y< -10)s.y=H+10; if(s.y>H+10)s.y=-10;
+    s.a=s.base*(0.25+0.75*Math.abs(Math.sin(s.t*s.tw))); drawSparkle(s); }
+  // burst: leaves fall, butterflies/dragonflies rise
+  if(now<spawnUntil){ for(var k=0;k<3;k++){ spawn(pick(['leaf','leaf','leaf','butterfly','dragonfly'])); } }
+  for(var i=P.length-1;i>=0;i--){ var p=P[i]; p.t+=0.016;
+    if(p.type==='leaf'){ p.y+=p.vy; p.x+=Math.sin(p.t*p.sway)*p.amp; p.rot+=p.vr||0; drawLeaf(p); }
+    else { p.y-=p.vy; p.x+=Math.sin(p.t*p.sway)*p.amp; p.phase+=p.flap;
+      if(p.type==='butterfly')drawButterfly(p); else drawDragonfly(p); }
+    if(p.y> H+60*DPR || p.y< -80*DPR) P.splice(i,1);
+  }
+  requestAnimationFrame(loop);
+}
+burst();
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

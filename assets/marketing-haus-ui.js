@@ -110,7 +110,7 @@
   // Every vault key here used to be a plain broad-mode string (e.g.
   // "social"); the Quick Generators tab adds a second shape, "gen:<id>",
   // one per sub-generator — getModeStore/modeLabel resolve either shape
-  // to the right underlying store/label, same pattern Product Haus and
+  // to the right underlying store/label, same pattern Project Haus and
   // Graphics Haus already use for their own Quick Generators tab.
   // ---------------------------------------------------------------------
   function getModeStore(mode) {
@@ -230,15 +230,18 @@
     car: '<path d="M4 13 5.5 8h9L16 13"/><rect x="3" y="13" width="14" height="3" rx="1"/><circle cx="6.5" cy="16.5" r="1.3"/><circle cx="13.5" cy="16.5" r="1.3"/>',
     bulb: '<path d="M7 15h6M8 17.5h4"/><path d="M10 2.5c-3 0-5 2.2-5 5 0 2 1.1 3.3 2 4.2.5.5.8 1 .9 1.8h4.2c.1-.8.4-1.3.9-1.8.9-.9 2-2.2 2-4.2 0-2.8-2-5-5-5Z"/>',
     mail: '<rect x="2.5" y="4.5" width="15" height="11" rx="1.3"/><path d="M3 5.5 10 11l7-5.5"/>',
+    video: '<rect x="2" y="4" width="16" height="12" rx="2"/><path d="M8 7.5v5l5-2.5-5-2.5Z" fill="currentColor" stroke="none"/>',
   };
 
   var TITLE_ICONS = {
     "Style": "sparkle", "Extras": "sparkle", "Filter It": "image",
     "Hero Product": "shirt", "Presentation Style": "person", "Surrounding Props": "hanger",
+    "Props & Accessories": "hanger", "Model / Person": "people", "Background": "image",
     "Setting": "image", "Foundation": "logoMark", "Color & Format": "palette",
     "Typography Direction": "type", "Composition & Lockup": "crop", "Brand Story": "heart",
     "Negative Constraints": "shield", "Pro Mode": "sparkle", "Colors": "palette",
     "Typography": "type", "Core Values": "heart", "Brand Voice": "sparkle",
+    "Video Motion Prompt": "video",
   };
 
   function icon(name, extraClass) {
@@ -399,6 +402,15 @@
       list.appendChild(el("label", { class: "mh-checklist__item" }, [checkbox, el("span", { text: item })]));
     });
     wrap.appendChild(list);
+    if (options.freeform) {
+      var freeformInput = el("textarea", { class: "mh-field__custom mh-field__freetext", rows: "2", placeholder: options.freeform.placeholder || "Add your own, comma-separated..." });
+      freeformInput.value = options.freeform.value || "";
+      freeformInput.addEventListener("input", function () { options.freeform.onChange(freeformInput.value); });
+      wrap.appendChild(el("div", { class: "mh-field-group__fields mh-checklist__freeform" }, [
+        el("label", { class: "mh-field__label", text: options.freeform.label || "Add Your Own" }),
+        freeformInput,
+      ]));
+    }
     return wrap;
   }
 
@@ -1179,8 +1191,13 @@
     var vaultKey = (activeMode === "generators" && modeApi && typeof modeApi.getActiveGeneratorId === "function" && modeApi.getActiveGeneratorId())
       ? "gen:" + modeApi.getActiveGeneratorId() : activeMode;
     if (modeApi && typeof modeApi.renderPanel === "function") {
-      left.appendChild(modeApi.renderPanel());
-      left.appendChild(renderConceptBox());
+      if (activeMode === "mockup") {
+        left.appendChild(renderConceptBox());
+        left.appendChild(modeApi.renderPanel());
+      } else {
+        left.appendChild(modeApi.renderPanel());
+        left.appendChild(renderConceptBox());
+      }
       renderSelectionsPanel(right, vaultKey, modeApi.getSelectionsByGroup());
       renderPreview(right, modeApi.assemblePrompt(), modeApi, vaultKey);
       renderSavedPrompts(right, vaultKey);

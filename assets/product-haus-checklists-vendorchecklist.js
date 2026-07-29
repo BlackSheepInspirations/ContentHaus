@@ -1,5 +1,5 @@
 /**
- * The AI Creator's Product Haus — Event Vendor Checklist content library
+ * The AI Creator's Project Haus — Event Vendor Checklist content library
  * Pure data, no dependencies. Loaded before
  * product-haus-generators-vendorchecklist.js.
  *

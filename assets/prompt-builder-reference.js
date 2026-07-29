@@ -128,7 +128,7 @@
       return;
     }
     var state = store.getState();
-    var promptText = assemblePrompt(1).text;
+    var promptText = assemblePrompt().text;
     if (!promptText) {
       store.setState({ generateImageError: "Add a description (or adjust your style choices) before generating an image." });
       return;
@@ -265,17 +265,7 @@
     return clause;
   }
 
-  // countOverride: used by generateImage() below to force a single-image
-  // prompt regardless of the Variations dropdown. That dropdown's "Create N
-  // variations... never combine into one grid" phrasing is meant for a
-  // multi-turn AI chat tool asked to produce several images across a
-  // conversation — a single Gemini generateContent call only ever returns
-  // one image, so sending it "produce N separate images" confuses it into
-  // returning no image at all instead of one. Every other caller (the
-  // pasted/copied text prompt) is unaffected since they call this with no
-  // argument.
-  function assemblePrompt(countOverride) {
-    var count = countOverride || parseInt(PromptHaus.styleDNA.getState().variationCount.value, 10) || 4;
+  function assemblePrompt() {
     var entries = [];
 
     // Image branch: the shopper's own typed description of an uploaded
@@ -361,7 +351,6 @@
     // the top of this file), so whatever AI tool the assembled text gets
     // pasted into never receives it. The prompt only ever has the typed
     // description to work with, so it should say that plainly.
-    var countPhrase = "Create " + count + (count === 1 ? " variation" : " variations");
     // Reimagined Style carries a full descriptive paragraph (chunk 3), not
     // a short word — embedding it mid-sentence as "in a {paragraph}
     // style —" reads as broken once the paragraph's own closing sentence
@@ -374,18 +363,16 @@
       // prompt's own intro sentence addressed to the receiving AI — not
       // just UI copy — mirroring exactly how the image branch already
       // resolves its own "description vs. chosen style" conflict below.
-      introParts.push(countPhrase + (sourceText ? " inspired by the following prompt, reimagined as an original composition." : " of an original composition"));
+      introParts.push(sourceText ? "Create an image inspired by the following prompt, reimagined as an original composition." : "Create an original composition");
       if (reimaginedStyle) introParts.push("Style: " + reimaginedStyle);
       if (sourceText) introParts.push("Use the prompt only as loose creative direction for subject and composition; do not reuse its exact wording, and produce an original result, not a copy:");
     } else {
-      introParts.push(countPhrase + (sourceText ? " reinterpreting the following description as an original illustration." : " of an image described as"));
+      introParts.push(sourceText ? "Create an image reinterpreting the following description as an original illustration." : "Create an image described as");
       if (reimaginedStyle) introParts.push("Style: " + reimaginedStyle);
       if (sourceText) introParts.push("Replace any photographic, camera, or realistic-photo qualities in the description with that style, keeping only the subject, pose, and composition it describes:");
     }
     var intro = introParts.join(" ");
-    var stickerSheetGuard = PromptHaus.engine.stickerSheetGuard(count);
-    var outro = (stickerSheetGuard ? stickerSheetGuard + " " : "") +
-      (artFinishText ? "Art finish: " + artFinishText + " " : "") +
+    var outro = (artFinishText ? "Art finish: " + artFinishText + " " : "") +
       "High quality digital illustration, immaculate composition, vibrant and polished finish with professional rendering.";
     return PromptHaus.engine.buildSentence({
       intro: intro,

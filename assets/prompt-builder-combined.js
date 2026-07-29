@@ -108,7 +108,6 @@
   }
 
   function assembleUnifiedPrompt() {
-    var count = parseInt(PromptHaus.styleDNA.getState().variationCount.value, 10) || 4;
     var entries = [];
 
     entries = entries.concat(
@@ -148,11 +147,8 @@
     var bufferEntry = PromptHaus.styleDNA.getBufferEntry();
     if (bufferEntry) entries.push(bufferEntry);
 
-    var stickerSheetGuard = PromptHaus.engine.stickerSheetGuard(count);
-    var intro = "Create " + count + (count === 1 ? " variation" : " variations") +
-      " of one cohesive image combining a";
-    var outro = (stickerSheetGuard ? stickerSheetGuard + " " : "") +
-      "High quality digital illustration, immaculate composition, vibrant and polished finish with professional rendering.";
+    var intro = "Create one cohesive image combining a";
+    var outro = "High quality digital illustration, immaculate composition, vibrant and polished finish with professional rendering.";
     return PromptHaus.engine.buildSentence({
       intro: intro,
       fieldEntries: entries,

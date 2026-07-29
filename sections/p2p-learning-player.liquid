@@ -1,0 +1,156 @@
+{% comment %}
+  Purpose 2 Profit — Course Player. Lessons are section blocks (add/edit in the
+  theme customizer). Completing all lessons fires the celebration + certificate.
+  Progress is stored per-course in the browser for now; move to customer metafields
+  when accounts are wired up.
+{% endcomment %}
+
+{{ 'p2p-player.css' | asset_url | stylesheet_tag }}
+
+{%- assign uname = customer.name | default: customer.first_name | default: '' -%}
+
+<div id="p2pp"
+     data-course="{{ section.settings.course_handle | default: 'course' | escape }}"
+     data-course-title="{{ section.settings.course_title | default: 'Course' | escape }}"
+     data-user="{{ uname | escape }}"
+     data-certid=""
+     style="--p2pp-sticky:{{ section.settings.sticky_offset | default: 0 }}px;">
+
+  <header class="phead">
+    <a class="back" href="{{ section.settings.back_url | default: '/pages/p2p-learning' }}">← Journey Map</a>
+    <div class="ptitle"><small>{{ section.settings.course_kicker | default: 'Course' }}</small>{{ section.settings.course_title | default: 'Course' }}</div>
+    <div class="pmini"><span>Course</span><div class="track"><i id="p2pp-track"></i></div><b id="p2pp-ppct">0%</b></div>
+  </header>
+
+  <div class="pbody">
+    <aside class="side">
+      <div class="st">{{ section.settings.sidebar_label | default: 'Start Here' }}</div>
+      <div class="sbar"><i id="p2pp-sbar"></i></div>
+      <span class="spct" id="p2pp-spct">0% complete</span>
+      <ul class="lessons">
+        {%- for block in section.blocks -%}
+          <li data-i="{{ forloop.index0 }}"><span class="cc">✓</span><span>Lesson {{ forloop.index }}: {{ block.settings.title }}</span></li>
+        {%- endfor -%}
+      </ul>
+    </aside>
+
+    <main class="content">
+      {%- for block in section.blocks -%}
+        <div class="lpanel" data-i="{{ forloop.index0 }}"{{ block.shopify_attributes }}>
+          <div class="lhead"><h1>Lesson {{ forloop.index }}: {{ block.settings.title }}</h1>
+            <button class="toggle" title="Mark complete">✓</button></div>
+          {%- if block.settings.video_embed != blank -%}
+            <div class="video"><iframe src="{{ block.settings.video_embed }}" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen loading="lazy"></iframe></div>
+          {%- elsif block.settings.video_label != blank -%}
+            <div class="video"><div class="play"></div><div class="lbl">{{ block.settings.video_label }}</div></div>
+          {%- endif -%}
+          <div class="rt">{{ block.settings.body }}</div>
+          {%- assign has_links = false -%}
+          {%- if block.settings.link_1_url != blank or block.settings.link_2_url != blank or block.settings.link_3_url != blank -%}{%- assign has_links = true -%}{%- endif -%}
+          {%- if has_links -%}
+            <div class="links">
+              {%- for n in (1..3) -%}
+                {%- assign k_url = 'link_' | append: n | append: '_url' -%}
+                {%- assign k_label = 'link_' | append: n | append: '_label' -%}
+                {%- assign k_tag = 'link_' | append: n | append: '_tag' -%}
+                {%- assign lurl = block.settings[k_url] -%}
+                {%- assign llabel = block.settings[k_label] -%}
+                {%- assign ltag = block.settings[k_tag] -%}
+                {%- if lurl != blank -%}
+                  <a class="lk" href="{{ lurl }}" target="_blank" rel="noopener">
+                    <span class="ar">→</span><span><b>{{ llabel | default: 'Open link' }}</b></span>
+                    {%- if ltag != blank -%}<span class="tag">{{ ltag }}</span>{%- endif -%}
+                  </a>
+                {%- endif -%}
+              {%- endfor -%}
+            </div>
+          {%- endif -%}
+          <button class="markbtn">Mark lesson complete</button>
+          <div class="navrow">
+            <button data-nav="prev"{% if forloop.first %} disabled{% endif %}>← Previous</button>
+            <button data-nav="next"{% if forloop.last %} disabled{% endif %}>Next →</button>
+          </div>
+        </div>
+      {%- endfor -%}
+      {%- if section.blocks.size == 0 -%}
+        <div class="rt"><p>Add lessons to this course in the theme editor.</p></div>
+      {%- endif -%}
+    </main>
+  </div>
+
+  {%- comment -%} celebration {%- endcomment -%}
+  <div id="p2pp-cel">
+    <div class="cel-aurora"><div class="rib a"></div><div class="rib b"></div><div class="rib c"></div><div class="rib d"></div></div>
+    <canvas></canvas>
+    <div class="cel-card"><div class="in">
+      <div class="k">Achievement Unlocked</div>
+      <h2>Course Complete!</h2>
+      <p>You finished <b>{{ section.settings.course_title }}</b>. Your certificate is ready — and the trail lights up ahead.</p>
+      <div class="row">
+        <button class="b1" data-cel="cert">View certificate</button>
+        <a class="b2" data-cel="back" href="{{ section.settings.back_url | default: '/pages/p2p-learning' }}">Back to Journey Map</a>
+      </div>
+    </div></div>
+  </div>
+
+  {%- comment -%} certificate {%- endcomment -%}
+  <div id="p2pp-cert">
+    <div class="certwrap">
+      <img src="{{ 'p2p-certificate-bg.jpg' | asset_url }}" alt="Certificate of Completion" crossorigin="anonymous" />
+      <div class="fld cname"></div>
+      <div class="fld ccourse"></div>
+      <div class="fld cdate"></div>
+      <div class="fld cid"></div>
+    </div>
+    <div class="certbtns">
+      <button data-cert="download">Download PNG</button>
+      <button class="ghost" data-cert="close">Close</button>
+    </div>
+  </div>
+</div>
+
+<script src="{{ 'p2p-progress.js' | asset_url }}" defer="defer"></script>
+<script src="{{ 'p2p-player.js' | asset_url }}" defer="defer"></script>
+
+{% schema %}
+{
+  "name": "P2P Course Player",
+  "settings": [
+    { "type": "text", "id": "course_kicker", "label": "Kicker", "default": "Course" },
+    { "type": "text", "id": "course_title", "label": "Course title", "default": "Quick Wins That Count" },
+    { "type": "text", "id": "course_handle", "label": "Course handle (for saved progress)", "default": "quick-wins" },
+    { "type": "text", "id": "sidebar_label", "label": "Sidebar label", "default": "Start Here" },
+    { "type": "url", "id": "back_url", "label": "Back-to-map link" },
+    { "type": "range", "id": "sticky_offset", "min": 0, "max": 120, "step": 2, "unit": "px", "label": "Sticky header offset", "default": 0 }
+  ],
+  "blocks": [
+    {
+      "type": "lesson",
+      "name": "Lesson",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Lesson title", "default": "New Lesson" },
+        { "type": "text", "id": "video_embed", "label": "Video embed URL", "info": "Vimeo/YouTube embed src. Leave blank for a placeholder." },
+        { "type": "text", "id": "video_label", "label": "Video placeholder label", "default": "Watch the lesson" },
+        { "type": "richtext", "id": "body", "label": "Lesson content" },
+        { "type": "text", "id": "link_1_label", "label": "Link 1 label" },
+        { "type": "url", "id": "link_1_url", "label": "Link 1 URL" },
+        { "type": "text", "id": "link_1_tag", "label": "Link 1 tag", "info": "e.g. GPT, P2P OS, FILE" },
+        { "type": "text", "id": "link_2_label", "label": "Link 2 label" },
+        { "type": "url", "id": "link_2_url", "label": "Link 2 URL" },
+        { "type": "text", "id": "link_2_tag", "label": "Link 2 tag" },
+        { "type": "text", "id": "link_3_label", "label": "Link 3 label" },
+        { "type": "url", "id": "link_3_url", "label": "Link 3 URL" },
+        { "type": "text", "id": "link_3_tag", "label": "Link 3 tag" }
+      ]
+    }
+  ],
+  "presets": [
+    { "name": "P2P Course Player",
+      "blocks": [
+        { "type": "lesson", "settings": { "title": "Welcome", "video_label": "Watch: intro" } },
+        { "type": "lesson", "settings": { "title": "The Game Plan", "video_label": "Watch: the plan" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

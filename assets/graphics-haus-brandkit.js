@@ -2,7 +2,7 @@
  * The AI Creator's Graphics Haus — Brand Kit
  * Depends on graphics-haus-util.js, graphics-haus-engine.js, and
  * graphics-haus-ui.js's exposed GraphicsHaus.ui helpers (all must load
- * first). Unlike Product Haus (which has broad studios like Invitations/
+ * first). Unlike Project Haus (which has broad studios like Invitations/
  * Devotional alongside its Quick Generators), Graphics Haus is
  * generator-grid-first with no broad studios at all — every mode is a
  * narrow generator. None of them have real color/typography fields to

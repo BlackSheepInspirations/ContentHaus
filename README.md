@@ -7,7 +7,7 @@ Private Shopify theme for Black Sheep Creations & Inspirations — a suite of AI
 Each "Haus" is an independent, self-contained app living in its own namespace (`assets/<haus>-*.js`, `sections/<haus>.liquid`, `dev/<haus>-preview.html`):
 
 - **Content Haus** (`prompt-builder-*`) — the original app: Character, Couples, Friends & Family, Animals & Creatures, Text, Graphics, Combined, and Image/Prompt Reference modes.
-- **Product Haus** (`product-haus-*`) — Invitations, Stationery, Devotional, Journals, Planners & Checklists, eBook Pages, Wall Art, Activities & Learning.
+- **Project Haus** (`product-haus-*`) — Invitations, Stationery, Devotional, Journals, Planners & Checklists, eBook Pages, Wall Art, Activities & Learning.
 - **Graphics Haus** (`graphics-haus-*`) — Clipart, Seasonal Cute Animals, Faux Textile, Retro Object Icons, License Plates, Mascot Generator.
 - **Marketing Haus** (`marketing-haus-*`) — Mockup, Social Media, Ad Copy, Email, Sales/Landing Page, Testimonial, plus Quick Generators and Customer Intelligence Studio.
 - **Brand Haus** (`brand-haus-*`) — Founder Interview, Brand DNA scoring, Branding Studio, Your Blueprint, Quick Generators.

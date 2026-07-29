@@ -184,25 +184,6 @@
     return text;
   }
 
-  // Shared across every mode: without this, "Generate N variations" alone
-  // is frequently read by image-generation AI tools as an instruction to
-  // composite the N variants into ONE image (a grid/sticker-sheet/mood
-  // board) rather than produce N separate standalone images — a reported
-  // bug confirmed via screenshot evidence. Strengthened a second time after
-  // the owner reported the combined-image behavior persisting across
-  // several different AI models even with the original wording present —
-  // this version reframes it as N separate generation requests (not just
-  // "N images") and names the specific combined-layout patterns seen in
-  // practice (contact sheet, side-by-side comparison). This is a wording
-  // strengthening, not a guaranteed fix — the tool only ever produces one
-  // block of prompt text, so whether the receiving AI actually honors it
-  // is ultimately up to that tool. Nothing to guard against with only 1
-  // variation.
-  function stickerSheetGuard(count) {
-    if (!count || count <= 1) return "";
-    return "Treat this as " + count + " separate, individual generation requests, not one combined image. Produce " + count + " completely separate images — never combine them into a single grid, collage, contact sheet, side-by-side comparison, or sticker sheet, and never show multiple variations, poses, or angles within one frame.";
-  }
-
   PromptHaus.engine = {
     resolveFieldValue: resolveFieldValue,
     resolveFields: resolveFields,
@@ -210,7 +191,6 @@
     buildSentence: buildSentence,
     buildMetaInstruction: buildMetaInstruction,
     formatForPlatform: formatForPlatform,
-    stickerSheetGuard: stickerSheetGuard,
     PLATFORM_GROUP: PLATFORM_GROUP,
   };
 })();

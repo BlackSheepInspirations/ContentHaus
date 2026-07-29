@@ -1,5 +1,5 @@
 /**
- * The AI Creator's Product Haus — Brand Kit
+ * The AI Creator's Project Haus — Brand Kit
  * Depends on product-haus-util.js, product-haus-engine.js, and
  * product-haus-ui.js's exposed ProductHaus.ui helpers (all must load
  * first). Every other mode's assemblePrompt calls getActiveKitEntries()
@@ -8,7 +8,7 @@
  * Simpler than Content Haus's own Brand Kit by necessity, not by
  * omission: Content Haus's modes (Text, Logo, Character, Reference) each
  * have real color/typography fields to write values into directly. None
- * of Product Haus's remaining 8 studios (Mockup, Social, Ad Copy,
+ * of Project Haus's remaining 8 studios (Mockup, Social, Ad Copy,
  * Email, Sales, Invitations, Devotional, Testimonial) do — Branding
  * Studio and Logo Studio, which did, moved to Brand Haus. So there's
  * only one mechanism here: synthetic descriptor entries, read fresh at

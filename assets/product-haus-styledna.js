@@ -1,5 +1,5 @@
 /**
- * The AI Creator's Product Haus — Business/Voice DNA (shared state)
+ * The AI Creator's Project Haus — Business/Voice DNA (shared state)
  * Depends on product-haus-util.js (must load first).
  *
  * The marketing equivalent of Prompt Haus's own Style DNA — set once in
@@ -78,7 +78,7 @@
 
   // "How this gets output" settings, same category as Variations — not
   // tied to any one project-type driver the way Prompt Haus's Aspect
-  // Ratio auto-follows Project Type, since Product Haus generators
+  // Ratio auto-follows Project Type, since Project Haus generators
   // already have their own local size/format fields (Sheet Size, Page
   // Format, etc.) instead of one shared Project Type concept.
   var TARGET_PLATFORM_OPTIONS = sortAlpha([

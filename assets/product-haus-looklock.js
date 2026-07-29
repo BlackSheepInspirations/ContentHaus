@@ -1,5 +1,5 @@
 /**
- * The AI Creator's Product Haus — Look Lock
+ * The AI Creator's Project Haus — Look Lock
  * Depends on product-haus-util.js, product-haus-engine.js, and
  * product-haus-ui.js's exposed ProductHaus.ui helpers (all must load
  * first). Quick Generators' cross-generator answer to Brand Kit: instead

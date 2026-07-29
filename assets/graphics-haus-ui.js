@@ -10,7 +10,7 @@
  * finished loading — so the load-order works fine even though the
  * generator files come before this one.
  *
- * Unlike Product Haus (broad studios like Invitations/Devotional
+ * Unlike Project Haus (broad studios like Invitations/Devotional
  * alongside Quick Generators, picked via a tab bar), Graphics Haus is
  * generator-grid-first with no broad studios and no tabs at all —
  * GraphicsHaus.generators IS the entire app, so this file skips the
@@ -200,7 +200,7 @@
   }
 
   // ---------------------------------------------------------------------
-  // Icon system — same hand-rolled inline SVG approach as Product Haus,
+  // Icon system — same hand-rolled inline SVG approach as Project Haus,
   // no external dependency.
   // ---------------------------------------------------------------------
   var ICONS = {
@@ -563,7 +563,7 @@
 
   // ---------------------------------------------------------------------
   // Business/Voice DNA bar — Tone/Audience/Reading Level are deliberately
-  // never included here (unlike Product Haus's version of this function):
+  // never included here (unlike Project Haus's version of this function):
   // every mode in Graphics Haus is a narrow generator with its own small
   // curated field set, and those three only ever made sense for broad
   // modes shaping general wording/voice, which don't exist here at all.

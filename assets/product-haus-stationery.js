@@ -1,5 +1,5 @@
 /**
- * The AI Creator's Product Haus — Stationery Studio
+ * The AI Creator's Project Haus — Stationery Studio
  * Depends on product-haus-util.js, product-haus-engine.js,
  * product-haus-styledna.js, and product-haus-ui.js's exposed
  * ProductHaus.ui helpers (all must load first).

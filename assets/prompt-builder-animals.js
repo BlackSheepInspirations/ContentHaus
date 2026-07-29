@@ -309,7 +309,6 @@
   // Character Mode's Illustration Style/Art Finish placement, so the style
   // is established before any creature is described.
   function assemblePrompt() {
-    var count = parseInt(PromptHaus.styleDNA.getState().variationCount.value, 10) || 4;
     var creatures = store.getState().creatures;
 
     var styleEntries = getStyleEntries().filter(function (e) { return e.fieldName === "characterType" || e.fieldName === "artFinish"; });
@@ -323,12 +322,7 @@
       : "";
 
     var parts = [];
-    parts.push(
-      "Create " + count + (count === 1 ? " variation" : " variations") +
-      " of a clean, professional portrait featuring the following animal(s)/creature(s)."
-    );
-    var stickerSheetGuard = PromptHaus.engine.stickerSheetGuard(count);
-    if (stickerSheetGuard) parts.push(stickerSheetGuard);
+    parts.push("Create a clean, professional portrait featuring the following animal(s)/creature(s).");
     if (illustrationStyleText) parts.push("Illustration style: " + illustrationStyleText);
     if (artFinishText) parts.push("Art finish: " + artFinishText);
 

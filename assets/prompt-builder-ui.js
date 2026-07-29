@@ -3966,7 +3966,7 @@
     var platformField = el("div", { class: "ph-styledna__field" }, [labelWithIcon("monitor", "Target Platform", platformSelect.id, null, platformHelp), platformSelect]);
     platformField.title = platformHelp;
 
-    var variationHelp = "How many versions to ask the AI for in one generation.";
+    var variationHelp = "How many separate images you plan to make. The copied prompt always describes just one image — asking an AI tool for several at once often gets rendered as one combined collage instead. Copy and generate it once per image (Randomize, or hand-adjust a field, between runs for variety).";
     var variationField = el("div", { class: "ph-styledna__field" }, [labelWithIcon("sparkle", "Variations", variationSelect.id, null, variationHelp), variationSelect]);
     variationField.title = variationHelp;
 

@@ -1289,11 +1289,7 @@
     if (projectTypeEntry) entries.push(projectTypeEntry);
     var bufferEntry = PromptHaus.styleDNA.getBufferEntry();
     if (bufferEntry) entries.push(bufferEntry);
-    var count = parseInt(PromptHaus.styleDNA.getState().variationCount.value, 10) || 4;
-    var stickerSheetGuard = PromptHaus.engine.stickerSheetGuard(count);
-    var outro = "Generate " + count + (count === 1 ? " variation." : " variations.") +
-      (stickerSheetGuard ? " " + stickerSheetGuard : "") +
-      " Elite quality illustration with professional rendering and premium styling.";
+    var outro = "Elite quality illustration with professional rendering and premium styling.";
     return PromptHaus.engine.buildSentence({
       intro: introParts.join(" "),
       fieldEntries: entries,

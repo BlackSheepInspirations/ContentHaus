@@ -683,7 +683,6 @@
     var toEntry = function (e) {
       return { label: e.label, field: e.field };
     };
-    var count = parseInt(PromptHaus.styleDNA.getState().variationCount.value, 10) || 4;
     var state = store.getState();
     var yourTextValue = PromptHaus.engine.resolveFieldValue(state.yourText);
     var letterStyleText = PromptHaus.engine.resolveFieldValue(withParagraphLookup({ fieldName: "letterStyle", field: state.letterStyle }).field);
@@ -725,21 +724,22 @@
     if (bufferEntry) fixedEntries.push(bufferEntry);
     if (extraFixedEntries && extraFixedEntries.length) fixedEntries = fixedEntries.concat(extraFixedEntries);
 
-    var intro = introParts.join(" ") + " Generate " + count + (count === 1 ? " variation." : " variations.");
-    if (count > 1) {
-      // Directly addresses the reported bug: without this, "Generate N
-      // variations" plus the Maintain/Vary framing below reads to some
-      // image models as "assemble N variants into one sticker-sheet/grid
-      // image" rather than N separate standalone images.
-      intro += " Create each variation as its own complete, separate image — never combine multiple variations into a single grid, collage, comparison sheet, or sticker sheet.";
-      intro += " Interpretation guide:";
-    }
+    var intro = introParts.join(" ");
 
+    // variationCount is always forced to 1 here regardless of the
+    // Variations dropdown: the "Maintain: X. Vary between the N
+    // variations: Y." framing buildMetaInstruction produces for count > 1
+    // reads to some image models as a request for a single comparison
+    // sheet/grid rather than N separate images — the exact bug this was
+    // meant to prevent, not avoid. The copied text always describes one
+    // image; running it multiple times (optionally hand-adjusting the
+    // Variation Details fields between runs) is how multiple distinct
+    // results are produced.
     return PromptHaus.engine.buildMetaInstruction({
       intro: intro,
       fixedFieldEntries: fixedEntries,
       variableFieldEntries: getVariableEntries().map(toEntry),
-      variationCount: count,
+      variationCount: 1,
       outro: PROMPT_OUTRO,
     });
   }

@@ -8,7 +8,7 @@
  * badges, a decorative divider, a quote-bubble callout, a border/frame)
  * rather than one finished graphic — each sharing one theme/aesthetic so
  * they drop into other posts/templates as a consistent set. Same Page
- * Bundle mechanism Product Haus's page-family generators already use
+ * Bundle mechanism Project Haus's page-family generators already use
  * (ported into this Haus's own generators.js earlier this session).
  */
 (function () {

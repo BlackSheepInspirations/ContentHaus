@@ -1,0 +1,13 @@
+{
+  "sections": {
+    "main": {
+      "type": "p2p-learning-journey",
+      "settings": {
+        "access_tag": "p2p-learning",
+        "access_code": "p2p-learning",
+        "slug": "p2p-learning"
+      }
+    }
+  },
+  "order": ["main"]
+}

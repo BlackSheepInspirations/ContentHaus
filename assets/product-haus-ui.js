@@ -1,5 +1,5 @@
 /**
- * The AI Creator's Product Haus — UI
+ * The AI Creator's Project Haus — UI
  * Depends on product-haus-util.js, product-haus-engine.js,
  * product-haus-favorites.js, product-haus-styledna.js. Loads BEFORE
  * the mode modules in the section/dev-harness script order, but its own
@@ -84,12 +84,12 @@
     if (!win) return;
     var escaped = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     win.document.write(
-      "<html><head><title>Your Marketing Prompt — The AI Creator's Product Haus</title><style>" +
+      "<html><head><title>Your Marketing Prompt — The AI Creator's Project Haus</title><style>" +
         "body{font-family:Georgia,serif;padding:48px;color:#1A1815;line-height:1.6;max-width:600px;margin:0 auto;}" +
         "h1{font-size:16px;letter-spacing:0.05em;text-transform:uppercase;color:#B5502B;margin-bottom:28px;}" +
         "p{font-size:15px;white-space:pre-wrap;}" +
         "</style></head><body>" +
-        "<h1>Black Sheep Creations &amp; Inspirations — The AI Creator's Product Haus</h1>" +
+        "<h1>Black Sheep Creations &amp; Inspirations — The AI Creator's Project Haus</h1>" +
         "<p>" + escaped + "</p>" +
         "</body></html>"
     );
@@ -1188,6 +1188,10 @@
         { type: "generator", id: "learning-cards" },
       ],
     },
+    {
+      id: "stickers", label: "Stickers", icon: "crop",
+      items: [{ type: "generator", id: "sticker-sheet" }],
+    },
   ];
 
   var activeMode = "invitations";
@@ -1292,7 +1296,7 @@
         el("p", { text: "Something went wrong displaying the builder — this can happen when loading a prompt saved under an older version of the tool." }),
         el("p", { text: "Reload the page to get back to a working state. If it happened right after clicking Load on a saved prompt, that item may need to be deleted from Your Vault or Recently Generated and recreated." }),
       ]));
-      if (window.console && window.console.error) window.console.error("Product Haus render error:", e);
+      if (window.console && window.console.error) window.console.error("Project Haus render error:", e);
     }
   }
 

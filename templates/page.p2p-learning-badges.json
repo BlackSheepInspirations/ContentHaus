@@ -1,0 +1,6 @@
+{
+  "sections": {
+    "main": { "type": "p2p-learning-badges" }
+  },
+  "order": ["main"]
+}

@@ -1,5 +1,5 @@
 {% comment %}
-  The AI Creator's Product Haus — main tool section.
+  The AI Creator's Project Haus — main tool section.
   Gated on customer.tags contains "product-haus-access" (added by its own
   Shopify Flow automation on order paid — separate product/tag from
   Prompt Haus's and Marketing Haus's own access control, so all three are
@@ -53,6 +53,7 @@
   <script src="{{ 'product-haus-generators-activitybook.js' | asset_url }}" defer="defer"></script>
   <script src="{{ 'product-haus-generators-adultcoloring.js' | asset_url }}" defer="defer"></script>
   <script src="{{ 'product-haus-generators-learningcards.js' | asset_url }}" defer="defer"></script>
+  <script src="{{ 'product-haus-generators-stickers.js' | asset_url }}" defer="defer"></script>
   <script src="{{ 'product-haus-generators-prayercards.js' | asset_url }}" defer="defer"></script>
   <script src="{{ 'product-haus-generators-devotionalpages.js' | asset_url }}" defer="defer"></script>
   <script src="{{ 'product-haus-generators-ebookpages.js' | asset_url }}" defer="defer"></script>
@@ -82,7 +83,7 @@
 
 {% schema %}
 {
-  "name": "Product Haus Builder",
+  "name": "Project Haus Builder",
   "settings": [
     {
       "type": "text",
@@ -94,7 +95,7 @@
       "type": "text",
       "id": "brand_heading",
       "label": "Heading",
-      "default": "The Product Haus"
+      "default": "The Project Haus"
     },
     {
       "type": "textarea",
@@ -119,13 +120,13 @@
       "type": "url",
       "id": "learn_more_url",
       "label": "Learn more link",
-      "info": "e.g. link to your Product Haus marketing page."
+      "info": "e.g. link to your Project Haus marketing page."
     },
     {
       "type": "text",
       "id": "locked_heading",
       "label": "Locked state heading",
-      "default": "Unlock The Product Haus"
+      "default": "Unlock The Project Haus"
     },
     {
       "type": "richtext",
@@ -136,7 +137,7 @@
   ],
   "presets": [
     {
-      "name": "Product Haus Builder"
+      "name": "Project Haus Builder"
     }
   ]
 }

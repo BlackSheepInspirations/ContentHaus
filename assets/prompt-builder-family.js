@@ -403,7 +403,6 @@
   // Pulled into their own intro sentences instead, mirroring Character
   // Mode's Illustration Style/Art Finish placement.
   function assemblePrompt() {
-    var count = parseInt(PromptHaus.styleDNA.getState().variationCount.value, 10) || 4;
     var state = store.getState();
 
     var dynamicEntries = getFamilyDynamicFieldEntries();
@@ -418,12 +417,7 @@
       : "";
 
     var parts = [];
-    parts.push(
-      "Create " + count + (count === 1 ? " variation" : " variations") +
-      " of a clean, professional group portrait."
-    );
-    var stickerSheetGuard = PromptHaus.engine.stickerSheetGuard(count);
-    if (stickerSheetGuard) parts.push(stickerSheetGuard);
+    parts.push("Create a clean, professional group portrait.");
     if (illustrationStyleText) parts.push("Illustration style: " + illustrationStyleText);
     if (artFinishText) parts.push("Art finish: " + artFinishText);
 

@@ -1,5 +1,5 @@
 /**
- * The AI Creator's Product Haus — Event Checklist content library
+ * The AI Creator's Project Haus — Event Checklist content library
  * Pure data, no dependencies. Loaded before
  * product-haus-generators-eventchecklist.js, which imports
  * EVENT_TYPE_OPTIONS and EVENT_CHECKLIST_LIBRARY from

@@ -1,5 +1,5 @@
 /**
- * The AI Creator's Product Haus — Narrow Generator Engine
+ * The AI Creator's Project Haus — Narrow Generator Engine
  * Depends on product-haus-util.js and product-haus-engine.js (must load
  * first). Reference implementation of the "quick generator" pattern:
  * a large locked base prompt plus 3-6 small visible fields, most
@@ -55,6 +55,11 @@
     "a livelier, more energetic sense of motion",
     "a bit more playful energy in the pose",
     "a more dynamic, animated feel overall",
+  ];
+  var DEFAULT_FOURTH_POOL = [
+    "a fresh, unexpected creative twist",
+    "a bolder, more attention-grabbing take",
+    "an alternate mood or color emphasis for variety",
   ];
 
   // Fallback content for the Checklist Items capability (see below) when a
@@ -120,6 +125,7 @@
     });
     state._charmIndex = randomIndex((def.charmPool || DEFAULT_CHARM_POOL).length);
     state._dynamicIndex = randomIndex((def.dynamicPool || DEFAULT_DYNAMIC_POOL).length);
+    state._fourthIndex = randomIndex((def.fourthPool || DEFAULT_FOURTH_POOL).length);
     if (def.sectionGroups) state._sections = [];
     if (def.pageTypes || def.pageTypesSourceField) {
       state._pageTypes = [];
@@ -278,6 +284,7 @@
     var patch = {
       _charmIndex: randomIndex((def.charmPool || DEFAULT_CHARM_POOL).length),
       _dynamicIndex: randomIndex((def.dynamicPool || DEFAULT_DYNAMIC_POOL).length),
+      _fourthIndex: randomIndex((def.fourthPool || DEFAULT_FOURTH_POOL).length),
     };
     if (def.sectionGroups) {
       var cap = def.sectionsCap || 4;
@@ -529,10 +536,15 @@
     var dynamicPhrase = dynamicPool[state._dynamicIndex % dynamicPool.length];
     var dynamicText = substituteTemplate(def.dynamicPromptTemplate || def.basePromptTemplate, valueMap) + " Give it " + dynamicPhrase + ".";
 
+    var fourthPool = def.fourthPool || DEFAULT_FOURTH_POOL;
+    var fourthPhrase = fourthPool[state._fourthIndex % fourthPool.length];
+    var fourthText = substituteTemplate(def.fourthPromptTemplate || def.basePromptTemplate, valueMap) + " Try " + fourthPhrase + ".";
+
     return [
       { key: "asSelected", label: "As Selected", text: asSelectedText },
       { key: "extraCharm", label: "+ A Little Extra Charm", text: charmText },
       { key: "moreDynamic", label: "+ More Dynamic", text: dynamicText },
+      { key: "somethingDifferent", label: "+ Something Different", text: fourthText },
     ];
   }
 
@@ -640,8 +652,57 @@
     return wrap;
   }
 
+  // Variations (DNA bar dropdown) caps how many of the 3 always-built
+  // blocks actually render — 1 hides "More Ways to Generate This"
+  // entirely, 2 shows just "+ A Little Extra Charm", 3+ shows both extras.
+  // None of the block TEXT itself ever changes with this value — each
+  // block is always phrased as a single standalone image, matching the
+  // fix applied everywhere else in this app for the "N variations landing
+  // on one image" bug.
   function renderVariationsBlock(id) {
-    return renderLabeledBlocksSection("More Ways to Generate This", assembleVariations(id).slice(1));
+    var cap = parseInt(ProductHaus.styleDNA.getState().variationCount.value, 10) || 3;
+    var extraBlocks = assembleVariations(id).slice(1, Math.max(1, cap));
+    if (!extraBlocks.length) return ProductHaus.ui.el("div", { class: "pdh-generator-variations pdh-generator-variations--empty" });
+    return renderLabeledBlocksSection("More Ways to Generate This", extraBlocks);
+  }
+
+  // ChatGPT (unlike Midjourney/Kittl/Leonardo/etc.) is a conversational
+  // agent that can call its own image tool multiple times within one
+  // reply — so, uniquely for that platform, a single request CAN
+  // actually produce several separate images. Every other platform
+  // genuinely cannot do this regardless of wording, which is why this is
+  // gated to ChatGPT only rather than reintroducing the "Generate N
+  // images" instruction everywhere (the exact thing that caused the
+  // collage bug this session).
+  function buildChatGPTMultiImageText(id) {
+    var cap = parseInt(ProductHaus.styleDNA.getState().variationCount.value, 10) || 1;
+    var blocks = assembleVariations(id).slice(0, Math.max(1, cap));
+    if (blocks.length <= 1) return blocks.length ? blocks[0].text : "";
+    var lines = blocks.map(function (b, i) { return (i + 1) + ") " + b.text; });
+    return "Generate the following as " + blocks.length + " separate, individual images in this same reply — call your image generation tool " + blocks.length + " separate times, once per item below, and do not combine them into a single collage, grid, or comparison sheet:\n\n" + lines.join("\n\n");
+  }
+
+  function renderChatGPTMultiImageRow(id) {
+    var ui = ProductHaus.ui;
+    var platform = ProductHaus.styleDNA.getState().targetPlatform.value;
+    var cap = parseInt(ProductHaus.styleDNA.getState().variationCount.value, 10) || 1;
+    if (platform !== "ChatGPT (GPT Image)" || cap <= 1) {
+      return ui.el("div", { class: "pdh-generator-chatgpt-multi pdh-generator-chatgpt-multi--empty" });
+    }
+    var text = buildChatGPTMultiImageText(id);
+    var wrap = ui.el("div", { class: "pdh-generator-chatgpt-multi" });
+    wrap.appendChild(ui.el("h4", { class: "pdh-generator-chatgpt-multi__title" }, [ui.icon("sparkle"), ui.el("span", { text: "Generate All " + cap + " at Once (ChatGPT Only)" })]));
+    wrap.appendChild(ui.el("p", { class: "pdh-generator-chatgpt-multi__note", text: "ChatGPT can call its image tool multiple times in one reply, so this one request can produce " + cap + " separate images there. Other platforms can't do this no matter the wording — use the blocks above instead, one at a time." }));
+    var copyBtn = ui.el("button", { type: "button", class: "pdh-btn pdh-btn--small pdh-btn--copy", text: "Copy" });
+    copyBtn.addEventListener("click", function () {
+      ui.copyTextToClipboard(text, function (ok) {
+        copyBtn.textContent = ok ? "Copied!" : "Copy failed";
+        setTimeout(function () { copyBtn.textContent = "Copy"; }, 1500);
+      });
+    });
+    wrap.appendChild(ui.el("div", { class: "pdh-generator-chatgpt-multi__actions" }, [copyBtn]));
+    wrap.appendChild(ui.el("p", { class: "pdh-generator-chatgpt-multi__text", text: text }));
+    return wrap;
   }
 
   var bundleSaveFeedback = null;
@@ -799,6 +860,7 @@
     if (def.checklistSourceField || def.staticChecklistSections) wrap.appendChild(renderChecklistItemsPicker(id, def, state));
 
     wrap.appendChild(hasPageBundle(def) ? renderBundleBlock(id) : renderVariationsBlock(id));
+    if (!hasPageBundle(def)) wrap.appendChild(renderChatGPTMultiImageRow(id));
 
     if (def.secondaryBlockTemplate) {
       var secondaryText = substituteTemplate(def.secondaryBlockTemplate, getFieldValueMap(def, state));

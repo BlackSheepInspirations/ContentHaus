@@ -1,5 +1,5 @@
 /**
- * The AI Creator's Product Haus — Event Vendor Checklist Generator
+ * The AI Creator's Project Haus — Event Vendor Checklist Generator
  * Depends on product-haus-util.js, product-haus-engine.js,
  * product-haus-checklists-vendorchecklist.js, and
  * product-haus-generators.js (all must load first — this file just

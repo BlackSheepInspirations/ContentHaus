@@ -770,6 +770,37 @@
   color: var(--gh-charcoal);
   line-height: 1.5;
 }
+.gh-generator-chatgpt-multi {
+  margin-top: 20px;
+  padding: 14px;
+  border: 1px dashed var(--gh-teal);
+  border-radius: 10px;
+  background: #fff;
+}
+.gh-generator-chatgpt-multi__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  margin: 0 0 8px;
+  color: var(--gh-teal);
+}
+.gh-generator-chatgpt-multi__note {
+  margin: 0 0 10px;
+  font-size: 12px;
+  color: var(--gh-charcoal);
+  opacity: 0.85;
+}
+.gh-generator-chatgpt-multi__actions {
+  margin-bottom: 8px;
+}
+.gh-generator-chatgpt-multi__text {
+  margin: 0;
+  font-size: 13px;
+  color: var(--gh-charcoal);
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
 
 /* Couples Mode */
 .gh-btn--swap {

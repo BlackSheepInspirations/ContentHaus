@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Course Haus — P2P Journey Board</title>
+<style>
+  :root{
+    --gold:#d8b45a; --gold-bright:#f4e2a6; --emerald:#27ae6e; --blue:#2563eb;
+    --teal:#39c5c0; --purple:#8f6fd6; --text:#eaf6f3; --muted:#9fb3ad;
+    --panel:rgba(9,17,24,.72); --stroke:rgba(216,180,90,.28); --ocean:#030a18;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{font-family:"Georgia",serif; background:#04070a; color:var(--text); -webkit-font-smoothing:antialiased;}
+  /* moving aurora backdrop (replaces flat black) */
+  .p2pj-aurora{position:fixed; inset:0; z-index:0; overflow:hidden; pointer-events:none; background:#04070a;}
+  .p2pj-aurora .rib{position:absolute; left:-30%; width:160%; height:32%; filter:blur(72px); mix-blend-mode:screen;}
+  .p2pj-aurora .a{top:-2%; background:linear-gradient(90deg,transparent,#1e8e5a,#27ae6e,#0d7377,transparent); opacity:.55; animation:pau1 8s ease-in-out infinite;}
+  .p2pj-aurora .b{top:22%; background:linear-gradient(90deg,transparent,#2563eb,#8f6fd6,#d6336c,transparent); opacity:.46; animation:pau2 10s ease-in-out infinite;}
+  .p2pj-aurora .c{top:48%; background:linear-gradient(90deg,transparent,#27ae6e,#0d7377,#8f6fd6,transparent); opacity:.44; animation:pau1 12s ease-in-out infinite reverse;}
+  .p2pj-aurora .d{top:72%; background:linear-gradient(90deg,transparent,#8f6fd6,#d6336c,#1e8e5a,transparent); opacity:.42; animation:pau2 14s ease-in-out infinite;}
+  @keyframes pau1{0%,100%{transform:translate(-12%,0) skewY(-6deg);}50%{transform:translate(12%,5%) skewY(5deg);}}
+  @keyframes pau2{0%,100%{transform:translate(11%,0) skewY(5deg);}50%{transform:translate(-11%,6%) skewY(-4deg);}}
+  .wrap{max-width:900px; margin:0 auto; background:transparent; position:relative; z-index:1;}
+
+  /* ---- HERO (title block) ---- */
+  .hero{position:relative; padding:56px 30px 22px;   /* top buffer leaves room for the Shopify announcement bar */
+    background:linear-gradient(180deg,#06090c 0%, #06111b 60%, #071722 100%);}
+  .eyebrow{font:700 12px/1 system-ui; letter-spacing:.32em; text-transform:uppercase; color:var(--gold); margin-bottom:8px;}
+  h1{font-size:clamp(40px,7vw,62px); font-weight:700; line-height:.98;}
+  h1 .two{background:linear-gradient(100deg,#f4e2a6,#8f6fd6,#27ae6e,#39c5c0,#2563eb,#d6336c,#f4e2a6);
+    background-size:300% 100%; -webkit-background-clip:text; background-clip:text; color:transparent;
+    padding:0 .08em; animation:p2pj-shift 7s linear infinite;}
+  @keyframes p2pj-shift{0%{background-position:0% 50%;}100%{background-position:300% 50%;}}
+  .ttl-sub{margin-top:8px; font:800 clamp(18px,3.4vw,28px)/1 system-ui; letter-spacing:.26em; text-transform:uppercase;
+    background:linear-gradient(100deg,#f4e2a6,#8f6fd6,#27ae6e,#39c5c0,#2563eb,#d6336c,#f4e2a6); background-size:300% 100%;
+    -webkit-background-clip:text; background-clip:text; color:transparent; animation:p2pj-shift 7s linear infinite;}
+  .desc{color:#cfe0da; font-size:15px; margin-top:14px; max-width:500px; font-family:system-ui; line-height:1.55;}
+
+  /* ---- STICKY nav + stats bar ---- */
+  .bar{position:sticky; top:6px; z-index:20; display:flex; justify-content:space-between; align-items:center;
+    gap:18px; flex-wrap:wrap; margin:14px 14px 0; padding:12px 16px; border-radius:18px;
+    background:linear-gradient(180deg,rgba(16,29,38,.96),rgba(9,16,22,.96));
+    border:1px solid var(--stroke); box-shadow:0 10px 30px rgba(0,0,0,.5), inset 0 1px 0 rgba(216,180,90,.12);
+    backdrop-filter:blur(8px);}
+  .nav{display:flex; gap:6px; align-items:center;}
+  .nav a{display:flex; flex-direction:column; align-items:center; gap:6px; text-decoration:none; cursor:pointer;
+    color:var(--gold); padding:6px 14px; border-radius:12px; transition:.18s; opacity:.72;}
+  .nav a svg{width:24px; height:24px; stroke:currentColor; fill:none; stroke-width:1.7; transition:.18s;}
+  .nav a small{font:700 10px/1 system-ui; letter-spacing:.04em;}
+  .nav a:hover{opacity:1; color:var(--gold-bright);}
+  .nav a.on{opacity:1; color:var(--gold-bright); text-shadow:0 0 14px rgba(244,226,166,.55);}
+  .nav a.on svg{filter:drop-shadow(0 0 6px rgba(244,226,166,.75));}
+  .nav a.on small{color:var(--gold-bright);}
+  .divider{width:1px; align-self:stretch; background:linear-gradient(rgba(216,180,90,0),rgba(216,180,90,.35),rgba(216,180,90,0)); margin:0 4px;}
+  .stats{display:flex; gap:2px; align-items:center;}
+  .stat{display:flex; flex-direction:column; align-items:center; padding:2px 12px;}
+  .stat b{font:700 19px/1 system-ui; display:flex; align-items:center; gap:6px; color:var(--text);}
+  .stat b svg{width:19px; height:19px;}
+  .stat small{font:700 8px/1 system-ui; letter-spacing:.16em; color:var(--muted); margin-top:5px; text-transform:uppercase;}
+  .level{display:flex; flex-direction:column; align-items:center; gap:5px; margin-left:6px;}
+  .level .coin{width:44px; height:44px; border-radius:50%; display:grid; place-items:center;
+    background:radial-gradient(circle at 40% 34%, #f4e2a6, #b6892f 70%, #8a641f);
+    border:2px solid #f0d584; box-shadow:0 0 16px rgba(216,180,90,.55), inset 0 -3px 6px rgba(0,0,0,.35);}
+  .level .coin svg{width:22px; height:22px; fill:#5a4212;}
+  .level small{font:700 8px/1 system-ui; letter-spacing:.08em; color:var(--gold-bright);
+    border:1px solid rgba(216,180,90,.45); padding:3px 9px; border-radius:20px; background:rgba(216,180,90,.12);}
+
+  /* ---- BOARD ---- */
+  .board{position:relative; z-index:1; line-height:0;}
+  .board .bg{display:block; width:100%;}
+
+  /* hotspots — invisible; the cursor:pointer is the only affordance */
+  .hs{position:absolute; z-index:5; cursor:pointer; border:0; background:transparent; border-radius:14px;}
+
+  /* progress overlays — a single centered icon per card (no box) */
+  .cs{position:absolute; z-index:4; transform:translate(-50%,-50%); pointer-events:none; display:grid; place-items:center;}
+  .cs .done{width:60px; height:60px; border-radius:50%; display:grid; place-items:center;
+    background:radial-gradient(circle at 40% 34%,#f7e6ac,#d8b45a 70%,#a97f28);
+    border:2px solid #f4e2a6; box-shadow:0 0 22px rgba(216,180,90,.8), 0 4px 12px rgba(0,0,0,.5);}
+  .cs .done svg{width:32px; height:32px; fill:none; stroke:#5a4212; stroke-width:3.4; stroke-linecap:round; stroke-linejoin:round;}
+  .cs .lock{width:60px; height:60px; border-radius:50%; display:grid; place-items:center;
+    background:radial-gradient(circle at 40% 34%,rgba(32,44,54,.94),rgba(8,14,18,.95));
+    border:2px solid rgba(216,180,90,.55); box-shadow:0 0 18px rgba(0,0,0,.6), inset 0 0 14px rgba(0,0,0,.5);}
+  .cs .lock svg{width:28px; height:28px; fill:#e0bd63;}
+  .cs .ring{position:relative; width:66px; height:66px; border-radius:50%; display:grid; place-items:center;
+    background:conic-gradient(#27ae6e calc(var(--p,0)*1%), rgba(255,255,255,.16) 0);
+    box-shadow:0 0 22px rgba(39,174,110,.65); animation:csp 2.4s ease-in-out infinite;}
+  @keyframes csp{0%,100%{box-shadow:0 0 16px rgba(39,174,110,.5);}50%{box-shadow:0 0 30px rgba(39,174,110,.9);}}
+  .cs .ring::before{content:""; position:absolute; width:52px; height:52px; border-radius:50%;
+    background:radial-gradient(circle at 40% 34%,#0e1a16,#08110d);}
+  .cs .ring b{position:relative; color:#eafaf6; font:800 16px/1 system-ui; text-shadow:0 1px 3px #000;}
+
+  /* ---- MODAL ---- */
+  .modal{position:fixed; inset:0; z-index:50; display:none; align-items:center; justify-content:center;
+    background:rgba(3,7,12,.72); backdrop-filter:blur(4px); padding:24px;}
+  .modal.show{display:flex;}
+  .modal-card{max-width:420px; width:100%; background:linear-gradient(180deg,#0f1c24,#0a141a);
+    border:1px solid var(--stroke); border-radius:20px; padding:26px; box-shadow:0 24px 60px rgba(0,0,0,.6);}
+  .modal-card .kicker{font:700 11px/1 system-ui; letter-spacing:.2em; text-transform:uppercase; color:var(--gold); margin-bottom:8px;}
+  .modal-card h3{font:700 24px/1.1 Georgia,serif; color:var(--text); margin-bottom:10px;}
+  .modal-card p{font:400 14.5px/1.55 system-ui; color:#c6d6d0;}
+  .modal-card .cta{display:inline-block; margin-top:20px; padding:12px 22px; border-radius:12px; cursor:pointer;
+    font:700 13px/1 system-ui; letter-spacing:.05em; color:#06120e; border:0; background:linear-gradient(145deg,#f4e2a6,var(--gold));}
+  .modal-card .x{float:right; cursor:pointer; color:var(--muted); font:700 20px/1 system-ui; margin:-6px -4px 0 0;}
+
+  /* ---- WELCOME POP-UP ---- */
+  .welcome{position:fixed; inset:0; z-index:60; display:none; align-items:center; justify-content:center;
+    background:rgba(3,7,12,.8); backdrop-filter:blur(6px); padding:24px;}
+  .welcome.show{display:flex;}
+  .welcome .wc{position:relative; max-width:470px; width:100%; text-align:center; padding:36px 32px 28px;
+    background:linear-gradient(180deg,#0f1c24,#0a141a); border:1px solid var(--stroke); border-radius:22px;
+    box-shadow:0 24px 70px rgba(0,0,0,.65), 0 0 60px rgba(39,174,110,.14);}
+  .welcome .wx{position:absolute; top:14px; right:18px; cursor:pointer; color:var(--muted); font:700 20px/1 system-ui;}
+  .welcome .we{font:700 12px/1 system-ui; letter-spacing:.26em; text-transform:uppercase; color:var(--gold); margin-bottom:10px;}
+  .welcome h2{font:700 30px/1.06 Georgia,serif; margin-bottom:14px;
+    background:linear-gradient(100deg,var(--gold-bright),#8f6fd6 45%,var(--emerald)); -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .welcome p{font:400 14.5px/1.6 system-ui; color:#cfe0da; margin-bottom:24px;}
+  .welcome .wbtn{cursor:pointer; border:0; padding:13px 28px; border-radius:12px; font:800 14px/1 system-ui;
+    color:#06120e; background:linear-gradient(145deg,#f4e2a6,var(--gold)); box-shadow:0 8px 22px rgba(216,180,90,.3);}
+  .welcome .wchk{display:inline-flex; align-items:center; gap:8px; margin-top:20px; color:var(--muted); font:500 12.5px/1 system-ui; cursor:pointer;}
+  .welcome .wchk input{accent-color:var(--emerald); width:15px; height:15px; cursor:pointer;}
+</style>
+</head>
+<body>
+<div class="p2pj-aurora"><div class="rib a"></div><div class="rib b"></div><div class="rib c"></div><div class="rib d"></div></div>
+<div class="wrap">
+
+  <header class="hero">
+    <div class="eyebrow">Black Sheep Creations &amp; Inspirations</div>
+    <h1>Purpose<span class="two">2</span>Profit</h1>
+    <div class="ttl-sub">Learning Journey</div>
+    <p class="desc">Complete each course, level up your craft, and unlock your next win — your path, your pace. Follow the glowing trail from the shore all the way to freedom.</p>
+  </header>
+
+  <div class="bar">
+    <nav class="nav">
+      <a class="on" data-tab="journey"><svg viewBox="0 0 24 24"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><path d="M9 4v14M15 6v14"/></svg><small>Journey Map</small></a>
+      <a data-tab="progress"><svg viewBox="0 0 24 24"><path d="M4 20V12M9.5 20V6M15 20v-9M20.5 20V8"/><path d="M3 20h18"/></svg><small>Progress</small></a>
+      <a data-tab="bonuses"><svg viewBox="0 0 24 24"><rect x="3.5" y="9" width="17" height="11" rx="1.2"/><path d="M2.5 9h19v3.4h-19z"/><path d="M12 9v11M12 9c-3.4-5.5-7.4-1.2-3 .6M12 9c3.4-5.5 7.4-1.2 3 .6"/></svg><small>Bonuses</small></a>
+      <a data-tab="milestones"><svg viewBox="0 0 24 24"><path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.9 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/></svg><small>Milestones</small></a>
+      <a data-tab="journal"><svg viewBox="0 0 24 24"><path d="M12 6C10 4.4 5.5 4.2 3.5 5.2v13.6c2-1 6.5-.8 8.5.8 2-1.6 6.5-1.8 8.5-.8V5.2C18.5 4.2 14 4.4 12 6z"/><path d="M12 6v13.6"/></svg><small>Journal</small></a>
+    </nav>
+    <div class="divider"></div>
+    <div class="stats">
+      <div class="stat"><b><svg viewBox="0 0 24 24"><path fill="#f4c534" stroke="#b98f1e" stroke-width="1" d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.9 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/></svg>1250</b><small>Points</small></div>
+      <div class="stat"><b><svg viewBox="0 0 24 24"><path fill="#39c5c0" stroke="#1f7f7c" stroke-width="1" d="M6 3h12l3 6-9 12L3 9z"/></svg>5</b><small>Badges</small></div>
+      <div class="stat"><b><svg viewBox="0 0 24 24"><path fill="#8f6fd6" stroke="#5b3c8c" stroke-width="1" d="M6 3h12l3 6-9 12L3 9z"/></svg>3</b><small>Streak</small></div>
+      <div class="level"><div class="coin"><svg viewBox="0 0 24 24"><path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.9 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/></svg></div><small>Level 12</small></div>
+    </div>
+  </div>
+
+  <div class="board">
+    <img class="bg" src="p2p-board-bg.jpg" alt="P2P Journey Board" />
+
+    <!-- COURSE CARDS -->
+    <button class="hs" style="left:40%; top:11%; width:23%; height:13%" data-type="course" data-title="Relieve the Overwhelm" data-body="Course 1 · Completed. Your first course — get out of the ocean and onto the path." data-cta="Revisit course"></button>
+    <button class="hs" style="left:25%; top:33.5%; width:20.5%; height:10.5%" data-type="course" data-title="Act Fast Now" data-body="Course 2 · Completed. Build momentum and take decisive early action." data-cta="Revisit course"></button>
+    <button class="hs" style="left:53.5%; top:41.5%; width:20%; height:10.5%" data-type="course" data-title="Quick Wins That Count" data-body="Course 3 · Ready to start. Bank early wins that build real traction." data-cta="Start course"></button>
+    <button class="hs" style="left:26%; top:52%; width:20.5%; height:10.5%" data-type="course" data-title="Ground Zero Clarity" data-body="Course 4 · Locked. Unlock with the Founder's Pass or a subscription." data-cta="Unlock"></button>
+    <button class="hs" style="left:49%; top:74%; width:21.5%; height:12%" data-type="course" data-title="Course Five" data-body="Course 5 · Locked. Unlock with the Founder's Pass or a subscription." data-cta="Unlock"></button>
+
+    <!-- FRAMEWORK / INFO SIGNS -->
+    <button class="hs" style="left:16.5%; top:16%; width:19%; height:5.5%" data-type="info" data-title="Your Journey Begins Here" data-body="New here? Learn how the journey works, how courses unlock, and how to earn your way to freedom." data-cta="Learn about your journey"></button>
+    <button class="hs" style="left:7.5%; top:27%; width:18%; height:9.5%" data-type="framework" data-title="The RAFT Framework" data-body="Your life raft — get out of the ocean. R: Relieve · A: Act · F: Fast Win · T: Traction." data-cta="Explore RAFT"></button>
+    <button class="hs" style="left:76.5%; top:51.5%; width:20%; height:10%" data-type="framework" data-title="The GROWS Framework" data-body="Map your path: (G + R) × O × W = S. Ground Zero · Roadmap · Ownership · Window of Time · Success Vision." data-cta="Explore GROWS"></button>
+    <button class="hs" style="left:7.5%; top:79.5%; width:19%; height:10.5%" data-type="framework" data-title="The ROOTED Framework" data-body="Time to thrive — launch method. Reach · Open · Offer · Trigger · Escalate · Deepen." data-cta="Explore ROOTED"></button>
+
+    <!-- SIDE QUESTS (Bonuses) — landscape rectangles covering icon + label -->
+    <button class="hs" style="left:51%; top:27.5%; width:42%; height:9%" data-type="sidequest" data-title="Mindset Check — Side Quest" data-body="A Bonus side-quest. Mindset lessons to keep your head right for the climb. Contains its own set of courses." data-cta="Enter side quest"></button>
+    <button class="hs" style="left:16%; top:65%; width:40%; height:9%" data-type="sidequest" data-title="Purpose Check — Side Quest" data-body="A Bonus side-quest. Reconnect with your why. Contains its own set of courses." data-cta="Enter side quest"></button>
+    <button class="hs" style="left:44%; top:88.5%; width:42%; height:8%" data-type="sidequest" data-title="Heart Check — Side Quest" data-body="A Bonus side-quest. Check in with your heart and motivation. Contains its own set of courses." data-cta="Enter side quest"></button>
+
+    <!-- PROGRESS OVERLAYS — centered icon per card (dynamic per student) -->
+    <div class="cs" style="left:50.4%; top:18%"><span class="done"><svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg></span></div>
+    <div class="cs" style="left:34.2%; top:40.4%"><span class="done"><svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg></span></div>
+    <div class="cs" style="left:63%; top:47.5%"><span class="ring" style="--p:45"><b>45%</b></span></div>
+    <div class="cs" style="left:35.5%; top:57.5%"><span class="lock"><svg viewBox="0 0 24 24"><path d="M6 10V8a6 6 0 0 1 12 0v2h1a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1h1zm2 0h8V8a4 4 0 0 0-8 0v2z"/></svg></span></div>
+    <div class="cs" style="left:58.5%; top:80%"><span class="lock"><svg viewBox="0 0 24 24"><path d="M6 10V8a6 6 0 0 1 12 0v2h1a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1h1zm2 0h8V8a4 4 0 0 0-8 0v2z"/></svg></span></div>
+  </div>
+
+</div>
+
+<!-- WELCOME POP-UP -->
+<div class="welcome" id="welcome">
+  <div class="wc">
+    <span class="wx" id="wx">✕</span>
+    <div class="we">Welcome, Traveler</div>
+    <h2>Your Journey Begins</h2>
+    <p>This is your map from the shore all the way to freedom. Complete each course to light up the path, earn badges, and unlock what's next. Tap any glowing marker to begin — and check the signs along the way for guidance.</p>
+    <button class="wbtn" id="wstart">Start exploring</button>
+    <label class="wchk"><input type="checkbox" id="wdont"> Don't show this again</label>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal" id="modal">
+  <div class="modal-card">
+    <span class="x" id="mx">✕</span>
+    <div class="kicker" id="mk">Course</div>
+    <h3 id="mt">Title</h3>
+    <p id="mb">Body</p>
+    <button class="cta" id="mc">Go</button>
+  </div>
+</div>
+
+<script>
+  var modal=document.getElementById('modal');
+  var kick={course:'Course',framework:'Framework',sidequest:'Bonus · Side Quest',info:'Getting Started'};
+  document.querySelectorAll('.hs').forEach(function(h){
+    h.addEventListener('click',function(){
+      document.getElementById('mk').textContent=kick[h.dataset.type]||'';
+      document.getElementById('mt').textContent=h.dataset.title;
+      document.getElementById('mb').textContent=h.dataset.body;
+      document.getElementById('mc').textContent=h.dataset.cta;
+      modal.classList.add('show');
+    });
+  });
+  function close(){modal.classList.remove('show');}
+  document.getElementById('mx').addEventListener('click',close);
+  document.getElementById('mc').addEventListener('click',close);
+  modal.addEventListener('click',function(e){if(e.target===modal)close();});
+  document.querySelectorAll('.nav a').forEach(function(a){
+    a.addEventListener('click',function(e){e.preventDefault();
+      document.querySelectorAll('.nav a').forEach(function(x){x.classList.remove('on');});
+      a.classList.add('on');});
+  });
+
+  // welcome pop-up (shows once unless dismissed)
+  var welcome=document.getElementById('welcome');
+  if(!localStorage.getItem('p2p_welcome_dismissed')) welcome.classList.add('show');
+  function closeWelcome(){ if(document.getElementById('wdont').checked) localStorage.setItem('p2p_welcome_dismissed','1'); welcome.classList.remove('show'); }
+  document.getElementById('wx').addEventListener('click',closeWelcome);
+  document.getElementById('wstart').addEventListener('click',closeWelcome);
+  welcome.addEventListener('click',function(e){if(e.target===welcome)closeWelcome();});
+</script>
+</body>
+</html>
