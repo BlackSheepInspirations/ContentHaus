@@ -24,37 +24,14 @@
     root.querySelectorAll('.p2pj-ringpct').forEach(function(el){ el.textContent = pct + '%'; });
   }
 
-  /* ---- access gate (access code / tag) ---- */
-  var code = (root.getAttribute('data-code') || '').trim().toLowerCase();
-  var storeKey = 'p2p_access_' + (root.getAttribute('data-slug') || 'p2p-learning');
-
-  function unlock(persist){
-    if(persist){ try{ localStorage.setItem(storeKey,'1'); }catch(e){} }
-    root.setAttribute('data-locked','false');
-  }
-  // server said locked, but this browser may have already redeemed the code
-  if(root.getAttribute('data-locked') === 'true'){
-    try{ if(localStorage.getItem(storeKey) === '1') unlock(false); }catch(e){}
-  }
-  var form = document.getElementById('p2pj-codeform');
-  if(form){
-    form.addEventListener('submit', function(e){
-      e.preventDefault();
-      var input = document.getElementById('p2pj-code');
-      var err = document.getElementById('p2pj-gerr');
-      var val = (input.value || '').trim().toLowerCase();
-      if(val && code && val === code){ err.textContent=''; unlock(true); window.scrollTo(0,0); }
-      else { err.textContent = 'That code isn’t right. Check it and try again.'; }
-    });
-  }
-
   /* ---- welcome pop-up ---- */
   var welcome = document.getElementById('p2pj-welcome');
   if(welcome){
     var wkey = 'p2p_welcome_dismissed';
     var seen = false; try{ seen = localStorage.getItem(wkey) === '1'; }catch(e){}
-    // only greet once the board is actually visible
-    if(!seen && root.getAttribute('data-locked') !== 'true') welcome.classList.add('show');
+    // this script only ever loads for an already-gated visitor (see the
+    // section's {% if has_access %}), so there's no lock state to check here
+    if(!seen) welcome.classList.add('show');
     function closeWelcome(){
       var dont = document.getElementById('p2pj-wdont');
       if(dont && dont.checked){ try{ localStorage.setItem(wkey,'1'); }catch(e){} }
@@ -209,7 +186,7 @@
     function place(off){ var wr = wrap.getBoundingClientRect(); bar.style.left = (wr.left + MARGIN) + 'px'; bar.style.width = (wr.width - MARGIN * 2) + 'px'; bar.style.top = off + 'px'; }
     function unstick(){ bar.classList.remove('p2pj-fixed'); fixed = false; spacer.style.height = '0'; bar.style.left = bar.style.width = bar.style.top = ''; }
     function sync(){
-      if(!shown()){ if(fixed) unstick(); return; }      // never measure while the board is locked/hidden
+      if(!shown()){ if(fixed) unstick(); return; }      // never measure while the bar is hidden (e.g. mid-panel-swap)
       var off = headerOffset();
       var refTop = fixed ? spacer.getBoundingClientRect().top : bar.getBoundingClientRect().top;
       if(!fixed && refTop <= off){ spacer.style.height = bar.offsetHeight + 'px'; bar.classList.add('p2pj-fixed'); fixed = true; place(off); }
@@ -218,7 +195,6 @@
     window.addEventListener('scroll', sync, { passive: true });
     window.addEventListener('resize', sync);
     window.addEventListener('load', sync);
-    new MutationObserver(sync).observe(root, { attributes: true, attributeFilter: ['data-locked'] }); // re-run when unlocked
     sync();
   }
 })();

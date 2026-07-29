@@ -3,12 +3,22 @@
   theme customizer). Completing all lessons fires the celebration + certificate.
   Progress is stored per-course in the browser for now; move to customer metafields
   when accounts are wired up.
+  Gate matches every other Haus exactly: customer.tags contains the access
+  tag, or request.design_mode inside the theme editor. Locked visitors get
+  none of the lesson content.
 {% endcomment %}
 
 {{ 'p2p-player.css' | asset_url | stylesheet_tag }}
 
 {%- assign uname = customer.name | default: customer.first_name | default: '' -%}
 
+{%- assign has_access = false -%}
+{%- if customer and section.settings.access_tag != blank and customer.tags contains section.settings.access_tag -%}
+  {%- assign has_access = true -%}
+{%- endif -%}
+{%- if request.design_mode -%}{%- assign has_access = true -%}{%- endif -%}
+
+{%- if has_access -%}
 <div id="p2pp"
      data-course="{{ section.settings.course_handle | default: 'course' | escape }}"
      data-course-title="{{ section.settings.course_title | default: 'Course' | escape }}"
@@ -112,6 +122,22 @@
 <script src="{{ 'p2p-progress.js' | asset_url }}" defer="defer"></script>
 <script src="{{ 'p2p-player.js' | asset_url }}" defer="defer"></script>
 
+{%- else -%}
+
+<div id="p2pp-locked">
+  <div class="ge">Members Only</div>
+  <h2>{{ section.settings.locked_heading | default: 'Unlock This Course' }}</h2>
+  <div class="p2pp-locked__body">{{ section.settings.locked_body | default: "<p>This lesson is part of the Purpose 2 Profit Learning Journey. Get access to unlock every course on the map.</p>" }}</div>
+  <div class="p2pp-locked__actions">
+    {%- if section.settings.access_product != blank -%}
+      <a class="gbtn" href="{{ section.settings.access_product.url }}">Get Access{% if section.settings.access_product.price %} — {{ section.settings.access_product.price | money }}{% endif %}</a>
+    {%- endif -%}
+    <a class="p2pp-locked__learn-more" href="{{ section.settings.back_url | default: '/pages/p2p-learning' }}">← Journey Map</a>
+  </div>
+</div>
+
+{%- endif -%}
+
 {% schema %}
 {
   "name": "P2P Course Player",
@@ -121,7 +147,13 @@
     { "type": "text", "id": "course_handle", "label": "Course handle (for saved progress)", "default": "quick-wins" },
     { "type": "text", "id": "sidebar_label", "label": "Sidebar label", "default": "Start Here" },
     { "type": "url", "id": "back_url", "label": "Back-to-map link" },
-    { "type": "range", "id": "sticky_offset", "min": 0, "max": 120, "step": 2, "unit": "px", "label": "Sticky header offset", "default": 0 }
+    { "type": "range", "id": "sticky_offset", "min": 0, "max": 120, "step": 2, "unit": "px", "label": "Sticky header offset", "default": 0 },
+
+    { "type": "header", "content": "Access" },
+    { "type": "text", "id": "access_tag", "label": "Access tag", "info": "Customer tag that unlocks this course. Must match the tag your Shopify Flow automation adds on purchase.", "default": "p2p-learning" },
+    { "type": "product", "id": "access_product", "label": "Access product", "info": "Shown as the \"Get Access\" button on the locked state." },
+    { "type": "text", "id": "locked_heading", "label": "Locked state heading", "default": "Unlock This Course" },
+    { "type": "richtext", "id": "locked_body", "label": "Locked state body", "default": "<p>This lesson is part of the Purpose 2 Profit Learning Journey. Get access to unlock every course on the map.</p>" }
   ],
   "blocks": [
     {

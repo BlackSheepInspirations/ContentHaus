@@ -2,6 +2,9 @@
   Purpose 2 Profit — Badges & Progress. Each badge is a block (icon, colour,
   requirement, earned toggle). Grouped by the "Family" field. Earned state is
   manual for now; wire to customer progress/tags later.
+  Gate matches every other Haus exactly: customer.tags contains the access
+  tag, or request.design_mode inside the theme editor. Locked visitors get
+  none of the badge content.
 {% endcomment %}
 
 {{ 'p2p-badges.css' | asset_url | stylesheet_tag }}
@@ -12,6 +15,13 @@
 {%- assign pct = 0 -%}
 {%- if total > 0 -%}{%- assign pct = earned_count | times: 100 | divided_by: total -%}{%- endif -%}
 
+{%- assign has_access = false -%}
+{%- if customer and section.settings.access_tag != blank and customer.tags contains section.settings.access_tag -%}
+  {%- assign has_access = true -%}
+{%- endif -%}
+{%- if request.design_mode -%}{%- assign has_access = true -%}{%- endif -%}
+
+{%- if has_access -%}
 <div id="p2pb">
   <div class="bwrap">
     <div class="top">
@@ -98,6 +108,22 @@
 <script src="{{ 'p2p-progress.js' | asset_url }}" defer></script>
 <script src="{{ 'p2p-badges.js' | asset_url }}" defer></script>
 
+{%- else -%}
+
+<div id="p2pb-locked">
+  <div class="ge">Members Only</div>
+  <h2>{{ section.settings.locked_heading | default: 'Unlock Your Badges & Milestones' }}</h2>
+  <div class="p2pb-locked__body">{{ section.settings.locked_body | default: "<p>Badges track your progress through the Purpose 2 Profit Learning Journey. Get access to start earning them.</p>" }}</div>
+  <div class="p2pb-locked__actions">
+    {%- if section.settings.access_product != blank -%}
+      <a class="gbtn" href="{{ section.settings.access_product.url }}">Get Access{% if section.settings.access_product.price %} — {{ section.settings.access_product.price | money }}{% endif %}</a>
+    {%- endif -%}
+    <a class="p2pb-locked__learn-more" href="{{ section.settings.back_url | default: '/pages/p2p-learning' }}">← Journey Map</a>
+  </div>
+</div>
+
+{%- endif -%}
+
 {% schema %}
 {
   "name": "P2P Badges & Progress",
@@ -105,6 +131,14 @@
     { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Your Progress" },
     { "type": "text", "id": "title", "label": "Title", "default": "Badges & Milestones" },
     { "type": "textarea", "id": "subtitle", "label": "Subtitle", "default": "Every badge is earned. Proof you kept going, not stickers you collected." },
+
+    { "type": "header", "content": "Access" },
+    { "type": "text", "id": "access_tag", "label": "Access tag", "info": "Customer tag that unlocks this page. Must match the tag your Shopify Flow automation adds on purchase.", "default": "p2p-learning" },
+    { "type": "product", "id": "access_product", "label": "Access product", "info": "Shown as the \"Get Access\" button on the locked state." },
+    { "type": "url", "id": "back_url", "label": "Back-to-map link" },
+    { "type": "text", "id": "locked_heading", "label": "Locked state heading", "default": "Unlock Your Badges & Milestones" },
+    { "type": "richtext", "id": "locked_body", "label": "Locked state body", "default": "<p>Badges track your progress through the Purpose 2 Profit Learning Journey. Get access to start earning them.</p>" },
+
     { "type": "header", "content": "Stats (placeholder)" },
     { "type": "text", "id": "stat_points", "label": "Points", "default": "0" },
     { "type": "text", "id": "stat_streak", "label": "Streak", "default": "0" },

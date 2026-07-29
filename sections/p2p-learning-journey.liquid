@@ -1,8 +1,10 @@
 {% comment %}
   Purpose 2 Profit — Learning Journey (journey map page).
-  Gate mirrors the gpt-access.liquid pattern: unlocked for logged-in customers
-  carrying the access tag, or in the theme editor (request.design_mode), or when
-  the visitor redeems the all-access code (stored client-side for the soft launch).
+  Gate matches every other Haus exactly: customer.tags contains the access
+  tag (added by a Shopify Flow on order paid), or request.design_mode inside
+  the theme editor. No client-side code redemption — locked visitors receive
+  none of the gated markup at all, same as Product/Graphics/Marketing/Brand
+  Haus's own access-gate pattern.
   Board art + course/sign/side-quest positions are tuned to assets/p2p-journey-board.jpg.
 {% endcomment %}
 
@@ -15,9 +17,6 @@
 {%- if request.design_mode -%}{%- assign has_access = true -%}{%- endif -%}
 
 <div id="p2pj"
-     data-locked="{% if has_access %}false{% else %}true{% endif %}"
-     data-code="{{ section.settings.access_code | escape | downcase }}"
-     data-slug="{{ section.settings.slug | default: 'p2p-learning' | escape }}"
      data-board-courses="{{ section.settings.board_courses | default: 5 }}"
      style="--p2pj-sticky:{{ section.settings.sticky_offset | default: 6 }}px;">
 
@@ -32,20 +31,7 @@
       {%- if section.settings.description != blank -%}<p class="desc">{{ section.settings.description }}</p>{%- endif -%}
     </header>
 
-    {%- comment -%} ---- LOCKED GATE (access code) ---- {%- endcomment -%}
-    <div id="p2pj-gate">
-      <div class="ge">Members Only</div>
-      <h2>Enter Your Access Code</h2>
-      <p>The {{ section.settings.journey_name | default: 'Purpose 2 Profit Learning Journey' }} is unlocked with your access code. Enter it below to step onto the path.</p>
-      <form id="p2pj-codeform" class="codeform" autocomplete="off">
-        <input id="p2pj-code" type="text" inputmode="text" placeholder="Access code" aria-label="Access code" />
-        <button class="gbtn" type="submit">Unlock</button>
-      </form>
-      <div id="p2pj-gerr" class="gerr"></div>
-      {%- if section.settings.access_product != blank -%}
-        <a class="gbuy" href="{{ section.settings.access_product.url }}">Don’t have access yet? Get the {{ section.settings.journey_name | default: 'P2P Learning Journey' }}{% if section.settings.access_product.price %} — {{ section.settings.access_product.price | money }}{% endif %}</a>
-      {%- endif -%}
-    </div>
+    {%- if has_access -%}
 
     {%- comment -%} ---- STICKY NAV + STATS ---- {%- endcomment -%}
     <div class="bar">
@@ -159,8 +145,28 @@
       <div class="jr-list-head">Your entries <span id="p2pj-jr-count"></span></div>
       <div class="jr-list" id="p2pj-jr-list"></div>
     </div>
+
+    {%- else -%}
+
+    {%- comment -%} ---- LOCKED STATE (matches every other Haus's pattern) ---- {%- endcomment -%}
+    <div class="p2pj-locked">
+      <div class="ge">Members Only</div>
+      <h2>{{ section.settings.locked_heading | default: 'Unlock The Purpose 2 Profit Learning Journey' }}</h2>
+      <div class="p2pj-locked__body">{{ section.settings.locked_body | default: "<p>Get instant access to the full Learning Journey — every course, badge, and side-quest on the map.</p>" }}</div>
+      <div class="p2pj-locked__actions">
+        {%- if section.settings.access_product != blank -%}
+          <a class="gbtn" href="{{ section.settings.access_product.url }}">Get Access{% if section.settings.access_product.price %} — {{ section.settings.access_product.price | money }}{% endif %}</a>
+        {%- endif -%}
+        {%- if section.settings.learn_more_url != blank -%}
+          <a class="p2pj-locked__learn-more" href="{{ section.settings.learn_more_url }}">Learn more</a>
+        {%- endif -%}
+      </div>
+    </div>
+
+    {%- endif -%}
   </div>
 
+  {%- if has_access -%}
   {%- comment -%} ---- WELCOME POP-UP ---- {%- endcomment -%}
   <div id="p2pj-welcome">
     <div class="wc">
@@ -297,8 +303,10 @@
 
   {%- comment -%} ---- persistent corner help button ---- {%- endcomment -%}
   <a class="p2pj-corner-info" href="#" data-info data-tip="Info, rules &amp; help" aria-label="Info and Help"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5" stroke-linecap="round"/><circle cx="12" cy="7.6" r="1.1" fill="#fff" stroke="none"/></svg></a>
+  {%- endif -%}
 </div>
 
+{%- if has_access -%}
 <script>
   window.P2P_POINTS = {
     course:  {{ section.settings.pts_course     | default: 100 }},
@@ -312,6 +320,7 @@
 </script>
 <script src="{{ 'p2p-progress.js' | asset_url }}" defer="defer"></script>
 <script src="{{ 'p2p-journey.js' | asset_url }}" defer="defer"></script>
+{%- endif -%}
 
 {% schema %}
 {
@@ -327,10 +336,11 @@
     { "type": "text", "id": "journey_name", "label": "Journey name", "default": "Purpose 2 Profit Learning Journey" },
 
     { "type": "header", "content": "Access" },
-    { "type": "text", "id": "access_tag", "label": "Access tag", "info": "Customer tag that unlocks the journey (added on purchase via Shopify Flow).", "default": "p2p-learning" },
-    { "type": "text", "id": "access_code", "label": "All-access code", "info": "Visitors can type this to unlock (soft launch). Not case-sensitive.", "default": "p2p-learning" },
-    { "type": "text", "id": "slug", "label": "Storage key slug", "default": "p2p-learning" },
-    { "type": "product", "id": "access_product", "label": "Access product", "info": "Shown as the “get access” link on the gate." },
+    { "type": "text", "id": "access_tag", "label": "Access tag", "info": "Customer tag that unlocks the journey. Must match the tag your Shopify Flow automation adds on purchase.", "default": "p2p-learning" },
+    { "type": "product", "id": "access_product", "label": "Access product", "info": "Shown as the \"Get Access\" button on the locked state." },
+    { "type": "url", "id": "learn_more_url", "label": "Learn more link", "info": "e.g. link to your Purpose 2 Profit marketing page." },
+    { "type": "text", "id": "locked_heading", "label": "Locked state heading", "default": "Unlock The Purpose 2 Profit Learning Journey" },
+    { "type": "richtext", "id": "locked_body", "label": "Locked state body", "default": "<p>Get instant access to the full Learning Journey — every course, badge, and side-quest on the map.</p>" },
 
     { "type": "header", "content": "Courses (marker → page)" },
     { "type": "text", "id": "course_1_title", "label": "Course 1 title", "default": "Relieve the Overwhelm" },
