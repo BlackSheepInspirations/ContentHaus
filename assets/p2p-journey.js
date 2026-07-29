@@ -91,6 +91,7 @@
     var board = root.querySelector('.board');
     if(!board) return;
     root.querySelectorAll('.hs').forEach(function(h){
+      if(h.classList.contains('hs--plain')) return; // decorative-info hotspot (e.g. RAFT scroll) — no state marker
       var type = nodeType(h);
       var state = nodeState(h);
       var cs = document.createElement('div');
@@ -173,6 +174,7 @@
     h.addEventListener('mouseleave', function(){ if(h._marker) h._marker.classList.remove('hovered'); });
     h.addEventListener('click', function(){
       if(h.hasAttribute('data-begin') && begin){ beginStep('welcome1'); begin.classList.add('show'); return; }
+      if(h.classList.contains('hs--plain')){ openModal(h); return; } // RAFT scroll info — never gated
       var type = h.getAttribute('data-type');
       if(type === 'check'){ openCheck(h); return; }
       if(nodeState(h) === 'locked'){ openLockedModal(h); return; }

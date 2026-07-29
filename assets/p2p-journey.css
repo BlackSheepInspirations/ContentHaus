@@ -39,8 +39,11 @@
   background:linear-gradient(180deg,rgba(16,29,38,.96),rgba(9,16,22,.96));
   border:1px solid var(--gstroke); box-shadow:0 10px 30px rgba(0,0,0,.5), inset 0 1px 0 rgba(216,180,90,.12); backdrop-filter:blur(8px);}
 #p2pj .bar-main{display:flex; justify-content:space-between; align-items:center; gap:18px; flex-wrap:wrap;}
-#p2pj .bar-realms{display:flex; align-items:center; gap:8px; overflow-x:auto; padding-top:10px; border-top:1px solid rgba(216,180,90,.14); -ms-overflow-style:none; scrollbar-width:none;}
-#p2pj .bar-realms::-webkit-scrollbar{display:none;}
+#p2pj .bar-realms{display:flex; align-items:center; gap:10px; padding-top:10px; border-top:1px solid rgba(216,180,90,.14);}
+#p2pj .realms-scroll{display:flex; align-items:center; gap:8px; overflow-x:auto; flex:1 1 auto; min-width:0; -ms-overflow-style:none; scrollbar-width:none;}
+#p2pj .realms-scroll::-webkit-scrollbar{display:none;}
+#p2pj .bar-realms .board-right{flex:none; flex-direction:row; align-items:center; gap:7px; padding:0 2px 0 12px; border-left:1px solid rgba(216,180,90,.14);}
+#p2pj .bar-realms .board-right small{margin-top:0;}
 #p2pj .brlbl{font:700 9px/1 system-ui; letter-spacing:.18em; text-transform:uppercase; color:var(--muted); flex:none; padding-right:2px;}
 #p2pj .rbtn{display:flex; align-items:center; gap:7px; flex:none; text-decoration:none; padding:5px 12px 5px 5px; border-radius:999px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.08); color:var(--text); transition:.16s; cursor:pointer;}
 #p2pj .rbtn b{display:grid; place-items:center; width:20px; height:20px; border-radius:50%; background:rgba(216,180,90,.18); color:var(--gold-bright); font:800 11px/1 system-ui; flex:none;}
@@ -208,6 +211,11 @@
    label; the visible affordance is the .cs marker badge rendered at its
    anchor point (below), not this element itself */
 #p2pj .hs{position:absolute; z-index:5; cursor:pointer; border:0; background:transparent; border-radius:14px;}
+/* next-realm compass link + gold label */
+#p2pj .p2pj-nextrealm{position:absolute; z-index:6; transform:translate(-50%,-50%); width:16%; height:6%; display:block; text-decoration:none;}
+#p2pj .p2pj-nextrealm .nr-text{position:absolute; left:50%; bottom:100%; transform:translateX(-50%); margin-bottom:8px; white-space:nowrap; text-align:center;
+  font:italic 700 clamp(14px,2.6vw,22px)/1.15 "Georgia",serif; color:#f4e2a6; text-shadow:0 2px 8px rgba(0,0,0,.85), 0 0 16px rgba(216,180,90,.55); transition:.16s;}
+#p2pj .p2pj-nextrealm:hover .nr-text{color:#fff3d2; text-shadow:0 2px 8px rgba(0,0,0,.9), 0 0 22px rgba(244,226,166,.85);}
 /* locked Main/Offshoot nodes stay clickable (to explain what unlocks them) but read as inert */
 #p2pj .hs.is-locked{cursor:not-allowed;}
 

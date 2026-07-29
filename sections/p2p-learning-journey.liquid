@@ -61,7 +61,6 @@
       </nav>
       <a class="barinfo" href="#" data-info data-tip="Info, rules &amp; help"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5" stroke-linecap="round"/><circle cx="12" cy="7.6" r="1.1" fill="#fff" stroke="none"/></svg></a>
       <div class="stats">
-        <div class="stat stat-ring" data-tip="% of this board's courses completed"><div class="ring-mini p2pj-ring" style="--p:0"><b class="p2pj-ringpct">0%</b></div><small>Board</small></div>
         <button class="stat stat-points" type="button" data-points data-tip="See how points work"><b><svg viewBox="0 0 24 24"><path fill="#f4c534" stroke="#b98f1e" stroke-width="1" d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.9 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/></svg><span class="p2pj-points">{{ section.settings.stat_points | default: '0' }}</span></b><small>Points</small></button>
         <div class="stat"><b><svg viewBox="0 0 24 24"><path fill="#39c5c0" stroke="#1f7f7c" stroke-width="1" d="M6 3h12l3 6-9 12L3 9z"/></svg><span class="p2pj-badges">{{ section.settings.stat_badges | default: '0' }}</span></b><small>Badges</small></div>
         <div class="stat"><b><svg viewBox="0 0 24 24"><path fill="#8f6fd6" stroke="#5b3c8c" stroke-width="1" d="M6 3h12l3 6-9 12L3 9z"/></svg><span class="p2pj-streak">{{ section.settings.stat_streak | default: '0' }}</span></b><small>Streak</small></div>
@@ -71,6 +70,7 @@
 
       {%- comment -%} ---- realm navigation (second toolbar row) ---- {%- endcomment -%}
       <div class="bar-realms">
+        <div class="realms-scroll">
         <span class="brlbl">Realms</span>
         {%- assign defnames = 'The Shoreline,The Thicket,The Bloom,The Fields,The Evergreens' | split: ',' -%}
         {%- assign cur = section.settings.current_realm | default: 1 -%}
@@ -87,6 +87,8 @@
             <a class="rbtn{% if cur == r %} on{% endif %}" href="{{ ru | default: '#' }}"><b>{{ r }}</b><span>{{ rn }}</span></a>
           {%- endif -%}
         {%- endfor -%}
+        </div>
+        <div class="stat stat-ring board-right" data-tip="% of this board's courses completed"><div class="ring-mini p2pj-ring" style="--p:0"><b class="p2pj-ringpct">0%</b></div><small>Board</small></div>
       </div>
     </div>
 
@@ -105,7 +107,7 @@
       {%- endif -%}
 
       {%- comment -%} "Your Journey Begins Here" — always present, opens onboarding {%- endcomment -%}
-      <button class="hs" style="left:29%; top:5.6%; width:22%; height:5%" data-begin data-title="Your Journey Begins Here"></button>
+      <button class="hs" style="left:27%; top:4%; width:22%; height:5%" data-begin data-title="Your Journey Begins Here"></button>
 
       {%- comment -%} Main / Offshoot / Check nodes — from section blocks. Lock state, done state,
          and the progress overlays are all computed client-side in p2p-journey.js from
@@ -124,6 +126,15 @@
             <button class="hs hs--check" style="{{ pos }}" data-type="check" data-title="{{ b.title }}" data-pulse-items="{{ b.pulse_items | strip_newlines | escape }}" data-link-url="{{ b.link_url }}" data-link-label="{{ b.link_label | default: 'Open' }}"{{ block.shopify_attributes }}></button>
         {%- endcase -%}
       {%- endfor -%}
+
+      {%- comment -%} RAFT framework scroll — clickable reference, no state marker {%- endcomment -%}
+      <button class="hs hs--plain" style="left:72%; top:9%; width:27%; height:11%" data-type="info" data-title="The RAFT Framework" data-body="Your life raft to get out of the ocean. R: Relieve · A: Act · F: Fast Win · T: Traction. Work these four in order and you're moving." data-cta="Continue"></button>
+
+      {%- comment -%} next-realm compass (bottom) — onward link with gold label {%- endcomment -%}
+      {%- assign next_n = section.settings.current_realm | default: 1 | plus: 1 -%}
+      {%- assign nrk = 'realm_' | append: next_n | append: '_url' -%}
+      {%- assign next_realm_url = section.settings[nrk] -%}
+      <a class="p2pj-nextrealm" href="{{ next_realm_url | default: '#' }}" style="left:38%; top:97%;" data-tip="On to the next realm"><span class="nr-text">Journey to the<br>Next Realm</span></a>
     </div>
 
     {%- comment -%} ---- PROGRESS PANEL ---- {%- endcomment -%}
