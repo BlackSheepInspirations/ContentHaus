@@ -309,7 +309,7 @@ optionals) · Founder (manual, Founder's Pass) · Masterclass (manual, live even
 The badges page shows a live "X of 42 earned" summary and a badge-unlock
 **popup** (aurora confetti + stars + twinkles) the first time each newly-earned
 badge is seen in a browser. Icons added for the Realms: `wave`, `thicket`,
-`bloom`, `wheat`, `evergreen`, `footprints`.
+`bloom`, `hills`, `evergreen`, and `compassrose` (Every Path Walked).
 
 ---
 

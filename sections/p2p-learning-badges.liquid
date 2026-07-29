@@ -81,9 +81,9 @@
               {%- when 'wave' -%}<path d="M3 9c1.5-1.8 3-1.8 4.5 0s3 1.8 4.5 0 3-1.8 4.5 0 3 1.8 4.5 0"/><path d="M3 13.5c1.5-1.8 3-1.8 4.5 0s3 1.8 4.5 0 3-1.8 4.5 0 3 1.8 4.5 0"/><path d="M3 18c1.5-1.8 3-1.8 4.5 0s3 1.8 4.5 0 3-1.8 4.5 0 3 1.8 4.5 0"/>
               {%- when 'thicket' -%}<path d="M12 20v-5"/><path d="M12 15c0-2.8-2.2-5-5-5-.3 2.8 2.2 5 5 5z"/><path d="M12 15c0-2.8 2.2-5 5-5 .3 2.8-2.2 5-5 5z"/><path d="M12 11c0-2.5-2-4.5-4.5-4.5-.3 2.5 2 4.5 4.5 4.5z"/><path d="M12 11c0-2.5 2-4.5 4.5-4.5 .3 2.5-2 4.5-4.5 4.5z"/>
               {%- when 'bloom' -%}<circle cx="12" cy="12" r="2.3"/><circle cx="12" cy="7" r="2.1"/><circle cx="16.3" cy="9.5" r="2.1"/><circle cx="16.3" cy="14.5" r="2.1"/><circle cx="12" cy="17" r="2.1"/><circle cx="7.7" cy="14.5" r="2.1"/><circle cx="7.7" cy="9.5" r="2.1"/>
-              {%- when 'wheat' -%}<path d="M12 21v-9"/><path d="M12 12c-1.8 0-3-1.4-3-3.2C10.8 8.8 12 10.2 12 12zM12 12c1.8 0 3-1.4 3-3.2C13.2 8.8 12 10.2 12 12zM12 9c-1.8 0-3-1.4-3-3.2C10.8 5.8 12 7.2 12 9zM12 9c1.8 0 3-1.4 3-3.2C13.2 5.8 12 7.2 12 9zM12 6c-1.6 0-2.7-1.3-2.7-3C10.9 3 12 4.3 12 6zM12 6c1.6 0 2.7-1.3 2.7-3C13.1 3 12 4.3 12 6z"/>
+              {%- when 'hills' -%}<circle cx="16.8" cy="7.2" r="2.2"/><path d="M2 18c3-6 6-6 9 0"/><path d="M9 18c3-6.5 6.5-6.5 9.5 0"/>
+              {%- when 'compassrose' -%}<circle cx="12" cy="12" r="9"/><path d="M12 3L13.2 10.8 21 12 13.2 13.2 12 21 10.8 13.2 3 12 10.8 10.8Z"/>
               {%- when 'evergreen' -%}<path d="M12 2L7 9h3l-4 5h3l-4 5h14l-4-5h3l-4-5h3z"/><path d="M12 19v3"/>
-              {%- when 'footprints' -%}<path d="M8 4c1.2 0 2 1.3 2 3s-.5 4-2 4-2-2-2-4 .8-3 2-3z"/><path d="M8 12c.9 0 1.5.7 1.5 1.7S9 15.5 8 15.5s-1.5-.8-1.5-1.8S7.1 12 8 12z"/><path d="M16 8c1.2 0 2 1.3 2 3s-.5 4-2 4-2-2-2-4 .8-3 2-3z"/><path d="M16 16c.9 0 1.5.7 1.5 1.7s-.5 1.8-1.5 1.8-1.5-.8-1.5-1.8S15.1 16 16 16z"/>
               {%- else -%}<circle cx="12" cy="12" r="8"/>
             {%- endcase -%}
           </svg>
@@ -167,7 +167,7 @@
             {"value":"boat","label":"Boat / Sail"},{"value":"pen","label":"Pen / Journal"},{"value":"fingerprint","label":"Fingerprint"},
             {"value":"shootingstar","label":"Star Cluster"},{"value":"notepad","label":"Notepad"},{"value":"grad","label":"Graduation Cap"},
             {"value":"magnifier","label":"Magnifier (explore)"},{"value":"seal","label":"Award Seal (certified)"},{"value":"comeback","label":"Comeback (return arrow)"},
-            {"value":"wave","label":"Wave (Shoreline)"},{"value":"thicket","label":"Thicket (bushes)"},{"value":"bloom","label":"Bloom (flower)"},{"value":"wheat","label":"Wheat (Fields)"},{"value":"evergreen","label":"Evergreen (tree)"},{"value":"footprints","label":"Footprints (every path)"}
+            {"value":"wave","label":"Wave (Shoreline)"},{"value":"thicket","label":"Thicket (bushes)"},{"value":"bloom","label":"Bloom (flower)"},{"value":"hills","label":"Hills (Fields)"},{"value":"evergreen","label":"Evergreen (tree)"},{"value":"compassrose","label":"Compass Rose (every path)"}
           ]
         },
         { "type": "select", "id": "color", "label": "Colour", "default": "c-gold",
@@ -187,10 +187,10 @@
         { "type": "badge", "settings": { "group": "Journey Milestones", "name": "First Win", "req": "Bank your first quick win", "icon": "trophy", "color": "c-gold", "earned": true } },
         { "type": "badge", "settings": { "group": "Journey Milestones", "name": "Finding Your Current", "req": "Complete 3 courses", "icon": "compass", "color": "c-te", "earned": true } },
         { "type": "badge", "settings": { "group": "The Realms", "name": "Made it to Shore", "req": "Clear Realm 1 — The Shoreline", "icon": "wave", "color": "c-te", "earned": false } },
-        { "type": "badge", "settings": { "group": "The Realms", "name": "Through the Thicket", "req": "Clear Realm 2 — The Thicket", "icon": "thicket", "color": "c-em", "earned": false } },
+        { "type": "badge", "settings": { "group": "The Realms", "name": "Through the Thicket", "req": "Clear Realm 2 — The Thicket", "icon": "thicket", "color": "c-pu", "earned": false } },
         { "type": "badge", "settings": { "group": "The Realms", "name": "In Full Bloom", "req": "Clear Realm 3 — The Bloom", "icon": "bloom", "color": "c-pk", "earned": false } },
-        { "type": "badge", "settings": { "group": "The Realms", "name": "Across the Fields", "req": "Clear Realm 4 — The Fields", "icon": "wheat", "color": "c-gold", "earned": false } },
-        { "type": "badge", "settings": { "group": "The Realms", "name": "ROOTED to Thrive", "req": "Clear Realm 5 — The Evergreens", "icon": "evergreen", "color": "c-pu", "earned": false } },
+        { "type": "badge", "settings": { "group": "The Realms", "name": "Across the Fields", "req": "Clear Realm 4 — The Fields", "icon": "hills", "color": "c-gold", "earned": false } },
+        { "type": "badge", "settings": { "group": "The Realms", "name": "ROOTED to Thrive", "req": "Clear Realm 5 — The Evergreens", "icon": "evergreen", "color": "c-em", "earned": false } },
         { "type": "badge", "settings": { "group": "The Realms", "name": "Reached Freedom", "req": "Clear all five realms", "icon": "shootingstar", "color": "c-gold", "earned": false } },
         { "type": "badge", "settings": { "group": "Framework Masteries", "name": "RAFT Master", "req": "Complete the RAFT course", "icon": "anchor", "color": "c-em", "earned": false } },
         { "type": "badge", "settings": { "group": "Framework Masteries", "name": "GROWS Master", "req": "Complete the GROWS course", "icon": "sprout", "color": "c-em", "earned": false } },
@@ -221,7 +221,7 @@
         { "type": "badge", "settings": { "group": "Streaks", "name": "100-Day Streak", "req": "100 days in a row", "icon": "flame", "color": "c-gold", "earned": false } },
         { "type": "badge", "settings": { "group": "Streaks", "name": "125-Day Streak", "req": "125 days in a row", "icon": "flame", "color": "c-pu", "earned": false } },
         { "type": "badge", "settings": { "group": "Streaks", "name": "150-Day Streak", "req": "150 days in a row", "icon": "flame", "color": "c-gold", "earned": false } },
-        { "type": "badge", "settings": { "group": "Special", "name": "Every Path Walked", "req": "Complete every course, even the optional ones", "icon": "footprints", "color": "c-gold", "earned": false } },
+        { "type": "badge", "settings": { "group": "Special", "name": "Every Path Walked", "req": "Complete every course, even the optional ones", "icon": "compassrose", "color": "c-gold", "earned": false } },
         { "type": "badge", "settings": { "group": "Special", "name": "Founder", "req": "Founder's Pass holder", "icon": "crown", "color": "c-gold", "earned": true } },
         { "type": "badge", "settings": { "group": "Special", "name": "Masterclass", "req": "Join a live masterclass", "icon": "grad", "color": "c-pu", "earned": false } }
       ]
