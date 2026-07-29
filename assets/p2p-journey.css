@@ -210,12 +210,13 @@
 /* hotspots — invisible click rectangle over the board art's own painted
    label; the visible affordance is the .cs marker badge rendered at its
    anchor point (below), not this element itself */
-#p2pj .hs{position:absolute; z-index:5; cursor:pointer; border:0; background:transparent; border-radius:14px;}
+#p2pj .hs{position:absolute; z-index:5; cursor:pointer; border:0; background:transparent; border-radius:14px; transform:translate(-50%,-50%);}
 /* next-realm compass link + gold label */
-#p2pj .p2pj-nextrealm{position:absolute; z-index:6; transform:translate(-50%,-50%); width:16%; height:6%; display:block; text-decoration:none;}
-#p2pj .p2pj-nextrealm .nr-text{position:absolute; left:50%; bottom:100%; transform:translateX(-50%); margin-bottom:8px; white-space:nowrap; text-align:center;
-  font:italic 700 clamp(14px,2.6vw,22px)/1.15 "Georgia",serif; color:#f4e2a6; text-shadow:0 2px 8px rgba(0,0,0,.85), 0 0 16px rgba(216,180,90,.55); transition:.16s;}
-#p2pj .p2pj-nextrealm:hover .nr-text{color:#fff3d2; text-shadow:0 2px 8px rgba(0,0,0,.9), 0 0 22px rgba(244,226,166,.85);}
+#p2pj .p2pj-nextrealm{position:absolute; z-index:6; transform:translate(-50%,-50%); display:flex; align-items:center; justify-content:flex-end;
+  padding:0 4% 0 2%; border:1.5px solid rgba(216,180,90,.5); border-radius:16px; background:rgba(8,16,20,.34); text-decoration:none; backdrop-filter:blur(1px); transition:.16s;}
+#p2pj .p2pj-nextrealm .nr-text{white-space:nowrap; text-align:right; font:italic 700 clamp(13px,2.3vw,20px)/1.2 "Georgia",serif; color:#f4e2a6; text-shadow:0 2px 8px rgba(0,0,0,.85), 0 0 16px rgba(216,180,90,.55);}
+#p2pj .p2pj-nextrealm:hover{border-color:var(--gold); background:rgba(20,34,42,.5);}
+#p2pj .p2pj-nextrealm:hover .nr-text{color:#fff3d2;}
 /* locked Main/Offshoot nodes stay clickable (to explain what unlocks them) but read as inert */
 #p2pj .hs.is-locked{cursor:not-allowed;}
 

@@ -1,0 +1,54 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+body{margin:0;background:#0a0a0a;font-family:system-ui;}
+.wrap{position:relative;width:520px;margin:0 auto;}
+.wrap img{width:520px;display:block;}
+.grid,.axis{position:absolute;inset:0;pointer-events:none;}
+.gl{position:absolute;background:rgba(120,200,255,.16);}
+.gl.med{background:rgba(120,200,255,.34);}
+.gl.major{background:rgba(255,220,120,.7);}
+.glx{width:1px;top:0;bottom:0;}
+.gly{height:1px;left:0;right:0;}
+.lab{position:absolute;font:700 9px/1 monospace;color:#7fe3ff;text-shadow:0 1px 2px #000;}
+.labx{top:2px;transform:translateX(-50%);}
+.laby{left:2px;transform:translateY(-50%);}
+.node{position:absolute;transform:translate(-50%,-50%);width:14px;height:14px;border-radius:50%;background:#ff3b6b;border:2px solid #fff;box-shadow:0 0 6px #000;}
+.node.c{background:#39c5c0;}.node.o{background:#8f6fd6;}.node.s{background:#ffd24a;}
+.nlab{position:absolute;transform:translate(-50%,-140%);font:700 9px/1 system-ui;color:#fff;white-space:nowrap;text-shadow:0 1px 3px #000,0 0 4px #000;}
+#readout{position:fixed;top:8px;left:8px;background:#000c;color:#7fe3ff;font:700 14px monospace;padding:8px 12px;border-radius:8px;z-index:99;}
+</style></head><body>
+<div id="readout">click anywhere → x, y</div>
+<div class="wrap" id="wrap">
+<img src="../assets/p2p-journey-board-openwater.jpg" alt="board">
+<div class="grid" id="grid"></div>
+</div>
+<script>
+var grid=document.getElementById('grid');
+for(var i=0;i<=100;i+=2){
+  var major=(i%10===0), med=(i%10===5);
+  var cls=major?' major':(med?' med':'');
+  var vx=document.createElement('div');vx.className='gl glx'+cls;vx.style.left=i+'%';grid.appendChild(vx);
+  var vy=document.createElement('div');vy.className='gl gly'+cls;vy.style.top=i+'%';grid.appendChild(vy);
+  if(major){
+    var lx=document.createElement('div');lx.className='lab labx';lx.style.left=i+'%';lx.textContent=i;grid.appendChild(lx);
+    var ly=document.createElement('div');ly.className='lab laby';ly.style.top=i+'%';ly.textContent=i;grid.appendChild(ly);
+  }
+}
+// current node CENTERS (from converted positions). class: s=start,c=check,o=offshoot,(default course)
+var N=[
+['Begin','s',38,6.5],['Welcome','',64,5.25],['Mindset','c',44.5,14.5],['RAFT','',61,18.25],
+['Lane','',40,23.25],['Purpose','c',66,27.5],['Protect','',42,31.75],['Storefront','',59,38.25],
+['Shopify','o',21,43],['Etsy','o',82,44.35],['Beacons','o',75,53],['Stan','o',22,57],
+['Heart','c',42.5,66.5],['Psychology','',38,72.25],['Show Up','',42,88.25]
+];
+N.forEach(function(n){
+  var d=document.createElement('div');d.className='node '+n[1];d.style.left=n[2]+'%';d.style.top=n[3]+'%';grid.appendChild(d);
+  var l=document.createElement('div');l.className='nlab';l.style.left=n[2]+'%';l.style.top=n[3]+'%';l.textContent=n[0]+' '+n[2]+','+n[3];grid.appendChild(l);
+});
+document.getElementById('wrap').addEventListener('click',function(e){
+  var r=this.getBoundingClientRect();
+  var x=((e.clientX-r.left)/r.width*100).toFixed(1);
+  var y=((e.clientY-r.top)/r.height*100).toFixed(1);
+  document.getElementById('readout').textContent='x '+x+'   y '+y;
+});
+</script>
+</body></html>

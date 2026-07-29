@@ -107,7 +107,7 @@
       {%- endif -%}
 
       {%- comment -%} "Your Journey Begins Here" — always present, opens onboarding {%- endcomment -%}
-      <button class="hs" style="left:27%; top:4%; width:22%; height:5%" data-begin data-title="Your Journey Begins Here"></button>
+      <button class="hs" style="left:38%; top:6.5%; width:22%; height:5%" data-begin data-title="Your Journey Begins Here"></button>
 
       {%- comment -%} Main / Offshoot / Check nodes — from section blocks. Lock state, done state,
          and the progress overlays are all computed client-side in p2p-journey.js from
@@ -128,13 +128,13 @@
       {%- endfor -%}
 
       {%- comment -%} RAFT framework scroll — clickable reference, no state marker {%- endcomment -%}
-      <button class="hs hs--plain" style="left:72%; top:9%; width:27%; height:11%" data-type="info" data-title="The RAFT Framework" data-body="Your life raft to get out of the ocean. R: Relieve · A: Act · F: Fast Win · T: Traction. Work these four in order and you're moving." data-cta="Continue"></button>
+      <button class="hs hs--plain" style="left:85.5%; top:13%; width:27%; height:8%" data-type="info" data-title="The RAFT Framework" data-body="Your life raft to get out of the ocean. R: Relieve · A: Act · F: Fast Win · T: Traction. Work these four in order and you're moving." data-cta="Continue"></button>
 
       {%- comment -%} next-realm compass (bottom) — onward link with gold label {%- endcomment -%}
       {%- assign next_n = section.settings.current_realm | default: 1 | plus: 1 -%}
       {%- assign nrk = 'realm_' | append: next_n | append: '_url' -%}
       {%- assign next_realm_url = section.settings[nrk] -%}
-      <a class="p2pj-nextrealm" href="{{ next_realm_url | default: '#' }}" style="left:38%; top:97%;" data-tip="On to the next realm"><span class="nr-text">Journey to the<br>Next Realm</span></a>
+      <a class="p2pj-nextrealm" href="{{ next_realm_url | default: '#' }}" style="left:49%; top:96.5%; width:40%; height:8%;" data-tip="On to the next realm"><span class="nr-text">Journey to the<br>Next Realm</span></a>
     </div>
 
     {%- comment -%} ---- PROGRESS PANEL ---- {%- endcomment -%}
