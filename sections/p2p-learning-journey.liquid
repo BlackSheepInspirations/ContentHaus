@@ -134,7 +134,7 @@
       {%- assign next_n = section.settings.current_realm | default: 1 | plus: 1 -%}
       {%- assign nrk = 'realm_' | append: next_n | append: '_url' -%}
       {%- assign next_realm_url = section.settings[nrk] -%}
-      <a class="p2pj-nextrealm" href="{{ next_realm_url | default: '#' }}" style="left:49%; top:96.5%; width:40%; height:8%;" data-tip="On to the next realm"><span class="nr-text">Journey to the<br>Next Realm</span></a>
+      <a class="p2pj-nextrealm" href="{{ next_realm_url | default: '#' }}" style="left:55%; top:96.5%; width:38%; height:8%;" data-tip="On to the next realm"><span class="nr-text">Journey to the<br>Next Realm</span></a>
     </div>
 
     {%- comment -%} ---- PROGRESS PANEL ---- {%- endcomment -%}
