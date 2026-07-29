@@ -1149,6 +1149,7 @@
       items: [
         { type: "generator", id: "journal-pages" },
         { type: "generator", id: "junk-journal" },
+        { type: "generator", id: "notebook-cover" },
       ],
     },
     {

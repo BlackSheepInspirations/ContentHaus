@@ -26,6 +26,36 @@ sections — no iframe, no external app, no build step. Progress currently lives
 in the browser (`localStorage`); the design is built to lift into a customer
 account backend before public launch (see §9).
 
+## 1a. The five Realms (multi-board structure)
+
+The journey is split into **five Realms**, each its own board + journey page
+(the multi-board architecture — one board caps ~8000–11k px). The full
+course/lesson plan lives in **`docs/P2P_Level_Map.xlsx`** (two tabs: Level
+Legend, Course Map — every level, course, lesson order, and which course awards
+which badge). Realms (a Realm = a stage; **do not** call them "Levels" — that
+word is now the points meter, renamed **Merit**):
+
+| # | Realm | Terrain | Anchor / gate |
+|---|---|---|---|
+| 1 | The Shoreline | Ocean → Shore | **GROWS** must be completed first (gates the rest of Realm 1) |
+| 2 | The Thicket | Mystical Forest | none — fully open |
+| 3 | The Bloom | Thriving Desert | none — fully open |
+| 4 | The Fields | Grasslands | none — fully open |
+| 5 | The Evergreens | Mature Woods | **ROOTED** must be completed first (gates the rest) |
+
+> Note: the xlsx still labels Realm 5 "The Canopy" — the owner renamed it to
+> **The Evergreens** (evergreen business); reconcile the sheet when convenient.
+
+**Lock rules:** only *Your Journey Begins Here* and *Welcome Aboard (incl. RAFT)*
+are always-locked-first. After that every Realm is open in any order, EXCEPT a
+Realm with an anchor course (GROWS in 1, ROOTED in 5) keeps the rest of that
+Realm locked until the anchor is done. Courses are **Main / Offshoot / Check**;
+offshoots are optional and hang off a trunk course.
+
+**Navigation:** the sticky toolbar has a **second row** of Realm buttons
+(settings `realm_1..5_name/url/locked`, `current_realm`) for jumping between
+boards; each board's bottom also links to the next. Realm 5 defaults locked.
+
 ---
 
 ## 2. Files (as built)
@@ -226,25 +256,36 @@ chart and the accrual math both read these same values.
 | Download a certificate | **25** |
 | Journal entry (each, up to 5/day) | **5** |
 | Daily streak (each day) | **5** |
-| **Level up every** | **250 points** |
+| **Earn a Merit every** | **250 points** |
+
+The points meter (`points ÷ 250`) is labeled **Merit** in the UI (renamed from
+"Level," which now belongs to the Realms). The engine function is still
+`P2P.level()`; only the display label changed.
 
 Tagline in the modal: *"These numbers will grow with you — as new courses land,
 so might new ways to earn."*
 
 ---
 
-## 9. Badges roster (36 total)
+## 9. Badges roster (42 total)
 
 Badges are section blocks in `p2p-learning-badges.liquid`, grouped by "Family".
 Each has a name, requirement, icon, color, and earned state. **Auto** = awarded
 by the engine; **Manual** = editor toggle / human-granted / pending content.
 
-**Journey Milestones** — Set Sail (manual/default) · First Steps (auto, 1
-course) · First Win (manual — pending Quick Wins course) · Finding Your Current
-(auto, 3 courses) · Reached Freedom (auto, 100 courses — placeholder total).
+**Journey Milestones** — Set Sail (auto, on reaching the journey) · First Steps
+(auto, 1 course) · First Win (manual — pending Quick Wins course) · Finding Your
+Current (auto, 3 courses).
 
-**Framework Masteries** — RAFT / GROWS / ROOTED Master (manual — pending leg
-mapping).
+**The Realms** — Made it to Shore (wave) · Through the Thicket (thicket) · In
+Full Bloom (bloom) · Across the Fields (wheat) · ROOTED to Thrive (evergreen) —
+one per Realm, manual until each Realm's required-course set is mapped — plus
+**Reached Freedom** (star cluster) the **capstone**, auto-awarded on the badges
+page once all five Realm badges are earned. These read together as the progress
+journey.
+
+**Framework Masteries** — RAFT / GROWS / ROOTED Master (manual — award on
+completing that framework's course; see the xlsx badge column).
 
 **Habits & Wins** — Founder Fingerprint (auto, Brand DNA self-attest) · First
 Reflection (auto, 1 entry) · Journal Keeper (auto, 10) · Journal Devotee (auto,
@@ -262,12 +303,13 @@ courses).
 
 **Streaks** — 5 / 10 / 15 / 20 / 25 / 50 / 75 / 100 / 125 / 150-Day (all auto).
 
-**Special** — Founder (manual, Founder's Pass) · Masterclass (manual, live
-event).
+**Special** — Every Path Walked (footprints — manual, complete every course incl.
+optionals) · Founder (manual, Founder's Pass) · Masterclass (manual, live event).
 
-The badges page shows a live "X of 36 earned" summary and a badge-unlock
+The badges page shows a live "X of 42 earned" summary and a badge-unlock
 **popup** (aurora confetti + stars + twinkles) the first time each newly-earned
-badge is seen in a browser.
+badge is seen in a browser. Icons added for the Realms: `wave`, `thicket`,
+`bloom`, `wheat`, `evergreen`, `footprints`.
 
 ---
 

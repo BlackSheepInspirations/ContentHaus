@@ -34,10 +34,22 @@
 #p2pj .desc{color:#cfe0da; font-size:15px; margin-top:14px; max-width:500px; font-family:system-ui; line-height:1.55;}
 
 /* sticky nav + stats bar */
-#p2pj .bar{position:relative; z-index:20; display:flex; justify-content:space-between; align-items:center;
-  gap:18px; flex-wrap:wrap; margin:14px 14px 0; padding:12px 16px; border-radius:18px;
+#p2pj .bar{position:relative; z-index:20; display:flex; flex-direction:column; gap:10px;
+  margin:14px 14px 0; padding:12px 16px; border-radius:18px;
   background:linear-gradient(180deg,rgba(16,29,38,.96),rgba(9,16,22,.96));
   border:1px solid var(--gstroke); box-shadow:0 10px 30px rgba(0,0,0,.5), inset 0 1px 0 rgba(216,180,90,.12); backdrop-filter:blur(8px);}
+#p2pj .bar-main{display:flex; justify-content:space-between; align-items:center; gap:18px; flex-wrap:wrap;}
+#p2pj .bar-realms{display:flex; align-items:center; gap:8px; overflow-x:auto; padding-top:10px; border-top:1px solid rgba(216,180,90,.14); -ms-overflow-style:none; scrollbar-width:none;}
+#p2pj .bar-realms::-webkit-scrollbar{display:none;}
+#p2pj .brlbl{font:700 9px/1 system-ui; letter-spacing:.18em; text-transform:uppercase; color:var(--muted); flex:none; padding-right:2px;}
+#p2pj .rbtn{display:flex; align-items:center; gap:7px; flex:none; text-decoration:none; padding:5px 12px 5px 5px; border-radius:999px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.08); color:var(--text); transition:.16s; cursor:pointer;}
+#p2pj .rbtn b{display:grid; place-items:center; width:20px; height:20px; border-radius:50%; background:rgba(216,180,90,.18); color:var(--gold-bright); font:800 11px/1 system-ui; flex:none;}
+#p2pj .rbtn>span{font:600 12px/1 system-ui; white-space:nowrap;}
+#p2pj .rbtn:hover{background:rgba(255,255,255,.09); border-color:var(--gstroke);}
+#p2pj .rbtn.on{background:linear-gradient(180deg,rgba(39,174,110,.28),rgba(39,174,110,.14)); border-color:rgba(39,174,110,.5);}
+#p2pj .rbtn.on b{background:var(--emerald); color:#06120e;}
+#p2pj .rbtn.locked{opacity:.6; cursor:default;}
+#p2pj .rbtn.locked b{background:rgba(255,255,255,.08); color:var(--muted); font-size:10px;}
 /* JS-driven sticky (CSS position:sticky is disabled by the theme's overflow-x) */
 #p2pj .bar.p2pj-fixed{position:fixed; margin:0; z-index:40;}
 #p2pj .p2pj-barspacer{height:0;}

@@ -35,6 +35,7 @@
 
     {%- comment -%} ---- STICKY NAV + STATS ---- {%- endcomment -%}
     <div class="bar">
+      <div class="bar-main">
       <nav class="nav">
         <a class="on" href="#" data-panel="journey" data-tip="Your map — courses, signs &amp; side-quests"><svg viewBox="0 0 24 24"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><path d="M9 4v14M15 6v14"/></svg><small>Journey Map</small></a>
         <a href="#" data-panel="progress" data-tip="Your points, badges &amp; streaks"><svg viewBox="0 0 24 24"><path d="M4 20V12M9.5 20V6M15 20v-9M20.5 20V8"/><path d="M3 20h18"/></svg><small>Progress</small></a>
@@ -47,7 +48,28 @@
         <button class="stat stat-points" type="button" data-points data-tip="See how points work"><b><svg viewBox="0 0 24 24"><path fill="#f4c534" stroke="#b98f1e" stroke-width="1" d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.9 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/></svg><span class="p2pj-points">{{ section.settings.stat_points | default: '0' }}</span></b><small>Points</small></button>
         <div class="stat"><b><svg viewBox="0 0 24 24"><path fill="#39c5c0" stroke="#1f7f7c" stroke-width="1" d="M6 3h12l3 6-9 12L3 9z"/></svg><span class="p2pj-badges">{{ section.settings.stat_badges | default: '0' }}</span></b><small>Badges</small></div>
         <div class="stat"><b><svg viewBox="0 0 24 24"><path fill="#8f6fd6" stroke="#5b3c8c" stroke-width="1" d="M6 3h12l3 6-9 12L3 9z"/></svg><span class="p2pj-streak">{{ section.settings.stat_streak | default: '0' }}</span></b><small>Streak</small></div>
-        <div class="level"><div class="coin"><svg viewBox="0 0 24 24"><path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.9 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/></svg></div><small>Level <span class="p2pj-level">{{ section.settings.stat_level | default: '1' }}</span></small></div>
+        <div class="level"><div class="coin"><svg viewBox="0 0 24 24"><path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.9 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/></svg></div><small>Merit <span class="p2pj-level">{{ section.settings.stat_level | default: '1' }}</span></small></div>
+      </div>
+      </div>
+
+      {%- comment -%} ---- realm navigation (second toolbar row) ---- {%- endcomment -%}
+      <div class="bar-realms">
+        <span class="brlbl">Realms</span>
+        {%- assign defnames = 'The Shoreline,The Thicket,The Bloom,The Fields,The Evergreens' | split: ',' -%}
+        {%- assign cur = section.settings.current_realm | default: 1 -%}
+        {%- for r in (1..5) -%}
+          {%- assign kn = 'realm_' | append: r | append: '_name' -%}
+          {%- assign ku = 'realm_' | append: r | append: '_url' -%}
+          {%- assign kl = 'realm_' | append: r | append: '_locked' -%}
+          {%- assign rn = section.settings[kn] | default: defnames[forloop.index0] -%}
+          {%- assign ru = section.settings[ku] -%}
+          {%- assign rl = section.settings[kl] -%}
+          {%- if rl -%}
+            <span class="rbtn locked" data-tip="Locked — keep progressing to open this realm"><b>🔒</b><span>{{ rn }}</span></span>
+          {%- else -%}
+            <a class="rbtn{% if cur == r %} on{% endif %}" href="{{ ru | default: '#' }}"><b>{{ r }}</b><span>{{ rn }}</span></a>
+          {%- endif -%}
+        {%- endfor -%}
       </div>
     </div>
 
@@ -92,7 +114,7 @@
           <div class="ptile"><b><span class="p2pj-points">{{ section.settings.stat_points | default: '0' }}</span></b><small>Points</small></div>
           <div class="ptile"><b><span class="p2pj-badges">{{ section.settings.stat_badges | default: '0' }}</span></b><small>Badges</small></div>
           <div class="ptile"><b><span class="p2pj-streak">{{ section.settings.stat_streak | default: '0' }}</span></b><small>Day streak</small></div>
-          <div class="ptile"><b>Lvl <span class="p2pj-level">{{ section.settings.stat_level | default: '1' }}</span></b><small>Level</small></div>
+          <div class="ptile"><b><span class="p2pj-level">{{ section.settings.stat_level | default: '1' }}</span></b><small>Merit</small></div>
         </div>
       </div>
       <div class="prog-next">
@@ -225,7 +247,7 @@
         <div class="pt-row"><span class="pt-label">Journal entry <em>· up to 5/day</em></span><span class="pt-bar"><i style="width:{{ p_journal | times: 100 | divided_by: p_max }}%"></i></span><b class="pt-val">+{{ p_journal }}</b></div>
         <div class="pt-row"><span class="pt-label">Show up — daily streak <em>· each day</em></span><span class="pt-bar"><i style="width:{{ p_streak | times: 100 | divided_by: p_max }}%"></i></span><b class="pt-val">+{{ p_streak }}</b></div>
       </div>
-      <div class="pt-foot"><span class="pt-coin"><svg viewBox="0 0 24 24"><path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.9 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/></svg></span> Every <b>{{ p_level }}</b> points levels you up.</div>
+      <div class="pt-foot"><span class="pt-coin"><svg viewBox="0 0 24 24"><path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.9 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/></svg></span> Every <b>{{ p_level }}</b> points earns a Merit.</div>
       <p class="pt-note">These numbers will grow with you — as new courses land, so might new ways to earn.</p>
     </div>
   </div>
@@ -359,11 +381,29 @@
     { "type": "range", "id": "sticky_offset", "min": 0, "max": 120, "step": 2, "unit": "px", "label": "Sticky bar offset", "info": "Match your theme header/announcement bar height.", "default": 6 },
     { "type": "range", "id": "board_courses", "min": 1, "max": 20, "step": 1, "label": "Courses on this board", "info": "Used for the Progress ring & “Courses done” tile.", "default": 5 },
 
+    { "type": "header", "content": "Realms (2nd toolbar row)" },
+    { "type": "range", "id": "current_realm", "min": 1, "max": 5, "step": 1, "label": "This page’s realm", "info": "Highlights which realm button is the current page.", "default": 1 },
+    { "type": "text", "id": "realm_1_name", "label": "Realm 1 name", "default": "The Shoreline" },
+    { "type": "url",  "id": "realm_1_url", "label": "Realm 1 page" },
+    { "type": "checkbox", "id": "realm_1_locked", "label": "Realm 1 locked", "default": false },
+    { "type": "text", "id": "realm_2_name", "label": "Realm 2 name", "default": "The Thicket" },
+    { "type": "url",  "id": "realm_2_url", "label": "Realm 2 page" },
+    { "type": "checkbox", "id": "realm_2_locked", "label": "Realm 2 locked", "default": false },
+    { "type": "text", "id": "realm_3_name", "label": "Realm 3 name", "default": "The Bloom" },
+    { "type": "url",  "id": "realm_3_url", "label": "Realm 3 page" },
+    { "type": "checkbox", "id": "realm_3_locked", "label": "Realm 3 locked", "default": false },
+    { "type": "text", "id": "realm_4_name", "label": "Realm 4 name", "default": "The Fields" },
+    { "type": "url",  "id": "realm_4_url", "label": "Realm 4 page" },
+    { "type": "checkbox", "id": "realm_4_locked", "label": "Realm 4 locked", "default": false },
+    { "type": "text", "id": "realm_5_name", "label": "Realm 5 name", "default": "The Evergreens" },
+    { "type": "url",  "id": "realm_5_url", "label": "Realm 5 page" },
+    { "type": "checkbox", "id": "realm_5_locked", "label": "Realm 5 locked", "default": true },
+
     { "type": "header", "content": "Stats (placeholder)" },
     { "type": "text", "id": "stat_points", "label": "Points", "default": "0" },
     { "type": "text", "id": "stat_badges", "label": "Badges", "default": "0" },
     { "type": "text", "id": "stat_streak", "label": "Streak", "default": "0" },
-    { "type": "text", "id": "stat_level", "label": "Level", "default": "1" },
+    { "type": "text", "id": "stat_level", "label": "Merit", "default": "1" },
 
     { "type": "header", "content": "Points breakdown (tap-Points chart)" },
     { "type": "number", "id": "pts_course", "label": "Finish a course", "default": 100 },
@@ -372,7 +412,7 @@
     { "type": "number", "id": "pts_cert", "label": "Download a certificate", "default": 25 },
     { "type": "number", "id": "pts_journal", "label": "Journal entry (per, up to 5/day)", "default": 5 },
     { "type": "number", "id": "pts_streak", "label": "Daily streak (per day)", "default": 5 },
-    { "type": "number", "id": "pts_level_step", "label": "Points per level", "default": 250 },
+    { "type": "number", "id": "pts_level_step", "label": "Points per Merit", "default": 250 },
 
     { "type": "header", "content": "Info / Help (ⓘ icon)" },
     { "type": "text", "id": "info_title", "label": "Title", "default": "About This Journey" },

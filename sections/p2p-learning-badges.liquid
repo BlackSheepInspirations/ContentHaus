@@ -34,7 +34,7 @@
         <div class="hstat"><b>{{ section.settings.stat_points | default: '0' }}</b><small>Points</small></div>
         <div class="hstat"><b>{{ earned_count }}</b><small>Badges</small></div>
         <div class="hstat"><b class="p2pb-streak">{{ section.settings.stat_streak | default: '0' }}</b><small>Streak</small></div>
-        <div class="hstat"><b>{{ section.settings.stat_level | default: '1' }}</b><small>Level</small></div>
+        <div class="hstat"><b>{{ section.settings.stat_level | default: '1' }}</b><small>Merit</small></div>
       </div>
     </div>
 
@@ -78,6 +78,12 @@
               {%- when 'magnifier' -%}<circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5 5"/>
               {%- when 'seal' -%}<circle cx="12" cy="9" r="6"/><path d="M8.5 14L7 21l5-2.7L17 21l-1.5-7"/><circle cx="12" cy="9" r="2.4"/>
               {%- when 'comeback' -%}<path d="M20 12a8 8 0 1 1-2.34-5.66"/><path d="M20 4v4h-4"/>
+              {%- when 'wave' -%}<path d="M3 9c1.5-1.8 3-1.8 4.5 0s3 1.8 4.5 0 3-1.8 4.5 0 3 1.8 4.5 0"/><path d="M3 13.5c1.5-1.8 3-1.8 4.5 0s3 1.8 4.5 0 3-1.8 4.5 0 3 1.8 4.5 0"/><path d="M3 18c1.5-1.8 3-1.8 4.5 0s3 1.8 4.5 0 3-1.8 4.5 0 3 1.8 4.5 0"/>
+              {%- when 'thicket' -%}<path d="M12 20v-5"/><path d="M12 15c0-2.8-2.2-5-5-5-.3 2.8 2.2 5 5 5z"/><path d="M12 15c0-2.8 2.2-5 5-5 .3 2.8-2.2 5-5 5z"/><path d="M12 11c0-2.5-2-4.5-4.5-4.5-.3 2.5 2 4.5 4.5 4.5z"/><path d="M12 11c0-2.5 2-4.5 4.5-4.5 .3 2.5-2 4.5-4.5 4.5z"/>
+              {%- when 'bloom' -%}<circle cx="12" cy="12" r="2.3"/><circle cx="12" cy="7" r="2.1"/><circle cx="16.3" cy="9.5" r="2.1"/><circle cx="16.3" cy="14.5" r="2.1"/><circle cx="12" cy="17" r="2.1"/><circle cx="7.7" cy="14.5" r="2.1"/><circle cx="7.7" cy="9.5" r="2.1"/>
+              {%- when 'wheat' -%}<path d="M12 21v-9"/><path d="M12 12c-1.8 0-3-1.4-3-3.2C10.8 8.8 12 10.2 12 12zM12 12c1.8 0 3-1.4 3-3.2C13.2 8.8 12 10.2 12 12zM12 9c-1.8 0-3-1.4-3-3.2C10.8 5.8 12 7.2 12 9zM12 9c1.8 0 3-1.4 3-3.2C13.2 5.8 12 7.2 12 9zM12 6c-1.6 0-2.7-1.3-2.7-3C10.9 3 12 4.3 12 6zM12 6c1.6 0 2.7-1.3 2.7-3C13.1 3 12 4.3 12 6z"/>
+              {%- when 'evergreen' -%}<path d="M12 2L7 9h3l-4 5h3l-4 5h14l-4-5h3l-4-5h3z"/><path d="M12 19v3"/>
+              {%- when 'footprints' -%}<path d="M8 4c1.2 0 2 1.3 2 3s-.5 4-2 4-2-2-2-4 .8-3 2-3z"/><path d="M8 12c.9 0 1.5.7 1.5 1.7S9 15.5 8 15.5s-1.5-.8-1.5-1.8S7.1 12 8 12z"/><path d="M16 8c1.2 0 2 1.3 2 3s-.5 4-2 4-2-2-2-4 .8-3 2-3z"/><path d="M16 16c.9 0 1.5.7 1.5 1.7s-.5 1.8-1.5 1.8-1.5-.8-1.5-1.8S15.1 16 16 16z"/>
               {%- else -%}<circle cx="12" cy="12" r="8"/>
             {%- endcase -%}
           </svg>
@@ -142,7 +148,7 @@
     { "type": "header", "content": "Stats (placeholder)" },
     { "type": "text", "id": "stat_points", "label": "Points", "default": "0" },
     { "type": "text", "id": "stat_streak", "label": "Streak", "default": "0" },
-    { "type": "text", "id": "stat_level", "label": "Level", "default": "1" }
+    { "type": "text", "id": "stat_level", "label": "Merit", "default": "1" }
   ],
   "blocks": [
     {
@@ -160,7 +166,8 @@
             {"value":"flame","label":"Flame"},{"value":"crown","label":"Crown"},{"value":"butterfly","label":"Butterfly"},{"value":"trophy","label":"Trophy"},
             {"value":"boat","label":"Boat / Sail"},{"value":"pen","label":"Pen / Journal"},{"value":"fingerprint","label":"Fingerprint"},
             {"value":"shootingstar","label":"Star Cluster"},{"value":"notepad","label":"Notepad"},{"value":"grad","label":"Graduation Cap"},
-            {"value":"magnifier","label":"Magnifier (explore)"},{"value":"seal","label":"Award Seal (certified)"},{"value":"comeback","label":"Comeback (return arrow)"}
+            {"value":"magnifier","label":"Magnifier (explore)"},{"value":"seal","label":"Award Seal (certified)"},{"value":"comeback","label":"Comeback (return arrow)"},
+            {"value":"wave","label":"Wave (Shoreline)"},{"value":"thicket","label":"Thicket (bushes)"},{"value":"bloom","label":"Bloom (flower)"},{"value":"wheat","label":"Wheat (Fields)"},{"value":"evergreen","label":"Evergreen (tree)"},{"value":"footprints","label":"Footprints (every path)"}
           ]
         },
         { "type": "select", "id": "color", "label": "Colour", "default": "c-gold",
@@ -179,10 +186,15 @@
         { "type": "badge", "settings": { "group": "Journey Milestones", "name": "First Steps", "req": "Complete your first course", "icon": "flag", "color": "c-gold", "earned": true } },
         { "type": "badge", "settings": { "group": "Journey Milestones", "name": "First Win", "req": "Bank your first quick win", "icon": "trophy", "color": "c-gold", "earned": true } },
         { "type": "badge", "settings": { "group": "Journey Milestones", "name": "Finding Your Current", "req": "Complete 3 courses", "icon": "compass", "color": "c-te", "earned": true } },
-        { "type": "badge", "settings": { "group": "Journey Milestones", "name": "Reached Freedom", "req": "Complete every course", "icon": "shootingstar", "color": "c-gold", "earned": false } },
-        { "type": "badge", "settings": { "group": "Framework Masteries", "name": "RAFT Master", "req": "Finish the RAFT leg", "icon": "anchor", "color": "c-em", "earned": true } },
-        { "type": "badge", "settings": { "group": "Framework Masteries", "name": "GROWS Master", "req": "Finish the GROWS leg", "icon": "sprout", "color": "c-em", "earned": false } },
-        { "type": "badge", "settings": { "group": "Framework Masteries", "name": "ROOTED Master", "req": "Finish the ROOTED leg", "icon": "roots", "color": "c-em", "earned": false } },
+        { "type": "badge", "settings": { "group": "The Realms", "name": "Made it to Shore", "req": "Clear Realm 1 — The Shoreline", "icon": "wave", "color": "c-te", "earned": false } },
+        { "type": "badge", "settings": { "group": "The Realms", "name": "Through the Thicket", "req": "Clear Realm 2 — The Thicket", "icon": "thicket", "color": "c-em", "earned": false } },
+        { "type": "badge", "settings": { "group": "The Realms", "name": "In Full Bloom", "req": "Clear Realm 3 — The Bloom", "icon": "bloom", "color": "c-pk", "earned": false } },
+        { "type": "badge", "settings": { "group": "The Realms", "name": "Across the Fields", "req": "Clear Realm 4 — The Fields", "icon": "wheat", "color": "c-gold", "earned": false } },
+        { "type": "badge", "settings": { "group": "The Realms", "name": "ROOTED to Thrive", "req": "Clear Realm 5 — The Evergreens", "icon": "evergreen", "color": "c-pu", "earned": false } },
+        { "type": "badge", "settings": { "group": "The Realms", "name": "Reached Freedom", "req": "Clear all five realms", "icon": "shootingstar", "color": "c-gold", "earned": false } },
+        { "type": "badge", "settings": { "group": "Framework Masteries", "name": "RAFT Master", "req": "Complete the RAFT course", "icon": "anchor", "color": "c-em", "earned": false } },
+        { "type": "badge", "settings": { "group": "Framework Masteries", "name": "GROWS Master", "req": "Complete the GROWS course", "icon": "sprout", "color": "c-em", "earned": false } },
+        { "type": "badge", "settings": { "group": "Framework Masteries", "name": "ROOTED Master", "req": "Complete the ROOTED course", "icon": "roots", "color": "c-em", "earned": false } },
         { "type": "badge", "settings": { "group": "Habits & Wins", "name": "Founder Fingerprint", "req": "Complete your Brand DNA Blueprint", "icon": "fingerprint", "color": "c-gold", "earned": true } },
         { "type": "badge", "settings": { "group": "Habits & Wins", "name": "First Reflection", "req": "Write your first journal entry", "icon": "pen", "color": "c-pu", "earned": true } },
         { "type": "badge", "settings": { "group": "Habits & Wins", "name": "Journal Keeper", "req": "Write 10 journal entries", "icon": "notepad", "color": "c-pu", "earned": false } },
@@ -209,6 +221,7 @@
         { "type": "badge", "settings": { "group": "Streaks", "name": "100-Day Streak", "req": "100 days in a row", "icon": "flame", "color": "c-gold", "earned": false } },
         { "type": "badge", "settings": { "group": "Streaks", "name": "125-Day Streak", "req": "125 days in a row", "icon": "flame", "color": "c-pu", "earned": false } },
         { "type": "badge", "settings": { "group": "Streaks", "name": "150-Day Streak", "req": "150 days in a row", "icon": "flame", "color": "c-gold", "earned": false } },
+        { "type": "badge", "settings": { "group": "Special", "name": "Every Path Walked", "req": "Complete every course, even the optional ones", "icon": "footprints", "color": "c-gold", "earned": false } },
         { "type": "badge", "settings": { "group": "Special", "name": "Founder", "req": "Founder's Pass holder", "icon": "crown", "color": "c-gold", "earned": true } },
         { "type": "badge", "settings": { "group": "Special", "name": "Masterclass", "req": "Join a live masterclass", "icon": "grad", "color": "c-pu", "earned": false } }
       ]

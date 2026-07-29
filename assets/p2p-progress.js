@@ -104,17 +104,16 @@ window.P2P = (function(){
     return n;
   }
 
-  /* course-completion badges — count of distinct finished courses.
-     ("First Win" and the framework masters stay manual: they need per-course
-     meaning / a leg roster the player can't see alone. "Reached Freedom" is
-     wired to 100 courses for now as a placeholder total.) */
+  /* course-completion badges — count of distinct finished courses. ("First Win"
+     and the framework/realm badges stay manual until their required-course sets
+     are mapped; "Reached Freedom" is the capstone for clearing all five realms,
+     awarded on the badges page when every realm badge is earned.) */
   function completeCourse(slug){
     slug = String(slug || ''); if(!slug) return 0;
     var done = get(K.courses, []);
     if(done.indexOf(slug) === -1){ done.push(slug); set(K.courses, done); }
-    if(done.length >= 1)   earnBadge('First Steps');
-    if(done.length >= 3)   earnBadge('Finding Your Current');
-    if(done.length >= 100) earnBadge('Reached Freedom');
+    if(done.length >= 1) earnBadge('First Steps');
+    if(done.length >= 3) earnBadge('Finding Your Current');
     return done.length;
   }
 

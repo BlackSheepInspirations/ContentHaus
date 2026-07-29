@@ -47,6 +47,20 @@
         if(!b.querySelector('.spark')){ var sp = document.createElement('span'); sp.className = 'spark'; (b.querySelector('.medal') || b).appendChild(sp); }
       }
     });
+    // Capstone — once all five realm badges are earned, "Reached Freedom" lights up
+    var REALMS = ['Made it to Shore', 'Through the Thicket', 'In Full Bloom', 'Across the Fields', 'ROOTED to Thrive'];
+    var earnedNow = {};
+    root.querySelectorAll('.badge.earned .name').forEach(function(n){ earnedNow[n.textContent] = 1; });
+    if(REALMS.every(function(r){ return earnedNow[r]; })){
+      window.P2P.earnBadge('Reached Freedom');
+      root.querySelectorAll('.badge').forEach(function(b){
+        if(((b.querySelector('.name') || {}).textContent || '') === 'Reached Freedom' && !b.classList.contains('earned')){
+          b.classList.remove('locked'); b.classList.add('earned');
+          var lk = b.querySelector('.lock'); if(lk) lk.remove();
+          if(!b.querySelector('.spark')){ var sp = document.createElement('span'); sp.className = 'spark'; (b.querySelector('.medal') || b).appendChild(sp); }
+        }
+      });
+    }
     var stc = window.P2P.streak().count;
     root.querySelectorAll('.p2pb-streak').forEach(function(el){ el.textContent = stc; });
     var pstat = root.querySelector('.hstats .hstat:nth-child(1) b'); if(pstat) pstat.textContent = window.P2P.points();
