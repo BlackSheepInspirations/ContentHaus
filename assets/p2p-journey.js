@@ -5,6 +5,7 @@
 
   /* ---- live stats (from the shared progress engine) ---- */
   if(window.P2P){
+    window.P2P.earnBadge('Set Sail'); // reaching the (gated) journey means you've set sail
     var streak = window.P2P.streak().count;
     root.querySelectorAll('.p2pj-streak').forEach(function(el){ el.textContent = streak; });
     root.querySelectorAll('.p2pj-points').forEach(function(el){ el.textContent = window.P2P.points(); });
