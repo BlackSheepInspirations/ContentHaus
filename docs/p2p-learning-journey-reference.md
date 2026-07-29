@@ -37,20 +37,29 @@ word is now the points meter, renamed **Merit**):
 
 | # | Realm | Terrain | Anchor / gate |
 |---|---|---|---|
-| 1 | The Shoreline | Ocean → Shore | **GROWS** must be completed first (gates the rest of Realm 1) |
-| 2 | The Thicket | Mystical Forest | none — fully open |
-| 3 | The Bloom | Thriving Desert | none — fully open |
-| 4 | The Fields | Grasslands | none — fully open |
+| 1 | The Shoreline (board: **Open Water**) | Ocean → Shore | none — all 7 Main courses unlock together once onboarding is done |
+| 2 | The Thicket | Mystical Forest | **GROW** (Realm 2's first course) gates Realms 2, 3, and 4 as one block |
+| 3 | The Bloom | Thriving Desert | gated by GROW (see Realm 2) |
+| 4 | The Fields | Grasslands | gated by GROW (see Realm 2) |
 | 5 | The Evergreens | Mature Woods | **ROOTED** must be completed first (gates the rest) |
 
 > Note: the xlsx still labels Realm 5 "The Canopy" — the owner renamed it to
 > **The Evergreens** (evergreen business); reconcile the sheet when convenient.
+>
+> Corrected 2026-07-29: this table previously said GROWS gated Realm 1 itself
+> with Realms 2-4 fully open — that was superseded. The current rule (confirmed
+> with the owner) is above: Realm 1 has no anchor of its own; GROW gates
+> Realms 2-4 as a single block, not Realm 1.
 
-**Lock rules:** only *Your Journey Begins Here* and *Welcome Aboard (incl. RAFT)*
-are always-locked-first. After that every Realm is open in any order, EXCEPT a
-Realm with an anchor course (GROWS in 1, ROOTED in 5) keeps the rest of that
-Realm locked until the anchor is done. Courses are **Main / Offshoot / Check**;
-offshoots are optional and hang off a trunk course.
+**Lock rules:** only *Your Journey Begins Here* (the onboarding flow) gates
+Realm 1's Main courses — finishing it unlocks all 7 at once (Welcome Aboard,
+RAFT, and the rest together, no further sequence between them). Offshoots
+(the starred side-quests) stay locked until their own hub course is done —
+Realm 1's are Selling on Etsy/Shopify/Stan/Beacons, gated behind **Storefront
+Essentials**. Checks (Mindset/Purpose/Heart) never gate anything — always
+clickable. Realms 2-4 stay locked as one block until GROW is done; Realm 5
+stays locked until ROOTED is done. Courses are **Main / Offshoot / Check**;
+Offshoots are optional and hang off a trunk (hub) course.
 
 **Navigation:** the sticky toolbar has a **second row** of Realm buttons
 (settings `realm_1..5_name/url/locked`, `current_realm`) for jumping between
@@ -72,7 +81,7 @@ boards; each board's bottom also links to the next. Realm 5 defaults locked.
 | `assets/p2p-badges.css` | Badge styles + unlock-popup styles, scoped under `#p2pb`. |
 | `assets/p2p-badges.js` | Applies auto-earned badges to the gallery, celebrates newly-earned ones (confetti), publishes the earned/total count, and shows live points/level/streak in the header. |
 | `assets/p2p-progress.js` | **The shared progress engine** — streaks, points, and badge auto-awards. Loaded first on all three pages; exposes `window.P2P`. This is the heart of the system (see §6). |
-| `assets/p2p-journey-board.jpg` | The baked journey-board art (course markers, RAFT/GROWS/ROOTED signs, side-quest checkpoints, "Your Journey Begins Here" sign). |
+| `assets/p2p-journey-board.jpg` | The **shared fallback** board art, used by any Realm that hasn't uploaded its own `board_image` yet. Each Realm now gets its own distinct illustrated board (Realm 1's is **Open Water**, uploaded via the section's `board_image` setting) — this file is the placeholder for the ones not painted yet, not "the" board anymore. |
 | `assets/p2p-certificate-bg.jpg` | The navy-and-gold certificate background. |
 
 CSS is isolated by **selector-prefixing**: journey rules under `#p2pj`, player
@@ -207,6 +216,7 @@ one step per `level` points (default 250): `level = 1 + floor(points / step)`.
 | `checkJournal()` | Reconcile journal-count badges |
 | `addJournalPoint()` | +journal points for a new entry (capped 5/day) |
 | `completeCourse(slug)` | Record a finished course; awards First Steps / Finding Your Current / Reached Freedom |
+| `isCourseDone(slug)` | Boolean — is this specific course's handle in the done array? (added 2026-07-29; the join key the journey map's lock engine checks for both a Main course's own done-state and an Offshoot's hub-course gate) |
 | `points()` / `level()` | Live totals |
 | `coursesDone()` | Count of finished courses |
 | `badgesStat()` | `{ earned, total }` the badges page publishes for the journey to display |
@@ -222,7 +232,8 @@ one step per `level` points (default 250): `level = 1 + floor(points / step)`.
 | `p2p_streak` | `{ last:"YYYY-MM-DD", count, longest }` |
 | `p2p_signs` | Array of opened framework signs |
 | `p2p_journal` | Array of `{ ts, prompt, text }` entries |
-| `p2p_courses_done` | Array of completed course slugs |
+| `p2p_courses_done` | Array of completed course slugs — read back per-slug via `isCourseDone()` |
+| `p2p_intro_done` | `"1"` once the onboarding flow ("Your Journey Begins Here") reaches its final step — the gate every Realm's Main courses check when `intro_required` is on |
 | `p2p_badges_earned` | Array of auto-earned badge names |
 | `p2p_badges_seen` | Array of already-celebrated badge names |
 | `p2p_badges_stat` | `{ earned, total }` published by the badges page |
@@ -316,8 +327,14 @@ badge is seen in a browser. Icons added for the Realms: `wave`, `thicket`,
 ## 10. Course player & certificate
 
 - Lessons are section blocks (title, video embed, rich-text body, up to 3
-  link-outs). Each has a **Mark lesson complete** toggle; per-course completion
-  is stored in `p2p_course_<course>_done`.
+  link-outs). Each has a **Mark lesson complete** toggle; finishing every
+  lesson calls `window.P2P.completeCourse(handle)`, which pushes the course's
+  handle into one shared array, `p2p_courses_done` (not a per-course key —
+  corrected 2026-07-29; an earlier draft of this doc said
+  `p2p_course_<course>_done`, which was never actually how the code stores
+  it). Read a specific course's status back with `window.P2P.isCourseDone(handle)`
+  — this is what the journey map's lock engine checks for every Main course's
+  done-state and every Offshoot's hub-course gate.
 - Finishing every lesson fires the **completion celebration**: a black aurora
   backdrop with drifting sparkles, falling leaves, and rising iridescent
   butterflies/dragonflies (a touch of pink — deliberately *not* falling stars).
@@ -347,10 +364,21 @@ owner — safe for staging in-progress work.
 
 ## 12. Key section settings
 
-**Journey** — access code/slug; course 1–5 titles + URLs; `milestones_url`;
-`brand_dna_url`; sticky offset; **`board_courses`** (drives the Progress ring &
-"courses done" tile); the **Points breakdown** numbers; the four stat
-placeholders; Info/Help title + body. **Badges** — eyebrow/title/subtitle; stat
+**Journey** — access tag; `milestones_url`; `brand_dna_url`; sticky offset;
+Info/Help title + body; the **Points breakdown** numbers; the four stat
+placeholders. Courses are no longer fixed settings (corrected 2026-07-29 — the
+old `course_1..5_title/url` + `board_courses` range setting are gone). Instead:
+`board_image` (this Realm's own art; falls back to the shared placeholder jpg),
+`offshoot_hub_handle` (an Offshoot block's default hub course if it doesn't set
+its own), `intro_required` (does this Realm gate on the onboarding flow),
+`unlock_after_handle` (the course handle that gates this whole Realm — blank
+for Realm 1, `grow`/`rooted` for the Realms that need one), plus three **block**
+types: `course` (Main — title/handle/url/body/position, `handle` must match
+that course's own page's `course_handle` setting), `offshoot` (same shape plus
+its own optional `unlock_after_handle` override), `check` (title/pulse
+items/optional link/position — never gated). The Progress ring & "courses
+done" tile now compute their denominator by counting `course`-type blocks,
+not a manually-set number. **Badges** — eyebrow/title/subtitle; stat
 placeholders; one block per badge (family, name, requirement, icon, color,
 earned). **Player** — course handle + title; one block per lesson.
 

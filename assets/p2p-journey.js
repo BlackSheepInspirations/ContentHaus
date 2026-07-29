@@ -44,9 +44,77 @@
     welcome.addEventListener('click', function(e){ if(e.target === welcome) closeWelcome(); });
   }
 
-  /* ---- info modal (hotspots) ---- */
+  /* ---- lock engine — Main courses gate on the intro flow, Offshoots gate on
+     their hub course, Checks never gate. Real per-course completion comes
+     from window.P2P.isCourseDone(handle); nothing here is hardcoded. ---- */
+  var INTRO_KEY = 'p2p_intro_done';
+  function onboardingDone(){ try{ return localStorage.getItem(INTRO_KEY) === '1'; }catch(e){ return false; } }
+  function markOnboardingDone(){ try{ localStorage.setItem(INTRO_KEY, '1'); }catch(e){} }
+  var introRequired = root.getAttribute('data-intro-required') !== 'false';
+
+  function nodeState(h){
+    if(h.hasAttribute('data-begin')) return onboardingDone() ? 'done' : 'available'; // entry point — never locked
+    var type = h.getAttribute('data-type');
+    if(type === 'check') return 'available'; // never locked
+    var handle = h.getAttribute('data-handle');
+    if(window.P2P && handle && window.P2P.isCourseDone(handle)) return 'done';
+    if(type === 'offshoot'){
+      var hub = h.getAttribute('data-unlock-after');
+      var hubDone = !hub || (window.P2P && window.P2P.isCourseDone(hub));
+      return hubDone ? 'available' : 'locked';
+    }
+    // Main course
+    return (introRequired && !onboardingDone()) ? 'locked' : 'available';
+  }
+  function nodeType(h){ return h.hasAttribute('data-begin') ? 'start' : (h.getAttribute('data-type') || 'course'); }
+  /* one icon per node type — shown on every "available" marker so the map
+     reads as a real trail (start=flag, course=book, offshoot=star, check=sparkle) */
+  var TYPE_ICON = {
+    start: '<svg viewBox="0 0 24 24"><path d="M6 3v18"/><path d="M6 4h11l-3 4 3 4H6z"/></svg>',
+    course: '<svg viewBox="0 0 24 24"><path d="M4 5c3-1.5 6-1.5 8 0v14c-2-1.5-5-1.5-8 0z"/><path d="M20 5c-3-1.5-6-1.5-8 0v14c2-1.5 5-1.5 8 0z"/></svg>',
+    offshoot: '<svg viewBox="0 0 24 24"><path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.9 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/></svg>',
+    check: '<svg viewBox="0 0 24 24"><path d="M12 2l2 7 7 2-7 2-2 7-2-7-7-2 7-2z"/></svg>'
+  };
+  function lockReason(h){
+    if(h.getAttribute('data-type') === 'offshoot'){
+      var hub = h.getAttribute('data-unlock-after');
+      return hub ? ('Complete "' + hub.replace(/-/g, ' ') + '" to unlock this.') : 'Locked for now.';
+    }
+    return 'Finish "Your Journey Begins Here" to unlock this.';
+  }
+
+  /* ---- progress overlays — one .cs dot per course/offshoot node, positioned
+     from the SAME inline left/top the button already has, so they can never
+     drift out of sync with it (the old hardcoded overlays could). ---- */
+  function renderOverlays(){
+    root.querySelectorAll('.board .cs').forEach(function(el){ el.remove(); });
+    var board = root.querySelector('.board');
+    if(!board) return;
+    root.querySelectorAll('.hs').forEach(function(h){
+      var type = nodeType(h);
+      var state = nodeState(h);
+      var cs = document.createElement('div');
+      cs.className = 'cs';
+      cs.style.left = h.style.left;
+      cs.style.top = h.style.top;
+      if(state === 'done'){
+        cs.innerHTML = '<span class="done"><svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg></span>';
+        h.classList.remove('is-locked');
+      } else if(state === 'locked'){
+        cs.innerHTML = '<span class="lock"><svg viewBox="0 0 24 24"><path d="M6 10V8a6 6 0 0 1 12 0v2h1a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1h1zm2 0h8V8a4 4 0 0 0-8 0v2z"/></svg></span>';
+        h.classList.add('is-locked');
+      } else {
+        h.classList.remove('is-locked');
+        cs.innerHTML = '<span class="avail avail--' + type + '">' + (TYPE_ICON[type] || TYPE_ICON.course) + '</span>';
+      }
+      h._marker = cs; // lets the hover wiring below light up the right marker
+      board.appendChild(cs);
+    });
+  }
+
+  /* ---- info modal (Main/Offshoot hotspots) ---- */
   var modal = document.getElementById('p2pj-modal');
-  var kick = {course:'Course', framework:'Framework', sidequest:'Bonus · Side Quest', info:'Getting Started'};
+  var kick = {course:'Course', offshoot:'Bonus · Offshoot', info:'Getting Started'};
   function openModal(h){
     document.getElementById('p2pj-mk').textContent = kick[h.getAttribute('data-type')] || '';
     document.getElementById('p2pj-mt').textContent = h.getAttribute('data-title') || '';
@@ -57,7 +125,31 @@
     if(url){ cta.setAttribute('href', url); cta.style.display='inline-block'; } else { cta.removeAttribute('href'); }
     modal.classList.add('show');
   }
+  function openLockedModal(h){
+    document.getElementById('p2pj-mk').textContent = 'Locked';
+    document.getElementById('p2pj-mt').textContent = h.getAttribute('data-title') || '';
+    document.getElementById('p2pj-mb').textContent = lockReason(h);
+    var cta = document.getElementById('p2pj-mc');
+    cta.removeAttribute('href');
+    modal.classList.add('show');
+  }
   function closeModal(){ modal.classList.remove('show'); }
+
+  /* ---- Check popup (Mindset/Purpose/Heart — pulse items, never gated) ---- */
+  var checkModal = document.getElementById('p2pj-check');
+  function openCheck(h){
+    if(!checkModal) return;
+    document.getElementById('p2pj-ct').textContent = h.getAttribute('data-title') || '';
+    var items = (h.getAttribute('data-pulse-items') || '').split('\n').map(function(s){ return s.trim(); }).filter(Boolean);
+    var list = document.getElementById('p2pj-cb');
+    list.innerHTML = items.map(function(i){ return '<li>' + i.replace(/[&<>]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c]; }) + '</li>'; }).join('');
+    var cta = document.getElementById('p2pj-cc');
+    var url = h.getAttribute('data-link-url');
+    if(url){ cta.textContent = h.getAttribute('data-link-label') || 'Open'; cta.setAttribute('href', url); cta.style.display = 'inline-block'; }
+    else { cta.removeAttribute('href'); cta.style.display = 'none'; }
+    checkModal.classList.add('show');
+  }
+  function closeCheck(){ checkModal.classList.remove('show'); }
   /* ---- Journey Begins onboarding ---- */
   var begin = document.getElementById('p2pj-begin');
   function beginStep(name){ if(!begin) return; begin.querySelectorAll('.step').forEach(function(s){ s.classList.toggle('on', s.getAttribute('data-step') === name); }); var bc = begin.querySelector('.bc'); if(bc) bc.scrollTop = 0; }
@@ -66,29 +158,37 @@
       // "Yes, I've completed my Brand DNA Blueprint" self-attests the Founder Fingerprint badge.
       // (At launch this is superseded by reading the shared Brand DNA metafield directly.)
       if(b.hasAttribute('data-dna-done') && window.P2P) window.P2P.earnBadge('Founder Fingerprint');
-      beginStep(b.getAttribute('data-go'));
+      var goTo = b.getAttribute('data-go');
+      // reaching "Welcome Aboard" (the final onboarding step) is the intro
+      // gate every Main course on this Realm checks — flip it once, here.
+      if(goTo === 'main'){ markOnboardingDone(); renderOverlays(); }
+      beginStep(goTo);
     }); });
     var bbx = begin.querySelector('.bx'); if(bbx) bbx.addEventListener('click', function(){ begin.classList.remove('show'); });
     begin.addEventListener('click', function(e){ if(e.target === begin) begin.classList.remove('show'); });
   }
 
   root.querySelectorAll('.hs').forEach(function(h){
+    h.addEventListener('mouseenter', function(){ if(h._marker) h._marker.classList.add('hovered'); });
+    h.addEventListener('mouseleave', function(){ if(h._marker) h._marker.classList.remove('hovered'); });
     h.addEventListener('click', function(){
       if(h.hasAttribute('data-begin') && begin){ beginStep('welcome1'); begin.classList.add('show'); return; }
-      // opening a framework sign counts toward the Trail Explorer badge
-      if(h.getAttribute('data-type') === 'framework' && window.P2P){
-        var t = (h.getAttribute('data-title') || '').toUpperCase();
-        var key = t.indexOf('RAFT') > -1 ? 'raft' : t.indexOf('GROWS') > -1 ? 'grows' : t.indexOf('ROOTED') > -1 ? 'rooted' : '';
-        if(key) window.P2P.markSign(key);
-      }
+      var type = h.getAttribute('data-type');
+      if(type === 'check'){ openCheck(h); return; }
+      if(nodeState(h) === 'locked'){ openLockedModal(h); return; }
       openModal(h);
     });
   });
+  renderOverlays();
   if(modal){
     document.getElementById('p2pj-mx').addEventListener('click', closeModal);
     modal.addEventListener('click', function(e){ if(e.target === modal) closeModal(); });
     var mc = document.getElementById('p2pj-mc');
     mc.addEventListener('click', function(e){ if(!mc.getAttribute('href')) closeModal(); });
+  }
+  if(checkModal){
+    document.getElementById('p2pj-cx').addEventListener('click', closeCheck);
+    checkModal.addEventListener('click', function(e){ if(e.target === checkModal) closeCheck(); });
   }
 
   /* ---- nav tabs → inline panels ---- */
@@ -106,8 +206,8 @@
     });
   });
 
-  /* ---- bonus cards open the side-quest modal ---- */
-  root.querySelectorAll('.bqcard').forEach(function(c){ c.addEventListener('click', function(){ openModal(c); }); });
+  /* ---- bonus cards (Checks) open the pulse-check popup ---- */
+  root.querySelectorAll('.bqcard').forEach(function(c){ c.addEventListener('click', function(){ openCheck(c); }); });
 
   /* ---- journal (localStorage; export to keep a copy) ---- */
   var jList = document.getElementById('p2pj-jr-list');

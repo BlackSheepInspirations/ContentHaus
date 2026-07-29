@@ -117,6 +117,13 @@ window.P2P = (function(){
     return done.length;
   }
 
+  /* per-course lookup — the join key the lock engine (journey map) checks
+     against a Main course's handle or an Offshoot's unlock_after_handle. */
+  function isCourseDone(slug){
+    slug = String(slug || ''); if(!slug) return false;
+    return get(K.courses, []).indexOf(slug) !== -1;
+  }
+
   var current = tick(); // any P2P page load counts as showing up today
   checkJournal();       // reconcile journal badges on every load
 
@@ -129,6 +136,7 @@ window.P2P = (function(){
     checkJournal: checkJournal,
     addJournalPoint: addJournalPoint,
     completeCourse: completeCourse,
+    isCourseDone: isCourseDone,
     points: points,
     level: level,
     coursesDone: function(){ return get(K.courses, []).length; },

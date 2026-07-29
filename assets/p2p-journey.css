@@ -183,6 +183,12 @@
 #p2pj .jr-empty{color:var(--muted); font:400 14px/1.5 system-ui; text-align:center; padding:24px;}
 #p2pj .stats{display:flex; gap:2px; align-items:center;}
 #p2pj .stat{display:flex; flex-direction:column; align-items:center; padding:2px 12px;}
+/* compact "% of board complete" ring — same --p/percentage the Progress tab's
+   own big ring uses (p2pj-ring/p2pj-ringpct), just always visible in the bar */
+#p2pj .ring-mini{position:relative; width:38px; height:38px; border-radius:50%; display:grid; place-items:center;
+  background:conic-gradient(var(--emerald) calc(var(--p,0)*1%), rgba(255,255,255,.16) 0); box-shadow:0 0 10px rgba(39,174,110,.35);}
+#p2pj .ring-mini::before{content:""; position:absolute; width:30px; height:30px; border-radius:50%; background:#0b1512;}
+#p2pj .ring-mini b{position:relative; font:800 10px/1 system-ui; color:var(--gold-bright);}
 #p2pj .stat b{font:700 19px/1 system-ui; display:flex; align-items:center; gap:6px; color:var(--text);}
 #p2pj .stat b svg{width:19px; height:19px;}
 #p2pj .stat small{font:700 8px/1 system-ui; letter-spacing:.16em; color:var(--muted); margin-top:5px; text-transform:uppercase;}
@@ -198,19 +204,40 @@
 #p2pj .board{position:relative; z-index:1; line-height:0;}
 #p2pj .board .bg{display:block; width:100%;}
 
-/* hotspots — invisible; cursor is the affordance */
+/* hotspots — invisible click rectangle over the board art's own painted
+   label; the visible affordance is the .cs marker badge rendered at its
+   anchor point (below), not this element itself */
 #p2pj .hs{position:absolute; z-index:5; cursor:pointer; border:0; background:transparent; border-radius:14px;}
+/* locked Main/Offshoot nodes stay clickable (to explain what unlocks them) but read as inert */
+#p2pj .hs.is-locked{cursor:not-allowed;}
 
-/* progress overlays — centered icon per card */
+/* progress overlays — centered icon per card; every node (available, done or
+   locked) always gets a visible marker so there's no such thing as an
+   invisible click target on the board */
 #p2pj .cs{position:absolute; z-index:4; transform:translate(-50%,-50%); pointer-events:none; display:grid; place-items:center;}
-#p2pj .cs .done{width:60px; height:60px; border-radius:50%; display:grid; place-items:center;
-  background:radial-gradient(circle at 40% 34%,#f7e6ac,#d8b45a 70%,#a97f28);
+#p2pj .cs .done, #p2pj .cs .lock, #p2pj .cs .avail{width:56px; height:56px; border-radius:50%; display:grid; place-items:center; transition:transform .16s ease, box-shadow .16s ease;}
+#p2pj .cs .done{background:radial-gradient(circle at 40% 34%,#f7e6ac,#d8b45a 70%,#a97f28);
   border:2px solid #f4e2a6; box-shadow:0 0 22px rgba(216,180,90,.8), 0 4px 12px rgba(0,0,0,.5);}
-#p2pj .cs .done svg{width:32px; height:32px; fill:none; stroke:#5a4212; stroke-width:3.4; stroke-linecap:round; stroke-linejoin:round;}
-#p2pj .cs .lock{width:60px; height:60px; border-radius:50%; display:grid; place-items:center;
-  background:radial-gradient(circle at 40% 34%,rgba(32,44,54,.94),rgba(8,14,18,.95));
+#p2pj .cs .done svg{width:30px; height:30px; fill:none; stroke:#5a4212; stroke-width:3.4; stroke-linecap:round; stroke-linejoin:round;}
+#p2pj .cs .lock{background:radial-gradient(circle at 40% 34%,rgba(32,44,54,.94),rgba(8,14,18,.95));
   border:2px solid rgba(216,180,90,.55); box-shadow:0 0 18px rgba(0,0,0,.6), inset 0 0 14px rgba(0,0,0,.5);}
-#p2pj .cs .lock svg{width:28px; height:28px; fill:#e0bd63;}
+#p2pj .cs .lock svg{width:26px; height:26px; fill:#e0bd63;}
+/* available — one color per node type, matching the board's own star/sign treatment */
+#p2pj .cs .avail{border:2px solid rgba(255,255,255,.4); box-shadow:0 4px 14px rgba(0,0,0,.45);}
+#p2pj .cs .avail svg{width:24px; height:24px; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round;}
+#p2pj .cs .avail--start{background:radial-gradient(circle at 40% 34%,#c9f5ea,#39c5c0 70%,#1f7f7c); border-color:#8ff0e0;}
+#p2pj .cs .avail--start svg{stroke:#06342f;}
+#p2pj .cs .avail--course{background:radial-gradient(circle at 40% 34%,#f7e6ac,#d8b45a 70%,#a97f28); border-color:#f4e2a6;}
+#p2pj .cs .avail--course svg{stroke:#5a4212;}
+#p2pj .cs .avail--offshoot{background:radial-gradient(circle at 40% 34%,#e6dcfb,#8f6fd6 70%,#5b3c8c); border-color:#cabdf0;}
+#p2pj .cs .avail--offshoot svg{fill:#4a2f70; stroke:none;}
+#p2pj .cs .avail--check{background:radial-gradient(circle at 40% 34%,#d3fbf5,#39c5c0 70%,#1f7f7c); border-color:#8ff0e0;}
+#p2pj .cs .avail--check svg{fill:#06342f; stroke:none;}
+/* hover — the underlying .hs button fires mouseenter/mouseleave in JS, which
+   toggles this class on its matching marker (cursor already signals intent
+   on .hs itself; this is the visible confirmation) */
+#p2pj .cs.hovered .done, #p2pj .cs.hovered .avail{transform:scale(1.14); box-shadow:0 6px 22px rgba(0,0,0,.55), 0 0 20px rgba(255,255,255,.3);}
+#p2pj .cs.hovered .lock{transform:scale(1.06);}
 #p2pj .cs .ring{position:relative; width:66px; height:66px; border-radius:50%; display:grid; place-items:center;
   background:conic-gradient(#27ae6e calc(var(--p,0)*1%), rgba(255,255,255,.16) 0);
   box-shadow:0 0 22px rgba(39,174,110,.65); animation:p2pj-csp 2.4s ease-in-out infinite;}
@@ -230,6 +257,22 @@
 #p2pj-modal .cta{display:inline-block; margin-top:20px; padding:12px 22px; border-radius:12px; cursor:pointer;
   font:700 13px/1 system-ui; letter-spacing:.05em; color:#06120e; border:0; background:linear-gradient(145deg,#f4e2a6,var(--gold)); text-decoration:none;}
 #p2pj-modal .x{float:right; cursor:pointer; color:var(--muted); font:700 20px/1 system-ui; margin:-6px -4px 0 0;}
+
+/* Check popup — its own id, same visual shell as the info modal above (kept
+   separate so a Check and a Main/Offshoot modal can never fight over one DOM node) */
+#p2pj-check{position:fixed; inset:0; z-index:50; display:none; align-items:center; justify-content:center;
+  background:rgba(3,7,12,.72); backdrop-filter:blur(4px); padding:24px; font-family:"Georgia",serif;}
+#p2pj-check.show{display:flex;}
+#p2pj-check .modal-card{max-width:420px; width:100%; background:linear-gradient(180deg,#0f1c24,#0a141a);
+  border:1px solid var(--gstroke); border-radius:20px; padding:26px; box-shadow:0 24px 60px rgba(0,0,0,.6); color:var(--text);}
+#p2pj-check .kicker{font:700 11px/1 system-ui; letter-spacing:.2em; text-transform:uppercase; color:#8ff0e0; margin-bottom:8px;}
+#p2pj-check h3{font:700 24px/1.1 Georgia,serif; margin-bottom:14px;}
+#p2pj-check .pulse-items{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px;}
+#p2pj-check .pulse-items li{font:400 14.5px/1.5 system-ui; color:#c6d6d0; padding-left:20px; position:relative;}
+#p2pj-check .pulse-items li::before{content:"·"; position:absolute; left:2px; color:#8ff0e0; font-weight:700;}
+#p2pj-check .cta{display:inline-block; margin-top:20px; padding:12px 22px; border-radius:12px; cursor:pointer;
+  font:700 13px/1 system-ui; letter-spacing:.05em; color:#06120e; border:0; background:linear-gradient(145deg,#c9f5ea,#8ff0e0); text-decoration:none;}
+#p2pj-check .x{float:right; cursor:pointer; color:var(--muted); font:700 20px/1 system-ui; margin:-6px -4px 0 0;}
 
 /* welcome pop-up */
 #p2pj-welcome{position:fixed; inset:0; z-index:60; display:none; align-items:center; justify-content:center;

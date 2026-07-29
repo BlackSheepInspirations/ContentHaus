@@ -16,8 +16,24 @@
 {%- endif -%}
 {%- if request.design_mode -%}{%- assign has_access = true -%}{%- endif -%}
 
+{%- comment -%} course-block count (drives the Progress ring) + first Main course (drives the "Up next" card + onboarding's final link) — replaces the old fixed course_1..5_* settings now that courses are section blocks. {%- endcomment -%}
+{%- assign board_courses_count = 0 -%}
+{%- assign first_course_title = '' -%}
+{%- assign first_course_url = '/pages/p2p-course' -%}
+{%- for block in section.blocks -%}
+  {%- if block.type == 'course' -%}
+    {%- assign board_courses_count = board_courses_count | plus: 1 -%}
+    {%- if first_course_title == '' -%}
+      {%- assign first_course_title = block.settings.title -%}
+      {%- assign first_course_url = block.settings.url | default: first_course_url -%}
+    {%- endif -%}
+  {%- endif -%}
+{%- endfor -%}
+
 <div id="p2pj"
-     data-board-courses="{{ section.settings.board_courses | default: 5 }}"
+     data-board-courses="{{ board_courses_count }}"
+     data-intro-required="{{ section.settings.intro_required }}"
+     data-unlock-after="{{ section.settings.unlock_after_handle }}"
      style="--p2pj-sticky:{{ section.settings.sticky_offset | default: 6 }}px;">
 
   <div class="p2pj-aurora"><div class="rib a"></div><div class="rib b"></div><div class="rib c"></div><div class="rib d"></div></div>
@@ -45,6 +61,7 @@
       </nav>
       <a class="barinfo" href="#" data-info data-tip="Info, rules &amp; help"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5" stroke-linecap="round"/><circle cx="12" cy="7.6" r="1.1" fill="#fff" stroke="none"/></svg></a>
       <div class="stats">
+        <div class="stat stat-ring" data-tip="% of this board's courses completed"><div class="ring-mini p2pj-ring" style="--p:0"><b class="p2pj-ringpct">0%</b></div><small>Board</small></div>
         <button class="stat stat-points" type="button" data-points data-tip="See how points work"><b><svg viewBox="0 0 24 24"><path fill="#f4c534" stroke="#b98f1e" stroke-width="1" d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.9 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/></svg><span class="p2pj-points">{{ section.settings.stat_points | default: '0' }}</span></b><small>Points</small></button>
         <div class="stat"><b><svg viewBox="0 0 24 24"><path fill="#39c5c0" stroke="#1f7f7c" stroke-width="1" d="M6 3h12l3 6-9 12L3 9z"/></svg><span class="p2pj-badges">{{ section.settings.stat_badges | default: '0' }}</span></b><small>Badges</small></div>
         <div class="stat"><b><svg viewBox="0 0 24 24"><path fill="#8f6fd6" stroke="#5b3c8c" stroke-width="1" d="M6 3h12l3 6-9 12L3 9z"/></svg><span class="p2pj-streak">{{ section.settings.stat_streak | default: '0' }}</span></b><small>Streak</small></div>
@@ -75,33 +92,38 @@
 
     {%- comment -%} ---- BOARD (baked art + interactive overlays) ---- {%- endcomment -%}
     <div class="board">
-      <img class="bg" src="{{ 'p2p-journey-board.jpg' | asset_url }}" alt="{{ section.settings.journey_name | default: 'Purpose 2 Profit Learning Journey' | escape }} map" loading="eager" />
+      {%- comment -%} board art fallback chain: an uploaded board_image wins if
+         set; otherwise Realm 1 (current_realm 1) defaults to its own painted
+         Open Water art; every other Realm falls back to the shared
+         placeholder jpg until its own art exists. {%- endcomment -%}
+      {%- if section.settings.board_image != blank -%}
+        <img class="bg" src="{{ section.settings.board_image | image_url: width: 2000 }}" alt="{{ section.settings.journey_name | default: 'Purpose 2 Profit Learning Journey' | escape }} map" loading="eager" />
+      {%- elsif section.settings.current_realm == 1 -%}
+        <img class="bg" src="{{ 'p2p-journey-board-openwater.jpg' | asset_url }}" alt="{{ section.settings.journey_name | default: 'Purpose 2 Profit Learning Journey' | escape }} map" loading="eager" />
+      {%- else -%}
+        <img class="bg" src="{{ 'p2p-journey-board.jpg' | asset_url }}" alt="{{ section.settings.journey_name | default: 'Purpose 2 Profit Learning Journey' | escape }} map" loading="eager" />
+      {%- endif -%}
 
-      {%- comment -%} course markers {%- endcomment -%}
-      {%- assign default_course_url = '/pages/p2p-course' -%}
-      <button class="hs" style="left:40%; top:11%; width:23%; height:13%" data-type="course" data-title="{{ section.settings.course_1_title | default: 'Relieve the Overwhelm' }}" data-body="Course 1 · Get out of the ocean and onto the path." data-cta="Open course" data-url="{{ section.settings.course_1_url | default: default_course_url }}"></button>
-      <button class="hs" style="left:25%; top:33.5%; width:20.5%; height:10.5%" data-type="course" data-title="{{ section.settings.course_2_title | default: 'Act Fast Now' }}" data-body="Course 2 · Build momentum and take decisive early action." data-cta="Open course" data-url="{{ section.settings.course_2_url | default: default_course_url }}"></button>
-      <button class="hs" style="left:53.5%; top:41.5%; width:20%; height:10.5%" data-type="course" data-title="{{ section.settings.course_3_title | default: 'Quick Wins That Count' }}" data-body="Course 3 · Bank early wins that build real traction." data-cta="Open course" data-url="{{ section.settings.course_3_url | default: default_course_url }}"></button>
-      <button class="hs" style="left:26%; top:52%; width:20.5%; height:10.5%" data-type="course" data-title="{{ section.settings.course_4_title | default: 'Ground Zero Clarity' }}" data-body="Course 4 · Get crystal clear on your foundation." data-cta="Open course" data-url="{{ section.settings.course_4_url | default: default_course_url }}"></button>
-      <button class="hs" style="left:49%; top:74%; width:21.5%; height:12%" data-type="course" data-title="{{ section.settings.course_5_title | default: 'Course Five' }}" data-body="Course 5 · The next leg of your journey." data-cta="Open course" data-url="{{ section.settings.course_5_url | default: default_course_url }}"></button>
+      {%- comment -%} "Your Journey Begins Here" — always present, opens onboarding {%- endcomment -%}
+      <button class="hs" style="left:29%; top:5.6%; width:22%; height:5%" data-begin data-title="Your Journey Begins Here"></button>
 
-      {%- comment -%} framework + info signs {%- endcomment -%}
-      <button class="hs" style="left:16.5%; top:16%; width:19%; height:5.5%" data-begin data-title="Your Journey Begins Here"></button>
-      <button class="hs" style="left:7.5%; top:27%; width:18%; height:9.5%" data-type="framework" data-title="The RAFT Framework" data-body="Your life raft — get out of the ocean. R: Relieve · A: Act · F: Fast Win · T: Traction." data-cta="Explore RAFT"></button>
-      <button class="hs" style="left:76.5%; top:51.5%; width:20%; height:10%" data-type="framework" data-title="The GROWS Framework" data-body="Map your path: (G + R) × O × W = S. Ground Zero · Roadmap · Ownership · Window of Time · Success Vision." data-cta="Explore GROWS"></button>
-      <button class="hs" style="left:7.5%; top:79.5%; width:19%; height:10.5%" data-type="framework" data-title="The ROOTED Framework" data-body="Time to thrive — launch method. Reach · Open · Offer · Trigger · Escalate · Deepen." data-cta="Explore ROOTED"></button>
-
-      {%- comment -%} side quests (bonuses) {%- endcomment -%}
-      <button class="hs" style="left:51%; top:27.5%; width:42%; height:9%" data-type="sidequest" data-title="Mindset Check — Side Quest" data-body="A Bonus side-quest. Mindset lessons to keep your head right for the climb." data-cta="Enter side quest"></button>
-      <button class="hs" style="left:16%; top:65%; width:40%; height:9%" data-type="sidequest" data-title="Purpose Check — Side Quest" data-body="A Bonus side-quest. Reconnect with your why." data-cta="Enter side quest"></button>
-      <button class="hs" style="left:44%; top:88.5%; width:42%; height:8%" data-type="sidequest" data-title="Heart Check — Side Quest" data-body="A Bonus side-quest. Check in with your heart and motivation." data-cta="Enter side quest"></button>
-
-      {%- comment -%} PROGRESS OVERLAYS — demo states; wire to customer progress later {%- endcomment -%}
-      <div class="cs" style="left:50.4%; top:18%"><span class="done"><svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg></span></div>
-      <div class="cs" style="left:34.2%; top:39.6%"><span class="done"><svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg></span></div>
-      <div class="cs" style="left:63%; top:47.5%"><span class="ring" style="--p:45"><b>45%</b></span></div>
-      <div class="cs" style="left:36.3%; top:57.5%"><span class="lock"><svg viewBox="0 0 24 24"><path d="M6 10V8a6 6 0 0 1 12 0v2h1a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1h1zm2 0h8V8a4 4 0 0 0-8 0v2z"/></svg></span></div>
-      <div class="cs" style="left:61%; top:80%"><span class="lock"><svg viewBox="0 0 24 24"><path d="M6 10V8a6 6 0 0 1 12 0v2h1a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1h1zm2 0h8V8a4 4 0 0 0-8 0v2z"/></svg></span></div>
+      {%- comment -%} Main / Offshoot / Check nodes — from section blocks. Lock state, done state,
+         and the progress overlays are all computed client-side in p2p-journey.js from
+         window.P2P.isCourseDone() + the onboarding flag; nothing here is hardcoded. {%- endcomment -%}
+      {%- for block in section.blocks -%}
+        {%- assign b = block.settings -%}
+        {%- assign pos = 'left:' | append: b.pos_left | append: '%; top:' | append: b.pos_top | append: '%; width:' | append: b.pos_width | append: '%; height:' | append: b.pos_height | append: '%;' -%}
+        {%- case block.type -%}
+          {%- when 'course' -%}
+            <button class="hs" style="{{ pos }}" data-type="course" data-handle="{{ b.handle }}" data-title="{{ b.title }}" data-body="{{ b.body }}" data-cta="Open course" data-url="{{ b.url }}"{{ block.shopify_attributes }}></button>
+          {%- when 'offshoot' -%}
+            {%- assign unlock_handle = b.unlock_after_handle -%}
+            {%- if unlock_handle == blank -%}{%- assign unlock_handle = section.settings.offshoot_hub_handle -%}{%- endif -%}
+            <button class="hs hs--offshoot" style="{{ pos }}" data-type="offshoot" data-handle="{{ b.handle }}" data-unlock-after="{{ unlock_handle }}" data-title="{{ b.title }}" data-body="{{ b.body }}" data-cta="Open course" data-url="{{ b.url }}"{{ block.shopify_attributes }}></button>
+          {%- when 'check' -%}
+            <button class="hs hs--check" style="{{ pos }}" data-type="check" data-title="{{ b.title }}" data-pulse-items="{{ b.pulse_items | strip_newlines | escape }}" data-link-url="{{ b.link_url }}" data-link-label="{{ b.link_label | default: 'Open' }}"{{ block.shopify_attributes }}></button>
+        {%- endcase -%}
+      {%- endfor -%}
     </div>
 
     {%- comment -%} ---- PROGRESS PANEL ---- {%- endcomment -%}
@@ -110,7 +132,7 @@
       <div class="prog-top">
         <div class="prog-ring p2pj-ring" style="--p:40"><b class="p2pj-ringpct">40%</b><span>Complete</span></div>
         <div class="prog-tiles">
-          <div class="ptile"><b><span class="p2pj-courses">0</span><i>/{{ section.settings.board_courses | default: 5 }}</i></b><small>Courses done</small></div>
+          <div class="ptile"><b><span class="p2pj-courses">0</span><i>/{{ board_courses_count }}</i></b><small>Courses done</small></div>
           <div class="ptile"><b><span class="p2pj-points">{{ section.settings.stat_points | default: '0' }}</span></b><small>Points</small></div>
           <div class="ptile"><b><span class="p2pj-badges">{{ section.settings.stat_badges | default: '0' }}</span></b><small>Badges</small></div>
           <div class="ptile"><b><span class="p2pj-streak">{{ section.settings.stat_streak | default: '0' }}</span></b><small>Day streak</small></div>
@@ -119,29 +141,25 @@
       </div>
       <div class="prog-next">
         <div class="pn-lbl">Up next on your trail</div>
-        <a class="pn-card" href="{{ section.settings.course_3_url | default: '/pages/p2p-course' }}">
-          <span class="pn-title">{{ section.settings.course_3_title | default: 'Quick Wins That Count' }}</span>
+        <a class="pn-card" href="{{ first_course_url }}">
+          <span class="pn-title">{{ first_course_title | default: 'Your next course' }}</span>
           <span class="pn-go">Continue →</span>
         </a>
       </div>
     </div>
 
-    {%- comment -%} ---- BONUSES PANEL (side-quests) ---- {%- endcomment -%}
+    {%- comment -%} ---- BONUSES PANEL (Checks — non-gating pulse checks) ---- {%- endcomment -%}
     <div class="panel" data-panel="bonuses">
-      <div class="pnl-head"><h2>Bonus Side-Quests</h2><p>Optional checkpoints to keep you steady between courses.</p></div>
+      <div class="pnl-head"><h2>Bonus Checks</h2><p>Optional pulse checks to keep you steady between courses — never locked.</p></div>
       <div class="bq-grid">
-        <div class="bqcard" data-type="sidequest" data-title="Mindset Check — Side Quest" data-body="Mindset lessons to keep your head right for the climb." data-cta="Enter side quest">
-          <div class="bq-ic" style="color:#8ff0e0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 4a5 5 0 0 0-5 5c0 2 1 3 1 4.5a4 4 0 0 0 8 0C16 12 17 11 17 9a5 5 0 0 0-5-5zM12 4v13.5M9.5 9h5"/></svg></div>
-          <b>Mindset Check</b><p>Keep your head right for the climb.</p><span class="bq-go">Enter →</span>
-        </div>
-        <div class="bqcard" data-type="sidequest" data-title="Purpose Check — Side Quest" data-body="Reconnect with your why." data-cta="Enter side quest">
-          <div class="bq-ic" style="color:#c9b2ff"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3l2.6 6 6.4.5-4.9 4.2 1.6 6.3L12 16.7 5.7 20l1.6-6.3L2.4 9.5 8.8 9z"/></svg></div>
-          <b>Purpose Check</b><p>Reconnect with your why.</p><span class="bq-go">Enter →</span>
-        </div>
-        <div class="bqcard" data-type="sidequest" data-title="Heart Check — Side Quest" data-body="Check in with your heart and motivation." data-cta="Enter side quest">
-          <div class="bq-ic" style="color:#ff9ec7"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 20s-7-4.4-9-8.8A4.4 4.4 0 0 1 12 8a4.4 4.4 0 0 1 9 3.2C19 15.6 12 20 12 20z"/></svg></div>
-          <b>Heart Check</b><p>Check in with your heart.</p><span class="bq-go">Enter →</span>
-        </div>
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'check' -%}
+            {%- assign b = block.settings -%}
+            <div class="bqcard" data-type="check" data-title="{{ b.title }}" data-pulse-items="{{ b.pulse_items | strip_newlines | escape }}" data-link-url="{{ b.link_url }}" data-link-label="{{ b.link_label | default: 'Open' }}">
+              <b>{{ b.title }}</b><span class="bq-go">Enter →</span>
+            </div>
+          {%- endif -%}
+        {%- endfor -%}
       </div>
     </div>
 
@@ -212,6 +230,17 @@
     </div>
   </div>
 
+  {%- comment -%} ---- CHECK POPUP (Mindset/Purpose/Heart — pulse items, never gated) ---- {%- endcomment -%}
+  <div id="p2pj-check">
+    <div class="modal-card">
+      <span class="x" id="p2pj-cx">✕</span>
+      <div class="kicker">Pulse Check</div>
+      <h3 id="p2pj-ct"></h3>
+      <ul class="pulse-items" id="p2pj-cb"></ul>
+      <a class="cta" id="p2pj-cc"></a>
+    </div>
+  </div>
+
   {%- comment -%} ---- INFO / HELP MODAL ---- {%- endcomment -%}
   <div id="p2pj-info">
     <div class="ic">
@@ -253,7 +282,7 @@
   </div>
 
   {%- comment -%} ---- JOURNEY BEGINS onboarding ---- {%- endcomment -%}
-  {%- assign lesson1_url = section.settings.course_1_url | default: '/pages/p2p-course' -%}
+  {%- assign lesson1_url = first_course_url -%}
   {%- assign brand_dna = section.settings.brand_dna_url | default: '/pages/brand-haus' -%}
   <div id="p2pj-begin">
     <div class="bc">
@@ -364,22 +393,16 @@
     { "type": "text", "id": "locked_heading", "label": "Locked state heading", "default": "Unlock The Purpose 2 Profit Learning Journey" },
     { "type": "richtext", "id": "locked_body", "label": "Locked state body", "default": "<p>Get instant access to the full Learning Journey — every course, badge, and side-quest on the map.</p>" },
 
-    { "type": "header", "content": "Courses (marker → page)" },
-    { "type": "text", "id": "course_1_title", "label": "Course 1 title", "default": "Relieve the Overwhelm" },
-    { "type": "url", "id": "course_1_url", "label": "Course 1 page" },
-    { "type": "text", "id": "course_2_title", "label": "Course 2 title", "default": "Act Fast Now" },
-    { "type": "url", "id": "course_2_url", "label": "Course 2 page" },
-    { "type": "text", "id": "course_3_title", "label": "Course 3 title", "default": "Quick Wins That Count" },
-    { "type": "url", "id": "course_3_url", "label": "Course 3 page" },
-    { "type": "text", "id": "course_4_title", "label": "Course 4 title", "default": "Ground Zero Clarity" },
-    { "type": "url", "id": "course_4_url", "label": "Course 4 page" },
-    { "type": "text", "id": "course_5_title", "label": "Course 5 title", "default": "Course Five" },
-    { "type": "url", "id": "course_5_url", "label": "Course 5 page" },
     { "type": "url", "id": "milestones_url", "label": "Milestones (badges) page", "info": "Where the Milestones tab links." },
+
+    { "type": "header", "content": "Board" },
+    { "type": "image_picker", "id": "board_image", "label": "Board image", "info": "This Realm's own board art. Leave blank to use the shared placeholder image until this Realm's art is ready." },
+    { "type": "text", "id": "offshoot_hub_handle", "label": "Default Offshoot hub course handle", "info": "An Offshoot block with no handle of its own falls back to this — e.g. \"storefront-essentials\". Saves repeating it on every Offshoot block on the same board.", "default": "storefront-essentials" },
+    { "type": "checkbox", "id": "intro_required", "label": "Require onboarding before Main courses unlock", "info": "Turn off only if this Realm should skip the \"Your Journey Begins Here\" gate entirely.", "default": true },
+    { "type": "text", "id": "unlock_after_handle", "label": "Realm unlock — required course handle", "info": "Leave blank if this Realm has no anchor (e.g. Realm 1). Set to the anchor course's handle for a Realm gated behind another course — e.g. \"grow\" or \"rooted\"." },
 
     { "type": "header", "content": "Layout" },
     { "type": "range", "id": "sticky_offset", "min": 0, "max": 120, "step": 2, "unit": "px", "label": "Sticky bar offset", "info": "Match your theme header/announcement bar height.", "default": 6 },
-    { "type": "range", "id": "board_courses", "min": 1, "max": 20, "step": 1, "label": "Courses on this board", "info": "Used for the Progress ring & “Courses done” tile.", "default": 5 },
 
     { "type": "header", "content": "Realms (2nd toolbar row)" },
     { "type": "range", "id": "current_realm", "min": 1, "max": 5, "step": 1, "label": "This page’s realm", "info": "Highlights which realm button is the current page.", "default": 1 },
@@ -429,6 +452,72 @@
     { "type": "text", "id": "welcome_title", "label": "Title", "default": "Your Journey Begins" },
     { "type": "textarea", "id": "welcome_body", "label": "Body", "default": "This is your map from the shore all the way to freedom. Complete each course to light up the path, earn badges, and unlock what's next. Tap any glowing marker to begin — and check the signs along the way for guidance." }
   ],
-  "presets": [ { "name": "P2P Learning Journey" } ]
+  "blocks": [
+    {
+      "type": "course",
+      "name": "Course (Main)",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Title", "default": "New Course" },
+        { "type": "text", "id": "handle", "label": "Handle", "info": "Must match this course's own page — its \"Course handle\" setting on the Course Player section. This is how the map checks completion." },
+        { "type": "url", "id": "url", "label": "Course page" },
+        { "type": "textarea", "id": "body", "label": "Info-popup blurb" },
+        { "type": "checkbox", "id": "is_realm_anchor", "label": "This is this Realm's anchor course", "info": "Informational only — the actual gate is the \"Realm unlock\" setting above, set on whichever Realm(s) this one gates." },
+        { "type": "range", "id": "pos_left", "min": 0, "max": 100, "step": 1, "unit": "%", "label": "Position — left", "default": 40 },
+        { "type": "range", "id": "pos_top", "min": 0, "max": 100, "step": 1, "unit": "%", "label": "Position — top", "default": 20 },
+        { "type": "range", "id": "pos_width", "min": 5, "max": 60, "step": 1, "unit": "%", "label": "Position — width", "default": 20 },
+        { "type": "range", "id": "pos_height", "min": 3, "max": 30, "step": 0.5, "unit": "%", "label": "Position — height", "default": 8 }
+      ]
+    },
+    {
+      "type": "offshoot",
+      "name": "Offshoot (side-quest)",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Title", "default": "New Offshoot" },
+        { "type": "text", "id": "handle", "label": "Handle" },
+        { "type": "url", "id": "url", "label": "Course page" },
+        { "type": "textarea", "id": "body", "label": "Info-popup blurb" },
+        { "type": "text", "id": "unlock_after_handle", "label": "Unlocks after (course handle)", "info": "Leave blank to use this board's default Offshoot hub handle." },
+        { "type": "range", "id": "pos_left", "min": 0, "max": 100, "step": 1, "unit": "%", "label": "Position — left", "default": 15 },
+        { "type": "range", "id": "pos_top", "min": 0, "max": 100, "step": 1, "unit": "%", "label": "Position — top", "default": 50 },
+        { "type": "range", "id": "pos_width", "min": 5, "max": 60, "step": 1, "unit": "%", "label": "Position — width", "default": 16 },
+        { "type": "range", "id": "pos_height", "min": 3, "max": 30, "step": 0.5, "unit": "%", "label": "Position — height", "default": 6 }
+      ]
+    },
+    {
+      "type": "check",
+      "name": "Check (pulse check)",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Title", "default": "Mindset Check" },
+        { "type": "textarea", "id": "pulse_items", "label": "Pulse-check items", "info": "One prompt per line. Never gates anything — always clickable." },
+        { "type": "url", "id": "link_url", "label": "Optional link" },
+        { "type": "text", "id": "link_label", "label": "Link label", "default": "Open" },
+        { "type": "range", "id": "pos_left", "min": 0, "max": 100, "step": 1, "unit": "%", "label": "Position — left", "default": 40 },
+        { "type": "range", "id": "pos_top", "min": 0, "max": 100, "step": 1, "unit": "%", "label": "Position — top", "default": 30 },
+        { "type": "range", "id": "pos_width", "min": 5, "max": 60, "step": 1, "unit": "%", "label": "Position — width", "default": 14 },
+        { "type": "range", "id": "pos_height", "min": 3, "max": 30, "step": 0.5, "unit": "%", "label": "Position — height", "default": 5 }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "P2P Learning Journey — Open Water (Realm 1)",
+      "blocks": [
+        { "type": "course", "settings": { "title": "Welcome Aboard", "handle": "welcome-aboard", "body": "You're in. Meet your map and get oriented before the first real course.", "pos_left": 53, "pos_top": 4, "pos_width": 22, "pos_height": 6.5 } },
+        { "type": "check", "settings": { "title": "Mindset Check", "pulse_items": "What am I telling myself about this right now?\nWhat would it feel like to trust the process today?", "pos_left": 34, "pos_top": 10, "pos_width": 18, "pos_height": 5 } },
+        { "type": "course", "settings": { "title": "RAFT", "handle": "raft", "body": "Your life raft — get out of the ocean. R: Relieve · A: Act · F: Fast Win · T: Traction.", "pos_left": 50, "pos_top": 13, "pos_width": 22, "pos_height": 6.5 } },
+        { "type": "course", "settings": { "title": "Finding Your Lane", "handle": "finding-your-lane", "body": "Get clear on the one lane that's actually yours to run in.", "pos_left": 31, "pos_top": 21, "pos_width": 22, "pos_height": 6.5 } },
+        { "type": "check", "settings": { "title": "Purpose Check", "pulse_items": "Why does this matter to me, really?\nWho am I doing this for?", "pos_left": 66, "pos_top": 27, "pos_width": 18, "pos_height": 5 } },
+        { "type": "course", "settings": { "title": "Protecting What You Make", "handle": "protecting-what-you-make", "body": "The unglamorous-but-essential part: protecting your work as you build it.", "pos_left": 31, "pos_top": 31, "pos_width": 22, "pos_height": 6.5 } },
+        { "type": "course", "settings": { "title": "Storefront Essentials", "handle": "storefront-essentials", "body": "The foundation every storefront needs, whichever platform you choose.", "is_realm_anchor": false, "pos_left": 50, "pos_top": 37, "pos_width": 22, "pos_height": 6.5 } },
+        { "type": "offshoot", "settings": { "title": "Selling on Shopify", "handle": "selling-on-shopify", "body": "Shopify-specific setup, once Storefront Essentials is done.", "pos_left": 9, "pos_top": 40, "pos_width": 20, "pos_height": 6 } },
+        { "type": "offshoot", "settings": { "title": "Selling on Etsy", "handle": "selling-on-etsy", "body": "Etsy-specific setup, once Storefront Essentials is done.", "pos_left": 69, "pos_top": 40, "pos_width": 20, "pos_height": 6 } },
+        { "type": "offshoot", "settings": { "title": "Selling on Beacons", "handle": "selling-on-beacons", "body": "Beacons-specific setup, once Storefront Essentials is done.", "pos_left": 65, "pos_top": 52, "pos_width": 20, "pos_height": 6 } },
+        { "type": "offshoot", "settings": { "title": "Selling on Stan", "handle": "selling-on-stan", "body": "Stan-specific setup, once Storefront Essentials is done.", "pos_left": 9, "pos_top": 54, "pos_width": 20, "pos_height": 6 } },
+        { "type": "check", "settings": { "title": "Heart Check", "pulse_items": "What am I proud of so far?\nWhere do I need to be gentler with myself?", "pos_left": 45, "pos_top": 65, "pos_width": 18, "pos_height": 5 } },
+        { "type": "course", "settings": { "title": "Psychology Behind a Purchase", "handle": "psychology-behind-a-purchase", "body": "Why people actually buy — and how to work with that honestly.", "pos_left": 31, "pos_top": 72, "pos_width": 22, "pos_height": 6.5 } },
+        { "type": "course", "settings": { "title": "Show Up Your Way", "handle": "show-up-your-way", "body": "Close out Realm 1 by finding the way of showing up that's sustainably yours.", "pos_left": 45, "pos_top": 80, "pos_width": 22, "pos_height": 6.5 } }
+      ]
+    }
+  ]
 }
 {% endschema %}
