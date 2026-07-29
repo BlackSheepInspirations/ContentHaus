@@ -2,10 +2,28 @@
   "sections": {
     "main": {
       "type": "p2p-learning-journey",
+      "blocks": {
+        "welcome": { "type": "course", "settings": { "title": "Welcome Aboard", "handle": "welcome-aboard", "body": "You're in. Meet your map and get oriented before the first real course.", "pos_left": 53, "pos_top": 6, "pos_width": 22, "pos_height": 6.5 } },
+        "mindset": { "type": "check", "settings": { "title": "Mindset Check", "pulse_items": "What am I telling myself about this right now?\nWhat would it feel like to trust the process today?", "pos_left": 33, "pos_top": 12.5, "pos_width": 17, "pos_height": 5 } },
+        "raft": { "type": "course", "settings": { "title": "RAFT", "handle": "raft", "body": "Your life raft — get out of the ocean. R: Relieve · A: Act · F: Fast Win · T: Traction.", "pos_left": 50, "pos_top": 15, "pos_width": 22, "pos_height": 6.5 } },
+        "lane": { "type": "course", "settings": { "title": "Finding Your Lane", "handle": "finding-your-lane", "body": "Get clear on the one lane that's actually yours to run in.", "pos_left": 31, "pos_top": 23, "pos_width": 22, "pos_height": 6.5 } },
+        "purpose": { "type": "check", "settings": { "title": "Purpose Check", "pulse_items": "Why does this matter to me, really?\nWho am I doing this for?", "pos_left": 58, "pos_top": 28, "pos_width": 17, "pos_height": 5 } },
+        "protecting": { "type": "course", "settings": { "title": "Protecting What You Make", "handle": "protecting-what-you-make", "body": "The unglamorous-but-essential part: protecting your work as you build it.", "pos_left": 31, "pos_top": 33, "pos_width": 22, "pos_height": 6.5 } },
+        "storefront": { "type": "course", "settings": { "title": "Storefront Essentials", "handle": "storefront-essentials", "body": "The foundation every storefront needs, whichever platform you choose.", "pos_left": 50, "pos_top": 39, "pos_width": 22, "pos_height": 6.5 } },
+        "shopify": { "type": "offshoot", "settings": { "title": "Selling on Shopify", "handle": "selling-on-shopify", "body": "Shopify-specific setup, once Storefront Essentials is done.", "unlock_after_handle": "storefront-essentials", "pos_left": 9, "pos_top": 42, "pos_width": 20, "pos_height": 6 } },
+        "etsy": { "type": "offshoot", "settings": { "title": "Selling on Etsy", "handle": "selling-on-etsy", "body": "Etsy-specific setup, once Storefront Essentials is done.", "unlock_after_handle": "storefront-essentials", "pos_left": 68, "pos_top": 42, "pos_width": 20, "pos_height": 6 } },
+        "beacons": { "type": "offshoot", "settings": { "title": "Selling on Beacons", "handle": "selling-on-beacons", "body": "Beacons-specific setup, once Storefront Essentials is done.", "unlock_after_handle": "storefront-essentials", "pos_left": 64, "pos_top": 54, "pos_width": 20, "pos_height": 6 } },
+        "stan": { "type": "offshoot", "settings": { "title": "Selling on Stan", "handle": "selling-on-stan", "body": "Stan-specific setup, once Storefront Essentials is done.", "unlock_after_handle": "storefront-essentials", "pos_left": 9, "pos_top": 56, "pos_width": 20, "pos_height": 6 } },
+        "heart": { "type": "check", "settings": { "title": "Heart Check", "pulse_items": "What am I proud of so far?\nWhere do I need to be gentler with myself?", "pos_left": 38, "pos_top": 66, "pos_width": 17, "pos_height": 5 } },
+        "psychology": { "type": "course", "settings": { "title": "Psychology Behind a Purchase", "handle": "psychology-behind-a-purchase", "body": "Why people actually buy — and how to work with that honestly.", "pos_left": 30, "pos_top": 73, "pos_width": 22, "pos_height": 6.5 } },
+        "showup": { "type": "course", "settings": { "title": "Show Up Your Way", "handle": "show-up-your-way", "body": "Close out Realm 1 by finding the way of showing up that's sustainably yours.", "pos_left": 35, "pos_top": 81, "pos_width": 22, "pos_height": 6.5 } }
+      },
+      "block_order": ["welcome", "mindset", "raft", "lane", "purpose", "protecting", "storefront", "shopify", "etsy", "beacons", "stan", "heart", "psychology", "showup"],
       "settings": {
         "access_tag": "p2p-learning",
         "access_code": "p2p-learning",
-        "slug": "p2p-learning"
+        "slug": "p2p-learning",
+        "current_realm": 1
       }
     }
   },
