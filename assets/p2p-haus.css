@@ -2556,6 +2556,266 @@
   background: var(--color-surface-soft);
 }
 
+/* =========================================================
+   ROOTED METHOD — stage tracker, Deepen toggle, calendar,
+   quality gate. All live inside the "launchplan" premium panel.
+   ========================================================= */
+#p2p-haus-app .rooted-stages,
+#p2p-haus-app .rooted-quality {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-medium);
+  background: var(--color-surface);
+  padding: 14px 16px;
+  margin-bottom: 14px;
+}
+
+#p2p-haus-app .rooted-stages__head,
+#p2p-haus-app .rooted-quality__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+#p2p-haus-app .rooted-stages__title,
+#p2p-haus-app .rooted-quality__title {
+  font-weight: 700;
+  font-size: 0.92rem;
+  color: var(--color-text);
+}
+
+#p2p-haus-app .rooted-stages__count {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  background: var(--color-primary-soft);
+  border-radius: var(--radius-pill);
+  padding: 3px 10px;
+}
+
+#p2p-haus-app .rooted-stages__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 8px;
+}
+
+#p2p-haus-app .rooted-stage {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-small);
+  padding: 8px 10px;
+  background: var(--color-surface-soft);
+}
+
+#p2p-haus-app .rooted-stage.is-done {
+  border-color: var(--color-primary);
+  background: var(--color-primary-soft);
+}
+
+#p2p-haus-app .rooted-stage label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  min-width: 0;
+}
+
+#p2p-haus-app .rooted-stage__letter {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: var(--color-gold);
+  color: var(--color-gold-ink);
+  flex-shrink: 0;
+}
+
+#p2p-haus-app .rooted-stage__name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text);
+  white-space: nowrap;
+}
+
+#p2p-haus-app .rooted-deepen-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+#p2p-haus-app .rooted-deepen-toggle__label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+#p2p-haus-app .rooted-deepen-toggle__btn {
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-surface);
+  color: var(--color-text);
+  border-radius: var(--radius-pill);
+  padding: 6px 14px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+#p2p-haus-app .rooted-deepen-toggle__btn.is-active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--on-accent);
+}
+
+#p2p-haus-app .rooted-calendar {
+  margin-top: 14px;
+}
+
+#p2p-haus-app .rooted-calendar__empty {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-medium);
+  padding: 14px;
+  text-align: center;
+}
+
+#p2p-haus-app .rooted-calendar__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+#p2p-haus-app .rooted-calendar__title {
+  font-weight: 700;
+  font-size: 0.92rem;
+  color: var(--color-text);
+}
+
+#p2p-haus-app .rooted-calendar__sub {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+#p2p-haus-app .rooted-calendar__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 8px;
+}
+
+#p2p-haus-app .rooted-calendar__cell {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-small);
+  padding: 8px 10px;
+  background: var(--color-surface-soft);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+#p2p-haus-app .rooted-calendar__date {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+#p2p-haus-app .rooted-calendar__stage {
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+}
+
+#p2p-haus-app .rooted-calendar__cell--trigger {
+  border-color: var(--color-gold);
+  background: var(--color-gold-soft, var(--color-primary-soft));
+}
+
+#p2p-haus-app .rooted-quality__draft-label {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  margin-bottom: 6px;
+}
+
+#p2p-haus-app .rooted-quality__draft {
+  width: 100%;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-small);
+  padding: 10px 12px;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  color: var(--color-text);
+  background: var(--color-surface-soft);
+  margin-bottom: 12px;
+  resize: vertical;
+}
+
+#p2p-haus-app .rooted-quality__list {
+  list-style: none;
+  margin: 0 0 10px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+#p2p-haus-app .rooted-quality__item {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-small);
+  padding: 8px 10px;
+  background: var(--color-surface-soft);
+}
+
+#p2p-haus-app .rooted-quality__item.is-pass {
+  border-color: var(--color-primary);
+  background: var(--color-primary-soft);
+}
+
+#p2p-haus-app .rooted-quality__item label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+#p2p-haus-app .rooted-quality__q {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+#p2p-haus-app .rooted-quality__hint {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+#p2p-haus-app .rooted-quality__score {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
 @media (max-width: 720px) {
   #p2p-haus-app .premium-tabs {
     gap: 6px;

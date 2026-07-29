@@ -739,7 +739,7 @@
 
               <div class="field-group">
                 <label for="launchChannels">
-                  Launch channels <span class="field-hint-inline">(optional — powers the PROFIT Path)</span>
+                  Launch channels <span class="field-hint-inline">(optional — powers the ROOTED Method)</span>
                 </label>
                 <input
                   type="text"
@@ -762,6 +762,19 @@
                   data-field-key="launchDate"
                   data-category="audience"
                   placeholder="e.g. Aug 8, or 'in 2 weeks'"
+                >
+              </div>
+
+              <div class="field-group">
+                <label for="launchDateExact">
+                  Exact go-live date <span class="field-hint-inline">(optional — powers your ROOTED launch calendar)</span>
+                </label>
+                <input
+                  type="date"
+                  id="launchDateExact"
+                  name="launchDateExact"
+                  data-field-key="launchDateExact"
+                  data-category="audience"
                 >
               </div>
 
@@ -2590,7 +2603,7 @@
               role="tab"
               aria-selected="false"
             >
-              The PROFIT Path
+              The ROOTED Method
             </button>
             <button
               type="button"
@@ -2681,22 +2694,30 @@
 
             <div class="premium-panel" data-premium-panel="launchplan" hidden>
               <div class="output-heading">
-                <h3>The PROFIT Path &mdash; Launch Plan</h3>
+                <h3>The ROOTED Method &mdash; Launch Plan</h3>
                 <button type="button" data-output-target="premiumLaunchPlanText">
                   Copy
                 </button>
               </div>
               <p class="field-note">
-                Your launch, run on the 6-phase PROFIT Path (Prime, Reveal, Offer,
-                Flood, Ignite, Tend) &mdash; sequenced to your kit, with a checklist.
+                Your launch, run on the 6-stage ROOTED Method (Reach, Open, Offer,
+                Trigger, Escalate, Deepen) &mdash; sequenced to your kit, with a
+                checklist.
               </p>
+
+              <div class="rooted-stages" id="rootedStages"></div>
+              <div class="rooted-deepen-toggle" id="rootedDeepenToggle"></div>
+
               <textarea
                 id="premiumLaunchPlanText"
                 class="premium-output"
                 rows="22"
                 readonly
-                aria-label="Seven day launch plan"
+                aria-label="ROOTED Method launch plan"
               ></textarea>
+
+              <div class="rooted-calendar" id="rootedCalendar"></div>
+              <div class="rooted-quality" id="rootedQualityCheck"></div>
             </div>
 
             <div class="premium-panel" data-premium-panel="calendar" hidden>

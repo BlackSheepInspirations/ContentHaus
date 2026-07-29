@@ -1392,7 +1392,21 @@ const appState = {
   activeAccordion: null,
   isGenerating: false,
   premiumOutputs: {},
-  brandMode: "product"
+  brandMode: "product",
+  // ROOTED Method: which of the 6 launch stages the user has marked done
+  // (business-execution progress — distinct from Launch Readiness, which
+  // scores whether the *input* is complete enough to generate from).
+  rootedStages: {
+    reach: false, open: false, offer: false,
+    trigger: false, escalate: false, deepen: false
+  },
+  // "live" (tied to this specific launch date) or "evergreen" (a rolling
+  // sequence for whoever joins, any day) — changes Deepen's wording.
+  deepenMode: "live",
+  // The doc's 3-question check, run against a pasted draft before it ships.
+  // Self-assessed, not auto-graded — "who's the hero"/"one problem"/"one
+  // action" aren't mechanically checkable from text alone.
+  rootedQualityCheck: { draft: "", hero: false, problem: false, action: false }
 };
 
 
@@ -1464,8 +1478,8 @@ const SECTION_INFO = {
 
 const PREMIUM_INFO = {
   adpackage: "A complete ad set — headlines, primary text, hooks, and CTAs for every channel, ready to paste.",
-  launchplan: "Your day-by-day PROFIT Path launch brief — product, customer, offer, and what to produce in each of the 6 phases.",
-  calendar: "A 30-day content calendar — a post idea and angle for every day, built around your launch.",
+  launchplan: "Your day-by-day ROOTED Method launch brief — product, customer, offer, and what to produce at each of the 6 stages.",
+  calendar: "A 30-day evergreen content calendar — a post idea and angle for every day, built around your launch.",
   suno: "A music-generator prompt (for Suno) — genre, mood, tempo, and structure to score your promo.",
   video: "A complete short-form video script — hook, scene-by-scene beats, and caption.",
   voice: "A natural voiceover script, timed and ready to record or feed to an AI voice.",
@@ -1686,6 +1700,10 @@ function initializeApplication() {
   initInfoPopovers();
   initStickyRail();
   initPremiumTabs();
+  renderRootedStages();
+  renderRootedDeepenToggle();
+  renderRootedQualityCheck();
+  renderRootedCalendar(collectProjectData());
   initJourney();
   initHeroVideo();
   initBackToTop();
@@ -3474,7 +3492,8 @@ function collectProjectData() {
       marketingGoal: readValue("marketingGoal"),
       buyerMotivation: readValue("buyerMotivation"),
       launchChannels: readValue("launchChannels"),
-      launchDate: readValue("launchDate")
+      launchDate: readValue("launchDate"),
+      launchDateExact: readValue("launchDateExact")
     },
 
     pricing: {
@@ -4929,6 +4948,10 @@ function generatePremiumOutputs(data) {
   };
 
   renderPremiumOutputs(appState.premiumOutputs);
+  renderRootedStages();
+  renderRootedDeepenToggle();
+  renderRootedQualityCheck();
+  renderRootedCalendar(data);
 }
 
 function renderPremiumOutputs(outputs) {
@@ -4981,6 +5004,7 @@ function premiumData(data) {
     motivation: data.display.buyerMotivation || "",
     channels: data.audience.launchChannels || "",
     launchDate: data.audience.launchDate || "",
+    launchDateExact: data.audience.launchDateExact || "",
     price: data.pricing.currentPrice ? formatPrice(data.pricing.currentPrice) : "",
     tier: data.display.pricingTier || "",
     offer: data.display.offerType || "",
@@ -5547,6 +5571,74 @@ function kitPick(picks, keywords, fallback) {
   return matches.length ? matches.join(", ") : fallback;
 }
 
+// The six ROOTED Method stages — content in the framework's own voice
+// (docs/ROOTED_Method.md's internal note: don't attribute this to any named
+// external framework in anything a customer sees). dayOffsetStart/End are
+// relative to the launch date and drive both the text brief below and the
+// visual calendar grid (renderRootedCalendar).
+const ROOTED_STAGES = [
+  {
+    id: "reach", letter: "R", name: "Reach",
+    dayLabel: "Days 1-3", dayOffsetStart: 1, dayOffsetEnd: 3,
+    whatHappens: "Warm up your audience before you sell. Show up, give value, build trust.",
+    whyItWorks: "People buy from someone they already trust and like — not a stranger who shows up once, asking. Give before you ask. Skip this stage and every stage after it gets harder, because you're asking strangers to buy instead of people who already know you.",
+    assets: "Social posts, hooks and captions, content series."
+  },
+  {
+    id: "open", letter: "O", name: "Open",
+    dayLabel: "Day 4", dayOffsetStart: 4, dayOffsetEnd: 4,
+    whatHappens: "Open the loop. Tease that something's coming, start a waitlist, spark curiosity.",
+    whyItWorks: "An open question is something the mind can't leave alone. Not knowing pulls harder than knowing — the gap itself is what keeps someone checking back. This is the stage that turns “I saw that” into “I'm watching for that.”",
+    assets: "Launch teaser, announcement, waitlist email."
+  },
+  {
+    id: "offer", letter: "O", name: "Offer",
+    dayLabel: "Days 5-7", dayOffsetStart: 5, dayOffsetEnd: 7,
+    whatHappens: "Deliver pre-launch value. Show the transformation and the proof, so they want it.",
+    whyItWorks: "People don't buy features. They buy proof it worked for someone like them, and they buy the deal is fair. By the time the launch happens, buying already feels like closing something that was already open, not starting something new.",
+    assets: "Sales page, video script + voiceover, “here's what you get” email."
+  },
+  {
+    id: "trigger", letter: "T", name: "Trigger",
+    dayLabel: "Day 8 — GO LIVE", dayOffsetStart: 8, dayOffsetEnd: 8,
+    whatHappens: "Go live. Publish the product and hit every channel at once.",
+    whyItWorks: "What's available right now, everywhere, at once, feels real and urgent in a way a single quiet listing never does. A launch that hits every channel the same hour feels like something is actually happening — because it is.",
+    assets: "Product listing/description, launch carousel, ad, the full ad package."
+  },
+  {
+    id: "escalate", letter: "E", name: "Escalate",
+    dayLabel: "Days 9-10", dayOffsetStart: 9, dayOffsetEnd: 10,
+    whatHappens: "Add urgency and momentum. Social proof, bonus, deadline, last call.",
+    whyItWorks: "This is almost gone, and look who already said yes — two forces stacked together, doing more than either does alone. They're the strongest push in the entire sequence, not because either is a trick, but because both things are usually just true by this point.",
+    assets: "Urgency email, last-call posts, testimonials."
+  },
+  {
+    id: "deepen", letter: "D", name: "Deepen",
+    dayLabel: "Day 11+", dayOffsetStart: 11, dayOffsetEnd: 17,
+    whatHappens: "After the close, nurture buyers, gather proof, turn it evergreen.",
+    whyItWorks: "The person who already said yes once is the easiest yes you'll ever get again. This is the stage most sellers rush or skip entirely — and it's the one with the highest return for the least new effort, because you're deepening the audience you already earned, not finding a new one.",
+    assets: "Follow-up email, review requests, evergreen social + GPT."
+  }
+];
+
+// Deepen's real 4-part structure, worded differently depending on whether
+// this launch is Live (tied to one launch date) or Evergreen (a rolling
+// sequence for whoever joins, any day) — appState.deepenMode.
+const ROOTED_DEEPEN_STEPS = {
+  live: [
+    { label: "The fast win", text: "Get the buyer an early result or a quick, easy use of what they bought — fast, before doubt has time to set in." },
+    { label: "The next offer", text: "Once they've had that win, they're the most open they'll ever be to what comes next. Invite them, don't wait for them to ask." },
+    { label: "The ask", text: "Once they trust the result, ask for the review or testimonial — while the feeling is fresh, not months later." },
+    { label: "The invitation to spread it", text: "Turn a happy buyer into someone who tells others — a referral ask, a share prompt, a simple “who else needs this.”" }
+  ],
+  evergreen: [
+    { label: "The fast win", text: "Same 4 moments, running on a rolling timer instead of a launch date — get every new buyer an early result fast, right after they join, whatever day that is." },
+    { label: "The next offer", text: "On their own timeline: once a buyer's had that fast win, invite them to what comes next — the same nurture sequence, just running on autopilot." },
+    { label: "The ask", text: "Ask for the review or testimonial once trust is built, timed from each buyer's own join date rather than a shared launch date." },
+    { label: "The invitation to spread it", text: "A rolling referral/share prompt — the same ask, triggered by where each buyer is in their own journey, not by the calendar." }
+  ]
+};
+
 function buildLaunchPlan(data) {
   const d = premiumData(data);
   const creator = appState.brandMode === "creator";
@@ -5554,7 +5646,9 @@ function buildLaunchPlan(data) {
     (key) => GENERATOR_DEFINITIONS[key]?.label || key
   );
   const has = (word) => picks.some((p) => p.toLowerCase().includes(word));
-  const kit = picks.length ? picks.join(", ") : "your generated assets";
+  const deepenMode = appState.deepenMode === "evergreen" ? "evergreen" : "live";
+  const deepenSteps = ROOTED_DEEPEN_STEPS[deepenMode];
+  const stageMark = (id) => (appState.rootedStages && appState.rootedStages[id] ? "[x]" : "[ ]");
 
   // Fill helper: use captured value, else a clearly-labeled placeholder so the
   // receiving AI never has to stop and ask — it fills the blank instead.
@@ -5562,10 +5656,10 @@ function buildLaunchPlan(data) {
     val && String(val).trim() ? String(val).trim() : `[COMPLETE: ${hint}]`;
 
   return [
-    `THE PROFIT PATH — LAUNCH BRIEF: ${d.name}`,
+    `THE ROOTED METHOD — LAUNCH BRIEF: ${d.name}`,
     "",
     "INSTRUCTIONS FOR THE AI:",
-    "Using the brief below, produce every deliverable listed under \"PRODUCE THESE ASSETS\" by working the 6-phase PROFIT Path in order. Do not ask clarifying questions — where a line is marked [COMPLETE], insert a clearly-labeled placeholder the reader can swap in. Never invent testimonials, reviews, results, or statistics; if proof would help and none is provided, describe the kind of proof to gather instead. Keep every asset in the brand voice below.",
+    "Using the brief below, produce every deliverable listed under \"PRODUCE THESE ASSETS\" by working the 6-stage ROOTED Method in order. Do not ask clarifying questions — where a line is marked [COMPLETE], insert a clearly-labeled placeholder the reader can swap in. Never invent testimonials, reviews, results, or statistics; if proof would help and none is provided, describe the kind of proof to gather instead. Keep every asset in the brand voice below.",
     "",
     "— THE PRODUCT —",
     `Name: ${d.name}`,
@@ -5595,39 +5689,41 @@ function buildLaunchPlan(data) {
     "— LAUNCH SETUP —",
     `Sell on: ${d.platform}`,
     `Channels: ${fill(d.channels, "the channels you'll post on — e.g. Instagram, TikTok, Pinterest, email list")}`,
-    `Go-live date: ${fill(d.launchDate, "choose your launch day (Day 8 below) and shift the other days around it")}`,
+    `Go-live date: ${fill(d.launchDateExact || d.launchDate, "choose your launch day (Day 8 below) and shift the other days around it")}`,
+    `Deepen runs as: ${deepenMode === "evergreen" ? "Evergreen — a rolling sequence for anyone who joins, any day" : "Live — tied to this specific launch date"}`,
     `Launch goal: ${d.goal}`,
     "",
-    "— THE PROFIT PATH (run in order; the dates are a movable template) —",
+    "— THE ROOTED METHOD (run in order; the dates are a movable template) —",
     "",
-    "P · PRIME — earn trust before you sell",
+    "R · REACH — warm up your audience, give before you ask",
     creator
       ? "Days 1-3: Show up as YOU — your story, POV, and helpful takes on the problem above to build the audience that will buy. Open a waitlist."
       : "Days 1-3: Warm up your niche with pure value tied to the problem above — helpful tips, no pitch. Open a waitlist so early fans can raise their hand.",
     `Produce: ${kitPick(picks, ["social", "hook", "content"], "3-5 value posts + a waitlist invite")}`,
     "",
-    "R · REVEAL — open the loop",
-    "Day 4: Tease that something's coming — a \"launching soon\" post and a short teaser. Point everyone to the waitlist.",
+    "O · OPEN — open the loop, spark curiosity",
+    "Day 4: Tease that something's coming — a \"launching soon\" post and a short teaser. Point everyone to the waitlist. Not knowing pulls harder than knowing.",
     `Produce: ${kitPick(picks, ["teaser", "announcement"], "a teaser post + announcement")}`,
     "",
-    "O · OFFER — show the transformation",
-    "Days 5-7: Reveal what it is and who it's for. Lead with the before→after above and spell out exactly what they get.",
+    "O · OFFER — show the transformation and the proof",
+    "Days 5-7: Reveal what it is and who it's for. Lead with the before→after above and spell out exactly what they get — proof it works, and proof the deal is fair.",
     `Produce: ${kitPick(picks, ["sales", "landing", "email"], "a sales/landing page + a value email")}`,
     "",
-    "F · FLOOD — go live everywhere",
+    "T · TRIGGER — go live, everywhere, at once",
     `Day 8 (GO LIVE): Publish the ${
       has("listing") || has("description") ? "listing / product page" : "product page"
-    } and send the launch email. Post the announcement across every channel at once.`,
+    } and send the launch email. Post the announcement across every channel at the same hour — a launch that trickles out over a week feels unfinished; one that hits everywhere at once feels real.`,
     `Produce: ${kitPick(picks, ["listing", "description", "ad", "graphic", "announcement", "carousel"], "your product page + ad graphic + announcement")}`,
     "",
-    "I · IGNITE — urgency + momentum",
-    "Days 9-10: Add an honest reason to act now — a launch bonus, an expiring intro offer, or a genuine deadline (never invent scarcity). Send a \"closing soon\" email and last-call posts.",
+    "E · ESCALATE — urgency + proof, stacked together",
+    "Days 9-10: Add an honest reason to act now — a launch bonus, an expiring intro offer, or a genuine deadline (never invent scarcity). Pair it with real social proof. Send a \"closing soon\" email and last-call posts.",
     "Produce: an urgency email + last-call posts",
     "",
-    "T · TEND — nurture + make it evergreen",
+    "D · DEEPEN — the easiest yes you'll ever get again",
     creator
-      ? "Days 11+: Thank buyers, gather real testimonials, keep showing up, and turn your best launch content into evergreen posts. Save this project for your next drop."
-      : "Days 11+: Thank buyers, request reviews, and turn your winners into evergreen content. Save this project so your next launch takes minutes.",
+      ? "Day 11+: Thank buyers, gather real testimonials, keep showing up, and turn your best launch content into evergreen posts. Save this project for your next drop."
+      : "Day 11+: Thank buyers, request reviews, and turn your winners into evergreen content. Save this project so your next launch takes minutes.",
+    ...deepenSteps.map((step, i) => `  ${i + 1}. ${step.label} — ${step.text}`),
     has("gpt")
       ? "Produce: a follow-up email + review request + your Custom GPT to keep answering buyers"
       : "Produce: a follow-up email + review request + evergreen social",
@@ -5641,16 +5737,229 @@ function buildLaunchPlan(data) {
     "• Never invent testimonials, reviews, results, or statistics.",
     "• Every asset stays in the brand voice above.",
     "",
-    "PROFIT PATH CHECKLIST:",
-    "[ ] Prime — value/story posts + waitlist live",
-    "[ ] Reveal — teaser posted",
-    "[ ] Offer — sales/landing page + email ready",
-    "[ ] Flood — product live + announced everywhere",
-    "[ ] Ignite — honest urgency + last-call planned",
-    "[ ] Tend — follow-up + testimonials + saved for next time"
+    "ROOTED METHOD CHECKLIST:",
+    `${stageMark("reach")} Reach — value/story posts + waitlist live`,
+    `${stageMark("open")} Open — teaser posted`,
+    `${stageMark("offer")} Offer — sales/landing page + email ready`,
+    `${stageMark("trigger")} Trigger — product live + announced everywhere`,
+    `${stageMark("escalate")} Escalate — honest urgency + last-call planned`,
+    `${stageMark("deepen")} Deepen — follow-up + testimonials + saved for next time`
   ]
     .filter((line) => line !== null)
     .join("\n");
+}
+
+// ROOTED Method stage-completion tracker — 6 checkboxes backed by
+// appState.rootedStages, persisted via the existing saveCurrentProject().
+// Distinct from Launch Readiness (input completeness); this tracks whether
+// the user has actually executed each launch stage in real life.
+function renderRootedStages() {
+  const container = getElement("rootedStages");
+  if (!container) return;
+
+  const stages = appState.rootedStages || {};
+  const doneCount = ROOTED_STAGES.filter((stage) => stages[stage.id]).length;
+
+  container.innerHTML = `
+    <div class="rooted-stages__head">
+      <span class="rooted-stages__title">Your ROOTED Progress</span>
+      <span class="rooted-stages__count">${doneCount} of ${ROOTED_STAGES.length} stages ready</span>
+    </div>
+    <ul class="rooted-stages__list">
+      ${ROOTED_STAGES.map(
+        (stage) => `
+        <li class="rooted-stage${stages[stage.id] ? " is-done" : ""}">
+          <label>
+            <input type="checkbox" data-rooted-stage="${stage.id}" ${
+              stages[stage.id] ? "checked" : ""
+            } />
+            <span class="rooted-stage__letter">${stage.letter}</span>
+            <span class="rooted-stage__name">${stage.name}</span>
+          </label>
+          ${infoIconHtml(`${stage.whatHappens} ${stage.whyItWorks}`)}
+        </li>
+      `
+      ).join("")}
+    </ul>
+  `;
+
+  container.querySelectorAll("[data-rooted-stage]").forEach((box) => {
+    box.addEventListener("change", () => {
+      appState.rootedStages = {
+        ...appState.rootedStages,
+        [box.dataset.rootedStage]: box.checked
+      };
+      saveCurrentProject();
+      renderRootedStages();
+    });
+  });
+}
+
+// Live-vs-Evergreen toggle for Deepen (docs/ROOTED_Method.md's explicit
+// fork) — changes the wording of Deepen's 4-part structure in the
+// generated brief, not just informational prose.
+function renderRootedDeepenToggle() {
+  const container = getElement("rootedDeepenToggle");
+  if (!container) return;
+
+  const mode = appState.deepenMode === "evergreen" ? "evergreen" : "live";
+
+  container.innerHTML = `
+    <span class="rooted-deepen-toggle__label">Deepen runs as:</span>
+    <button type="button" class="rooted-deepen-toggle__btn${
+      mode === "live" ? " is-active" : ""
+    }" data-deepen-mode="live">Live Launch</button>
+    <button type="button" class="rooted-deepen-toggle__btn${
+      mode === "evergreen" ? " is-active" : ""
+    }" data-deepen-mode="evergreen">Evergreen</button>
+    ${infoIconHtml("Live ties Deepen to this one launch date. Evergreen runs the same 4 moments (fast win, next offer, ask, spread) on a rolling timer for anyone who joins, any day.")}
+  `;
+
+  container.querySelectorAll("[data-deepen-mode]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      appState.deepenMode = btn.dataset.deepenMode;
+      saveCurrentProject();
+      renderRootedDeepenToggle();
+      if (Object.keys(appState.generatedOptions).length > 0) {
+        appState.premiumOutputs = {
+          ...appState.premiumOutputs,
+          launchplan: buildLaunchPlan(collectProjectData())
+        };
+        renderPremiumOutputs(appState.premiumOutputs);
+        saveCurrentProject();
+      }
+    });
+  });
+}
+
+// The doc's 3-question check ("who's the hero, what's the one problem,
+// what's the one action") — a self-assessment against a pasted draft, not
+// an auto-grader (those three things aren't mechanically checkable from
+// text alone). Usable at any stage, modeled on the Launch Readiness
+// checklist pattern (updateValidationSummary, above) but scoped to these
+// 3 questions instead of input-completeness.
+const ROOTED_QUALITY_QUESTIONS = [
+  { id: "hero", label: "Who's the hero of this message?", hint: "Never you. Always them." },
+  { id: "problem", label: "What's the one problem being solved?", hint: "Not five. One." },
+  { id: "action", label: "What's the one action being asked?", hint: "Clear, singular, obvious." }
+];
+
+function renderRootedQualityCheck() {
+  const container = getElement("rootedQualityCheck");
+  if (!container) return;
+
+  const state = appState.rootedQualityCheck || {};
+  const passedCount = ROOTED_QUALITY_QUESTIONS.filter((q) => state[q.id]).length;
+
+  container.innerHTML = `
+    <div class="rooted-quality__head">
+      <span class="rooted-quality__title">Before It Ships</span>
+      ${infoIconHtml("An Escalate email that's technically urgent but forgets who the hero is will underperform a plain, honest one that remembers. The stage gets the timing right — this gets the words right.")}
+    </div>
+    <label class="rooted-quality__draft-label" for="rootedQualityDraft">Paste a draft to check it against (optional)</label>
+    <textarea id="rootedQualityDraft" class="rooted-quality__draft" rows="4" placeholder="Paste any asset you're about to ship — an email, a post, an ad...">${escapeHtml(
+      state.draft || ""
+    )}</textarea>
+    <ul class="rooted-quality__list">
+      ${ROOTED_QUALITY_QUESTIONS.map(
+        (q) => `
+        <li class="rooted-quality__item${state[q.id] ? " is-pass" : ""}">
+          <label>
+            <input type="checkbox" data-rooted-quality="${q.id}" ${state[q.id] ? "checked" : ""} />
+            <span class="rooted-quality__q">${q.label}</span>
+          </label>
+          <span class="rooted-quality__hint">${q.hint}</span>
+        </li>
+      `
+      ).join("")}
+    </ul>
+    <p class="rooted-quality__score">${passedCount} of ${ROOTED_QUALITY_QUESTIONS.length} — ${
+      passedCount === ROOTED_QUALITY_QUESTIONS.length ? "ready to ship" : "worth another look before you ship"
+    }</p>
+  `;
+
+  const draftField = getElement("rootedQualityDraft");
+  if (draftField) {
+    draftField.addEventListener("input", () => {
+      appState.rootedQualityCheck = { ...appState.rootedQualityCheck, draft: draftField.value };
+      saveCurrentProject();
+    });
+  }
+
+  container.querySelectorAll("[data-rooted-quality]").forEach((box) => {
+    box.addEventListener("change", () => {
+      appState.rootedQualityCheck = {
+        ...appState.rootedQualityCheck,
+        [box.dataset.rootedQuality]: box.checked
+      };
+      saveCurrentProject();
+      renderRootedQualityCheck();
+    });
+  });
+}
+
+// Real calendar dates for the launch sequence, computed from the exact
+// go-live date field — separate from the evergreen "30-Day Calendar" tab
+// (build30DayCalendar below), which is rolling content rotation, not tied
+// to a launch date.
+function renderRootedCalendar(data) {
+  const container = getElement("rootedCalendar");
+  if (!container) return;
+
+  const d = premiumData(data);
+  const rawDate = d.launchDateExact;
+
+  if (!rawDate) {
+    container.innerHTML = `
+      <p class="rooted-calendar__empty">
+        Set your <strong>exact go-live date</strong> above to see your ROOTED
+        launch calendar — every day mapped to its stage.
+      </p>
+    `;
+    return;
+  }
+
+  // Native <input type="date"> always yields YYYY-MM-DD; parse as local
+  // midnight (not UTC) so the grid doesn't shift a day depending on timezone.
+  const [y, m, day] = rawDate.split("-").map(Number);
+  const launch = new Date(y, (m || 1) - 1, day || 1);
+
+  if (Number.isNaN(launch.getTime())) {
+    container.innerHTML = "";
+    return;
+  }
+
+  const cards = [];
+  ROOTED_STAGES.forEach((stage) => {
+    for (let offset = stage.dayOffsetStart; offset <= stage.dayOffsetEnd; offset += 1) {
+      const cellDate = new Date(launch);
+      cellDate.setDate(launch.getDate() + (offset - 8)); // Trigger (day 8) = go-live date
+      cards.push({ stage, offset, date: cellDate });
+    }
+  });
+
+  container.innerHTML = `
+    <div class="rooted-calendar__head">
+      <span class="rooted-calendar__title">Your Launch Calendar</span>
+      <span class="rooted-calendar__sub">Go-live: ${launch.toLocaleDateString(undefined, {
+        weekday: "short", month: "short", day: "numeric"
+      })}</span>
+    </div>
+    <div class="rooted-calendar__grid">
+      ${cards
+        .map(
+          (card) => `
+        <div class="rooted-calendar__cell rooted-calendar__cell--${card.stage.id}">
+          <span class="rooted-calendar__date">${card.date.toLocaleDateString(undefined, {
+            weekday: "short", month: "short", day: "numeric"
+          })}</span>
+          <span class="rooted-calendar__stage">${card.stage.letter} · ${card.stage.name}</span>
+        </div>
+      `
+        )
+        .join("")}
+    </div>
+  `;
 }
 
 function build30DayCalendar(data) {
@@ -6087,7 +6396,10 @@ function saveCurrentProject() {
       generatedOptions: appState.generatedOptions,
       selectedOptions: appState.selectedOptions,
       premiumOutputs: appState.premiumOutputs,
-      lastGeneratedSignature: appState.lastGeneratedSignature
+      lastGeneratedSignature: appState.lastGeneratedSignature,
+      rootedStages: appState.rootedStages,
+      deepenMode: appState.deepenMode,
+      rootedQualityCheck: appState.rootedQualityCheck
     };
 
     localStorage.setItem(
@@ -6132,6 +6444,15 @@ function restoreCurrentProject(showFeedback = false) {
     appState.brandMode = data.brandMode === "creator" ? "creator" : "product";
     appState.lastGeneratedSignature =
       project.lastGeneratedSignature || "";
+    appState.rootedStages = {
+      ...appState.rootedStages,
+      ...(project.rootedStages || {})
+    };
+    appState.deepenMode = project.deepenMode === "evergreen" ? "evergreen" : "live";
+    appState.rootedQualityCheck = {
+      ...appState.rootedQualityCheck,
+      ...(project.rootedQualityCheck || {})
+    };
 
     initializeGeneratorSettings();
     synchronizeSelectedGenerators();
@@ -6141,12 +6462,16 @@ function restoreCurrentProject(showFeedback = false) {
     updateValidationSummary();
     syncAllPillSelects();
     updateModeToggle();
+    renderRootedStages();
+    renderRootedDeepenToggle();
+    renderRootedQualityCheck();
 
     if (Object.keys(appState.generatedOptions).length > 0) {
       renderGeneratedOptions();
       assembleAllOutputs(collectProjectData());
       renderQualityResult(collectProjectData());
       renderPremiumOutputs(appState.premiumOutputs);
+      renderRootedCalendar(collectProjectData());
     }
 
     updateGeneratedVisibility();
@@ -6175,6 +6500,9 @@ function restoreProjectFields(data) {
     buyerOutcome: data.audience?.desiredOutcome,
     marketingGoal: data.audience?.marketingGoal,
     buyerMotivation: data.audience?.buyerMotivation,
+    launchChannels: data.audience?.launchChannels,
+    launchDate: data.audience?.launchDate,
+    launchDateExact: data.audience?.launchDateExact,
 
     currentPrice: data.pricing?.currentPrice,
     pricingTier: data.pricing?.pricingTier,
