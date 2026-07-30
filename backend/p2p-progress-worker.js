@@ -22,7 +22,7 @@ export default {
     if (request.method === 'OPTIONS') return new Response(null, { headers: cors() });
 
     // 1) confirm the request really came from Shopify's App Proxy
-    if (!(await verifyProxySignature(url, env.CLIENT_SECRET))) return json({ error: 'bad signature' }, 401);
+    if (!(await verifyProxySignature(url, env.client_secret))) return json({ error: 'bad signature' }, 401);
 
     // 2) require a logged-in customer (guests fall back to localStorage on the theme)
     const customerId = url.searchParams.get('logged_in_customer_id');
@@ -68,13 +68,13 @@ function enc(s) { return new TextEncoder().encode(s); }
 
 /* ---- Admin API auth ---- */
 async function getToken(env) {
-  if (env.ADMIN_TOKEN) return env.ADMIN_TOKEN;                 // static token wins if provided
+  if (env.admin_token) return env.admin_token;                 // static token wins if provided
   const now = Date.now();
   if (cachedToken && now - cachedAt < 50 * 60 * 1000) return cachedToken;  // reuse for ~50 min
-  const res = await fetch(`https://${env.SHOP}/admin/oauth/access_token`, {
+  const res = await fetch(`https://${env.shop}/admin/oauth/access_token`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ client_id: env.CLIENT_ID, client_secret: env.CLIENT_SECRET, grant_type: 'client_credentials' })
+    body: JSON.stringify({ client_id: env.client_id, client_secret: env.client_secret, grant_type: 'client_credentials' })
   });
   if (!res.ok) throw new Error('token ' + res.status + ' ' + (await res.text()));
   const j = await res.json();
@@ -83,7 +83,7 @@ async function getToken(env) {
 }
 async function adminGraphQL(env, query, variables) {
   const token = await getToken(env);
-  const res = await fetch(`https://${env.SHOP}/admin/api/${API_VERSION}/graphql.json`, {
+  const res = await fetch(`https://${env.shop}/admin/api/${API_VERSION}/graphql.json`, {
     method: 'POST',
     headers: { 'content-type': 'application/json', 'X-Shopify-Access-Token': token },
     body: JSON.stringify({ query, variables })
