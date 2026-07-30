@@ -145,3 +145,56 @@ window.P2P = (function(){
     STREAK_BADGES: STREAK_BADGES
   };
 })();
+
+/* ---- cross-device sync: App Proxy <-> customer metafield (logged-in members only) ----
+   All P2P state lives in localStorage. For a logged-in customer we mirror it to a
+   `custom.p2p_progress` metafield via /apps/p2p/progress (a signed App Proxy call to our
+   Cloudflare Worker). Guests are untouched — they keep using localStorage only. */
+(function(){
+  var PROXY = '/apps/p2p/progress', TS_KEY = 'p2p_sync_ts';
+  function collect(){ var o = {}; for(var i=0;i<localStorage.length;i++){ var k = localStorage.key(i); if(k && k.indexOf('p2p_') === 0 && k !== TS_KEY) o[k] = localStorage.getItem(k); } return o; }
+  function snap(){ return JSON.stringify(collect()); }
+  var lastPushed = snap();
+
+  function applyBlob(blob){
+    var changed = false;
+    Object.keys(blob).forEach(function(k){
+      if(k === '_ts') return;
+      if(typeof blob[k] === 'string' && localStorage.getItem(k) !== blob[k]){ try{ localStorage.setItem(k, blob[k]); changed = true; }catch(e){} }
+    });
+    return changed;
+  }
+  function push(){
+    if(snap() === lastPushed) return;
+    var blob = collect(); blob._ts = Date.now();
+    try{ localStorage.setItem(TS_KEY, String(blob._ts)); }catch(e){}
+    lastPushed = snap();
+    fetch(PROXY, { method:'POST', headers:{ 'content-type':'application/json' }, credentials:'same-origin', body: JSON.stringify(blob), keepalive:true }).catch(function(){});
+  }
+  var t = null;
+  function schedulePush(){ if(t) clearTimeout(t); t = setTimeout(push, 1500); }
+
+  // pull the server's copy on load; newest wins
+  fetch(PROXY, { method:'GET', credentials:'same-origin' })
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(j){
+      if(!j || j.guest) return;                                   // not logged in -> localStorage only
+      var serverTs = (j.progress && j.progress._ts) || 0;
+      var localTs = parseInt(localStorage.getItem(TS_KEY) || '0', 10) || 0;
+      if(j.progress && serverTs > localTs){
+        var changed = applyBlob(j.progress);
+        try{ localStorage.setItem(TS_KEY, String(serverTs)); }catch(e){}
+        lastPushed = snap();
+        if(changed && !sessionStorage.getItem('p2p_synced')){ sessionStorage.setItem('p2p_synced', '1'); location.reload(); }
+      } else {
+        push();                                                   // server empty/older -> upload our progress
+      }
+    })
+    .catch(function(){});
+
+  // keep it synced during the visit, and flush when leaving/hiding the tab
+  setInterval(function(){ if(snap() !== lastPushed) schedulePush(); }, 4000);
+  document.addEventListener('visibilitychange', function(){ if(document.visibilityState === 'hidden') push(); });
+  window.addEventListener('pagehide', push);
+  if(window.P2P) window.P2P.push = push;
+})();
