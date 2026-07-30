@@ -229,11 +229,11 @@
     root.querySelectorAll('.panel').forEach(function(p){ p.classList.toggle('on', p.getAttribute('data-panel') === name); });
     if(board) board.style.display = (name === 'journey') ? '' : 'none';
     root.querySelectorAll('.nav a[data-panel]').forEach(function(x){ x.classList.toggle('on', x.getAttribute('data-panel') === name); });
-    // land on the opened content just below the sticky toolbar (not the page top)
-    var target = (name === 'journey') ? board : root.querySelector('.panel[data-panel="' + name + '"]');
-    if(target){
-      var barH = bar ? bar.offsetHeight : 0;
-      var y = window.pageYOffset + target.getBoundingClientRect().top - barH - 18;
+    // land at the toolbar (bottom of the hero) so it pins to the top and the panel
+    // opens right below it — a stable anchor that avoids the sticky-spacer jump
+    var hero = root.querySelector('.hero');
+    if(hero){
+      var y = hero.getBoundingClientRect().bottom + window.pageYOffset - 8;
       window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
     }
   }
