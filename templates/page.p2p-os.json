@@ -1,0 +1,26 @@
+{
+  "sections": {
+    "main": {
+      "type": "p2p-os",
+      "blocks": {
+        "prompt": { "type": "tool", "settings": { "title": "Prompt Haus", "blurb": "Your AI prompt studio.", "icon": "prompt", "access_tag": "prompt-haus-access" } },
+        "p2p": { "type": "tool", "settings": { "title": "Prompt to Profit Haus", "blurb": "Turn prompts into products.", "icon": "rocket", "access_tag": "P2P-haus-access" } },
+        "graphics": { "type": "tool", "settings": { "title": "Graphics Haus", "blurb": "Brand kits & design.", "icon": "palette", "access_tag": "graphics-haus-access" } },
+        "marketing": { "type": "tool", "settings": { "title": "Marketing Haus", "blurb": "Ads, posts & campaigns.", "icon": "megaphone", "access_tag": "marketing-haus-access" } },
+        "product": { "type": "tool", "settings": { "title": "Product Haus", "blurb": "Build & ship products.", "icon": "box", "access_tag": "product-haus-access" } },
+        "brand": { "type": "tool", "settings": { "title": "Brand Haus", "blurb": "Define your brand DNA.", "icon": "crown", "access_tag": "brand-haus-access" } }
+      },
+      "block_order": ["prompt","p2p","graphics","marketing","product","brand"],
+      "settings": {
+        "show_journey": true,
+        "show_stats": true,
+        "journey_access_tag": "p2p-learning",
+        "journey_url": "/pages/p2p-learning",
+        "tutorial_url": "/pages/p2p-tutorial",
+        "milestones_url": "/pages/p2p-badges",
+        "support_email": "Hello@blacksheepcreations.com"
+      }
+    }
+  },
+  "order": ["main"]
+}

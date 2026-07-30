@@ -205,7 +205,7 @@ window.P2P = (function(){
      when its Main (non-offshoot) courses are all done; Framework Masters map to the
      anchor course handle; "Reached Freedom" once all five realm badges are earned;
      "Every Path Walked" once every course (offshoots included) is done. Idempotent. */
-  var REALM_BADGES = { 1:'Made it to Shore', 2:'Through the Thicket', 3:'In Full Bloom', 4:'Across the Fields', 5:'ROOTED to Thrive' };
+  var REALM_BADGES = { 1:'Open Water Cleared', 2:'Element Forest Cleared', 3:'Desert Blooms Cleared', 4:'Golden Harvest Cleared', 5:'Evergreen Cleared' };
   var FRAMEWORK_BADGES = { raft:'RAFT Master', grows:'GROWS Master', rooted:'ROOTED Master' };
   function reconcileMapBadges(){
     var map = window.P2P_MAP; if(!map || !map.length) return;
