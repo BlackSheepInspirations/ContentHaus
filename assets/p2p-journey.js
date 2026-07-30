@@ -4,25 +4,44 @@
   if(!root) return;
 
   /* ---- live stats (from the shared progress engine) ---- */
-  if(window.P2P){
+  // Totals across EVERY realm (the Progress panel is journey-wide, not per-board).
+  function mapTotals(){
+    var total = 0, done = 0, P = window.P2P;
+    if(window.P2P_MAP){
+      window.P2P_MAP.forEach(function(realm){
+        (realm.courses || []).forEach(function(c){ total++; if(P && P.isCourseDone(c.h)) done++; });
+      });
+    }
+    return { total: total, done: done };
+  }
+  function badgeCount(){
+    if(!window.P2P) return 0;
+    var bstat = window.P2P.badgesStat();
+    return bstat ? bstat.earned : window.P2P.earnedSet().length;
+  }
+  function renderStats(){
+    if(!window.P2P) return;
     var streak = window.P2P.streak().count;
     root.querySelectorAll('.p2pj-streak').forEach(function(el){ el.textContent = streak; });
     root.querySelectorAll('.p2pj-points').forEach(function(el){ el.textContent = window.P2P.points(); });
-    root.querySelectorAll('.p2pj-level').forEach(function(el){ el.textContent = window.P2P.level(); });
+    root.querySelectorAll('.p2pj-level').forEach(function(el){ el.textContent = window.P2P.merits ? window.P2P.merits() : window.P2P.level(); });
+    var tn = window.P2P.tier ? window.P2P.tier().name : '';
+    root.querySelectorAll('.p2pj-tiername').forEach(function(el){ el.textContent = tn; });
+    root.querySelectorAll('.p2pj-badges').forEach(function(el){ el.textContent = badgeCount(); });
 
-    // Badges — use the accurate count the badges page published; fall back to auto-earned
-    var bstat = window.P2P.badgesStat();
-    var badges = bstat ? bstat.earned : window.P2P.earnedSet().length;
-    root.querySelectorAll('.p2pj-badges').forEach(function(el){ el.textContent = badges; });
-
-    // Courses done + % complete ring, against this board's course count
+    // Hero mini-ring stays per-board; the Progress panel shows journey-wide totals.
     var boardCourses = parseInt(root.getAttribute('data-board-courses'), 10) || 5;
-    var done = Math.min(window.P2P.coursesDone(), boardCourses);
-    var pct = boardCourses ? Math.round(done / boardCourses * 100) : 0;
-    root.querySelectorAll('.p2pj-courses').forEach(function(el){ el.textContent = done; });
-    root.querySelectorAll('.p2pj-ring').forEach(function(el){ el.style.setProperty('--p', pct); });
-    root.querySelectorAll('.p2pj-ringpct').forEach(function(el){ el.textContent = pct + '%'; });
+    var boardDone = Math.min(window.P2P.coursesDone(), boardCourses);
+    var boardPct = boardCourses ? Math.round(boardDone / boardCourses * 100) : 0;
+    root.querySelectorAll('.ring-mini.p2pj-ring').forEach(function(el){ el.style.setProperty('--p', boardPct); var p = el.querySelector('.p2pj-ringpct'); if(p) p.textContent = boardPct + '%'; });
+
+    var g = mapTotals();
+    var gpct = g.total ? Math.round(g.done / g.total * 100) : 0;
+    root.querySelectorAll('.p2pj-courses').forEach(function(el){ el.textContent = g.done; });
+    root.querySelectorAll('.p2pj-courses-total').forEach(function(el){ el.textContent = '/' + g.total; });
+    root.querySelectorAll('.prog-ring.p2pj-ring').forEach(function(el){ el.style.setProperty('--p', gpct); var p = el.querySelector('.p2pj-ringpct'); if(p) p.textContent = gpct + '%'; });
   }
+  renderStats();
 
   /* ---- Mindset Moment (one item per day, rotating through the whole library) ---- */
   var mm = document.getElementById('p2pj-moment');
@@ -172,7 +191,7 @@
     if(!checkModal) return;
     var ctitle = h.getAttribute('data-title') || '';
     // engaging a pulse Check is its side-quest completion — +points once per distinct check
-    if(ctitle && window.P2P && window.P2P.completeCheck){ window.P2P.completeCheck('check:' + ctitle); if(window.P2P.push) window.P2P.push(); }
+    if(ctitle && window.P2P && window.P2P.completeCheck){ window.P2P.completeCheck('check:' + ctitle); if(window.P2P.push) window.P2P.push(); renderStats(); checkRankUp(); }
     document.getElementById('p2pj-ct').textContent = ctitle;
     var items = (h.getAttribute('data-pulse-items') || '').split('\n').map(function(s){ return s.trim(); }).filter(Boolean);
     var list = document.getElementById('p2pj-cb');
@@ -403,8 +422,7 @@
       render();
       if(kind === 'reflection' && window.P2P){
         window.P2P.checkJournal(); window.P2P.addJournalPoint();
-        root.querySelectorAll('.p2pj-points').forEach(function(el){ el.textContent = window.P2P.points(); });
-        root.querySelectorAll('.p2pj-level').forEach(function(el){ el.textContent = window.P2P.level(); });
+        renderStats(); checkRankUp();
         if(window.P2P_celebrate) window.P2P_celebrate();
       }
     });
@@ -483,6 +501,138 @@
     var px = ptsModal.querySelector('.px'); if(px) px.addEventListener('click', function(){ ptsModal.classList.remove('show'); });
     ptsModal.addEventListener('click', function(e){ if(e.target === ptsModal) ptsModal.classList.remove('show'); });
   }
+
+  /* ---- Progress detail pop-ups (Courses / Points / Badges / Streak / Merit) ---- */
+  function esc(s){ return String(s == null ? '' : s).replace(/[&<>]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c]; }); }
+  var MEDAL = '<svg viewBox="0 0 24 24"><path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.9 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/></svg>';
+  function dNum(s){ var p = String(s).split('-'); return Math.floor(Date.UTC(+p[0], +p[1]-1, +p[2]) / 86400000); }
+
+  function viewCourses(){
+    var P = window.P2P, html = '', anyCourses = false;
+    (window.P2P_MAP || []).forEach(function(realm){
+      var cs = realm.courses || []; if(!cs.length) return;
+      anyCourses = true;
+      var doneN = 0;
+      var rows = cs.map(function(c){
+        var d = P && P.isCourseDone(c.h); if(d) doneN++;
+        return '<div class="pb-crow' + (d ? ' is-done' : '') + '"><span class="pb-dot"></span><span>' + esc(c.t) + (c.o ? ' · offshoot' : '') + '</span></div>';
+      }).join('');
+      html += '<div class="pb-realm"><div class="pb-rhead"><span class="pb-rname">' + esc(realm.name) + '</span><span class="pb-rcount">' + doneN + '/' + cs.length + '</span></div><div class="pb-clist">' + rows + '</div></div>';
+    });
+    if(!anyCourses) return { title:'Courses done', body:'<p class="pb-empty">Your course list is loading — check back in a moment.</p>' };
+    var g = mapTotals();
+    return { title:'Courses done', sub: g.done + ' of ' + g.total + ' courses complete across every realm.', body: html };
+  }
+
+  function viewPoints(){
+    var P = window.P2P;
+    if(!P.pointsBreakdown) return { title:'Points', body:'<p class="pb-empty">No points yet — finish a course to get started.</p>' };
+    var b = P.pointsBreakdown();
+    var rows = [
+      ['Courses finished', b.courses], ['Brand DNA Blueprint', b.dna], ['Certificates', b.certs],
+      ['Side quests (Checks)', b.side], ['Badges earned', b.badges], ['Daily streak', b.streak], ['Journal', b.journal]
+    ];
+    var max = rows.reduce(function(m, r){ return Math.max(m, r[1]); }, 1);
+    var total = P.points();
+    var chart = rows.map(function(r){
+      var zero = r[1] <= 0, w = Math.max(2, Math.round(r[1] / max * 100));
+      return '<div class="pt-row' + (zero ? ' is-zero' : '') + '"><span class="pt-label">' + r[0] + '</span><span class="pt-bar"><i style="width:' + w + '%"></i></span><b class="pt-val">' + (zero ? '—' : '+' + r[1]) + '</b></div>';
+    }).join('');
+    return { title:'Where your points came from', sub:'Every point is proof you showed up.', body:'<div class="pt-chart">' + chart + '</div><div class="pt-total"><span>Your total</span><b>' + total + '</b></div>' };
+  }
+
+  function viewBadges(){
+    var names = (window.P2P && window.P2P.earnedSet) ? window.P2P.earnedSet() : [];
+    var n = badgeCount();
+    if(!names.length) return { title:'Badges', sub: n + ' earned', body:'<p class="pb-empty">No badges yet — they unlock as you finish courses, keep a streak, and reflect. Your first is closer than you think.</p>' };
+    var grid = names.map(function(nm){ return '<div class="pb-badge"><span class="pb-bmedal">' + MEDAL + '</span><span class="pb-bname">' + esc(nm) + '</span></div>'; }).join('');
+    return { title:'Badges earned', sub: n + ' unlocked so far.', body:'<div class="pb-badges">' + grid + '</div>' };
+  }
+
+  function viewStreak(){
+    var s = (window.P2P && window.P2P.streak) ? window.P2P.streak() : { count:0, last:'', longest:0 };
+    var count = s.count || 0, longest = s.longest || count;
+    var now = new Date(), y = now.getFullYear(), m = now.getMonth();
+    var monthName = ['January','February','March','April','May','June','July','August','September','October','November','December'][m];
+    var firstDow = new Date(y, m, 1).getDay(), dim = new Date(y, m + 1, 0).getDate(), todayDom = now.getDate();
+    var endNum = s.last ? dNum(s.last) : Math.floor(Date.now()/864e5), startNum = endNum - (count - 1);
+    var dows = ['S','M','T','W','T','F','S'].map(function(d){ return '<span class="cell dow">' + d + '</span>'; }).join('');
+    var cells = '';
+    for(var i = 0; i < firstDow; i++) cells += '<span class="cell" style="background:none"></span>';
+    for(var dom = 1; dom <= dim; dom++){
+      var cn = Math.floor(Date.UTC(y, m, dom) / 86400000);
+      var on = count > 0 && cn >= startNum && cn <= endNum;
+      cells += '<span class="cell' + (on ? ' on' : '') + (dom === todayDom ? ' today' : '') + '">' + dom + '</span>';
+    }
+    var sub = longest > count ? ('Longest run: ' + longest + ' days.') : 'Keep it lit — every day counts.';
+    return { title:'Your streak', body:'<div class="pb-streaktop"><span class="pb-flame">🔥</span><span class="pb-streaknum">' + count + '<small>day' + (count === 1 ? '' : 's') + ' in a row · ' + monthName + '</small></span></div><div class="pb-cal">' + dows + cells + '</div><p class="pb-sub" style="margin-top:14px">' + sub + '</p>' };
+  }
+
+  function viewMerit(){
+    var P = window.P2P; if(!P.tier) return { title:'Merit', body:'<p class="pb-empty">Keep going to earn your first Merit.</p>' };
+    var t = P.tier(), pts = t.points, span = (t.next - t.start) || 1, into = Math.max(0, Math.min(span, pts - t.start));
+    var pct = Math.round(into / span * 100), toNext = t.next - pts;
+    var names = t.tiers || [];
+    var ladder = names.map(function(nm, i){
+      var idx = i + 1, start = i * span, cls = idx === t.index ? 'here' : (t.index > idx ? 'done' : 'locked');
+      return '<div class="pb-rung ' + cls + '"><span class="pb-rnum">' + idx + '</span><span class="pb-rtname">' + esc(nm) + (idx === t.index && t.name !== nm ? ' ' + esc(t.name.replace(nm, '').trim()) : '') + '</span><span class="pb-rtpts">' + start + '+</span></div>';
+    }).join('');
+    var head = '<div class="pb-merittop"><div class="pb-tiernow">' + esc(t.name) + '</div><div class="pb-tiermeta">' + t.merits + ' Merits · ' + pts + ' points</div><div class="pb-nextbar"><i style="width:' + pct + '%"></i></div><div class="pb-nexttxt">' + toNext + ' points to ' + esc(t.nextName) + '</div></div>';
+    return { title:'Merit &amp; Tiers', sub:'Earn a Merit every ' + (window.P2P_POINTS && window.P2P_POINTS.level || 250) + ' points; a new Tier every two Merits.', body: head + '<div class="pb-ladder">' + ladder + '</div>' };
+  }
+
+  var VIEWS = { courses: viewCourses, points: viewPoints, badges: viewBadges, streak: viewStreak, merit: viewMerit };
+  var progModal = document.getElementById('p2pj-prog');
+  function openProg(name){
+    if(!progModal || !VIEWS[name]) return;
+    var v = VIEWS[name]();
+    progModal.querySelector('[data-prog-title]').innerHTML = v.title;
+    var body = progModal.querySelector('[data-prog-body]');
+    body.innerHTML = (v.sub ? '<p class="pb-sub">' + v.sub + '</p>' : '') + v.body;
+    progModal.classList.add('show');
+  }
+  function closeProg(){ if(progModal) progModal.classList.remove('show'); }
+  root.querySelectorAll('[data-prog]').forEach(function(t){ t.addEventListener('click', function(){ openProg(t.getAttribute('data-prog')); }); });
+  if(progModal){
+    var pcx = progModal.querySelector('[data-prog-close]'); if(pcx) pcx.addEventListener('click', closeProg);
+    progModal.addEventListener('click', function(e){ if(e.target === progModal) closeProg(); });
+    document.addEventListener('keydown', function(e){ if(e.key === 'Escape') closeProg(); });
+  }
+
+  /* ---- Rank-up celebration (new Merit tier since last visit) ---- */
+  var rankModal = document.getElementById('p2pj-rankup');
+  function showRankUp(t){
+    if(!rankModal) return;
+    rankModal.querySelector('.ru-tier').textContent = t.name;
+    rankModal.querySelector('.ru-sub').textContent = 'You reached ' + t.name + ' — ' + t.merits + ' Merits and climbing.';
+    rankModal.classList.add('show');
+    ruConfetti(rankModal.querySelector('.ru-canvas'));
+  }
+  function checkRankUp(){
+    if(!window.P2P || !window.P2P.tier) return;
+    var cur = window.P2P.tier().index, seen = null;
+    try{ seen = parseInt(localStorage.getItem('p2p_seen_tier'), 10); }catch(e){}
+    if(isNaN(seen) || seen == null){ try{ localStorage.setItem('p2p_seen_tier', String(cur)); }catch(e){} return; }
+    if(cur > seen){ showRankUp(window.P2P.tier()); }
+    if(cur !== seen){ try{ localStorage.setItem('p2p_seen_tier', String(cur)); }catch(e){} }
+  }
+  if(rankModal){
+    var ruc = rankModal.querySelector('.ru-close'); if(ruc) ruc.addEventListener('click', function(){ rankModal.classList.remove('show'); });
+    rankModal.addEventListener('click', function(e){ if(e.target === rankModal) rankModal.classList.remove('show'); });
+  }
+  function ruConfetti(cv){
+    if(!cv || !cv.getContext) return;
+    var ctx = cv.getContext('2d'), W = cv.width = cv.offsetWidth, H = cv.height = cv.offsetHeight;
+    var cols = ['#f4c534','#8f6fd6','#39c5c0','#d6336c','#f4e2a6'], bits = [];
+    for(var i = 0; i < 90; i++) bits.push({ x:Math.random()*W, y:-20-Math.random()*H*0.4, r:3+Math.random()*4, vy:2+Math.random()*3, vx:-1.5+Math.random()*3, c:cols[i%cols.length], a:1 });
+    var t0 = Date.now();
+    (function frame(){
+      ctx.clearRect(0,0,W,H); var el = Date.now()-t0;
+      bits.forEach(function(b){ b.x+=b.vx; b.y+=b.vy; b.vy+=0.03; if(el>1600) b.a=Math.max(0,b.a-0.03); ctx.globalAlpha=b.a; ctx.fillStyle=b.c; ctx.beginPath(); ctx.arc(b.x,b.y,b.r,0,7); ctx.fill(); });
+      if(el < 2400 && rankModal.classList.contains('show')) requestAnimationFrame(frame); else ctx.clearRect(0,0,W,H);
+    })();
+  }
+  checkRankUp();
 
   /* ---- JS sticky bar (sits below the theme's own sticky header; ignores lock state) ---- */
   var bar = root.querySelector('.bar'), wrap = root.querySelector('.wrap');

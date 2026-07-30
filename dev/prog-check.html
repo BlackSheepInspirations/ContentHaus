@@ -1,0 +1,56 @@
+<!doctype html><html><head><meta charset="utf-8">
+<link rel="stylesheet" href="../assets/p2p-journey.css">
+<style>body{margin:0;background:#04070a;padding:30px;font-family:system-ui;} .hint{color:#7fa;font:600 12px system-ui;margin:0 0 14px;}</style>
+</head><body>
+<p class="hint">Click any tile → detail pop-up. Reload with localStorage.p2p_seen_tier removed to see rank-up.</p>
+<div id="p2pj" data-board-courses="7">
+  <div class="wrap">
+    <div class="panel on" data-panel="progress">
+      <div class="pnl-head"><h2>Your Progress</h2><p>Where you are on the trail — your pace, your win.</p></div>
+      <div class="prog-top">
+        <div class="prog-ring p2pj-ring" style="--p:0"><b class="p2pj-ringpct">0%</b><span>Complete</span></div>
+        <div class="prog-tiles">
+          <button class="ptile" type="button" data-prog="courses"><b><span class="p2pj-courses">0</span><i class="p2pj-courses-total">/7</i></b><small>Courses done</small></button>
+          <button class="ptile" type="button" data-prog="points"><b><span class="p2pj-points">0</span></b><small>Points</small></button>
+          <button class="ptile" type="button" data-prog="badges"><b><span class="p2pj-badges">0</span></b><small>Badges</small></button>
+          <button class="ptile" type="button" data-prog="streak"><b><span class="p2pj-streak">0</span></b><small>Day streak</small></button>
+          <button class="ptile" type="button" data-prog="merit"><b><span class="p2pj-tiername">Dreamer</span></b><small>Merit · <span class="p2pj-level">0</span></small></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="p2pj-prog">
+    <div class="pc"><span class="px" data-prog-close>✕</span><div class="pk" data-prog-kicker>Your Progress</div><h3 data-prog-title>Details</h3><div class="prog-body" data-prog-body></div></div>
+  </div>
+  <div id="p2pj-rankup">
+    <canvas class="ru-canvas"></canvas>
+    <div class="ru-card"><div class="ru-crest"><svg viewBox="0 0 24 24"><path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.9 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/></svg></div><div class="ru-eyebrow">✦ New Rank ✦</div><div class="ru-tier"></div><div class="ru-sub"></div><button class="ru-close" type="button">Keep climbing</button></div>
+  </div>
+</div>
+
+<script>
+  // ---- stub the shared engine + map (approximates real data) ----
+  var doneCourses = ['welcome','current','fields','bloom'];
+  window.P2P_POINTS = { level:250 };
+  window.P2P_MAP = [
+    { n:1, name:'The Shore', url:'#', gate:null, courses:[{h:'welcome',t:'Your Journey Starts Here'},{h:'current',t:'Finding Your Current'},{h:'raft',t:'Build Your RAFT'},{h:'drift',t:'Reading the Drift',o:true}] },
+    { n:2, name:'The Fields', url:'#', gate:'fields', courses:[{h:'fields',t:'Into the Fields'},{h:'bloom',t:'In Full Bloom'},{h:'harvest',t:'The Harvest Plan'}] },
+    { n:3, name:'The Thicket', url:'#', gate:'thicket', courses:[{h:'thicket',t:'Through the Thicket'},{h:'clearing',t:'Finding the Clearing'},{h:'roots',t:'ROOTED to Thrive'},{h:'branch',t:'Branching Out',o:true}] }
+  ];
+  var earned = ['First Steps','Finding Your Current','Set Sail','First Reflection','5-Day Streak','Founder Fingerprint'];
+  window.P2P = {
+    streak: function(){ return { count:6, last:new Date().toISOString().slice(0,10), longest:9 }; },
+    points: function(){ return 1180; },
+    merits: function(){ return Math.floor(1180/250); },
+    level: function(){ return Math.floor(1180/250); },
+    tier: function(){ var p=1180,step=500,idx=Math.floor(p/step)+1,start=(idx-1)*step; var T=['Dreamer','Seeker','Starter','Apprentice','Builder','Maker','Crafter','Creator','Artisan','Designer','Explorer','Navigator','Pathfinder','Pioneer','Trailblazer','Innovator','Architect','Visionary','Luminary','Unbound']; return { index:idx, name:T[idx-1], start:start, next:start+step, nextName:T[idx]||'Unbound II', points:p, merits:Math.floor(p/250), tiers:T }; },
+    pointsBreakdown: function(){ return { courses:400, dna:250, certs:100, side:80, badges:150, streak:30, journal:0 }; },
+    earnedSet: function(){ return earned; },
+    badgesStat: function(){ return { earned: earned.length, total: 45 }; },
+    isCourseDone: function(h){ return doneCourses.indexOf(h) !== -1; },
+    coursesDone: function(){ return doneCourses.length; }
+  };
+</script>
+<script src="../assets/p2p-journey.js"></script>
+</body></html>

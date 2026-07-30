@@ -177,13 +177,13 @@
     <div class="panel" data-panel="progress">
       <div class="pnl-head"><h2>Your Progress</h2><p>Where you are on the trail — your pace, your win.</p></div>
       <div class="prog-top">
-        <div class="prog-ring p2pj-ring" style="--p:40"><b class="p2pj-ringpct">40%</b><span>Complete</span></div>
+        <div class="prog-ring p2pj-ring" style="--p:0"><b class="p2pj-ringpct">0%</b><span>Complete</span></div>
         <div class="prog-tiles">
-          <div class="ptile"><b><span class="p2pj-courses">0</span><i>/{{ board_courses_count }}</i></b><small>Courses done</small></div>
-          <div class="ptile"><b><span class="p2pj-points">{{ section.settings.stat_points | default: '0' }}</span></b><small>Points</small></div>
-          <div class="ptile"><b><span class="p2pj-badges">{{ section.settings.stat_badges | default: '0' }}</span></b><small>Badges</small></div>
-          <div class="ptile"><b><span class="p2pj-streak">{{ section.settings.stat_streak | default: '0' }}</span></b><small>Day streak</small></div>
-          <div class="ptile"><b><span class="p2pj-level">{{ section.settings.stat_level | default: '1' }}</span></b><small>Merit</small></div>
+          <button class="ptile" type="button" data-prog="courses"><b><span class="p2pj-courses">0</span><i class="p2pj-courses-total">/{{ board_courses_count }}</i></b><small>Courses done</small></button>
+          <button class="ptile" type="button" data-prog="points"><b><span class="p2pj-points">{{ section.settings.stat_points | default: '0' }}</span></b><small>Points</small></button>
+          <button class="ptile" type="button" data-prog="badges"><b><span class="p2pj-badges">{{ section.settings.stat_badges | default: '0' }}</span></b><small>Badges</small></button>
+          <button class="ptile" type="button" data-prog="streak"><b><span class="p2pj-streak">{{ section.settings.stat_streak | default: '0' }}</span></b><small>Day streak</small></button>
+          <button class="ptile" type="button" data-prog="merit"><b><span class="p2pj-tiername">Dreamer</span></b><small>Merit · <span class="p2pj-level">0</span></small></button>
         </div>
       </div>
       <div class="prog-next">
@@ -370,6 +370,28 @@
       </div>
       <div class="pt-foot"><span class="pt-coin"><svg viewBox="0 0 24 24"><path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.9 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/></svg></span> Every <b>{{ p_level }}</b> points earns a Merit.</div>
       <p class="pt-note">These numbers will grow with you — as new courses land, so might new ways to earn.</p>
+    </div>
+  </div>
+
+  {%- comment -%} ---- PROGRESS DETAIL POPUP (Courses / Points / Badges / Streak / Merit — filled by JS) ---- {%- endcomment -%}
+  <div id="p2pj-prog">
+    <div class="pc">
+      <span class="px" data-prog-close>✕</span>
+      <div class="pk" data-prog-kicker>Your Progress</div>
+      <h3 data-prog-title>Details</h3>
+      <div class="prog-body" data-prog-body></div>
+    </div>
+  </div>
+
+  {%- comment -%} ---- RANK-UP CELEBRATION (new Merit tier) ---- {%- endcomment -%}
+  <div id="p2pj-rankup">
+    <canvas class="ru-canvas"></canvas>
+    <div class="ru-card">
+      <div class="ru-crest"><svg viewBox="0 0 24 24"><path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.9 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/></svg></div>
+      <div class="ru-eyebrow">✦ New Rank ✦</div>
+      <div class="ru-tier"></div>
+      <div class="ru-sub"></div>
+      <button class="ru-close" type="button">Keep climbing</button>
     </div>
   </div>
 
