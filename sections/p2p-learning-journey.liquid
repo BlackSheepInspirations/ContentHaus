@@ -72,7 +72,7 @@
       <div class="bar-realms">
         <div class="realms-scroll">
         <span class="brlbl">Realms</span>
-        {%- assign defnames = 'The Shoreline,The Thicket,The Bloom,The Fields,The Evergreens' | split: ',' -%}
+        {%- assign defnames = 'The Shoreline,Element Forest,The Bloom,The Fields,The Evergreens' | split: ',' -%}
         {%- assign cur = section.settings.current_realm | default: 1 -%}
         {%- for r in (1..5) -%}
           {%- assign kn = 'realm_' | append: r | append: '_name' -%}
@@ -102,12 +102,16 @@
         <img class="bg" src="{{ section.settings.board_image | image_url: width: 2000 }}" alt="{{ section.settings.journey_name | default: 'Purpose 2 Profit Learning Journey' | escape }} map" loading="eager" />
       {%- elsif section.settings.current_realm == 1 -%}
         <img class="bg" src="{{ 'p2p-journey-board-openwater.jpg' | asset_url }}" alt="{{ section.settings.journey_name | default: 'Purpose 2 Profit Learning Journey' | escape }} map" loading="eager" />
+      {%- elsif section.settings.current_realm == 2 -%}
+        <img class="bg" src="{{ 'p2p-journey-board-elementforest.jpg' | asset_url }}" alt="{{ section.settings.journey_name | default: 'Purpose 2 Profit Learning Journey' | escape }} map" loading="eager" />
       {%- else -%}
         <img class="bg" src="{{ 'p2p-journey-board.jpg' | asset_url }}" alt="{{ section.settings.journey_name | default: 'Purpose 2 Profit Learning Journey' | escape }} map" loading="eager" />
       {%- endif -%}
 
-      {%- comment -%} "Your Journey Begins Here" — always present, opens onboarding {%- endcomment -%}
-      <button class="hs" style="left:36.8%; top:7.7%; width:22%; height:5%" data-begin data-title="Your Journey Begins Here"></button>
+      {%- comment -%} "Your Journey Begins Here" — Realm 1 only (opens onboarding) {%- endcomment -%}
+      {%- if section.settings.current_realm == 1 -%}
+        <button class="hs" style="left:36.8%; top:7.7%; width:22%; height:5%" data-begin data-title="Your Journey Begins Here"></button>
+      {%- endif -%}
 
       {%- comment -%} Main / Offshoot / Check nodes — from section blocks. Lock state, done state,
          and the progress overlays are all computed client-side in p2p-journey.js from
@@ -127,14 +131,20 @@
         {%- endcase -%}
       {%- endfor -%}
 
-      {%- comment -%} RAFT framework scroll — clickable reference, no state marker {%- endcomment -%}
-      <button class="hs hs--plain" style="left:85.7%; top:13.1%; width:19%; height:8%" data-type="info" data-title="The RAFT Framework" data-body="Your life raft to get out of the ocean. R: Relieve · A: Act · F: Fast Win · T: Traction. Work these four in order and you're moving." data-cta="Continue"></button>
+      {%- comment -%} framework scroll (RAFT / GROWS / …) — per-realm clickable reference, no state marker {%- endcomment -%}
+      {%- if section.settings.scroll_title != blank -%}
+        {%- capture scroll_style -%}left:{{ section.settings.scroll_left }}%; top:{{ section.settings.scroll_top }}%; width:{{ section.settings.scroll_width }}%; height:{{ section.settings.scroll_height }}%;{%- endcapture -%}
+        <button class="hs hs--plain" style="{{ scroll_style }}" data-type="info" data-title="{{ section.settings.scroll_title }}" data-body="{{ section.settings.scroll_body }}" data-cta="Continue"></button>
+      {%- endif -%}
 
-      {%- comment -%} next-realm compass (bottom) — onward link with gold label {%- endcomment -%}
+      {%- comment -%} next-realm (bottom) — links onward; optional PNG overlay, else a plain clickable over baked art {%- endcomment -%}
       {%- assign next_n = section.settings.current_realm | default: 1 | plus: 1 -%}
       {%- assign nrk = 'realm_' | append: next_n | append: '_url' -%}
       {%- assign next_realm_url = section.settings[nrk] -%}
-      <a class="p2pj-nextrealm" href="{{ next_realm_url | default: '#' }}" style="left:55.6%; top:97%; width:60%;" data-tip="On to the next realm"><img class="nr-img" src="{{ 'p2p-next-realm.png' | asset_url }}" alt="Journey to the next realm" /></a>
+      {%- capture nr_style -%}left:{{ section.settings.nextrealm_left }}%; top:{{ section.settings.nextrealm_top }}%; width:{{ section.settings.nextrealm_width }}%;{%- if section.settings.nextrealm_asset == blank %} height:{{ section.settings.nextrealm_height }}%;{% endif -%}{%- endcapture -%}
+      <a class="p2pj-nextrealm" href="{{ next_realm_url | default: '#' }}" style="{{ nr_style }}" data-tip="On to the next realm">
+        {%- if section.settings.nextrealm_asset != blank -%}<img class="nr-img" src="{{ section.settings.nextrealm_asset | asset_url }}" alt="Journey to the next realm" />{%- endif -%}
+      </a>
     </div>
 
     {%- comment -%} ---- PROGRESS PANEL ---- {%- endcomment -%}
@@ -412,6 +422,21 @@
     { "type": "checkbox", "id": "intro_required", "label": "Require onboarding before Main courses unlock", "info": "Turn off only if this Realm should skip the \"Your Journey Begins Here\" gate entirely.", "default": true },
     { "type": "text", "id": "unlock_after_handle", "label": "Realm unlock — required course handle", "info": "Leave blank if this Realm has no anchor (e.g. Realm 1). Set to the anchor course's handle for a Realm gated behind another course — e.g. \"grow\" or \"rooted\"." },
 
+    { "type": "header", "content": "Framework scroll (RAFT / GROWS / …)" },
+    { "type": "text", "id": "scroll_title", "label": "Scroll title", "info": "The clickable framework scroll painted on the board. Leave blank for no scroll on this Realm." },
+    { "type": "textarea", "id": "scroll_body", "label": "Scroll popup text" },
+    { "type": "number", "id": "scroll_left", "label": "Scroll — center left %" },
+    { "type": "number", "id": "scroll_top", "label": "Scroll — center top %" },
+    { "type": "number", "id": "scroll_width", "label": "Scroll — width %" },
+    { "type": "number", "id": "scroll_height", "label": "Scroll — height %" },
+
+    { "type": "header", "content": "Next-realm marker (bottom)" },
+    { "type": "text", "id": "nextrealm_asset", "label": "Next-realm image (asset filename)", "info": "e.g. p2p-next-realm.png to overlay a compass+text graphic. Leave blank if the board art already includes the compass/text — then it's just an invisible clickable." },
+    { "type": "number", "id": "nextrealm_left", "label": "Next-realm — center left %" },
+    { "type": "number", "id": "nextrealm_top", "label": "Next-realm — center top %" },
+    { "type": "number", "id": "nextrealm_width", "label": "Next-realm — width %" },
+    { "type": "number", "id": "nextrealm_height", "label": "Next-realm — height % (only when no image)" },
+
     { "type": "header", "content": "Layout" },
     { "type": "range", "id": "sticky_offset", "min": 0, "max": 120, "step": 2, "unit": "px", "label": "Sticky bar offset", "info": "Match your theme header/announcement bar height.", "default": 6 },
 
@@ -420,7 +445,7 @@
     { "type": "text", "id": "realm_1_name", "label": "Realm 1 name", "default": "The Shoreline" },
     { "type": "url",  "id": "realm_1_url", "label": "Realm 1 page" },
     { "type": "checkbox", "id": "realm_1_locked", "label": "Realm 1 locked", "default": false },
-    { "type": "text", "id": "realm_2_name", "label": "Realm 2 name", "default": "The Thicket" },
+    { "type": "text", "id": "realm_2_name", "label": "Realm 2 name", "default": "Element Forest" },
     { "type": "url",  "id": "realm_2_url", "label": "Realm 2 page" },
     { "type": "checkbox", "id": "realm_2_locked", "label": "Realm 2 locked", "default": false },
     { "type": "text", "id": "realm_3_name", "label": "Realm 3 name", "default": "The Bloom" },

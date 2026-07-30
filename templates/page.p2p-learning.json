@@ -23,7 +23,19 @@
         "access_tag": "p2p-learning",
         "access_code": "p2p-learning",
         "slug": "p2p-learning",
-        "current_realm": 1
+        "current_realm": 1,
+        "scroll_title": "The RAFT Framework",
+        "scroll_body": "Your life raft to get out of the ocean. R: Relieve · A: Act · F: Fast Win · T: Traction. Work these four in order and you're moving.",
+        "scroll_left": 85.7,
+        "scroll_top": 13.1,
+        "scroll_width": 19,
+        "scroll_height": 8,
+        "nextrealm_asset": "p2p-next-realm.png",
+        "nextrealm_left": 55.6,
+        "nextrealm_top": 97,
+        "nextrealm_width": 60,
+        "realm_1_url": "/pages/p2p-learning",
+        "realm_2_url": "/pages/p2p-element-forest"
       }
     }
   },
