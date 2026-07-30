@@ -227,7 +227,7 @@
     <div class="panel" data-panel="journal">
       <div class="pnl-head jr-head">
         <div><h2>Your Journal</h2><p>A private space to reflect and to mark what you've done. Saved on this device — <strong>Export</strong> anytime to keep a permanent copy.</p></div>
-        <button class="jr-export-all" id="p2pj-export-all" type="button">Export everything</button>
+        <button class="jr-export-all" id="p2pj-export-all" type="button" data-jr-export>Export everything</button>
       </div>
       <div class="jr-tabs">
         <button class="jr-tab on" type="button" data-jrmode="reflect">Reflections</button>
@@ -565,6 +565,7 @@
   };
 </script>
 <script src="{{ 'p2p-progress.js' | asset_url }}" defer="defer"></script>
+<script src="{{ 'p2p-notebook.js' | asset_url }}" defer="defer"></script>
 <script src="{{ 'p2p-journey-map.js' | asset_url }}" defer="defer"></script>
 <script src="{{ 'p2p-moments.js' | asset_url }}" defer="defer"></script>
 <script src="{{ 'p2p-journey.js' | asset_url }}" defer="defer"></script>

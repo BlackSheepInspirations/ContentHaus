@@ -352,15 +352,6 @@
   /* ---- bonus cards (Checks) open the pulse-check popup ---- */
   root.querySelectorAll('.bqcard').forEach(function(c){ c.addEventListener('click', function(){ openCheck(c); }); });
 
-  /* ---- journal tabs (Reflections / Wins) ---- */
-  root.querySelectorAll('.jr-tab').forEach(function(tab){
-    tab.addEventListener('click', function(){
-      var mode = tab.getAttribute('data-jrmode');
-      root.querySelectorAll('.jr-tab').forEach(function(t){ t.classList.toggle('on', t === tab); });
-      root.querySelectorAll('.jr-pane').forEach(function(p){ p.hidden = (p.getAttribute('data-jrpane') !== mode); });
-    });
-  });
-
   /* ---- confirm dialog (shared) ---- */
   var cfEl = document.getElementById('p2pj-confirm'), cfCb = null;
   function confirmDialog(title, msg, okLabel, onOk){
@@ -376,105 +367,19 @@
     cfEl.addEventListener('click', function(e){ if(e.target === cfEl){ cfEl.classList.remove('show'); cfCb = null; } });
   }
 
-  /* ---- notebooks (Reflections & Wins): titles, search, archive, 60-day trash ---- */
-  var SIXTY = 60 * 864e5;
-  function jrEsc(s){ return (s || '').replace(/[&<>]/g, function(c){ return { '&':'&amp;','<':'&lt;','>':'&gt;' }[c]; }); }
-  function initNotebook(pane){
-    var key = pane.getAttribute('data-store'), kind = pane.getAttribute('data-kind');
-    var listEl = pane.querySelector('[data-jr-list]'), titleIn = pane.querySelector('[data-jr-title]');
-    var textIn = pane.querySelector('[data-jr-text]'), promptIn = pane.querySelector('[data-jr-prompt]');
-    var searchIn = pane.querySelector('[data-jr-search]'), saveBtn = pane.querySelector('[data-jr-save]');
-    var view = 'active', query = '';
-    function load(){ try{ return JSON.parse(localStorage.getItem(key) || '[]') || []; }catch(e){ return []; } }
-    function save(a){ try{ localStorage.setItem(key, JSON.stringify(a)); }catch(e){} }
-    function normalize(){
-      var a = load(), ch = false, now = Date.now();
-      a.forEach(function(e){
-        if(!e.id){ e.id = String(e.ts || Date.now()) + '-' + Math.random().toString(36).slice(2,7); ch = true; }
-        if(e.title === undefined){ e.title = ''; ch = true; }
-        if(e.archived === undefined){ e.archived = false; ch = true; }
-        if(e.deletedAt === undefined){ e.deletedAt = null; ch = true; }
-      });
-      var b = a.filter(function(e){ return !(e.deletedAt && (now - e.deletedAt) > SIXTY); });
-      if(b.length !== a.length) ch = true;
-      if(ch) save(b);
-      return b;
-    }
-    function fmt(ts){ return new Date(ts).toLocaleDateString(undefined, { month:'short', day:'numeric', year:'numeric' }); }
-    function daysLeft(t){ return Math.max(0, Math.ceil((SIXTY - (Date.now() - t)) / 864e5)); }
-    function setField(id, f, v){ var a = load(), e = a.filter(function(x){ return x.id === id; })[0]; if(e){ e[f] = v; save(a); render(); } }
-    function removeEntry(id){ save(load().filter(function(x){ return x.id !== id; })); render(); }
-    function switchView(v){ view = v; pane.querySelectorAll('.jr-view').forEach(function(x){ x.classList.toggle('on', x.getAttribute('data-jr-view') === v); }); render(); }
-    function render(){
-      var a = normalize(), q = query.trim().toLowerCase();
-      var rows = a.filter(function(e){
-        if(view === 'trash') return !!e.deletedAt;
-        if(e.deletedAt) return false;
-        return view === 'archived' ? !!e.archived : !e.archived;
-      }).filter(function(e){
-        if(!q) return true;
-        return ((e.title || '') + ' ' + (e.text || '') + ' ' + (e.prompt || '')).toLowerCase().indexOf(q) !== -1;
-      });
-      if(!rows.length){
-        var msg = view === 'trash' ? 'Trash is empty.' : view === 'archived' ? 'Nothing archived.'
-          : q ? 'No matches.' : (kind === 'win' ? 'No wins logged yet. Every accomplishment counts — start with one.' : 'No entries yet. Your reflections will appear here.');
-        listEl.innerHTML = '<div class="jr-empty">' + msg + '</div>'; return;
-      }
-      listEl.innerHTML = rows.map(function(e){
-        var meta = (kind === 'win' ? '🏆 ' : '') + fmt(e.ts) + (view === 'trash' ? ' · ' + daysLeft(e.deletedAt) + ' days left' : '');
-        return '<div class="jr-entry' + (kind === 'win' ? ' jr-win' : '') + '"><div class="je-top"><span class="je-date">' + meta + '</span><span class="je-acts" data-id="' + e.id + '"></span></div>'
-          + (e.title ? '<div class="je-title">' + jrEsc(e.title) + '</div>' : '')
-          + (e.prompt ? '<div class="je-prompt">' + jrEsc(e.prompt) + '</div>' : '')
-          + '<div class="je-text">' + jrEsc(e.text) + '</div></div>';
-      }).join('');
-      rows.forEach(function(e){
-        var host = listEl.querySelector('.je-acts[data-id="' + e.id + '"]'); if(!host) return;
-        function btn(cls, label){ var b = document.createElement('button'); b.className = 'je-btn ' + cls; b.textContent = label; host.appendChild(b); return b; }
-        if(view === 'trash'){
-          btn('je-restore', 'Restore').addEventListener('click', function(){ setField(e.id, 'deletedAt', null); switchView(e.archived ? 'archived' : 'active'); });
-          btn('je-del', 'Delete forever').addEventListener('click', function(){ confirmDialog('Delete forever?', 'This permanently removes it — it can’t be undone.', 'Delete forever', function(){ removeEntry(e.id); }); });
-        } else {
-          btn('je-arch', e.archived ? 'Unarchive' : 'Archive').addEventListener('click', function(){ var na = !e.archived; setField(e.id, 'archived', na); if(!na) switchView('active'); });
-          btn('je-del', 'Delete').addEventListener('click', function(){ confirmDialog('Move to Trash?', 'It’ll stay in Trash for 60 days — you can restore it any time before then.', 'Move to Trash', function(){ setField(e.id, 'deletedAt', Date.now()); }); });
+  /* ---- notebook: Journal (Reflections) & Wins — shared engine (assets/p2p-notebook.js) ---- */
+  if(window.P2PNotebook){
+    window.P2PNotebook.mount(root, {
+      confirmDialog: confirmDialog,
+      onSave: function(kind){
+        if(kind === 'reflection' && window.P2P){
+          window.P2P.checkJournal(); window.P2P.addJournalPoint();
+          renderStats(); checkRankUp();
+          if(window.P2P_celebrate) window.P2P_celebrate();
         }
-      });
-    }
-    if(saveBtn) saveBtn.addEventListener('click', function(){
-      var text = (textIn.value || '').trim(); if(!text) return;
-      var a = load();
-      a.unshift({ id: String(Date.now()) + '-' + Math.random().toString(36).slice(2,7), ts: Date.now(), title: (titleIn ? titleIn.value : '').trim(), prompt: promptIn ? (promptIn.value || '') : '', text: text, archived: false, deletedAt: null });
-      save(a); textIn.value = ''; if(titleIn) titleIn.value = ''; if(promptIn) promptIn.value = '';
-      view = 'active'; pane.querySelectorAll('.jr-view').forEach(function(v){ v.classList.toggle('on', v.getAttribute('data-jr-view') === 'active'); });
-      render();
-      if(kind === 'reflection' && window.P2P){
-        window.P2P.checkJournal(); window.P2P.addJournalPoint();
-        renderStats(); checkRankUp();
-        if(window.P2P_celebrate) window.P2P_celebrate();
       }
     });
-    if(searchIn) searchIn.addEventListener('input', function(){ query = searchIn.value; render(); });
-    pane.querySelectorAll('.jr-view').forEach(function(v){ v.addEventListener('click', function(){ view = v.getAttribute('data-jr-view'); pane.querySelectorAll('.jr-view').forEach(function(x){ x.classList.toggle('on', x === v); }); render(); }); });
-    render();
   }
-  root.querySelectorAll('.jr-pane[data-store]').forEach(initNotebook);
-
-  /* ---- export everything (both notebooks, active + archived) ---- */
-  var exportAll = document.getElementById('p2pj-export-all');
-  if(exportAll) exportAll.addEventListener('click', function(){
-    function dump(key, label){
-      var a = []; try{ a = JSON.parse(localStorage.getItem(key) || '[]') || []; }catch(e){}
-      a = a.filter(function(e){ return !e.deletedAt; });
-      if(!a.length) return '';
-      return '\n=== ' + label + ' ===\n\n' + a.map(function(e){
-        return new Date(e.ts).toLocaleString() + (e.title ? '\n' + e.title : '') + (e.prompt ? '\n[' + e.prompt + ']' : '') + '\n' + e.text + '\n\n----------\n';
-      }).join('\n');
-    }
-    var body = dump('p2p_journal', 'Reflections') + dump('p2p_wins', 'Wins & Accomplishments');
-    if(!body.trim()) return;
-    var blob = new Blob(['Purpose 2 Profit — Journal Export\n' + body], { type: 'text/plain' });
-    var url = URL.createObjectURL(blob), link = document.createElement('a');
-    link.href = url; link.download = 'P2P-Journal-Export.txt'; link.click(); URL.revokeObjectURL(url);
-  });
 
   /* ---- badge-earned celebration (fires on any journey screen) ---- */
   var bpop = document.getElementById('p2pj-badgepop');

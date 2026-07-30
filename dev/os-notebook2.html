@@ -1,0 +1,72 @@
+<!doctype html><html><head><meta charset="utf-8"><title>OS Notebook v2 shared</title><style>body{margin:0;background:#050a10;padding:24px;}</style></head><body>
+<div id="p2pos" class="osx"><main class="osx-main" style="max-height:none;overflow:visible">
+<section class="osx-view on" data-view="notebook" data-osx-nb>
+  <div class="jr-head"><div><div class="osx-kick">Notebook</div><h2 class="osx-h2">Your Notebook</h2></div><button class="jr-export-all" type="button" data-jr-export>Export everything</button></div>
+  <p class="osx-lede">Jot ideas, plans, and notes as you build. Journal &amp; Wins are shared with your Learning Journey.</p>
+  <div class="jr-tabs">
+    <button class="jr-tab on" type="button" data-jrmode="journal">Journal</button>
+    <button class="jr-tab" type="button" data-jrmode="notes">Notes</button>
+    <button class="jr-tab" type="button" data-jrmode="ideas">Ideas</button>
+    <button class="jr-tab" type="button" data-jrmode="wins">Wins</button>
+  </div>
+  <div class="jr-pane" data-jrpane="journal" data-store="demo_journal" data-kind="reflection">
+    <div class="jr-compose"><input class="jr-title" type="text" maxlength="80" placeholder="Title (optional)" data-jr-title /><textarea data-jr-text rows="5" placeholder="Reflect on what you're learning and building…"></textarea><div class="jr-actions"><button class="jr-save" type="button" data-jr-save>Save entry</button></div></div>
+    <div class="jr-toolbar"><input class="jr-search" type="search" placeholder="Search titles & text…" data-jr-search /><div class="jr-views"><button class="jr-view on" type="button" data-jr-view="active">Active</button><button class="jr-view" type="button" data-jr-view="archived">Archived</button><button class="jr-view" type="button" data-jr-view="trash">Trash</button></div></div>
+    <div class="jr-list" data-jr-list></div>
+  </div>
+  <div class="jr-pane" data-jrpane="notes" data-store="demo_notes" data-kind="note" hidden>
+    <div class="jr-compose"><input class="jr-title" type="text" maxlength="80" placeholder="Title — e.g. “Spring launch campaign”" data-jr-title /><textarea data-jr-text rows="4" placeholder="Jot a note…"></textarea><div class="jr-actions"><button class="jr-save" type="button" data-jr-save>Save note</button></div></div>
+    <div class="jr-toolbar"><input class="jr-search" type="search" placeholder="Search titles & text…" data-jr-search /><div class="jr-views"><button class="jr-view on" type="button" data-jr-view="active">Active</button><button class="jr-view" type="button" data-jr-view="archived">Archived</button><button class="jr-view" type="button" data-jr-view="trash">Trash</button></div></div>
+    <div class="jr-list" data-jr-list></div>
+  </div>
+  <div class="jr-pane" data-jrpane="ideas" data-store="demo_ideas" data-kind="idea" hidden>
+    <div class="jr-compose"><input class="jr-title" type="text" maxlength="80" placeholder="Title" data-jr-title /><textarea data-jr-text rows="4" placeholder="Capture the idea…"></textarea><div class="jr-actions"><button class="jr-save" type="button" data-jr-save>Save idea</button></div></div>
+    <div class="jr-toolbar"><input class="jr-search" type="search" placeholder="Search titles & text…" data-jr-search /><div class="jr-views"><button class="jr-view on" type="button" data-jr-view="active">Active</button><button class="jr-view" type="button" data-jr-view="archived">Archived</button><button class="jr-view" type="button" data-jr-view="trash">Trash</button></div></div>
+    <div class="jr-list" data-jr-list></div>
+  </div>
+  <div class="jr-pane" data-jrpane="wins" data-store="demo_wins" data-kind="win" hidden>
+    <div class="jr-compose"><input class="jr-title" type="text" maxlength="80" placeholder="Title (optional)" data-jr-title /><textarea data-jr-text rows="4" placeholder="Big or small…" data-jr-text></textarea><div class="jr-actions"><button class="jr-save" type="button" data-jr-save>Save win</button></div></div>
+    <div class="jr-toolbar"><input class="jr-search" type="search" placeholder="Search titles & text…" data-jr-search /><div class="jr-views"><button class="jr-view on" type="button" data-jr-view="active">Active</button><button class="jr-view" type="button" data-jr-view="archived">Archived</button><button class="jr-view" type="button" data-jr-view="trash">Trash</button></div></div>
+    <div class="jr-list" data-jr-list></div>
+  </div>
+</section>
+</main></div>
+<style>
+  #p2pos.osx{--text:#e7efeb;--muted:#8aa0a6;--gold:#c9a24a;--gold-bright:#f4c534;--stroke:rgba(255,255,255,.09);--gstroke:rgba(216,180,90,.38);--panel:#0b1620;--emerald:#27ae6e;--teal:#39c5c0;color:var(--text);font-family:system-ui;max-width:860px;margin:0 auto;}
+  #p2pos .osx-kick{font:700 12px/1 system-ui;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+  #p2pos .osx-h2{font:700 26px/1.15 Georgia,serif;margin:0;}
+  #p2pos .osx-lede{font:400 15px/1.6 system-ui;color:#c6d6d0;margin:6px 0 0;}
+  #p2pos .jr-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:4px;}
+  #p2pos .jr-export-all{flex:none;font:700 12px/1 system-ui;color:var(--gold-bright);background:rgba(216,180,90,.1);border:1px solid var(--gstroke);border-radius:30px;padding:10px 16px;cursor:pointer;}
+  #p2pos .jr-tabs{display:flex;gap:8px;margin:18px 0;flex-wrap:wrap;}
+  #p2pos .jr-tab{font:700 12px/1 system-ui;color:var(--muted);background:rgba(255,255,255,.04);border:1px solid var(--stroke);border-radius:30px;padding:10px 16px;cursor:pointer;}
+  #p2pos .jr-tab.on{color:#06120e;background:linear-gradient(145deg,#f4e2a6,var(--gold));border-color:transparent;}
+  #p2pos .jr-pane[hidden]{display:none;}
+  #p2pos .jr-compose{background:var(--panel);border:1px solid var(--stroke);border-radius:18px;padding:20px;margin-bottom:22px;}
+  #p2pos .jr-title{width:100%;box-sizing:border-box;padding:11px 12px;border-radius:10px;font:700 14px/1 system-ui;color:var(--text);background:#0e1a20;border:1px solid var(--stroke);margin-bottom:12px;}
+  #p2pos .jr-compose textarea{width:100%;box-sizing:border-box;padding:14px;border-radius:12px;font:400 15px/1.6 system-ui;color:var(--text);background:rgba(255,255,255,.05);border:1px solid var(--stroke);resize:vertical;outline:none;}
+  #p2pos .jr-actions{display:flex;gap:10px;margin-top:14px;}
+  #p2pos .jr-save{cursor:pointer;border:0;padding:12px 22px;border-radius:11px;font:800 13px/1 system-ui;color:#06120e;background:linear-gradient(145deg,var(--emerald),var(--teal));}
+  #p2pos .jr-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px;}
+  #p2pos .jr-search{flex:1;min-width:180px;box-sizing:border-box;padding:10px 14px;border-radius:30px;font:600 13px/1 system-ui;color:var(--text);background:#0e1a20;border:1px solid var(--stroke);}
+  #p2pos .jr-views{display:flex;gap:4px;background:rgba(255,255,255,.04);border:1px solid var(--stroke);border-radius:30px;padding:3px;}
+  #p2pos .jr-view{font:700 11px/1 system-ui;color:var(--muted);background:none;border:0;border-radius:30px;padding:8px 13px;cursor:pointer;}
+  #p2pos .jr-view.on{color:#06120e;background:linear-gradient(145deg,#f4e2a6,var(--gold));}
+  #p2pos .jr-list{display:flex;flex-direction:column;gap:12px;}
+  #p2pos .jr-entry{background:rgba(255,255,255,.03);border:1px solid var(--stroke);border-radius:14px;padding:16px 18px;}
+  #p2pos .jr-entry .je-top{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:6px;}
+  #p2pos .jr-entry .je-date{font:600 11px/1 system-ui;color:var(--muted);}
+  #p2pos .jr-win .je-date{color:var(--gold-bright);}
+  #p2pos .je-title{font:700 15px/1.25 system-ui;color:var(--gold-bright);margin:2px 0 4px;}
+  #p2pos .jr-entry .je-text{font:400 14px/1.6 system-ui;color:#cfe0da;white-space:pre-wrap;}
+  #p2pos .je-acts{display:flex;gap:6px;flex-wrap:wrap;}
+  #p2pos .je-btn{font:700 11px/1 system-ui;color:var(--muted);background:rgba(255,255,255,.05);border:1px solid var(--stroke);border-radius:20px;padding:6px 11px;cursor:pointer;}
+  #p2pos .jr-empty{color:var(--muted);font:400 14px/1.5 system-ui;text-align:center;padding:24px;}
+</style>
+<script>['demo_journal','demo_notes','demo_ideas','demo_wins'].forEach(function(k){localStorage.removeItem(k);});</script>
+<script src="../assets/p2p-notebook.js"></script>
+<script>
+  var root=document.getElementById('p2pos');
+  P2PNotebook.mount(root.querySelector('[data-osx-nb]'), { onSave:function(kind){ /* demo */ } });
+</script>
+</body></html>
