@@ -17,6 +17,37 @@
           <button class="ptile" type="button" data-prog="merit"><b><span class="p2pj-tiername">Dreamer</span></b><small>Merit · <span class="p2pj-level">0</span></small></button>
         </div>
       </div>
+      <div class="prog-next">
+        <div class="pn-lbl">Up next on your trail</div>
+        <a class="pn-card" href="#"><span class="pn-title">The Harvest Plan</span><span class="pn-go">Continue →</span></a>
+        <div class="pn-goal" data-nextgoal hidden></div>
+      </div>
+      <div class="prog-week" data-weekgoal hidden>
+        <div class="pw-top"><span class="pw-lbl">✦ This week's goal</span><span class="pw-count" data-week-count>0/1</span></div>
+        <div class="pw-bar"><i data-week-bar style="width:0%"></i></div>
+        <div class="pw-note" data-week-note></div>
+      </div>
+      <button class="prog-recap-btn" type="button" data-recap><span>✦</span> See my Journey Recap</button>
+    </div>
+  </div>
+
+  <div id="p2pj-recap">
+    <div class="rcwrap">
+      <span class="rx" data-recap-close>✕</span>
+      <div class="rc-card" data-recap-card>
+        <div class="rc-aurora"></div>
+        <div class="rc-eyebrow">✦ My Purpose 2 Profit Journey ✦</div>
+        <div class="rc-tier" data-rc-tier>Dreamer</div>
+        <div class="rc-pts"><b data-rc-points>0</b> points earned</div>
+        <div class="rc-grid">
+          <div class="rc-stat"><b data-rc-courses>0</b><small>Courses done</small></div>
+          <div class="rc-stat"><b data-rc-badges>0</b><small>Badges earned</small></div>
+          <div class="rc-stat"><b data-rc-streak>0</b><small>Longest streak</small></div>
+          <div class="rc-stat"><b data-rc-active>0</b><small>Days active</small></div>
+        </div>
+        <div class="rc-foot">blacksheepcreations.com · Purpose 2 Profit</div>
+      </div>
+      <div class="rc-hint">Screenshot this to share your progress 📸</div>
     </div>
   </div>
 
@@ -45,11 +76,13 @@
     merits: function(){ return Math.floor(1180/250); },
     level: function(){ return Math.floor(1180/250); },
     tier: function(){ var p=1180,step=500,idx=Math.floor(p/step)+1,start=(idx-1)*step; var T=['Dreamer','Seeker','Starter','Apprentice','Builder','Maker','Crafter','Creator','Artisan','Designer','Explorer','Navigator','Pathfinder','Pioneer','Trailblazer','Innovator','Architect','Visionary','Luminary','Unbound']; return { index:idx, name:T[idx-1], start:start, next:start+step, nextName:T[idx]||'Unbound II', points:p, merits:Math.floor(p/250), tiers:T }; },
-    pointsBreakdown: function(){ return { courses:400, dna:250, certs:100, side:80, badges:150, streak:30, journal:0 }; },
+    pointsBreakdown: function(){ return { courses:400, dna:250, certs:100, side:80, badges:150, streak:30, journal:0, weekly:50 }; },
     earnedSet: function(){ return earned; },
     badgesStat: function(){ return { earned: earned.length, total: 45 }; },
     isCourseDone: function(h){ return doneCourses.indexOf(h) !== -1; },
-    coursesDone: function(){ return doneCourses.length; }
+    coursesDone: function(){ return doneCourses.length; },
+    weekGoal: function(){ return { done:1, goal:2, paid:false, bonus:50 }; },
+    daysActive: function(){ return 23; }
   };
 </script>
 <script src="../assets/p2p-journey.js"></script>

@@ -1,0 +1,49 @@
+<!doctype html><html><head><meta charset="utf-8">
+<link rel="stylesheet" href="../assets/p2p-journey.css">
+<style>body{margin:0;background:#030a18;} #p2pj{padding:20px 0;} .wrap{max-width:940px;margin:0 auto;}</style>
+</head><body>
+<div id="p2pj"><div class="wrap"><div class="panel on" data-panel="directory">
+  <div class="pnl-head"><h2>All Courses</h2><p>Every course across all five realms. Jump straight to any one — no need to remember where it lives on the map.</p></div>
+  <div class="p2pj-dir" data-current-realm="1"></div>
+</div></div></div>
+<script src="../assets/p2p-journey-map.js"></script>
+<script>
+// stub progress: some done, one gate not done (realm 5 locked), storefront not done (offshoots locked)
+var DONE = ['welcome-aboard','raft','grows','digital-product-advantage','pod-foundations','turning-digital-to-physical'];
+window.P2P = { isCourseDone:function(h){ return DONE.indexOf(h)!==-1; } };
+// in-progress: some lessons done but course not complete
+localStorage.setItem('p2p_course_finding-your-lane_done','[0]');
+localStorage.setItem('p2p_course_pricing-your-products_done','[0,1]');
+
+// --- mirror of buildDirectory() from p2p-journey.js ---
+var dir = document.querySelector('.p2pj-dir');
+function courseState(c, realm){
+  var P = window.P2P;
+  if(P && P.isCourseDone(c.h)) return 'done';
+  var locked = realm.gate && c.h !== realm.gate && !(P && P.isCourseDone(realm.gate));
+  if(!locked && c.after) locked = !(P && P.isCourseDone(c.after));
+  if(locked) return 'locked';
+  try{ var a = JSON.parse(localStorage.getItem('p2p_course_' + c.h + '_done') || '[]'); if(a && a.length) return 'progress'; }catch(e){}
+  return 'available';
+}
+var STATE_LABEL = { done:'Completed', progress:'In progress', locked:'Locked', available:'Not started' };
+function buildDirectory(){
+  var curN = parseInt(dir.getAttribute('data-current-realm'),10)||1, html='';
+  window.P2P_MAP.forEach(function(realm){
+    var doneN=0, rows='';
+    realm.courses.forEach(function(c){
+      var st=courseState(c,realm); if(st==='done')doneN++;
+      var href=(st==='locked')?realm.url:'/pages/courses-'+c.h;
+      rows+='<a class="dir-course is-'+st+'" href="'+href+'">'+
+        '<span class="dir-ico"></span><span class="dir-ct">'+c.t+(c.o?'<i class="dir-off">offshoot</i>':'')+'</span>'+
+        '<span class="dir-go">'+(st==='locked'?'View realm':'Open')+' →</span></a>';
+    });
+    var open=(realm.n===curN)?' open':'';
+    html+='<div class="dir-realm'+open+'"><button class="dir-rhead" type="button"><span class="dir-rnum">'+realm.n+'</span><span class="dir-rname">'+realm.name+'</span><span class="dir-rprog">'+doneN+'/'+realm.courses.length+'</span><svg class="dir-chev" viewBox="0 0 24 24"><path d="M8 10l4 4 4-4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button><div class="dir-courses">'+rows+'</div></div>';
+  });
+  dir.innerHTML=html;
+  dir.querySelectorAll('.dir-rhead').forEach(function(h){h.addEventListener('click',function(){h.parentNode.classList.toggle('open');});});
+}
+buildDirectory();
+</script>
+</body></html>

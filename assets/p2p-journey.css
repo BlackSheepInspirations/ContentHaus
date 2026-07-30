@@ -475,6 +475,40 @@
 #p2pj-rankup .ru-sub{font:500 13px/1.5 system-ui; color:#c6d6d0; margin-bottom:20px;}
 #p2pj-rankup .ru-close{padding:11px 22px; border:0; border-radius:12px; font:700 13px/1 system-ui; color:#06120e; background:linear-gradient(145deg,#f4e2a6,var(--gold)); cursor:pointer;}
 
+/* ---- "up next" goal line + weekly goal card + recap button ---- */
+#p2pj .prog-next .pn-goal{margin-top:8px; font:600 12.5px/1.4 system-ui; color:var(--gold-bright);}
+#p2pj .prog-week{margin-top:14px; padding:14px 16px; border:1px solid var(--stroke); border-radius:14px; background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(9,17,24,.4)); transition:border-color .2s;}
+#p2pj .prog-week.is-done{border-color:rgba(39,174,110,.5); background:linear-gradient(180deg,rgba(39,174,110,.1),rgba(9,17,24,.4));}
+#p2pj .prog-week .pw-top{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:9px;}
+#p2pj .prog-week .pw-lbl{font:700 12px/1 system-ui; letter-spacing:.03em; color:#dbe7e2;}
+#p2pj .prog-week .pw-count{font:800 13px/1 system-ui; color:var(--gold-bright);}
+#p2pj .prog-week .pw-bar{height:8px; border-radius:6px; background:rgba(255,255,255,.08); overflow:hidden;}
+#p2pj .prog-week .pw-bar i{display:block; height:100%; border-radius:6px; background:linear-gradient(90deg,#39c5c0,#8f6fd6 55%,#f4c534); transition:width .5s ease;}
+#p2pj .prog-week.is-done .pw-bar i{background:linear-gradient(90deg,#27ae6e,#39c5c0);}
+#p2pj .prog-week .pw-note{margin-top:9px; font:500 11.5px/1.4 system-ui; color:var(--muted);}
+#p2pj .prog-week.is-done .pw-note{color:#7fd6a6;}
+#p2pj .prog-recap-btn{display:inline-flex; align-items:center; gap:7px; margin-top:14px; padding:11px 18px; border:1px solid var(--gstroke); border-radius:12px; background:linear-gradient(180deg,rgba(216,180,90,.14),rgba(9,17,24,.3)); color:var(--gold-bright); font:700 12.5px/1 system-ui; cursor:pointer; transition:transform .12s, box-shadow .18s, border-color .18s;}
+#p2pj .prog-recap-btn span{animation:p2pj-shift 7s linear infinite;}
+#p2pj .prog-recap-btn:hover{transform:translateY(-1px); border-color:var(--gold); box-shadow:0 8px 22px rgba(0,0,0,.35);}
+
+/* ---- journey recap (shareable snapshot) ---- */
+#p2pj-recap{position:fixed; inset:0; z-index:60; display:none; align-items:center; justify-content:center; background:rgba(3,7,12,.82); backdrop-filter:blur(6px); padding:24px;}
+#p2pj-recap.show{display:flex;}
+#p2pj-recap .rcwrap{position:relative; width:100%; max-width:400px;}
+#p2pj-recap .rx{position:absolute; top:-30px; right:0; cursor:pointer; color:#c6d6d0; font:700 22px/1 system-ui; z-index:3;}
+#p2pj-recap .rc-card{position:relative; overflow:hidden; border-radius:22px; padding:34px 28px 22px; text-align:center; background:linear-gradient(180deg,#0f1c24,#0a141a); border:1px solid var(--gstroke); box-shadow:0 24px 70px rgba(0,0,0,.65);}
+#p2pj-recap .rc-aurora{position:absolute; inset:-40% -20% auto -20%; height:220px; background:radial-gradient(60% 80% at 30% 20%,rgba(143,111,214,.5),transparent 60%),radial-gradient(60% 80% at 75% 30%,rgba(57,197,192,.45),transparent 60%),radial-gradient(50% 70% at 50% 10%,rgba(244,197,52,.4),transparent 60%); filter:blur(14px); opacity:.65; pointer-events:none;}
+#p2pj-recap .rc-eyebrow{position:relative; font:700 11px/1 system-ui; letter-spacing:.18em; text-transform:uppercase; color:var(--gold); margin-bottom:10px;}
+#p2pj-recap .rc-tier{position:relative; font:700 34px/1.05 Georgia,serif; background:linear-gradient(100deg,#f4e2a6,#8f6fd6,#39c5c0,#f4e2a6); background-size:250% 100%; -webkit-background-clip:text; background-clip:text; color:transparent; animation:p2pj-shift 7s linear infinite;}
+#p2pj-recap .rc-pts{position:relative; font:500 13px/1.3 system-ui; color:#c6d6d0; margin-top:6px;}
+#p2pj-recap .rc-pts b{color:var(--gold-bright); font-weight:800;}
+#p2pj-recap .rc-grid{position:relative; display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:22px 0 18px;}
+#p2pj-recap .rc-stat{padding:14px 8px; border:1px solid var(--stroke); border-radius:14px; background:rgba(255,255,255,.03);}
+#p2pj-recap .rc-stat b{display:block; font:800 26px/1 system-ui; color:var(--text);}
+#p2pj-recap .rc-stat small{display:block; margin-top:5px; font:600 10.5px/1.2 system-ui; letter-spacing:.02em; color:var(--muted); text-transform:uppercase;}
+#p2pj-recap .rc-foot{position:relative; font:600 11px/1.3 system-ui; letter-spacing:.03em; color:var(--gold); opacity:.85;}
+#p2pj-recap .rc-hint{margin-top:16px; text-align:center; font:500 12px/1.3 system-ui; color:var(--muted);}
+
 /* ---- course directory (All Courses panel) ---- */
 #p2pj .p2pj-dir{display:flex; flex-direction:column; gap:14px;}
 #p2pj .dir-realm{

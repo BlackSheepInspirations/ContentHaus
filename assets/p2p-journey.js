@@ -40,6 +40,32 @@
     root.querySelectorAll('.p2pj-courses').forEach(function(el){ el.textContent = g.done; });
     root.querySelectorAll('.p2pj-courses-total').forEach(function(el){ el.textContent = '/' + g.total; });
     root.querySelectorAll('.prog-ring.p2pj-ring').forEach(function(el){ el.style.setProperty('--p', gpct); var p = el.querySelector('.p2pj-ringpct'); if(p) p.textContent = gpct + '%'; });
+    renderNudges();
+  }
+
+  /* ---- "Up next" goal line + weekly-goal card (Progress panel) ---- */
+  function renderNudges(){
+    if(!window.P2P) return;
+    // points-to-next-tier nudge under the Up-next card
+    var goalEl = root.querySelector('[data-nextgoal]');
+    if(goalEl && window.P2P.tier){
+      var t = window.P2P.tier(), toNext = t.next - t.points;
+      if(toNext > 0){ goalEl.textContent = "You're " + toNext + ' point' + (toNext === 1 ? '' : 's') + ' from ' + t.nextName + '.'; goalEl.hidden = false; }
+      else goalEl.hidden = true;
+    }
+    // weekly goal card
+    var wc = root.querySelector('[data-weekgoal]');
+    if(wc && window.P2P.weekGoal){
+      var w = window.P2P.weekGoal();
+      var pct = w.goal ? Math.min(100, Math.round(w.done / w.goal * 100)) : 0;
+      var cEl = wc.querySelector('[data-week-count]'), bEl = wc.querySelector('[data-week-bar]'), nEl = wc.querySelector('[data-week-note]');
+      if(cEl) cEl.textContent = Math.min(w.done, w.goal) + '/' + w.goal;
+      if(bEl) bEl.style.width = pct + '%';
+      if(nEl) nEl.textContent = w.paid ? ('Done! +' + w.bonus + ' bonus earned this week 🎉')
+        : ('Finish ' + w.goal + ' course' + (w.goal === 1 ? '' : 's') + ' this week for +' + w.bonus + ' points.');
+      wc.classList.toggle('is-done', !!w.paid);
+      wc.hidden = false;
+    }
   }
   renderStats();
 
@@ -530,7 +556,8 @@
     var b = P.pointsBreakdown();
     var rows = [
       ['Courses finished', b.courses], ['Brand DNA Blueprint', b.dna], ['Certificates', b.certs],
-      ['Side quests (Checks)', b.side], ['Badges earned', b.badges], ['Daily streak', b.streak], ['Journal', b.journal]
+      ['Side quests (Checks)', b.side], ['Badges earned', b.badges], ['Weekly goals', b.weekly || 0],
+      ['Daily streak', b.streak], ['Journal', b.journal]
     ];
     var max = rows.reduce(function(m, r){ return Math.max(m, r[1]); }, 1);
     var total = P.points();
@@ -633,6 +660,26 @@
     })();
   }
   checkRankUp();
+
+  /* ---- Journey Recap (shareable stats snapshot) ---- */
+  var recapModal = document.getElementById('p2pj-recap');
+  function openRecap(){
+    if(!recapModal || !window.P2P) return;
+    var P = window.P2P, s = P.streak ? P.streak() : { longest:0 }, t = P.tier ? P.tier() : { name:'Dreamer' };
+    var set = function(sel, val){ var el = recapModal.querySelector(sel); if(el) el.textContent = val; };
+    set('[data-rc-tier]', t.name);
+    set('[data-rc-points]', P.points());
+    set('[data-rc-courses]', P.coursesDone());
+    set('[data-rc-badges]', badgeCount());
+    set('[data-rc-streak]', (s.longest || s.count || 0));
+    set('[data-rc-active]', P.daysActive ? P.daysActive() : (s.longest || 0));
+    recapModal.classList.add('show');
+  }
+  root.querySelectorAll('[data-recap]').forEach(function(b){ b.addEventListener('click', openRecap); });
+  if(recapModal){
+    var rx = recapModal.querySelector('[data-recap-close]'); if(rx) rx.addEventListener('click', function(){ recapModal.classList.remove('show'); });
+    recapModal.addEventListener('click', function(e){ if(e.target === recapModal) recapModal.classList.remove('show'); });
+  }
 
   /* ---- JS sticky bar (sits below the theme's own sticky header; ignores lock state) ---- */
   var bar = root.querySelector('.bar'), wrap = root.querySelector('.wrap');

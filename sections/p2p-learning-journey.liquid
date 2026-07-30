@@ -192,7 +192,14 @@
           <span class="pn-title">{{ first_course_title | default: 'Your next course' }}</span>
           <span class="pn-go">Continue →</span>
         </a>
+        <div class="pn-goal" data-nextgoal hidden></div>
       </div>
+      <div class="prog-week" data-weekgoal hidden>
+        <div class="pw-top"><span class="pw-lbl">✦ This week's goal</span><span class="pw-count" data-week-count>0/1</span></div>
+        <div class="pw-bar"><i data-week-bar style="width:0%"></i></div>
+        <div class="pw-note" data-week-note></div>
+      </div>
+      <button class="prog-recap-btn" type="button" data-recap><span>✦</span> See my Journey Recap</button>
     </div>
 
     {%- comment -%} ---- COURSE DIRECTORY PANEL (cross-realm jump-to-course index) ---- {%- endcomment -%}
@@ -395,6 +402,27 @@
     </div>
   </div>
 
+  {%- comment -%} ---- JOURNEY RECAP (shareable stats snapshot) ---- {%- endcomment -%}
+  <div id="p2pj-recap">
+    <div class="rcwrap">
+      <span class="rx" data-recap-close>✕</span>
+      <div class="rc-card" data-recap-card>
+        <div class="rc-aurora"></div>
+        <div class="rc-eyebrow">✦ My Purpose 2 Profit Journey ✦</div>
+        <div class="rc-tier" data-rc-tier>Dreamer</div>
+        <div class="rc-pts"><b data-rc-points>0</b> points earned</div>
+        <div class="rc-grid">
+          <div class="rc-stat"><b data-rc-courses>0</b><small>Courses done</small></div>
+          <div class="rc-stat"><b data-rc-badges>0</b><small>Badges earned</small></div>
+          <div class="rc-stat"><b data-rc-streak>0</b><small>Longest streak</small></div>
+          <div class="rc-stat"><b data-rc-active>0</b><small>Days active</small></div>
+        </div>
+        <div class="rc-foot">{{ section.settings.recap_tag | default: 'blacksheepcreations.com · Purpose 2 Profit' }}</div>
+      </div>
+      <div class="rc-hint">Screenshot this to share your progress 📸</div>
+    </div>
+  </div>
+
   {%- comment -%} ---- badge-earned celebration (fires on any journey screen) ---- {%- endcomment -%}
   <div id="p2pj-badgepop">
     <canvas class="bp-canvas"></canvas>
@@ -508,6 +536,8 @@
     streak:  {{ section.settings.pts_streak     | default: 5 }},
     badge:   {{ section.settings.pts_badge      | default: 25 }},
     masterclass: {{ section.settings.pts_masterclass | default: 250 }},
+    weekbonus: {{ section.settings.pts_week_bonus | default: 50 }},
+    weekgoal: {{ section.settings.week_goal_courses | default: 1 }},
     level:   {{ section.settings.pts_level_step | default: 250 }}
   };
 </script>
@@ -600,7 +630,10 @@
     { "type": "number", "id": "pts_streak", "label": "Daily streak (per day)", "default": 5 },
     { "type": "number", "id": "pts_badge", "label": "Earn a badge", "default": 25 },
     { "type": "number", "id": "pts_masterclass", "label": "Complete a masterclass", "default": 250 },
+    { "type": "number", "id": "pts_week_bonus", "label": "Weekly-goal bonus", "default": 50 },
+    { "type": "number", "id": "week_goal_courses", "label": "Weekly goal — courses/week", "default": 1 },
     { "type": "number", "id": "pts_level_step", "label": "Points per Merit", "default": 250 },
+    { "type": "text", "id": "recap_tag", "label": "Journey Recap footer tag", "default": "blacksheepcreations.com · Purpose 2 Profit" },
 
     { "type": "header", "content": "Info / Help (ⓘ icon)" },
     { "type": "text", "id": "info_title", "label": "Title", "default": "About This Journey" },
