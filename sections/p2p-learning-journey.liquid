@@ -226,12 +226,14 @@
     {%- comment -%} ---- JOURNAL PANEL (localStorage; export to keep a copy) ---- {%- endcomment -%}
     <div class="panel" data-panel="journal">
       <div class="pnl-head jr-head">
-        <div><h2>Your Journal</h2><p>A private space to reflect and to mark what you've done. Saved on this device — <strong>Export</strong> anytime to keep a permanent copy.</p></div>
+        <div><h2>Your Journal</h2><p>A private space to reflect, capture notes and ideas, and mark your wins. Shared with your Operating System — <strong>Export</strong> anytime to keep a permanent copy.</p></div>
         <button class="jr-export-all" id="p2pj-export-all" type="button" data-jr-export>Export everything</button>
       </div>
       <div class="jr-tabs">
-        <button class="jr-tab on" type="button" data-jrmode="reflect">Reflections</button>
-        <button class="jr-tab" type="button" data-jrmode="wins">Wins &amp; Accomplishments</button>
+        <button class="jr-tab on" type="button" data-jrmode="reflect">Journal</button>
+        <button class="jr-tab" type="button" data-jrmode="notes">Notes</button>
+        <button class="jr-tab" type="button" data-jrmode="ideas">Ideas</button>
+        <button class="jr-tab" type="button" data-jrmode="wins">Wins</button>
       </div>
 
       <div class="jr-pane" data-jrpane="reflect" data-store="p2p_journal" data-kind="reflection">
@@ -252,6 +254,40 @@
           </select>
           <textarea data-jr-text rows="5" placeholder="Write freely…"></textarea>
           <div class="jr-actions"><button class="jr-save" type="button" data-jr-save>Save entry</button></div>
+        </div>
+        <div class="jr-toolbar">
+          <input class="jr-search" type="search" placeholder="Search titles &amp; text…" data-jr-search />
+          <div class="jr-views">
+            <button class="jr-view on" type="button" data-jr-view="active">Active</button>
+            <button class="jr-view" type="button" data-jr-view="archived">Archived</button>
+            <button class="jr-view" type="button" data-jr-view="trash">Trash</button>
+          </div>
+        </div>
+        <div class="jr-list" data-jr-list></div>
+      </div>
+
+      <div class="jr-pane" data-jrpane="notes" data-store="p2p_notes" data-kind="note" hidden>
+        <div class="jr-compose">
+          <input class="jr-title" type="text" maxlength="80" placeholder="Title — e.g. “Spring launch campaign”" data-jr-title />
+          <textarea data-jr-text rows="4" placeholder="Jot a note…"></textarea>
+          <div class="jr-actions"><button class="jr-save" type="button" data-jr-save>Save note</button></div>
+        </div>
+        <div class="jr-toolbar">
+          <input class="jr-search" type="search" placeholder="Search titles &amp; text…" data-jr-search />
+          <div class="jr-views">
+            <button class="jr-view on" type="button" data-jr-view="active">Active</button>
+            <button class="jr-view" type="button" data-jr-view="archived">Archived</button>
+            <button class="jr-view" type="button" data-jr-view="trash">Trash</button>
+          </div>
+        </div>
+        <div class="jr-list" data-jr-list></div>
+      </div>
+
+      <div class="jr-pane" data-jrpane="ideas" data-store="p2p_ideas" data-kind="idea" hidden>
+        <div class="jr-compose">
+          <input class="jr-title" type="text" maxlength="80" placeholder="Title — e.g. “Devotional journal for new moms”" data-jr-title />
+          <textarea data-jr-text rows="4" placeholder="Capture the idea…"></textarea>
+          <div class="jr-actions"><button class="jr-save" type="button" data-jr-save>Save idea</button></div>
         </div>
         <div class="jr-toolbar">
           <input class="jr-search" type="search" placeholder="Search titles &amp; text…" data-jr-search />
