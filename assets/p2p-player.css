@@ -14,6 +14,7 @@
 #p2pp .phead{position:sticky; top:var(--p2pp-sticky,0); z-index:20; display:flex; align-items:center; gap:16px; flex-wrap:wrap;
   padding:14px 22px; background:linear-gradient(180deg,rgba(10,18,22,.96),rgba(8,14,18,.9));
   border-bottom:1px solid var(--gstroke); backdrop-filter:blur(8px);}
+#p2pp .pback-group{display:flex; align-items:center; gap:8px; flex-wrap:wrap;}
 #p2pp .back{display:flex; align-items:center; gap:7px; text-decoration:none; color:var(--gold); cursor:pointer;
   font:700 13px/1 system-ui; padding:8px 12px; border-radius:10px; border:1px solid var(--gstroke);}
 #p2pp .back:hover{color:var(--gold-bright); background:rgba(216,180,90,.08);}
@@ -120,3 +121,17 @@
 #p2pp-locked .gbtn{display:inline-block; cursor:pointer; border:0; padding:14px 24px; border-radius:12px; font:800 14px/1 system-ui; color:#06120e; background:linear-gradient(145deg,#f4e2a6,var(--gold)); text-decoration:none;}
 #p2pp-locked .p2pp-locked__learn-more{display:inline-flex; align-items:center; padding:14px 20px; border-radius:12px; border:1px solid var(--gstroke); color:var(--muted); font:600 14px/1 system-ui; text-decoration:none;}
 #p2pp-locked .p2pp-locked__learn-more:hover{color:var(--gold-bright); border-color:var(--gold);}
+
+/* ---- badge-earned celebration (course completion) ---- */
+#p2pp-badgepop{position:fixed; inset:0; z-index:200; display:none; align-items:center; justify-content:center; padding:20px; background:rgba(3,7,12,.74); backdrop-filter:blur(4px);}
+#p2pp-badgepop.show{display:flex;}
+#p2pp-badgepop .bp-card{position:relative; max-width:360px; width:100%; text-align:center; padding:34px 28px 24px; border-radius:22px; background:linear-gradient(180deg,#0f1c24,#0a141a); border:1px solid var(--gstroke); box-shadow:0 24px 70px rgba(0,0,0,.65), 0 0 60px rgba(216,180,90,.16);}
+#p2pp-badgepop .bp-medal{width:78px; height:78px; margin:0 auto 14px; border-radius:50%; display:grid; place-items:center; background:radial-gradient(circle at 40% 30%,#1c2b31,#0a1216); border:2px solid var(--gold); box-shadow:0 0 28px rgba(216,180,90,.55); animation:p2pp-pop .5s cubic-bezier(.2,1.4,.4,1);}
+#p2pp-badgepop .bp-medal svg{width:40px; height:40px; fill:#f4c534; stroke:#b98f1e; stroke-width:1;}
+@keyframes p2pp-pop{0%{transform:scale(.4); opacity:0;}100%{transform:scale(1); opacity:1;}}
+#p2pp-badgepop .bp-eyebrow{font:700 11px/1 system-ui; letter-spacing:.22em; text-transform:uppercase; color:var(--gold); margin-bottom:8px;}
+#p2pp-badgepop .bp-name{font:700 25px/1.12 Georgia,serif; color:var(--gold-bright); margin-bottom:20px;}
+#p2pp-badgepop .bp-actions{display:flex; flex-direction:column; gap:8px;}
+#p2pp-badgepop .bp-view{text-decoration:none; padding:12px; border-radius:12px; font:700 13px/1 system-ui; color:#06120e; background:linear-gradient(145deg,#f4e2a6,var(--gold));}
+#p2pp-badgepop .bp-close{padding:9px; border:0; background:none; color:var(--muted); font:600 13px/1 system-ui; cursor:pointer;}
+#p2pp-badgepop .bp-close:hover{color:var(--text);}

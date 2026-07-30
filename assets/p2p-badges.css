@@ -10,7 +10,8 @@
 }
 #p2pb *{box-sizing:border-box; margin:0; padding:0;}
 #p2pb .bwrap{max-width:960px; margin:0 auto;}
-#p2pb .bback{display:inline-flex; align-items:center; gap:7px; margin-bottom:22px; text-decoration:none;
+#p2pb .bnav{display:flex; flex-wrap:wrap; gap:10px; margin-bottom:22px;}
+#p2pb .bback{display:inline-flex; align-items:center; gap:7px; text-decoration:none;
   font:700 11px/1 system-ui; letter-spacing:.13em; text-transform:uppercase; color:var(--gold);
   padding:8px 15px 8px 11px; border:1px solid var(--gstroke); border-radius:30px; background:rgba(216,180,90,.06); transition:.16s;}
 #p2pb .bback svg{width:15px; height:15px; fill:none;}
@@ -83,3 +84,23 @@
 #p2pb-locked .gbtn{display:inline-block; cursor:pointer; border:0; padding:14px 24px; border-radius:12px; font:800 14px/1 system-ui; color:#06120e; background:linear-gradient(145deg,#f4e2a6,var(--gold)); text-decoration:none;}
 #p2pb-locked .p2pb-locked__learn-more{display:inline-flex; align-items:center; padding:14px 20px; border-radius:12px; border:1px solid var(--gstroke); color:var(--muted); font:600 14px/1 system-ui; text-decoration:none;}
 #p2pb-locked .p2pb-locked__learn-more:hover{color:var(--gold-bright); border-color:var(--gold);}
+
+/* ---- certificates control + viewer ---- */
+#p2pb .summary{flex-wrap:wrap;}
+#p2pb .certs-ctl{margin-left:auto; text-align:right;}
+#p2pb .certs-lbl{display:block; font:700 9px/1 system-ui; letter-spacing:.2em; text-transform:uppercase; color:var(--gold); margin-bottom:8px;}
+#p2pb .certs-row{display:flex; gap:8px; align-items:center;}
+#p2pb .certs-row select{padding:9px 12px; border-radius:10px; font:600 13px/1 system-ui; color:var(--text); background:#0e1a20; border:1px solid var(--gstroke); max-width:220px;}
+#p2pb .certs-row button{cursor:pointer; border:0; padding:10px 16px; border-radius:10px; font:800 12px/1 system-ui; color:#06120e; background:linear-gradient(145deg,#f4e2a6,#d8b45a);}
+#p2pb-cert{position:fixed; inset:0; z-index:70; display:none; align-items:center; justify-content:center; background:rgba(3,7,12,.85); backdrop-filter:blur(6px); padding:20px;}
+#p2pb-cert.show{display:flex; flex-direction:column; gap:16px;}
+#p2pb-cert .certwrap{position:relative; max-width:900px; width:100%; line-height:0; box-shadow:0 24px 70px rgba(0,0,0,.6);}
+#p2pb-cert .certwrap img{width:100%; display:block;}
+#p2pb-cert .fld{position:absolute; transform:translate(-50%,-50%); text-align:center; color:#14294f; line-height:1;}
+#p2pb-cert .cname{left:50%; top:55.6%; width:74%; font-family:"Snell Roundhand","Brush Script MT",cursive; font-weight:600; font-size:clamp(24px,5.4vw,58px); color:#132a54;}
+#p2pb-cert .ccourse{left:50%; top:66%; width:76%; font-family:Georgia,serif; font-weight:700; letter-spacing:.06em; text-transform:uppercase; font-size:clamp(13px,2.4vw,25px); color:#173056;}
+#p2pb-cert .cdate{left:11%; top:72%; font-family:Georgia,serif; font-style:italic; font-size:clamp(8px,1.3vw,14px); color:#3a4d70;}
+#p2pb-cert .cid{left:89%; top:72%; font-family:Georgia,serif; font-size:clamp(7px,1.2vw,13px); letter-spacing:.06em; color:#3a4d70;}
+#p2pb-cert .certbtns{display:flex; gap:10px; flex-wrap:wrap; justify-content:center;}
+#p2pb-cert .certbtns button{cursor:pointer; border:0; padding:12px 20px; border-radius:12px; font:800 13px/1 system-ui; color:#06120e; background:linear-gradient(145deg,#f4e2a6,#d8b45a);}
+#p2pb-cert .certbtns .ghost{color:#dfeee8; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.16);}

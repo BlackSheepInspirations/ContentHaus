@@ -42,10 +42,23 @@
 
     <header class="hero">
       {%- if section.settings.os_url != blank -%}<a class="hero-back" href="{{ section.settings.os_url }}"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>{{ section.settings.os_label | default: 'P2P Operating System' }}</a>{%- endif -%}
-      {%- if section.settings.eyebrow != blank -%}<div class="eyebrow">{{ section.settings.eyebrow }}</div>{%- endif -%}
-      <h1>{{ section.settings.title_pre }}<span class="two">{{ section.settings.title_mid }}</span>{{ section.settings.title_post }}</h1>
-      {%- if section.settings.title_sub != blank -%}<div class="ttl-sub">{{ section.settings.title_sub }}</div>{%- endif -%}
-      {%- if section.settings.description != blank -%}<p class="desc">{{ section.settings.description }}</p>{%- endif -%}
+      <div class="hero-cols">
+        <div class="hero-main">
+          {%- if section.settings.eyebrow != blank -%}<div class="eyebrow">{{ section.settings.eyebrow }}</div>{%- endif -%}
+          <h1>{{ section.settings.title_pre }}<span class="two">{{ section.settings.title_mid }}</span>{{ section.settings.title_post }}</h1>
+          {%- if section.settings.title_sub != blank -%}<div class="ttl-sub">{{ section.settings.title_sub }}</div>{%- endif -%}
+          {%- if section.settings.description != blank -%}<p class="desc">{{ section.settings.description }}</p>{%- endif -%}
+        </div>
+        {%- if section.settings.moment_show -%}
+        <aside class="hero-aside">
+          <div class="mindset-moment" id="p2pj-moment" hidden>
+            <div class="mm-label"><span class="mm-star">✦</span> {{ section.settings.moment_label | default: 'Mindset Moment' }}</div>
+            <blockquote class="mm-text"></blockquote>
+            <cite class="mm-source"></cite>
+          </div>
+        </aside>
+        {%- endif -%}
+      </div>
     </header>
 
     {%- if has_access -%}
@@ -61,12 +74,14 @@
         <a href="{{ section.settings.milestones_url | default: '/pages/p2p-badges' }}" data-tip="Badges you've earned"><svg viewBox="0 0 24 24"><path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.9 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/></svg><small>Milestones</small></a>
         <a href="#" data-panel="journal" data-tip="Your notes &amp; reflections"><svg viewBox="0 0 24 24"><path d="M12 6C10 4.4 5.5 4.2 3.5 5.2v13.6c2-1 6.5-.8 8.5.8 2-1.6 6.5-1.8 8.5-.8V5.2C18.5 4.2 14 4.4 12 6z"/><path d="M12 6v13.6"/></svg><small>Journal</small></a>
       </nav>
-      <a class="barinfo" href="#" data-info data-tip="Info, rules &amp; help"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5" stroke-linecap="round"/><circle cx="12" cy="7.6" r="1.1" fill="#fff" stroke="none"/></svg></a>
+      <div class="bar-right">
       <div class="stats">
         <button class="stat stat-points" type="button" data-points data-tip="See how points work"><b><svg viewBox="0 0 24 24"><path fill="#f4c534" stroke="#b98f1e" stroke-width="1" d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.9 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/></svg><span class="p2pj-points">{{ section.settings.stat_points | default: '0' }}</span></b><small>Points</small></button>
         <div class="stat"><b><svg viewBox="0 0 24 24"><path fill="#39c5c0" stroke="#1f7f7c" stroke-width="1" d="M6 3h12l3 6-9 12L3 9z"/></svg><span class="p2pj-badges">{{ section.settings.stat_badges | default: '0' }}</span></b><small>Badges</small></div>
         <div class="stat"><b><svg viewBox="0 0 24 24"><path fill="#8f6fd6" stroke="#5b3c8c" stroke-width="1" d="M6 3h12l3 6-9 12L3 9z"/></svg><span class="p2pj-streak">{{ section.settings.stat_streak | default: '0' }}</span></b><small>Streak</small></div>
-        <div class="level"><div class="coin"><svg viewBox="0 0 24 24"><path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.9 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/></svg></div><small>Merit <span class="p2pj-level">{{ section.settings.stat_level | default: '1' }}</span></small></div>
+        <button class="stat level" type="button" data-points data-tip="See how points &amp; Merit work"><div class="coin"><svg viewBox="0 0 24 24"><path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.9 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/></svg></div><small>Merit <span class="p2pj-level">{{ section.settings.stat_level | default: '1' }}</span></small></button>
+      </div>
+      <a class="barinfo" href="#" data-info data-tip="Info, rules &amp; help"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5" stroke-linecap="round"/><circle cx="12" cy="7.6" r="1.1" fill="#fff" stroke="none"/></svg></a>
       </div>
       </div>
 
@@ -203,29 +218,62 @@
 
     {%- comment -%} ---- JOURNAL PANEL (localStorage; export to keep a copy) ---- {%- endcomment -%}
     <div class="panel" data-panel="journal">
-      <div class="pnl-head"><h2>Your Journal</h2><p>A private space to reflect. Saved on this device — <strong>Export</strong> anytime to keep a permanent copy.</p></div>
-      <div class="jr-compose">
-        <label class="jr-lbl" for="p2pj-jr-prompt">Reflect on…</label>
-        <select id="p2pj-jr-prompt">
-          <option value="">Free write</option>
-          <option>What's one thing I'm taking from this today?</option>
-          <option>Where did I feel resistance today, and why?</option>
-          <option>Where did my Fingerprint show up today?</option>
-          <option>What's my next small, obvious step?</option>
-          <option>What am I proud of right now?</option>
-          <option>Does what I'm building still feel like mine?</option>
-          <option>What's one relationship I could deepen — instead of one more thing I could launch?</option>
-          <option>What's one thing I'm doing "just because" — and can I let it go?</option>
-          <option>What would my future self thank me for doing today?</option>
-        </select>
-        <textarea id="p2pj-jr-text" rows="5" placeholder="Write freely…"></textarea>
-        <div class="jr-actions">
-          <button class="jr-save" id="p2pj-jr-save" type="button">Save entry</button>
-          <button class="jr-export" id="p2pj-jr-export" type="button">Export journal</button>
-        </div>
+      <div class="pnl-head jr-head">
+        <div><h2>Your Journal</h2><p>A private space to reflect and to mark what you've done. Saved on this device — <strong>Export</strong> anytime to keep a permanent copy.</p></div>
+        <button class="jr-export-all" id="p2pj-export-all" type="button">Export everything</button>
       </div>
-      <div class="jr-list-head">Your entries <span id="p2pj-jr-count"></span></div>
-      <div class="jr-list" id="p2pj-jr-list"></div>
+      <div class="jr-tabs">
+        <button class="jr-tab on" type="button" data-jrmode="reflect">Reflections</button>
+        <button class="jr-tab" type="button" data-jrmode="wins">Wins &amp; Accomplishments</button>
+      </div>
+
+      <div class="jr-pane" data-jrpane="reflect" data-store="p2p_journal" data-kind="reflection">
+        <div class="jr-compose">
+          <input class="jr-title" type="text" maxlength="80" placeholder="Title (optional)" data-jr-title />
+          <label class="jr-lbl" for="p2pj-jr-prompt">Reflect on…</label>
+          <select id="p2pj-jr-prompt" data-jr-prompt>
+            <option value="">Free write</option>
+            <option>What's one thing I'm taking from this today?</option>
+            <option>Where did I feel resistance today, and why?</option>
+            <option>Where did my Fingerprint show up today?</option>
+            <option>What's my next small, obvious step?</option>
+            <option>What am I proud of right now?</option>
+            <option>Does what I'm building still feel like mine?</option>
+            <option>What's one relationship I could deepen — instead of one more thing I could launch?</option>
+            <option>What's one thing I'm doing "just because" — and can I let it go?</option>
+            <option>What would my future self thank me for doing today?</option>
+          </select>
+          <textarea data-jr-text rows="5" placeholder="Write freely…"></textarea>
+          <div class="jr-actions"><button class="jr-save" type="button" data-jr-save>Save entry</button></div>
+        </div>
+        <div class="jr-toolbar">
+          <input class="jr-search" type="search" placeholder="Search titles &amp; text…" data-jr-search />
+          <div class="jr-views">
+            <button class="jr-view on" type="button" data-jr-view="active">Active</button>
+            <button class="jr-view" type="button" data-jr-view="archived">Archived</button>
+            <button class="jr-view" type="button" data-jr-view="trash">Trash</button>
+          </div>
+        </div>
+        <div class="jr-list" data-jr-list></div>
+      </div>
+
+      <div class="jr-pane" data-jrpane="wins" data-store="p2p_wins" data-kind="win" hidden>
+        <div class="jr-compose">
+          <input class="jr-title" type="text" maxlength="80" placeholder="Title (optional)" data-jr-title />
+          <label class="jr-lbl">What did you accomplish?</label>
+          <textarea data-jr-text rows="4" placeholder="Big or small — finished a course, made a first sale, showed up when it was hard…"></textarea>
+          <div class="jr-actions"><button class="jr-save" type="button" data-jr-save>Save win</button></div>
+        </div>
+        <div class="jr-toolbar">
+          <input class="jr-search" type="search" placeholder="Search titles &amp; text…" data-jr-search />
+          <div class="jr-views">
+            <button class="jr-view on" type="button" data-jr-view="active">Active</button>
+            <button class="jr-view" type="button" data-jr-view="archived">Archived</button>
+            <button class="jr-view" type="button" data-jr-view="trash">Trash</button>
+          </div>
+        </div>
+        <div class="jr-list" data-jr-list></div>
+      </div>
     </div>
 
     {%- else -%}
@@ -325,6 +373,31 @@
     </div>
   </div>
 
+  {%- comment -%} ---- badge-earned celebration (fires on any journey screen) ---- {%- endcomment -%}
+  <div id="p2pj-badgepop">
+    <div class="bp-card">
+      <div class="bp-medal"><svg viewBox="0 0 24 24"><path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.9 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/></svg></div>
+      <div class="bp-eyebrow">✦ Badge Unlocked ✦</div>
+      <div class="bp-name"></div>
+      <div class="bp-actions">
+        <a class="bp-view" href="{{ section.settings.milestones_url | default: '/pages/p2p-badges' }}">See it in Milestones →</a>
+        <button class="bp-close" type="button">Keep going</button>
+      </div>
+    </div>
+  </div>
+
+  {%- comment -%} ---- confirm dialog (journal delete / restore) ---- {%- endcomment -%}
+  <div id="p2pj-confirm">
+    <div class="cf-card">
+      <div class="cf-title"></div>
+      <div class="cf-msg"></div>
+      <div class="cf-actions">
+        <button class="cf-cancel" type="button">Cancel</button>
+        <button class="cf-ok" type="button">Delete</button>
+      </div>
+    </div>
+  </div>
+
   {%- comment -%} ---- JOURNEY BEGINS onboarding ---- {%- endcomment -%}
   {%- assign lesson1_url = first_course_url -%}
   {%- assign brand_dna = section.settings.brand_dna_url | default: '/pages/brand-haus' -%}
@@ -415,6 +488,7 @@
 </script>
 <script src="{{ 'p2p-progress.js' | asset_url }}" defer="defer"></script>
 <script src="{{ 'p2p-journey-map.js' | asset_url }}" defer="defer"></script>
+<script src="{{ 'p2p-moments.js' | asset_url }}" defer="defer"></script>
 <script src="{{ 'p2p-journey.js' | asset_url }}" defer="defer"></script>
 {%- endif -%}
 
@@ -432,6 +506,8 @@
     { "type": "text", "id": "journey_name", "label": "Journey name", "default": "Purpose 2 Profit Learning Journey" },
     { "type": "text", "id": "os_url", "label": "Operating System back-link (URL)", "info": "Shown as a back button at the top of the hero on every realm. Point at your P2P Operating System page. Leave blank to hide it.", "default": "/pages/p2p-operating-system" },
     { "type": "text", "id": "os_label", "label": "Operating System back-link — label", "default": "P2P Operating System" },
+    { "type": "checkbox", "id": "moment_show", "label": "Show Mindset Moment card", "info": "A daily rotating quote / affirmation / verse in the hero. Content lives in assets/p2p-moments.js.", "default": true },
+    { "type": "text", "id": "moment_label", "label": "Mindset Moment — label", "default": "Mindset Moment" },
 
     { "type": "header", "content": "Access" },
     { "type": "text", "id": "access_tag", "label": "Access tag", "info": "Customer tag that unlocks the journey. Must match the tag your Shopify Flow automation adds on purchase.", "default": "p2p-learning" },
@@ -468,7 +544,7 @@
 
     { "type": "header", "content": "Realms (2nd toolbar row)" },
     { "type": "range", "id": "current_realm", "min": 1, "max": 5, "step": 1, "label": "This page’s realm", "info": "Highlights which realm button is the current page.", "default": 1 },
-    { "type": "text", "id": "realm_1_name", "label": "Realm 1 name", "default": "The Shoreline" },
+    { "type": "text", "id": "realm_1_name", "label": "Realm 1 name", "default": "Open Water" },
     { "type": "url",  "id": "realm_1_url", "label": "Realm 1 page" },
     { "type": "checkbox", "id": "realm_1_locked", "label": "Realm 1 locked", "default": false },
     { "type": "text", "id": "realm_2_name", "label": "Realm 2 name", "default": "Element Forest" },
@@ -480,7 +556,7 @@
     { "type": "text", "id": "realm_4_name", "label": "Realm 4 name", "default": "Golden Harvest" },
     { "type": "url",  "id": "realm_4_url", "label": "Realm 4 page" },
     { "type": "checkbox", "id": "realm_4_locked", "label": "Realm 4 locked", "default": false },
-    { "type": "text", "id": "realm_5_name", "label": "Realm 5 name", "default": "The Evergreens" },
+    { "type": "text", "id": "realm_5_name", "label": "Realm 5 name", "default": "Evergreen" },
     { "type": "url",  "id": "realm_5_url", "label": "Realm 5 page" },
     { "type": "checkbox", "id": "realm_5_locked", "label": "Realm 5 locked", "default": true },
 

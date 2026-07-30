@@ -27,7 +27,10 @@
      style="--p2pp-sticky:{{ section.settings.sticky_offset | default: 0 }}px;">
 
   <header class="phead">
-    <a class="back" href="{{ section.settings.back_url | default: '/pages/p2p-learning' }}">← Journey Map</a>
+    <span class="pback-group">
+      <a class="back" href="{{ section.settings.back_url | default: '/pages/p2p-learning' }}">← Journey Map</a>
+      {%- if section.settings.os_url != blank -%}<a class="back" href="{{ section.settings.os_url }}">← {{ section.settings.os_label | default: 'P2P Operating System' }}</a>{%- endif -%}
+    </span>
     <div class="ptitle"><small>{{ section.settings.course_kicker | default: 'Course' }}</small>{{ section.settings.course_title | default: 'Course' }}</div>
     <div class="pmini"><span>Course</span><div class="track"><i id="p2pp-track"></i></div><b id="p2pp-ppct">0%</b></div>
   </header>
@@ -117,6 +120,19 @@
       <button class="ghost" data-cert="close">Close</button>
     </div>
   </div>
+
+  {%- comment -%} badge-earned celebration (fires when a course finish unlocks a badge) {%- endcomment -%}
+  <div id="p2pp-badgepop">
+    <div class="bp-card">
+      <div class="bp-medal"><svg viewBox="0 0 24 24"><path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.9 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/></svg></div>
+      <div class="bp-eyebrow">✦ Badge Unlocked ✦</div>
+      <div class="bp-name"></div>
+      <div class="bp-actions">
+        <a class="bp-view" href="{{ section.settings.milestones_url | default: '/pages/p2p-badges' }}">See it in Milestones →</a>
+        <button class="bp-close" type="button">Keep going</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script src="{{ 'p2p-progress.js' | asset_url }}" defer="defer"></script>
@@ -147,6 +163,8 @@
     { "type": "text", "id": "course_handle", "label": "Course handle (for saved progress)", "default": "quick-wins" },
     { "type": "text", "id": "sidebar_label", "label": "Sidebar label", "default": "Start Here" },
     { "type": "url", "id": "back_url", "label": "Back-to-map link" },
+    { "type": "text", "id": "os_url", "label": "Operating System back-link (URL)", "info": "Second back link next to Journey Map. Leave blank to hide.", "default": "/pages/p2p-operating-system" },
+    { "type": "text", "id": "os_label", "label": "Operating System back-link — label", "default": "P2P Operating System" },
     { "type": "range", "id": "sticky_offset", "min": 0, "max": 120, "step": 2, "unit": "px", "label": "Sticky header offset", "default": 0 },
 
     { "type": "header", "content": "Access" },

@@ -24,7 +24,10 @@
 {%- if has_access -%}
 <div id="p2pb">
   <div class="bwrap">
-    <a class="bback" href="{{ section.settings.back_url | default: '/pages/p2p-learning' }}"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Back to Journey Map</a>
+    <div class="bnav">
+      <a class="bback" href="{{ section.settings.back_url | default: '/pages/p2p-learning' }}"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Back to Journey Map</a>
+      {%- if section.settings.os_url != blank -%}<a class="bback" href="{{ section.settings.os_url }}"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>{{ section.settings.os_label | default: 'P2P Operating System' }}</a>{%- endif -%}
+    </div>
     <div class="top">
       <div>
         <div class="eyebrow">{{ section.settings.eyebrow | default: 'Your Progress' }}</div>
@@ -42,6 +45,13 @@
     <div class="summary" style="--p:{{ pct }}">
       <div class="ring"><b>{{ earned_count }}/{{ total }}</b></div>
       <div class="txt"><b>{{ earned_count }} of {{ total }} badges earned</b><div>{{ total | minus: earned_count }} more to unlock — keep climbing the trail.</div></div>
+      <div class="certs-ctl" id="p2pb-certs" hidden>
+        <span class="certs-lbl">Your Certificates</span>
+        <div class="certs-row">
+          <select id="p2pb-cert-select" aria-label="Select a certificate to view"></select>
+          <button id="p2pb-cert-view" type="button">View</button>
+        </div>
+      </div>
     </div>
 
     {%- assign cur_group = '__none__' -%}
@@ -110,6 +120,22 @@
       <button class="pbt-btn" type="button">Awesome</button>
     </div>
   </div>
+
+  {%- comment -%} ---- certificate viewer (re-view / download / print past certificates) ---- {%- endcomment -%}
+  <div id="p2pb-cert">
+    <div class="certwrap">
+      <img src="{{ 'p2p-certificate-bg.jpg' | asset_url }}" alt="Certificate of Completion" crossorigin="anonymous" />
+      <div class="fld cname"></div>
+      <div class="fld ccourse"></div>
+      <div class="fld cdate"></div>
+      <div class="fld cid"></div>
+    </div>
+    <div class="certbtns">
+      <button data-bcert="download">Download PNG</button>
+      <button data-bcert="print">Print</button>
+      <button class="ghost" data-bcert="close">Close</button>
+    </div>
+  </div>
 </div>
 
 <script src="{{ 'p2p-progress.js' | asset_url }}" defer></script>
@@ -143,6 +169,8 @@
     { "type": "text", "id": "access_tag", "label": "Access tag", "info": "Customer tag that unlocks this page. Must match the tag your Shopify Flow automation adds on purchase.", "default": "p2p-learning" },
     { "type": "product", "id": "access_product", "label": "Access product", "info": "Shown as the \"Get Access\" button on the locked state." },
     { "type": "url", "id": "back_url", "label": "Back-to-map link" },
+    { "type": "text", "id": "os_url", "label": "Operating System back-link (URL)", "info": "Second back button, right of Back to Journey Map. Leave blank to hide.", "default": "/pages/p2p-operating-system" },
+    { "type": "text", "id": "os_label", "label": "Operating System back-link — label", "default": "P2P Operating System" },
     { "type": "text", "id": "locked_heading", "label": "Locked state heading", "default": "Unlock Your Badges & Milestones" },
     { "type": "richtext", "id": "locked_body", "label": "Locked state body", "default": "<p>Badges track your progress through the Purpose 2 Profit Learning Journey. Get access to start earning them.</p>" },
 

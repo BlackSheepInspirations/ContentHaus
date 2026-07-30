@@ -142,4 +142,54 @@
     queue.push({ medal:medalHTML, name:name, req:req, color:colorClass });
     if(!showing) next();
   };
+
+  /* ---- certificates viewer (re-view / download / print earned certificates) ---- */
+  (function(){
+    var ctl = document.getElementById('p2pb-certs'), sel = document.getElementById('p2pb-cert-select');
+    var viewBtn = document.getElementById('p2pb-cert-view'), modal = document.getElementById('p2pb-cert');
+    if(!ctl || !sel || !viewBtn || !modal) return;
+    var certs = {}; try{ certs = JSON.parse(localStorage.getItem('p2p_certificates') || '{}') || {}; }catch(e){}
+    var list = Object.keys(certs).map(function(k){ return certs[k]; }).sort(function(a,b){ return (b.ts||0) - (a.ts||0); });
+    if(!list.length) return; // no certificates yet — leave the control hidden
+    ctl.hidden = false;
+    sel.innerHTML = list.map(function(c,i){ return '<option value="'+i+'">'+(c.title || 'Certificate')+'</option>'; }).join('');
+    var cur = list[0];
+    function fmtDate(ts){ return new Date(ts||Date.now()).toLocaleDateString(undefined, { year:'numeric', month:'long', day:'numeric' }); }
+    function fill(c){
+      cur = c;
+      modal.querySelector('.cname').textContent = c.name || 'Your Name';
+      modal.querySelector('.ccourse').textContent = c.title || '';
+      modal.querySelector('.cdate').textContent = 'Awarded ' + fmtDate(c.ts);
+      modal.querySelector('.cid').textContent = 'ID · ' + (c.id || '');
+    }
+    function renderCanvas(){
+      var img = modal.querySelector('img'); if(!img || !img.complete || !img.naturalWidth) return null;
+      var W = 1600, H = Math.round(W * img.naturalHeight / img.naturalWidth);
+      var cv = document.createElement('canvas'); cv.width = W; cv.height = H; var x = cv.getContext('2d');
+      x.drawImage(img, 0, 0, W, H);
+      x.textAlign = 'center'; x.textBaseline = 'middle';
+      x.fillStyle = '#132a54'; x.font = '600 ' + Math.round(W*0.055) + 'px "Snell Roundhand","Brush Script MT",cursive';
+      x.fillText(cur.name || 'Your Name', W*0.5, H*0.556);
+      x.fillStyle = '#173056'; x.font = '700 ' + Math.round(W*0.021) + 'px Georgia,serif';
+      x.fillText((cur.title || '').toUpperCase(), W*0.5, H*0.66);
+      x.fillStyle = '#3a4d70'; x.font = 'italic ' + Math.round(W*0.012) + 'px Georgia,serif';
+      x.fillText('Awarded ' + fmtDate(cur.ts), W*0.11, H*0.72);
+      x.font = Math.round(W*0.011) + 'px Georgia,serif';
+      x.fillText('ID · ' + (cur.id || ''), W*0.89, H*0.72);
+      try{ return cv.toDataURL('image/png'); }catch(e){ return null; }
+    }
+    viewBtn.addEventListener('click', function(){ fill(list[+sel.value || 0]); modal.classList.add('show'); });
+    modal.addEventListener('click', function(e){ if(e.target === modal) modal.classList.remove('show'); });
+    modal.querySelector('[data-bcert="close"]').addEventListener('click', function(){ modal.classList.remove('show'); });
+    modal.querySelector('[data-bcert="download"]').addEventListener('click', function(){
+      var url = renderCanvas(); if(!url) return;
+      var a = document.createElement('a'); a.download = 'P2P-Certificate-' + (cur.title||'course').replace(/[^a-z0-9]+/gi,'-').toLowerCase() + '.png'; a.href = url; a.click();
+    });
+    modal.querySelector('[data-bcert="print"]').addEventListener('click', function(){
+      var url = renderCanvas(); if(!url) return;
+      var w = window.open('', '_blank'); if(!w) return;
+      w.document.write('<title>Certificate</title><body style="margin:0"><img src="' + url + '" style="width:100%" onload="window.focus();window.print();"></body>');
+      w.document.close();
+    });
+  })();
 })();

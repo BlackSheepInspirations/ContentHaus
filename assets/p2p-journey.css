@@ -37,13 +37,27 @@
   padding:8px 15px 8px 11px; border:1px solid var(--gstroke); border-radius:30px; background:rgba(216,180,90,.06); transition:.16s;}
 #p2pj .hero-back svg{width:15px; height:15px; stroke:currentColor; fill:none; stroke-width:2;}
 #p2pj .hero-back:hover{color:var(--gold-bright); border-color:var(--gold); background:rgba(216,180,90,.13);}
+#p2pj .hero-cols{display:flex; gap:40px; align-items:center; margin-top:4px;}
+#p2pj .hero-main{flex:1 1 auto; min-width:0;}
+#p2pj .hero-aside{flex:0 0 336px; max-width:336px;}
+@media (max-width:860px){
+  #p2pj .hero-cols{flex-direction:column; align-items:stretch; gap:26px;}
+  #p2pj .hero-aside{flex:none; max-width:none;}
+}
+#p2pj .mindset-moment{position:relative; border:1px solid var(--gstroke); border-radius:18px; padding:24px 22px 22px; background:linear-gradient(160deg, rgba(216,180,90,.09), rgba(9,17,24,.5)); box-shadow:0 14px 36px -22px rgba(216,180,90,.55); overflow:hidden;}
+#p2pj .mindset-moment::before{content:''; position:absolute; top:0; bottom:0; left:0; width:3px; background:linear-gradient(180deg,var(--gold-bright),var(--gold));}
+#p2pj .mm-label{font:700 10px/1 system-ui; letter-spacing:.24em; text-transform:uppercase; color:var(--gold); margin-bottom:14px; display:flex; align-items:center; gap:7px;}
+#p2pj .mm-star{color:var(--gold-bright);}
+#p2pj .mm-text{font:italic 500 19px/1.42 Georgia,serif; color:var(--text); margin:0 0 14px;}
+#p2pj .mm-source{display:block; font:700 12px/1.35 system-ui; letter-spacing:.02em; color:var(--gold-bright); font-style:normal;}
 
 /* sticky nav + stats bar */
 #p2pj .bar{position:relative; z-index:20; display:flex; flex-direction:column; gap:10px;
   margin:14px 14px 0; padding:12px 16px; border-radius:18px;
   background:linear-gradient(180deg,rgba(16,29,38,.96),rgba(9,16,22,.96));
   border:1px solid var(--gstroke); box-shadow:0 10px 30px rgba(0,0,0,.5), inset 0 1px 0 rgba(216,180,90,.12); backdrop-filter:blur(8px);}
-#p2pj .bar-main{display:flex; justify-content:space-between; align-items:center; gap:18px; flex-wrap:wrap;}
+#p2pj .bar-main{display:flex; align-items:center; gap:14px; flex-wrap:nowrap;}
+#p2pj .bar-right{display:flex; align-items:center; gap:10px; flex:none;}
 #p2pj .bar-realms{display:flex; align-items:center; gap:10px; padding-top:10px; border-top:1px solid rgba(216,180,90,.14);}
 #p2pj .realms-scroll{display:flex; align-items:center; gap:8px; overflow-x:auto; flex:1 1 auto; min-width:0; -ms-overflow-style:none; scrollbar-width:none;}
 #p2pj .realms-scroll::-webkit-scrollbar{display:none;}
@@ -61,9 +75,10 @@
 /* JS-driven sticky (CSS position:sticky is disabled by the theme's overflow-x) */
 #p2pj .bar.p2pj-fixed{position:fixed; margin:0; z-index:40;}
 #p2pj .p2pj-barspacer{height:0;}
-#p2pj .nav{display:flex; gap:6px; align-items:center;}
-#p2pj .nav a{display:flex; flex-direction:column; align-items:center; gap:6px; text-decoration:none; cursor:pointer;
-  color:var(--gold); padding:6px 14px; border-radius:12px; transition:.18s; opacity:.72;}
+#p2pj .nav{display:flex; gap:4px; align-items:center; flex:1 1 auto; min-width:0; overflow-x:auto; scrollbar-width:none;}
+#p2pj .nav::-webkit-scrollbar{display:none;}
+#p2pj .nav a{display:flex; flex-direction:column; align-items:center; gap:6px; text-decoration:none; cursor:pointer; flex:none;
+  color:var(--gold); padding:6px 10px; border-radius:12px; transition:.18s; opacity:.72;}
 #p2pj .nav a svg{width:24px; height:24px; stroke:currentColor; fill:none; stroke-width:1.7; transition:.18s;}
 #p2pj .nav a small{font:700 10px/1 system-ui; letter-spacing:.04em;}
 #p2pj .nav a:hover{opacity:1; color:var(--gold-bright);}
@@ -170,6 +185,37 @@
 #p2pj .bqcard p{font:400 13px/1.4 system-ui; color:var(--muted); margin-bottom:12px;}
 #p2pj .bq-go{font:700 12px/1 system-ui; color:var(--gold-bright);}
 /* journal */
+#p2pj .jr-tabs{display:flex; gap:8px; margin-bottom:18px; flex-wrap:wrap;}
+#p2pj .jr-tab{font:700 12px/1 system-ui; letter-spacing:.02em; color:var(--muted); background:rgba(255,255,255,.04); border:1px solid var(--stroke); border-radius:30px; padding:10px 16px; cursor:pointer; transition:.15s;}
+#p2pj .jr-tab:hover{color:var(--text); border-color:var(--gstroke);}
+#p2pj .jr-tab.on{color:#06120e; background:linear-gradient(145deg,#f4e2a6,var(--gold)); border-color:transparent;}
+#p2pj .jr-pane[hidden]{display:none;}
+#p2pj .jr-win .je-date{color:var(--gold-bright);}
+#p2pj .jr-head{display:flex; align-items:flex-start; justify-content:space-between; gap:16px; flex-wrap:wrap;}
+#p2pj .jr-export-all{flex:none; font:700 12px/1 system-ui; color:var(--gold-bright); background:rgba(216,180,90,.1); border:1px solid var(--gstroke); border-radius:30px; padding:10px 16px; cursor:pointer; transition:.15s;}
+#p2pj .jr-export-all:hover{background:rgba(216,180,90,.18);}
+#p2pj .jr-title{width:100%; padding:11px 12px; border-radius:10px; font:700 14px/1 system-ui; color:var(--text); background:#0e1a20; border:1px solid var(--stroke); margin-bottom:12px;}
+#p2pj .jr-toolbar{display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:14px;}
+#p2pj .jr-search{flex:1; min-width:180px; padding:10px 14px; border-radius:30px; font:600 13px/1 system-ui; color:var(--text); background:#0e1a20; border:1px solid var(--stroke);}
+#p2pj .jr-views{display:flex; gap:4px; background:rgba(255,255,255,.04); border:1px solid var(--stroke); border-radius:30px; padding:3px;}
+#p2pj .jr-view{font:700 11px/1 system-ui; color:var(--muted); background:none; border:0; border-radius:30px; padding:8px 13px; cursor:pointer; transition:.15s;}
+#p2pj .jr-view:hover{color:var(--text);}
+#p2pj .jr-view.on{color:#06120e; background:linear-gradient(145deg,#f4e2a6,var(--gold));}
+#p2pj .je-title{font:700 15px/1.25 system-ui; color:var(--gold-bright); margin:2px 0 4px;}
+#p2pj .je-acts{display:flex; gap:6px; flex-wrap:wrap;}
+#p2pj .je-btn{font:700 11px/1 system-ui; color:var(--muted); background:rgba(255,255,255,.05); border:1px solid var(--stroke); border-radius:20px; padding:6px 11px; cursor:pointer; transition:.15s;}
+#p2pj .je-btn:hover{color:var(--text); border-color:var(--gstroke);}
+#p2pj .je-btn.je-restore:hover{color:var(--emerald); border-color:rgba(39,174,110,.5);}
+#p2pj .je-btn.je-del:hover{color:#ff9e9e; border-color:rgba(214,51,51,.45);}
+#p2pj-confirm{position:fixed; inset:0; z-index:210; display:none; align-items:center; justify-content:center; padding:20px; background:rgba(3,7,12,.72); backdrop-filter:blur(3px);}
+#p2pj-confirm.show{display:flex;}
+#p2pj-confirm .cf-card{max-width:360px; width:100%; background:linear-gradient(180deg,#0f1c24,#0a141a); border:1px solid var(--gstroke); border-radius:18px; padding:26px 24px 20px; box-shadow:0 24px 60px rgba(0,0,0,.6);}
+#p2pj-confirm .cf-title{font:700 19px/1.2 Georgia,serif; color:var(--gold-bright); margin-bottom:8px;}
+#p2pj-confirm .cf-msg{font:400 14px/1.5 system-ui; color:var(--muted); margin-bottom:20px;}
+#p2pj-confirm .cf-actions{display:flex; gap:10px; justify-content:flex-end;}
+#p2pj-confirm .cf-cancel{font:700 13px/1 system-ui; color:var(--muted); background:none; border:1px solid var(--stroke); border-radius:11px; padding:11px 16px; cursor:pointer;}
+#p2pj-confirm .cf-cancel:hover{color:var(--text);}
+#p2pj-confirm .cf-ok{font:700 13px/1 system-ui; color:#06120e; background:linear-gradient(145deg,#f4e2a6,var(--gold)); border:0; border-radius:11px; padding:11px 18px; cursor:pointer;}
 #p2pj .jr-compose{background:var(--panel); border:1px solid var(--stroke); border-radius:18px; padding:20px; margin-bottom:22px;}
 #p2pj .jr-lbl{display:block; font:700 10px/1 system-ui; letter-spacing:.16em; text-transform:uppercase; color:var(--gold); margin-bottom:8px;}
 #p2pj .jr-compose select{width:100%; max-width:440px; padding:11px 12px; border-radius:10px; font:600 14px/1 system-ui; color:var(--text); background:#0e1a20; border:1px solid var(--stroke); margin-bottom:12px;}
@@ -190,7 +236,7 @@
 #p2pj .jr-entry .je-text{font:400 14px/1.6 system-ui; color:#cfe0da; white-space:pre-wrap;}
 #p2pj .jr-empty{color:var(--muted); font:400 14px/1.5 system-ui; text-align:center; padding:24px;}
 #p2pj .stats{display:flex; gap:2px; align-items:center;}
-#p2pj .stat{display:flex; flex-direction:column; align-items:center; padding:2px 12px;}
+#p2pj .stat{display:flex; flex-direction:column; align-items:center; padding:2px 9px;}
 /* compact "% of board complete" ring — same --p/percentage the Progress tab's
    own big ring uses (p2pj-ring/p2pj-ringpct), just always visible in the bar */
 #p2pj .ring-mini{position:relative; width:38px; height:38px; border-radius:50%; display:grid; place-items:center;
@@ -200,8 +246,9 @@
 #p2pj .stat b{font:700 19px/1 system-ui; display:flex; align-items:center; gap:6px; color:var(--text);}
 #p2pj .stat b svg{width:19px; height:19px;}
 #p2pj .stat small{font:700 8px/1 system-ui; letter-spacing:.16em; color:var(--muted); margin-top:5px; text-transform:uppercase;}
-#p2pj .level{display:flex; flex-direction:column; align-items:center; gap:5px; margin-left:6px;}
-#p2pj .level .coin{width:44px; height:44px; border-radius:50%; display:grid; place-items:center;
+#p2pj .level{display:flex; flex-direction:column; align-items:center; gap:5px; margin-left:6px; background:none; border:0; cursor:pointer; font-family:inherit; position:relative;}
+#p2pj .level:hover .coin{box-shadow:0 0 16px rgba(216,180,90,.6);}
+#p2pj .level .coin{width:40px; height:40px; border-radius:50%; display:grid; place-items:center;
   background:radial-gradient(circle at 40% 34%, #f4e2a6, #b6892f 70%, #8a641f);
   border:2px solid #f0d584; box-shadow:0 0 16px rgba(216,180,90,.55), inset 0 -3px 6px rgba(0,0,0,.35);}
 #p2pj .level .coin svg{width:22px; height:22px; fill:#5a4212;}
@@ -389,20 +436,34 @@
 #p2pj .is-locked .dir-ico::after{content:'\1F512';}
 #p2pj .is-done .dir-ct{color:var(--muted);}
 
-/* ---- mobile: keep the toolbar compact (nav on one swipeable row) ---- */
+/* ---- badge-earned celebration ---- */
+#p2pj-badgepop{position:fixed; inset:0; z-index:200; display:none; align-items:center; justify-content:center; padding:20px; background:rgba(3,7,12,.74); backdrop-filter:blur(4px);}
+#p2pj-badgepop.show{display:flex;}
+#p2pj-badgepop .bp-card{position:relative; max-width:360px; width:100%; text-align:center; padding:34px 28px 24px; border-radius:22px; background:linear-gradient(180deg,#0f1c24,#0a141a); border:1px solid var(--gstroke); box-shadow:0 24px 70px rgba(0,0,0,.65), 0 0 60px rgba(216,180,90,.16);}
+#p2pj-badgepop .bp-medal{width:78px; height:78px; margin:0 auto 14px; border-radius:50%; display:grid; place-items:center; background:radial-gradient(circle at 40% 30%,#1c2b31,#0a1216); border:2px solid var(--gold); box-shadow:0 0 28px rgba(216,180,90,.55); animation:p2pj-pop .5s cubic-bezier(.2,1.4,.4,1);}
+#p2pj-badgepop .bp-medal svg{width:40px; height:40px; fill:#f4c534; stroke:#b98f1e; stroke-width:1;}
+@keyframes p2pj-pop{0%{transform:scale(.4); opacity:0;}100%{transform:scale(1); opacity:1;}}
+#p2pj-badgepop .bp-eyebrow{font:700 11px/1 system-ui; letter-spacing:.22em; text-transform:uppercase; color:var(--gold); margin-bottom:8px;}
+#p2pj-badgepop .bp-name{font:700 25px/1.12 Georgia,serif; color:var(--gold-bright); margin-bottom:20px;}
+#p2pj-badgepop .bp-actions{display:flex; flex-direction:column; gap:8px;}
+#p2pj-badgepop .bp-view{text-decoration:none; padding:12px; border-radius:12px; font:700 13px/1 system-ui; color:#06120e; background:linear-gradient(145deg,#f4e2a6,var(--gold));}
+#p2pj-badgepop .bp-close{padding:9px; border:0; background:none; color:var(--muted); font:600 13px/1 system-ui; cursor:pointer;}
+#p2pj-badgepop .bp-close:hover{color:var(--text);}
+
+/* ---- mobile: nav on one swipeable row, stats + info on a second row ---- */
 @media (max-width:700px){
   #p2pj .hero{padding:44px 18px 18px;}
-  #p2pj .bar-main{gap:10px 8px;}
-  #p2pj .nav{flex-basis:100%; order:0; flex-wrap:nowrap; overflow-x:auto; justify-content:flex-start; gap:2px; scrollbar-width:none; -webkit-overflow-scrolling:touch;}
-  #p2pj .nav::-webkit-scrollbar{display:none;}
-  #p2pj .nav a{flex:0 0 auto; padding:4px 9px;}
+  #p2pj .bar-main{flex-direction:column; align-items:stretch; gap:10px;}
+  #p2pj .nav{gap:2px; -webkit-overflow-scrolling:touch;}
+  #p2pj .nav a{padding:4px 9px;}
   #p2pj .nav a svg{width:21px; height:21px;}
   #p2pj .nav a small{font-size:9px;}
-  #p2pj .barinfo{order:1; width:34px; height:34px;}
+  #p2pj .bar-right{justify-content:space-between;}
+  #p2pj .barinfo{width:34px; height:34px;}
   #p2pj .barinfo svg{width:19px; height:19px;}
-  #p2pj .stats{order:2; margin-left:auto;}
   #p2pj .stat{padding:2px 7px;}
   #p2pj .stat b{font-size:16px;}
   #p2pj .stat b svg{width:16px; height:16px;}
   #p2pj .stat small{font-size:7.5px; letter-spacing:.1em;}
+  #p2pj .level .coin{width:38px; height:38px;}
 }

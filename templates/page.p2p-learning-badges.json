@@ -245,6 +245,17 @@
             "earned": false
           }
         },
+        "mindset-3": {
+          "type": "badge",
+          "settings": {
+            "group": "Mindset Check",
+            "name": "Mindset III",
+            "req": "Complete your 3rd Mindset Check",
+            "icon": "mind",
+            "color": "c-te",
+            "earned": false
+          }
+        },
         "clear-mind": {
           "type": "badge",
           "settings": {
@@ -278,6 +289,17 @@
             "earned": false
           }
         },
+        "purpose-3": {
+          "type": "badge",
+          "settings": {
+            "group": "Purpose Check",
+            "name": "Purpose III",
+            "req": "Complete your 3rd Purpose Check",
+            "icon": "star",
+            "color": "c-pu",
+            "earned": false
+          }
+        },
         "true-purpose": {
           "type": "badge",
           "settings": {
@@ -306,6 +328,17 @@
             "group": "Heart Check",
             "name": "Heart II",
             "req": "Complete your 2nd Heart Check",
+            "icon": "heart",
+            "color": "c-pk",
+            "earned": false
+          }
+        },
+        "heart-3": {
+          "type": "badge",
+          "settings": {
+            "group": "Heart Check",
+            "name": "Heart III",
+            "req": "Complete your 3rd Heart Check",
             "icon": "heart",
             "color": "c-pk",
             "earned": false
@@ -489,12 +522,15 @@
         "comeback",
         "mindset-1",
         "mindset-2",
+        "mindset-3",
         "clear-mind",
         "purpose-1",
         "purpose-2",
+        "purpose-3",
         "true-purpose",
         "heart-1",
         "heart-2",
+        "heart-3",
         "open-heart",
         "streak-5",
         "streak-10",

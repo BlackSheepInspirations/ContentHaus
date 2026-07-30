@@ -38,11 +38,29 @@
     panels.forEach(function(pn,n){ pn.style.display = n===i ? '' : 'none'; });
     if(window.scrollY>120) window.scrollTo({top:0,behavior:'smooth'});
   }
+  /* badge-earned pop-up — queued on completion, shown after the certificate closes */
+  var bpEl = document.getElementById('p2pp-badgepop'), bpQ = [], BP_SEEN = 'p2p_badges_seen';
+  var bpName = bpEl ? bpEl.querySelector('.bp-name') : null;
+  function bpLoadSeen(){ try{ return JSON.parse(localStorage.getItem(BP_SEEN) || '[]') || []; }catch(e){ return []; } }
+  function bpSaveSeen(a){ try{ localStorage.setItem(BP_SEEN, JSON.stringify(a)); }catch(e){} }
+  function bpCollect(){
+    if(!window.P2P || !window.P2P.earnedSet) return;
+    var earned = window.P2P.earnedSet() || [], all = bpLoadSeen().slice();
+    earned.forEach(function(n){ if(all.indexOf(n) === -1){ bpQ.push(n); all.push(n); } });
+    bpSaveSeen(all);
+  }
+  function bpNext(){ if(!bpEl) return; if(!bpQ.length){ bpEl.classList.remove('show'); return; } bpName.textContent = bpQ.shift(); bpEl.classList.add('show'); }
+  if(bpEl){
+    var bpc = bpEl.querySelector('.bp-close'); if(bpc) bpc.addEventListener('click', bpNext);
+    bpEl.addEventListener('click', function(e){ if(e.target === bpEl) bpNext(); });
+  }
   function mark(i){
     if(doneSet[i]) delete doneSet[i]; else doneSet[i]=1;
     saveDone(); refresh();
     if(doneCount()===total){
       if(window.P2P) window.P2P.completeCourse(course); // First Steps / Finding Your Current
+      recordCert(); // save the certificate so it can be re-viewed in Milestones
+      bpCollect(); // capture newly-earned badges to celebrate after the certificate
       setTimeout(celebrate, 350);
     }
   }
@@ -70,11 +88,14 @@
     if(n) n.textContent = userName || 'Your Name';
     if(c) c.textContent = courseTitle;
     if(d){ var dt=new Date(); d.textContent='Awarded '+dt.toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'}); }
-    if(id){ id.textContent='ID · '+ (root.getAttribute('data-certid') || genId()); }
+    if(id){ id.textContent='ID · '+ certIdFor(); }
   }
   function genId(){ var s='P2P-'+new Date().getFullYear()+'-'; for(var i=0;i<6;i++) s+='ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[(Math.random()*32)|0]; return s; }
+  function storedCerts(){ try{ return JSON.parse(localStorage.getItem('p2p_certificates') || '{}') || {}; }catch(e){ return {}; } }
+  function certIdFor(){ var c=storedCerts()[course]; return (c && c.id) || root.getAttribute('data-certid') || genId(); }
+  function recordCert(){ var certs=storedCerts(); if(!certs[course]){ certs[course]={ handle:course, title:courseTitle, name:userName||'', id:(root.getAttribute('data-certid')||genId()), ts:Date.now() }; try{ localStorage.setItem('p2p_certificates', JSON.stringify(certs)); }catch(e){} } }
   function showCert(){ fillCert(); certEl.classList.add('show'); }
-  function hideCert(){ certEl.classList.remove('show'); }
+  function hideCert(){ certEl.classList.remove('show'); if(bpQ && bpQ.length) setTimeout(bpNext, 250); }
   function downloadCert(){
     var img=certEl.querySelector('img'); if(!img) return;
     var W=1600, H=Math.round(W*img.naturalHeight/img.naturalWidth);
@@ -88,7 +109,7 @@
     x.fillStyle='#3a4d70'; x.font='italic '+Math.round(W*0.012)+'px Georgia,serif';
     var dt=new Date(); x.fillText('Awarded '+dt.toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'}), W*0.11, H*0.72);
     x.font=Math.round(W*0.011)+'px Georgia,serif';
-    x.fillText('ID · '+(root.getAttribute('data-certid')||''), W*0.89, H*0.72);
+    x.fillText('ID · '+certIdFor(), W*0.89, H*0.72);
     var a=document.createElement('a'); a.download='P2P-Certificate.png'; a.href=cv.toDataURL('image/png'); a.click();
     if(window.P2P) window.P2P.earnBadge('Certified'); // downloaded your first certificate
   }
