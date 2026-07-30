@@ -2,38 +2,44 @@
 
 > Rewrites the three thin intro moments so people understand the VALUE before they invest.
 > Implemented during Phase 2b (edits to `brand-haus-ui.js` renderArchetypeGuideStep /
-> renderWelcomeStep, and `brand-haus-pathintake.js`'s intro). Draft — tune tone freely.
-> Voice: warm, plain, confident; leans on the "you're the spark / your fingerprint" theme.
+> renderWelcomeStep, and `brand-haus-pathintake.js`'s intro). Copy/structure only — no
+> engine/scoring changes.
+>
+> **Voice: quiet authority.** Warm and reassuring, but unmistakably someone who knows this
+> craft. Calm, plain, precise. No hype, no exclamation, no "trust → sales" cadence. It
+> reassures by being clear, not by selling. Leans lightly on the "your fingerprint / your
+> spark" theme without leaning on it.
 
 ---
 
 ## Screen 1 — The Archetype Guide  (make it an actual guide)
 
 **Eyebrow:** Before you begin
-**Title:** Why every strong brand starts with a **Brand DNA**
+**Title:** Every strong brand starts with a **Brand DNA**
 
 **Lede:**
-Most founders build backwards — they pick colors, a logo, a name, and *hope* it adds up to
-something. The brands you admire did the opposite: they got clear on *who they are* first, then
-made every choice point the same direction. That clarity is what makes a brand feel confident,
-consistent, and impossible to forget. That's what this is.
+It's tempting to start with the colors, the logo, the name — and hope it all adds up to something.
+It rarely does. The brands you trust worked the other way around: they got clear on who they are
+first, and let every choice follow from that. That clarity is quiet, but you feel it in everything
+they make. That's what we'll find here — before you create a single thing.
 
-**Section — What's an archetype (and why 11)?**
-Every founder who finishes this assessment lands on one of **11 Brand DNA archetypes** — research-based
-identities that capture your brand's natural way of showing up. It isn't a box; it's a compass. Knowing
-yours means you stop guessing and start deciding with intent.
-*(the interactive wheel stays here — "Explore all 11: click any archetype to see its name and one-word identity.")*
+**Section — What an archetype is (and why 11)**
+When you finish, you'll land on one of **11 Brand DNA archetypes** — identities, drawn from decades of
+brand research, that describe how your brand naturally shows up in the world. Think of it less as a box
+and more as a compass: once you know yours, the hundred small decisions ahead get a lot easier.
+*(interactive wheel stays — "Explore all 11 — click any archetype to see its name and its one word.")*
 
-**Section — What you'll walk away with, and why it matters**
-When you finish, you get three deliverables — on screen and downloadable:
-- **Blueprint Snapshot — who you are at a glance.** Your north star. Pin it up; every decision checks against it.
-- **Brand DNA Report — the *why* behind you.** The psychology and patterns that shape your brand, so you understand yourself well enough to stay consistent under pressure.
-- **Brand Playbook™ — your decision compass.** Your colors, voice, mission, and values, spelled out — the foundation for every logo, product, message, page, and campaign you build next.
+**Section — What you'll leave with**
+Three things, on screen and ready to download:
+- **Blueprint Snapshot** — who you are, at a glance. The version you keep close and check your choices against.
+- **Brand DNA Report** — the reasoning underneath it: the patterns and psychology behind your result, so it makes sense, and so you can hold to it when you're unsure.
+- **Brand Playbook™** — the working document: your colors, voice, mission, and values, laid out as the reference for every logo, product, message, page, and campaign you build from here.
 
-**Section — Why this is step one (not a nice-to-have)**
-Consistency is what turns a business into a *brand* — and a brand into trust, and trust into sales.
-This Blueprint doesn't just live here: it saves to your Brand Vault and flows into every other Haus,
-so your Graphics, Content, Marketing, and Growth work all sound and look like *you*, automatically.
+**Section — Why this comes first**
+Consistency is the quiet thing that separates a business from a brand. Getting clear now means you're
+not re-deciding who you are every time you sit down to create. And it doesn't stay here: your Blueprint
+saves to your Brand Vault and carries into every other Haus, so your graphics, content, marketing, and
+growth work already sound and look like you — without you having to explain it twice.
 
 **Button:** Continue →
 
@@ -45,18 +51,17 @@ so your Graphics, Content, Marketing, and Growth work all sound and look like *y
 **Title:** Let's find your **Brand DNA Blueprint™**
 
 **Body 1:**
-Over the next few minutes you'll answer a series of questions about how you think, what you value,
-and what you're building. There are no right answers — this is a conversation, not a quiz. Just be honest;
-the more *you* it is, the more useful it is.
+Over the next few minutes, you'll answer some questions about how you think, what you value, and what
+you're building. There are no right answers, and it isn't a test — it's a conversation. The more honest
+it is, the more it's worth to you.
 
-**Body 2 (set expectations):**
-- Takes about **10–15 minutes** — and you can pause; your progress is saved.
-- At the end you'll have a complete picture of your brand's natural identity: your **colors, voice,
-  mission, and values.**
-- It all saves to your **Brand Vault** and ports to every Haus, so you only define this once.
+**Body 2 — what to expect:**
+- About **10–15 minutes**, and you can stop anytime; your place is saved.
+- You'll come away with a clear picture of your brand's natural identity — your **colors, voice, mission, and values.**
+- It saves to your **Brand Vault** and carries into every Haus, so this is the one time you'll need to define it.
 
 **Reassurance beat:**
-You don't need to have it all figured out. That's the whole point — this helps you *find* it.
+You don't need to have this figured out already. Finding it is what we're here to do.
 
 **Button:** Begin →
 
@@ -68,23 +73,22 @@ You don't need to have it all figured out. That's the whole point — this helps
 
 **Title:** Find Your Direction
 **Lede:**
-You know your brand DNA — now let's aim it. This is a short, **7–8 question** check-in that turns a
-vibe ("I want to make *something*…") into a real, specific direction you can actually start building.
+You know your brand DNA — now let's point it somewhere. This is a short check-in, **7–8 questions**, that
+takes a general sense of "I want to make something" and turns it into a direction specific enough to start on.
 
 **Why it matters:**
-Direction before building saves you months. Most people stall because the path is fuzzy — this makes it
-concrete: what you're making, who it's for, and the first move.
+A little clarity now saves a lot of second-guessing later. Most people stall not from lack of effort but
+from a fuzzy path — this makes it concrete: what you're making, who it's for, and where to begin.
 
 **What you get:**
-At the end, your answers become a **starting brief** you can hand straight to **Frank**, your AI Creative
-Director in the Idea Haus, to kick off a real back-and-forth about *what* to build — then carry into the
-build Hauses.
+Your answers become a **starting brief** you can take straight to **Frank**, your AI Creative Director in
+the Idea Haus, for a real back-and-forth about what to build — and then carry into the build Hauses.
 
 **Buttons/forks:** (keep the existing creator / product-shop fork cards)
 
 ---
 
 ## Notes
-- Keep the beautiful wheel and the existing 3-deliverable results screen exactly as-is.
-- These are copy/structure changes to the intro steps only — no engine/scoring changes.
+- Keep the wheel and the existing 3-deliverable results screen exactly as-is.
+- Intro copy/structure only — no engine or scoring changes.
 - Verify visually (preview) before shipping — part of Phase 2b.
