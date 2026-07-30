@@ -5,19 +5,23 @@
     <h1>Your Operating System<span class="p2pos-name">, Andrea</span></h1>
     <p class="p2pos-intro">Your home base — everything you own, in one place. Jump back into your journey, open your tools, and keep building.</p>
   </header>
-  <section class="p2pos-journey">
-    <div class="pj-copy">
-      <div class="pj-kicker">✦ Learning Journey</div>
-      <h2>Pick up where you left off</h2>
-      <div class="pj-stats">
-        <div class="pj-stat"><b class="p2pos-points">1180</b><small>Points</small></div>
-        <div class="pj-stat"><b class="p2pos-badges">6</b><small>Badges</small></div>
-        <div class="pj-stat"><b class="p2pos-streak">6</b><small>Day streak</small></div>
-        <div class="pj-stat"><b class="p2pos-tier">Starter</b><small>Merit tier</small></div>
-      </div>
+  <section class="p2pos-dash">
+    <div class="pd-head">
+      <div><div class="pj-kicker">✦ Your Learning Journey</div><h2>Pick up where you left off</h2></div>
       <a class="pj-go" href="#">Continue your journey →</a>
     </div>
-    <div class="pj-art"><div class="pj-aurora"></div><svg viewBox="0 0 24 24"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><path d="M9 4v14M15 6v14"/></svg></div>
+    <div class="pd-body">
+      <div class="pd-metrics">
+        <div class="pd-ring" style="--p:36"><div class="pd-ringin"><b class="p2pos-ringpct">36%</b><small>Complete</small></div></div>
+        <div class="pd-stats">
+          <div class="pd-chip"><span class="pd-ico">⭐</span><span class="pd-val"><b class="p2pos-points">1180</b><small>Points</small></span></div>
+          <div class="pd-chip"><span class="pd-ico">🏅</span><span class="pd-val"><b class="p2pos-badges">6</b><small>Badges</small></span></div>
+          <div class="pd-chip"><span class="pd-ico">🔥</span><span class="pd-val"><b class="p2pos-streak">6</b><small>Day streak</small></span></div>
+          <div class="pd-chip"><span class="pd-ico">✦</span><span class="pd-val"><b class="p2pos-tier">Starter</b><small>Merit tier</small></span></div>
+        </div>
+      </div>
+      <aside class="pd-moment"><div class="mm-label"><span class="mm-star">✦</span> Daily <span class="mm-grad">Mindset</span> Moment</div><blockquote class="mm-text">“I am exactly one honest effort away from momentum.”</blockquote><cite class="mm-source">Affirmation</cite></aside>
+    </div>
   </section>
   <h3 class="p2pos-secttl">Your tools</h3>
   <div class="p2pos-grid">
@@ -45,19 +49,30 @@
   #p2pos .p2pos-hero h1{font:700 clamp(28px,5vw,44px)/1.1 Georgia,serif;margin:0 0 10px;}
   #p2pos .p2pos-name{background:var(--aurora);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:p2pos-shift 18s linear infinite;}
   #p2pos .p2pos-intro{font:400 16px/1.6 system-ui;color:#c6d6d0;max-width:640px;margin:0;}
-  #p2pos .p2pos-journey{display:grid;grid-template-columns:1fr 200px;gap:20px;align-items:center;margin:0 0 30px;
-    border:1px solid var(--gstroke);border-radius:20px;padding:26px;background:linear-gradient(120deg,rgba(143,111,214,.14),rgba(57,197,192,.08));overflow:hidden;position:relative;}
   #p2pos .pj-kicker{font:700 11px/1 system-ui;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:8px;}
-  #p2pos .p2pos-journey h2{font:700 24px/1.15 Georgia,serif;margin:0 0 14px;}
-  #p2pos .pj-stats{display:flex;flex-wrap:wrap;gap:22px;margin:0 0 18px;}
-  #p2pos .pj-stat b{display:block;font:800 22px/1 system-ui;color:var(--gold-bright);}
-  #p2pos .pj-stat .p2pos-tier{font:700 18px/1.1 Georgia,serif;background:var(--aurora);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:p2pos-shift 18s linear infinite;}
-  #p2pos .pj-stat small{display:block;margin-top:5px;font:600 10.5px/1 system-ui;letter-spacing:.02em;text-transform:uppercase;color:var(--muted);}
-  #p2pos .pj-go{display:inline-block;padding:13px 24px;border-radius:12px;font:800 14px/1 system-ui;color:#0a1410;text-decoration:none;
+  #p2pos .pj-go{display:inline-block;padding:13px 24px;border-radius:12px;font:800 14px/1 system-ui;color:#0a1410;text-decoration:none;white-space:nowrap;
     background:var(--aurora);background-size:300% 100%;animation:p2pos-shift 18s linear infinite;box-shadow:0 12px 30px rgba(0,0,0,.3);}
-  #p2pos .pj-art{position:relative;display:grid;place-items:center;height:130px;}
-  #p2pos .pj-art svg{width:64px;height:64px;fill:none;stroke:var(--gold-bright);stroke-width:1.3;position:relative;z-index:2;}
-  #p2pos .pj-aurora{position:absolute;inset:0;background:radial-gradient(circle at 50% 45%,rgba(244,197,52,.35),transparent 65%);filter:blur(8px);}
+  #p2pos .p2pos-dash{margin:0 0 30px;border:1px solid var(--gstroke);border-radius:20px;padding:24px 26px;background:linear-gradient(120deg,rgba(143,111,214,.14),rgba(57,197,192,.08));}
+  #p2pos .pd-head{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:20px;}
+  #p2pos .p2pos-dash h2{font:700 24px/1.15 Georgia,serif;margin:0;}
+  #p2pos .pd-body{display:grid;grid-template-columns:1fr 320px;gap:22px;align-items:stretch;}
+  #p2pos .pd-metrics{display:flex;align-items:center;gap:22px;flex-wrap:wrap;}
+  #p2pos .pd-ring{flex:0 0 108px;width:108px;height:108px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(from -90deg,#39c5c0,#8f6fd6,#f4c534 calc(var(--p)*1%),rgba(255,255,255,.08) calc(var(--p)*1%));}
+  #p2pos .pd-ringin{width:84px;height:84px;border-radius:50%;background:#0b1620;display:grid;place-items:center;text-align:center;}
+  #p2pos .pd-ringin b{font:800 21px/1 system-ui;color:var(--gold-bright);}
+  #p2pos .pd-ringin small{display:block;margin-top:3px;font:600 9px/1 system-ui;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);}
+  #p2pos .pd-stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;flex:1;min-width:210px;}
+  #p2pos .pd-chip{display:flex;align-items:center;gap:11px;padding:12px 14px;border:1px solid var(--stroke);border-radius:13px;background:rgba(255,255,255,.03);}
+  #p2pos .pd-ico{font-size:18px;line-height:1;}
+  #p2pos .pd-val b{display:block;font:800 19px/1 system-ui;color:var(--gold-bright);}
+  #p2pos .pd-val .p2pos-tier{font:700 15px/1.1 Georgia,serif;background:var(--aurora);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:p2pos-shift 18s linear infinite;}
+  #p2pos .pd-val small{display:block;margin-top:4px;font:600 9.5px/1 system-ui;letter-spacing:.03em;text-transform:uppercase;color:var(--muted);}
+  #p2pos .pd-moment{border:1px solid var(--gstroke);border-radius:16px;padding:18px 20px;background:rgba(9,17,24,.42);display:flex;flex-direction:column;justify-content:center;}
+  #p2pos .pd-moment .mm-label{font:700 10.5px/1.2 system-ui;letter-spacing:.05em;text-transform:uppercase;color:var(--gold);margin-bottom:10px;}
+  #p2pos .pd-moment .mm-star{color:var(--gold-bright);}
+  #p2pos .pd-moment .mm-grad{background:var(--aurora);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:p2pos-shift 18s linear infinite;}
+  #p2pos .pd-moment .mm-text{font:italic 400 15px/1.55 Georgia,serif;color:var(--text);margin:0 0 10px;}
+  #p2pos .pd-moment .mm-source{font:600 11.5px/1.3 system-ui;color:var(--muted);font-style:normal;}
   #p2pos .p2pos-secttl{font:700 13px/1 system-ui;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:26px 0 14px;}
   #p2pos .p2pos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;}
   #p2pos .p2pos-card{display:flex;align-items:center;gap:14px;padding:18px;border:1px solid var(--stroke);border-radius:16px;text-decoration:none;color:var(--text);

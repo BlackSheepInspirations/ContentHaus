@@ -14,6 +14,7 @@
       "settings": {
         "show_journey": true,
         "show_stats": true,
+        "show_moment": true,
         "journey_access_tag": "p2p-learning",
         "journey_url": "/pages/p2p-learning",
         "tutorial_url": "/pages/p2p-tutorial",
