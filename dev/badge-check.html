@@ -1,0 +1,32 @@
+<!doctype html><html><head><meta charset="utf-8">
+<style>body{margin:0;background:#04070a;color:#dbe7e2;font:14px/1.6 system-ui;padding:30px;}
+h2{color:#f4c534;} .ok{color:#39c5c0;} pre{background:#0f1c24;padding:16px;border-radius:10px;border:1px solid #1f3540;white-space:pre-wrap;}</style>
+</head><body>
+<h2>Badge auto-award reconcile test</h2>
+<p>Seeds: all Realm-1 main courses + <code>grows</code> + <code>rooted</code>. Expected badges:
+<span class="ok">Made it to Shore, RAFT Master, GROWS Master, ROOTED Master</span> (no capstone — only 1 realm cleared).</p>
+<pre id="out">running…</pre>
+
+<script>
+  // 1) seed completed courses BEFORE the engine loads (engine reconciles on load)
+  var seed = ['welcome-aboard','raft','finding-your-lane','protecting-what-you-make',
+              'storefront-essentials','psychology-behind-a-purchase','show-up-your-way', // Realm 1 main
+              'grows','rooted']; // framework anchors in other realms
+  localStorage.setItem('p2p_courses_done', JSON.stringify(seed));
+  localStorage.removeItem('p2p_badges_earned'); // clean slate for the test
+</script>
+<script src="../assets/p2p-journey-map.js"></script>
+<script src="../assets/p2p-progress.js"></script>
+<script>
+  // 2) read what the engine awarded
+  var earned = (window.P2P && window.P2P.earnedSet) ? window.P2P.earnedSet() : [];
+  var expect = ['Made it to Shore','RAFT Master','GROWS Master','ROOTED Master'];
+  var missing = expect.filter(function(n){ return earned.indexOf(n) === -1; });
+  var unexpectedRealm = ['Reached Freedom','Through the Thicket','In Full Bloom','Across the Fields','ROOTED to Thrive','Every Path Walked']
+    .filter(function(n){ return earned.indexOf(n) !== -1; });
+  document.getElementById('out').textContent =
+    'earnedSet(): ' + JSON.stringify(earned, null, 2) +
+    '\n\nExpected present: ' + (missing.length ? 'MISSING ' + missing.join(', ') : 'ALL PRESENT ✓') +
+    '\nShould NOT be present yet: ' + (unexpectedRealm.length ? 'WRONGLY AWARDED ' + unexpectedRealm.join(', ') : 'none ✓');
+</script>
+</body></html>

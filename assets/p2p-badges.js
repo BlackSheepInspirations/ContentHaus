@@ -38,6 +38,7 @@
   /* apply badges the progress engine auto-earned (streaks, Trail Explorer,
      Comeback, …), then refresh the counts + live streak before we celebrate. */
   if(window.P2P){
+    if(window.P2P.reconcileMapBadges) window.P2P.reconcileMapBadges(); // award realm/framework badges if the map is on this page
     var auto = window.P2P.earnedSet();
     root.querySelectorAll('.badge').forEach(function(b){
       var nm = (b.querySelector('.name') || {}).textContent || '';
@@ -48,7 +49,7 @@
       }
     });
     // Capstone — once all five realm badges are earned, "Reached Freedom" lights up
-    var REALMS = ['Open Water Cleared', 'Element Forest Cleared', 'Desert Blooms Cleared', 'Golden Harvest Cleared', 'Evergreen Cleared'];
+    var REALMS = ['Made it to Shore', 'Through the Thicket', 'In Full Bloom', 'Across the Fields', 'ROOTED to Thrive'];
     var earnedNow = {};
     root.querySelectorAll('.badge.earned .name').forEach(function(n){ earnedNow[n.textContent] = 1; });
     if(REALMS.every(function(r){ return earnedNow[r]; })){

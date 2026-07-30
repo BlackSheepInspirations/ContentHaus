@@ -200,8 +200,31 @@ window.P2P = (function(){
     return get(K.courses, []).indexOf(slug) !== -1;
   }
 
-  var current = tick(); // any P2P page load counts as showing up today
-  checkJournal();       // reconcile journal badges on every load
+  /* ---- auto-award realm / framework / capstone badges from the canonical map ----
+     Runs wherever window.P2P_MAP is present (the journey page). A realm is "cleared"
+     when its Main (non-offshoot) courses are all done; Framework Masters map to the
+     anchor course handle; "Reached Freedom" once all five realm badges are earned;
+     "Every Path Walked" once every course (offshoots included) is done. Idempotent. */
+  var REALM_BADGES = { 1:'Made it to Shore', 2:'Through the Thicket', 3:'In Full Bloom', 4:'Across the Fields', 5:'ROOTED to Thrive' };
+  var FRAMEWORK_BADGES = { raft:'RAFT Master', grows:'GROWS Master', rooted:'ROOTED Master' };
+  function reconcileMapBadges(){
+    var map = window.P2P_MAP; if(!map || !map.length) return;
+    var realmsCleared = 0, allCoursesDone = true;
+    map.forEach(function(realm){
+      var main = (realm.courses || []).filter(function(c){ return !c.o; });
+      var cleared = main.length > 0 && main.every(function(c){ return isCourseDone(c.h); });
+      if(cleared && REALM_BADGES[realm.n]) earnBadge(REALM_BADGES[realm.n]);
+      if(cleared) realmsCleared++;
+      (realm.courses || []).forEach(function(c){ if(!isCourseDone(c.h)) allCoursesDone = false; });
+    });
+    Object.keys(FRAMEWORK_BADGES).forEach(function(h){ if(isCourseDone(h)) earnBadge(FRAMEWORK_BADGES[h]); });
+    if(realmsCleared >= 5) earnBadge('Reached Freedom');   // capstone
+    if(allCoursesDone) earnBadge('Every Path Walked');     // completionist (incl. offshoots)
+  }
+
+  var current = tick();     // any P2P page load counts as showing up today
+  checkJournal();           // reconcile journal badges on every load
+  reconcileMapBadges();     // reconcile realm/framework/capstone badges (where the map is loaded)
 
   return {
     streak: function(){ return get(K.streak, { last:today(), count:1, longest:1 }); },
@@ -210,6 +233,7 @@ window.P2P = (function(){
     earnBadge: earnBadge,
     earnedSet: earnedSet,
     checkJournal: checkJournal,
+    reconcileMapBadges: reconcileMapBadges,
     addJournalPoint: addJournalPoint,
     completeCourse: completeCourse,
     isCourseDone: isCourseDone,
