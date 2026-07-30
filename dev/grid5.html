@@ -1,0 +1,39 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+body{margin:0;background:#0a0a0a;font-family:system-ui;}
+.wrap{position:relative;width:560px;margin:0 auto;}
+.wrap img{width:560px;display:block;}
+.grid{position:absolute;inset:0;pointer-events:none;}
+.gl{position:absolute;background:rgba(120,200,255,.16);}
+.gl.med{background:rgba(120,200,255,.34);}
+.gl.major{background:rgba(255,220,120,.7);}
+.glx{width:1px;top:0;bottom:0;}
+.gly{height:1px;left:0;right:0;}
+.lab{position:absolute;font:700 9px/1 monospace;color:#7fe3ff;text-shadow:0 1px 2px #000;}
+.labx{top:2px;transform:translateX(-50%);}
+.laby{left:2px;transform:translateY(-50%);}
+#readout{position:fixed;top:8px;left:8px;background:#000c;color:#7fe3ff;font:700 15px monospace;padding:8px 12px;border-radius:8px;z-index:99;}
+#log{position:fixed;top:8px;right:8px;width:180px;max-height:92vh;overflow:auto;background:#000c;color:#cfe;font:600 11px/1.5 monospace;padding:8px 10px;border-radius:8px;z-index:99;}
+</style></head><body>
+<div id="readout">click board → x, y (click adds to log →)</div>
+<div id="log"><b>clicks</b><br></div>
+<div class="wrap" id="wrap">
+<img src="../assets/p2p-journey-board-evergreens.jpg" alt="board">
+<div class="grid" id="grid"></div>
+</div>
+<script>
+var grid=document.getElementById('grid');
+for(var i=0;i<=100;i+=2){
+  var major=(i%10===0), med=(i%10===5), cls=major?' major':(med?' med':'');
+  var vx=document.createElement('div');vx.className='gl glx'+cls;vx.style.left=i+'%';grid.appendChild(vx);
+  var vy=document.createElement('div');vy.className='gl gly'+cls;vy.style.top=i+'%';grid.appendChild(vy);
+  if(major){var lx=document.createElement('div');lx.className='lab labx';lx.style.left=i+'%';lx.textContent=i;grid.appendChild(lx);
+    var ly=document.createElement('div');ly.className='lab laby';ly.style.top=i+'%';ly.textContent=i;grid.appendChild(ly);}
+}
+var log=document.getElementById('log');
+document.getElementById('wrap').addEventListener('click',function(e){var r=this.getBoundingClientRect();
+  var x=((e.clientX-r.left)/r.width*100).toFixed(1), y=((e.clientY-r.top)/r.height*100).toFixed(1);
+  document.getElementById('readout').textContent='x '+x+'   y '+y;
+  log.insertAdjacentHTML('beforeend', x+', '+y+'<br>');
+});
+</script>
+</body></html>

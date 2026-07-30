@@ -41,6 +41,7 @@
   <div class="wrap">
 
     <header class="hero">
+      {%- if section.settings.os_url != blank -%}<a class="hero-back" href="{{ section.settings.os_url }}"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>{{ section.settings.os_label | default: 'P2P Operating System' }}</a>{%- endif -%}
       {%- if section.settings.eyebrow != blank -%}<div class="eyebrow">{{ section.settings.eyebrow }}</div>{%- endif -%}
       <h1>{{ section.settings.title_pre }}<span class="two">{{ section.settings.title_mid }}</span>{{ section.settings.title_post }}</h1>
       {%- if section.settings.title_sub != blank -%}<div class="ttl-sub">{{ section.settings.title_sub }}</div>{%- endif -%}
@@ -54,6 +55,7 @@
       <div class="bar-main">
       <nav class="nav">
         <a class="on" href="#" data-panel="journey" data-tip="Your map — courses, signs &amp; side-quests"><svg viewBox="0 0 24 24"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><path d="M9 4v14M15 6v14"/></svg><small>Journey Map</small></a>
+        <a href="#" data-panel="directory" data-tip="Jump straight to any course, across every realm"><svg viewBox="0 0 24 24"><path d="M4 5h16M4 12h16M4 19h16" stroke-linecap="round"/><circle cx="4" cy="5" r="0.4"/></svg><small>All Courses</small></a>
         <a href="#" data-panel="progress" data-tip="Your points, badges &amp; streaks"><svg viewBox="0 0 24 24"><path d="M4 20V12M9.5 20V6M15 20v-9M20.5 20V8"/><path d="M3 20h18"/></svg><small>Progress</small></a>
         <a href="#" data-panel="bonuses" data-tip="Side-quests: Mindset, Purpose &amp; Heart"><svg viewBox="0 0 24 24"><rect x="3.5" y="9" width="17" height="11" rx="1.2"/><path d="M2.5 9h19v3.4h-19z"/><path d="M12 9v11M12 9c-3.4-5.5-7.4-1.2-3 .6M12 9c3.4-5.5 7.4-1.2 3 .6"/></svg><small>Bonuses</small></a>
         <a href="{{ section.settings.milestones_url | default: '/pages/p2p-badges' }}" data-tip="Badges you've earned"><svg viewBox="0 0 24 24"><path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.9 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/></svg><small>Milestones</small></a>
@@ -72,7 +74,7 @@
       <div class="bar-realms">
         <div class="realms-scroll">
         <span class="brlbl">Realms</span>
-        {%- assign defnames = 'The Shoreline,Element Forest,Desert Blooms,Golden Harvest,The Evergreens' | split: ',' -%}
+        {%- assign defnames = 'Open Water,Element Forest,Desert Blooms,Golden Harvest,Evergreen' | split: ',' -%}
         {%- assign cur = section.settings.current_realm | default: 1 -%}
         {%- for r in (1..5) -%}
           {%- assign kn = 'realm_' | append: r | append: '_name' -%}
@@ -108,13 +110,15 @@
         <img class="bg" src="{{ 'p2p-journey-board-desertblooms.jpg' | asset_url }}" alt="{{ section.settings.journey_name | default: 'Purpose 2 Profit Learning Journey' | escape }} map" loading="eager" />
       {%- elsif section.settings.current_realm == 4 -%}
         <img class="bg" src="{{ 'p2p-journey-board-goldenharvest.jpg' | asset_url }}" alt="{{ section.settings.journey_name | default: 'Purpose 2 Profit Learning Journey' | escape }} map" loading="eager" />
+      {%- elsif section.settings.current_realm == 5 -%}
+        <img class="bg" src="{{ 'p2p-journey-board-evergreens.jpg' | asset_url }}" alt="{{ section.settings.journey_name | default: 'Purpose 2 Profit Learning Journey' | escape }} map" loading="eager" />
       {%- else -%}
         <img class="bg" src="{{ 'p2p-journey-board.jpg' | asset_url }}" alt="{{ section.settings.journey_name | default: 'Purpose 2 Profit Learning Journey' | escape }} map" loading="eager" />
       {%- endif -%}
 
       {%- comment -%} "Your Journey Begins Here" — Realm 1 only (opens onboarding) {%- endcomment -%}
       {%- if section.settings.current_realm == 1 -%}
-        <button class="hs" style="left:36.8%; top:10%; width:22%; height:9%" data-begin data-title="Your Journey Begins Here"></button>
+        <button class="hs" style="left:36.6%; top:9.6%; width:22%; height:9%" data-begin data-title="Your Journey Begins Here"></button>
       {%- endif -%}
 
       {%- comment -%} Main / Offshoot / Check nodes — from section blocks. Lock state, done state,
@@ -176,6 +180,12 @@
       </div>
     </div>
 
+    {%- comment -%} ---- COURSE DIRECTORY PANEL (cross-realm jump-to-course index) ---- {%- endcomment -%}
+    <div class="panel" data-panel="directory">
+      <div class="pnl-head"><h2>All Courses</h2><p>Every course across all five realms. Jump straight to any one — no need to remember where it lives on the map.</p></div>
+      <div class="p2pj-dir" data-current-realm="{{ section.settings.current_realm | default: 1 }}"></div>
+    </div>
+
     {%- comment -%} ---- BONUSES PANEL (Checks — non-gating pulse checks) ---- {%- endcomment -%}
     <div class="panel" data-panel="bonuses">
       <div class="pnl-head"><h2>Bonus Checks</h2><p>Optional pulse checks to keep you steady between courses — never locked.</p></div>
@@ -198,11 +208,15 @@
         <label class="jr-lbl" for="p2pj-jr-prompt">Reflect on…</label>
         <select id="p2pj-jr-prompt">
           <option value="">Free write</option>
-          <option>What's one thing I'm taking from this?</option>
-          <option>Where did I feel resistance — and why?</option>
-          <option>What does my Founder Fingerprint look like today?</option>
+          <option>What's one thing I'm taking from this today?</option>
+          <option>Where did I feel resistance today, and why?</option>
+          <option>Where did my Fingerprint show up today?</option>
           <option>What's my next small, obvious step?</option>
           <option>What am I proud of right now?</option>
+          <option>Does what I'm building still feel like mine?</option>
+          <option>What's one relationship I could deepen — instead of one more thing I could launch?</option>
+          <option>What's one thing I'm doing "just because" — and can I let it go?</option>
+          <option>What would my future self thank me for doing today?</option>
         </select>
         <textarea id="p2pj-jr-text" rows="5" placeholder="Write freely…"></textarea>
         <div class="jr-actions">
@@ -235,7 +249,8 @@
   </div>
 
   {%- if has_access -%}
-  {%- comment -%} ---- WELCOME POP-UP ---- {%- endcomment -%}
+  {%- comment -%} ---- WELCOME POP-UP (Realm 1 / Open Water only) ---- {%- endcomment -%}
+  {%- if section.settings.current_realm == 1 -%}
   <div id="p2pj-welcome">
     <div class="wc">
       <span class="wx" id="p2pj-wx">✕</span>
@@ -246,6 +261,7 @@
       <label class="wchk"><input type="checkbox" id="p2pj-wdont"> Don't show this again</label>
     </div>
   </div>
+  {%- endif -%}
 
   {%- comment -%} ---- INFO MODAL ---- {%- endcomment -%}
   <div id="p2pj-modal">
@@ -374,7 +390,7 @@
           <li><b>Don't skip your bonus checkpoints.</b> Mindset, Purpose, and Heart Checks help you thrive and stay on track between courses.</li>
         </ul>
 
-        <a class="cont" href="{{ lesson1_url }}">Continue to Lesson 1: RAFT — Your Life Raft</a>
+        <a class="cont" href="{{ lesson1_url }}">Your First Course Awaits →</a>
       </div>
 
     </div>
@@ -398,6 +414,7 @@
   };
 </script>
 <script src="{{ 'p2p-progress.js' | asset_url }}" defer="defer"></script>
+<script src="{{ 'p2p-journey-map.js' | asset_url }}" defer="defer"></script>
 <script src="{{ 'p2p-journey.js' | asset_url }}" defer="defer"></script>
 {%- endif -%}
 
@@ -413,6 +430,8 @@
     { "type": "text", "id": "title_sub", "label": "Title — second line (caps)", "default": "Learning Journey" },
     { "type": "textarea", "id": "description", "label": "Description", "default": "Complete each course, level up your craft, and unlock your next win — your path, your pace. Follow the glowing trail from the shore all the way to freedom." },
     { "type": "text", "id": "journey_name", "label": "Journey name", "default": "Purpose 2 Profit Learning Journey" },
+    { "type": "text", "id": "os_url", "label": "Operating System back-link (URL)", "info": "Shown as a back button at the top of the hero on every realm. Point at your P2P Operating System page. Leave blank to hide it.", "default": "/pages/p2p-operating-system" },
+    { "type": "text", "id": "os_label", "label": "Operating System back-link — label", "default": "P2P Operating System" },
 
     { "type": "header", "content": "Access" },
     { "type": "text", "id": "access_tag", "label": "Access tag", "info": "Customer tag that unlocks the journey. Must match the tag your Shopify Flow automation adds on purchase.", "default": "p2p-learning" },

@@ -24,6 +24,7 @@
 {%- if has_access -%}
 <div id="p2pb">
   <div class="bwrap">
+    <a class="bback" href="{{ section.settings.back_url | default: '/pages/p2p-learning' }}"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Back to Journey Map</a>
     <div class="top">
       <div>
         <div class="eyebrow">{{ section.settings.eyebrow | default: 'Your Progress' }}</div>

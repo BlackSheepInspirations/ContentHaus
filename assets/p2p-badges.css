@@ -10,6 +10,11 @@
 }
 #p2pb *{box-sizing:border-box; margin:0; padding:0;}
 #p2pb .bwrap{max-width:960px; margin:0 auto;}
+#p2pb .bback{display:inline-flex; align-items:center; gap:7px; margin-bottom:22px; text-decoration:none;
+  font:700 11px/1 system-ui; letter-spacing:.13em; text-transform:uppercase; color:var(--gold);
+  padding:8px 15px 8px 11px; border:1px solid var(--gstroke); border-radius:30px; background:rgba(216,180,90,.06); transition:.16s;}
+#p2pb .bback svg{width:15px; height:15px; fill:none;}
+#p2pb .bback:hover{color:var(--gold-bright); border-color:var(--gold); background:rgba(216,180,90,.13);}
 #p2pb .top{display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:8px;}
 #p2pb .eyebrow{font:700 12px/1 system-ui; letter-spacing:.3em; text-transform:uppercase; color:var(--gold);}
 #p2pb h1{font:700 34px/1 Georgia,serif; margin:6px 0 4px;}

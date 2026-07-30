@@ -1,6 +1,522 @@
 {
   "sections": {
-    "main": { "type": "p2p-learning-badges" }
+    "main": {
+      "type": "p2p-learning-badges",
+      "blocks": {
+        "set-sail": {
+          "type": "badge",
+          "settings": {
+            "group": "Journey Milestones",
+            "name": "Set Sail",
+            "req": "Start your journey",
+            "icon": "boat",
+            "color": "c-te",
+            "earned": false
+          }
+        },
+        "first-steps": {
+          "type": "badge",
+          "settings": {
+            "group": "Journey Milestones",
+            "name": "First Steps",
+            "req": "Complete your first course",
+            "icon": "flag",
+            "color": "c-gold",
+            "earned": false
+          }
+        },
+        "first-win": {
+          "type": "badge",
+          "settings": {
+            "group": "Journey Milestones",
+            "name": "First Win",
+            "req": "Bank your first quick win",
+            "icon": "trophy",
+            "color": "c-gold",
+            "earned": false
+          }
+        },
+        "finding-current": {
+          "type": "badge",
+          "settings": {
+            "group": "Journey Milestones",
+            "name": "Finding Your Current",
+            "req": "Complete 3 courses",
+            "icon": "compass",
+            "color": "c-te",
+            "earned": false
+          }
+        },
+        "realm-open-water": {
+          "type": "badge",
+          "settings": {
+            "group": "The Realms",
+            "name": "Open Water Cleared",
+            "req": "Complete every course in Open Water",
+            "icon": "wave",
+            "color": "c-te",
+            "earned": false
+          }
+        },
+        "realm-element-forest": {
+          "type": "badge",
+          "settings": {
+            "group": "The Realms",
+            "name": "Element Forest Cleared",
+            "req": "Complete every course in Element Forest",
+            "icon": "thicket",
+            "color": "c-pu",
+            "earned": false
+          }
+        },
+        "realm-desert-blooms": {
+          "type": "badge",
+          "settings": {
+            "group": "The Realms",
+            "name": "Desert Blooms Cleared",
+            "req": "Complete every course in Desert Blooms",
+            "icon": "bloom",
+            "color": "c-pk",
+            "earned": false
+          }
+        },
+        "realm-golden-harvest": {
+          "type": "badge",
+          "settings": {
+            "group": "The Realms",
+            "name": "Golden Harvest Cleared",
+            "req": "Complete every course in Golden Harvest",
+            "icon": "grass",
+            "color": "c-gold",
+            "earned": false
+          }
+        },
+        "realm-evergreen": {
+          "type": "badge",
+          "settings": {
+            "group": "The Realms",
+            "name": "Evergreen Cleared",
+            "req": "Complete every course in Evergreen",
+            "icon": "evergreen",
+            "color": "c-em",
+            "earned": false
+          }
+        },
+        "reached-freedom": {
+          "type": "badge",
+          "settings": {
+            "group": "The Realms",
+            "name": "Reached Freedom",
+            "req": "Clear all five realms",
+            "icon": "shootingstar",
+            "color": "c-gold",
+            "earned": false
+          }
+        },
+        "raft-master": {
+          "type": "badge",
+          "settings": {
+            "group": "Framework Masteries",
+            "name": "RAFT Master",
+            "req": "Complete the RAFT course",
+            "icon": "anchor",
+            "color": "c-em",
+            "earned": false
+          }
+        },
+        "grows-master": {
+          "type": "badge",
+          "settings": {
+            "group": "Framework Masteries",
+            "name": "GROWS Master",
+            "req": "Complete the GROWS course",
+            "icon": "sprout",
+            "color": "c-em",
+            "earned": false
+          }
+        },
+        "rooted-master": {
+          "type": "badge",
+          "settings": {
+            "group": "Framework Masteries",
+            "name": "ROOTED Master",
+            "req": "Complete the ROOTED course",
+            "icon": "roots",
+            "color": "c-em",
+            "earned": false
+          }
+        },
+        "founder-fingerprint": {
+          "type": "badge",
+          "settings": {
+            "group": "Habits & Wins",
+            "name": "Founder Fingerprint",
+            "req": "Complete your Brand DNA Blueprint",
+            "icon": "fingerprint",
+            "color": "c-gold",
+            "earned": false
+          }
+        },
+        "first-reflection": {
+          "type": "badge",
+          "settings": {
+            "group": "Habits & Wins",
+            "name": "First Reflection",
+            "req": "Write your first journal entry",
+            "icon": "pen",
+            "color": "c-pu",
+            "earned": false
+          }
+        },
+        "journal-keeper": {
+          "type": "badge",
+          "settings": {
+            "group": "Habits & Wins",
+            "name": "Journal Keeper",
+            "req": "Write 10 journal entries",
+            "icon": "notepad",
+            "color": "c-pu",
+            "earned": false
+          }
+        },
+        "journal-devotee": {
+          "type": "badge",
+          "settings": {
+            "group": "Habits & Wins",
+            "name": "Journal Devotee",
+            "req": "Write 15 journal entries",
+            "icon": "notepad",
+            "color": "c-pu",
+            "earned": false
+          }
+        },
+        "trail-explorer": {
+          "type": "badge",
+          "settings": {
+            "group": "Habits & Wins",
+            "name": "Trail Explorer",
+            "req": "Open the RAFT, GROWS & ROOTED signs",
+            "icon": "magnifier",
+            "color": "c-te",
+            "earned": false
+          }
+        },
+        "certified": {
+          "type": "badge",
+          "settings": {
+            "group": "Habits & Wins",
+            "name": "Certified",
+            "req": "Download your first certificate",
+            "icon": "seal",
+            "color": "c-gold",
+            "earned": false
+          }
+        },
+        "comeback": {
+          "type": "badge",
+          "settings": {
+            "group": "Habits & Wins",
+            "name": "Comeback",
+            "req": "Restart a streak after it breaks",
+            "icon": "comeback",
+            "color": "c-em",
+            "earned": false
+          }
+        },
+        "mindset-1": {
+          "type": "badge",
+          "settings": {
+            "group": "Mindset Check",
+            "name": "Mindset I",
+            "req": "Complete your 1st Mindset Check",
+            "icon": "mind",
+            "color": "c-te",
+            "earned": false
+          }
+        },
+        "mindset-2": {
+          "type": "badge",
+          "settings": {
+            "group": "Mindset Check",
+            "name": "Mindset II",
+            "req": "Complete your 2nd Mindset Check",
+            "icon": "mind",
+            "color": "c-te",
+            "earned": false
+          }
+        },
+        "clear-mind": {
+          "type": "badge",
+          "settings": {
+            "group": "Mindset Check",
+            "name": "Clear Mind",
+            "req": "Complete every Mindset Check",
+            "icon": "mind",
+            "color": "c-gold",
+            "earned": false
+          }
+        },
+        "purpose-1": {
+          "type": "badge",
+          "settings": {
+            "group": "Purpose Check",
+            "name": "Purpose I",
+            "req": "Complete your 1st Purpose Check",
+            "icon": "star",
+            "color": "c-pu",
+            "earned": false
+          }
+        },
+        "purpose-2": {
+          "type": "badge",
+          "settings": {
+            "group": "Purpose Check",
+            "name": "Purpose II",
+            "req": "Complete your 2nd Purpose Check",
+            "icon": "star",
+            "color": "c-pu",
+            "earned": false
+          }
+        },
+        "true-purpose": {
+          "type": "badge",
+          "settings": {
+            "group": "Purpose Check",
+            "name": "True Purpose",
+            "req": "Complete every Purpose Check",
+            "icon": "star",
+            "color": "c-gold",
+            "earned": false
+          }
+        },
+        "heart-1": {
+          "type": "badge",
+          "settings": {
+            "group": "Heart Check",
+            "name": "Heart I",
+            "req": "Complete your 1st Heart Check",
+            "icon": "heart",
+            "color": "c-pk",
+            "earned": false
+          }
+        },
+        "heart-2": {
+          "type": "badge",
+          "settings": {
+            "group": "Heart Check",
+            "name": "Heart II",
+            "req": "Complete your 2nd Heart Check",
+            "icon": "heart",
+            "color": "c-pk",
+            "earned": false
+          }
+        },
+        "open-heart": {
+          "type": "badge",
+          "settings": {
+            "group": "Heart Check",
+            "name": "Open Heart",
+            "req": "Complete every Heart Check",
+            "icon": "heart",
+            "color": "c-gold",
+            "earned": false
+          }
+        },
+        "streak-5": {
+          "type": "badge",
+          "settings": {
+            "group": "Streaks",
+            "name": "5-Day Streak",
+            "req": "5 days in a row",
+            "icon": "flame",
+            "color": "c-te",
+            "earned": false
+          }
+        },
+        "streak-10": {
+          "type": "badge",
+          "settings": {
+            "group": "Streaks",
+            "name": "10-Day Streak",
+            "req": "10 days in a row",
+            "icon": "flame",
+            "color": "c-em",
+            "earned": false
+          }
+        },
+        "streak-15": {
+          "type": "badge",
+          "settings": {
+            "group": "Streaks",
+            "name": "15-Day Streak",
+            "req": "15 days in a row",
+            "icon": "flame",
+            "color": "c-gold",
+            "earned": false
+          }
+        },
+        "streak-20": {
+          "type": "badge",
+          "settings": {
+            "group": "Streaks",
+            "name": "20-Day Streak",
+            "req": "20 days in a row",
+            "icon": "flame",
+            "color": "c-gold",
+            "earned": false
+          }
+        },
+        "streak-25": {
+          "type": "badge",
+          "settings": {
+            "group": "Streaks",
+            "name": "25-Day Streak",
+            "req": "25 days in a row",
+            "icon": "flame",
+            "color": "c-pu",
+            "earned": false
+          }
+        },
+        "streak-50": {
+          "type": "badge",
+          "settings": {
+            "group": "Streaks",
+            "name": "50-Day Streak",
+            "req": "50 days in a row",
+            "icon": "flame",
+            "color": "c-pk",
+            "earned": false
+          }
+        },
+        "streak-75": {
+          "type": "badge",
+          "settings": {
+            "group": "Streaks",
+            "name": "75-Day Streak",
+            "req": "75 days in a row",
+            "icon": "flame",
+            "color": "c-pk",
+            "earned": false
+          }
+        },
+        "streak-100": {
+          "type": "badge",
+          "settings": {
+            "group": "Streaks",
+            "name": "100-Day Streak",
+            "req": "100 days in a row",
+            "icon": "flame",
+            "color": "c-gold",
+            "earned": false
+          }
+        },
+        "streak-125": {
+          "type": "badge",
+          "settings": {
+            "group": "Streaks",
+            "name": "125-Day Streak",
+            "req": "125 days in a row",
+            "icon": "flame",
+            "color": "c-pu",
+            "earned": false
+          }
+        },
+        "streak-150": {
+          "type": "badge",
+          "settings": {
+            "group": "Streaks",
+            "name": "150-Day Streak",
+            "req": "150 days in a row",
+            "icon": "flame",
+            "color": "c-gold",
+            "earned": false
+          }
+        },
+        "every-path": {
+          "type": "badge",
+          "settings": {
+            "group": "Special",
+            "name": "Every Path Walked",
+            "req": "Complete every course, even the optional ones",
+            "icon": "compassrose",
+            "color": "c-gold",
+            "earned": false
+          }
+        },
+        "founder": {
+          "type": "badge",
+          "settings": {
+            "group": "Special",
+            "name": "Founder",
+            "req": "Founder's Pass holder",
+            "icon": "crown",
+            "color": "c-gold",
+            "earned": false
+          }
+        },
+        "masterclass": {
+          "type": "badge",
+          "settings": {
+            "group": "Special",
+            "name": "Masterclass",
+            "req": "Join a live masterclass",
+            "icon": "grad",
+            "color": "c-pu",
+            "earned": false
+          }
+        }
+      },
+      "block_order": [
+        "set-sail",
+        "first-steps",
+        "first-win",
+        "finding-current",
+        "realm-open-water",
+        "realm-element-forest",
+        "realm-desert-blooms",
+        "realm-golden-harvest",
+        "realm-evergreen",
+        "reached-freedom",
+        "raft-master",
+        "grows-master",
+        "rooted-master",
+        "founder-fingerprint",
+        "first-reflection",
+        "journal-keeper",
+        "journal-devotee",
+        "trail-explorer",
+        "certified",
+        "comeback",
+        "mindset-1",
+        "mindset-2",
+        "clear-mind",
+        "purpose-1",
+        "purpose-2",
+        "true-purpose",
+        "heart-1",
+        "heart-2",
+        "open-heart",
+        "streak-5",
+        "streak-10",
+        "streak-15",
+        "streak-20",
+        "streak-25",
+        "streak-50",
+        "streak-75",
+        "streak-100",
+        "streak-125",
+        "streak-150",
+        "every-path",
+        "founder",
+        "masterclass"
+      ],
+      "settings": {
+        "access_tag": "p2p-learning",
+        "back_url": "/pages/p2p-learning"
+      }
+    }
   },
-  "order": ["main"]
+  "order": [
+    "main"
+  ]
 }

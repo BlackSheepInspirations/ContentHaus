@@ -25,14 +25,14 @@
         "offshoot_hub_handle": "",
         "nextrealm_left": 50,
         "nextrealm_top": 96.5,
-        "nextrealm_width": 55,
-        "nextrealm_height": 6,
+        "nextrealm_width": 58,
+        "nextrealm_height": 5.5,
         "realm_1_url": "/pages/p2p-learning",
         "realm_2_url": "/pages/realm-2",
         "realm_3_url": "/pages/realm-3",
         "realm_4_url": "/pages/realm-4",
         "realm_5_url": "/pages/realm-5",
-        "realm_5_locked": true
+        "realm_5_locked": false
       }
     }
   },

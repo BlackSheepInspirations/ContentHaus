@@ -1,0 +1,47 @@
+{
+  "sections": {
+    "main": {
+      "type": "p2p-learning-journey",
+      "blocks": {
+        "rooted": { "type": "course", "settings": { "title": "ROOTED", "handle": "rooted", "body": "The launch sequence itself: Reach · Open · Offer · Trigger · Escalate · Deepen. Finish this first — it unlocks the rest of the realm.", "pos_left": 22.1, "pos_top": 12.7, "pos_width": 20, "pos_height": 6.5 } },
+        "mindset": { "type": "check", "settings": { "title": "Mindset Check", "pulse_items": "What am I telling myself about launching right now?\nWhat would it feel like to trust the process today?", "pos_left": 38.7, "pos_top": 23.1, "pos_width": 15, "pos_height": 5 } },
+        "pricing": { "type": "course", "settings": { "title": "Pricing Your Products", "handle": "pricing-your-products", "body": "A pricing method that accounts for platform fees and the psychology of what people will pay.", "pos_left": 62.6, "pos_top": 30.1, "pos_width": 20, "pos_height": 6.5 } },
+        "packaging": { "type": "course", "settings": { "title": "Packaging to Sell", "handle": "packaging-to-sell", "body": "Bundle and position your work into a packaged, sellable offer — the bridge between built and launching.", "pos_left": 27, "pos_top": 36.2, "pos_width": 20, "pos_height": 6.5 } },
+        "delivering": { "type": "course", "settings": { "title": "Delivering to Your Buyer", "handle": "delivering-to-your-buyer", "body": "File prep and delivery mechanics — and how to fix a delivery gone wrong.", "pos_left": 36.5, "pos_top": 46.7, "pos_width": 20, "pos_height": 6.5 } },
+        "marketing-haus": { "type": "course", "settings": { "title": "Marketing Haus", "handle": "marketing-haus", "body": "Mockups, listing strategy, and customer intelligence — your launch-ready visibility layer.", "pos_left": 80.3, "pos_top": 50.7, "pos_width": 20, "pos_height": 6.5 } },
+        "when-things": { "type": "offshoot", "settings": { "title": "When Things Go Wrong", "handle": "when-things-go-wrong", "body": "A plan for handling complaints, unhappy buyers, and refunds after launch.", "pos_left": 84.7, "pos_top": 62.8, "pos_width": 18, "pos_height": 6 } },
+        "purpose": { "type": "check", "settings": { "title": "Purpose Check", "pulse_items": "Why does getting this launched matter to me?\nWho am I doing this for?", "pos_left": 45.8, "pos_top": 64.8, "pos_width": 15, "pos_height": 5 } },
+        "making-official": { "type": "course", "settings": { "title": "Making It Official", "handle": "making-it-official", "body": "Business-structure awareness — LLC and sales-tax basics, in plain language (orientation, not legal advice).", "pos_left": 55.3, "pos_top": 73.7, "pos_width": 20, "pos_height": 6.5 } },
+        "email-list": { "type": "course", "settings": { "title": "Building Your Email List", "handle": "building-your-email-list", "body": "A basic list-building setup — the list ROOTED's Deepen step assumes you already have.", "pos_left": 16.5, "pos_top": 78.1, "pos_width": 20, "pos_height": 6.5 } },
+        "heart": { "type": "check", "settings": { "title": "Heart Check", "pulse_items": "What am I proud of finishing?\nWhat win am I about to skip celebrating?", "pos_left": 25.4, "pos_top": 88.7, "pos_width": 15, "pos_height": 5 } }
+      },
+      "block_order": ["rooted", "mindset", "pricing", "packaging", "delivering", "marketing-haus", "when-things", "purpose", "making-official", "email-list", "heart"],
+      "settings": {
+        "access_tag": "p2p-learning",
+        "access_code": "p2p-learning",
+        "slug": "realm-5",
+        "current_realm": 5,
+        "intro_required": false,
+        "offshoot_hub_handle": "",
+        "unlock_after_handle": "rooted",
+        "scroll_title": "The ROOTED Framework",
+        "scroll_body": "Time to thrive — your launch method: Reach · Open · Offer · Trigger · Escalate · Deepen. Work these six in order and you're launching.",
+        "scroll_left": 67.6,
+        "scroll_top": 17.8,
+        "scroll_width": 19,
+        "scroll_height": 8,
+        "nextrealm_left": 51,
+        "nextrealm_top": 96.8,
+        "nextrealm_width": 54,
+        "nextrealm_height": 5.5,
+        "realm_1_url": "/pages/p2p-learning",
+        "realm_2_url": "/pages/realm-2",
+        "realm_3_url": "/pages/realm-3",
+        "realm_4_url": "/pages/realm-4",
+        "realm_5_url": "/pages/realm-5",
+        "realm_5_locked": false
+      }
+    }
+  },
+  "order": ["main"]
+}

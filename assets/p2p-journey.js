@@ -101,11 +101,17 @@
         cs.style.left = h.style.left;
         cs.style.top = h.style.top;
       } else {
-        // course/offshoot/check: badge in the sign's top-right corner, off the art
         var L = parseFloat(h.style.left) || 0, T = parseFloat(h.style.top) || 0,
             W = parseFloat(h.style.width) || 0, Hh = parseFloat(h.style.height) || 0;
-        cs.style.left = (L + W / 2 - 3.5) + '%';
-        cs.style.top = (T - Hh / 2 + 3.5) + '%';
+        if(type === 'check'){
+          // check: badge at the bottom, horizontally centered
+          cs.style.left = L + '%';
+          cs.style.top = (T + Hh / 2) + '%';
+        } else {
+          // course/offshoot: badge at the far-right edge, vertically centered
+          cs.style.left = (L + W / 2) + '%';
+          cs.style.top = T + '%';
+        }
       }
       if(state === 'done'){
         cs.innerHTML = '<span class="done"><svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg></span>';
@@ -212,10 +218,62 @@
   }
   root.querySelectorAll('.nav a').forEach(function(a){
     a.addEventListener('click', function(e){
-      if(a.hasAttribute('data-panel')){ e.preventDefault(); showPanel(a.getAttribute('data-panel')); }
+      if(a.hasAttribute('data-panel')){ e.preventDefault(); if(a.getAttribute('data-panel') === 'directory') buildDirectory(); showPanel(a.getAttribute('data-panel')); }
       // Milestones is a real link (navigates); info is handled separately
     });
   });
+
+  /* ---- course directory (cross-realm jump-to-course index) ---- */
+  var dir = root.querySelector('.p2pj-dir');
+  function courseState(c, realm){
+    var P = window.P2P;
+    if(P && P.isCourseDone(c.h)) return 'done';
+    var locked = realm.gate && c.h !== realm.gate && !(P && P.isCourseDone(realm.gate));
+    if(!locked && c.after) locked = !(P && P.isCourseDone(c.after));
+    if(locked) return 'locked';
+    try{ var a = JSON.parse(localStorage.getItem('p2p_course_' + c.h + '_done') || '[]'); if(a && a.length) return 'progress'; }catch(e){}
+    return 'available';
+  }
+  var STATE_LABEL = { done:'Completed', progress:'In progress', locked:'Locked', available:'Not started' };
+  function buildDirectory(){
+    if(!dir || !window.P2P_MAP) return;
+    var curN = parseInt(dir.getAttribute('data-current-realm'), 10) || 1;
+    var html = '';
+    window.P2P_MAP.forEach(function(realm){
+      var doneN = 0;
+      var rows = '';
+      realm.courses.forEach(function(c){
+        var st = courseState(c, realm);
+        if(st === 'done') doneN++;
+        var href = (st === 'locked') ? realm.url : '/pages/courses-' + c.h;
+        var tip = (st === 'locked' && realm.gate) ? (' data-tip="Finish ' + realm.gate.toUpperCase() + ' first to unlock"') : '';
+        rows += '<a class="dir-course is-' + st + '" href="' + href + '"' + tip + '>' +
+                  '<span class="dir-ico" aria-label="' + STATE_LABEL[st] + '"></span>' +
+                  '<span class="dir-ct">' + c.t + (c.o ? '<i class="dir-off">offshoot</i>' : '') + '</span>' +
+                  '<span class="dir-go">' + (st === 'locked' ? 'View realm' : 'Open') + ' →</span>' +
+                '</a>';
+      });
+      var open = (realm.n === curN) ? ' open' : '';
+      var total = realm.courses.length;
+      var pct = total ? Math.round(doneN / total * 100) : 0;
+      html += '<div class="dir-realm' + open + '" data-realm="' + realm.n + '">' +
+                '<button class="dir-rhead" type="button">' +
+                  '<span class="dir-rnum">' + realm.n + '</span>' +
+                  '<span class="dir-rtitle"><span class="dir-rname">' + realm.name + '</span>' +
+                    '<span class="dir-rmeta">' + doneN + ' of ' + total + ' complete</span></span>' +
+                  '<span class="dir-rpct">' + pct + '%</span>' +
+                  '<svg class="dir-chev" viewBox="0 0 24 24"><path d="M8 10l4 4 4-4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+                '</button>' +
+                '<span class="dir-bar"><i style="width:' + pct + '%"></i></span>' +
+                '<div class="dir-courses">' + rows + '</div>' +
+              '</div>';
+    });
+    dir.innerHTML = html;
+    dir.querySelectorAll('.dir-rhead').forEach(function(h){
+      h.addEventListener('click', function(){ h.parentNode.classList.toggle('open'); });
+    });
+  }
+  buildDirectory();
 
   /* ---- bonus cards (Checks) open the pulse-check popup ---- */
   root.querySelectorAll('.bqcard').forEach(function(c){ c.addEventListener('click', function(){ openCheck(c); }); });
