@@ -43,11 +43,19 @@ just before public launch. Not urgent while password-locked.
 
 - **Assign templates to pages** in admin: `p2p-realm-2/3/4/5` → `/pages/realm-2..5`.
 - **Create course pages** (`/pages/courses-<handle>`) using the course-player section.
-- **Auto-award the rest of the badges:** realm-completion, framework masters
-  (RAFT/GROWS/ROOTED), and the Check badges aren't wired to earn yet — map
-  "finished these courses → earn this badge" in `assets/p2p-progress.js`.
-- **Dynamic badge counter:** the "X of Y badges earned" number on the badges page
-  is still server-rendered/static; make it tick up live as badges light.
+- ~~**Auto-award realm / framework / capstone badges**~~ ✅ DONE — `reconcileMapBadges()`
+  in `assets/p2p-progress.js` awards realm-completion (all Main courses of a realm
+  done), Framework Masters (raft/grows/rooted anchor course done), *Reached Freedom*
+  (all five realms), and *Every Path Walked* (every course incl. offshoots). Runs on
+  load wherever `window.P2P_MAP` is present. Verified via `dev/badge-check.html`.
+- **Check badges still need Andrea's input:** Mindset/Purpose/Heart I·II + Clear
+  Mind/True Purpose/Open Heart aren't auto-wired because the Check taxonomy is
+  unknown to the engine — need the exact Check titles and how many of each
+  category exist (they're `check` blocks in the journey section). Once known, map
+  `checksDone` ids → these badges in `reconcileMapBadges()`.
+- ~~**Dynamic badge counter**~~ ✅ Already live — `assets/p2p-badges.js` recomputes
+  `earned/total` from the DOM after applying auto-earned badges and updates the
+  summary ring + text (lines ~68-78).
 - **P2P Operating System page** — build the page (or repoint the hero back-link
   `os_url`, currently `/pages/p2p-operating-system`).
 - **Certificate backfill:** certs only record from the deploy onward; past
