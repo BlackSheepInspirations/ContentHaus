@@ -316,6 +316,7 @@
         <button class="wbtn" id="p2pj-wstart">Start exploring</button>
         <button class="wbtn ghost" data-tour-start>✦ Take the tour</button>
       </div>
+      {%- if section.settings.tutorial_url != blank -%}<a class="wtutlink" href="{{ section.settings.tutorial_url }}">New here? See how it all works →</a>{%- endif -%}
       <label class="wchk"><input type="checkbox" id="p2pj-wdont"> Don't show this again</label>
     </div>
   </div>
@@ -368,6 +369,7 @@
       <h3>{{ section.settings.info_title | default: 'About This Journey' }}</h3>
       <div class="ibody">{{ section.settings.info_body }}</div>
       <button class="itour" type="button" data-tour-start><svg viewBox="0 0 24 24" width="16" height="16"><path d="M8 5v14l11-7z" fill="currentColor" stroke="none"/></svg> Replay the guided tour</button>
+      {%- if section.settings.tutorial_url != blank -%}<a class="itutlink" href="{{ section.settings.tutorial_url }}"><svg viewBox="0 0 24 24" width="15" height="15"><path d="M4 5h13a2 2 0 0 1 2 2v12H6a2 2 0 0 1-2-2z" fill="none"/><path d="M8 9h7M8 13h7" stroke-linecap="round"/></svg> Read the full walkthrough</a>{%- endif -%}
       {%- if section.settings.info_link != blank -%}<a class="ilink" href="{{ section.settings.info_link }}">{{ section.settings.info_link_label | default: 'Back to Purpose 2 Profit' }}</a>{%- endif -%}
       <div class="ifoot">{{ section.settings.info_footer | default: '© Black Sheep Creations &amp; Inspirations. All rights reserved.' }}</div>
     </div>
@@ -593,6 +595,7 @@
     { "type": "richtext", "id": "locked_body", "label": "Locked state body", "default": "<p>Get instant access to the full Learning Journey — every course, badge, and side-quest on the map.</p>" },
 
     { "type": "url", "id": "milestones_url", "label": "Milestones (badges) page", "info": "Where the Milestones tab links." },
+    { "type": "url", "id": "tutorial_url", "label": "Tutorial page", "info": "The annotated 'How it works' walkthrough page (e.g. /pages/p2p-tutorial). Adds a link in the Welcome pop-up and Help menu. Leave blank to hide." },
 
     { "type": "header", "content": "Board" },
     { "type": "image_picker", "id": "board_image", "label": "Board image", "info": "This Realm's own board art. Leave blank to use the shared placeholder image until this Realm's art is ready." },
