@@ -503,10 +503,10 @@
         { "type": "url", "id": "url", "label": "Course page" },
         { "type": "textarea", "id": "body", "label": "Info-popup blurb" },
         { "type": "checkbox", "id": "is_realm_anchor", "label": "This is this Realm's anchor course", "info": "Informational only — the actual gate is the \"Realm unlock\" setting above, set on whichever Realm(s) this one gates." },
-        { "type": "range", "id": "pos_left", "min": 0, "max": 100, "step": 1, "unit": "%", "label": "Position — left", "default": 40 },
-        { "type": "range", "id": "pos_top", "min": 0, "max": 100, "step": 1, "unit": "%", "label": "Position — top", "default": 20 },
-        { "type": "range", "id": "pos_width", "min": 5, "max": 60, "step": 1, "unit": "%", "label": "Position — width", "default": 20 },
-        { "type": "range", "id": "pos_height", "min": 3, "max": 30, "step": 0.5, "unit": "%", "label": "Position — height", "default": 8 }
+        { "type": "number", "id": "pos_left", "label": "Position — left (%)", "default": 40 },
+        { "type": "number", "id": "pos_top", "label": "Position — top (%)", "default": 20 },
+        { "type": "number", "id": "pos_width", "label": "Position — width (%)", "default": 20 },
+        { "type": "number", "id": "pos_height", "label": "Position — height (%)", "default": 8 }
       ]
     },
     {
@@ -518,10 +518,10 @@
         { "type": "url", "id": "url", "label": "Course page" },
         { "type": "textarea", "id": "body", "label": "Info-popup blurb" },
         { "type": "text", "id": "unlock_after_handle", "label": "Unlocks after (course handle)", "info": "Leave blank to use this board's default Offshoot hub handle." },
-        { "type": "range", "id": "pos_left", "min": 0, "max": 100, "step": 1, "unit": "%", "label": "Position — left", "default": 15 },
-        { "type": "range", "id": "pos_top", "min": 0, "max": 100, "step": 1, "unit": "%", "label": "Position — top", "default": 50 },
-        { "type": "range", "id": "pos_width", "min": 5, "max": 60, "step": 1, "unit": "%", "label": "Position — width", "default": 16 },
-        { "type": "range", "id": "pos_height", "min": 3, "max": 30, "step": 0.5, "unit": "%", "label": "Position — height", "default": 6 }
+        { "type": "number", "id": "pos_left", "label": "Position — left (%)", "default": 15 },
+        { "type": "number", "id": "pos_top", "label": "Position — top (%)", "default": 50 },
+        { "type": "number", "id": "pos_width", "label": "Position — width (%)", "default": 16 },
+        { "type": "number", "id": "pos_height", "label": "Position — height (%)", "default": 6 }
       ]
     },
     {
@@ -532,10 +532,10 @@
         { "type": "textarea", "id": "pulse_items", "label": "Pulse-check items", "info": "One prompt per line. Never gates anything — always clickable." },
         { "type": "url", "id": "link_url", "label": "Optional link" },
         { "type": "text", "id": "link_label", "label": "Link label", "default": "Open" },
-        { "type": "range", "id": "pos_left", "min": 0, "max": 100, "step": 1, "unit": "%", "label": "Position — left", "default": 40 },
-        { "type": "range", "id": "pos_top", "min": 0, "max": 100, "step": 1, "unit": "%", "label": "Position — top", "default": 30 },
-        { "type": "range", "id": "pos_width", "min": 5, "max": 60, "step": 1, "unit": "%", "label": "Position — width", "default": 14 },
-        { "type": "range", "id": "pos_height", "min": 3, "max": 30, "step": 0.5, "unit": "%", "label": "Position — height", "default": 5 }
+        { "type": "number", "id": "pos_left", "label": "Position — left (%)", "default": 40 },
+        { "type": "number", "id": "pos_top", "label": "Position — top (%)", "default": 30 },
+        { "type": "number", "id": "pos_width", "label": "Position — width (%)", "default": 14 },
+        { "type": "number", "id": "pos_height", "label": "Position — height (%)", "default": 5 }
       ]
     }
   ],
