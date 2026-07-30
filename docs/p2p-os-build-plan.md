@@ -158,3 +158,29 @@ So the flagship engine stays the single source; we surface it, we don't rip it o
 
 **Risk:** LOW. Only additive changes (a focused page + ~3-line ui.js init hook). Zero deletion/refactor of the
 flagship. Must verify visually (the assessment is heavy + stateful) before shipping — do it when the preview works.
+
+### 2b — CONFIRMED SCOPE (2026-07-30)
+
+**Bring EVERYTHING from Brand Haus into the OS "Founders Assessment" EXCEPT the Branding
+Studio + its nested generators.** In `STEPS` terms, include and show these six, in order:
+`archetypeGuide → welcome → conversation (Assessment) → brandDNA (Your Brand DNA) →
+blueprint (Your Blueprint) → pathIntake (Find Your Direction)`. **Exclude `brandingStudio`**
+(and its substeps `branding`, `logo`, `quickGenerators`) — those stay in the Brand Haus item.
+Carry over the sidebar's **Version History** and **Saved Results (x/3)** too.
+
+**Results delivery — keep the current format EXACTLY (Andrea confirmed via screenshot).** The
+`blueprint` step already renders the completion screen with three deliverables, each click-to-open
++ exportable, and this must stay identical:
+- **Your Blueprint Snapshot** — "Discover Your Brand" (Export Snapshot)
+- **Your Brand DNA Report** — "Decode Your Brand" (Export Brand DNA Report)
+- **Your Brand Playbook™** — "Build With Confidence" (Export Playbook)
+Delivered **on-screen AND downloadable immediately** after the assessment. Because we reuse
+`BrandHaus.blueprint.renderFull()`, this is automatic — no reformatting.
+
+**Porting — already solved.** On completion the identity saves to the shared vault
+`blackSheepBrandKitVault` (colors, voice, mission, core values, fonts, name), which
+`graphics/marketing/product/p2p` brandkit modules already read. Keep the "save to Brand Vault"
+action in the peeled assessment (it's separable from the excluded Branding Studio UI).
+
+**Focused view:** hide the excluded step from the Brand Haus sidebar when in OS/assessment mode
+(a focus flag/class + the boot-into-step hook `window.BrandHausInitialStep = "conversation"`).
