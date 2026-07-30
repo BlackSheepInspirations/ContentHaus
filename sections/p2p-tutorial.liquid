@@ -1,9 +1,9 @@
 {%- comment -%}
   Purpose 2 Profit — Learning Journey Tutorial (annotated help page).
-  A standalone /pages walkthrough. Each "step" block is a screenshot + caption;
-  drop real screenshots into the image slots in the theme editor when ready.
-  Scoped to #p2pt so nothing leaks. Pairs with the in-page guided tour on the
-  Journey page (the "Take the tour" / "Replay the guided tour" buttons).
+  A standalone /pages walkthrough. Each "step" block is a screenshot + caption,
+  with optional Tip and Bonus callouts; drop real screenshots into the image slots
+  in the theme editor when ready. Scoped to #p2pt so nothing leaks. Pairs with the
+  in-page guided tour on the Journey page (the "Take the tour" buttons).
 {%- endcomment -%}
 
 <div id="p2pt">
@@ -37,6 +37,7 @@
             <h2>{{ block.settings.title }}</h2>
             <div class="p2pt-body">{{ block.settings.body }}</div>
             {%- if block.settings.tip != blank -%}<div class="p2pt-tip"><b>Tip</b> {{ block.settings.tip }}</div>{%- endif -%}
+            {%- if block.settings.bonus != blank -%}<div class="p2pt-bonus"><b>✦ Bonus</b> {{ block.settings.bonus }}</div>{%- endif -%}
           </div>
         </section>
       {%- endif -%}
@@ -52,15 +53,23 @@
 
 <style>
   #p2pt{--bg:#04070a;--text:#e7efeb;--muted:#8aa0a6;--gold:#c9a24a;--gold-bright:#f4c534;--stroke:rgba(255,255,255,.09);--gstroke:rgba(216,180,90,.4);
+    --aurora:linear-gradient(100deg,#f4e2a6,#8f6fd6,#27ae6e,#39c5c0,#2563eb,#d6336c,#f4e2a6);
     max-width:1000px;margin:0 auto;padding:40px 20px 60px;color:var(--text);font-family:system-ui,-apple-system,sans-serif;}
+  @keyframes p2pt-shift{0%{background-position:0% 50%;}100%{background-position:300% 50%;}}
+  /* animated aurora — text clip */
+  #p2pt .aurora-text{background:var(--aurora);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:p2pt-shift 7s linear infinite;}
+  /* animated aurora — filled (buttons, numbered badges) */
+  #p2pt .aurora-fill{background:var(--aurora);background-size:300% 100%;animation:p2pt-shift 7s linear infinite;color:#0a1410;}
+
   #p2pt .p2pt-hero{text-align:center;margin-bottom:44px;}
   #p2pt .p2pt-eyebrow{font:700 12px/1 system-ui;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:12px;}
   #p2pt .p2pt-hero h1{font:700 clamp(28px,5vw,42px)/1.1 Georgia,serif;margin:0 0 14px;
-    background:linear-gradient(100deg,#f4e2a6,#8f6fd6,#39c5c0,#f4e2a6);background-size:250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;}
+    background:var(--aurora);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:p2pt-shift 7s linear infinite;}
   #p2pt .p2pt-intro{font:400 16px/1.6 system-ui;color:#c6d6d0;max-width:620px;margin:0 auto 18px;}
-  #p2pt .p2pt-tourbtn{display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border:1px solid var(--gstroke);border-radius:12px;
-    background:linear-gradient(180deg,rgba(216,180,90,.14),rgba(9,17,24,.3));color:var(--gold-bright);font:700 13px/1.3 system-ui;text-decoration:none;transition:transform .12s,border-color .18s;}
-  #p2pt .p2pt-tourbtn:hover{transform:translateY(-1px);border-color:var(--gold);}
+  #p2pt .p2pt-tourbtn{display:inline-flex;align-items:center;gap:8px;padding:12px 20px;border:0;border-radius:12px;
+    background:var(--aurora);background-size:300% 100%;animation:p2pt-shift 7s linear infinite;color:#0a1410;font:800 13px/1.3 system-ui;text-decoration:none;
+    box-shadow:0 10px 26px rgba(0,0,0,.35);transition:transform .12s;}
+  #p2pt .p2pt-tourbtn:hover{transform:translateY(-1px);}
   #p2pt .p2pt-steps{display:flex;flex-direction:column;gap:26px;}
   #p2pt .p2pt-step{display:grid;grid-template-columns:1fr 1fr;gap:26px;align-items:center;
     border:1px solid var(--stroke);border-radius:20px;padding:22px;background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(9,17,24,.35));}
@@ -70,18 +79,25 @@
     display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--gold);}
   #p2pt .p2pt-shot-ph svg{fill:none;stroke:var(--gold);stroke-width:1.5;opacity:.8;}
   #p2pt .p2pt-shot-ph span{font:600 12px/1 system-ui;color:var(--muted);}
-  #p2pt .p2pt-num{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font:800 15px/1 system-ui;color:#06120e;
-    background:linear-gradient(145deg,#f4e2a6,var(--gold));margin-bottom:12px;}
+  #p2pt .p2pt-num{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font:800 15px/1 system-ui;color:#0a1410;margin-bottom:12px;
+    background:var(--aurora);background-size:300% 100%;animation:p2pt-shift 7s linear infinite;box-shadow:0 4px 14px rgba(0,0,0,.3);}
   #p2pt .p2pt-copy h2{font:700 22px/1.2 Georgia,serif;margin:0 0 10px;}
   #p2pt .p2pt-body{font:400 14.5px/1.65 system-ui;color:#c6d6d0;}
   #p2pt .p2pt-body p{margin:0 0 10px;}
   #p2pt .p2pt-tip{margin-top:14px;padding:10px 14px;border-left:3px solid var(--gold);border-radius:0 8px 8px 0;
     background:rgba(216,180,90,.08);font:400 13px/1.5 system-ui;color:#dbe7e2;}
   #p2pt .p2pt-tip b{color:var(--gold-bright);margin-right:6px;text-transform:uppercase;font:800 10.5px/1 system-ui;letter-spacing:.08em;}
+  #p2pt .p2pt-bonus{margin-top:10px;padding:10px 14px;border-radius:8px;border:1px solid rgba(143,111,214,.35);
+    background:linear-gradient(180deg,rgba(143,111,214,.12),rgba(57,197,192,.06));font:400 13px/1.5 system-ui;color:#e4ecf0;}
+  #p2pt .p2pt-bonus b{margin-right:6px;text-transform:uppercase;font:800 10.5px/1 system-ui;letter-spacing:.08em;
+    background:var(--aurora);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:p2pt-shift 7s linear infinite;}
   #p2pt .p2pt-cta{text-align:center;margin-top:44px;}
-  #p2pt .p2pt-cta a{display:inline-block;padding:15px 34px;border-radius:14px;font:800 15px/1 system-ui;color:#06120e;text-decoration:none;
-    background:linear-gradient(145deg,#f4e2a6,var(--gold));box-shadow:0 12px 30px rgba(216,180,90,.25);transition:transform .12s;}
+  #p2pt .p2pt-cta a{display:inline-block;padding:15px 34px;border-radius:14px;font:800 15px/1 system-ui;color:#0a1410;text-decoration:none;
+    background:var(--aurora);background-size:300% 100%;animation:p2pt-shift 7s linear infinite;box-shadow:0 12px 30px rgba(0,0,0,.35);transition:transform .12s;}
   #p2pt .p2pt-cta a:hover{transform:translateY(-2px);}
+  @media (prefers-reduced-motion: reduce){
+    #p2pt .p2pt-hero h1,#p2pt .p2pt-tourbtn,#p2pt .p2pt-num,#p2pt .p2pt-bonus b,#p2pt .p2pt-cta a,#p2pt .aurora-text,#p2pt .aurora-fill{animation:none;}
+  }
   @media (max-width:680px){
     #p2pt .p2pt-step{grid-template-columns:1fr;gap:16px;}
     #p2pt .p2pt-step:nth-child(even) .p2pt-shot{order:0;}
@@ -110,7 +126,8 @@
         { "type": "image_picker", "id": "image", "label": "Screenshot" },
         { "type": "text", "id": "title", "label": "Title" },
         { "type": "richtext", "id": "body", "label": "Body" },
-        { "type": "text", "id": "tip", "label": "Tip (optional)" }
+        { "type": "text", "id": "tip", "label": "Tip (optional)" },
+        { "type": "text", "id": "bonus", "label": "Bonus item (optional)" }
       ]
     }
   ],
@@ -118,16 +135,16 @@
     {
       "name": "P2P Tutorial",
       "blocks": [
-        { "type": "step", "settings": { "title": "Your map", "body": "<p>The board is your trail from the shore all the way to freedom. Each glowing marker is a course. Finish one and the path lights up to the next — so you always see how far you've come, not just how far there is to go.</p>" } },
-        { "type": "step", "settings": { "title": "Opening a course", "body": "<p>Tap any glowing marker to open it. Inside, work through the lessons and mark each one complete. When you finish every lesson, the course is done — you earn points, your certificate is ready, and the trail unlocks ahead.</p>", "tip": "Locked markers unlock as you clear the courses before them." } },
-        { "type": "step", "settings": { "title": "All Courses", "body": "<p>The <strong>All Courses</strong> tab lists every course across all five realms, grouped by realm with your progress on each. Jump straight to any course — no need to remember where it lives on the map.</p>" } },
-        { "type": "step", "settings": { "title": "Your Progress", "body": "<p>The <strong>Progress</strong> tab shows your courses done, points, badges, day streak and Merit rank. Tap any tile to see the details behind it — which courses you've finished, where your points came from, your badge collection, a streak calendar, and the full tier ladder.</p>" } },
-        { "type": "step", "settings": { "title": "Bonus Checks", "body": "<p>Between courses, the <strong>Bonuses</strong> tab has quick Mindset, Purpose and Heart check-ins. They're never locked and never required — just short pulse-checks to keep you steady and earn a few points.</p>" } },
-        { "type": "step", "settings": { "title": "Milestones & badges", "body": "<p>The <strong>Milestones</strong> page holds every badge you earn — realms cleared, framework masteries, streaks, reflections and special awards. Badges light up automatically as you hit each mark, with a little celebration.</p>" } },
-        { "type": "step", "settings": { "title": "Journal", "body": "<p>The <strong>Journal</strong> is your private space for notes and reflections as you learn. Give entries titles, search them, and archive the ones you're done with. Your first entry each day earns points, too.</p>" } },
-        { "type": "step", "settings": { "title": "Daily Mindset Moment", "body": "<p>At the top of your journey, a fresh Mindset Moment appears every day — an affirmation, a verse, or a bit of motivation to start you off right. It rotates automatically at midnight.</p>" } },
-        { "type": "step", "settings": { "title": "Streaks & weekly goal", "body": "<p>Show up each day to build a streak — and don't worry, one missed day is forgiven so a long run survives a slip. There's also a gentle weekly goal: finish a course this week for a bonus. Small, steady momentum.</p>" } },
-        { "type": "step", "settings": { "title": "Your Journey Recap", "body": "<p>Tap <strong>See my Journey Recap</strong> on the Progress tab for a shareable snapshot of your stats — your rank, points, courses done, badges, longest streak and days active. Screenshot it to share how far you've come.</p>" } }
+        { "type": "step", "settings": { "title": "Your map", "body": "<p>The board is your trail from the shore all the way to freedom. Each glowing marker is a course. Finish one and the path lights up to the next — so you always see how far you've come, not just how far there is to go.</p>", "tip": "Locked markers unlock automatically as you clear the courses before them.", "bonus": "The lit-up trail isn't just decoration — it's your progress made visible. Watch it grow as you go." } },
+        { "type": "step", "settings": { "title": "Opening a course", "body": "<p>Tap any glowing marker to open it. Inside, work through the lessons and mark each one complete. When you finish every lesson, the course is done — you earn points, your certificate is ready, and the trail unlocks ahead.</p>", "tip": "You can revisit any finished course anytime — nothing ever locks back up.", "bonus": "Every completed course hands you a certificate you can download, print, or re-view later from Milestones." } },
+        { "type": "step", "settings": { "title": "All Courses", "body": "<p>The <strong>All Courses</strong> tab lists every course across all five realms, grouped by realm with your progress on each. Jump straight to any course — no need to remember where it lives on the map.</p>", "tip": "Each realm shows a little progress bar so you can see what's left at a glance.", "bonus": "In a hurry? This is the fastest way back to the exact course you left off on." } },
+        { "type": "step", "settings": { "title": "Your Progress", "body": "<p>The <strong>Progress</strong> tab shows your courses done, points, badges, day streak and Merit rank. Tap any tile to see the details behind it — which courses you've finished, where your points came from, your badge collection, a streak calendar, and the full tier ladder.</p>", "tip": "Tap the Points tile for a breakdown of exactly where every point came from.", "bonus": "The Merit tile opens the full 20-rank ladder — Dreamer all the way to Unbound — with how close you are to the next rank." } },
+        { "type": "step", "settings": { "title": "Bonus Checks", "body": "<p>Between courses, the <strong>Bonuses</strong> tab has quick Mindset, Purpose and Heart check-ins. They're never locked and never required — just short pulse-checks to keep you steady and earn a few points.</p>", "tip": "Dip in whenever you need a reset — there's no wrong time and no penalty for skipping.", "bonus": "Each check you complete adds points, so even a two-minute pause still moves you forward." } },
+        { "type": "step", "settings": { "title": "Milestones & badges", "body": "<p>The <strong>Milestones</strong> page holds every badge you earn — realms cleared, framework masteries, streaks, reflections and special awards. Badges light up automatically as you hit each mark, with a little celebration.</p>", "tip": "Badges light up the moment you earn them — there's nothing to claim.", "bonus": "Clear a whole realm, master a framework, or hold a long streak to unlock the rare ones. There are 45 in all." } },
+        { "type": "step", "settings": { "title": "Journal", "body": "<p>The <strong>Journal</strong> is your private space for notes and reflections as you learn. Give entries titles, search them, and archive the ones you're done with. Your first entry each day earns points, too.</p>", "tip": "Give entries titles and use search to find them again later.", "bonus": "Archived entries stay tucked away but recoverable for 60 days before they clear — nothing disappears on you." } },
+        { "type": "step", "settings": { "title": "Daily Mindset Moment", "body": "<p>At the top of your journey, a fresh Mindset Moment appears every day — an affirmation, a verse, or a bit of motivation to start you off right. It rotates automatically at midnight.</p>", "tip": "A new one is waiting each morning — no refresh needed.", "bonus": "Drawn from a library of 500 affirmations, verses, and quotes, so it stays fresh for well over a year." } },
+        { "type": "step", "settings": { "title": "Streaks & weekly goal", "body": "<p>Show up each day to build a streak — and don't worry, one missed day is forgiven so a long run survives a slip. There's also a gentle weekly goal: finish a course this week for a bonus. Small, steady momentum.</p>", "tip": "Miss a day? A single slip is forgiven, so a long streak won't vanish overnight.", "bonus": "Hit your weekly goal and the bonus lands automatically — there's no button to press." } },
+        { "type": "step", "settings": { "title": "Your Journey Recap", "body": "<p>Tap <strong>See my Journey Recap</strong> on the Progress tab for a shareable snapshot of your stats — your rank, points, courses done, badges, longest streak and days active. Screenshot it to share how far you've come.</p>", "tip": "Screenshot it to share your progress with a friend or your community.", "bonus": "It updates live, so every time you open it, it reflects exactly where you are right now." } }
       ]
     }
   ]
