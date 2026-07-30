@@ -48,6 +48,7 @@
 #p2pj .mindset-moment::before{content:''; position:absolute; top:0; bottom:0; left:0; width:3px; background:linear-gradient(180deg,var(--gold-bright),var(--gold));}
 #p2pj .mm-label{font:800 13px/1.1 system-ui; letter-spacing:.2em; text-transform:uppercase; color:var(--gold); margin-bottom:15px; display:flex; align-items:center; gap:8px;}
 #p2pj .mm-star{color:var(--gold-bright);}
+#p2pj .mm-grad{background:linear-gradient(100deg,#f4e2a6,#8f6fd6,#27ae6e,#39c5c0,#2563eb,#d6336c,#f4e2a6); background-size:300% 100%; -webkit-background-clip:text; background-clip:text; color:transparent; animation:p2pj-shift 7s linear infinite;}
 #p2pj .mm-text{font:italic 500 19px/1.42 Georgia,serif; color:var(--text); margin:0 0 14px;}
 #p2pj .mm-source{display:block; font:700 12px/1.35 system-ui; letter-spacing:.02em; color:var(--gold-bright); font-style:normal;}
 

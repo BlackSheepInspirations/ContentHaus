@@ -52,7 +52,7 @@
         {%- if section.settings.moment_show -%}
         <aside class="hero-aside">
           <div class="mindset-moment" id="p2pj-moment" hidden>
-            <div class="mm-label"><span class="mm-star">✦</span> {{ section.settings.moment_label | default: 'Mindset Moment' }}</div>
+            <div class="mm-label"><span class="mm-star">✦</span> {{ section.settings.moment_label | default: 'Daily Mindset Moment' | replace: 'Mindset', '<span class="mm-grad">Mindset</span>' }}</div>
             <blockquote class="mm-text"></blockquote>
             <cite class="mm-source"></cite>
           </div>
