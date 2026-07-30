@@ -1,0 +1,71 @@
+<!doctype html><html><head><meta charset="utf-8">
+<link rel="stylesheet" href="../assets/p2p-journey.css">
+<style>body{margin:0;background:#04070a;}
+  .demo-start{position:fixed;top:12px;right:12px;z-index:50;padding:10px 16px;border-radius:10px;border:1px solid #c9a24a;background:#1a2730;color:#f4e2a6;font:700 13px system-ui;cursor:pointer;}
+  .board{position:relative;height:520px;background:linear-gradient(160deg,#0c2230,#123);border-radius:12px;margin:14px;display:grid;place-items:center;color:#3a5560;font:600 14px system-ui;}
+  .hs--demo{position:absolute;left:44%;top:40%;width:46px;height:46px;border-radius:50%;background:radial-gradient(circle,#f4e2a6,#c9a24a);box-shadow:0 0 20px #f4c534;}
+</style>
+</head><body>
+<div id="p2pj" data-board-courses="7">
+  <button class="demo-start" data-tour-start>✦ Take the tour</button>
+  <header style="padding:24px 14px 6px">
+    <div class="hero-cols">
+      <div class="hero-main"><h1 style="color:#e7efeb;font:700 26px Georgia,serif;margin:0">Learning Journey</h1></div>
+      <aside class="hero-aside" style="max-width:320px">
+        <div class="mindset-moment" style="display:block;border:1px solid #1f3540;border-radius:14px;padding:16px;background:#0c1a22">
+          <div class="mm-label"><span class="mm-star">✦</span> Daily <span class="mm-grad">Mindset</span> Moment</div>
+          <blockquote class="mm-text" style="color:#dbe7e2">"I am one honest effort from momentum."</blockquote>
+          <cite class="mm-source" style="color:#8aa">Affirmation</cite>
+        </div>
+      </aside>
+    </div>
+  </header>
+  <div class="bar">
+    <div class="bar-main">
+      <nav class="nav">
+        <a class="on" href="#" data-panel="journey"><svg viewBox="0 0 24 24"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/></svg><small>Journey Map</small></a>
+        <a href="#" data-panel="directory"><svg viewBox="0 0 24 24"><path d="M4 5h16M4 12h16M4 19h16"/></svg><small>All Courses</small></a>
+        <a href="#" data-panel="progress"><svg viewBox="0 0 24 24"><path d="M4 20V12M9.5 20V6M15 20v-9M20.5 20V8"/></svg><small>Progress</small></a>
+        <a href="#" data-panel="bonuses"><svg viewBox="0 0 24 24"><rect x="3.5" y="9" width="17" height="11" rx="1.2"/></svg><small>Bonuses</small></a>
+        <a href="/pages/p2p-badges"><svg viewBox="0 0 24 24"><path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.9 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/></svg><small>Milestones</small></a>
+        <a href="#" data-panel="journal"><svg viewBox="0 0 24 24"><path d="M12 6C10 4.4 5.5 4.2 3.5 5.2v13.6c2-1 6.5-.8 8.5.8 2-1.6 6.5-1.8 8.5-.8V5.2C18.5 4.2 14 4.4 12 6z"/></svg><small>Journal</small></a>
+      </nav>
+      <div class="bar-right">
+        <div class="stats">
+          <button class="stat stat-points" type="button" data-points><b><span class="p2pj-points">0</span></b><small>Points</small></button>
+          <div class="stat"><b><span class="p2pj-badges">0</span></b><small>Badges</small></div>
+          <div class="stat"><b><span class="p2pj-streak">0</span></b><small>Streak</small></div>
+          <button class="stat level" type="button" data-points><small>Merit <span class="p2pj-level">0</span></small></button>
+        </div>
+        <a class="barinfo" href="#" data-info><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/></svg></a>
+      </div>
+    </div>
+    <div class="bar-realms">
+      <div class="realms-scroll"><span class="brlbl">Realms</span>
+        <a class="rbtn on" href="#"><b>1</b><span>Open Water</span></a>
+        <a class="rbtn" href="#"><b>2</b><span>Element Forest</span></a>
+        <a class="rbtn" href="#"><b>3</b><span>Desert Blooms</span></a>
+      </div>
+    </div>
+  </div>
+  <div class="board">The Map<button class="hs hs--demo"></button></div>
+
+  <div id="p2pj-tour" hidden>
+    <div class="tour-spot" data-tour-spot></div>
+    <div class="tour-pop" data-tour-pop>
+      <div class="tour-count" data-tour-count></div>
+      <h4 data-tour-title></h4>
+      <p data-tour-body></p>
+      <div class="tour-foot">
+        <button class="tour-skip" type="button" data-tour-skip>Skip</button>
+        <div class="tour-btns">
+          <button class="tour-back" type="button" data-tour-back>Back</button>
+          <button class="tour-next" type="button" data-tour-next>Next</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>window.P2P_MAP=[]; window.P2P={streak:function(){return{count:0,longest:0}},points:function(){return 0},merits:function(){return 0},level:function(){return 0},tier:function(){return{index:1,name:'Dreamer',next:500,points:0,merits:0,nextName:'Seeker',tiers:[]}},earnedSet:function(){return[]},badgesStat:function(){return null},isCourseDone:function(){return false},coursesDone:function(){return 0},weekGoal:function(){return{done:0,goal:1,paid:false,bonus:50}},daysActive:function(){return 0},pointsBreakdown:function(){return{}}};</script>
+<script src="../assets/p2p-journey.js"></script>
+</body></html>

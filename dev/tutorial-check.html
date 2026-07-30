@@ -1,0 +1,53 @@
+<!doctype html><html><head><meta charset="utf-8"><style>body{margin:0;background:#04070a;}</style></head><body>
+<div id="p2pt">
+  <header class="p2pt-hero">
+    <div class="p2pt-eyebrow">Learning Journey</div>
+    <h1>How Your Learning Journey Works</h1>
+    <p class="p2pt-intro">A quick, friendly walkthrough of everything on your journey — the map, your courses, points, badges, streaks and more. Take it at your own pace.</p>
+    <a class="p2pt-tourbtn" href="#"><svg viewBox="0 0 24 24" width="16" height="16"><path d="M8 5v14l11-7z" fill="currentColor" stroke="none"/></svg> Prefer a guided tour? Open the Journey and tap “Take the tour.”</a>
+  </header>
+  <div class="p2pt-steps">
+    <section class="p2pt-step">
+      <div class="p2pt-shot"><div class="p2pt-shot-ph"><svg viewBox="0 0 24 24" width="34" height="34"><rect x="3" y="5" width="18" height="14" rx="2" fill="none"/><circle cx="8.5" cy="10" r="1.5"/><path d="M5 17l4.5-4.5 3 3L16 12l3 3.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Screenshot coming soon</span></div></div>
+      <div class="p2pt-copy"><div class="p2pt-num">1</div><h2>Your map</h2><div class="p2pt-body"><p>The board is your trail from the shore all the way to freedom. Each glowing marker is a course. Finish one and the path lights up to the next.</p></div><div class="p2pt-tip"><b>Tip</b> Locked markers unlock as you clear the courses before them.</div></div>
+    </section>
+    <section class="p2pt-step">
+      <div class="p2pt-shot"><div class="p2pt-shot-ph"><svg viewBox="0 0 24 24" width="34" height="34"><rect x="3" y="5" width="18" height="14" rx="2" fill="none"/><circle cx="8.5" cy="10" r="1.5"/><path d="M5 17l4.5-4.5 3 3L16 12l3 3.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Screenshot coming soon</span></div></div>
+      <div class="p2pt-copy"><div class="p2pt-num">2</div><h2>Your Progress</h2><div class="p2pt-body"><p>The Progress tab shows courses done, points, badges, day streak and Merit rank. Tap any tile to see the details behind it.</p></div></div>
+    </section>
+  </div>
+  <div class="p2pt-cta"><a href="#">Start your journey →</a></div>
+</div>
+<style>
+  #p2pt{--bg:#04070a;--text:#e7efeb;--muted:#8aa0a6;--gold:#c9a24a;--gold-bright:#f4c534;--stroke:rgba(255,255,255,.09);--gstroke:rgba(216,180,90,.4);
+    max-width:1000px;margin:0 auto;padding:40px 20px 60px;color:var(--text);font-family:system-ui,-apple-system,sans-serif;}
+  #p2pt .p2pt-hero{text-align:center;margin-bottom:44px;}
+  #p2pt .p2pt-eyebrow{font:700 12px/1 system-ui;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:12px;}
+  #p2pt .p2pt-hero h1{font:700 clamp(28px,5vw,42px)/1.1 Georgia,serif;margin:0 0 14px;
+    background:linear-gradient(100deg,#f4e2a6,#8f6fd6,#39c5c0,#f4e2a6);background-size:250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;}
+  #p2pt .p2pt-intro{font:400 16px/1.6 system-ui;color:#c6d6d0;max-width:620px;margin:0 auto 18px;}
+  #p2pt .p2pt-tourbtn{display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border:1px solid var(--gstroke);border-radius:12px;
+    background:linear-gradient(180deg,rgba(216,180,90,.14),rgba(9,17,24,.3));color:var(--gold-bright);font:700 13px/1.3 system-ui;text-decoration:none;}
+  #p2pt .p2pt-steps{display:flex;flex-direction:column;gap:26px;}
+  #p2pt .p2pt-step{display:grid;grid-template-columns:1fr 1fr;gap:26px;align-items:center;
+    border:1px solid var(--stroke);border-radius:20px;padding:22px;background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(9,17,24,.35));}
+  #p2pt .p2pt-step:nth-child(even) .p2pt-shot{order:2;}
+  #p2pt .p2pt-shot img{width:100%;border-radius:12px;border:1px solid var(--stroke);display:block;}
+  #p2pt .p2pt-shot-ph{aspect-ratio:16/10;border-radius:12px;border:1.5px dashed var(--gstroke);background:rgba(216,180,90,.05);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--gold);}
+  #p2pt .p2pt-shot-ph svg{fill:none;stroke:var(--gold);stroke-width:1.5;opacity:.8;}
+  #p2pt .p2pt-shot-ph span{font:600 12px/1 system-ui;color:var(--muted);}
+  #p2pt .p2pt-num{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font:800 15px/1 system-ui;color:#06120e;
+    background:linear-gradient(145deg,#f4e2a6,var(--gold));margin-bottom:12px;}
+  #p2pt .p2pt-copy h2{font:700 22px/1.2 Georgia,serif;margin:0 0 10px;}
+  #p2pt .p2pt-body{font:400 14.5px/1.65 system-ui;color:#c6d6d0;}
+  #p2pt .p2pt-body p{margin:0 0 10px;}
+  #p2pt .p2pt-tip{margin-top:14px;padding:10px 14px;border-left:3px solid var(--gold);border-radius:0 8px 8px 0;
+    background:rgba(216,180,90,.08);font:400 13px/1.5 system-ui;color:#dbe7e2;}
+  #p2pt .p2pt-tip b{color:var(--gold-bright);margin-right:6px;text-transform:uppercase;font:800 10.5px/1 system-ui;letter-spacing:.08em;}
+  #p2pt .p2pt-cta{text-align:center;margin-top:44px;}
+  #p2pt .p2pt-cta a{display:inline-block;padding:15px 34px;border-radius:14px;font:800 15px/1 system-ui;color:#06120e;text-decoration:none;
+    background:linear-gradient(145deg,#f4e2a6,var(--gold));box-shadow:0 12px 30px rgba(216,180,90,.25);}
+  @media (max-width:680px){#p2pt .p2pt-step{grid-template-columns:1fr;gap:16px;}#p2pt .p2pt-step:nth-child(even) .p2pt-shot{order:0;}}
+</style>
+</body></html>

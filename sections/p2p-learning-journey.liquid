@@ -312,11 +312,31 @@
       <div class="we">{{ section.settings.welcome_eyebrow | default: 'Welcome, Traveler' }}</div>
       <h2>{{ section.settings.welcome_title | default: 'Your Journey Begins' }}</h2>
       <p>{{ section.settings.welcome_body | default: "This is your map from the shore all the way to freedom. Complete each course to light up the path, earn badges, and unlock what's next. Tap any glowing marker to begin — and check the signs along the way for guidance." }}</p>
-      <button class="wbtn" id="p2pj-wstart">Start exploring</button>
+      <div class="wbtns">
+        <button class="wbtn" id="p2pj-wstart">Start exploring</button>
+        <button class="wbtn ghost" data-tour-start>✦ Take the tour</button>
+      </div>
       <label class="wchk"><input type="checkbox" id="p2pj-wdont"> Don't show this again</label>
     </div>
   </div>
   {%- endif -%}
+
+  {%- comment -%} ---- GUIDED TOUR (spotlight walkthrough of the live page) ---- {%- endcomment -%}
+  <div id="p2pj-tour" hidden>
+    <div class="tour-spot" data-tour-spot></div>
+    <div class="tour-pop" data-tour-pop>
+      <div class="tour-count" data-tour-count></div>
+      <h4 data-tour-title></h4>
+      <p data-tour-body></p>
+      <div class="tour-foot">
+        <button class="tour-skip" type="button" data-tour-skip>Skip</button>
+        <div class="tour-btns">
+          <button class="tour-back" type="button" data-tour-back>Back</button>
+          <button class="tour-next" type="button" data-tour-next>Next</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   {%- comment -%} ---- INFO MODAL ---- {%- endcomment -%}
   <div id="p2pj-modal">
@@ -347,6 +367,7 @@
       <div class="ik">Info &amp; Help</div>
       <h3>{{ section.settings.info_title | default: 'About This Journey' }}</h3>
       <div class="ibody">{{ section.settings.info_body }}</div>
+      <button class="itour" type="button" data-tour-start><svg viewBox="0 0 24 24" width="16" height="16"><path d="M8 5v14l11-7z" fill="currentColor" stroke="none"/></svg> Replay the guided tour</button>
       {%- if section.settings.info_link != blank -%}<a class="ilink" href="{{ section.settings.info_link }}">{{ section.settings.info_link_label | default: 'Back to Purpose 2 Profit' }}</a>{%- endif -%}
       <div class="ifoot">{{ section.settings.info_footer | default: '© Black Sheep Creations &amp; Inspirations. All rights reserved.' }}</div>
     </div>

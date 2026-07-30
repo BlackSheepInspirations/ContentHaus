@@ -681,6 +681,71 @@
     recapModal.addEventListener('click', function(e){ if(e.target === recapModal) recapModal.classList.remove('show'); });
   }
 
+  /* ---- Guided tour (spotlight walkthrough of the live page) ---- */
+  (function(){
+    var tour = document.getElementById('p2pj-tour'); if(!tour) return;
+    var spot = tour.querySelector('[data-tour-spot]'), pop = tour.querySelector('[data-tour-pop]');
+    var elCount = tour.querySelector('[data-tour-count]'), elTitle = tour.querySelector('[data-tour-title]'), elBody = tour.querySelector('[data-tour-body]');
+    var btnBack = tour.querySelector('[data-tour-back]'), btnNext = tour.querySelector('[data-tour-next]'), btnSkip = tour.querySelector('[data-tour-skip]');
+    var STEPS = [
+      { center:true, title:'Welcome aboard!', body:"Here's a quick tour of your Learning Journey — about a minute. Tap Next to begin." },
+      { sel:'.board', scroll:'center', title:'Your map', body:'This is your trail. Each glowing marker is a course. Finish one and the path lights up to the next.' },
+      { sel:'.nav', scroll:'top', title:'Getting around', body:'These tabs move you between your map, courses, progress, bonuses and journal.' },
+      { sel:'.nav a[data-panel="directory"]', scroll:'top', title:'All Courses', body:'Jump straight to any course across every realm — no hunting on the map.' },
+      { sel:'.nav a[data-panel="progress"]', scroll:'top', title:'Your Progress', body:'Points, badges, streak and your Merit rank. Tap any tile there for the full breakdown.' },
+      { sel:'.nav a[data-panel="bonuses"]', scroll:'top', title:'Bonus Checks', body:'Quick Mindset, Purpose & Heart check-ins to keep you steady between courses.' },
+      { sel:'.nav a[href*="badges"]', scroll:'top', title:'Milestones', body:'Every badge you earn lives here — realms cleared, streaks, reflections and more.' },
+      { sel:'.nav a[data-panel="journal"]', scroll:'top', title:'Journal', body:'Jot notes and reflections as you go. Your first entry each day earns points too.' },
+      { sel:'.stats', scroll:'top', title:'Your live stats', body:'Points, badges, streak and Merit — always in view, updating as you go.' },
+      { sel:'.bar-realms', scroll:'top', title:'The five realms', body:'Hop between realms here as you unlock them — from Open Water all the way to Evergreen.' },
+      { sel:'.mindset-moment', scroll:'center', title:'Daily Mindset Moment', body:'A fresh affirmation, verse or quote every day to start you off right.' },
+      { center:true, title:"You're all set!", body:'Tap any glowing marker to begin. Replay this tour anytime from the ⓘ Help menu. Enjoy the journey!' }
+    ];
+    var i = 0, active = STEPS, curTarget = null;
+    function vis(el){ if(!el || el.hidden) return false; var r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0; }
+    function chrome(){
+      var s = active[i];
+      elCount.textContent = (i+1) + ' of ' + active.length;
+      elTitle.textContent = s.title; elBody.textContent = s.body;
+      btnBack.style.visibility = i === 0 ? 'hidden' : 'visible';
+      btnNext.textContent = (i === active.length - 1) ? 'Done' : 'Next';
+    }
+    function reposition(){
+      var s = active[i];
+      if(!curTarget){ tour.classList.add('center'); spot.style.display = 'none'; pop.classList.add('at-center'); pop.style.left = ''; pop.style.top = ''; return; }
+      tour.classList.remove('center'); spot.style.display = 'block'; pop.classList.remove('at-center');
+      var r = curTarget.getBoundingClientRect(), pad = 8;
+      spot.style.left = (r.left - pad) + 'px'; spot.style.top = (r.top - pad) + 'px';
+      spot.style.width = (r.width + pad*2) + 'px'; spot.style.height = (r.height + pad*2) + 'px';
+      var pw = pop.offsetWidth, ph = pop.offsetHeight, m = 14, vw = window.innerWidth, vh = window.innerHeight;
+      var top = (r.bottom + m + ph <= vh) ? (r.bottom + m) : Math.max(m, r.top - m - ph);
+      var left = Math.max(m, Math.min(r.left + r.width/2 - pw/2, vw - pw - m));
+      pop.style.left = left + 'px'; pop.style.top = top + 'px';
+    }
+    function place(){
+      chrome();
+      var s = active[i];
+      curTarget = s.center ? null : root.querySelector(s.sel);
+      if(!curTarget){ reposition(); return; }
+      try{ curTarget.scrollIntoView({ behavior:'auto', block: s.scroll === 'top' ? 'start' : 'center', inline:'center' }); }catch(e){ curTarget.scrollIntoView(); }
+      setTimeout(reposition, 300);
+    }
+    function start(){
+      ['p2pj-welcome','p2pj-info'].forEach(function(id){ var m = document.getElementById(id); if(m) m.classList.remove('show'); });
+      active = STEPS.filter(function(s){ return s.center || vis(root.querySelector(s.sel)); });
+      i = 0; tour.hidden = false; requestAnimationFrame(place);
+    }
+    function stop(){ tour.hidden = true; tour.classList.remove('center'); }
+    function go(d){ var n = i + d; if(n < 0) return; if(n >= active.length){ stop(); return; } i = n; place(); }
+    btnNext.addEventListener('click', function(){ go(1); });
+    btnBack.addEventListener('click', function(){ go(-1); });
+    btnSkip.addEventListener('click', stop);
+    document.addEventListener('keydown', function(e){ if(tour.hidden) return; if(e.key === 'Escape') stop(); else if(e.key === 'ArrowRight') go(1); else if(e.key === 'ArrowLeft') go(-1); });
+    window.addEventListener('resize', function(){ if(!tour.hidden) reposition(); });
+    window.addEventListener('scroll', function(){ if(!tour.hidden && curTarget) reposition(); }, { passive:true });
+    root.querySelectorAll('[data-tour-start]').forEach(function(b){ b.addEventListener('click', function(e){ e.preventDefault(); start(); }); });
+  })();
+
   /* ---- JS sticky bar (sits below the theme's own sticky header; ignores lock state) ---- */
   var bar = root.querySelector('.bar'), wrap = root.querySelector('.wrap');
   if(bar && wrap){
