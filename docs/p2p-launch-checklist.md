@@ -54,3 +54,13 @@ just before public launch. Not urgent while password-locked.
   completions won't show until re-completed unless we backfill.
 - **Mindset Moment library → 500:** currently ~120 items in `assets/p2p-moments.js`;
   grow in ~100-item batches (say "keep going").
+
+## 3. Known bug — panel-switch scroll (deferred)
+
+Clicking a nav tab (All Courses / Progress / Bonuses / Journal) used to auto-scroll
+to the opened panel, but it fought the JS sticky bar's spacer and **bounced
+inconsistently** (worked for one tab, not another). Auto-scroll is currently
+**disabled** in `showPanel()` in `assets/p2p-journey.js` — panels just swap in
+place (no jump, no bounce). Proper fix idea: replace the JS sticky bar with native
+`position:sticky` + `scroll-margin-top`, or debounce a single settled scroll that
+doesn't re-trigger the sticky sync mid-scroll. Milestones is unaffected (real link).
