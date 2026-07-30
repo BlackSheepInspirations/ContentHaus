@@ -118,11 +118,43 @@ Marketing Haus · Growth Haus. Must map each to the existing section/URL. Open: 
   "Your Journey Starts Here" landing (hero w/ image slot, live stat strip, gamified step-map w/
   step 1 pre-done, reassurance, FAQ). `sections/p2p-os.liquid` + `templates/page.p2p-os.json`.
   Other views show placeholders until built. Verified in `dev/os-check.html`.
-- **P2 — Assessment & Brand:** peel out Founders Assessment + "Find your Direction"; Brand
-  Haus embed + brand-card upload/version history.
+- **P2 — Assessment & Brand:** Checkpoint ✅ DONE. Founders Assessment peel-out plan below.
+  Brand Haus embed + brand-card upload/version history (later).
 - **P3 — Build Hauses:** Content, Graphics, Project (luxe rework + embed).
 - **P4 — Market & Grow:** Marketing Haus, Growth Haus, transitions.
 - **P5 — PROFIT Path + Certificate** (confetti, branded, personalizable).
 - **P6 — Tools & Resources, Notebook, Bonus Resources.**
 - **P7 — Below-the-fold vault modules** (Brand Kits, Vault, Recently Generated, Look/Mascot Lock).
 - Luxe restyle applied progressively as each Haus is touched.
+
+## Phase 2b — Founders Assessment peel-out (PLAN, not yet built)
+
+**Key discovery — no extraction needed, and "Find Your Direction" already exists.**
+The Brand Haus app (`#brand-haus-app`, orchestrated by `assets/brand-haus-ui.js`) routes by an
+internal `activeStep`, and exposes a public navigator **`BrandHaus.ui.setActiveStep(step)`**
+(ui.js:2069). `STEPS = ["archetypeGuide","welcome","conversation","brandDNA","blueprint","pathIntake","brandingStudio"]`:
+
+- **`conversation`** → the 30-question **Founders Assessment** (`BrandHaus.founderInterview.renderFull()`)
+- **`brandDNA`** → the results / diagnosis (the **takeaways**), `BrandHaus.results.renderStep3()`
+- **`pathIntake`** → **"Find Your Direction" ALREADY EXISTS** (`BrandHaus.pathIntake.renderFull()`) — no need to build it new
+- `brandingStudio` → Branding Studio (where the assessment "Apply" writes)
+
+So the flagship engine stays the single source; we surface it, we don't rip it out.
+
+**Build steps (execute next session, with visual verification):**
+1. New focused page `p2p-assessment` (template + a thin section, or reuse `brand-haus` template with a
+   focus flag). It loads the SAME brand-haus JS chain (brand-haus.liquid lines 65–85) + `#brand-haus-app` root.
+2. **Boot-into-step hook:** add a minimal, additive check in `brand-haus-ui.js` init — if
+   `window.BrandHausInitialStep` (or `#step=conversation` hash) is set, call `setActiveStep(that)` after first
+   render. ~3 lines, no behavior change to Brand Haus otherwise. The focused page sets
+   `window.BrandHausInitialStep = "conversation"`.
+3. **Focused mode (optional):** a body/root class the focused page adds to hide the Brand Haus marketing
+   header + sidebar so it reads as a standalone assessment (CSS overrides only). Or rely on OS embedded-mode chrome-hide.
+4. OS sidebar **"Founders Assessment"** item → `mode:"embed"`, `target:"/pages/p2p-assessment"` (swap the
+   current placeholder). Gate with `brand-haus-access` (or all-access).
+5. **Additive OS layers** (build around, not inside the engine): a short "Find your Direction" intro linking to
+   `#step=pathIntake`, takeaway cards pulled from the brandDNA results, cross-Haus CTAs, and save-to-vault
+   (Brand Haus already has a vault; reuse or mirror into the OS vault modules in P7).
+
+**Risk:** LOW. Only additive changes (a focused page + ~3-line ui.js init hook). Zero deletion/refactor of the
+flagship. Must verify visually (the assessment is heavy + stateful) before shipping — do it when the preview works.
