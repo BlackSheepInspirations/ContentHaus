@@ -229,7 +229,13 @@
     root.querySelectorAll('.panel').forEach(function(p){ p.classList.toggle('on', p.getAttribute('data-panel') === name); });
     if(board) board.style.display = (name === 'journey') ? '' : 'none';
     root.querySelectorAll('.nav a[data-panel]').forEach(function(x){ x.classList.toggle('on', x.getAttribute('data-panel') === name); });
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // land on the opened content just below the sticky toolbar (not the page top)
+    var target = (name === 'journey') ? board : root.querySelector('.panel[data-panel="' + name + '"]');
+    if(target){
+      var barH = bar ? bar.offsetHeight : 0;
+      var y = window.pageYOffset + target.getBoundingClientRect().top - barH - 18;
+      window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+    }
   }
   root.querySelectorAll('.nav a').forEach(function(a){
     a.addEventListener('click', function(e){
