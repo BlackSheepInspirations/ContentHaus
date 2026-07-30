@@ -229,12 +229,15 @@
     root.querySelectorAll('.panel').forEach(function(p){ p.classList.toggle('on', p.getAttribute('data-panel') === name); });
     if(board) board.style.display = (name === 'journey') ? '' : 'none';
     root.querySelectorAll('.nav a[data-panel]').forEach(function(x){ x.classList.toggle('on', x.getAttribute('data-panel') === name); });
-    // land at the toolbar (bottom of the hero) so it pins to the top and the panel
-    // opens right below it — a stable anchor that avoids the sticky-spacer jump
-    var hero = root.querySelector('.hero');
-    if(hero){
-      var y = hero.getBoundingClientRect().bottom + window.pageYOffset - 8;
-      window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+    // land the opened content just below the sticky toolbar. scroll-margin-top
+    // reserves the bar's height; the double pass lets the JS sticky settle its
+    // spacer first (a single scroll lands under the bar by exactly its height).
+    var target = (name === 'journey') ? board : root.querySelector('.panel[data-panel="' + name + '"]');
+    if(target){
+      var barH = bar ? bar.offsetHeight : 0;
+      target.style.scrollMarginTop = (barH + 24) + 'px';
+      target.scrollIntoView({ block: 'start' });                                   // settles the sticky bar
+      requestAnimationFrame(function(){ target.scrollIntoView({ block: 'start' }); }); // corrects for the spacer
     }
   }
   root.querySelectorAll('.nav a').forEach(function(a){
