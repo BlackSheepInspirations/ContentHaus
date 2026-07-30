@@ -123,7 +123,8 @@ Marketing Haus · Growth Haus. Must map each to the existing section/URL. Open: 
 - **P3 — Build Hauses:** Content, Graphics, Project (luxe rework + embed).
 - **P4 — Market & Grow:** Marketing Haus, Growth Haus, transitions.
 - **P5 — PROFIT Path + Certificate** (confetti, branded, personalizable).
-- **P6 — Tools & Resources, Notebook, Bonus Resources.**
+- **P6 — Tools & Resources, Notebook, Bonus Resources.** Notebook ✅ DONE early (2026-07-30) —
+  titled notes + search, persisted to `p2p_os_notebook` (cross-device). Tools & Resources + Bonus remain.
 - **P7 — Below-the-fold vault modules** (Brand Kits, Vault, Recently Generated, Look/Mascot Lock).
 - Luxe restyle applied progressively as each Haus is touched.
 
