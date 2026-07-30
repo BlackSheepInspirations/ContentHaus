@@ -96,8 +96,17 @@
       var state = nodeState(h);
       var cs = document.createElement('div');
       cs.className = 'cs';
-      cs.style.left = h.style.left;
-      cs.style.top = h.style.top;
+      if(type === 'start'){
+        // Begin: centered where placed (sits below the sign wording)
+        cs.style.left = h.style.left;
+        cs.style.top = h.style.top;
+      } else {
+        // course/offshoot/check: badge in the sign's top-right corner, off the art
+        var L = parseFloat(h.style.left) || 0, T = parseFloat(h.style.top) || 0,
+            W = parseFloat(h.style.width) || 0, Hh = parseFloat(h.style.height) || 0;
+        cs.style.left = (L + W / 2 - 3.5) + '%';
+        cs.style.top = (T - Hh / 2 + 3.5) + '%';
+      }
       if(state === 'done'){
         cs.innerHTML = '<span class="done"><svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg></span>';
         h.classList.remove('is-locked');
