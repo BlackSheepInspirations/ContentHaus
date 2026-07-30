@@ -212,9 +212,9 @@
    anchor point (below), not this element itself */
 #p2pj .hs{position:absolute; z-index:5; cursor:pointer; border:0; background:transparent; border-radius:14px; transform:translate(-50%,-50%);}
 /* next-realm compass link + gold label */
-#p2pj .p2pj-nextrealm{position:absolute; z-index:6; transform:translate(-50%,-50%); display:flex; align-items:center; justify-content:flex-end; text-decoration:none;}
-#p2pj .p2pj-nextrealm .nr-text{white-space:nowrap; text-align:left; font:italic 700 clamp(13px,2.3vw,20px)/1.2 "Georgia",serif; color:#f4e2a6; text-shadow:0 2px 8px rgba(0,0,0,.85), 0 0 16px rgba(216,180,90,.55); transition:.16s;}
-#p2pj .p2pj-nextrealm:hover .nr-text{color:#fff3d2; text-shadow:0 2px 8px rgba(0,0,0,.9), 0 0 22px rgba(244,226,166,.85);}
+#p2pj .p2pj-nextrealm{position:absolute; z-index:6; transform:translate(-50%,-50%); display:block; text-decoration:none;}
+#p2pj .p2pj-nextrealm .nr-img{display:block; width:100%; height:auto; filter:drop-shadow(0 2px 10px rgba(0,0,0,.5)); transition:filter .16s;}
+#p2pj .p2pj-nextrealm:hover .nr-img{filter:drop-shadow(0 2px 16px rgba(244,226,166,.65));}
 /* locked Main/Offshoot nodes stay clickable (to explain what unlocks them) but read as inert */
 #p2pj .hs.is-locked{cursor:not-allowed;}
 
