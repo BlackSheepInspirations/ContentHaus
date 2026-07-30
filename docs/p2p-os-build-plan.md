@@ -114,8 +114,10 @@ Marketing Haus · Growth Haus. Must map each to the existing section/URL. Open: 
 
 ## Proposed phasing (draft)
 
-- **P1 — Shell & landing:** sidebar + routing/embed mechanism + "Your Journey Starts
-  Here" (WOW landing + gamified map) + Checkpoint. Establishes the frame everything hangs on.
+- **P1 — Shell & landing:** ✅ DONE (2026-07-30). Sidebar shell + routing (view/embed/link) +
+  "Your Journey Starts Here" landing (hero w/ image slot, live stat strip, gamified step-map w/
+  step 1 pre-done, reassurance, FAQ). `sections/p2p-os.liquid` + `templates/page.p2p-os.json`.
+  Other views show placeholders until built. Verified in `dev/os-check.html`.
 - **P2 — Assessment & Brand:** peel out Founders Assessment + "Find your Direction"; Brand
   Haus embed + brand-card upload/version history.
 - **P3 — Build Hauses:** Content, Graphics, Project (luxe rework + embed).

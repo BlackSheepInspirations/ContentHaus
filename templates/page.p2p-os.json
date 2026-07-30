@@ -30,12 +30,29 @@
         "faq-1": { "type": "faq", "settings": { "q": "Where do I start?", "a": "<p>Right here. Work top to bottom down the sidebar — each step builds on the last, from finding your direction all the way to launching with ROOTED.</p>" } },
         "faq-2": { "type": "faq", "settings": { "q": "What if I only have one Haus?", "a": "<p>You'll still see everything here. What you own is unlocked; the rest shows a lock with a way to add it whenever you're ready.</p>" } },
         "faq-3": { "type": "faq", "settings": { "q": "I'm not techy — is that okay?", "a": "<p>Completely. This home base was built for exactly that. One step at a time, plain language, and your Haus Mates are here to help.</p>" } },
-        "faq-4": { "type": "faq", "settings": { "q": "How do I get better results from the generators?", "a": "<p>Be specific, give an example of what 'good' looks like, and tell it who it's for. Small, clear details beat long vague ones every time.</p>" } }
+        "faq-4": { "type": "faq", "settings": { "q": "How do I get better results from the generators?", "a": "<p>Be specific, give an example of what 'good' looks like, and tell it who it's for. Small, clear details beat long vague ones every time.</p>" } },
+
+        "ck-1": { "type": "checkitem", "settings": { "label": "Take the Founders Assessment", "note": "Find your direction before you build." } },
+        "ck-2": { "type": "checkitem", "settings": { "label": "Create your brand identity in Brand Haus", "note": "Your card, logo and kit." } },
+        "ck-3": { "type": "checkitem", "settings": { "label": "Peek into each Haus", "note": "See what's inside and where it helps." } },
+        "ck-4": { "type": "checkitem", "settings": { "label": "Say hi to your Haus Mates", "note": "Frank and Ruth are here to help." } },
+        "ck-5": { "type": "checkitem", "settings": { "label": "Jot your first idea in the Notebook", "note": "Capture the spark while it's hot." } },
+        "ck-6": { "type": "checkitem", "settings": { "label": "Come back tomorrow", "note": "Keep your streak alive." } },
+
+        "meet-brand": { "type": "meet", "settings": { "icon": "crown", "title": "Brand Haus", "blurb": "Your identity — brand card, logo, and kit. Start here so everything else sounds like you." } },
+        "meet-content": { "type": "meet", "settings": { "icon": "prompt", "title": "Content Haus", "blurb": "Your words — prompts and copy that carry your voice everywhere you show up." } },
+        "meet-graphics": { "type": "meet", "settings": { "icon": "palette", "title": "Graphics Haus", "blurb": "Your look — on-brand visuals and design without the degree." } },
+        "meet-project": { "type": "meet", "settings": { "icon": "box", "title": "Project Haus", "blurb": "Your build — turn the idea into a real product, step by step." } },
+        "meet-marketing": { "type": "meet", "settings": { "icon": "megaphone", "title": "Marketing Haus", "blurb": "Your reach — posts, ads and campaigns that get you seen." } },
+        "meet-growth": { "type": "meet", "settings": { "icon": "rocket", "title": "Growth Haus", "blurb": "Your launch — generators that execute the ROOTED method and scale what works." } },
+        "meet-mates": { "type": "meet", "settings": { "icon": "mates", "title": "Frank & Ruth — your Haus Mates", "blurb": "Frank, your Creative Director, and Ruth, your ruthless Design Meister. Ask them anything as you go." } }
       },
       "block_order": [
         "nav-start","nav-checkpoint","nav-assessment","nav-brand","nav-content","nav-graphics","nav-project","nav-marketing","nav-growth","nav-rooted","nav-mates","nav-tools","nav-notebook","nav-bonus",
         "step-1","step-2","step-3","step-4","step-5","step-6","step-7","step-8",
-        "faq-1","faq-2","faq-3","faq-4"
+        "faq-1","faq-2","faq-3","faq-4",
+        "ck-1","ck-2","ck-3","ck-4","ck-5","ck-6",
+        "meet-brand","meet-content","meet-graphics","meet-project","meet-marketing","meet-growth","meet-mates"
       ],
       "settings": {
         "show_stats": true,
