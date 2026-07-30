@@ -229,20 +229,8 @@
     root.querySelectorAll('.panel').forEach(function(p){ p.classList.toggle('on', p.getAttribute('data-panel') === name); });
     if(board) board.style.display = (name === 'journey') ? '' : 'none';
     root.querySelectorAll('.nav a[data-panel]').forEach(function(x){ x.classList.toggle('on', x.getAttribute('data-panel') === name); });
-    // land the opened content just below the sticky toolbar by measuring the bar's
-    // actual on-screen bottom and nudging the panel to sit under it. Repeated over a
-    // few frames so it converges after the JS sticky inserts/collapses its spacer.
-    var target = (name === 'journey') ? board : root.querySelector('.panel[data-panel="' + name + '"]');
-    if(target){
-      var landPanel = function(){
-        var barH = bar ? bar.offsetHeight : 0;
-        var off = (bar && bar.classList.contains('p2pj-fixed')) ? (parseFloat(bar.style.top) || 0) : 0;
-        var delta = target.getBoundingClientRect().top - (off + barH + 14);
-        if(Math.abs(delta) > 1) window.scrollBy(0, delta);
-      };
-      landPanel();
-      var n = 0, iv = setInterval(function(){ landPanel(); if(++n >= 5) clearInterval(iv); }, 45);
-    }
+    // NOTE: auto-scroll-to-panel intentionally disabled — the sticky-bar spacer made it
+    // bounce. Panels swap in place for now; revisit a stable scroll approach (see launch checklist).
   }
   root.querySelectorAll('.nav a').forEach(function(a){
     a.addEventListener('click', function(e){
