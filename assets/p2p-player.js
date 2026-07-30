@@ -41,6 +41,7 @@
   /* badge-earned pop-up — queued on completion, shown after the certificate closes */
   var bpEl = document.getElementById('p2pp-badgepop'), bpQ = [], BP_SEEN = 'p2p_badges_seen';
   var bpName = bpEl ? bpEl.querySelector('.bp-name') : null;
+  var bpCanvas = bpEl ? bpEl.querySelector('.bp-canvas') : null;
   function bpLoadSeen(){ try{ return JSON.parse(localStorage.getItem(BP_SEEN) || '[]') || []; }catch(e){ return []; } }
   function bpSaveSeen(a){ try{ localStorage.setItem(BP_SEEN, JSON.stringify(a)); }catch(e){} }
   function bpCollect(){
@@ -49,7 +50,21 @@
     earned.forEach(function(n){ if(all.indexOf(n) === -1){ bpQ.push(n); all.push(n); } });
     bpSaveSeen(all);
   }
-  function bpNext(){ if(!bpEl) return; if(!bpQ.length){ bpEl.classList.remove('show'); return; } bpName.textContent = bpQ.shift(); bpEl.classList.add('show'); }
+  function bpConfetti(){
+    var cv = bpCanvas; if(!cv || !cv.getContext) return;
+    var ctx = cv.getContext('2d'), DPR = Math.min(window.devicePixelRatio || 1, 2);
+    var W = cv.width = cv.clientWidth * DPR, H = cv.height = cv.clientHeight * DPR; if(!W || !H) return;
+    var colors = ['#f4e2a6','#d8b45a','#39c5c0','#8f6fd6','#27ae6e'], P = [];
+    for(var i=0;i<90;i++){ P.push({ x:W/2 + (Math.random()-.5)*W*0.3, y:H*0.34, vx:(Math.random()-.5)*11*DPR, vy:(Math.random()*-10-3)*DPR, s:(Math.random()*5+3)*DPR, c:colors[(Math.random()*colors.length)|0], r:Math.random()*6, vr:(Math.random()-.5)*0.4 }); }
+    var t0 = performance.now();
+    (function frame(t){
+      var el = t - t0, a = Math.max(0, 1 - el/2600); ctx.clearRect(0,0,W,H);
+      P.forEach(function(p){ p.vy += 0.25*DPR; p.x += p.vx; p.y += p.vy; p.r += p.vr;
+        ctx.save(); ctx.globalAlpha = a; ctx.translate(p.x, p.y); ctx.rotate(p.r); ctx.fillStyle = p.c; ctx.fillRect(-p.s/2, -p.s/2, p.s, p.s*0.62); ctx.restore(); });
+      if(el < 2600 && bpEl.classList.contains('show')) requestAnimationFrame(frame); else ctx.clearRect(0,0,W,H);
+    })(t0);
+  }
+  function bpNext(){ if(!bpEl) return; if(!bpQ.length){ bpEl.classList.remove('show'); return; } bpName.textContent = bpQ.shift(); bpEl.classList.add('show'); requestAnimationFrame(bpConfetti); }
   if(bpEl){
     var bpc = bpEl.querySelector('.bp-close'); if(bpc) bpc.addEventListener('click', bpNext);
     bpEl.addEventListener('click', function(e){ if(e.target === bpEl) bpNext(); });

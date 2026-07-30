@@ -104,3 +104,16 @@
 #p2pb-cert .certbtns{display:flex; gap:10px; flex-wrap:wrap; justify-content:center;}
 #p2pb-cert .certbtns button{cursor:pointer; border:0; padding:12px 20px; border-radius:12px; font:800 13px/1 system-ui; color:#06120e; background:linear-gradient(145deg,#f4e2a6,#d8b45a);}
 #p2pb-cert .certbtns .ghost{color:#dfeee8; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.16);}
+#p2pb .certs-empty{font:italic 500 12px/1.4 system-ui; color:var(--muted); max-width:220px;}
+
+/* ---- animated aurora (matches the journey's living background) ---- */
+#p2pb{position:relative; overflow:hidden;}
+#p2pb .bwrap{position:relative; z-index:1;}
+#p2pb .pb-aurora{position:absolute; inset:0; z-index:0; overflow:hidden; pointer-events:none;}
+#p2pb .pb-aurora .rib{position:absolute; left:-30%; width:160%; height:34%; filter:blur(70px); mix-blend-mode:screen;}
+#p2pb .pb-aurora .a{top:-4%; background:linear-gradient(90deg,transparent,#1e8e5a,#27ae6e,#0d7377,transparent); opacity:.5; animation:pb-au1 9s ease-in-out infinite;}
+#p2pb .pb-aurora .b{top:24%; background:linear-gradient(90deg,transparent,#2563eb,#8f6fd6,#d6336c,transparent); opacity:.44; animation:pb-au2 11s ease-in-out infinite;}
+#p2pb .pb-aurora .c{top:52%; background:linear-gradient(90deg,transparent,#27ae6e,#0d7377,#8f6fd6,transparent); opacity:.42; animation:pb-au1 13s ease-in-out infinite reverse;}
+#p2pb .pb-aurora .d{top:76%; background:linear-gradient(90deg,transparent,#8f6fd6,#d6336c,#1e8e5a,transparent); opacity:.4; animation:pb-au2 15s ease-in-out infinite;}
+@keyframes pb-au1{0%,100%{transform:translate(-12%,0) skewY(-6deg);}50%{transform:translate(12%,5%) skewY(5deg);}}
+@keyframes pb-au2{0%,100%{transform:translate(11%,0) skewY(5deg);}50%{transform:translate(-11%,6%) skewY(-4deg);}}

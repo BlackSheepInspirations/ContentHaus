@@ -150,8 +150,10 @@
     if(!ctl || !sel || !viewBtn || !modal) return;
     var certs = {}; try{ certs = JSON.parse(localStorage.getItem('p2p_certificates') || '{}') || {}; }catch(e){}
     var list = Object.keys(certs).map(function(k){ return certs[k]; }).sort(function(a,b){ return (b.ts||0) - (a.ts||0); });
-    if(!list.length) return; // no certificates yet — leave the control hidden
-    ctl.hidden = false;
+    if(!list.length) return; // no certificates yet — the empty-state hint stays visible
+    var hasRow = document.getElementById('p2pb-cert-has'), emptyEl = document.getElementById('p2pb-cert-empty');
+    if(hasRow) hasRow.hidden = false;
+    if(emptyEl) emptyEl.hidden = true;
     sel.innerHTML = list.map(function(c,i){ return '<option value="'+i+'">'+(c.title || 'Certificate')+'</option>'; }).join('');
     var cur = list[0];
     function fmtDate(ts){ return new Date(ts||Date.now()).toLocaleDateString(undefined, { year:'numeric', month:'long', day:'numeric' }); }

@@ -5,7 +5,6 @@
 
   /* ---- live stats (from the shared progress engine) ---- */
   if(window.P2P){
-    window.P2P.earnBadge('Set Sail'); // reaching the (gated) journey means you've set sail
     var streak = window.P2P.streak().count;
     root.querySelectorAll('.p2pj-streak').forEach(function(el){ el.textContent = streak; });
     root.querySelectorAll('.p2pj-points').forEach(function(el){ el.textContent = window.P2P.points(); });
@@ -62,7 +61,10 @@
      from window.P2P.isCourseDone(handle); nothing here is hardcoded. ---- */
   var INTRO_KEY = 'p2p_intro_done';
   function onboardingDone(){ try{ return localStorage.getItem(INTRO_KEY) === '1'; }catch(e){ return false; } }
-  function markOnboardingDone(){ try{ localStorage.setItem(INTRO_KEY, '1'); }catch(e){} }
+  function markOnboardingDone(){
+    try{ localStorage.setItem(INTRO_KEY, '1'); }catch(e){}
+    if(window.P2P){ window.P2P.earnBadge('Set Sail'); if(window.P2P_celebrate) window.P2P_celebrate(); } // earned for completing "Your Journey Starts Here"
+  }
   var introRequired = root.getAttribute('data-intro-required') !== 'false';
 
   function nodeState(h){
@@ -419,10 +421,24 @@
   /* ---- badge-earned celebration (fires on any journey screen) ---- */
   var bpop = document.getElementById('p2pj-badgepop');
   if(bpop && window.P2P && window.P2P.earnedSet){
-    var BP_SEEN = 'p2p_badges_seen', bpNameEl = bpop.querySelector('.bp-name'), bpQ = [];
+    var BP_SEEN = 'p2p_badges_seen', bpNameEl = bpop.querySelector('.bp-name'), bpCanvas = bpop.querySelector('.bp-canvas'), bpQ = [];
     function bpLoad(){ try{ return JSON.parse(localStorage.getItem(BP_SEEN) || '[]') || []; }catch(e){ return []; } }
     function bpSave(a){ try{ localStorage.setItem(BP_SEEN, JSON.stringify(a)); }catch(e){} }
-    function bpNext(){ if(!bpQ.length){ bpop.classList.remove('show'); return; } bpNameEl.textContent = bpQ.shift(); bpop.classList.add('show'); }
+    function bpConfetti(){
+      var cv = bpCanvas; if(!cv || !cv.getContext) return;
+      var ctx = cv.getContext('2d'), DPR = Math.min(window.devicePixelRatio || 1, 2);
+      var W = cv.width = cv.clientWidth * DPR, H = cv.height = cv.clientHeight * DPR; if(!W || !H) return;
+      var colors = ['#f4e2a6','#d8b45a','#39c5c0','#8f6fd6','#27ae6e'], P = [];
+      for(var i=0;i<90;i++){ P.push({ x:W/2 + (Math.random()-.5)*W*0.3, y:H*0.34, vx:(Math.random()-.5)*11*DPR, vy:(Math.random()*-10-3)*DPR, s:(Math.random()*5+3)*DPR, c:colors[(Math.random()*colors.length)|0], r:Math.random()*6, vr:(Math.random()-.5)*0.4 }); }
+      var t0 = performance.now();
+      (function frame(t){
+        var el = t - t0, a = Math.max(0, 1 - el/2600); ctx.clearRect(0,0,W,H);
+        P.forEach(function(p){ p.vy += 0.25*DPR; p.x += p.vx; p.y += p.vy; p.r += p.vr;
+          ctx.save(); ctx.globalAlpha = a; ctx.translate(p.x, p.y); ctx.rotate(p.r); ctx.fillStyle = p.c; ctx.fillRect(-p.s/2, -p.s/2, p.s, p.s*0.62); ctx.restore(); });
+        if(el < 2600 && bpop.classList.contains('show')) requestAnimationFrame(frame); else ctx.clearRect(0,0,W,H);
+      })(t0);
+    }
+    function bpNext(){ if(!bpQ.length){ bpop.classList.remove('show'); return; } bpNameEl.textContent = bpQ.shift(); bpop.classList.add('show'); requestAnimationFrame(bpConfetti); }
     var bpc = bpop.querySelector('.bp-close'); if(bpc) bpc.addEventListener('click', bpNext);
     bpop.addEventListener('click', function(e){ if(e.target === bpop) bpNext(); });
     function bpCelebrate(){
