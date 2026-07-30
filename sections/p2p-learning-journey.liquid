@@ -119,13 +119,16 @@
       {%- for block in section.blocks -%}
         {%- assign b = block.settings -%}
         {%- assign pos = 'left:' | append: b.pos_left | append: '%; top:' | append: b.pos_top | append: '%; width:' | append: b.pos_width | append: '%; height:' | append: b.pos_height | append: '%;' -%}
+        {%- comment -%} course/offshoot link: explicit url wins; otherwise auto-derive /pages/courses-<handle> {%- endcomment -%}
+        {%- assign node_url = b.url -%}
+        {%- if node_url == blank and b.handle != blank -%}{%- assign node_url = '/pages/courses-' | append: b.handle -%}{%- endif -%}
         {%- case block.type -%}
           {%- when 'course' -%}
-            <button class="hs" style="{{ pos }}" data-type="course" data-handle="{{ b.handle }}" data-title="{{ b.title }}" data-body="{{ b.body }}" data-cta="Open course" data-url="{{ b.url }}"{{ block.shopify_attributes }}></button>
+            <button class="hs" style="{{ pos }}" data-type="course" data-handle="{{ b.handle }}" data-title="{{ b.title }}" data-body="{{ b.body }}" data-cta="Open course" data-url="{{ node_url }}"{{ block.shopify_attributes }}></button>
           {%- when 'offshoot' -%}
             {%- assign unlock_handle = b.unlock_after_handle -%}
             {%- if unlock_handle == blank -%}{%- assign unlock_handle = section.settings.offshoot_hub_handle -%}{%- endif -%}
-            <button class="hs hs--offshoot" style="{{ pos }}" data-type="offshoot" data-handle="{{ b.handle }}" data-unlock-after="{{ unlock_handle }}" data-title="{{ b.title }}" data-body="{{ b.body }}" data-cta="Open course" data-url="{{ b.url }}"{{ block.shopify_attributes }}></button>
+            <button class="hs hs--offshoot" style="{{ pos }}" data-type="offshoot" data-handle="{{ b.handle }}" data-unlock-after="{{ unlock_handle }}" data-title="{{ b.title }}" data-body="{{ b.body }}" data-cta="Open course" data-url="{{ node_url }}"{{ block.shopify_attributes }}></button>
           {%- when 'check' -%}
             <button class="hs hs--check" style="{{ pos }}" data-type="check" data-title="{{ b.title }}" data-pulse-items="{{ b.pulse_items | strip_newlines | escape }}" data-link-url="{{ b.link_url }}" data-link-label="{{ b.link_label | default: 'Open' }}"{{ block.shopify_attributes }}></button>
         {%- endcase -%}

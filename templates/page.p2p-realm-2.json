@@ -26,7 +26,7 @@
       "settings": {
         "access_tag": "p2p-learning",
         "access_code": "p2p-learning",
-        "slug": "p2p-element-forest",
+        "slug": "realm-2",
         "current_realm": 2,
         "intro_required": false,
         "offshoot_hub_handle": "",
@@ -41,7 +41,13 @@
         "nextrealm_width": 55,
         "nextrealm_height": 8,
         "realm_1_url": "/pages/p2p-learning",
-        "realm_2_url": "/pages/p2p-element-forest"
+        "realm_2_url": "/pages/realm-2",
+        "realm_3_url": "/pages/realm-3",
+        "realm_4_url": "/pages/realm-4",
+        "realm_5_url": "/pages/realm-5",
+        "realm_3_locked": true,
+        "realm_4_locked": true,
+        "realm_5_locked": true
       }
     }
   },
