@@ -72,7 +72,7 @@
       <div class="bar-realms">
         <div class="realms-scroll">
         <span class="brlbl">Realms</span>
-        {%- assign defnames = 'The Shoreline,Element Forest,Desert Blooms,The Fields,The Evergreens' | split: ',' -%}
+        {%- assign defnames = 'The Shoreline,Element Forest,Desert Blooms,Golden Harvest,The Evergreens' | split: ',' -%}
         {%- assign cur = section.settings.current_realm | default: 1 -%}
         {%- for r in (1..5) -%}
           {%- assign kn = 'realm_' | append: r | append: '_name' -%}
@@ -106,6 +106,8 @@
         <img class="bg" src="{{ 'p2p-journey-board-elementforest.jpg' | asset_url }}" alt="{{ section.settings.journey_name | default: 'Purpose 2 Profit Learning Journey' | escape }} map" loading="eager" />
       {%- elsif section.settings.current_realm == 3 -%}
         <img class="bg" src="{{ 'p2p-journey-board-desertblooms.jpg' | asset_url }}" alt="{{ section.settings.journey_name | default: 'Purpose 2 Profit Learning Journey' | escape }} map" loading="eager" />
+      {%- elsif section.settings.current_realm == 4 -%}
+        <img class="bg" src="{{ 'p2p-journey-board-goldenharvest.jpg' | asset_url }}" alt="{{ section.settings.journey_name | default: 'Purpose 2 Profit Learning Journey' | escape }} map" loading="eager" />
       {%- else -%}
         <img class="bg" src="{{ 'p2p-journey-board.jpg' | asset_url }}" alt="{{ section.settings.journey_name | default: 'Purpose 2 Profit Learning Journey' | escape }} map" loading="eager" />
       {%- endif -%}
@@ -456,7 +458,7 @@
     { "type": "text", "id": "realm_3_name", "label": "Realm 3 name", "default": "Desert Blooms" },
     { "type": "url",  "id": "realm_3_url", "label": "Realm 3 page" },
     { "type": "checkbox", "id": "realm_3_locked", "label": "Realm 3 locked", "default": false },
-    { "type": "text", "id": "realm_4_name", "label": "Realm 4 name", "default": "The Fields" },
+    { "type": "text", "id": "realm_4_name", "label": "Realm 4 name", "default": "Golden Harvest" },
     { "type": "url",  "id": "realm_4_url", "label": "Realm 4 page" },
     { "type": "checkbox", "id": "realm_4_locked", "label": "Realm 4 locked", "default": false },
     { "type": "text", "id": "realm_5_name", "label": "Realm 5 name", "default": "The Evergreens" },

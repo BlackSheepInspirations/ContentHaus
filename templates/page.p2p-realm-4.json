@@ -1,0 +1,42 @@
+{
+  "sections": {
+    "main": {
+      "type": "p2p-learning-journey",
+      "blocks": {
+        "digital-to-physical": { "type": "course", "settings": { "title": "Turning Digital to Physical", "handle": "turning-digital-to-physical", "body": "Rebuild a digital product as a print interior — journals, devotionals, planners, and more, as bound books.", "pos_left": 36.7, "pos_top": 9.25, "pos_width": 20, "pos_height": 6.5 } },
+        "publishing-ebook": { "type": "course", "settings": { "title": "Publishing & Ebook Production", "handle": "publishing-ebook-production", "body": "Reflowable vs. fixed-layout, front/back matter, and formatting a clean ebook.", "pos_left": 72.2, "pos_top": 15.5, "pos_width": 20, "pos_height": 6.5 } },
+        "kdp-audible": { "type": "course", "settings": { "title": "Amazon KDP & Audible", "handle": "amazon-kdp-audible", "body": "Royalties, formats (ebook / paperback / hardcover), and setting up your KDP account.", "pos_left": 68.9, "pos_top": 28, "pos_width": 20, "pos_height": 6.5 } },
+        "author-central": { "type": "course", "settings": { "title": "Author Central & Book Marketing", "handle": "author-central-book-marketing", "body": "Set up Author Central and the marketing that helps a book get found.", "pos_left": 34.4, "pos_top": 31.5, "pos_width": 20, "pos_height": 6.5 } },
+        "kdp-wont-allow": { "type": "course", "settings": { "title": "What KDP Actually Won't Allow", "handle": "what-kdp-wont-allow", "body": "KDP's originality and content rules — closing the gap right before you publish.", "pos_left": 34.4, "pos_top": 43.5, "pos_width": 20, "pos_height": 6.5 } },
+        "coloring-books": { "type": "offshoot", "settings": { "title": "Coloring & Activity Books", "handle": "coloring-activity-books", "body": "Line-art interiors built as bound, sellable books.", "pos_left": 76.7, "pos_top": 50.5, "pos_width": 18, "pos_height": 6 } },
+        "music-playlists": { "type": "offshoot", "settings": { "title": "Music & Playlists", "handle": "music-playlists", "body": "Curated music and playlist products.", "pos_left": 76.7, "pos_top": 60, "pos_width": 18, "pos_height": 6 } },
+        "audiobooks": { "type": "offshoot", "settings": { "title": "Books to Audiobooks", "handle": "books-to-audiobooks", "body": "Extend a finished book into a narrated audiobook.", "pos_left": 16.7, "pos_top": 71, "pos_width": 18, "pos_height": 6 } },
+        "ingramspark": { "type": "offshoot", "settings": { "title": "IngramSpark", "handle": "ingramspark", "body": "Wider distribution beyond KDP via IngramSpark.", "pos_left": 76.7, "pos_top": 70, "pos_width": 18, "pos_height": 6 } },
+        "childrens-books": { "type": "offshoot", "settings": { "title": "Children's Books on KDP", "handle": "childrens-books-kdp", "body": "Page-count conventions, character consistency, and formatting for print + Kindle.", "pos_left": 76.7, "pos_top": 79, "pos_width": 18, "pos_height": 6 } },
+        "mindset": { "type": "check", "settings": { "title": "Mindset Check", "pulse_items": "What am I telling myself about this right now?\nWhat would it feel like to trust the process today?", "pos_left": 38.9, "pos_top": 23, "pos_width": 15, "pos_height": 5 } },
+        "purpose": { "type": "check", "settings": { "title": "Purpose Check", "pulse_items": "Is this book worth the time?\nWho am I doing this for?", "pos_left": 46.7, "pos_top": 59, "pos_width": 15, "pos_height": 5 } },
+        "heart": { "type": "check", "settings": { "title": "Heart Check", "pulse_items": "What am I proud of so far?\nWhere do I need to be gentler with myself?", "pos_left": 54.4, "pos_top": 88, "pos_width": 15, "pos_height": 5 } }
+      },
+      "block_order": ["digital-to-physical", "publishing-ebook", "kdp-audible", "author-central", "kdp-wont-allow", "coloring-books", "music-playlists", "audiobooks", "ingramspark", "childrens-books", "mindset", "purpose", "heart"],
+      "settings": {
+        "access_tag": "p2p-learning",
+        "access_code": "p2p-learning",
+        "slug": "realm-4",
+        "current_realm": 4,
+        "intro_required": false,
+        "offshoot_hub_handle": "",
+        "nextrealm_left": 50,
+        "nextrealm_top": 95.5,
+        "nextrealm_width": 55,
+        "nextrealm_height": 8,
+        "realm_1_url": "/pages/p2p-learning",
+        "realm_2_url": "/pages/realm-2",
+        "realm_3_url": "/pages/realm-3",
+        "realm_4_url": "/pages/realm-4",
+        "realm_5_url": "/pages/realm-5",
+        "realm_5_locked": true
+      }
+    }
+  },
+  "order": ["main"]
+}
