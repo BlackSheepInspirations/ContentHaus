@@ -75,6 +75,8 @@
     if(doneCount()===total){
       if(window.P2P) window.P2P.completeCourse(course); // First Steps / Finding Your Current
       recordCert(); // save the certificate so it can be re-viewed in Milestones
+      if(window.P2P && window.P2P.awardCert) window.P2P.awardCert(course); // +25 once per course
+      if(window.P2P && window.P2P.push) window.P2P.push(); // flush to cross-device backend
       bpCollect(); // capture newly-earned badges to celebrate after the certificate
       setTimeout(celebrate, 350);
     }

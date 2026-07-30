@@ -347,7 +347,7 @@
 
   {%- comment -%} ---- POINTS breakdown chart ---- {%- endcomment -%}
   {%- assign p_course  = section.settings.pts_course     | default: 100 -%}
-  {%- assign p_dna     = section.settings.pts_brand_dna  | default: 75 -%}
+  {%- assign p_dna     = section.settings.pts_brand_dna  | default: 250 -%}
   {%- assign p_side    = section.settings.pts_sidequest  | default: 40 -%}
   {%- assign p_cert    = section.settings.pts_cert       | default: 25 -%}
   {%- assign p_journal = section.settings.pts_journal    | default: 5 -%}
@@ -479,11 +479,13 @@
 <script>
   window.P2P_POINTS = {
     course:  {{ section.settings.pts_course     | default: 100 }},
-    dna:     {{ section.settings.pts_brand_dna  | default: 75 }},
+    dna:     {{ section.settings.pts_brand_dna  | default: 250 }},
     side:    {{ section.settings.pts_sidequest  | default: 40 }},
     cert:    {{ section.settings.pts_cert       | default: 25 }},
     journal: {{ section.settings.pts_journal    | default: 5 }},
     streak:  {{ section.settings.pts_streak     | default: 5 }},
+    badge:   {{ section.settings.pts_badge      | default: 25 }},
+    masterclass: {{ section.settings.pts_masterclass | default: 250 }},
     level:   {{ section.settings.pts_level_step | default: 250 }}
   };
 </script>
@@ -569,11 +571,13 @@
 
     { "type": "header", "content": "Points breakdown (tap-Points chart)" },
     { "type": "number", "id": "pts_course", "label": "Finish a course", "default": 100 },
-    { "type": "number", "id": "pts_brand_dna", "label": "Brand DNA Blueprint", "default": 75 },
+    { "type": "number", "id": "pts_brand_dna", "label": "Brand DNA Blueprint", "default": 250 },
     { "type": "number", "id": "pts_sidequest", "label": "Side quest (Mindset/Purpose/Heart)", "default": 40 },
-    { "type": "number", "id": "pts_cert", "label": "Download a certificate", "default": 25 },
-    { "type": "number", "id": "pts_journal", "label": "Journal entry (per, up to 5/day)", "default": 5 },
+    { "type": "number", "id": "pts_cert", "label": "Certificate (once per course)", "default": 25 },
+    { "type": "number", "id": "pts_journal", "label": "Journal — first entry each day", "default": 5 },
     { "type": "number", "id": "pts_streak", "label": "Daily streak (per day)", "default": 5 },
+    { "type": "number", "id": "pts_badge", "label": "Earn a badge", "default": 25 },
+    { "type": "number", "id": "pts_masterclass", "label": "Complete a masterclass", "default": 250 },
     { "type": "number", "id": "pts_level_step", "label": "Points per Merit", "default": 250 },
 
     { "type": "header", "content": "Info / Help (ⓘ icon)" },

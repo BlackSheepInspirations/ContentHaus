@@ -170,7 +170,10 @@
   var checkModal = document.getElementById('p2pj-check');
   function openCheck(h){
     if(!checkModal) return;
-    document.getElementById('p2pj-ct').textContent = h.getAttribute('data-title') || '';
+    var ctitle = h.getAttribute('data-title') || '';
+    // engaging a pulse Check is its side-quest completion — +points once per distinct check
+    if(ctitle && window.P2P && window.P2P.completeCheck){ window.P2P.completeCheck('check:' + ctitle); if(window.P2P.push) window.P2P.push(); }
+    document.getElementById('p2pj-ct').textContent = ctitle;
     var items = (h.getAttribute('data-pulse-items') || '').split('\n').map(function(s){ return s.trim(); }).filter(Boolean);
     var list = document.getElementById('p2pj-cb');
     list.innerHTML = items.map(function(i){ return '<li>' + i.replace(/[&<>]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c]; }) + '</li>'; }).join('');

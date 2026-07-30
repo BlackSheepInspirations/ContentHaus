@@ -24,7 +24,8 @@ window.P2P = (function(){
     100:'100-Day Streak', 125:'125-Day Streak', 150:'150-Day Streak' };
   var K = { streak:'p2p_streak', signs:'p2p_signs', earned:'p2p_badges_earned',
     journal:'p2p_journal', courses:'p2p_courses_done',
-    rates:'p2p_rates', ptsStreak:'p2p_pts_streak', ptsJournal:'p2p_pts_journal', journalDay:'p2p_journal_day' };
+    rates:'p2p_rates', ptsStreak:'p2p_pts_streak', ptsJournal:'p2p_pts_journal', journalDay:'p2p_journal_day',
+    certsAwarded:'p2p_certs_awarded', checksDone:'p2p_checks_done' };
 
   function get(k, def){ try{ var v = JSON.parse(localStorage.getItem(k)); return v == null ? def : v; }catch(e){ return def; } }
   function set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
@@ -32,7 +33,8 @@ window.P2P = (function(){
   /* POINT RATES — the journey section passes its editable values via
      window.P2P_POINTS; we cache them so the player & badges pages (which don't
      carry those settings) award the same amounts. Falls back to these defaults. */
-  var DEFAULT_RATES = { course:100, dna:75, side:40, cert:25, journal:5, streak:5, level:250 };
+  var DEFAULT_RATES = { course:100, dna:250, side:40, cert:25, journal:5, streak:5, badge:25, masterclass:250, level:250 };
+  var POINT_INELIGIBLE = []; // badge names that must NOT award points (future points-milestone badges), to prevent reward loops
   var R = (function(){
     var cfg = window.P2P_POINTS;
     if(cfg && typeof cfg === 'object'){
@@ -68,24 +70,56 @@ window.P2P = (function(){
     return s;
   }
 
-  /* +points for a journal entry, capped at 5 entries/day. Call on each save. */
+  /* +points for the FIRST journal entry each day only (more entries are welcome —
+     just not point-farmable). Call on each save. */
   function addJournalPoint(){
-    var t = today(), jd = get(K.journalDay, { d:'', c:0 });
-    if(jd.d !== t) jd = { d:t, c:0 };
-    if(jd.c < 5){ set(K.ptsJournal, (get(K.ptsJournal, 0) || 0) + R.journal); jd.c += 1; set(K.journalDay, jd); }
+    var t = today();
+    if(get(K.journalDay, '') !== t){ set(K.ptsJournal, (get(K.ptsJournal, 0) || 0) + R.journal); set(K.journalDay, t); }
   }
 
   /* live points total — milestones recomputed from state, streak/journal from
      their running ledgers. Level climbs one step per R.level points. */
+  function eligibleBadgeCount(){ return get(K.earned, []).filter(function(n){ return POINT_INELIGIBLE.indexOf(n) === -1; }).length; }
   function points(){
-    var e = get(K.earned, []), courses = get(K.courses, []).length;
-    var p = courses * R.course;
-    if(e.indexOf('Founder Fingerprint') !== -1) p += R.dna;  // Brand DNA Blueprint done
-    if(e.indexOf('Certified') !== -1) p += R.cert;           // certificate downloaded
-    p += (get(K.ptsStreak, 0) || 0) + (get(K.ptsJournal, 0) || 0);
+    var e = get(K.earned, []);
+    var p = get(K.courses, []).length * R.course;                  // finished courses
+    if(e.indexOf('Founder Fingerprint') !== -1) p += R.dna;        // Brand DNA Blueprint (one-time)
+    p += get(K.certsAwarded, []).length * R.cert;                  // certificates — once per course
+    p += get(K.checksDone, []).length * R.side;                    // side quests (checks)
+    p += eligibleBadgeCount() * R.badge;                           // eligible badges (+25 each)
+    p += (get(K.ptsStreak, 0) || 0) + (get(K.ptsJournal, 0) || 0); // streak + journal ledgers
     return p;
   }
-  function level(){ return 1 + Math.floor(points() / (R.level || 250)); }
+  function pointsBreakdown(){
+    var e = get(K.earned, []);
+    return {
+      courses: get(K.courses, []).length * R.course,
+      dna:     (e.indexOf('Founder Fingerprint') !== -1) ? R.dna : 0,
+      certs:   get(K.certsAwarded, []).length * R.cert,
+      side:    get(K.checksDone, []).length * R.side,
+      badges:  eligibleBadgeCount() * R.badge,
+      streak:  get(K.ptsStreak, 0) || 0,
+      journal: get(K.ptsJournal, 0) || 0
+    };
+  }
+
+  /* Merits: one per R.level (250) points. Tiers: named ranks, one every 2 Merits (500 pts). */
+  var TIERS = ['Dreamer','Seeker','Starter','Apprentice','Builder','Maker','Crafter','Creator','Artisan','Designer',
+    'Explorer','Navigator','Pathfinder','Pioneer','Trailblazer','Innovator','Architect','Visionary','Luminary','Unbound'];
+  function roman(n){ var m = ['','I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII']; return m[n] || String(n); }
+  function merits(){ return Math.floor(points() / (R.level || 250)); }
+  function tier(){
+    var p = points(), step = 2 * (R.level || 250), idx = Math.floor(p / step) + 1, start = (idx - 1) * step, name, nextName;
+    if(idx <= TIERS.length){ name = TIERS[idx - 1]; nextName = (idx < TIERS.length) ? TIERS[idx] : 'Unbound ' + roman(2); }
+    else { var ub = idx - (TIERS.length - 1); name = 'Unbound ' + roman(ub); nextName = 'Unbound ' + roman(ub + 1); }
+    return { index: idx, name: name, start: start, next: start + step, nextName: nextName, points: p, merits: merits(), tiers: TIERS.slice() };
+  }
+  function level(){ return merits(); } // legacy alias
+
+  /* side-quest completion (checks) — +R.side once per distinct check id */
+  function completeCheck(id){ id = String(id || ''); var d = get(K.checksDone, []); if(id && d.indexOf(id) === -1){ d.push(id); set(K.checksDone, d); } return d.length; }
+  /* certificate award — +R.cert once per course handle */
+  function awardCert(handle){ handle = String(handle || ''); var a = get(K.certsAwarded, []); if(handle && a.indexOf(handle) === -1){ a.push(handle); set(K.certsAwarded, a); } return a.length; }
 
   function markSign(key){
     key = String(key || '').toLowerCase();
@@ -137,8 +171,13 @@ window.P2P = (function(){
     addJournalPoint: addJournalPoint,
     completeCourse: completeCourse,
     isCourseDone: isCourseDone,
+    completeCheck: completeCheck,
+    awardCert: awardCert,
     points: points,
+    pointsBreakdown: pointsBreakdown,
     level: level,
+    merits: merits,
+    tier: tier,
     coursesDone: function(){ return get(K.courses, []).length; },
     badgesStat: function(){ return get('p2p_badges_stat', null); }, // {earned,total} published by the badges page
     rates: R,
