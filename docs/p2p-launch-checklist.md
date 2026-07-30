@@ -55,12 +55,12 @@ just before public launch. Not urgent while password-locked.
 - **Mindset Moment library → 500:** currently ~120 items in `assets/p2p-moments.js`;
   grow in ~100-item batches (say "keep going").
 
-## 3. Known bug — panel-switch scroll (deferred)
+## 3. ~~Known bug — panel-switch scroll~~ ✅ FIXED
 
-Clicking a nav tab (All Courses / Progress / Bonuses / Journal) used to auto-scroll
-to the opened panel, but it fought the JS sticky bar's spacer and **bounced
-inconsistently** (worked for one tab, not another). Auto-scroll is currently
-**disabled** in `showPanel()` in `assets/p2p-journey.js` — panels just swap in
-place (no jump, no bounce). Proper fix idea: replace the JS sticky bar with native
-`position:sticky` + `scroll-margin-top`, or debounce a single settled scroll that
-doesn't re-trigger the sticky sync mid-scroll. Milestones is unaffected (real link).
+Clicking a nav tab now scrolls the toolbar to pin at the top with the panel title
+just beneath it — consistently, no bounce. Fix (in `assets/p2p-journey.js` +
+`.css`): a single scroll to a *stable* target (`panelDocY - stickyOff - barH + 2`;
+panelDocY is constant because the bar/spacer always occupies barH before the panel,
+so no re-measuring/feedback loop = no bounce), plus a `min-height:calc(100vh - 40px)`
+on `.panel` so even short panels (Progress/Bonuses) have room to pin the bar the
+same way tall ones do. Verified against a faithful sticky-bar mock.

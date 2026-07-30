@@ -225,12 +225,22 @@
 
   /* ---- nav tabs → inline panels ---- */
   var board = root.querySelector('.board');
+  var stickyOff = 8; // sticky-bar top offset, kept current by the sticky sync() below
   function showPanel(name){
     root.querySelectorAll('.panel').forEach(function(p){ p.classList.toggle('on', p.getAttribute('data-panel') === name); });
     if(board) board.style.display = (name === 'journey') ? '' : 'none';
     root.querySelectorAll('.nav a[data-panel]').forEach(function(x){ x.classList.toggle('on', x.getAttribute('data-panel') === name); });
-    // NOTE: auto-scroll-to-panel intentionally disabled — the sticky-bar spacer made it
-    // bounce. Panels swap in place for now; revisit a stable scroll approach (see launch checklist).
+    // Scroll so the toolbar pins to the top with the panel title just beneath it. A single
+    // scroll to a stable target (panelDocY is constant — the bar/spacer always occupies barH
+    // before the panel) never bounces. Panels carry a CSS min-height so even short ones have
+    // room to pin the bar; the panel's own top padding shows the title clear of the bar.
+    var target = (name === 'journey') ? board : root.querySelector('.panel[data-panel="' + name + '"]');
+    if(target && bar){
+      var barH = bar.offsetHeight;
+      var panelDocY = target.getBoundingClientRect().top + window.pageYOffset;
+      var y = panelDocY - stickyOff - barH + 2;
+      window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+    }
   }
   root.querySelectorAll('.nav a').forEach(function(a){
     a.addEventListener('click', function(e){
@@ -492,7 +502,7 @@
     function unstick(){ bar.classList.remove('p2pj-fixed'); fixed = false; spacer.style.height = '0'; bar.style.left = bar.style.width = bar.style.top = ''; }
     function sync(){
       if(!shown()){ if(fixed) unstick(); return; }      // never measure while the bar is hidden (e.g. mid-panel-swap)
-      var off = headerOffset();
+      var off = headerOffset(); stickyOff = off;
       var refTop = fixed ? spacer.getBoundingClientRect().top : bar.getBoundingClientRect().top;
       if(!fixed && refTop <= off){ spacer.style.height = bar.offsetHeight + 'px'; bar.classList.add('p2pj-fixed'); fixed = true; place(off); }
       else if(fixed){ if(spacer.getBoundingClientRect().top >= off) unstick(); else place(off); }

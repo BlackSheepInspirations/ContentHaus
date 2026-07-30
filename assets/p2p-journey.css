@@ -155,7 +155,7 @@
   color:#06120e; background:linear-gradient(145deg,var(--emerald),var(--teal)); text-decoration:none; box-shadow:0 8px 22px rgba(39,174,110,.3);}
 
 /* ---- inline tab panels (Progress / Bonuses / Journal) ---- */
-#p2pj .panel{display:none; max-width:900px; margin:0 auto; padding:24px 22px 60px; position:relative; z-index:1;}
+#p2pj .panel{display:none; max-width:900px; margin:0 auto; padding:24px 22px 60px; position:relative; z-index:1; min-height:calc(100vh - 40px); box-sizing:border-box;}
 #p2pj .panel.on{display:block;}
 #p2pj .pnl-head{margin-bottom:20px;}
 #p2pj .pnl-head h2{font:700 30px/1.05 Georgia,serif; margin-bottom:6px;}
