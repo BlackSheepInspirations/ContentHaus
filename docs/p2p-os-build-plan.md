@@ -63,11 +63,11 @@ loads that view **inside the OS** (embed). Sidebar top, always visible:
 6. **Content Haus**
 7. **Graphics Haus**
 8. **Project Haus** (rename of Product Haus)
-9. **Transition** — "you've built something → let's market it." Include the **PROFIT Path** entry. (needs content direction)
+9. **Transition** — "you've built something → let's market it." Include the **ROOTED** launch entry. (needs content direction)
 10. **Marketing Haus**
 11. **Growth / mindset transition** — continued growth, "mindset matters."
 12. **Growth Haus**
-13. **PROFIT Path** (own page — "Light the Path to Profits")
+13. **ROOTED — Light the Path** (own page; formerly "PROFIT Path")
     - Product readiness checklist, product listing items, launch plan components.
     - **Certificate of Achievement** after all gamified steps: branded, personalizable
       (brand name etc.), download/print, **confetti celebration on first open + a
