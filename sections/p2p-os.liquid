@@ -1,307 +1,378 @@
 {%- comment -%}
-  Purpose 2 Profit — Operating System (member home base).
-  A personalized hub: every tool shows as UNLOCKED (clickable) if the customer owns
-  its access tag (or the all-access tag), or LOCKED with a "Get access" link if not.
-  Gating matches every other Haus: customer.tags contains <access_tag>. Theme editor
-  bypasses all gates (request.design_mode). Scoped to #p2pos.
+  Purpose 2 Profit — Operating System SHELL (member home base).
+  A persistent left sidebar + a content pane. Sidebar items are `navitem` blocks:
+    mode "view"  -> shows a native view in the pane (only "start" is built in P1; others show a placeholder)
+    mode "embed" -> loads the target page inside the pane (iframe; seamless once that Haus adds embedded-mode)
+    mode "link"  -> navigates to the target URL
+  The "Your Journey Starts Here" view is driven by settings + `step` (gamified map) + `faq` blocks.
+  Gating matches every Haus: customer.tags contains the item's access_tag (or the all-access tag).
+  Scoped to #p2pos. Phase 1 of docs/p2p-os-build-plan.md.
 {%- endcomment -%}
 
 {%- assign all_tag = section.settings.all_access_tag | default: 'all-access' -%}
 {%- assign owns_all = false -%}
 {%- if customer and all_tag != blank and customer.tags contains all_tag -%}{%- assign owns_all = true -%}{%- endif -%}
-
+{%- if request.design_mode -%}{%- assign owns_all = true -%}{%- endif -%}
 {%- assign has_journey = owns_all -%}
 {%- if customer and section.settings.journey_access_tag != blank and customer.tags contains section.settings.journey_access_tag -%}{%- assign has_journey = true -%}{%- endif -%}
-{%- if request.design_mode -%}{%- assign has_journey = true -%}{%- assign owns_all = true -%}{%- endif -%}
 
-<div id="p2pos">
-  <header class="p2pos-hero">
-    {%- if section.settings.eyebrow != blank -%}<div class="p2pos-eyebrow">{{ section.settings.eyebrow }}</div>{%- endif -%}
-    <h1>{{ section.settings.title | default: 'Your Operating System' }}{%- if customer.first_name != blank -%}<span class="p2pos-name">, {{ customer.first_name }}</span>{%- endif -%}</h1>
-    {%- if section.settings.intro != blank -%}<p class="p2pos-intro">{{ section.settings.intro }}</p>{%- endif -%}
-  </header>
+<div id="p2pos" class="osx">
+  <button class="osx-burger" type="button" aria-label="Menu" data-osx-burger><span></span><span></span><span></span></button>
 
-  {%- comment -%} ---- Continue the Learning Journey (owners) / unlock promo (non-owners) ---- {%- endcomment -%}
-  {%- if section.settings.show_journey -%}
-    {%- if has_journey -%}
-      <section class="p2pos-dash" data-p2pos-journey>
-        <div class="pd-head">
-          <div>
-            <div class="pj-kicker">✦ Your Learning Journey</div>
-            <h2>{{ section.settings.journey_heading | default: 'Pick up where you left off' }}</h2>
-          </div>
-          <a class="pj-go" href="{{ section.settings.journey_url | default: '/pages/p2p-learning' }}">{{ section.settings.journey_cta | default: 'Continue your journey →' }}</a>
-        </div>
-        <div class="pd-body">
-          {%- if section.settings.show_stats -%}
-          <div class="pd-metrics">
-            <div class="pd-ring" data-p2pos-ring style="--p:0"><div class="pd-ringin"><b class="p2pos-ringpct">0%</b><small>Complete</small></div></div>
-            <div class="pd-stats">
-              <div class="pd-chip"><span class="pd-ico">⭐</span><span class="pd-val"><b class="p2pos-points">0</b><small>Points</small></span></div>
-              <div class="pd-chip"><span class="pd-ico">🏅</span><span class="pd-val"><b class="p2pos-badges">0</b><small>Badges</small></span></div>
-              <div class="pd-chip"><span class="pd-ico">🔥</span><span class="pd-val"><b class="p2pos-streak">0</b><small>Day streak</small></span></div>
-              <div class="pd-chip"><span class="pd-ico">✦</span><span class="pd-val"><b class="p2pos-tier">Dreamer</b><small>Merit tier</small></span></div>
-            </div>
-          </div>
-          {%- endif -%}
-          {%- if section.settings.show_moment -%}
-          <aside class="pd-moment" id="p2pos-moment" hidden>
-            <div class="mm-label"><span class="mm-star">✦</span> Daily <span class="mm-grad">Mindset</span> Moment</div>
-            <blockquote class="mm-text"></blockquote>
-            <cite class="mm-source"></cite>
-          </aside>
-          {%- endif -%}
-        </div>
-      </section>
-    {%- else -%}
-      <section class="p2pos-journey locked">
-        <div class="pj-copy">
-          <div class="pj-kicker">✦ Learning Journey</div>
-          <h2>{{ section.settings.journey_locked_heading | default: 'Start the Learning Journey' }}</h2>
-          <p class="pj-lockedbody">{{ section.settings.journey_locked_body | default: 'A gamified, step-by-step path from the shore all the way to a business that runs — courses, badges, streaks and more.' }}</p>
-          {%- if section.settings.journey_get_url != blank -%}<a class="pj-go" href="{{ section.settings.journey_get_url }}">{{ section.settings.journey_get_label | default: 'Get access →' }}</a>{%- endif -%}
-        </div>
-        <div class="pj-art locked" aria-hidden="true"><span class="pj-lock">🔒</span></div>
-      </section>
-    {%- endif -%}
-  {%- endif -%}
-
-  {%- comment -%} ---- Your tools grid (gated per card) ---- {%- endcomment -%}
-  {%- assign tool_blocks = section.blocks | where: 'type', 'tool' -%}
-  {%- if tool_blocks.size > 0 -%}
-    {%- if section.settings.tools_heading != blank -%}<h3 class="p2pos-secttl">{{ section.settings.tools_heading }}</h3>{%- endif -%}
-    <div class="p2pos-grid">
+  <aside class="osx-side" data-osx-side>
+    <div class="osx-brand">
+      <div class="osx-brandmark">Purpose <span class="osx-2">2</span> Profit</div>
+      <div class="osx-brandsub">{{ section.settings.brand_sub | default: 'powered by Black Sheep Creations &amp; Inspirations' }}</div>
+    </div>
+    <nav class="osx-nav">
       {%- for block in section.blocks -%}
-        {%- if block.type == 'tool' -%}
+        {%- if block.type == 'navitem' -%}
           {%- assign owns = owns_all -%}
+          {%- if block.settings.access_tag == blank -%}{%- assign owns = true -%}{%- endif -%}
           {%- if customer and block.settings.access_tag != blank and customer.tags contains block.settings.access_tag -%}{%- assign owns = true -%}{%- endif -%}
           {%- if request.design_mode -%}{%- assign owns = true -%}{%- endif -%}
-          {%- if owns -%}
-            <a class="p2pos-card is-owned" href="{{ block.settings.url | default: '#' }}" {{ block.shopify_attributes }}>
-          {%- else -%}
-            <a class="p2pos-card is-locked" href="{{ block.settings.get_url | default: '#' }}" {{ block.shopify_attributes }}>
-          {%- endif -%}
-            <span class="pc-ico">
+          <button class="osx-item{% if forloop.first %} on{% endif %}{% unless owns %} locked{% endunless %}" type="button"
+            data-mode="{{ block.settings.mode | default: 'view' }}"
+            data-target="{{ block.settings.target }}"
+            {% unless owns %}data-get="{{ block.settings.get_url }}"{% endunless %}
+            {{ block.shopify_attributes }}>
+            <span class="osx-ico">
               {%- case block.settings.icon -%}
-                {%- when 'prompt' -%}<svg viewBox="0 0 24 24"><path d="M4 5h16v11H8l-4 3z"/><path d="M8 9h8M8 12h5"/></svg>
-                {%- when 'palette' -%}<svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 100 18c1.5 0 2-1 2-2 0-1.3-1-1.5-1-2.5S14 15 15 15h2a4 4 0 004-4c0-4.4-4-8-9-8z"/><circle cx="7.5" cy="10.5" r="1"/><circle cx="12" cy="7.5" r="1"/><circle cx="16.5" cy="10.5" r="1"/></svg>
-                {%- when 'megaphone' -%}<svg viewBox="0 0 24 24"><path d="M3 10v4h3l7 4V6l-7 4z"/><path d="M17 8a5 5 0 010 8"/></svg>
-                {%- when 'box' -%}<svg viewBox="0 0 24 24"><path d="M12 3l8 4v10l-8 4-8-4V7z"/><path d="M4 7l8 4 8-4M12 11v10"/></svg>
+                {%- when 'spark' -%}<svg viewBox="0 0 24 24"><path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.9 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/></svg>
+                {%- when 'check' -%}<svg viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg>
+                {%- when 'fingerprint' -%}<svg viewBox="0 0 24 24"><path d="M12 11v3m-4-3a4 4 0 018 0v2M6 12a6 6 0 0112 0v3m-9 0a3 3 0 006 0"/></svg>
                 {%- when 'crown' -%}<svg viewBox="0 0 24 24"><path d="M4 8l4 4 4-6 4 6 4-4v9H4z"/></svg>
+                {%- when 'prompt' -%}<svg viewBox="0 0 24 24"><path d="M4 5h16v11H8l-4 3z"/><path d="M8 9h8M8 12h5"/></svg>
+                {%- when 'palette' -%}<svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 100 18c1.5 0 2-1 2-2 0-1.3-1-1.5-1-2.5S14 15 15 15h2a4 4 0 004-4c0-4.4-4-8-9-8z"/></svg>
+                {%- when 'box' -%}<svg viewBox="0 0 24 24"><path d="M12 3l8 4v10l-8 4-8-4V7z"/><path d="M4 7l8 4 8-4M12 11v10"/></svg>
+                {%- when 'megaphone' -%}<svg viewBox="0 0 24 24"><path d="M3 10v4h3l7 4V6l-7 4z"/><path d="M17 8a5 5 0 010 8"/></svg>
                 {%- when 'rocket' -%}<svg viewBox="0 0 24 24"><path d="M12 3c4 2 6 6 6 10l-3 3H9l-3-3c0-4 2-8 6-10z"/><circle cx="12" cy="10" r="1.6"/><path d="M9 19l-2 2M15 19l2 2"/></svg>
-                {%- when 'book' -%}<svg viewBox="0 0 24 24"><path d="M12 6C10 4.4 5.5 4.2 3.5 5.2v13.6c2-1 6.5-.8 8.5.8 2-1.6 6.5-1.8 8.5-.8V5.2C18.5 4.2 14 4.4 12 6z"/><path d="M12 6v13.6"/></svg>
-                {%- else -%}<svg viewBox="0 0 24 24"><path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.9 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/></svg>
+                {%- when 'path' -%}<svg viewBox="0 0 24 24"><path d="M6 20c0-6 12-4 12-10a4 4 0 00-8 0"/><circle cx="6" cy="20" r="1.4"/><circle cx="14" cy="6" r="1.4"/></svg>
+                {%- when 'mates' -%}<svg viewBox="0 0 24 24"><circle cx="8.5" cy="9" r="3"/><circle cx="16" cy="10" r="2.4"/><path d="M3 20c0-3 2.5-5 5.5-5S14 17 14 20M14.5 20c0-2 1.5-3.5 3.5-3.5s3 1.3 3 3"/></svg>
+                {%- when 'tools' -%}<svg viewBox="0 0 24 24"><path d="M14 7a3 3 0 00-4 4l-6 6 2 2 6-6a3 3 0 004-4l-2 2-2-2z"/></svg>
+                {%- when 'notebook' -%}<svg viewBox="0 0 24 24"><path d="M6 4h12v16H6z"/><path d="M6 9h12M9 4v16"/></svg>
+                {%- when 'gift' -%}<svg viewBox="0 0 24 24"><path d="M4 11h16v9H4z"/><path d="M4 8h16v3H4zM12 8v12M12 8c-2-4-6-1-3 0 3 1 3 0 3 0zm0 0c2-4 6-1 3 0-3 1-3 0-3 0z"/></svg>
+                {%- else -%}<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></svg>
               {%- endcase -%}
             </span>
-            <span class="pc-body">
-              <span class="pc-title">{{ block.settings.title | default: 'Tool' }}</span>
-              {%- if block.settings.blurb != blank -%}<span class="pc-blurb">{{ block.settings.blurb }}</span>{%- endif -%}
-            </span>
-            {%- if owns -%}
-              <span class="pc-go">Open →</span>
-            {%- else -%}
-              <span class="pc-lock" aria-label="Locked">🔒<em>Get access</em></span>
-            {%- endif -%}
-          </a>
+            <span class="osx-lbl">{{ block.settings.label }}</span>
+            {%- unless owns -%}<span class="osx-lock">🔒</span>{%- endunless -%}
+          </button>
         {%- endif -%}
       {%- endfor -%}
-    </div>
-  {%- endif -%}
+    </nav>
+  </aside>
 
-  {%- comment -%} ---- Help & resources ---- {%- endcomment -%}
-  {%- assign has_help = false -%}
-  {%- if section.settings.tutorial_url != blank or section.settings.milestones_url != blank or section.settings.support_url != blank or section.settings.support_email != blank -%}{%- assign has_help = true -%}{%- endif -%}
-  {%- if has_help -%}
-    <h3 class="p2pos-secttl">{{ section.settings.help_heading | default: 'Help & resources' }}</h3>
-    <div class="p2pos-help">
-      {%- if section.settings.tutorial_url != blank -%}<a class="ph-item" href="{{ section.settings.tutorial_url }}"><b>How it works</b><span>The full walkthrough</span></a>{%- endif -%}
-      {%- if section.settings.milestones_url != blank -%}<a class="ph-item" href="{{ section.settings.milestones_url }}"><b>Milestones</b><span>Your badges & certificates</span></a>{%- endif -%}
-      {%- if section.settings.support_url != blank -%}<a class="ph-item" href="{{ section.settings.support_url }}"><b>Support</b><span>Get help</span></a>
-      {%- elsif section.settings.support_email != blank -%}<a class="ph-item" href="mailto:{{ section.settings.support_email }}"><b>Support</b><span>{{ section.settings.support_email }}</span></a>{%- endif -%}
-    </div>
-  {%- endif -%}
+  <main class="osx-main" data-osx-main>
+    {%- comment -%} ===== VIEW: Your Journey Starts Here ===== {%- endcomment -%}
+    <section class="osx-view on" data-view="start">
+      <header class="osx-hero"{% if section.settings.hero_image != blank %} style="--hero:url('{{ section.settings.hero_image | image_url: width: 2000 }}')"{% endif %}>
+        <div class="osx-hero-glow"></div>
+        <div class="osx-hero-in">
+          {%- if section.settings.hero_eyebrow != blank -%}<div class="osx-eyebrow">{{ section.settings.hero_eyebrow }}</div>{%- endif -%}
+          <h1>{{ section.settings.hero_title | default: 'Welcome home' }}{%- if customer.first_name != blank -%}<span class="osx-name">, {{ customer.first_name }}</span>{%- endif -%}</h1>
+          {%- if section.settings.hero_body != blank -%}<p class="osx-hero-body">{{ section.settings.hero_body }}</p>{%- endif -%}
+          {%- if section.settings.hero_cta_label != blank -%}<button class="osx-cta" type="button" data-osx-goto="{{ section.settings.hero_cta_target | default: 'checkpoint' }}">{{ section.settings.hero_cta_label }}</button>{%- endif -%}
+        </div>
+      </header>
+
+      {%- if section.settings.show_stats -%}
+      <div class="osx-stats" data-osx-stats hidden>
+        <div class="osx-ring" data-osx-ring style="--p:0"><div class="osx-ringin"><b class="p2pos-ringpct">0%</b><small>Complete</small></div></div>
+        <div class="osx-chips">
+          <div class="osx-chip"><span class="osx-cico">⭐</span><span><b class="p2pos-points">0</b><small>Points</small></span></div>
+          <div class="osx-chip"><span class="osx-cico">🏅</span><span><b class="p2pos-badges">0</b><small>Badges</small></span></div>
+          <div class="osx-chip"><span class="osx-cico">🔥</span><span><b class="p2pos-streak">0</b><small>Day streak</small></span></div>
+          <div class="osx-chip"><span class="osx-cico">✦</span><span><b class="p2pos-tier">Dreamer</b><small>Merit tier</small></span></div>
+        </div>
+      </div>
+      {%- endif -%}
+
+      {%- comment -%} gamified step map {%- endcomment -%}
+      {%- assign steps = section.blocks | where: 'type', 'step' -%}
+      {%- if steps.size > 0 -%}
+      <div class="osx-block">
+        <div class="osx-kick">Your road ahead</div>
+        <div class="osx-map">
+          {%- assign i = 0 -%}
+          {%- for block in section.blocks -%}
+            {%- if block.type == 'step' -%}
+              {%- assign i = i | plus: 1 -%}
+              <div class="osx-node{% if forloop.first %} done{% endif %}" {{ block.shopify_attributes }}>
+                <span class="osx-dot">{% if forloop.first %}✓{% else %}{{ i }}{% endif %}</span>
+                <span class="osx-nlbl">{{ block.settings.label }}</span>
+                {%- if block.settings.note != blank -%}<span class="osx-nnote">{{ block.settings.note }}</span>{%- endif -%}
+              </div>
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
+      </div>
+      {%- endif -%}
+
+      {%- comment -%} you've got this — reassurance {%- endcomment -%}
+      {%- if section.settings.reassure_body != blank -%}
+      <div class="osx-reassure">
+        <div class="osx-reassure-ic">🛶</div>
+        <div>
+          <b>{{ section.settings.reassure_title | default: "You've got this." }}</b>
+          <p>{{ section.settings.reassure_body }}</p>
+          <div class="osx-rjourney"><span>Get on the raft</span><i>→</i><span>Float</span><i>→</i><span>Sail</span><i>→</i><span>Thrive</span></div>
+        </div>
+      </div>
+      {%- endif -%}
+
+      {%- comment -%} need help / FAQ {%- endcomment -%}
+      {%- assign faqs = section.blocks | where: 'type', 'faq' -%}
+      {%- if faqs.size > 0 -%}
+      <div class="osx-block">
+        <div class="osx-kick">{{ section.settings.faq_heading | default: 'Need help?' }}</div>
+        <div class="osx-faq">
+          {%- for block in section.blocks -%}
+            {%- if block.type == 'faq' -%}
+              <details {{ block.shopify_attributes }}><summary>{{ block.settings.q }}</summary><div class="osx-fa">{{ block.settings.a }}</div></details>
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
+      </div>
+      {%- endif -%}
+    </section>
+
+    {%- comment -%} ===== generic placeholder + embed frame ===== {%- endcomment -%}
+    <section class="osx-view" data-view="__placeholder">
+      <div class="osx-ph"><div class="osx-ph-ic">✦</div><h2 data-osx-ph-title>Coming together</h2><p>This part of your OS is being built. Check back very soon.</p></div>
+    </section>
+    <section class="osx-view" data-view="__locked">
+      <div class="osx-ph"><div class="osx-ph-ic">🔒</div><h2 data-osx-lock-title>Locked</h2><p>You don't have access to this yet.</p><a class="osx-cta as-link" data-osx-get href="#">Get access →</a></div>
+    </section>
+    <iframe class="osx-frame" data-osx-frame title="Tool" hidden></iframe>
+  </main>
 </div>
 
 <style>
-  #p2pos{--text:#e7efeb;--muted:#8aa0a6;--gold:#c9a24a;--gold-bright:#f4c534;--stroke:rgba(255,255,255,.09);--gstroke:rgba(216,180,90,.4);
-    --aurora:linear-gradient(100deg,#f4e2a6,#8f6fd6,#27ae6e,#39c5c0,#2563eb,#d6336c,#f4e2a6);
-    max-width:1080px;margin:0 auto;padding:40px 20px 64px;color:var(--text);font-family:system-ui,-apple-system,sans-serif;}
+  #p2pos.osx{--text:#e7efeb;--muted:#8aa0a6;--gold:#c9a24a;--gold-bright:#f4c534;--stroke:rgba(255,255,255,.09);--gstroke:rgba(216,180,90,.38);
+    --panel:#0b1620;--side:#081119;--aurora:linear-gradient(100deg,#f4e2a6,#8f6fd6,#27ae6e,#39c5c0,#2563eb,#d6336c,#f4e2a6);
+    display:grid;grid-template-columns:264px 1fr;gap:0;min-height:80vh;color:var(--text);font-family:system-ui,-apple-system,sans-serif;
+    background:radial-gradient(120% 80% at 0% 0%,#0d1a26,#050a10);border:1px solid var(--stroke);border-radius:22px;overflow:hidden;}
   @keyframes p2pos-shift{0%{background-position:0% 50%;}100%{background-position:300% 50%;}}
-  #p2pos .p2pos-hero{margin-bottom:30px;}
-  #p2pos .p2pos-eyebrow{font:700 12px/1 system-ui;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:12px;}
-  #p2pos .p2pos-hero h1{font:700 clamp(28px,5vw,44px)/1.1 Georgia,serif;margin:0 0 10px;}
-  #p2pos .p2pos-name{background:var(--aurora);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:p2pos-shift 18s linear infinite;}
-  #p2pos .p2pos-intro{font:400 16px/1.6 system-ui;color:#c6d6d0;max-width:640px;margin:0;}
+  #p2pos .osx-2{background:var(--aurora);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:p2pos-shift 20s linear infinite;font-style:italic;}
+  #p2pos .osx-burger{display:none;}
 
-  #p2pos .pj-kicker{font:700 11px/1 system-ui;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:8px;}
-  #p2pos .pj-go{display:inline-block;padding:13px 24px;border-radius:12px;font:800 14px/1 system-ui;color:#0a1410;text-decoration:none;white-space:nowrap;
-    background:var(--aurora);background-size:300% 100%;animation:p2pos-shift 18s linear infinite;box-shadow:0 12px 30px rgba(0,0,0,.3);transition:transform .12s;}
-  #p2pos .pj-go:hover{transform:translateY(-2px);}
-  /* ---- Learning Journey dashboard (owners) ---- */
-  #p2pos .p2pos-dash{margin:0 0 30px;border:1px solid var(--gstroke);border-radius:20px;padding:24px 26px;
-    background:linear-gradient(120deg,rgba(143,111,214,.14),rgba(57,197,192,.08));}
-  #p2pos .pd-head{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:20px;}
-  #p2pos .p2pos-dash h2{font:700 24px/1.15 Georgia,serif;margin:0;}
-  #p2pos .pd-body{display:grid;grid-template-columns:1fr 320px;gap:22px;align-items:stretch;}
-  #p2pos .pd-metrics{display:flex;align-items:center;gap:22px;flex-wrap:wrap;}
-  #p2pos .pd-ring{flex:0 0 108px;width:108px;height:108px;border-radius:50%;display:grid;place-items:center;
-    background:conic-gradient(from -90deg,#39c5c0,#8f6fd6,#f4c534 calc(var(--p)*1%),rgba(255,255,255,.08) calc(var(--p)*1%));}
-  #p2pos .pd-ringin{width:84px;height:84px;border-radius:50%;background:#0b1620;display:grid;place-items:center;text-align:center;}
-  #p2pos .pd-ringin b{font:800 21px/1 system-ui;color:var(--gold-bright);}
-  #p2pos .pd-ringin small{display:block;margin-top:3px;font:600 9px/1 system-ui;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);}
-  #p2pos .pd-stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;flex:1;min-width:210px;}
-  #p2pos .pd-chip{display:flex;align-items:center;gap:11px;padding:12px 14px;border:1px solid var(--stroke);border-radius:13px;background:rgba(255,255,255,.03);}
-  #p2pos .pd-ico{font-size:18px;line-height:1;}
-  #p2pos .pd-val b{display:block;font:800 19px/1 system-ui;color:var(--gold-bright);}
-  #p2pos .pd-val .p2pos-tier{font:700 15px/1.1 Georgia,serif;background:var(--aurora);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:p2pos-shift 18s linear infinite;}
-  #p2pos .pd-val small{display:block;margin-top:4px;font:600 9.5px/1 system-ui;letter-spacing:.03em;text-transform:uppercase;color:var(--muted);}
-  #p2pos .pd-moment{border:1px solid var(--gstroke);border-radius:16px;padding:18px 20px;background:rgba(9,17,24,.42);display:flex;flex-direction:column;justify-content:center;}
-  #p2pos .pd-moment .mm-label{font:700 10.5px/1.2 system-ui;letter-spacing:.05em;text-transform:uppercase;color:var(--gold);margin-bottom:10px;}
-  #p2pos .pd-moment .mm-star{color:var(--gold-bright);}
-  #p2pos .pd-moment .mm-grad{background:var(--aurora);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:p2pos-shift 18s linear infinite;}
-  #p2pos .pd-moment .mm-text{font:italic 400 15px/1.55 Georgia,serif;color:var(--text);margin:0 0 10px;}
-  #p2pos .pd-moment .mm-source{font:600 11.5px/1.3 system-ui;color:var(--muted);font-style:normal;}
-  /* ---- locked promo (non-owners) ---- */
-  #p2pos .p2pos-journey{display:grid;grid-template-columns:1fr 150px;gap:20px;align-items:center;margin:0 0 30px;
-    border:1px solid var(--stroke);border-radius:20px;padding:26px;background:linear-gradient(120deg,rgba(255,255,255,.03),rgba(9,17,24,.4));}
-  #p2pos .p2pos-journey h2{font:700 24px/1.15 Georgia,serif;margin:0 0 12px;}
-  #p2pos .pj-lockedbody{font:400 14px/1.6 system-ui;color:#c6d6d0;margin:0 0 16px;max-width:520px;}
-  #p2pos .pj-art{display:grid;place-items:center;height:120px;}
-  #p2pos .pj-lock{font-size:44px;opacity:.5;}
+  /* sidebar */
+  #p2pos .osx-side{background:linear-gradient(180deg,var(--side),#060d14);border-right:1px solid var(--stroke);padding:22px 14px;display:flex;flex-direction:column;gap:6px;}
+  #p2pos .osx-brand{padding:6px 10px 16px;border-bottom:1px solid var(--stroke);margin-bottom:10px;}
+  #p2pos .osx-brandmark{font:700 19px/1.1 Georgia,serif;letter-spacing:.01em;}
+  #p2pos .osx-brandsub{margin-top:5px;font:600 9.5px/1.3 system-ui;letter-spacing:.03em;text-transform:uppercase;color:var(--muted);}
+  #p2pos .osx-nav{display:flex;flex-direction:column;gap:3px;overflow-y:auto;}
+  #p2pos .osx-item{display:flex;align-items:center;gap:11px;width:100%;padding:11px 12px;border:1px solid transparent;border-radius:11px;background:none;color:#cdd9dd;font:600 13.5px/1.2 system-ui;text-align:left;cursor:pointer;transition:background .15s,border-color .15s,color .15s;}
+  #p2pos .osx-item:hover{background:rgba(255,255,255,.04);color:var(--text);}
+  #p2pos .osx-item.on{background:linear-gradient(100deg,rgba(216,180,90,.16),rgba(143,111,214,.12));border-color:var(--gstroke);color:#fff;}
+  #p2pos .osx-ico{flex:0 0 20px;height:20px;display:grid;place-items:center;}
+  #p2pos .osx-ico svg{width:18px;height:18px;fill:none;stroke:var(--gold-bright);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;}
+  #p2pos .osx-item.locked .osx-ico svg{stroke:var(--muted);}
+  #p2pos .osx-lbl{flex:1;min-width:0;}
+  #p2pos .osx-lock{font-size:11px;opacity:.7;}
 
-  #p2pos .p2pos-secttl{font:700 13px/1 system-ui;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:26px 0 14px;}
-  #p2pos .p2pos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;}
-  #p2pos .p2pos-card{display:flex;align-items:center;gap:14px;padding:18px;border:1px solid var(--stroke);border-radius:16px;text-decoration:none;color:var(--text);
-    background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(9,17,24,.35));transition:transform .12s,border-color .18s,box-shadow .18s;}
-  #p2pos .p2pos-card:hover{transform:translateY(-2px);border-color:var(--gstroke);box-shadow:0 12px 28px rgba(0,0,0,.35);}
-  #p2pos .p2pos-card.is-locked{opacity:.72;}
-  #p2pos .p2pos-card.is-locked:hover{opacity:1;}
-  #p2pos .pc-ico{flex:0 0 46px;width:46px;height:46px;border-radius:12px;display:grid;place-items:center;background:radial-gradient(circle at 40% 30%,#1c2b31,#0a1216);border:1px solid var(--gstroke);}
-  #p2pos .pc-ico svg{width:24px;height:24px;fill:none;stroke:var(--gold-bright);stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;}
-  #p2pos .p2pos-card.is-locked .pc-ico svg{stroke:var(--muted);}
-  #p2pos .pc-body{flex:1;min-width:0;}
-  #p2pos .pc-title{display:block;font:700 15px/1.2 system-ui;}
-  #p2pos .pc-blurb{display:block;margin-top:4px;font:400 12.5px/1.4 system-ui;color:var(--muted);}
-  #p2pos .pc-go{font:800 12.5px/1 system-ui;color:var(--gold-bright);white-space:nowrap;}
-  #p2pos .pc-lock{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:16px;white-space:nowrap;}
-  #p2pos .pc-lock em{font:700 9.5px/1 system-ui;font-style:normal;letter-spacing:.04em;text-transform:uppercase;color:var(--gold);}
+  /* main pane */
+  #p2pos .osx-main{position:relative;overflow-y:auto;max-height:88vh;}
+  #p2pos .osx-view{display:none;padding:30px 34px 44px;}
+  #p2pos .osx-view.on{display:block;}
+  #p2pos .osx-frame{width:100%;height:88vh;border:0;background:#0b1620;}
 
-  #p2pos .p2pos-help{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;}
-  #p2pos .ph-item{padding:14px 16px;border:1px solid var(--stroke);border-radius:12px;text-decoration:none;background:rgba(255,255,255,.02);transition:border-color .18s;}
-  #p2pos .ph-item:hover{border-color:var(--gstroke);}
-  #p2pos .ph-item b{display:block;font:700 13.5px/1.2 system-ui;color:var(--text);}
-  #p2pos .ph-item span{display:block;margin-top:3px;font:400 12px/1.3 system-ui;color:var(--muted);}
-  @media (prefers-reduced-motion: reduce){#p2pos .p2pos-name,#p2pos .pj-go,#p2pos .pj-stat .p2pos-tier{animation:none;}}
-  @media (max-width:760px){#p2pos .pd-body{grid-template-columns:1fr;}}
-  @media (max-width:620px){#p2pos .p2pos-journey{grid-template-columns:1fr;}#p2pos .pj-art{height:90px;}#p2pos .pd-stats{grid-template-columns:1fr;}}
+  /* hero */
+  #p2pos .osx-hero{position:relative;border-radius:20px;overflow:hidden;padding:44px 36px;margin-bottom:24px;
+    background:linear-gradient(120deg,rgba(143,111,214,.16),rgba(57,197,192,.08)),#0a141c;}
+  #p2pos .osx-hero[style*="--hero"]{background:linear-gradient(180deg,rgba(5,10,16,.55),rgba(5,10,16,.82)),var(--hero) center/cover no-repeat;}
+  #p2pos .osx-hero-glow{position:absolute;inset:-40% -10% auto -10%;height:60%;background:radial-gradient(50% 100% at 30% 0%,rgba(143,111,214,.5),transparent 70%),radial-gradient(50% 100% at 75% 10%,rgba(57,197,192,.4),transparent 70%);filter:blur(20px);opacity:.6;pointer-events:none;}
+  #p2pos .osx-hero-in{position:relative;}
+  #p2pos .osx-eyebrow{font:700 11px/1 system-ui;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:12px;}
+  #p2pos .osx-hero h1{font:700 clamp(28px,4.5vw,42px)/1.1 Georgia,serif;margin:0 0 12px;}
+  #p2pos .osx-name{background:var(--aurora);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:p2pos-shift 20s linear infinite;}
+  #p2pos .osx-hero-body{font:400 16px/1.6 system-ui;color:#dbe7e2;max-width:600px;margin:0 0 20px;}
+  #p2pos .osx-cta{display:inline-block;padding:14px 28px;border:0;border-radius:12px;font:800 14px/1 system-ui;color:#0a1410;text-decoration:none;cursor:pointer;
+    background:var(--aurora);background-size:300% 100%;animation:p2pos-shift 20s linear infinite;box-shadow:0 12px 30px rgba(0,0,0,.35);transition:transform .12s;}
+  #p2pos .osx-cta:hover{transform:translateY(-2px);}
+  #p2pos .osx-cta.as-link{margin-top:8px;}
+
+  /* stat strip */
+  #p2pos .osx-stats{display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin-bottom:26px;}
+  #p2pos .osx-ring{flex:0 0 104px;width:104px;height:104px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(from -90deg,#39c5c0,#8f6fd6,#f4c534 calc(var(--p)*1%),rgba(255,255,255,.08) calc(var(--p)*1%));}
+  #p2pos .osx-ringin{width:80px;height:80px;border-radius:50%;background:var(--panel);display:grid;place-items:center;text-align:center;}
+  #p2pos .osx-ringin b{font:800 20px/1 system-ui;color:var(--gold-bright);}
+  #p2pos .osx-ringin small{display:block;margin-top:2px;font:600 8.5px/1 system-ui;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);}
+  #p2pos .osx-chips{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:11px;flex:1;min-width:240px;}
+  #p2pos .osx-chip{display:flex;align-items:center;gap:10px;padding:11px 13px;border:1px solid var(--stroke);border-radius:13px;background:rgba(255,255,255,.03);}
+  #p2pos .osx-cico{font-size:17px;}
+  #p2pos .osx-chip b{display:block;font:800 18px/1 system-ui;color:var(--gold-bright);}
+  #p2pos .osx-chip .p2pos-tier{font:700 14px/1.1 Georgia,serif;background:var(--aurora);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:p2pos-shift 20s linear infinite;}
+  #p2pos .osx-chip small{display:block;margin-top:3px;font:600 9px/1 system-ui;letter-spacing:.03em;text-transform:uppercase;color:var(--muted);}
+
+  /* blocks / kickers */
+  #p2pos .osx-block{margin-bottom:26px;}
+  #p2pos .osx-kick{font:700 12px/1 system-ui;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;}
+
+  /* gamified map */
+  #p2pos .osx-map{display:flex;flex-wrap:wrap;gap:10px;}
+  #p2pos .osx-node{position:relative;flex:1 1 150px;min-width:140px;padding:16px 14px;border:1px solid var(--stroke);border-radius:14px;background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(9,17,24,.4));}
+  #p2pos .osx-node.done{border-color:rgba(39,174,110,.5);background:linear-gradient(180deg,rgba(39,174,110,.12),rgba(9,17,24,.4));}
+  #p2pos .osx-dot{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;font:800 12px/1 system-ui;color:#0a1410;background:linear-gradient(145deg,#f4e2a6,var(--gold));margin-bottom:9px;}
+  #p2pos .osx-node.done .osx-dot{background:var(--em,#27ae6e);color:#fff;}
+  #p2pos .osx-nlbl{display:block;font:700 13.5px/1.2 system-ui;color:var(--text);}
+  #p2pos .osx-nnote{display:block;margin-top:4px;font:400 11.5px/1.4 system-ui;color:var(--muted);}
+
+  /* reassurance */
+  #p2pos .osx-reassure{display:flex;gap:16px;align-items:flex-start;padding:20px 22px;border:1px solid var(--gstroke);border-radius:16px;margin-bottom:26px;background:linear-gradient(120deg,rgba(216,180,90,.1),rgba(57,197,192,.06));}
+  #p2pos .osx-reassure-ic{font-size:30px;line-height:1;}
+  #p2pos .osx-reassure b{font:700 16px/1.2 Georgia,serif;}
+  #p2pos .osx-reassure p{margin:6px 0 12px;font:400 14px/1.6 system-ui;color:#dbe7e2;}
+  #p2pos .osx-rjourney{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font:700 12px/1 system-ui;color:var(--gold-bright);}
+  #p2pos .osx-rjourney i{color:var(--muted);font-style:normal;}
+
+  /* faq */
+  #p2pos .osx-faq{display:flex;flex-direction:column;gap:8px;}
+  #p2pos .osx-faq details{border:1px solid var(--stroke);border-radius:12px;background:rgba(255,255,255,.02);overflow:hidden;}
+  #p2pos .osx-faq summary{padding:14px 16px;font:600 13.5px/1.3 system-ui;cursor:pointer;list-style:none;}
+  #p2pos .osx-faq summary::-webkit-details-marker{display:none;}
+  #p2pos .osx-faq summary::after{content:'+';float:right;color:var(--gold);font-weight:800;}
+  #p2pos .osx-faq details[open] summary::after{content:'–';}
+  #p2pos .osx-fa{padding:0 16px 14px;font:400 13px/1.6 system-ui;color:#c6d6d0;}
+
+  /* placeholder / locked views */
+  #p2pos .osx-ph{max-width:460px;margin:60px auto;text-align:center;}
+  #p2pos .osx-ph-ic{font-size:40px;margin-bottom:14px;}
+  #p2pos .osx-ph h2{font:700 24px/1.2 Georgia,serif;margin:0 0 8px;}
+  #p2pos .osx-ph p{font:400 14px/1.6 system-ui;color:var(--muted);margin:0;}
+
+  @media (prefers-reduced-motion: reduce){#p2pos .osx-2,#p2pos .osx-name,#p2pos .osx-cta,#p2pos .osx-chip .p2pos-tier{animation:none;}}
+  @media (max-width:820px){
+    #p2pos.osx{grid-template-columns:1fr;}
+    #p2pos .osx-burger{display:flex;flex-direction:column;justify-content:center;gap:4px;position:absolute;top:14px;left:14px;z-index:6;width:40px;height:40px;border:1px solid var(--stroke);border-radius:10px;background:var(--side);cursor:pointer;}
+    #p2pos .osx-burger span{display:block;height:2px;width:18px;margin:0 auto;background:var(--gold-bright);}
+    #p2pos .osx-side{position:absolute;inset:0 auto 0 0;width:264px;z-index:5;transform:translateX(-100%);transition:transform .25s ease;box-shadow:0 0 40px rgba(0,0,0,.6);}
+    #p2pos .osx-side.open{transform:translateX(0);}
+    #p2pos .osx-view{padding:64px 20px 40px;}
+  }
 </style>
 
-{%- if section.settings.show_journey and has_journey -%}
+{%- if section.settings.show_stats or section.settings.show_moment -%}
 <script src="{{ 'p2p-progress.js' | asset_url }}" defer="defer"></script>
 <script src="{{ 'p2p-journey-map.js' | asset_url }}" defer="defer"></script>
-<script src="{{ 'p2p-moments.js' | asset_url }}" defer="defer"></script>
+{%- endif -%}
 <script>
   document.addEventListener('DOMContentLoaded', function(){
     var root = document.getElementById('p2pos'); if(!root) return;
+    var main = root.querySelector('[data-osx-main]');
+    var frame = root.querySelector('[data-osx-frame]');
+    var items = root.querySelectorAll('.osx-item');
+    var views = root.querySelectorAll('.osx-view');
     function put(cls, val){ var el = root.querySelector(cls); if(el) el.textContent = val; }
-
-    // Daily Mindset Moment (same daily rotation as the Journey)
-    var mm = document.getElementById('p2pos-moment');
-    if(mm && window.P2P_MOMENTS && window.P2P_MOMENTS.length){
-      var day = Math.floor(Date.now() / 864e5);
-      var it = window.P2P_MOMENTS[day % window.P2P_MOMENTS.length];
-      if(it && it.t){
-        var t = mm.querySelector('.mm-text'), s = mm.querySelector('.mm-source');
-        if(t) t.textContent = '“' + it.t + '”';
-        if(s) s.textContent = it.s || '';
-        mm.hidden = false;
+    function showView(name){ views.forEach(function(v){ v.classList.toggle('on', v.getAttribute('data-view') === name); }); if(frame){ frame.hidden = true; frame.removeAttribute('src'); } if(main) main.scrollTop = 0; }
+    function activate(btn){
+      items.forEach(function(b){ b.classList.toggle('on', b === btn); });
+      var mode = btn.getAttribute('data-mode'), target = btn.getAttribute('data-target') || '';
+      if(btn.classList.contains('locked')){
+        showView('__locked');
+        var lt = root.querySelector('[data-osx-lock-title]'); if(lt) lt.textContent = (btn.querySelector('.osx-lbl')||{}).textContent || 'Locked';
+        var g = root.querySelector('[data-osx-get]'); if(g) g.setAttribute('href', btn.getAttribute('data-get') || '#');
+        return;
       }
+      if(mode === 'link'){ if(target) window.location.href = target; return; }
+      if(mode === 'embed'){
+        views.forEach(function(v){ v.classList.remove('on'); });
+        if(frame && target){ frame.hidden = false; frame.src = target; if(main) main.scrollTop = 0; }
+        return;
+      }
+      // view
+      var exists = root.querySelector('.osx-view[data-view="' + target + '"]');
+      if(exists){ showView(target); }
+      else { showView('__placeholder'); var pt = root.querySelector('[data-osx-ph-title]'); if(pt) pt.textContent = (btn.querySelector('.osx-lbl')||{}).textContent || 'Coming together'; }
     }
+    items.forEach(function(b){ b.addEventListener('click', function(){ activate(b); closeSide(); }); });
+    // hero CTA -> jump to a view by target
+    root.querySelectorAll('[data-osx-goto]').forEach(function(b){ b.addEventListener('click', function(){
+      var t = b.getAttribute('data-osx-goto');
+      var nav = Array.prototype.filter.call(items, function(x){ return x.getAttribute('data-target') === t; })[0];
+      if(nav) nav.click();
+    }); });
+    // mobile drawer
+    var side = root.querySelector('[data-osx-side]'), burger = root.querySelector('[data-osx-burger]');
+    function closeSide(){ if(side) side.classList.remove('open'); }
+    if(burger && side) burger.addEventListener('click', function(){ side.classList.toggle('open'); });
 
-    if(!window.P2P) return;
-    put('.p2pos-points', window.P2P.points());
-    var bs = window.P2P.badgesStat(); put('.p2pos-badges', bs ? bs.earned : window.P2P.earnedSet().length);
-    put('.p2pos-streak', window.P2P.streak().count);
-    if(window.P2P.tier) put('.p2pos-tier', window.P2P.tier().name);
-
-    // completion ring — courses done across every realm
-    var ring = root.querySelector('[data-p2pos-ring]');
-    if(ring && window.P2P_MAP){
-      var total = 0, done = 0;
-      window.P2P_MAP.forEach(function(r){ (r.courses || []).forEach(function(c){ total++; if(window.P2P.isCourseDone(c.h)) done++; }); });
-      var pct = total ? Math.round(done / total * 100) : 0;
-      ring.style.setProperty('--p', pct);
-      put('.p2pos-ringpct', pct + '%');
+    // live stats + ring (reuse the engine)
+    if(root.querySelector('[data-osx-stats]') && window.P2P){
+      put('.p2pos-points', window.P2P.points());
+      var bs = window.P2P.badgesStat(); put('.p2pos-badges', bs ? bs.earned : window.P2P.earnedSet().length);
+      put('.p2pos-streak', window.P2P.streak().count);
+      if(window.P2P.tier) put('.p2pos-tier', window.P2P.tier().name);
+      var ring = root.querySelector('[data-osx-ring]');
+      if(ring && window.P2P_MAP){
+        var total = 0, done = 0;
+        window.P2P_MAP.forEach(function(r){ (r.courses || []).forEach(function(c){ total++; if(window.P2P.isCourseDone(c.h)) done++; }); });
+        var pct = total ? Math.round(done / total * 100) : 0; ring.style.setProperty('--p', pct); put('.p2pos-ringpct', pct + '%');
+      }
+      root.querySelector('[data-osx-stats]').hidden = false;
     }
   });
 </script>
-{%- endif -%}
 
 {% schema %}
 {
   "name": "P2P Operating System",
   "settings": [
-    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Purpose 2 Profit" },
-    { "type": "text", "id": "title", "label": "Title", "default": "Your Operating System" },
-    { "type": "textarea", "id": "intro", "label": "Intro", "default": "Your home base — everything you own, in one place. Jump back into your journey, open your tools, and keep building." },
-    { "type": "header", "content": "Access" },
-    { "type": "text", "id": "all_access_tag", "label": "All-access tag", "info": "Customers with this tag unlock every card. Add it via a Shopify Flow on your all-access bundle.", "default": "all-access" },
-    { "type": "header", "content": "Learning Journey module" },
-    { "type": "checkbox", "id": "show_journey", "label": "Show the Journey module", "default": true },
+    { "type": "text", "id": "brand_sub", "label": "Brand subtitle", "default": "powered by Black Sheep Creations & Inspirations" },
+    { "type": "text", "id": "all_access_tag", "label": "All-access tag", "default": "all-access" },
+    { "type": "header", "content": "Your Journey Starts Here (landing)" },
+    { "type": "image_picker", "id": "hero_image", "label": "Hero image (your premium PNG)" },
+    { "type": "text", "id": "hero_eyebrow", "label": "Hero eyebrow", "default": "Purpose 2 Profit" },
+    { "type": "text", "id": "hero_title", "label": "Hero title", "default": "Your journey starts here" },
+    { "type": "textarea", "id": "hero_body", "label": "Hero body", "default": "This is your home — built around you. Your fingerprint, your spark, your story. Everything you need to go from idea to income lives right here. Let's make it yours." },
+    { "type": "text", "id": "hero_cta_label", "label": "Hero button label", "default": "Show me around →" },
+    { "type": "text", "id": "hero_cta_target", "label": "Hero button target (nav target)", "default": "checkpoint" },
     { "type": "checkbox", "id": "show_stats", "label": "Show live stats (ring + points/badges/streak/tier)", "default": true },
-    { "type": "checkbox", "id": "show_moment", "label": "Show the Daily Mindset Moment", "default": true },
+    { "type": "checkbox", "id": "show_moment", "label": "Load progress engine", "default": true },
     { "type": "text", "id": "journey_access_tag", "label": "Journey access tag", "default": "p2p-learning" },
-    { "type": "url", "id": "journey_url", "label": "Journey page URL" },
-    { "type": "text", "id": "journey_heading", "label": "Heading (owners)", "default": "Pick up where you left off" },
-    { "type": "text", "id": "journey_cta", "label": "Button label (owners)", "default": "Continue your journey →" },
-    { "type": "text", "id": "journey_locked_heading", "label": "Heading (non-owners)", "default": "Start the Learning Journey" },
-    { "type": "textarea", "id": "journey_locked_body", "label": "Body (non-owners)", "default": "A gamified, step-by-step path from the shore all the way to a business that runs — courses, badges, streaks and more." },
-    { "type": "url", "id": "journey_get_url", "label": "Get-access URL (non-owners)" },
-    { "type": "text", "id": "journey_get_label", "label": "Get-access label", "default": "Get access →" },
-    { "type": "header", "content": "Tools grid" },
-    { "type": "text", "id": "tools_heading", "label": "Tools heading", "default": "Your tools" },
-    { "type": "header", "content": "Help & resources" },
-    { "type": "text", "id": "help_heading", "label": "Help heading", "default": "Help & resources" },
-    { "type": "url", "id": "tutorial_url", "label": "Tutorial page URL" },
-    { "type": "url", "id": "milestones_url", "label": "Milestones (badges) URL" },
-    { "type": "url", "id": "support_url", "label": "Support page URL" },
-    { "type": "text", "id": "support_email", "label": "Support email", "info": "Used if no support page URL is set." }
+    { "type": "text", "id": "reassure_title", "label": "Reassurance title", "default": "You've got this." },
+    { "type": "textarea", "id": "reassure_body", "label": "Reassurance body", "default": "You don't have to know it all today. Take one step at a time — we'll get you on the raft, help you float, then sail, and thrive as you grow." },
+    { "type": "text", "id": "faq_heading", "label": "FAQ heading", "default": "Need help?" }
   ],
   "blocks": [
     {
-      "type": "tool",
-      "name": "Tool",
+      "type": "navitem",
+      "name": "Sidebar item",
       "settings": [
-        { "type": "text", "id": "title", "label": "Title" },
-        { "type": "text", "id": "blurb", "label": "Blurb" },
-        { "type": "select", "id": "icon", "label": "Icon", "default": "sparkle", "options": [
-          { "value": "sparkle", "label": "Sparkle" },
-          { "value": "prompt", "label": "Prompt / chat" },
-          { "value": "palette", "label": "Palette (graphics)" },
-          { "value": "megaphone", "label": "Megaphone (marketing)" },
-          { "value": "box", "label": "Box (product)" },
-          { "value": "crown", "label": "Crown (brand)" },
-          { "value": "rocket", "label": "Rocket" },
-          { "value": "book", "label": "Book (journey)" }
+        { "type": "text", "id": "label", "label": "Label" },
+        { "type": "select", "id": "icon", "label": "Icon", "default": "spark", "options": [
+          { "value": "spark", "label": "Spark" }, { "value": "check", "label": "Check" }, { "value": "fingerprint", "label": "Fingerprint" },
+          { "value": "crown", "label": "Crown (Brand)" }, { "value": "prompt", "label": "Prompt (Content)" }, { "value": "palette", "label": "Palette (Graphics)" },
+          { "value": "box", "label": "Box (Project)" }, { "value": "megaphone", "label": "Megaphone (Marketing)" }, { "value": "rocket", "label": "Rocket (Growth)" },
+          { "value": "path", "label": "Path (ROOTED)" }, { "value": "mates", "label": "Haus Mates" }, { "value": "tools", "label": "Tools" },
+          { "value": "notebook", "label": "Notebook" }, { "value": "gift", "label": "Gift (Bonus)" }
         ] },
-        { "type": "text", "id": "access_tag", "label": "Access tag", "info": "The customer tag that unlocks this tool (e.g. graphics-haus-access)." },
-        { "type": "url", "id": "url", "label": "Tool URL (when unlocked)" },
-        { "type": "url", "id": "get_url", "label": "Get-access URL (when locked)", "info": "Your marketing/preview page for this tool." }
+        { "type": "select", "id": "mode", "label": "Behavior", "default": "view", "options": [
+          { "value": "view", "label": "Show a built-in view" }, { "value": "embed", "label": "Embed a page in the pane" }, { "value": "link", "label": "Navigate to a page" }
+        ] },
+        { "type": "text", "id": "target", "label": "Target", "info": "A view id (start / checkpoint …) for 'view', or a URL for 'embed'/'link'." },
+        { "type": "text", "id": "access_tag", "label": "Access tag (optional)", "info": "Locks the item unless the customer has this tag (or all-access)." },
+        { "type": "url", "id": "get_url", "label": "Get-access URL (when locked)" }
+      ]
+    },
+    {
+      "type": "step",
+      "name": "Journey step",
+      "settings": [
+        { "type": "text", "id": "label", "label": "Label" },
+        { "type": "text", "id": "note", "label": "Note" }
+      ]
+    },
+    {
+      "type": "faq",
+      "name": "FAQ",
+      "settings": [
+        { "type": "text", "id": "q", "label": "Question" },
+        { "type": "richtext", "id": "a", "label": "Answer" }
       ]
     }
   ],
-  "presets": [
-    {
-      "name": "P2P Operating System",
-      "blocks": [
-        { "type": "tool", "settings": { "title": "Prompt Haus", "blurb": "Your AI prompt studio.", "icon": "prompt", "access_tag": "prompt-haus-access" } },
-        { "type": "tool", "settings": { "title": "Prompt to Profit Haus", "blurb": "Turn prompts into products.", "icon": "rocket", "access_tag": "P2P-haus-access" } },
-        { "type": "tool", "settings": { "title": "Graphics Haus", "blurb": "Brand kits & design.", "icon": "palette", "access_tag": "graphics-haus-access" } },
-        { "type": "tool", "settings": { "title": "Marketing Haus", "blurb": "Ads, posts & campaigns.", "icon": "megaphone", "access_tag": "marketing-haus-access" } },
-        { "type": "tool", "settings": { "title": "Product Haus", "blurb": "Build & ship products.", "icon": "box", "access_tag": "product-haus-access" } },
-        { "type": "tool", "settings": { "title": "Brand Haus", "blurb": "Define your brand DNA.", "icon": "crown", "access_tag": "brand-haus-access" } }
-      ]
-    }
-  ]
+  "presets": [ { "name": "P2P Operating System" } ]
 }
 {% endschema %}
