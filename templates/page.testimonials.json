@@ -1,0 +1,22 @@
+{
+  "sections": {
+    "main": {
+      "type": "p2p-testimonials",
+      "settings": {
+        "scheme": "cream",
+        "kicker": "In their words",
+        "heading": "Loved by creators like you",
+        "intro": "Real words from real members. We only ever share the ones we've been given permission to.",
+        "columns": 3,
+        "show_stars": true
+      },
+      "blocks": {
+        "t1": { "type": "testimonial", "settings": { "rating": 5, "quote": "I finally sound like myself. Brand Haus gave me words I'd been circling for years.", "name": "Sample Name", "role": "Journal creator", "source": "Brand Haus", "highlight": true } },
+        "t2": { "type": "testimonial", "settings": { "rating": 5, "quote": "I went from a blank page to a full launch plan in an afternoon. This is the map I needed.", "name": "Sample Name", "role": "New seller", "source": "Growth Haus" } },
+        "t3": { "type": "testimonial", "settings": { "rating": 5, "quote": "Not techy at all, and I still made something I'm proud of. The steps just make sense.", "name": "Sample Name", "role": "Learning Journey member" } }
+      },
+      "block_order": ["t1", "t2", "t3"]
+    }
+  },
+  "order": ["main"]
+}
