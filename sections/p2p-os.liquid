@@ -126,14 +126,15 @@
       {%- endif -%}
 
       {%- comment -%} gamified step map (baked into the section — label^note) {%- endcomment -%}
-      {%- capture os_steps -%}You made it!^Your journey begins — first step complete.|Find your direction^Founders Assessment|Brand^Your identity|Content^Your words|Graphics^Your look|Project^Your build|Marketing^Your reach|Growth^Launch with ROOTED{%- endcapture -%}
+      {%- comment -%} step keys drive the JS that lights each node from real cross-Haus signals {%- endcomment -%}
+      {%- capture os_steps -%}You made it!^Your journey begins — first step complete.^arrived|Find your direction^Founders Assessment^assessment|Brand^Your identity^brand|Content^Your words^content|Graphics^Your look^graphics|Project^Your build^project|Marketing^Your reach^marketing|Growth^Launch with ROOTED^growth{%- endcapture -%}
       {%- assign os_step_items = os_steps | split: '|' -%}
       <div class="osx-block">
         <div class="osx-kick">Your road ahead</div>
         <div class="osx-map">
           {%- for st in os_step_items -%}
             {%- assign sf = st | split: '^' -%}
-            <div class="osx-node{% if forloop.first %} done{% endif %}">
+            <div class="osx-node{% if forloop.first %} done{% endif %}" data-step="{{ sf[2] }}">
               <span class="osx-dot">{% if forloop.first %}✓{% else %}{{ forloop.index }}{% endif %}</span>
               <span class="osx-nlbl">{{ sf[0] }}</span>
               {%- if sf[1] != blank -%}<span class="osx-nnote">{{ sf[1] }}</span>{%- endif -%}
@@ -1104,6 +1105,26 @@
 
     // clickable stat chips + ring -> shared Progress detail pop-ups (Points/Badges/Streak/Merit/Courses)
     if(window.P2PProgressPopups){ window.P2PProgressPopups.mount(root); }
+
+    // "Your road ahead" — light up each step from real cross-Haus signals (same localStorage the Vault reads)
+    (function(){
+      function J(k){ try{ return JSON.parse(localStorage.getItem(k)); }catch(e){ return null; } }
+      function log(k){ var v = J(k); return Array.isArray(v) && v.length > 0; }
+      var vault = J('blackSheepBrandKitVault'), gp = J('promptToProfit.currentProject'), P = window.P2P;
+      var signals = {
+        arrived: true,
+        assessment: !!J('p2p_archetype'),
+        brand: (vault && vault.brandHausKits && vault.brandHausKits.length > 0) || log('brandHausRecentLog'),
+        content: log('promptHausRecentLog'),
+        graphics: log('graphicsHausRecentLog'),
+        project: log('productHausRecentLog'),
+        marketing: log('marketingHausRecentLog'),
+        growth: (gp && gp.rootedStages && Object.keys(gp.rootedStages).some(function(k){ return gp.rootedStages[k]; })) || (P && P.isCourseDone && P.isCourseDone('rooted'))
+      };
+      root.querySelectorAll('.osx-node[data-step]').forEach(function(node){
+        if(signals[node.getAttribute('data-step')]){ node.classList.add('done'); var d = node.querySelector('.osx-dot'); if(d) d.textContent = '✓'; }
+      });
+    })();
   });
 </script>
 
