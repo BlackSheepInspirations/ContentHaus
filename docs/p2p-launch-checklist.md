@@ -63,7 +63,49 @@ just before public launch. Not urgent while password-locked.
 - **Mindset Moment library → 500:** currently ~120 items in `assets/p2p-moments.js`;
   grow in ~100-item batches (say "keep going").
 
-## 3. ~~Known bug — panel-switch scroll~~ ✅ FIXED
+## 3. Access gating for launch — every page must gate (storefront-searchable)
+
+**Why (Andrea, 2026-07-31):** all P2P pages are searchable in the Shopify
+storefront, so a non-member can land on any of them. Before launch, EVERY content
+surface must gate on the member's tag — its own access tag **or** the master
+**`all-access`** tag — so found pages don't leak content.
+
+**The shared gating framework** (Andrea confirms the Journey was updated to match the
+Hausen — this is the canonical pattern to follow). Every gated section does:
+```liquid
+{%- assign has_access = false -%}
+{%- if customer and customer.tags contains section.settings.access_tag -%}{%- assign has_access = true -%}{%- endif -%}
+{%- if request.design_mode -%}{%- assign has_access = true -%}{%- endif -%}
+```
+Confirmed present in: `p2p-learning-journey.liquid`, `p2p-learning-player.liquid`,
+`p2p-learning-badges.liquid`, and each Haus tool (`prompt-builder.liquid` uses
+`ph_has_access` = `customer.tags contains access_tag` + design_mode; the others follow suit).
+
+**`all-access` is NOT wired (confirmed by Andrea 2026-07-31).** The only place it
+appears is the OS *nav* (`snippets/p2p-os-nav.liquid`, `sections/p2p-os.liquid`:
+`owns_all = customer.tags contains 'all-access'`) — and that only controls whether a
+sidebar item LOOKS locked. It does NOT gate the destination page. So an all-access
+member still hits each page's own tag-gate and is locked out.
+
+**Launch task:** extend the shared framework so every gated section's `has_access`
+also honors all-access, i.e. add to each:
+`{%- if customer and customer.tags contains 'all-access' -%}{%- assign has_access = true -%}{%- endif -%}`
+(ideally via a shared `all_access_tag` setting, default `all-access`). Sweep: the 6
+Haus tools + preview pages, `p2p-learning-*` (journey/player/badges), all 52
+`page.courses-*` (they use the player, so fixing the player section covers them), and
+the realm templates. Then wire Shopify Flow to add `all-access` on the all-access
+purchase. NOTE: this is small + low-risk (one OR-branch per section) and could be done
+now if Andrea wants, but she's scoped it as an after-everything-is-built sweep.
+
+**Also decide:** (a) should the OS PAGE itself require login to view the shell (today
+it renders to anonymous; only the tools inside gate)? (b) should gated pages be
+excluded from storefront search / `noindex` so they don't surface at all — separate
+from content gating, and the actual reason this matters (pages are storefront-searchable).
+
+**At launch:** sweep every page template + section, confirm the tag-gate (+ all-access)
+is present, and that Flow grants the right tags on purchase.
+
+## 4. ~~Known bug — panel-switch scroll~~ ✅ FIXED
 
 Clicking a nav tab now scrolls the toolbar to pin at the top with the panel title
 just beneath it — consistently, no bounce. Fix (in `assets/p2p-journey.js` +
