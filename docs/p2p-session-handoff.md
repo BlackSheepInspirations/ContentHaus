@@ -145,7 +145,12 @@ the LAST — push files SEPARATELY.** 3. Copy each file to the mirror
    default aurora. (c) ASSESSMENT LINK (a9853ee): the "Discover your Brand DNA" nudge
    + "Refresh your assessment" now point at the REAL assessment
    /pages/brand-haus?bh_focus=1 (was the non-existent /pages/p2p-assessment). All
-   live-verified. OPEN (not blockers): (i) 2 archetype hero images have a baked-in
+   live-verified. REFINED (d098ae9): recolor now uses ONLY the archetype's single
+   Stand Out color (p2p_archetype.standOut, e.g. Bold Pioneer #3A86FF) — accents +
+   an analogous-hue aurora shimmer, not the whole palette; AND the OS now follows
+   the member's ACTIVE assessment version (republishes on load + on setActiveVersion
+   switch, so photo + Stand Out color track the chosen one of their up-to-5 saved).
+   OPEN (not blockers): (i) 2 archetype hero images have a baked-in
    transparency checkerboard — assets/brand-haus-hero-{trail-forger,quiet-authority}.jpg
    are WebP alpha=no with the grid flattened in; the other 9 are alpha=yes and clean;
    Andrea to re-supply the 2 good originals. (ii) the assessment is gated by
