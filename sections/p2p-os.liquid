@@ -891,7 +891,16 @@
     var items = root.querySelectorAll('.osx-item');
     var views = root.querySelectorAll('.osx-view');
     function put(cls, val){ var el = root.querySelector(cls); if(el) el.textContent = val; }
-    function showView(name){ views.forEach(function(v){ v.classList.toggle('on', v.getAttribute('data-view') === name); }); if(frame){ frame.hidden = true; frame.removeAttribute('src'); } if(main) main.scrollTop = 0; }
+    function showView(name){
+      views.forEach(function(v){ v.classList.toggle('on', v.getAttribute('data-view') === name); });
+      if(frame){ frame.hidden = true; frame.removeAttribute('src'); }
+      if(main) main.scrollTop = 0;
+      // if the shell has scrolled up under the sticky theme header, bring its top (and the view title) back into view
+      var r = root.getBoundingClientRect();
+      var hdr = document.querySelector('.shopify-section-group-header-group');
+      var off = hdr ? Math.max(0, hdr.getBoundingClientRect().bottom) : 0;
+      if(r.top < off + 4){ window.scrollTo(0, Math.max(0, window.pageYOffset + r.top - off - 12)); }
+    }
     function activate(btn){
       items.forEach(function(b){ b.classList.toggle('on', b === btn); });
       var mode = btn.getAttribute('data-mode'), target = btn.getAttribute('data-target') || '';
@@ -932,7 +941,9 @@
       var m = /[?&]v=([^&]+)/.exec(window.location.search); if(!m) return;
       var want = decodeURIComponent(m[1]).replace(/[^a-z0-9_-]/gi, '');
       var nav = Array.prototype.filter.call(items, function(x){ return x.getAttribute('data-target') === want; })[0];
-      if(nav){ activate(nav); if(main && main.scrollIntoView) main.scrollIntoView({block:'start'}); }
+      if(nav){ activate(nav); }
+      // consume the deep-link param so a refresh (or a duplicated tab) returns to the dashboard, not this view
+      try{ history.replaceState(null, '', window.location.pathname); }catch(e){}
     })();
     // mobile drawer
     var side = root.querySelector('[data-osx-side]'), burger = root.querySelector('[data-osx-burger]');
