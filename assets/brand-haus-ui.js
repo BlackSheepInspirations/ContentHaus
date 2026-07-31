@@ -1830,15 +1830,27 @@
         },
       });
     }
+    function bhDeliverable(label, desc) {
+      return el("p", { class: "bh-founder-interview__welcome-body" }, [
+        el("strong", { class: "bh-heading-accent", text: label + " — " }),
+        el("span", { text: desc }),
+      ]);
+    }
     return el("div", { class: "bh-founder-interview bh-founder-interview--welcome" }, [
       el("h2", { class: "bh-founder-interview__welcome-title" }, [
         icon("compass"),
-        el("span", { text: "A Guide to the " }),
-        el("span", { class: "bh-heading-accent", text: "11 Brand DNA Archetypes" }),
+        el("span", { text: "Every strong brand starts with a " }),
+        el("span", { class: "bh-heading-accent", text: "Brand DNA" }),
       ]),
-      el("p", { class: "bh-founder-interview__welcome-body", text: "Every founder who completes this assessment lands on one of 11 brand identities. Before you begin, take a look at all of them — click any archetype below to see its name and one-word identity." }),
+      el("p", { class: "bh-founder-interview__welcome-body", text: "It's tempting to start with the colors, the logo, the name — and hope it all adds up to something. It rarely does. The brands you trust worked the other way around: they got clear on who they are first, and let every choice follow from that. That clarity is quiet, but you feel it in everything they make. That's what we'll find here — before you create a single thing." }),
+      el("p", { class: "bh-founder-interview__welcome-body", text: "When you finish, you'll land on one of 11 Brand DNA archetypes — identities, drawn from decades of brand research, that describe how your brand naturally shows up. Less a box, more a compass. Explore all 11 below — tap any to see its name and its one word." }),
       wheelMount,
       detailMount,
+      el("p", { class: "bh-founder-interview__welcome-body" }, [el("strong", { text: "What you'll leave with:" })]),
+      bhDeliverable("Blueprint Snapshot", "who you are, at a glance — the version you keep close and check your choices against."),
+      bhDeliverable("Brand DNA Report", "the reasoning underneath it, so it makes sense, and so you can hold to it when you're unsure."),
+      bhDeliverable("Brand Playbook™", "your colors, voice, mission and values, laid out — the reference for every logo, product, message and campaign you build from here."),
+      el("p", { class: "bh-founder-interview__welcome-body", text: "Getting clear now means you're not re-deciding who you are every time you sit down to create — and it doesn't stay here: it saves to your Brand Vault and carries into every other Haus, so your graphics, content, marketing and growth work already sound and look like you." }),
       el("div", { class: "bh-founder-interview__welcome-actions" }, [continueBtn]),
     ]);
   }
@@ -1849,11 +1861,12 @@
     return el("div", { class: "bh-founder-interview bh-founder-interview--welcome" }, [
       el("h2", { class: "bh-founder-interview__welcome-title" }, [
         icon("sparkle"),
-        el("span", { text: "Welcome to Your " }),
+        el("span", { text: "Let's find your " }),
         el("span", { class: "bh-heading-accent", text: "Brand DNA Blueprint™" }),
       ]),
-      el("p", { class: "bh-founder-interview__welcome-body", text: "Over the next few minutes, you'll answer a series of questions about how you think, what you value, and what you're building. There are no right answers — this is a conversation, not a quiz." }),
-      el("p", { class: "bh-founder-interview__welcome-body", text: "By the end, you'll have a complete picture of your brand's natural identity: your colors, your voice, your mission, and the values that should show up in everything you create." }),
+      el("p", { class: "bh-founder-interview__welcome-body", text: "Over the next few minutes, you'll answer some questions about how you think, what you value, and what you're building. There are no right answers, and it isn't a test — it's a conversation. The more honest it is, the more it's worth to you." }),
+      el("p", { class: "bh-founder-interview__welcome-body", text: "It takes about 10–15 minutes, and you can stop anytime — your place is saved. You'll come away with a clear picture of your brand's natural identity: your colors, your voice, your mission, and your values. It saves to your Brand Vault and carries into every Haus, so this is the one time you'll need to define it." }),
+      el("p", { class: "bh-founder-interview__welcome-body", text: "You don't need to have this figured out already. Finding it is what we're here to do." }),
       el("div", { class: "bh-founder-interview__welcome-actions" }, [beginBtn]),
     ]);
   }
