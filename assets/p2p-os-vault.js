@@ -148,14 +148,16 @@
     }).join("");
     var voice = fieldVal(kit.voice);
     var name = kit.name || "Your brand kit";
+    // name + swatches are separate grid cells so every column's swatches line up
+    // on one vertical edge (the name track sizes to the longest name).
     function kitRow(o) {
       var sw = (o.colors || []).filter(isHex).slice(0, 5).map(function (c) {
         var hex = c.charAt(0) === "#" ? c : "#" + c;
         return '<span class="ov-swatch ov-swatch--sm" style="background:' + esc(hex) + '"></span>';
       }).join("");
-      return '<a class="ov-kit-other" href="/pages/brand-haus" title="Open in Brand Haus">' +
-        '<span class="ov-kit-other-name">' + esc(o.name || "Kit") + '</span>' +
-        '<span class="ov-kit-other-sw">' + sw + '</span></a>';
+      var nm = o.name || "Kit";
+      return '<span class="ov-kit-other-name" title="' + esc(nm) + '">' + esc(nm) + '</span>' +
+        '<span class="ov-kit-other-sw">' + sw + '</span>';
     }
     // Up to 4 others (5-kit vault: 1 active + 4), split into two columns divided by
     // a light vertical line — matching the vault's own 5-kit limit.
