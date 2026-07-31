@@ -19,7 +19,7 @@
     <h1>{{ section.settings.title | default: 'How Your Learning Journey Works' }}</h1>
     {%- if section.settings.intro != blank -%}<p class="p2pt-intro">{{ section.settings.intro }}</p>{%- endif -%}
     {%- if section.settings.tour_url != blank -%}
-      <a class="p2pt-tourbtn" href="{{ section.settings.tour_url }}"><svg viewBox="0 0 24 24" width="16" height="16"><path d="M8 5v14l11-7z" fill="currentColor" stroke="none"/></svg> {{ section.settings.tour_label | default: 'Prefer a guided tour? Open the Journey and tap “Take the tour.”' }}</a>
+      <a class="p2pt-tourbtn" href="{{ section.settings.tour_url }}#tour"><svg viewBox="0 0 24 24" width="16" height="16"><path d="M8 5v14l11-7z" fill="currentColor" stroke="none"/></svg> {{ section.settings.tour_label | default: 'Take the guided tour →' }}</a>
     {%- endif -%}
   </header>
 
@@ -141,7 +141,7 @@
     { "type": "text", "id": "map_url", "label": "Journey Map URL", "default": "/pages/p2p-learning" },
     { "type": "header", "content": "Guided-tour link" },
     { "type": "url", "id": "tour_url", "label": "Journey page URL", "info": "Links to the Journey page where members can tap 'Take the tour'." },
-    { "type": "text", "id": "tour_label", "label": "Guided-tour link label", "default": "Prefer a guided tour? Open the Journey and tap “Take the tour.”" },
+    { "type": "text", "id": "tour_label", "label": "Guided-tour link label", "default": "Take the guided tour →" },
     { "type": "header", "content": "Bottom call-to-action" },
     { "type": "url", "id": "cta_url", "label": "CTA URL" },
     { "type": "text", "id": "cta_label", "label": "CTA label", "default": "Start your journey →" }

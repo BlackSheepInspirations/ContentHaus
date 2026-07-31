@@ -76,6 +76,8 @@
           {%- if section.settings.hero_eyebrow != blank -%}<div class="osx-eyebrow">{{ section.settings.hero_eyebrow }}</div>{%- endif -%}
           {%- assign hero_phrase = section.settings.hero_title | default: 'Make this Haus Your Home' -%}
           <h1>{%- if customer.first_name != blank -%}<span class="osx-name">{{ customer.first_name }}</span>,<br>{{ hero_phrase | slice: 0 | downcase }}{{ hero_phrase | slice: 1, 400 }}{%- else -%}{{ hero_phrase }}{%- endif -%}</h1>
+          {%- assign os_brand_tagline = section.settings.hero_brand_tagline | default: 'Where Your originality is rooted and ready to grow.' -%}
+          {%- if os_brand_tagline != blank -%}<p class="osx-hero-tagline">{{ os_brand_tagline }}</p>{%- endif -%}
           {%- if section.settings.hero_body != blank -%}<p class="osx-hero-body">{{ section.settings.hero_body }}</p>{%- endif -%}
           {%- assign os_journey_url = section.settings.journey_url | default: '/pages/p2p-learning' -%}
           <div class="osx-hero-btns">
@@ -554,6 +556,9 @@
   #p2pos .osx-hero[style*="--hero"]{background:linear-gradient(180deg,rgba(5,10,16,.55),rgba(5,10,16,.82)),var(--hero) center/cover no-repeat;}
   #p2pos .osx-hero-glow{position:absolute;inset:-40% -10% auto -10%;height:60%;background:radial-gradient(50% 100% at 30% 0%,rgba(143,111,214,.5),transparent 70%),radial-gradient(50% 100% at 75% 10%,rgba(57,197,192,.4),transparent 70%);filter:blur(20px);opacity:.6;pointer-events:none;}
   #p2pos .osx-hero-in{position:relative;flex:1;min-width:280px;}
+  #p2pos .osx-hero-tagline{margin:10px 0 0;font:italic 600 clamp(14px,2vw,17px)/1.4 Georgia,serif;
+    background:var(--aurora);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:p2pos-shift 26s linear infinite;}
+  @media (prefers-reduced-motion:reduce){#p2pos .osx-hero-tagline{animation:none;}}
   /* personalized Brand DNA panel */
   #p2pos .osx-hero-dna{position:relative;flex:0 0 300px;max-width:340px;}
   #p2pos .osx-hero-dna.is-result{border:1px solid var(--gstroke);border-radius:18px;padding:16px;background:rgba(5,10,16,.5);backdrop-filter:blur(4px);}
@@ -1383,6 +1388,7 @@
     { "type": "image_picker", "id": "hero_image", "label": "Hero image (your premium PNG)" },
     { "type": "text", "id": "hero_eyebrow", "label": "Hero eyebrow", "default": "Purpose 2 Profit" },
     { "type": "text", "id": "hero_title", "label": "Hero title", "default": "Make this Haus Your Home", "info": "A logged-in member's first name is prepended: 'Andrea, make this Haus Your Home.' Shown as-is when there's no name: 'Make this Haus Your Home.'" },
+    { "type": "text", "id": "hero_brand_tagline", "label": "Brand tagline", "default": "Where Your originality is rooted and ready to grow.", "info": "The Purpose 2 Profit tagline, shown under the greeting. Leave blank to hide." },
     { "type": "textarea", "id": "hero_body", "label": "Hero body", "default": "This is your home — built around you. Your fingerprint, your spark, your story. Everything you need to go from idea to income lives right here. Let's make it yours." },
     { "type": "text", "id": "hero_cta_label", "label": "Hero button label", "default": "Show me around →" },
     { "type": "text", "id": "hero_cta_url", "label": "Hero button link", "info": "Where 'Show me around' goes — the walkthrough. Defaults to /pages/p2p-tutorial.", "default": "/pages/p2p-tutorial" },

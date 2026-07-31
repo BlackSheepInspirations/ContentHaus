@@ -12,11 +12,19 @@
   <header class="pmv-hero">
     <span class="pmv-eyebrow">{{ section.settings.eyebrow | default: 'Black Sheep Creations &amp; Inspirations' }}</span>
     <h1 class="pmv-h1">Purpose <span class="pmv-2">2</span> Profit</h1>
+    <p class="pmv-tagline">{{ section.settings.tagline | default: 'Where Your originality is rooted and ready to grow.' }}</p>
     <p class="pmv-tag">{{ section.settings.hero_tagline | default: 'The operating system that takes you from idea to income — built around the one thing no one can copy: you.' }}</p>
     <div class="pmv-hero-cta">
       <a class="pmv-btn pmv-btn--primary" href="{{ cta_url }}">{{ section.settings.cta_label | default: 'Get the Access Pass' }}{% if section.settings.access_product.price %} — {{ section.settings.access_product.price | money }}{% endif %}</a>
       <a class="pmv-btn pmv-btn--ghost" href="#pmv-quiz">Try the free mini quiz ↓</a>
     </div>
+    <ul class="pmv-chips" aria-label="What's inside">
+      <li><b>6</b> Hausen</li>
+      <li><b>2</b> AI partners</li>
+      <li><b>52</b> courses</li>
+      <li><b>5</b> realms</li>
+      <li><b>11</b> Brand archetypes</li>
+    </ul>
   </header>
 
   {%- comment -%} FREE MINI ASSESSMENT — the hook {%- endcomment -%}
@@ -31,26 +39,70 @@
   <section class="pmv-block">
     <div class="pmv-kick">What it is</div>
     <h2 class="pmv-h2">Your whole business, in one home base</h2>
-    <p class="pmv-lede">Six connected Hausen, a gamified learning journey, and a launch method — all speaking one brand language: yours.</p>
+    <p class="pmv-lede">Six connected Hausen, two AI partners, a gamified learning journey, and a proven launch method — all speaking one brand language: yours.</p>
     {%- if section.settings.shot_dashboard != blank -%}
       <div class="pmv-shot"><img src="{{ section.settings.shot_dashboard | image_url: width: 1600 }}" alt="The Purpose 2 Profit dashboard" loading="lazy"></div>
     {%- endif -%}
     <div class="pmv-grid">
       <div class="pmv-feat"><span class="pmv-fic">👑</span><b>Brand Haus</b><p>Define your identity — archetype, colors, fonts and voice — so everything else sounds like you.</p></div>
-      <div class="pmv-feat"><span class="pmv-fic">✍️</span><b>Content · Graphics · Project · Marketing</b><p>Generate on-brand prompts, visuals, products and campaigns, all tuned to your Brand Kit.</p></div>
-      <div class="pmv-feat"><span class="pmv-fic">🚀</span><b>Growth Haus + ROOTED</b><p>Run a proven 6-stage launch method that turns everything you built into a launch.</p></div>
-      <div class="pmv-feat"><span class="pmv-fic">🗺️</span><b>The Learning Journey</b><p>Realms, courses, badges and streaks that teach the whole thing — one step at a time.</p></div>
+      <div class="pmv-feat"><span class="pmv-fic">✍️</span><b>Content Haus</b><p>Generate on-brand prompts and copy for anything you make, tuned to your Brand Kit.</p></div>
+      <div class="pmv-feat"><span class="pmv-fic">🎨</span><b>Graphics Haus</b><p>On-brand visuals and design prompts — no design degree required.</p></div>
+      <div class="pmv-feat"><span class="pmv-fic">📦</span><b>Project Haus</b><p>Turn an idea into a real, sellable digital product, step by step.</p></div>
+      <div class="pmv-feat"><span class="pmv-fic">📣</span><b>Marketing Haus</b><p>Mockups, posts, ads, emails and listing copy that get you seen.</p></div>
+      <div class="pmv-feat"><span class="pmv-fic">🚀</span><b>Growth Haus + ROOTED</b><p>A proven 6-stage launch method that turns everything you built into a launch.</p></div>
     </div>
+  </section>
+
+  {%- comment -%} MEET YOUR AI PARTNERS — Frank (Idea) + Ruth (Build) {%- endcomment -%}
+  <section class="pmv-block">
+    <div class="pmv-kick">Never build alone</div>
+    <h2 class="pmv-h2">Two AI partners in your corner</h2>
+    <p class="pmv-lede">Stuck on what to make — or how to make it sell? Frank and Ruth are your always-on creative partners, built to think alongside you.</p>
+    <div class="pmv-mates">
+      <div class="pmv-mate">
+        <div class="pmv-mate-av"><img src="{{ 'haus-mate-idea.png' | asset_url }}" alt="Frank — The Idea Haus" loading="lazy" onerror="this.style.display='none'"></div>
+        <div class="pmv-mate-txt">
+          <span class="pmv-mate-name">Frank <span class="pmv-mate-dot">•</span> The Idea Haus</span>
+          <i class="pmv-mate-role">Where brilliant ideas begin</i>
+          <p>Your AI Business Partner. Sharpen your concept, positioning and direction before you brand or build a single thing.</p>
+        </div>
+      </div>
+      <div class="pmv-mate">
+        <div class="pmv-mate-av"><img src="{{ 'haus-mate-build.png' | asset_url }}" alt="Ruth — The Build Haus" loading="lazy" onerror="this.style.display='none'"></div>
+        <div class="pmv-mate-txt">
+          <span class="pmv-mate-name">Ruth <span class="pmv-mate-dot">•</span> The Build Haus</span>
+          <i class="pmv-mate-role">Building brilliant designs</i>
+          <p>Your AI design partner. Turn a rough idea into something polished, on-brand and ready to sell.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {%- comment -%} THE JOURNEY {%- endcomment -%}
+  <section class="pmv-block">
+    <div class="pmv-kick">Learn as you go</div>
+    <h2 class="pmv-h2">A journey, not a course dump</h2>
+    <p class="pmv-lede">Five realms, 52 courses, badges, points and streaks — the whole method taught one step at a time, so you always know your next move.</p>
     {%- if section.settings.shot_realms != blank -%}
       <div class="pmv-shot"><img src="{{ section.settings.shot_realms | image_url: width: 1600 }}" alt="The Learning Journey realms" loading="lazy"></div>
+    {%- else -%}
+      <div class="pmv-realms" aria-hidden="true">
+        <span class="pmv-realm">🌊 Open Water</span>
+        <span class="pmv-realm">🌲 Element Forest</span>
+        <span class="pmv-realm">🌵 Desert Blooms</span>
+        <span class="pmv-realm">🌾 Golden Harvest</span>
+        <span class="pmv-realm">🌿 Evergreen</span>
+      </div>
     {%- endif -%}
   </section>
 
   {%- comment -%} FINAL CTA {%- endcomment -%}
   <section class="pmv-final">
+    <div class="pmv-kick pmv-kick--center">One pass. Everything.</div>
     <h2 class="pmv-h2">Ready to make this Haus your home?</h2>
     <p class="pmv-lede">{{ section.settings.final_sub | default: 'Unlock the full Brand DNA assessment, every Haus, the courses and the launch method — the entire Purpose 2 Profit Operating System.' }}</p>
     <a class="pmv-btn pmv-btn--primary pmv-btn--lg" href="{{ cta_url }}">{{ section.settings.cta_label | default: 'Get the Access Pass' }}{% if section.settings.access_product.price %} — {{ section.settings.access_product.price | money }}{% endif %}</a>
+    <p class="pmv-fineprint">{{ section.settings.tagline | default: 'Where Your originality is rooted and ready to grow.' }}</p>
   </section>
 </div>
 
@@ -77,36 +129,63 @@
 <style>
   #p2posprev{--gold:#f4c534;--text:#eef6f3;--muted:#9fb3ad;--stroke:rgba(255,255,255,.10);--gstroke:rgba(216,180,90,.34);
     --aurora:linear-gradient(100deg,#f4e2a6,#8f6fd6,#27ae6e,#39c5c0,#2563eb,#d6336c,#f4e2a6);
-    max-width:1080px;margin:0 auto;padding:0 18px 80px;color:var(--text);
+    max-width:1080px;margin:22px auto;padding:14px 18px 70px;color:var(--text);border-radius:26px;
+    background:radial-gradient(46% 30% at 12% 3%,rgba(39,174,110,.14),transparent 60%),radial-gradient(42% 26% at 88% 6%,rgba(37,99,235,.12),transparent 60%),radial-gradient(50% 30% at 60% 100%,rgba(214,51,108,.10),transparent 60%),linear-gradient(180deg,#080d0b,#0a1310 46%,#080d0b);
+    border:1px solid var(--stroke);box-shadow:0 30px 80px -40px rgba(0,0,0,.8);
     font-family:system-ui,-apple-system,"Segoe UI",sans-serif;}
   @keyframes pmv-shift{0%{background-position:0% 50%;}100%{background-position:300% 50%;}}
-  #p2posprev .pmv-hero{text-align:center;padding:60px 24px 52px;border-radius:24px;margin:22px 0 40px;position:relative;overflow:hidden;
+  @keyframes pmv-float{0%,100%{transform:translateY(0);}50%{transform:translateY(-6px);}}
+  #p2posprev .pmv-hero{text-align:center;padding:56px 24px 40px;border-radius:22px;margin:6px 0 40px;position:relative;overflow:hidden;
     background:radial-gradient(60% 120% at 18% 6%,rgba(39,174,110,.30),transparent 60%),radial-gradient(55% 120% at 84% 12%,rgba(37,99,235,.24),transparent 60%),radial-gradient(50% 120% at 60% 110%,rgba(214,51,108,.20),transparent 60%),linear-gradient(150deg,#0a0f0c,#101613 46%,#0c1310);
     border:1px solid var(--stroke);}
   #p2posprev .pmv-eyebrow{display:inline-block;font:700 12px/1 system-ui;letter-spacing:.16em;text-transform:uppercase;color:#7fe3b8;margin-bottom:16px;}
-  #p2posprev .pmv-h1{font:800 clamp(38px,7vw,66px)/1 Georgia,serif;margin:0 0 16px;letter-spacing:-.02em;}
+  #p2posprev .pmv-h1{font:800 clamp(38px,7vw,66px)/1 Georgia,serif;margin:0 0 12px;letter-spacing:-.02em;}
   #p2posprev .pmv-2{background:var(--aurora);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:pmv-shift 20s linear infinite;font-style:italic;}
-  #p2posprev .pmv-tag{max-width:600px;margin:0 auto 28px;font:400 17px/1.6 system-ui;color:#c9e6da;}
+  #p2posprev .pmv-tagline{max-width:640px;margin:0 auto 14px;font:600 clamp(16px,2.6vw,21px)/1.4 Georgia,serif;font-style:italic;
+    background:var(--aurora);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:pmv-shift 26s linear infinite;}
+  #p2posprev .pmv-tag{max-width:600px;margin:0 auto 26px;font:400 17px/1.6 system-ui;color:#c9e6da;}
   #p2posprev .pmv-hero-cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
   #p2posprev .pmv-btn{display:inline-flex;align-items:center;padding:14px 26px;border-radius:999px;font:700 15px/1 system-ui;text-decoration:none;transition:transform .14s ease,filter .14s ease;}
   #p2posprev .pmv-btn--primary{color:#0a1410;background:linear-gradient(100deg,#f4e2a6,#c9a24a);box-shadow:0 12px 30px -12px rgba(216,180,90,.6);}
   #p2posprev .pmv-btn--ghost{color:var(--text);border:1px solid var(--gstroke);}
   #p2posprev .pmv-btn:hover{transform:translateY(-2px);filter:brightness(1.04);}
   #p2posprev .pmv-btn--lg{font-size:17px;padding:16px 34px;}
-  #p2posprev .pmv-block{margin:0 0 56px;}
+  #p2posprev .pmv-chips{list-style:none;display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:26px 0 0;padding:0;}
+  #p2posprev .pmv-chips li{font:600 12.5px/1 system-ui;color:#c9e6da;background:rgba(255,255,255,.05);border:1px solid var(--stroke);border-radius:999px;padding:9px 14px;}
+  #p2posprev .pmv-chips b{color:var(--gold);font-weight:800;margin-right:5px;font-size:14px;}
+  #p2posprev .pmv-block{margin:0 0 54px;}
   #p2posprev .pmv-kick{font:700 11px/1 system-ui;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:10px;}
+  #p2posprev .pmv-kick--center{text-align:center;}
   #p2posprev .pmv-h2{font:700 clamp(24px,4vw,34px)/1.15 Georgia,serif;margin:0 0 10px;}
   #p2posprev .pmv-lede{max-width:640px;font:400 16px/1.6 system-ui;color:var(--muted);margin:0 0 22px;}
   #p2posprev .pmv-shot{border-radius:16px;overflow:hidden;border:1px solid var(--stroke);margin:22px 0;box-shadow:0 24px 60px -30px rgba(0,0,0,.7);}
   #p2posprev .pmv-shot img{width:100%;display:block;}
   #p2posprev .pmv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px;}
-  #p2posprev .pmv-feat{padding:18px 18px 20px;border:1px solid var(--stroke);border-radius:14px;background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(9,17,24,.4));}
+  #p2posprev .pmv-feat{padding:18px 18px 20px;border:1px solid var(--stroke);border-radius:14px;background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(9,17,24,.4));transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease;}
+  #p2posprev .pmv-feat:hover{transform:translateY(-3px);border-color:var(--gstroke);box-shadow:0 18px 40px -24px rgba(0,0,0,.7);}
   #p2posprev .pmv-fic{font-size:24px;line-height:1;}
   #p2posprev .pmv-feat b{display:block;margin:10px 0 5px;font:700 15px/1.2 system-ui;}
   #p2posprev .pmv-feat p{margin:0;font:400 13px/1.5 system-ui;color:var(--muted);}
+  /* AI partners */
+  #p2posprev .pmv-mates{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;}
+  #p2posprev .pmv-mate{display:flex;gap:16px;align-items:center;padding:20px;border:1px solid var(--gstroke);border-radius:18px;
+    background:radial-gradient(120% 120% at 0% 0%,rgba(216,180,90,.10),rgba(9,17,24,.5));}
+  #p2posprev .pmv-mate-av{flex:0 0 84px;width:84px;height:84px;border-radius:50%;overflow:hidden;border:2px solid var(--gstroke);
+    background:radial-gradient(circle at 50% 30%,#12202b,#0a141c);animation:pmv-float 6s ease-in-out infinite;}
+  #p2posprev .pmv-mate:last-child .pmv-mate-av{animation-delay:-3s;}
+  #p2posprev .pmv-mate-av img{width:100%;height:100%;object-fit:cover;display:block;}
+  #p2posprev .pmv-mate-name{display:block;font:800 16px/1.2 system-ui;color:var(--text);}
+  #p2posprev .pmv-mate-dot{color:var(--gold);}
+  #p2posprev .pmv-mate-role{display:block;margin:3px 0 8px;font:italic 600 13px/1.3 Georgia,serif;color:var(--gold);}
+  #p2posprev .pmv-mate-txt p{margin:0;font:400 13.5px/1.55 system-ui;color:var(--muted);}
+  /* realm chips fallback */
+  #p2posprev .pmv-realms{display:flex;gap:10px;flex-wrap:wrap;}
+  #p2posprev .pmv-realm{font:600 13.5px/1 system-ui;color:#c9e6da;background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(9,17,24,.4));border:1px solid var(--stroke);border-radius:12px;padding:12px 15px;}
   #p2posprev .pmv-final{text-align:center;padding:52px 24px;border-radius:22px;border:1px solid var(--gstroke);
     background:linear-gradient(120deg,rgba(216,180,90,.1),rgba(57,197,192,.06));}
+  #p2posprev .pmv-final .pmv-kick{margin-bottom:8px;}
   #p2posprev .pmv-final .pmv-lede{margin-left:auto;margin-right:auto;}
+  #p2posprev .pmv-fineprint{margin:20px auto 0;font:italic 600 13px/1.4 Georgia,serif;color:var(--gold);opacity:.9;}
 
   /* ---- mini assessment ---- */
   #p2pmini{max-width:560px;}
@@ -140,7 +219,7 @@
   #p2pmini .pm-cta{display:inline-block;padding:14px 28px;border-radius:999px;font:700 15px/1 system-ui;color:#0a1410;text-decoration:none;background:linear-gradient(100deg,#f4e2a6,#c9a24a);box-shadow:0 12px 30px -12px rgba(216,180,90,.6);}
   #p2pmini .pm-restart{display:block;margin:14px auto 0;border:0;background:none;color:var(--muted);cursor:pointer;font:600 12.5px/1 system-ui;}
   #p2pmini .pm-restart:hover{color:var(--text);}
-  @media (prefers-reduced-motion:reduce){#p2posprev .pmv-2,#p2posprev .pmv-prog-bar,#p2pmini .pm-name,#p2pmini .pm-prog-bar{animation:none;}}
+  @media (prefers-reduced-motion:reduce){#p2posprev .pmv-2,#p2posprev .pmv-tagline,#p2posprev .pmv-mate-av,#p2pmini .pm-name,#p2pmini .pm-prog-bar{animation:none;}}
 </style>
 
 {% schema %}
@@ -148,12 +227,13 @@
   "name": "P2P OS Preview",
   "settings": [
     { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Black Sheep Creations & Inspirations" },
-    { "type": "textarea", "id": "hero_tagline", "label": "Hero tagline", "default": "The operating system that takes you from idea to income — built around the one thing no one can copy: you." },
+    { "type": "text", "id": "tagline", "label": "Brand tagline", "default": "Where Your originality is rooted and ready to grow." },
+    { "type": "textarea", "id": "hero_tagline", "label": "Hero sub-tagline", "default": "The operating system that takes you from idea to income — built around the one thing no one can copy: you." },
     { "type": "header", "content": "Access / CTA" },
     { "type": "product", "id": "access_product", "label": "Access Pass product", "info": "The P2P Operating System - ACCESS PASS product. Falls back to /products/p2p-os-access." },
     { "type": "text", "id": "cta_label", "label": "CTA button label", "default": "Get the Access Pass" },
     { "type": "text", "id": "mini_cta_label", "label": "Mini-quiz result CTA label", "default": "Unlock the full assessment" },
-    { "type": "header", "content": "Screenshots" },
+    { "type": "header", "content": "Screenshots (optional)", "info": "Leave blank to show the built-in styled fallback. Add a member dashboard shot + a Journey realms shot when you have them." },
     { "type": "image_picker", "id": "shot_dashboard", "label": "Dashboard screenshot" },
     { "type": "image_picker", "id": "shot_realms", "label": "Realms / Journey screenshot" },
     { "type": "header", "content": "Final CTA" },

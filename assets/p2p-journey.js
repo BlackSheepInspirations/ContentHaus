@@ -683,7 +683,18 @@
     document.addEventListener('keydown', function(e){ if(tour.hidden) return; if(e.key === 'Escape') stop(); else if(e.key === 'ArrowRight') go(1); else if(e.key === 'ArrowLeft') go(-1); });
     window.addEventListener('resize', function(){ if(!tour.hidden) reposition(); });
     window.addEventListener('scroll', function(){ if(!tour.hidden && curTarget) reposition(); }, { passive:true });
-    root.querySelectorAll('[data-tour-start]').forEach(function(b){ b.addEventListener('click', function(e){ e.preventDefault(); start(); }); });
+    // Delegated so it fires no matter where the button lives (welcome pop-up, Help
+    // menu, or markup rendered outside #p2pj) or when it renders.
+    document.addEventListener('click', function(e){
+      var b = e.target && e.target.closest ? e.target.closest('[data-tour-start]') : null;
+      if(b){ e.preventDefault(); start(); }
+    });
+    // Deep-link: /pages/p2p-learning#tour (or ?tour=1) auto-opens the tour, so the
+    // tutorial page's "guided tour" button can launch it directly.
+    try{
+      var _h = (location.hash || '').toLowerCase(), _q = (location.search || '').toLowerCase();
+      if(_h === '#tour' || _q.indexOf('tour=1') > -1){ requestAnimationFrame(start); }
+    }catch(e){}
   })();
 
   /* ---- JS sticky bar (sits below the theme's own sticky header; ignores lock state) ---- */
