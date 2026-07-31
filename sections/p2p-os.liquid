@@ -20,10 +20,10 @@
   <button class="osx-burger" type="button" aria-label="Menu" data-osx-burger><span></span><span></span><span></span></button>
 
   <aside class="osx-side" data-osx-side>
-    <div class="osx-brand">
+    <button class="osx-brand" type="button" data-osx-home aria-label="Back to Operating System home">
       <div class="osx-brandmark">Purpose <span class="osx-2">2</span> Profit</div>
       <div class="osx-brandsub">{{ section.settings.brand_sub | default: 'powered by Black Sheep Creations &amp; Inspirations' }}</div>
-    </div>
+    </button>
     <nav class="osx-nav">
       {%- for block in section.blocks -%}
         {%- if block.type == 'navitem' -%}
@@ -72,7 +72,11 @@
           {%- if section.settings.hero_eyebrow != blank -%}<div class="osx-eyebrow">{{ section.settings.hero_eyebrow }}</div>{%- endif -%}
           <h1>{{ section.settings.hero_title | default: 'Welcome home' }}{%- if customer.first_name != blank -%}<span class="osx-name">, {{ customer.first_name }}</span>{%- endif -%}</h1>
           {%- if section.settings.hero_body != blank -%}<p class="osx-hero-body">{{ section.settings.hero_body }}</p>{%- endif -%}
-          {%- if section.settings.hero_cta_label != blank -%}<button class="osx-cta" type="button" data-osx-goto="{{ section.settings.hero_cta_target | default: 'checkpoint' }}">{{ section.settings.hero_cta_label }}</button>{%- endif -%}
+          {%- assign os_journey_url = section.settings.journey_url | default: '/pages/p2p-learning' -%}
+          <div class="osx-hero-btns">
+            {%- if section.settings.hero_cta_label != blank -%}<button class="osx-cta" type="button" data-osx-goto="{{ section.settings.hero_cta_target | default: 'checkpoint' }}">{{ section.settings.hero_cta_label }}</button>{%- endif -%}
+            {%- if os_journey_url != blank -%}<a class="osx-cta ghost" href="{{ os_journey_url }}">{{ section.settings.journey_label | default: 'Enter your Learning Journey →' }}</a>{%- endif -%}
+          </div>
         </div>
       </header>
 
@@ -265,8 +269,9 @@
 
   /* sidebar */
   #p2pos .osx-side{background:linear-gradient(180deg,var(--side),#060d14);border-right:1px solid var(--stroke);padding:22px 14px;display:flex;flex-direction:column;gap:6px;}
-  #p2pos .osx-brand{padding:6px 10px 16px;border-bottom:1px solid var(--stroke);margin-bottom:10px;}
-  #p2pos .osx-brandmark{font:700 19px/1.1 Georgia,serif;letter-spacing:.01em;}
+  #p2pos .osx-brand{display:block;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--stroke);padding:6px 10px 16px;margin-bottom:10px;cursor:pointer;border-radius:8px 8px 0 0;transition:background .15s;}
+  #p2pos .osx-brand:hover{background:rgba(255,255,255,.03);}
+  #p2pos .osx-brandmark{font:700 19px/1.1 Georgia,serif;letter-spacing:.01em;color:var(--text);}
   #p2pos .osx-brandsub{margin-top:5px;font:600 9.5px/1.3 system-ui;letter-spacing:.03em;text-transform:uppercase;color:var(--muted);}
   #p2pos .osx-nav{display:flex;flex-direction:column;gap:3px;overflow-y:auto;}
   #p2pos .osx-item{display:flex;align-items:center;gap:11px;width:100%;padding:11px 12px;border:1px solid transparent;border-radius:11px;background:none;color:#cdd9dd;font:600 13.5px/1.2 system-ui;text-align:left;cursor:pointer;transition:background .15s,border-color .15s,color .15s;}
@@ -298,6 +303,9 @@
     background:var(--aurora);background-size:300% 100%;animation:p2pos-shift 20s linear infinite;box-shadow:0 12px 30px rgba(0,0,0,.35);transition:transform .12s;}
   #p2pos .osx-cta:hover{transform:translateY(-2px);}
   #p2pos .osx-cta.as-link{margin-top:8px;}
+  #p2pos .osx-hero-btns{display:flex;gap:12px;flex-wrap:wrap;}
+  #p2pos .osx-cta.ghost{background:transparent;border:1px solid var(--gstroke);color:var(--gold-bright);box-shadow:none;animation:none;}
+  #p2pos .osx-cta.ghost:hover{border-color:var(--gold-bright);background:rgba(216,180,90,.08);}
 
   /* stat strip */
   #p2pos .osx-stats{display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin-bottom:26px;}
@@ -456,6 +464,13 @@
       else { showView('__placeholder'); var pt = root.querySelector('[data-osx-ph-title]'); if(pt) pt.textContent = (btn.querySelector('.osx-lbl')||{}).textContent || 'Coming together'; }
     }
     items.forEach(function(b){ b.addEventListener('click', function(){ activate(b); closeSide(); }); });
+    // brand -> back to OS home (the Start view)
+    var brand = root.querySelector('[data-osx-home]');
+    if(brand) brand.addEventListener('click', function(){
+      var startNav = Array.prototype.filter.call(items, function(x){ return x.getAttribute('data-target') === 'start'; })[0];
+      if(startNav){ activate(startNav); } else { showView('start'); }
+      closeSide();
+    });
     // hero CTA -> jump to a view by target
     root.querySelectorAll('[data-osx-goto]').forEach(function(b){ b.addEventListener('click', function(){
       var t = b.getAttribute('data-osx-goto');
@@ -530,6 +545,8 @@
     { "type": "textarea", "id": "hero_body", "label": "Hero body", "default": "This is your home — built around you. Your fingerprint, your spark, your story. Everything you need to go from idea to income lives right here. Let's make it yours." },
     { "type": "text", "id": "hero_cta_label", "label": "Hero button label", "default": "Show me around →" },
     { "type": "text", "id": "hero_cta_target", "label": "Hero button target (nav target)", "default": "checkpoint" },
+    { "type": "url", "id": "journey_url", "label": "Learning Journey URL", "info": "Adds a link on the hero to the gamified Learning Journey." },
+    { "type": "text", "id": "journey_label", "label": "Learning Journey button label", "default": "Enter your Learning Journey →" },
     { "type": "checkbox", "id": "show_stats", "label": "Show live stats (ring + points/badges/streak/tier)", "default": true },
     { "type": "checkbox", "id": "show_moment", "label": "Load progress engine", "default": true },
     { "type": "text", "id": "journey_access_tag", "label": "Journey access tag", "default": "p2p-learning" },
