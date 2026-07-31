@@ -80,6 +80,16 @@
             {%- if section.settings.hero_cta_label != blank -%}<button class="osx-cta" type="button" data-osx-goto="{{ section.settings.hero_cta_target | default: 'checkpoint' }}">{{ section.settings.hero_cta_label }}</button>{%- endif -%}
             {%- if os_journey_url != blank -%}<a class="osx-cta ghost" href="{{ os_journey_url }}">{{ section.settings.journey_label | default: 'Enter your Learning Journey →' }}</a>{%- endif -%}
           </div>
+          {%- comment -%} daily Mindset · Purpose · Heart carousel (auto-rotates + Next) {%- endcomment -%}
+          <div class="osx-moments" data-osx-moments hidden>
+            <div class="mo-title" data-mo-title></div>
+            <blockquote class="mo-text" data-mo-text></blockquote>
+            <cite class="mo-source" data-mo-source></cite>
+            <div class="mo-foot">
+              <div class="mo-dots" data-mo-dots></div>
+              <button class="mo-next" type="button" data-mo-next aria-label="Next check">›</button>
+            </div>
+          </div>
         </div>
         {%- comment -%} personalized Brand DNA panel — filled by JS from p2p_archetype (set when the Founders Assessment completes) {%- endcomment -%}
         <aside class="osx-hero-dna" data-osx-dna hidden></aside>
@@ -322,6 +332,20 @@
   #p2pos .osx-hero-dna .dna-nudge b{display:block;font:700 15px/1.2 Georgia,serif;color:var(--text);margin-bottom:6px;}
   #p2pos .osx-hero-dna .dna-nudge-sub{display:block;font:500 12px/1.4 system-ui;color:var(--muted);}
   @media (max-width:760px){#p2pos .osx-hero-dna{flex:1 1 100%;max-width:none;}}
+  /* daily Mindset · Purpose · Heart carousel */
+  #p2pos .osx-moments{margin-top:22px;border:1px solid var(--gstroke);border-radius:14px;padding:15px 18px;background:rgba(5,10,16,.45);}
+  #p2pos .mo-title{font:700 10.5px/1.2 system-ui;letter-spacing:.05em;text-transform:uppercase;color:var(--gold);margin-bottom:9px;}
+  #p2pos .mo-star{color:var(--gold-bright);}
+  #p2pos .mo-grad{background:var(--aurora);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:p2pos-shift 20s linear infinite;}
+  #p2pos .mo-text{font:italic 400 15px/1.5 Georgia,serif;color:var(--text);margin:0 0 7px;min-height:2.9em;}
+  #p2pos .mo-source{font:600 11.5px/1.3 system-ui;color:var(--muted);font-style:normal;}
+  #p2pos .mo-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px;}
+  #p2pos .mo-dots{display:flex;gap:7px;}
+  #p2pos .mo-dot{width:7px;height:7px;border-radius:50%;border:0;padding:0;background:rgba(255,255,255,.22);cursor:pointer;transition:background .15s,transform .15s;}
+  #p2pos .mo-dot.on{background:var(--gold-bright);transform:scale(1.25);}
+  #p2pos .mo-dot:hover{background:rgba(255,255,255,.42);}
+  #p2pos .mo-next{width:30px;height:30px;border-radius:50%;border:1px solid var(--stroke);background:rgba(255,255,255,.04);color:var(--gold-bright);font:700 18px/1 system-ui;cursor:pointer;transition:.15s;display:grid;place-items:center;}
+  #p2pos .mo-next:hover{border-color:var(--gstroke);background:rgba(216,180,90,.1);}
   #p2pos .osx-eyebrow{font:700 11px/1 system-ui;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:12px;}
   #p2pos .osx-hero h1{font:700 clamp(28px,4.5vw,42px)/1.1 Georgia,serif;margin:0 0 12px;}
   #p2pos .osx-name{background:var(--aurora);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:p2pos-shift 20s linear infinite;}
@@ -461,6 +485,10 @@
 <script src="{{ 'p2p-notebook.js' | asset_url }}" defer="defer"></script>
 <script src="{{ 'p2p-journey-map.js' | asset_url }}" defer="defer"></script>
 {%- endif -%}
+{%- comment -%} daily Mindset · Purpose · Heart content for the hero carousel {%- endcomment -%}
+<script src="{{ 'p2p-moments.js' | asset_url }}" defer="defer"></script>
+<script src="{{ 'p2p-purpose.js' | asset_url }}" defer="defer"></script>
+<script src="{{ 'p2p-heart.js' | asset_url }}" defer="defer"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function(){
     var root = document.getElementById('p2pos'); if(!root) return;
@@ -565,6 +593,38 @@
         dna.innerHTML = '<a class="dna-nudge" href="' + esc(assessUrl) + '"><span class="dna-nudge-ic">✦</span><b>Discover your Brand DNA</b><span class="dna-nudge-sub">Take your Founders Assessment to reveal your archetype →</span></a>';
         dna.hidden = false;
       }
+    })();
+
+    // Daily Mindset · Purpose · Heart carousel — one item per pillar per day; auto-rotate + Next
+    (function(){
+      var wrap = root.querySelector('[data-osx-moments]'); if(!wrap) return;
+      var day = Math.floor(Date.now() / 864e5);
+      var pillars = [
+        { label: 'Mindset', pool: window.P2P_MOMENTS },
+        { label: 'Purpose', pool: window.P2P_PURPOSE },
+        { label: 'Heart', pool: window.P2P_HEART }
+      ].filter(function(p){ return p.pool && p.pool.length; });
+      if(!pillars.length) return;
+      var titleEl = wrap.querySelector('[data-mo-title]'), textEl = wrap.querySelector('[data-mo-text]'), srcEl = wrap.querySelector('[data-mo-source]');
+      var dotsWrap = wrap.querySelector('[data-mo-dots]');
+      dotsWrap.innerHTML = pillars.map(function(_, di){ return '<button class="mo-dot' + (di === 0 ? ' on' : '') + '" type="button" aria-label="Check ' + (di + 1) + '"></button>'; }).join('');
+      var dots = dotsWrap.querySelectorAll('.mo-dot');
+      var i = 0, timer = null;
+      function render(){
+        var p = pillars[i], it = p.pool[day % p.pool.length] || {};
+        titleEl.innerHTML = '<span class="mo-star">✦</span> <span class="mo-grad">' + p.label + '</span> Check';
+        textEl.textContent = it.t ? ('“' + it.t + '”') : '';
+        srcEl.textContent = it.s || '';
+        dots.forEach(function(d, di){ d.classList.toggle('on', di === i); });
+      }
+      function go(n){ i = ((n % pillars.length) + pillars.length) % pillars.length; render(); }
+      function next(){ go(i + 1); }
+      function stop(){ if(timer){ clearInterval(timer); timer = null; } }
+      function start(){ stop(); timer = setInterval(next, 9000); }
+      var nb = wrap.querySelector('[data-mo-next]'); if(nb) nb.addEventListener('click', function(){ next(); start(); });
+      dots.forEach(function(d, di){ d.addEventListener('click', function(){ go(di); start(); }); });
+      wrap.addEventListener('mouseenter', stop); wrap.addEventListener('mouseleave', start);
+      render(); wrap.hidden = false; start();
     })();
 
     // live stats + ring (reuse the engine)
