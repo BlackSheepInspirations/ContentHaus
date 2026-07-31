@@ -188,7 +188,12 @@
       var slug = profile.name.toLowerCase().replace(/^the /, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
       var vals = (results.founderOutput && results.founderOutput.values) || [];
       var traits = vals.map(function (v) { return v && v.name; }).filter(Boolean).slice(0, 3);
-      var rec = { slug: slug, name: profile.name, word: WORDS[profile.name] || "", traits: traits, ts: Date.now() };
+      // Archetype palette (fallback color source for the OS recolor — a custom
+      // brand kit, if the member saved one, takes precedence there).
+      var pc = (profile.output && profile.output.colors) || {};
+      var colors = ["primary", "secondary", "neutral", "accent", "support", "standOut"]
+        .map(function (role) { return pc[role]; }).filter(Boolean);
+      var rec = { slug: slug, name: profile.name, word: WORDS[profile.name] || "", traits: traits, colors: colors, ts: Date.now() };
       localStorage.setItem("p2p_archetype", JSON.stringify(rec));
       if (window.P2P && window.P2P.push) window.P2P.push();
     } catch (e) {}

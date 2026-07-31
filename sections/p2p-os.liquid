@@ -1037,6 +1037,50 @@
       document.addEventListener('keydown', function(e){ if(e.key === 'Escape' && !modal.hidden) close(); });
     })();
 
+    // Recolor the OS to the member's saved brand palette (their choice). Reads a
+    // saved custom brand kit first, falls back to the archetype's palette. Hue +
+    // saturation come from the brand colors; LIGHTNESS is forced into a legible
+    // band so a dark brand color never makes accent text unreadable on the dark UI.
+    (function(){
+      function J(k){ try{ return JSON.parse(localStorage.getItem(k)); }catch(e){ return null; } }
+      function toHsl(hex){
+        var h = String(hex == null ? '' : hex).trim().replace('#', '');
+        if(h.length === 3){ h = h.replace(/(.)/g, '$1$1'); }
+        if(!/^[0-9a-fA-F]{6}$/.test(h)) return null;
+        var r = parseInt(h.slice(0,2),16)/255, g = parseInt(h.slice(2,4),16)/255, b = parseInt(h.slice(4,6),16)/255;
+        var mx = Math.max(r,g,b), mn = Math.min(r,g,b), l = (mx+mn)/2, s, hue;
+        if(mx === mn){ hue = 0; s = 0; }
+        else { var d = mx-mn; s = l > 0.5 ? d/(2-mx-mn) : d/(mx+mn);
+          hue = mx === r ? (g-b)/d + (g<b?6:0) : mx === g ? (b-r)/d + 2 : (r-g)/d + 4; hue *= 60; }
+        return [hue, s*100, l*100];
+      }
+      function hsl(h,s,l){ return 'hsl(' + Math.round(h) + ',' + Math.round(s) + '%,' + Math.round(l) + '%)'; }
+      function clamp(v,a,b){ return Math.max(a, Math.min(b, v)); }
+      var vault = J('blackSheepBrandKitVault'), arch = J('p2p_archetype');
+      var kit = vault && vault.brandHausKits && vault.brandHausKits.length ? vault.brandHausKits[vault.brandHausKits.length - 1] : null;
+      var raw = (kit && kit.colors && kit.colors.length) ? kit.colors : (arch && arch.colors ? arch.colors : []);
+      var cols = raw.map(toHsl).filter(Boolean);
+      if(!cols.length) return; // no brand palette -> keep the default aurora identity
+      var base = cols.slice().sort(function(a,b){ return b[1] - a[1]; })[0]; // most saturated = signature hue
+      if(base[1] < 12){
+        // near-greyscale brand: no meaningful hue to port -> clean neutral accents,
+        // and leave the aurora as-is so a minimalist brand still looks premium.
+        root.style.setProperty('--gold', hsl(0, 0, 80));
+        root.style.setProperty('--gold-bright', hsl(0, 0, 90));
+        root.style.setProperty('--gstroke', 'hsla(0,0%,82%,.30)');
+        return;
+      }
+      var sat = clamp(base[1], 45, 88);
+      root.style.setProperty('--gold', hsl(base[0], sat, 62));
+      root.style.setProperty('--gold-bright', hsl(base[0], clamp(sat + 6, 50, 92), 70));
+      root.style.setProperty('--gstroke', 'hsla(' + Math.round(base[0]) + ',' + Math.round(sat) + '%,60%,.38)');
+      var vivid = cols.filter(function(c){ return c[1] >= 12; }); // real hues only for the aurora
+      if(vivid.length >= 3){
+        var stops = vivid.slice(0, 5).map(function(c){ return hsl(c[0], clamp(c[1], 45, 85), clamp(c[2], 56, 72)); });
+        root.style.setProperty('--aurora', 'linear-gradient(100deg,' + stops.concat(stops[0]).join(',') + ')');
+      }
+    })();
+
     // Personalized Brand DNA panel — reads p2p_archetype (set when the Founders Assessment completes)
     (function(){
       var dna = root.querySelector('[data-osx-dna]'); if(!dna) return;
