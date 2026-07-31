@@ -4,6 +4,22 @@ Read this first in a fresh conversation, alongside the auto-loaded memory
 (`memory/MEMORY.md` + files), `docs/p2p-os-build-plan.md`, and
 `docs/p2p-launch-checklist.md`. Everything below is committed + live.
 
+## Latest session close-out (2026-07-31)
+- **Daily libraries +100 net-new each** (deduped, PD-safe): `p2p-moments.js` 552→652,
+  `p2p-purpose.js` 217→318, `p2p-heart.js` 220→320. Public-domain quotes (authors
+  died pre-1940), WEB/KJV scripture, and original Affirmations/Reflections. Pushed +
+  mirrored + committed. (Appender scripts w/ dedup in scratchpad; the `.js` files ARE
+  the durable store.)
+- **OS "Born an Original" carousel 25→100** statements (LINES array in
+  `sections/p2p-os.liquid`). Pushed + mirrored + committed.
+- **Gated pages hidden from search** — base-theme edits (mirror only, NOT git):
+  `layout/theme.liquid` adds `<meta robots noindex,nofollow>` and
+  `sections/main-search.liquid` + both `hdt_predictive-search*.liquid` skip any page
+  whose `template.suffix` matches `courses-*`, `p2p-realm-*`, `p2p-learning*`,
+  `p2p-tutorial`, or `p2p-course`. Public (indexable): OS, all 6 Hausen, previews,
+  testimonials. Live-verified: realm-2/courses-*/p2p-learning → noindex; brand-haus/
+  marketing-haus/p2p-os/p2p-os-preview → clean.
+
 ## Owner / voice
 Andrea (admin@blacksheepcreations.com). Warm, high-energy, calls me "friend."
 Copy voice = **quiet authority** (warm, reassuring, expert; no hype). Deadline is
