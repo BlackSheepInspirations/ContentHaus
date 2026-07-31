@@ -71,14 +71,14 @@
   function writePersisted(state) {
     if (!window.localStorage) return;
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ kits: state.kits, activeKitId: state.activeKitId }));
-    writeSharedVault(state.kits);
+    writeSharedVault(state.kits, state.activeKitId);
   }
 
   // Mirrors this product's own kits into the shared vault other Haus
   // products read — flattened to plain hex/string values (no field-
   // shape objects) so any consumer can use them without knowing this
   // file's internal makeField structure.
-  function writeSharedVault(kits) {
+  function writeSharedVault(kits, activeKitId) {
     if (!window.localStorage) return;
     var shared = kits.map(function (kit) {
       return {
@@ -95,7 +95,7 @@
         mission: resolved(kit.fields.mission),
       };
     });
-    window.localStorage.setItem(SHARED_STORAGE_KEY, JSON.stringify({ brandHausKits: shared }));
+    window.localStorage.setItem(SHARED_STORAGE_KEY, JSON.stringify({ brandHausKits: shared, activeKitId: activeKitId || null }));
   }
 
   var store = BrandHaus.util.createStore(readPersisted());

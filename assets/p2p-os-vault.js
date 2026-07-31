@@ -81,7 +81,27 @@
   function collectBrandKit() {
     var v = readJSON("blackSheepBrandKitVault");
     var kits = v && Array.isArray(v.brandHausKits) ? v.brandHausKits : [];
-    return kits.length ? kits[0] : null;
+    var activeId = v && v.activeKitId;
+    var arch = readJSON("p2p_archetype");
+    var active = null;
+    // The LIVE archetype (p2p_archetype) drives the whole OS (hero + recolor), so the
+    // Vault follows it too, for consistency.
+    // 1) a saved kit whose name matches the live archetype (richest data: voice, saved colors)
+    if (arch && arch.name) {
+      var an = String(arch.name).toLowerCase();
+      active = kits.filter(function (k) { return String(k.name || "").toLowerCase() === an; })[0] || null;
+    }
+    // 2) else the live archetype itself (name + its palette), so the Vault matches the rest of the OS
+    if (!active && arch && (arch.name || (arch.colors && arch.colors.length))) {
+      active = { name: arch.name || "Your Brand DNA", colors: arch.colors || [], voice: "", fromArchetype: true };
+    }
+    // 3) else the kit explicitly set active in Brand Haus
+    if (!active && activeId) active = kits.filter(function (k) { return k.id === activeId; })[0] || null;
+    // 4) else first saved kit
+    if (!active && kits.length) active = kits[0];
+    if (!active) return null;
+    var others = kits.filter(function (k) { return active.id ? k.id !== active.id : k !== active; });
+    return { active: active, others: others };
   }
   function collectLooks() {
     var out = [];
@@ -119,7 +139,8 @@
     return String(f);
   }
 
-  function renderBrandKit(kit) {
+  function renderBrandKit(data) {
+    var kit = data.active, others = data.others || [];
     var colors = (kit.colors || []).filter(isHex).slice(0, 8);
     var swatches = colors.map(function (c) {
       var hex = c.charAt(0) === "#" ? c : "#" + c;
@@ -127,11 +148,24 @@
     }).join("");
     var voice = fieldVal(kit.voice);
     var name = kit.name || "Your brand kit";
+    var othersHtml = others.length ? (
+      '<div class="ov-kit-others"><span class="ov-kit-others-lbl">Also in your vault</span>' +
+      others.map(function (o) {
+        var sw = (o.colors || []).filter(isHex).slice(0, 5).map(function (c) {
+          var hex = c.charAt(0) === "#" ? c : "#" + c;
+          return '<span class="ov-swatch ov-swatch--sm" style="background:' + esc(hex) + '"></span>';
+        }).join("");
+        return '<a class="ov-kit-other" href="/pages/brand-haus" title="Open in Brand Haus">' +
+          '<span class="ov-kit-other-name">' + esc(o.name || "Kit") + '</span>' +
+          '<span class="ov-kit-other-sw">' + sw + '</span></a>';
+      }).join("") + '</div>'
+    ) : "";
     return '<div class="ov-card ov-card--kit">' +
       '<div class="ov-card-head"><span class="ov-ic">🎨</span><b>Brand Kit</b></div>' +
-      '<div class="ov-kit-name">' + esc(name) + '</div>' +
+      '<div class="ov-kit-name">' + esc(name) + '<span class="ov-kit-live">Live</span></div>' +
       (swatches ? '<div class="ov-swatches">' + swatches + '</div>' : '') +
       (voice ? '<div class="ov-kit-voice">Voice: <i>' + esc(voice) + '</i></div>' : '') +
+      othersHtml +
       '<a class="ov-link" href="/pages/brand-haus">Open in Brand Haus →</a>' +
       '</div>';
   }
