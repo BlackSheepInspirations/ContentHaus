@@ -538,6 +538,8 @@
   #p2pos .osx-hero-dna{position:relative;flex:0 0 300px;max-width:340px;}
   #p2pos .osx-hero-dna.is-result{border:1px solid var(--gstroke);border-radius:18px;padding:16px;background:rgba(5,10,16,.5);backdrop-filter:blur(4px);}
   #p2pos .osx-hero-dna .dna-img{border-radius:12px;overflow:hidden;aspect-ratio:4/3;margin-bottom:12px;border:1px solid var(--stroke);}
+  /* archetypes whose art has an opaque black background (couldn't be cut out) sit on black so they blend */
+  #p2pos .osx-hero-dna .dna-img--onblack{background:#000;}
   #p2pos .osx-hero-dna .dna-img img{width:100%;height:100%;object-fit:cover;display:block;}
   #p2pos .osx-hero-dna .dna-kick{font:700 10px/1 system-ui;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:6px;}
   #p2pos .osx-hero-dna .dna-name{font:700 22px/1.1 Georgia,serif;background:var(--aurora);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:p2pos-shift 20s linear infinite;}
@@ -1095,7 +1097,7 @@
         var traits = (rec.traits || []).slice(0, 3).map(function(t){ return '<span class="dna-trait">' + esc(t) + '</span>'; }).join('');
         dna.className = 'osx-hero-dna is-result';
         dna.innerHTML =
-          (img ? '<div class="dna-img"><img src="' + esc(img) + '" alt="' + esc(rec.name) + '" loading="lazy"></div>' : '') +
+          (img ? '<div class="dna-img' + (rec.slug === 'quiet-authority' ? ' dna-img--onblack' : '') + '"><img src="' + esc(img) + '" alt="' + esc(rec.name) + '" loading="lazy"></div>' : '') +
           '<div class="dna-meta"><div class="dna-kick">Your Brand DNA</div>' +
           '<div class="dna-name">' + esc(rec.name) + '</div>' +
           (rec.word ? '<div class="dna-word">' + esc(rec.word) + '</div>' : '') +

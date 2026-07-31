@@ -88,18 +88,17 @@
   // live "Your Brand DNA" step and the exported Brand DNA Report, where
   // this box's aspect ratio matches the image's own aspect ratio exactly
   // (1536x1024, i.e. 3:2) so object-fit:cover has zero margin to crop.
-  // TIGHT_CROP_SLUGS gets a modifier class that scales the image in just
-  // enough to push that checkerboard border outside the visible frame —
-  // scoped to this one profile only so the other 10, already-clean hero
-  // photos don't get an unnecessary/over-aggressive crop.
-  var TIGHT_CROP_SLUGS = ["quiet-authority"];
+  // DARK_BG_SLUGS: this profile's hero art has an opaque BLACK background (its
+  // source couldn't be cleanly cut out), so its frame gets a black background to
+  // blend seamlessly — the other 10 are transparent and fade into the frame color.
+  var DARK_BG_SLUGS = ["quiet-authority"];
 
   function renderHeroImage(ui, profile) {
     var map = window.BrandHausHeroImages || {};
     var slug = profileSlug(profile);
     var src = map[slug];
     if (!src) return null;
-    var wrapClass = "bh-chapter__hero-image" + (TIGHT_CROP_SLUGS.indexOf(slug) !== -1 ? " bh-chapter__hero-image--tight-crop" : "");
+    var wrapClass = "bh-chapter__hero-image" + (DARK_BG_SLUGS.indexOf(slug) !== -1 ? " bh-chapter__hero-image--onblack" : "");
     var wrap = ui.el("div", { class: wrapClass });
     var img = ui.el("img", { src: src, alt: profile.name + " brand identity artwork" });
     img.addEventListener("error", function () { wrap.style.display = "none"; });

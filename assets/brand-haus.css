@@ -2597,14 +2597,12 @@
   object-fit: cover;
   display: block;
 }
-/* See TIGHT_CROP_SLUGS in brand-haus-results.js — this profile's hero
-   photo has a checkerboard canvas baked into the source file itself,
-   and the box above matches the photo's own aspect ratio exactly (no
-   margin for object-fit:cover to crop away on its own). Scaling the
-   image up within the box's existing overflow:hidden pushes that
-   checkerboard border outside the visible frame on every side. */
-.bh-chapter__hero-image--tight-crop img {
-  transform: scale(1.4);
+/* See DARK_BG_SLUGS in brand-haus-results.js — this profile's hero art has an
+   opaque black background (its source couldn't be cleanly cut out), so its frame
+   is black to blend seamlessly; the other 10 are transparent and fade into the
+   frame's own color. */
+.bh-chapter__hero-image--onblack {
+  background: #000;
 }
 .bh-chapter__heading {
   margin-bottom: 24px;
