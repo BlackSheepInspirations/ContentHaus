@@ -1037,10 +1037,12 @@
       document.addEventListener('keydown', function(e){ if(e.key === 'Escape' && !modal.hidden) close(); });
     })();
 
-    // Recolor the OS to the member's saved brand palette (their choice). Reads a
-    // saved custom brand kit first, falls back to the archetype's palette. Hue +
-    // saturation come from the brand colors; LIGHTNESS is forced into a legible
-    // band so a dark brand color never makes accent text unreadable on the dark UI.
+    // Recolor the OS to the member's STAND OUT color (their choice — one signature
+    // color, not the whole palette). Prefers the archetype's standOut (e.g. Bold
+    // Pioneer = #3A86FF blue); falls back to the most-saturated color of a saved
+    // custom brand kit. Hue + saturation come from that color; LIGHTNESS is forced
+    // legible on the dark UI. The aurora becomes an analogous shimmer in that hue's
+    // family, so the page reads as "their color" while keeping its living gradient.
     (function(){
       function J(k){ try{ return JSON.parse(localStorage.getItem(k)); }catch(e){ return null; } }
       function toHsl(hex){
@@ -1054,31 +1056,31 @@
           hue = mx === r ? (g-b)/d + (g<b?6:0) : mx === g ? (b-r)/d + 2 : (r-g)/d + 4; hue *= 60; }
         return [hue, s*100, l*100];
       }
-      function hsl(h,s,l){ return 'hsl(' + Math.round(h) + ',' + Math.round(s) + '%,' + Math.round(l) + '%)'; }
+      function hsl(h,s,l){ return 'hsl(' + (((Math.round(h) % 360) + 360) % 360) + ',' + Math.round(s) + '%,' + Math.round(l) + '%)'; }
       function clamp(v,a,b){ return Math.max(a, Math.min(b, v)); }
-      var vault = J('blackSheepBrandKitVault'), arch = J('p2p_archetype');
-      var kit = vault && vault.brandHausKits && vault.brandHausKits.length ? vault.brandHausKits[vault.brandHausKits.length - 1] : null;
-      var raw = (kit && kit.colors && kit.colors.length) ? kit.colors : (arch && arch.colors ? arch.colors : []);
-      var cols = raw.map(toHsl).filter(Boolean);
-      if(!cols.length) return; // no brand palette -> keep the default aurora identity
-      var base = cols.slice().sort(function(a,b){ return b[1] - a[1]; })[0]; // most saturated = signature hue
-      if(base[1] < 12){
-        // near-greyscale brand: no meaningful hue to port -> clean neutral accents,
-        // and leave the aurora as-is so a minimalist brand still looks premium.
+      var arch = J('p2p_archetype'), vault = J('blackSheepBrandKitVault');
+      var pick = arch && arch.standOut ? toHsl(arch.standOut) : null; // 1) archetype Stand Out wins
+      if(!pick){ // 2) else the most-saturated color of a saved custom kit
+        var kit = vault && vault.brandHausKits && vault.brandHausKits.length ? vault.brandHausKits[vault.brandHausKits.length - 1] : null;
+        var kc = (kit && kit.colors ? kit.colors : []).map(toHsl).filter(Boolean).sort(function(a,b){ return b[1] - a[1]; });
+        pick = kc[0] || null;
+      }
+      if(!pick) return; // no brand color -> keep the default aurora identity
+      if(pick[1] < 12){
+        // near-greyscale stand-out: no meaningful hue -> clean neutral accents, keep the default aurora.
         root.style.setProperty('--gold', hsl(0, 0, 80));
         root.style.setProperty('--gold-bright', hsl(0, 0, 90));
         root.style.setProperty('--gstroke', 'hsla(0,0%,82%,.30)');
         return;
       }
-      var sat = clamp(base[1], 45, 88);
-      root.style.setProperty('--gold', hsl(base[0], sat, 62));
-      root.style.setProperty('--gold-bright', hsl(base[0], clamp(sat + 6, 50, 92), 70));
-      root.style.setProperty('--gstroke', 'hsla(' + Math.round(base[0]) + ',' + Math.round(sat) + '%,60%,.38)');
-      var vivid = cols.filter(function(c){ return c[1] >= 12; }); // real hues only for the aurora
-      if(vivid.length >= 3){
-        var stops = vivid.slice(0, 5).map(function(c){ return hsl(c[0], clamp(c[1], 45, 85), clamp(c[2], 56, 72)); });
-        root.style.setProperty('--aurora', 'linear-gradient(100deg,' + stops.concat(stops[0]).join(',') + ')');
-      }
+      var h = pick[0], sat = clamp(pick[1], 45, 90);
+      root.style.setProperty('--gold', hsl(h, sat, 62));
+      root.style.setProperty('--gold-bright', hsl(h, clamp(sat + 6, 50, 94), 70));
+      root.style.setProperty('--gstroke', 'hsla(' + Math.round(h) + ',' + Math.round(sat) + '%,60%,.38)');
+      // analogous shimmer around the stand-out hue -> alive, but all one color family
+      var offs = [-28, -12, 0, 16, 30];
+      var stops = offs.map(function(o, i){ return hsl(h + o, clamp(sat - Math.abs(o) * 0.4, 40, 90), 58 + (i % 2 ? 8 : 0)); });
+      root.style.setProperty('--aurora', 'linear-gradient(100deg,' + stops.concat(stops[0]).join(',') + ')');
     })();
 
     // Personalized Brand DNA panel — reads p2p_archetype (set when the Founders Assessment completes)

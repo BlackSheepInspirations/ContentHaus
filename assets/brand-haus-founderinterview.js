@@ -193,7 +193,9 @@
       var pc = (profile.output && profile.output.colors) || {};
       var colors = ["primary", "secondary", "neutral", "accent", "support", "standOut"]
         .map(function (role) { return pc[role]; }).filter(Boolean);
-      var rec = { slug: slug, name: profile.name, word: WORDS[profile.name] || "", traits: traits, colors: colors, ts: Date.now() };
+      // standOut is the archetype's signature accent (e.g. Bold Pioneer = #3A86FF
+      // blue). The OS recolors from THIS one color, not the whole palette.
+      var rec = { slug: slug, name: profile.name, word: WORDS[profile.name] || "", traits: traits, standOut: pc.standOut || "", colors: colors, ts: Date.now() };
       localStorage.setItem("p2p_archetype", JSON.stringify(rec));
       if (window.P2P && window.P2P.push) window.P2P.push();
     } catch (e) {}
@@ -413,11 +415,13 @@
     return renderQuestion();
   }
 
-  // Backfill for members who completed the assessment BEFORE publishArchetype
-  // existed (or whose p2p_archetype key was cleared): on load, if the key is
-  // missing but a completed assessment is saved in the Vault, publish it so the
-  // Operating System hero shows their Brand DNA without a re-take. Mirrors
-  // brand-haus-favorites.js getCurrentVersion() since that helper isn't exported.
+  // Keep the Operating System's Brand DNA hero in sync with the member's ACTIVE
+  // assessment version. Publishes p2p_archetype from the active saved snapshot on
+  // load (this also backfills members who completed the assessment before the
+  // publish hook existed), and re-publishes whenever they switch which saved
+  // version is active — so the OS photo + Stand Out color follow the version they
+  // choose (up to 5 are kept). Mirrors brand-haus-favorites.js getCurrentVersion()
+  // since that helper isn't exported.
   function latestAssessmentSnapshot() {
     if (!BrandHaus.favorites || !BrandHaus.favorites.getAll) return null;
     var items = BrandHaus.favorites.getAll(HISTORY_MODE) || [];
@@ -430,17 +434,29 @@
     }
     return fav.snapshot || null;
   }
-  function backfillArchetype() {
+  function syncArchetypeFromActive() {
     try {
-      if (localStorage.getItem("p2p_archetype")) return;
       var snap = latestAssessmentSnapshot();
-      if (snap) publishArchetype(snap);
+      if (snap) publishArchetype(snap); // reflect the active version (no-op if none saved)
     } catch (e) {}
   }
+  function initArchetypeSync() {
+    // Re-publish when the member switches their active assessment version.
+    if (BrandHaus.favorites && BrandHaus.favorites.setActiveVersion && !BrandHaus.favorites.__p2pArchetypeHooked) {
+      var _setActiveVersion = BrandHaus.favorites.setActiveVersion;
+      BrandHaus.favorites.setActiveVersion = function (mode, id, versionIndex) {
+        var r = _setActiveVersion.apply(this, arguments);
+        if (mode === HISTORY_MODE) { syncArchetypeFromActive(); }
+        return r;
+      };
+      BrandHaus.favorites.__p2pArchetypeHooked = true;
+    }
+    syncArchetypeFromActive();
+  }
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", backfillArchetype);
+    document.addEventListener("DOMContentLoaded", initArchetypeSync);
   } else {
-    backfillArchetype();
+    initArchetypeSync();
   }
 
   BrandHaus.founderInterview = Object.assign({}, store, {
