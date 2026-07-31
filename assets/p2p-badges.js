@@ -186,7 +186,13 @@
     modal.querySelector('[data-bcert="close"]').addEventListener('click', function(){ modal.classList.remove('show'); });
     modal.querySelector('[data-bcert="download"]').addEventListener('click', function(){
       var url = renderCanvas(); if(!url) return;
-      var a = document.createElement('a'); a.download = 'P2P-Certificate-' + (cur.title||'course').replace(/[^a-z0-9]+/gi,'-').toLowerCase() + '.png'; a.href = url; a.click();
+      var name = 'P2P-Certificate-' + (cur.title||'course').replace(/[^a-z0-9]+/gi,'-').toLowerCase() + '.png';
+      // Convert the (multi-MB) data URL to a Blob object URL — anchors silently
+      // refuse to download very large data: URLs.
+      fetch(url).then(function(r){ return r.blob(); }).then(function(b){
+        var u = URL.createObjectURL(b); var a = document.createElement('a'); a.download = name; a.href = u;
+        document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){ URL.revokeObjectURL(u); }, 2000);
+      }).catch(function(){ var a = document.createElement('a'); a.download = name; a.href = url; a.click(); });
     });
     modal.querySelector('[data-bcert="print"]').addEventListener('click', function(){
       var url = renderCanvas(); if(!url) return;

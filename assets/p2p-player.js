@@ -127,7 +127,11 @@
     var dt=new Date(); x.fillText('Awarded '+dt.toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'}), W*0.11, H*0.72);
     x.font=Math.round(W*0.011)+'px Georgia,serif';
     x.fillText('ID · '+certIdFor(), W*0.89, H*0.72);
-    var a=document.createElement('a'); a.download='P2P-Certificate.png'; a.href=cv.toDataURL('image/png'); a.click();
+    // Download via a Blob object URL, not toDataURL — a 1600px PNG is a multi-MB
+    // data: URL that browsers silently refuse to download from an anchor click.
+    function saveHref(href, revoke){ var a=document.createElement('a'); a.download='P2P-Certificate.png'; a.href=href; document.body.appendChild(a); a.click(); a.remove(); if(revoke){ setTimeout(function(){ URL.revokeObjectURL(href); }, 2000); } }
+    if(cv.toBlob){ cv.toBlob(function(b){ if(b){ saveHref(URL.createObjectURL(b), true); } else { saveHref(cv.toDataURL('image/png')); } }, 'image/png'); }
+    else { saveHref(cv.toDataURL('image/png')); }
     if(window.P2P) window.P2P.earnBadge('Certified'); // downloaded your first certificate
   }
   if(certEl){
