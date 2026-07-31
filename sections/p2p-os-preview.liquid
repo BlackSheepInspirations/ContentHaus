@@ -10,6 +10,7 @@
 
 <div id="p2posprev" class="pmv">
   <header class="pmv-hero">
+    {%- if section.settings.brand_mark != blank -%}<div class="pmv-mark"><img src="{{ section.settings.brand_mark | image_url: width: 500 }}" alt="Purpose 2 Profit" loading="eager"></div>{%- endif -%}
     <span class="pmv-eyebrow">{{ section.settings.eyebrow | default: 'Black Sheep Creations &amp; Inspirations' }}</span>
     <h1 class="pmv-h1">Purpose <span class="pmv-2">2</span> Profit</h1>
     <p class="pmv-tagline">{{ section.settings.tagline | default: 'Where Your originality is rooted and ready to grow.' }}</p>
@@ -21,7 +22,6 @@
     <ul class="pmv-chips" aria-label="What's inside">
       <li><b>6</b> Hausen</li>
       <li><b>2</b> AI partners</li>
-      <li><b>52</b> courses</li>
       <li><b>5</b> realms</li>
       <li><b>11</b> Brand archetypes</li>
     </ul>
@@ -60,19 +60,19 @@
     <p class="pmv-lede">Stuck on what to make — or how to make it sell? Frank and Ruth are your always-on creative partners, built to think alongside you.</p>
     <div class="pmv-mates">
       <div class="pmv-mate">
-        <div class="pmv-mate-av"><img src="{{ 'haus-mate-idea.png' | asset_url }}" alt="Frank — The Idea Haus" loading="lazy" onerror="this.style.display='none'"></div>
+        <div class="pmv-mate-av"><img src="{{ 'haus-mate-idea.png' | asset_url }}" alt="The Idea Haus" loading="lazy" onerror="this.style.display='none'"></div>
         <div class="pmv-mate-txt">
-          <span class="pmv-mate-name">Frank <span class="pmv-mate-dot">•</span> The Idea Haus</span>
+          <span class="pmv-mate-name">The Idea Haus</span>
           <i class="pmv-mate-role">Where brilliant ideas begin</i>
-          <p>Your AI Business Partner. Sharpen your concept, positioning and direction before you brand or build a single thing.</p>
+          <p>Frank is your frank Creative Director and AI Business Partner. He'll help you sharpen your concept, positioning, and direction before you brand or build a single thing.</p>
         </div>
       </div>
       <div class="pmv-mate">
-        <div class="pmv-mate-av"><img src="{{ 'haus-mate-build.png' | asset_url }}" alt="Ruth — The Build Haus" loading="lazy" onerror="this.style.display='none'"></div>
+        <div class="pmv-mate-av"><img src="{{ 'haus-mate-build.png' | asset_url }}" alt="The Build Haus" loading="lazy" onerror="this.style.display='none'"></div>
         <div class="pmv-mate-txt">
-          <span class="pmv-mate-name">Ruth <span class="pmv-mate-dot">•</span> The Build Haus</span>
+          <span class="pmv-mate-name">The Build Haus</span>
           <i class="pmv-mate-role">Building brilliant designs</i>
-          <p>Your AI design partner. Turn a rough idea into something polished, on-brand and ready to sell.</p>
+          <p>Ruth is your ruthless Design Meister. She helps you turn a rough idea into something polished, on-brand and ready to sell.</p>
         </div>
       </div>
     </div>
@@ -82,7 +82,7 @@
   <section class="pmv-block">
     <div class="pmv-kick">Learn as you go</div>
     <h2 class="pmv-h2">A journey, not a course dump</h2>
-    <p class="pmv-lede">Five realms, 52 courses, badges, points and streaks — the whole method taught one step at a time, so you always know your next move.</p>
+    <p class="pmv-lede">Five realms, badges, points and streaks — the whole method taught one step at a time, so you always know your next move.</p>
     {%- if section.settings.shot_realms != blank -%}
       <div class="pmv-shot"><img src="{{ section.settings.shot_realms | image_url: width: 1600 }}" alt="The Learning Journey realms" loading="lazy"></div>
     {%- else -%}
@@ -100,7 +100,7 @@
   <section class="pmv-final">
     <div class="pmv-kick pmv-kick--center">One pass. Everything.</div>
     <h2 class="pmv-h2">Ready to make this Haus your home?</h2>
-    <p class="pmv-lede">{{ section.settings.final_sub | default: 'Unlock the full Brand DNA assessment, every Haus, the courses and the launch method — the entire Purpose 2 Profit Operating System.' }}</p>
+    <p class="pmv-lede">{{ section.settings.final_sub | default: 'Unlock the full Brand DNA assessment, every Haus, the AI Partners, the courses, the launch method, and the bonuses — the entire Purpose 2 Profit Operating System.' }}</p>
     <a class="pmv-btn pmv-btn--primary pmv-btn--lg" href="{{ cta_url }}">{{ section.settings.cta_label | default: 'Get the Access Pass' }}{% if section.settings.access_product.price %} — {{ section.settings.access_product.price | money }}{% endif %}</a>
     <p class="pmv-fineprint">{{ section.settings.tagline | default: 'Where Your originality is rooted and ready to grow.' }}</p>
   </section>
@@ -138,6 +138,8 @@
   #p2posprev .pmv-hero{text-align:center;padding:56px 24px 40px;border-radius:22px;margin:6px 0 40px;position:relative;overflow:hidden;
     background:radial-gradient(60% 120% at 18% 6%,rgba(39,174,110,.30),transparent 60%),radial-gradient(55% 120% at 84% 12%,rgba(37,99,235,.24),transparent 60%),radial-gradient(50% 120% at 60% 110%,rgba(214,51,108,.20),transparent 60%),linear-gradient(150deg,#0a0f0c,#101613 46%,#0c1310);
     border:1px solid var(--stroke);}
+  #p2posprev .pmv-mark img{height:clamp(120px,22vw,184px);width:auto;display:block;margin:0 auto 16px;
+    filter:drop-shadow(0 14px 34px rgba(120,80,220,.4));animation:pmv-float 7s ease-in-out infinite;}
   #p2posprev .pmv-eyebrow{display:inline-block;font:700 12px/1 system-ui;letter-spacing:.16em;text-transform:uppercase;color:#7fe3b8;margin-bottom:16px;}
   #p2posprev .pmv-h1{font:800 clamp(38px,7vw,66px)/1 Georgia,serif;margin:0 0 12px;letter-spacing:-.02em;}
   #p2posprev .pmv-2{background:var(--aurora);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:pmv-shift 20s linear infinite;font-style:italic;}
@@ -226,6 +228,7 @@
 {
   "name": "P2P OS Preview",
   "settings": [
+    { "type": "image_picker", "id": "brand_mark", "label": "Brand mark / logo", "info": "The rooted-fingerprint tree logo. Shown centered above the wordmark, over the tagline. Leave blank to hide." },
     { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Black Sheep Creations & Inspirations" },
     { "type": "text", "id": "tagline", "label": "Brand tagline", "default": "Where Your originality is rooted and ready to grow." },
     { "type": "textarea", "id": "hero_tagline", "label": "Hero sub-tagline", "default": "The operating system that takes you from idea to income — built around the one thing no one can copy: you." },
@@ -237,7 +240,7 @@
     { "type": "image_picker", "id": "shot_dashboard", "label": "Dashboard screenshot" },
     { "type": "image_picker", "id": "shot_realms", "label": "Realms / Journey screenshot" },
     { "type": "header", "content": "Final CTA" },
-    { "type": "textarea", "id": "final_sub", "label": "Final CTA subtext", "default": "Unlock the full Brand DNA assessment, every Haus, the courses and the launch method — the entire Purpose 2 Profit Operating System." }
+    { "type": "textarea", "id": "final_sub", "label": "Final CTA subtext", "default": "Unlock the full Brand DNA assessment, every Haus, the AI Partners, the courses, the launch method, and the bonuses — the entire Purpose 2 Profit Operating System." }
   ],
   "presets": [{ "name": "P2P OS Preview" }]
 }
