@@ -81,7 +81,26 @@
             {%- if os_journey_url != blank -%}<a class="osx-cta ghost" href="{{ os_journey_url }}">{{ section.settings.journey_label | default: 'Enter your Learning Journey →' }}</a>{%- endif -%}
           </div>
         </div>
+        {%- comment -%} personalized Brand DNA panel — filled by JS from p2p_archetype (set when the Founders Assessment completes) {%- endcomment -%}
+        <aside class="osx-hero-dna" data-osx-dna hidden></aside>
       </header>
+      <script>
+        window.P2P_ARCHETYPE = window.P2P_ARCHETYPE || {};
+        window.P2P_ARCHETYPE.assessUrl = {{ section.settings.assessment_url | default: '/pages/p2p-assessment' | json }};
+        window.P2P_ARCHETYPE.img = {
+          "bold-pioneer": {{ 'brand-haus-hero-bold-pioneer.jpg' | asset_url | json }},
+          "trusted-guide": {{ 'brand-haus-hero-trusted-guide.jpg' | asset_url | json }},
+          "cozy-craftsman": {{ 'brand-haus-hero-cozy-craftsman.jpg' | asset_url | json }},
+          "elevated-icon": {{ 'brand-haus-hero-elevated-icon.jpg' | asset_url | json }},
+          "free-spirit": {{ 'brand-haus-hero-free-spirit.jpg' | asset_url | json }},
+          "joyful-connector": {{ 'brand-haus-hero-joyful-connector.jpg' | asset_url | json }},
+          "quiet-authority": {{ 'brand-haus-hero-quiet-authority.jpg' | asset_url | json }},
+          "modern-minimalist": {{ 'brand-haus-hero-modern-minimalist.jpg' | asset_url | json }},
+          "community-builder": {{ 'brand-haus-hero-community-builder.jpg' | asset_url | json }},
+          "luxe-rebel": {{ 'brand-haus-hero-luxe-rebel.jpg' | asset_url | json }},
+          "trail-forger": {{ 'brand-haus-hero-trail-forger.jpg' | asset_url | json }}
+        };
+      </script>
 
       {%- if section.settings.show_stats -%}
       <div class="osx-stats" data-osx-stats hidden>
@@ -280,10 +299,29 @@
 
   /* hero */
   #p2pos .osx-hero{position:relative;border-radius:20px;overflow:hidden;padding:44px 36px;margin-bottom:24px;
+    display:flex;gap:30px;align-items:center;flex-wrap:wrap;
     background:linear-gradient(120deg,rgba(143,111,214,.16),rgba(57,197,192,.08)),#0a141c;}
   #p2pos .osx-hero[style*="--hero"]{background:linear-gradient(180deg,rgba(5,10,16,.55),rgba(5,10,16,.82)),var(--hero) center/cover no-repeat;}
   #p2pos .osx-hero-glow{position:absolute;inset:-40% -10% auto -10%;height:60%;background:radial-gradient(50% 100% at 30% 0%,rgba(143,111,214,.5),transparent 70%),radial-gradient(50% 100% at 75% 10%,rgba(57,197,192,.4),transparent 70%);filter:blur(20px);opacity:.6;pointer-events:none;}
-  #p2pos .osx-hero-in{position:relative;}
+  #p2pos .osx-hero-in{position:relative;flex:1;min-width:280px;}
+  /* personalized Brand DNA panel */
+  #p2pos .osx-hero-dna{position:relative;flex:0 0 300px;max-width:340px;}
+  #p2pos .osx-hero-dna.is-result{border:1px solid var(--gstroke);border-radius:18px;padding:16px;background:rgba(5,10,16,.5);backdrop-filter:blur(4px);}
+  #p2pos .osx-hero-dna .dna-img{border-radius:12px;overflow:hidden;aspect-ratio:4/3;margin-bottom:12px;border:1px solid var(--stroke);}
+  #p2pos .osx-hero-dna .dna-img img{width:100%;height:100%;object-fit:cover;display:block;}
+  #p2pos .osx-hero-dna .dna-kick{font:700 10px/1 system-ui;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:6px;}
+  #p2pos .osx-hero-dna .dna-name{font:700 22px/1.1 Georgia,serif;background:var(--aurora);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:p2pos-shift 20s linear infinite;}
+  #p2pos .osx-hero-dna .dna-word{font:800 11px/1 system-ui;letter-spacing:.2em;text-transform:uppercase;color:var(--gold-bright);margin-top:5px;}
+  #p2pos .osx-hero-dna .dna-traits{display:flex;flex-wrap:wrap;gap:6px;margin-top:11px;}
+  #p2pos .osx-hero-dna .dna-trait{font:600 10.5px/1 system-ui;color:#dbe7e2;background:rgba(255,255,255,.06);border:1px solid var(--stroke);border-radius:20px;padding:6px 10px;}
+  #p2pos .osx-hero-dna .dna-link{display:inline-block;margin-top:12px;font:700 11.5px/1 system-ui;color:var(--gold-bright);text-decoration:none;}
+  #p2pos .osx-hero-dna .dna-link:hover{text-decoration:underline;}
+  #p2pos .osx-hero-dna .dna-nudge{display:block;padding:20px 18px;border:1px dashed var(--gstroke);border-radius:16px;background:rgba(216,180,90,.06);text-decoration:none;text-align:center;transition:background .15s;}
+  #p2pos .osx-hero-dna .dna-nudge:hover{background:rgba(216,180,90,.12);}
+  #p2pos .osx-hero-dna .dna-nudge-ic{display:block;font-size:22px;margin-bottom:8px;color:var(--gold-bright);}
+  #p2pos .osx-hero-dna .dna-nudge b{display:block;font:700 15px/1.2 Georgia,serif;color:var(--text);margin-bottom:6px;}
+  #p2pos .osx-hero-dna .dna-nudge-sub{display:block;font:500 12px/1.4 system-ui;color:var(--muted);}
+  @media (max-width:760px){#p2pos .osx-hero-dna{flex:1 1 100%;max-width:none;}}
   #p2pos .osx-eyebrow{font:700 11px/1 system-ui;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:12px;}
   #p2pos .osx-hero h1{font:700 clamp(28px,4.5vw,42px)/1.1 Georgia,serif;margin:0 0 12px;}
   #p2pos .osx-name{background:var(--aurora);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:p2pos-shift 20s linear infinite;}
@@ -504,6 +542,31 @@
       }
     })();
 
+    // Personalized Brand DNA panel — reads p2p_archetype (set when the Founders Assessment completes)
+    (function(){
+      var dna = root.querySelector('[data-osx-dna]'); if(!dna) return;
+      var A = window.P2P_ARCHETYPE || {}, imgs = A.img || {}, assessUrl = A.assessUrl || '/pages/p2p-assessment';
+      var rec = null; try{ rec = JSON.parse(localStorage.getItem('p2p_archetype') || 'null'); }catch(e){}
+      function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+      if(rec && rec.name){
+        var img = imgs[rec.slug] || '';
+        var traits = (rec.traits || []).slice(0, 3).map(function(t){ return '<span class="dna-trait">' + esc(t) + '</span>'; }).join('');
+        dna.className = 'osx-hero-dna is-result';
+        dna.innerHTML =
+          (img ? '<div class="dna-img"><img src="' + esc(img) + '" alt="' + esc(rec.name) + '" loading="lazy"></div>' : '') +
+          '<div class="dna-meta"><div class="dna-kick">Your Brand DNA</div>' +
+          '<div class="dna-name">' + esc(rec.name) + '</div>' +
+          (rec.word ? '<div class="dna-word">' + esc(rec.word) + '</div>' : '') +
+          (traits ? '<div class="dna-traits">' + traits + '</div>' : '') +
+          '<a class="dna-link" href="' + esc(assessUrl) + '">Refresh your assessment →</a></div>';
+        dna.hidden = false;
+      } else {
+        dna.className = 'osx-hero-dna is-nudge';
+        dna.innerHTML = '<a class="dna-nudge" href="' + esc(assessUrl) + '"><span class="dna-nudge-ic">✦</span><b>Discover your Brand DNA</b><span class="dna-nudge-sub">Take your Founders Assessment to reveal your archetype →</span></a>';
+        dna.hidden = false;
+      }
+    })();
+
     // live stats + ring (reuse the engine)
     if(root.querySelector('[data-osx-stats]') && window.P2P){
       put('.p2pos-points', window.P2P.points());
@@ -536,6 +599,7 @@
     { "type": "text", "id": "hero_cta_target", "label": "Hero button target (nav target)", "default": "checkpoint" },
     { "type": "url", "id": "journey_url", "label": "Learning Journey URL", "info": "Adds a link on the hero to the gamified Learning Journey." },
     { "type": "text", "id": "journey_label", "label": "Learning Journey button label", "default": "Enter your Learning Journey →" },
+    { "type": "url", "id": "assessment_url", "label": "Founders Assessment URL", "info": "Where the hero Brand DNA panel links (defaults to /pages/p2p-assessment)." },
     { "type": "checkbox", "id": "show_stats", "label": "Show live stats (ring + points/badges/streak/tier)", "default": true },
     { "type": "checkbox", "id": "show_moment", "label": "Load progress engine", "default": true },
     { "type": "text", "id": "journey_access_tag", "label": "Journey access tag", "default": "p2p-learning" },
