@@ -75,7 +75,7 @@
         <div class="osx-hero-in">
           {%- if section.settings.hero_eyebrow != blank -%}<div class="osx-eyebrow">{{ section.settings.hero_eyebrow }}</div>{%- endif -%}
           {%- assign hero_phrase = section.settings.hero_title | default: 'Make this Haus Your Home' -%}
-          <h1>{%- if customer.first_name != blank -%}<span class="osx-name">{{ customer.first_name }}</span>, {{ hero_phrase | slice: 0 | downcase }}{{ hero_phrase | slice: 1, 400 }}{%- else -%}{{ hero_phrase }}{%- endif -%}</h1>
+          <h1>{%- if customer.first_name != blank -%}<span class="osx-name">{{ customer.first_name }}</span>,<br>{{ hero_phrase | slice: 0 | downcase }}{{ hero_phrase | slice: 1, 400 }}{%- else -%}{{ hero_phrase }}{%- endif -%}</h1>
           {%- if section.settings.hero_body != blank -%}<p class="osx-hero-body">{{ section.settings.hero_body }}</p>{%- endif -%}
           {%- assign os_journey_url = section.settings.journey_url | default: '/pages/p2p-learning' -%}
           <div class="osx-hero-btns">
