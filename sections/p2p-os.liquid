@@ -406,9 +406,10 @@
       <h2 class="osx-h2">{{ section.settings.bonus_title | default: 'Free downloads, just for you' }}</h2>
       <p class="osx-lede">{{ section.settings.bonus_intro | default: "Guides, checklists and templates to download and keep. New drops are added regularly — grab whatever helps." }}</p>
 
-      {%- comment -%} Baked freebies (revert-proof): one per line, title^description^file-url^type-label.
-         Fill in as PDFs are ready; asset PDFs can use {{ 'name.pdf' | asset_url }} for the url. {%- endcomment -%}
-      {%- capture os_bonus -%}{%- endcapture -%}
+      {%- comment -%} Baked freebies (revert-proof): one per line (| separated), fields ^ separated:
+         title^description^download-url^type-label^thumbnail-asset-filename.
+         Thumbnail is an assets/ filename (resolved with asset_url); leave blank for a 📄 icon. {%- endcomment -%}
+      {%- capture os_bonus -%}Journal Creator Quickstart Series — Vol. 1^Turn a broad journal thought into one clear concept you're ready to build.^https://canva.link/vol-1-journal-creator-series^eBook^bonus-journal-creator-vol1.jpg{%- endcapture -%}
       {%- assign os_bonus_clean = os_bonus | strip -%}
       {%- assign bonus_blocks = section.blocks | where: 'type', 'bonus' -%}
 
@@ -419,7 +420,11 @@
             {%- for bo in os_bonus_items -%}
               {%- assign bf = bo | split: '^' -%}
               <a class="osx-bonuscard" href="{{ bf[2] }}" download target="_blank" rel="noopener">
-                <span class="osx-bonus-thumb osx-bonus-thumb--ic">📄</span>
+                {%- if bf[4] != blank -%}
+                  <span class="osx-bonus-thumb"><img src="{{ bf[4] | asset_url }}" alt="{{ bf[0] | escape }}" loading="lazy"></span>
+                {%- else -%}
+                  <span class="osx-bonus-thumb osx-bonus-thumb--ic">📄</span>
+                {%- endif -%}
                 <span class="osx-bonus-type">{{ bf[3] | default: 'PDF' }}</span>
                 <b>{{ bf[0] }}</b>
                 {%- if bf[1] != blank -%}<span class="osx-bonus-desc">{{ bf[1] }}</span>{%- endif -%}
@@ -665,8 +670,8 @@
   #p2pos .osx-bonuscard{position:relative;display:flex;flex-direction:column;padding:14px 14px 16px;border:1px solid var(--stroke);border-radius:16px;
     background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(9,17,24,.4));color:var(--text);text-decoration:none;transition:transform .15s ease,border-color .15s ease;}
   #p2pos .osx-bonuscard:hover{transform:translateY(-3px);border-color:var(--gstroke);}
-  #p2pos .osx-bonus-thumb{display:block;aspect-ratio:4/3;border-radius:11px;overflow:hidden;margin-bottom:12px;border:1px solid var(--stroke);background:linear-gradient(145deg,rgba(216,180,90,.14),rgba(57,197,192,.08));}
-  #p2pos .osx-bonus-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+  #p2pos .osx-bonus-thumb{display:block;aspect-ratio:3/4;border-radius:11px;overflow:hidden;margin-bottom:12px;border:1px solid var(--stroke);background:linear-gradient(145deg,rgba(216,180,90,.14),rgba(57,197,192,.08));}
+  #p2pos .osx-bonus-thumb img{width:100%;height:100%;object-fit:cover;object-position:center top;display:block;}
   #p2pos .osx-bonus-thumb--ic{display:grid;place-items:center;font-size:38px;}
   #p2pos .osx-bonus-type{align-self:flex-start;font:800 9.5px/1 system-ui;letter-spacing:.1em;text-transform:uppercase;color:#0a1410;background:linear-gradient(145deg,#f4e2a6,var(--gold));padding:5px 9px;border-radius:20px;margin-bottom:8px;}
   #p2pos .osx-bonuscard b{font:700 15px/1.25 system-ui;margin-bottom:4px;}
