@@ -94,10 +94,18 @@ the LAST — push files SEPARATELY.** 3. Copy each file to the mirror
    except the demo `page.p2p-course`.
    NOTE: course `marketing-haus` (Realm 5) → page `/pages/courses-marketing-haus`,
    distinct from the Marketing Haus TOOL at `/pages/marketing-haus`. No collision.
-2. **Haus rebuilds (luxe):** rebuild the 6 Haus tool standalone pages to the OS
-   aesthetic + fix stale naming still in `sections/p2p-haus.liquid` (Growth) &
-   `sections/prompt-builder.liquid` (Content) — ~15 visible strings ("Prompt to
-   Profit Haus", "PROFIT Path", one "Product Haus", "Prompt Haus").
+2. **Haus rebuilds (luxe):** — **NAMING PASS DONE (2026-07-31, commit 5b81725).**
+   All visible stale strings fixed: crown jewel `p2p-haus` (wordmark/footer/schema/
+   locked copy/PDF export) → **Growth Haus**; its method → **ROOTED** (Reach·Open·
+   Offer·Trigger·Escalate·Deepen), replacing the old PROFIT/Prime-Reveal-Offer-Flood-
+   Ignite-Tend copy in `p2p-haus-preview`; `prompt-builder` + preview → **Content
+   Haus**; a "Product Haus" ref → **Project Haus**. Comment headers note "formerly".
+   localStorage keys `promptToProfit.*` left untouched (member data). The ~62 JS
+   "Prompt Haus" hits are code-architecture COMMENTS (invisible) — intentionally left.
+   **STILL TODO — the luxe VISUAL rebuild:** the 6 Haus tool pages are functional
+   but not yet restyled to the OS aesthetic. This needs Andrea's design direction
+   (scope: full reskin vs. lighter polish; whether to keep each Haus's own palette
+   like Growth's "Black Opal" or unify). Gated pages — verify via store unlock.
 3. **#9 Haus Helper free-type search:** KB source MAPPED — each Haus keeps a
    `FAQ_ITEMS` array ([{q,a}]) + `TIPS` array in its `*-ui.js` (Content
    prompt-builder-ui.js = 9 TIPS + ~25 FAQ; brand-haus-ui.js = FAQ_ITEMS(10)+tips;
