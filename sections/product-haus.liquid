@@ -24,7 +24,7 @@
 <div class="pdh-brand-header">
   <div class="pdh-marketing__hero">
     <p class="pdh-marketing__eyebrow">{{ section.settings.brand_eyebrow }}</p>
-    <h1 class="pdh-marketing__heading">{{ section.settings.brand_heading | replace: 'Product', '<span class="pdh-heading-accent">Product</span>' }}</h1>
+    <h1 class="pdh-marketing__heading">{{ section.settings.brand_heading | replace: 'Project', '<span class="pdh-heading-accent">Project</span>' }}</h1>
     <div class="pdh-marketing__subheading">{{ section.settings.brand_subheading }}</div>
   </div>
 </div>
@@ -65,7 +65,7 @@
   <script src="{{ 'product-haus-ui.js' | asset_url }}" defer="defer"></script>
 {% else %}
   <div class="pdh-locked">
-    <h2 class="pdh-locked__heading">{{ section.settings.locked_heading | replace: 'Product', '<span class="pdh-heading-accent">Product</span>' }}</h2>
+    <h2 class="pdh-locked__heading">{{ section.settings.locked_heading | replace: 'Project', '<span class="pdh-heading-accent">Project</span>' }}</h2>
     <div class="pdh-locked__body">{{ section.settings.locked_body }}</div>
     <div class="pdh-locked__actions">
       {% if section.settings.access_product %}
