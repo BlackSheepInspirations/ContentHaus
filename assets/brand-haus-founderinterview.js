@@ -408,6 +408,36 @@
     return renderQuestion();
   }
 
+  // Backfill for members who completed the assessment BEFORE publishArchetype
+  // existed (or whose p2p_archetype key was cleared): on load, if the key is
+  // missing but a completed assessment is saved in the Vault, publish it so the
+  // Operating System hero shows their Brand DNA without a re-take. Mirrors
+  // brand-haus-favorites.js getCurrentVersion() since that helper isn't exported.
+  function latestAssessmentSnapshot() {
+    if (!BrandHaus.favorites || !BrandHaus.favorites.getAll) return null;
+    var items = BrandHaus.favorites.getAll(HISTORY_MODE) || [];
+    if (!items.length) return null;
+    var fav = items[0];
+    if (fav.versions && fav.versions.length) {
+      var idx = typeof fav.activeVersionIndex === "number" ? fav.activeVersionIndex : fav.versions.length - 1;
+      var v = fav.versions[idx] || fav.versions[fav.versions.length - 1];
+      if (v && v.snapshot) return v.snapshot;
+    }
+    return fav.snapshot || null;
+  }
+  function backfillArchetype() {
+    try {
+      if (localStorage.getItem("p2p_archetype")) return;
+      var snap = latestAssessmentSnapshot();
+      if (snap) publishArchetype(snap);
+    } catch (e) {}
+  }
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", backfillArchetype);
+  } else {
+    backfillArchetype();
+  }
+
   BrandHaus.founderInterview = Object.assign({}, store, {
     renderFull: renderFull,
     applyToBrandingStudio: applyToBrandingStudio,
