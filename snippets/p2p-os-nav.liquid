@@ -48,7 +48,7 @@
 <aside id="p2posnav" data-p2posnav aria-label="Purpose 2 Profit navigation">
   <a class="p2posnav-brand" href="/pages/p2p-os">
     <span class="p2posnav-mark">Purpose <span class="p2posnav-2">2</span> Profit</span>
-    <span class="p2posnav-sub">powered by Black Sheep</span>
+    <span class="p2posnav-sub">powered by Black Sheep Creations &amp; Inspirations</span>
   </a>
   <nav class="p2posnav-nav">
     {%- capture os_nav -%}start^Your Journey Starts Here^spark^view^^|checkpoint^Checkpoint^check^view^^|/pages/brand-haus?bh_focus=1^Founders Assessment^fingerprint^link^brand-haus-access^/pages/brand-haus-preview|/pages/brand-haus^Brand Haus^crown^link^brand-haus-access^/pages/brand-haus-preview|/pages/content-haus^Content Haus^prompt^link^prompt-haus-access^/pages/content-haus-preview|/pages/graphics-haus^Graphics Haus^palette^link^graphics-haus-access^/pages/graphics-haus-preview|/pages/project-haus^Project Haus^box^link^product-haus-access^/pages/project-haus-preview|/pages/marketing-haus^Marketing Haus^megaphone^link^marketing-haus-access^/pages/marketing-haus-preview|/pages/growth-haus^Growth Haus^rocket^link^P2P-haus-access^/pages/growth-haus-preview|rooted^ROOTED — Light the Path^path^view^^|mates^Haus Mates^mates^view^^|community^Community^chat^view^^|tools^Tools & Resources^tools^view^^|notebook^Notebook^notebook^view^^|bonus^Bonus Resources^gift^view^^{%- endcapture -%}
@@ -113,7 +113,7 @@
   :root{--p2posnav-w:264px;}
   #p2posnav{--text:#e7efeb;--muted:#8aa0a6;--gold:#c9a24a;--gold-bright:#f4c534;--stroke:rgba(255,255,255,.09);--gstroke:rgba(216,180,90,.38);
     --side:#081119;--aurora:linear-gradient(100deg,#f4e2a6,#8f6fd6,#27ae6e,#39c5c0,#2563eb,#d6336c,#f4e2a6);
-    position:fixed;left:0;top:0;bottom:0;width:var(--p2posnav-w);z-index:120;
+    position:fixed;left:0;top:var(--p2posnav-top,0px);bottom:0;width:var(--p2posnav-w);z-index:120;
     background:linear-gradient(180deg,var(--side),#060d14);border-right:1px solid var(--stroke);
     padding:20px 14px;box-sizing:border-box;display:flex;flex-direction:column;gap:6px;overflow-y:auto;
     color:var(--text);font-family:system-ui,-apple-system,sans-serif;}
@@ -170,5 +170,15 @@
     document.addEventListener('keydown', function(e){ if(e.key === 'Escape') close(); });
     // close the drawer when a nav item is tapped (it's navigating away anyway)
     el.querySelectorAll('.p2posnav-item, .p2posnav-brand').forEach(function(a){ a.addEventListener('click', close); });
+    // Keep the fixed rail directly BELOW the sticky theme header (not at top:0, where
+    // it rides up behind the banner and clips its own brand mark) so it lines up with
+    // the OS page and the layout doesn't jump between them.
+    function syncTop(){
+      var h = document.querySelector('header.shopify-section') || document.querySelector('header');
+      html.style.setProperty('--p2posnav-top', (h ? Math.round(h.offsetHeight) : 0) + 'px');
+    }
+    syncTop();
+    window.addEventListener('resize', syncTop);
+    window.addEventListener('load', syncTop);
   })();
 </script>
