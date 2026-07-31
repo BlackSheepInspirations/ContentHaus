@@ -129,17 +129,27 @@
 
       {%- comment -%} gamified step map (baked into the section — label^note) {%- endcomment -%}
       {%- comment -%} step keys drive the JS that lights each node from real cross-Haus signals {%- endcomment -%}
-      {%- capture os_steps -%}You made it!^Your journey begins — first step complete.^arrived|Find your direction^Founders Assessment^assessment|Brand^Your identity^brand|Content^Your words^content|Graphics^Your look^graphics|Project^Your build^project|Marketing^Your reach^marketing|Growth^Launch with ROOTED^growth{%- endcapture -%}
+      {%- comment -%} 4th field = the exact task that earns the ✓ (mapped to the JS signals below) {%- endcomment -%}
+      {%- capture os_steps -%}You made it!^Your journey begins^arrived^You're here — arriving at your Haus IS the first step. Already done.|Find your direction^Founders Assessment^assessment^Finish the Founders Assessment in Brand Haus to reveal your archetype.|Brand Haus^Your identity^brand^Save a Brand Kit in Brand Haus (your colors, fonts & voice).|Content Haus^Your words^content^Generate & copy your first prompt in Content Haus.|Graphics Haus^Your look^graphics^Create your first design in Graphics Haus.|Project Haus^Your build^project^Build your first product concept in Project Haus.|Marketing Haus^Your reach^marketing^Create your first marketing asset in Marketing Haus.|Growth Haus^Launch with ROOTED^growth^Complete any ROOTED stage in Growth Haus.{%- endcapture -%}
       {%- assign os_step_items = os_steps | split: '|' -%}
       <div class="osx-block">
         <div class="osx-kick">Your road ahead</div>
         <div class="osx-map">
           {%- for st in os_step_items -%}
             {%- assign sf = st | split: '^' -%}
-            <div class="osx-node{% if forloop.first %} done{% endif %}" data-step="{{ sf[2] }}">
-              <span class="osx-dot">{% if forloop.first %}✓{% else %}{{ forloop.index }}{% endif %}</span>
-              <span class="osx-nlbl">{{ sf[0] }}</span>
-              {%- if sf[1] != blank -%}<span class="osx-nnote">{{ sf[1] }}</span>{%- endif -%}
+            <div class="osx-node{% if forloop.first %} done{% endif %}" data-step="{{ sf[2] }}" role="button" tabindex="0" aria-label="{{ sf[0] | escape }} — tap to see what earns this step">
+              <div class="osx-node-inner">
+                <div class="osx-node-face osx-node-front">
+                  <span class="osx-flip-ic" aria-hidden="true">↻</span>
+                  <span class="osx-dot">{% if forloop.first %}✓{% else %}{{ forloop.index }}{% endif %}</span>
+                  <span class="osx-nlbl">{{ sf[0] }}</span>
+                  {%- if sf[1] != blank -%}<span class="osx-nnote">{{ sf[1] }}</span>{%- endif -%}
+                </div>
+                <div class="osx-node-face osx-node-back">
+                  <span class="osx-task-kick">To earn this</span>
+                  <span class="osx-task">{{ sf[3] }}</span>
+                </div>
+              </div>
             </div>
           {%- endfor -%}
         </div>
@@ -603,8 +613,20 @@
 
   /* gamified map */
   #p2pos .osx-map{display:flex;flex-wrap:wrap;gap:10px;}
-  #p2pos .osx-node{position:relative;flex:1 1 150px;min-width:140px;padding:16px 14px;border:1px solid var(--stroke);border-radius:14px;background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(9,17,24,.4));}
-  #p2pos .osx-node.done{border-color:rgba(39,174,110,.5);background:linear-gradient(180deg,rgba(39,174,110,.12),rgba(9,17,24,.4));}
+  #p2pos .osx-node{position:relative;flex:1 1 150px;min-width:140px;min-height:122px;perspective:1000px;cursor:pointer;border:0;background:none;padding:0;text-align:left;font:inherit;color:inherit;}
+  #p2pos .osx-node:focus-visible{outline:2px solid var(--gold-bright);outline-offset:3px;border-radius:15px;}
+  #p2pos .osx-node-inner{position:absolute;inset:0;transition:transform .55s cubic-bezier(.4,.15,.2,1);transform-style:preserve-3d;}
+  #p2pos .osx-node.flipped .osx-node-inner{transform:rotateY(180deg);}
+  #p2pos .osx-node-face{position:absolute;inset:0;display:flex;flex-direction:column;padding:16px 14px;border:1px solid var(--stroke);border-radius:14px;background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(9,17,24,.4));-webkit-backface-visibility:hidden;backface-visibility:hidden;overflow:hidden;}
+  #p2pos .osx-node.done .osx-node-front{border-color:rgba(39,174,110,.5);background:linear-gradient(180deg,rgba(39,174,110,.12),rgba(9,17,24,.4));}
+  #p2pos .osx-node-back{transform:rotateY(180deg);justify-content:center;background:linear-gradient(180deg,rgba(216,180,90,.12),rgba(9,17,24,.6));border-color:var(--gstroke);}
+  #p2pos .osx-flip-ic{position:absolute;top:10px;right:11px;font-size:12px;line-height:1;color:var(--muted);opacity:.6;}
+  #p2pos .osx-node:hover .osx-flip-ic{opacity:1;color:var(--gold-bright);}
+  #p2pos .osx-task-kick{font:700 9px/1 system-ui;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-bright);margin-bottom:7px;}
+  #p2pos .osx-node.done .osx-task-kick{color:var(--em,#27ae6e);}
+  #p2pos .osx-node.done .osx-task-kick::after{content:' ✓';}
+  #p2pos .osx-task{font:600 12px/1.42 system-ui;color:#eef6f3;}
+  @media (prefers-reduced-motion:reduce){#p2pos .osx-node-inner{transition:none;}}
   #p2pos .osx-dot{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;font:800 12px/1 system-ui;color:#0a1410;background:linear-gradient(145deg,#f4e2a6,var(--gold));margin-bottom:9px;}
   #p2pos .osx-node.done .osx-dot{background:var(--em,#27ae6e);color:#fff;}
   #p2pos .osx-nlbl{display:block;font:700 13.5px/1.2 system-ui;color:var(--text);}
@@ -1178,6 +1200,9 @@
       };
       root.querySelectorAll('.osx-node[data-step]').forEach(function(node){
         if(signals[node.getAttribute('data-step')]){ node.classList.add('done'); var d = node.querySelector('.osx-dot'); if(d) d.textContent = '✓'; }
+        // flip to reveal the exact task that earns this step's checkmark
+        node.addEventListener('click', function(){ node.classList.toggle('flipped'); });
+        node.addEventListener('keydown', function(e){ if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); node.classList.toggle('flipped'); } });
       });
     })();
   });
