@@ -1927,10 +1927,10 @@
   border-radius: 22px;
   padding: 52px 40px 46px;
   background:
-    radial-gradient(60% 120% at 18% 8%, rgba(201, 168, 76, 0.50), transparent 60%),
-    radial-gradient(55% 120% at 82% 12%, rgba(200, 92, 158, 0.26), transparent 62%),
-    radial-gradient(50% 130% at 60% 108%, rgba(39, 174, 110, 0.24), transparent 60%),
-    linear-gradient(135deg, #3a2c0e 0%, #241c08 42%, #14100a 100%);
+    radial-gradient(60% 120% at 18% 8%, rgba(184, 30, 70, 0.52), transparent 60%),
+    radial-gradient(55% 120% at 82% 12%, rgba(201, 168, 76, 0.22), transparent 62%),
+    radial-gradient(50% 130% at 60% 108%, rgba(143, 111, 214, 0.22), transparent 60%),
+    linear-gradient(135deg, #3a0e1c 0%, #250a13 42%, #14090c 100%);
   box-shadow: 0 24px 60px -28px rgba(6, 10, 14, 0.72), inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 /* livelier moving aurora sheen */
@@ -1985,10 +1985,10 @@
 }
 /* light-on-opal text + shimmer accent, scoped to the hero so the locked-state
    heading keeps its readable on-cream color. */
-.bh-marketing__hero .bh-marketing__eyebrow { color: #f2e4b0; letter-spacing: 0.14em; }
+.bh-marketing__hero .bh-marketing__eyebrow { color: #f2c9d6; letter-spacing: 0.14em; }
 .bh-marketing__hero .bh-marketing__heading { color: #f5f7fb; font-size: 38px; line-height: 1.1; letter-spacing: -0.02em; }
 .bh-marketing__hero .bh-heading-accent {
-  background: linear-gradient(100deg, #E6C25A, #fff0c4 28%, #C9A84C 60%, #f0d488 78%, #E6C25A);
+  background: linear-gradient(100deg, #E0457B, #f7b6cf 28%, #C9A84C 60%, #f0d488 78%, #E0457B);
   background-size: 220% auto;
   -webkit-background-clip: text;
   background-clip: text;
@@ -1999,10 +1999,10 @@
 .bh-marketing__hero .bh-marketing__subheading { color: #cdd7e3; }
 .bh-marketing__hero .bh-marketing__cta {
   color: #06121f;
-  background: linear-gradient(100deg, #E6C25A, #fff0c4 45%, #C9A84C);
+  background: linear-gradient(100deg, #E0457B, #f7b6cf 45%, #C9A84C);
   background-size: 180% auto;
   border: 0;
-  box-shadow: 0 10px 26px -10px rgba(201, 168, 76, 0.6);
+  box-shadow: 0 10px 26px -10px rgba(184, 30, 70, 0.6);
   transition: transform 0.15s ease, background-position 0.4s ease;
 }
 .bh-marketing__hero .bh-marketing__cta:hover { transform: translateY(-1px); background-position: 100% center; }
@@ -2019,11 +2019,11 @@
   font-size: 32px;
   margin: 0 0 8px;
 }
-/* Brand Haus signature = gold (distinct from Content's teal). On the dark hero
-   this accent is overridden by the shimmer rule above; on cream (locked state)
-   it uses a readable dark-gold. */
+/* Brand Haus signature = Quiet Authority crimson/wine. On the dark hero this
+   accent is overridden by the shimmer rule above; on cream (locked state) it
+   uses a readable deep crimson. */
 .bh-heading-accent {
-  color: #846E32;
+  color: #8a1e3d;
 }
 .bh-marketing__tagline {
   color: var(--bh-charcoal);
