@@ -201,5 +201,24 @@ window.P2P_PURPOSE = [
   { t: "Nobody needs to wait a single moment before starting to make the world better.", s: "Reflection" },
   { t: "My calling is not a spotlight to stand in. It is a lamp to carry into dark places.", s: "Affirmation" },
   { t: "Let us not grow weary in doing good, for in due season we will reap, if we don't give up.", s: "Galatians 6:9 (WEB)" },
-  { t: "I am not too late, too old, or too ordinary. I am right on time for my own becoming.", s: "Affirmation" }
+  { t: "I am not too late, too old, or too ordinary. I am right on time for my own becoming.", s: "Affirmation" },
+  /* ---- Added batch (2026-07-31): PD quotes + WEB scripture + original ---- */
+  { t: "The best way to find yourself is to lose yourself in the service of others.", s: "Mahatma Gandhi" },
+  { t: "What we have done for others and the world remains and is immortal.", s: "Albert Pike" },
+  { t: "Do all the good you can, by all the means you can, in all the ways you can.", s: "John Wesley" },
+  { t: "Act well your part; there all the honor lies.", s: "Alexander Pope" },
+  { t: "The vocation of every person is to serve other people.", s: "Leo Tolstoy" },
+  { t: "You are the light of the world. A city set on a hill cannot be hidden.", s: "Matthew 5:14 (WEB)" },
+  { t: "Let your light shine before men, that they may see your good works.", s: "Matthew 5:16 (WEB)" },
+  { t: "For we are his workmanship, created for good works, which God prepared for us to walk in.", s: "Ephesians 2:10 (WEB)" },
+  { t: "As each has received a gift, use it in serving one another.", s: "1 Peter 4:10 (WEB)" },
+  { t: "Whatever you do, work heartily, as for the Lord and not for men.", s: "Colossians 3:23 (WEB)" },
+  { t: "Commit your way to Yahweh; trust in him, and he will act.", s: "Psalm 37:5 (WEB)" },
+  { t: "My gift was never meant to stay hidden; today I let a little of it out.", s: "Affirmation" },
+  { t: "I build things that would leave a hole in the world if I did not make them.", s: "Affirmation" },
+  { t: "My purpose is not a title I earn but a service I offer.", s: "Reflection" },
+  { t: "The need I keep noticing is probably the one I was made to meet.", s: "Reflection" },
+  { t: "I am not here to be impressive. I am here to be useful.", s: "Affirmation" },
+  { t: "What only I can make is worth the discomfort of making it.", s: "Affirmation" },
+  { t: "My work is a letter to someone I have not met yet who needs it.", s: "Reflection" }
 ];

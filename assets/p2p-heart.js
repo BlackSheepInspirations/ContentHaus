@@ -202,5 +202,26 @@ window.P2P_HEART = [
   { t: "I hold space for my own grief without rushing it toward a lesson.", s: "Affirmation" },
   { t: "Kind words are easy to speak, but their echoes go on and on.", s: "Reflection" },
   { t: "I return to my own heart the way one returns home — gently, and often.", s: "Affirmation" },
-  { t: "Finally, be all likeminded, compassionate, loving, tenderhearted, and humble.", s: "1 Peter 3:8 (WEB)" }
+  { t: "Finally, be all likeminded, compassionate, loving, tenderhearted, and humble.", s: "1 Peter 3:8 (WEB)" },
+  /* ---- Added batch (2026-07-31): PD quotes + WEB scripture + original ---- */
+  { t: "No act of kindness, no matter how small, is ever wasted.", s: "Aesop" },
+  { t: "Kindness is a language which the deaf can hear and the blind can see.", s: "Mark Twain" },
+  { t: "How far that little candle throws its beams! So shines a good deed in a weary world.", s: "William Shakespeare" },
+  { t: "Wherever there is a human being, there is an opportunity for a kindness.", s: "Seneca" },
+  { t: "Tenderness and kindness are manifestations of strength and resolution.", s: "Kahlil Gibran" },
+  { t: "The best portion of a good life is the little, nameless acts of kindness and love.", s: "William Wordsworth" },
+  { t: "Rest is not idleness, and it is by no means a waste of time.", s: "John Lubbock" },
+  { t: "Come to me, all you who labor and are heavily burdened, and I will give you rest.", s: "Matthew 11:28 (WEB)" },
+  { t: "Cast all your worries on him, because he cares for you.", s: "1 Peter 5:7 (WEB)" },
+  { t: "A cheerful heart is good medicine.", s: "Proverbs 17:22 (WEB)" },
+  { t: "Be kind to one another, tenderhearted, forgiving each other.", s: "Ephesians 4:32 (WEB)" },
+  { t: "Love is patient and is kind.", s: "1 Corinthians 13:4 (WEB)" },
+  { t: "He heals the brokenhearted, and binds up their wounds.", s: "Psalm 147:3 (WEB)" },
+  { t: "Yahweh is near to those who have a broken heart.", s: "Psalm 34:18 (WEB)" },
+  { t: "I speak to myself the way I would speak to someone I love.", s: "Affirmation" },
+  { t: "Rest is part of the work, not a reward I have to earn first.", s: "Affirmation" },
+  { t: "I let today be enough, and I let myself be enough within it.", s: "Affirmation" },
+  { t: "I can hold high standards and deep gentleness in the same hand.", s: "Reflection" },
+  { t: "I am allowed to be a work in progress and a masterpiece at once.", s: "Affirmation" },
+  { t: "When I am hard on myself, I pause and offer the grace I would give a friend.", s: "Reflection" }
 ];
