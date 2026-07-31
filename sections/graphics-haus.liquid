@@ -13,6 +13,10 @@
 {% if request.design_mode %}
   {% assign gh_has_access = true %}
 {% endif %}
+{% comment %} master all-access tag unlocks every Haus {% endcomment %}
+{% if customer and customer.tags contains 'all-access' %}
+  {% assign gh_has_access = true %}
+{% endif %}
 
 {{ 'graphics-haus.css' | asset_url | stylesheet_tag }}
 

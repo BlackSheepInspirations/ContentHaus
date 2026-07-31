@@ -20,6 +20,10 @@
 {% if request.design_mode %}
   {% assign bh_has_access = true %}
 {% endif %}
+{% comment %} master all-access tag unlocks every Haus {% endcomment %}
+{% if customer and customer.tags contains 'all-access' %}
+  {% assign bh_has_access = true %}
+{% endif %}
 
 {{ 'brand-haus.css' | asset_url | stylesheet_tag }}
 

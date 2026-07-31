@@ -23,6 +23,16 @@
 {% if request.design_mode %}
   {% assign p2p_access = true %}
 {% endif %}
+{% comment %} master all-access tag (case-insensitive) unlocks every Haus {% endcomment %}
+{% if customer and p2p_access == false %}
+  {% for p2p_t in customer.tags %}
+    {% assign p2p_t_norm = p2p_t | strip | downcase %}
+    {% if p2p_t_norm == 'all-access' %}
+      {% assign p2p_access = true %}
+      {% break %}
+    {% endif %}
+  {% endfor %}
+{% endif %}
 
 <link rel="preconnect" href="https://api.fontshare.com" crossorigin>
 <link href="https://api.fontshare.com/v2/css?f[]=general-sans@600,700,800&f[]=switzer@400,500,600,700&display=swap" rel="stylesheet">

@@ -20,6 +20,8 @@
   {%- assign has_access = true -%}
 {%- endif -%}
 {%- if request.design_mode -%}{%- assign has_access = true -%}{%- endif -%}
+{%- comment -%} master all-access tag unlocks every gated surface {%- endcomment -%}
+{%- if customer and customer.tags contains 'all-access' -%}{%- assign has_access = true -%}{%- endif -%}
 
 {%- if has_access -%}
 <div id="p2pb">
