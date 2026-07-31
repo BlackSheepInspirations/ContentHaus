@@ -28,6 +28,10 @@
       <button class="p2ph-close" type="button" data-p2ph-close aria-label="Close">✕</button>
     </div>
     <div class="p2ph-log" data-p2ph-log></div>
+    <form class="p2ph-ask" data-p2ph-ask>
+      <input class="p2ph-ask-in" data-p2ph-input type="text" placeholder="Type your question…" autocomplete="off" aria-label="Type your question">
+      <button class="p2ph-ask-btn" type="submit" aria-label="Search">→</button>
+    </form>
     <div class="p2ph-foot">
       <a href="mailto:{{ shop.email | default: 'Hello@blacksheepcreations.com' }}">Still stuck? Talk to a human →</a>
     </div>
@@ -78,9 +82,17 @@
     #p2phelp .p2ph-launch-lbl{display:none;}
     #p2phelp .p2ph-panel{right:10px;left:10px;bottom:76px;width:auto;max-height:calc(100vh - 150px);}
   }
+  #p2phelp .p2ph-ask{display:flex;gap:8px;padding:10px 12px;border-top:1px solid var(--hstroke);}
+  #p2phelp .p2ph-ask-in{flex:1;min-width:0;background:rgba(255,255,255,.06);border:1px solid var(--hstroke);border-radius:10px;padding:9px 12px;color:#e7efeb;font:400 13px/1.3 system-ui;}
+  #p2phelp .p2ph-ask-in::placeholder{color:var(--hmuted);}
+  #p2phelp .p2ph-ask-in:focus{outline:none;border-color:var(--hg);}
+  #p2phelp .p2ph-ask-btn{flex:none;width:38px;border:0;border-radius:10px;cursor:pointer;background:linear-gradient(145deg,#f4e2a6,#c9a24a);color:#0a1410;font:700 16px/1 system-ui;transition:filter .14s;}
+  #p2phelp .p2ph-ask-btn:hover{filter:brightness(1.06);}
+
   @media (prefers-reduced-motion:reduce){#p2phelp .p2ph-panel{animation:none;}}
 </style>
 
+<script src="{{ 'p2p-faq-kb.js' | asset_url }}"></script>
 <script>
   (function(){
     var root = document.getElementById('p2phelp'); if(!root) return;
@@ -88,6 +100,8 @@
     var panel = root.querySelector('[data-p2ph-panel]');
     var closeBtn = root.querySelector('[data-p2ph-close]');
     var log = root.querySelector('[data-p2ph-log]');
+    var askForm = root.querySelector('[data-p2ph-ask]');
+    var askInput = root.querySelector('[data-p2ph-input]');
 
     // ---- Knowledge base: plain data. `to` = go to another node; `url` = open a link. ----
     var SUPPORT = {{ shop.email | default: 'Hello@blacksheepcreations.com' | json }};
@@ -156,7 +170,7 @@
         { t: "Email support", url: "mailto:" + SUPPORT }, { t: "← Back", to: "billing" } ]}
     };
 
-    function fmt(s){ return String(s).replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>"); }
+    function fmt(s){ return String(s).replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>").replace(/\n/g, "<br>"); }
     function scroll(){ log.scrollTop = log.scrollHeight; }
     function addBot(node){
       var b = document.createElement("div"); b.className = "p2ph-bot"; b.innerHTML = fmt(node.msg); log.appendChild(b);
@@ -168,12 +182,51 @@
         else { el = document.createElement("button"); el.type = "button"; el.className = "p2ph-opt"; }
         el.textContent = o.t;
         if(o.to){ el.addEventListener("click", function(){ addUser(o.t); go(o.to); }); }
+        else if(o.act){ el.addEventListener("click", o.act); }
         wrap.appendChild(el);
       });
       log.appendChild(wrap); scroll();
     }
     function addUser(t){ var u = document.createElement("div"); u.className = "p2ph-user"; u.textContent = t; log.appendChild(u); scroll(); }
     function go(id){ var n = NODES[id] || NODES.root; addBot(n); }
+
+    // ---- Free-type keyword search over the harvested FAQ knowledge base ----
+    var STOP = {the:1,and:1,for:1,are:1,you:1,your:1,what:1,how:1,why:1,does:1,did:1,can:1,with:1,this:1,that:1,when:1,where:1,which:1,into:1,from:1,have:1,has:1,was:1,were:1,about:1,get:1,got:1,use:1,using:1,its:1,it:1,is:1,my:1,me:1,to:1,of:1,do:1,in:1,on:1,or:1,an:1,at:1,be:1,should:1,need:1,help:1,just:1,not:1,but:1,all:1};
+    function tokens(s){ return String(s).toLowerCase().replace(/[^a-z0-9]+/g, " ").split(" ").filter(function(t){ return t.length >= 3 && !STOP[t]; }); }
+    function search(query){
+      var kb = window.P2P_FAQ_KB || [], qs = tokens(query); if(!qs.length) return [];
+      var out = [];
+      for(var i = 0; i < kb.length; i++){
+        var e = kb[i], hq = e.q.toLowerCase(), ha = (e.q + " " + e.a).toLowerCase(), s = 0;
+        for(var j = 0; j < qs.length; j++){ var t = qs[j]; if(hq.indexOf(t) >= 0){ s += 3; } else if(ha.indexOf(t) >= 0){ s += 1; } }
+        if(s > 0){ out.push({ e: e, s: s }); }
+      }
+      out.sort(function(a, b){ return b.s - a.s; });
+      return out;
+    }
+    function answerFor(e, more){
+      var opts = [];
+      if(e.url){ opts.push({ t: "Open " + e.haus, url: e.url }); }
+      (more || []).forEach(function(m){ opts.push({ t: m.q, act: function(){ addUser(m.q); showAnswer(m); } }); });
+      opts.push({ t: "Ask another question", act: function(){ if(askInput){ askInput.focus(); } } });
+      opts.push({ t: "Talk to a human", url: "mailto:" + SUPPORT });
+      return { msg: e.a + "\n\n— from **" + e.haus + "**", opts: opts };
+    }
+    function showAnswer(e){ addBot(answerFor(e, [])); }
+    function showResults(query){
+      var res = search(query);
+      if(!res.length || res[0].s < 2){
+        addBot({ msg: "I couldn't find a sure answer for that — but here's how I can still help, or reach a human and we'll sort it fast.", opts: [
+          { t: "Which Haus should I use?", to: "which" },
+          { t: "How do I get started?", to: "start" },
+          { t: "Billing, account & access", to: "billing" },
+          { t: "Talk to a human", url: "mailto:" + SUPPORT }
+        ]});
+        return;
+      }
+      addBot(answerFor(res[0].e, res.slice(1, 3).map(function(x){ return x.e; })));
+    }
+    if(askForm){ askForm.addEventListener("submit", function(ev){ ev.preventDefault(); var v = (askInput.value || "").trim(); if(!v){ return; } askInput.value = ""; addUser(v); showResults(v); }); }
 
     var started = false;
     function open(){ root.classList.add("is-open"); panel.hidden = false; if(!started){ started = true; go("root"); } }
