@@ -265,6 +265,38 @@
       </div>
     </section>
 
+    {%- comment -%} ===== VIEW: ROOTED — Light the Path (concise overview → deeper dive in the Evergreens) ===== {%- endcomment -%}
+    {%- assign evergreens_url = section.settings.evergreens_url | default: '/pages/realm-5' -%}
+    {%- assign rooted_growth_url = section.settings.rooted_growth_url | default: '/pages/growth-haus' -%}
+    <section class="osx-view" data-view="rooted">
+      <div class="osx-kick">The path to launch</div>
+      <h2 class="osx-h2">{{ section.settings.rooted_title | default: 'ROOTED — light the path' }}</h2>
+      <p class="osx-lede">{{ section.settings.rooted_intro | default: "ROOTED is the six-stage method that carries you from ready to launched. Here's the shape of the whole path — walk it top to bottom, then go deep in the Evergreens when you're ready to run one for real." }}</p>
+
+      {%- comment -%} the 6 stages (letter^name^one-liner) — spell ROOTED down the trail {%- endcomment -%}
+      {%- capture os_rooted -%}R^Reach^Warm up the right people before you sell a thing.|O^Open^Open the loop — build anticipation with pre-launch content.|O^Offer^Make the offer. The doors open, and it's for sale.|T^Trigger^Give them a reason to decide now — proof and gentle urgency.|E^Escalate^The close — last call as the window starts to narrow.|D^Deepen^Keep the relationship going long after launch day.{%- endcapture -%}
+      {%- assign os_rooted_items = os_rooted | split: '|' -%}
+      <ol class="osx-rooted">
+        {%- for rs in os_rooted_items -%}
+          {%- assign rf = rs | split: '^' -%}
+          <li class="osx-rstep">
+            <span class="osx-rletter">{{ rf[0] }}</span>
+            <div class="osx-rbody"><b>{{ rf[1] }}</b><span>{{ rf[2] }}</span></div>
+          </li>
+        {%- endfor -%}
+      </ol>
+
+      <div class="osx-rooted-cta">
+        <div class="osx-rooted-cta-ic">🌲</div>
+        <div class="osx-rooted-cta-in">
+          <b>Go deeper in the Evergreens</b>
+          <p>Realm 5 of your Learning Journey is the full ROOTED course — every stage, worked example by example. Finish it there to earn your <i>ROOTED Master</i> certificate.</p>
+          <a class="osx-cta" href="{{ evergreens_url }}">Enter the Evergreens →</a>
+        </div>
+      </div>
+      <p class="osx-rooted-foot">Ready to run your launch now? <a href="{{ rooted_growth_url }}">Build your ROOTED plan in Growth Haus →</a></p>
+    </section>
+
     {%- comment -%} ===== VIEW: Haus Mates (Frank — Idea Haus · Ruth — Build Haus) ===== {%- endcomment -%}
     {%- assign frank_url = section.settings.frank_url | default: 'https://chatgpt.com/g/g-6a489ad05ac48191a7692939b09fc6f1-the-idea-haus' -%}
     {%- assign ruth_url = section.settings.ruth_url | default: 'https://chatgpt.com/g/g-6a638c2591848191837a671eb3097901-the-build-haus' -%}
@@ -487,6 +519,27 @@
   #p2pos .osx-meic{font-size:22px;line-height:1;}
   #p2pos .osx-meetcard b{display:block;margin:10px 0 5px;font:700 14.5px/1.2 system-ui;}
   #p2pos .osx-meetcard p{margin:0;font:400 12.5px/1.5 system-ui;color:var(--muted);}
+
+  /* ROOTED — Light the Path (the lit 6-stage trail) */
+  #p2pos .osx-rooted{list-style:none;margin:0 0 26px;padding:0;position:relative;}
+  #p2pos .osx-rooted::before{content:"";position:absolute;left:23px;top:24px;bottom:24px;width:2px;
+    background:linear-gradient(180deg,#f4e2a6,#8f6fd6,#27ae6e,#39c5c0,#2563eb,#d6336c);opacity:.55;border-radius:2px;}
+  #p2pos .osx-rstep{position:relative;display:flex;align-items:flex-start;gap:16px;padding:9px 0;}
+  #p2pos .osx-rletter{position:relative;z-index:1;flex:0 0 48px;width:48px;height:48px;border-radius:50%;display:grid;place-items:center;
+    font:800 20px/1 Georgia,serif;color:#0a1410;background:linear-gradient(145deg,#f4e2a6,var(--gold));
+    box-shadow:0 0 0 4px #0a141c,0 8px 22px rgba(0,0,0,.45);}
+  #p2pos .osx-rbody{padding-top:5px;}
+  #p2pos .osx-rbody b{display:block;font:700 16px/1.2 Georgia,serif;color:var(--text);}
+  #p2pos .osx-rbody span{display:block;margin-top:3px;font:400 13.5px/1.55 system-ui;color:#c6d6d0;max-width:52ch;}
+  #p2pos .osx-rooted-cta{display:flex;gap:18px;align-items:flex-start;padding:22px 24px;border:1px solid var(--gstroke);border-radius:18px;
+    background:linear-gradient(120deg,rgba(39,174,110,.12),rgba(57,197,192,.06));margin-bottom:14px;}
+  #p2pos .osx-rooted-cta-ic{font-size:30px;line-height:1;}
+  #p2pos .osx-rooted-cta-in b{font:700 17px/1.2 Georgia,serif;color:var(--text);}
+  #p2pos .osx-rooted-cta-in p{margin:7px 0 14px;font:400 14px/1.6 system-ui;color:#dbe7e2;max-width:60ch;}
+  #p2pos .osx-rooted-cta-in i{color:var(--gold-bright);font-style:italic;}
+  #p2pos .osx-rooted-foot{font:400 13px/1.6 system-ui;color:var(--muted);margin:0;}
+  #p2pos .osx-rooted-foot a{color:var(--gold-bright);text-decoration:none;font-weight:700;}
+  #p2pos .osx-rooted-foot a:hover{text-decoration:underline;}
 
   /* Haus Mates — Frank (Idea) & Ruth (Build) */
   #p2pos .osx-mates{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;margin-bottom:18px;}
@@ -840,6 +893,11 @@
     { "type": "header", "content": "Notebook view" },
     { "type": "text", "id": "notebook_title", "label": "Notebook title", "default": "Your Notebook" },
     { "type": "textarea", "id": "notebook_intro", "label": "Notebook intro", "default": "Jot ideas, plans, and notes as you build. Give each a title so you can find it again later." },
+    { "type": "header", "content": "ROOTED — Light the Path view" },
+    { "type": "text", "id": "rooted_title", "label": "ROOTED title", "default": "ROOTED — light the path" },
+    { "type": "textarea", "id": "rooted_intro", "label": "ROOTED intro", "default": "ROOTED is the six-stage method that carries you from ready to launched. Here's the shape of the whole path — walk it top to bottom, then go deep in the Evergreens when you're ready to run one for real." },
+    { "type": "url", "id": "evergreens_url", "label": "Evergreens (Realm 5) URL", "info": "Where the ROOTED course + certificate live. Defaults to /pages/realm-5." },
+    { "type": "url", "id": "rooted_growth_url", "label": "Growth Haus URL", "info": "The 'run it now' link. Defaults to /pages/growth-haus." },
     { "type": "header", "content": "Haus Mates view" },
     { "type": "text", "id": "mates_title", "label": "Haus Mates title", "default": "Two partners, always on call" },
     { "type": "textarea", "id": "mates_intro", "label": "Haus Mates intro", "default": "Stuck on what to make, or how to make it beautiful? Frank and Ruth are your AI partners — one to spark the idea, one to build it right. Open either any time you need a second brain." },
