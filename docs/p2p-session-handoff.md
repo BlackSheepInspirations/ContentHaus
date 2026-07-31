@@ -134,11 +134,22 @@ the LAST — push files SEPARATELY.** 3. Copy each file to the mirror
    guided options + email. Harvest script: scratchpad/extract_kb.js (rerun to
    refresh the KB when FAQs change). Live-verified on the OS page. NOTE: the other
    3 Hausen (product/marketing/graphics-ui.js) have NO FAQ_ITEMS arrays to harvest.
-4. **#11 Brand identity → OS:** archetype hero card only populates when the Founders
-   Assessment completes (writes `p2p_archetype` via publish hook in
-   brand-haus-founderinterview.js). Saving a brand kit does NOT. Wire brand-kit
-   save to also publish p2p_archetype. DESIGN CALL: should the OS recolor from the
-   member's brand-kit colors, or keep its own aurora identity? (Currently its own.)
+4. **#11 Brand identity → OS — DONE (2026-07-31).** (a) BACKFILL (a45b2b9):
+   brand-haus-founderinterview.js publishes p2p_archetype from the saved assessment
+   snapshot on load if the key is missing — members who completed the assessment
+   before the publish hook existed get the OS DNA card without a re-take. (b) RECOLOR
+   (100d44a, Andrea chose full recolor): the OS reads the member's saved brand palette
+   (custom brand kit first, else the archetype palette now in p2p_archetype.colors)
+   and overrides --gold/--gold-bright/--gstroke/--aurora; hue+sat from the brand,
+   LIGHTNESS forced legible on dark; near-greyscale → neutral accents; no palette →
+   default aurora. (c) ASSESSMENT LINK (a9853ee): the "Discover your Brand DNA" nudge
+   + "Refresh your assessment" now point at the REAL assessment
+   /pages/brand-haus?bh_focus=1 (was the non-existent /pages/p2p-assessment). All
+   live-verified. OPEN (not blockers): (i) 2 archetype hero images have a baked-in
+   transparency checkerboard — assets/brand-haus-hero-{trail-forger,quiet-authority}.jpg
+   are WebP alpha=no with the grid flattened in; the other 9 are alpha=yes and clean;
+   Andrea to re-supply the 2 good originals. (ii) the assessment is gated by
+   brand-haus-access — decide if the Founders Assessment should be a free lead magnet.
 5. **#12 Checkpoint flip cards (LATER):** the "Meet your Hausen" cards on the
    Checkpoint view should flip/pop to reveal more about each Haus.
 6. **Design calls:** OS color-porting (see #4); a real **tagline** for Purpose 2 Profit.
