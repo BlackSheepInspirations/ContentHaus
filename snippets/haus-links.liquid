@@ -31,13 +31,15 @@
     s.textContent =
       '.p2p-embedded .shopify-section-group-header-group,' +
       '.p2p-embedded .shopify-section-group-footer-group,' +
+      '.p2p-embedded .shopify-section-group-system-group,' +
       '.p2p-embedded #shopify-section-header,.p2p-embedded #shopify-section-footer,' +
       '.p2p-embedded [role="banner"],.p2p-embedded [role="contentinfo"],' +
       '.p2p-embedded .announcement-bar-section,.p2p-embedded .announcement-bar,' +
       '.p2p-embedded .header-wrapper,.p2p-embedded .site-header,.p2p-embedded .site-footer,' +
-      '.p2p-embedded .haus-links,.p2p-embedded .utility-bar' +
+      '.p2p-embedded .haus-links,.p2p-embedded .utility-bar,.p2p-embedded .hdt-loading-bar' +
       '{display:none !important;}' +
-      'html.p2p-embedded,html.p2p-embedded body{background:#04070a !important;}';
+      'html.p2p-embedded,html.p2p-embedded body{background:#04070a !important;margin:0 !important;}' +
+      'html.p2p-embedded #MainContent{padding-top:0 !important;}';
     (document.head || document.documentElement).appendChild(s);
   })();
 </script>
