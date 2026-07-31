@@ -80,6 +80,7 @@
           <div class="osx-hero-btns">
             {%- if section.settings.hero_cta_label != blank -%}<button class="osx-cta" type="button" data-osx-goto="{{ section.settings.hero_cta_target | default: 'checkpoint' }}">{{ section.settings.hero_cta_label }}</button>{%- endif -%}
             {%- if os_journey_url != blank -%}<a class="osx-cta ghost" href="{{ os_journey_url }}">{{ section.settings.journey_label | default: 'Enter your Learning Journey →' }}</a>{%- endif -%}
+            <button class="osx-help" type="button" data-osx-help aria-label="Get help">i</button>
           </div>
           {%- comment -%} daily Mindset · Purpose · Heart carousel (auto-rotates + Next) {%- endcomment -%}
           <div class="osx-moments" data-osx-moments hidden>
@@ -149,7 +150,7 @@
         <img class="osx-reassure-ic" src="{{ 'bsc-sheep-mark.png' | asset_url }}" alt="" width="46" height="46" loading="lazy">
         <div>
           <b>{{ section.settings.reassure_title | default: 'Born an Original.' }}</b>
-          <p>{{ section.settings.reassure_body }}</p>
+          <p>{{ section.settings.reassure_body }}{%- if section.settings.reassure_spark != blank -%}<br>{{ section.settings.reassure_spark }}{%- endif -%}</p>
           <div class="osx-reassure-note">{{ section.settings.reassure_note | default: "One step at a time. We're glad to be here with you." }}</div>
         </div>
       </div>
@@ -551,13 +552,13 @@
   #p2pos .osx-hero-dna .dna-nudge-sub{display:block;font:500 12px/1.4 system-ui;color:var(--muted);}
   @media (max-width:760px){#p2pos .osx-hero-dna{flex:1 1 100%;max-width:none;}}
   /* daily Mindset · Purpose · Heart carousel */
-  #p2pos .osx-moments{margin-top:22px;border:1px solid var(--gstroke);border-radius:14px;padding:15px 18px;background:rgba(5,10,16,.45);}
-  #p2pos .mo-title{font:700 10.5px/1.2 system-ui;letter-spacing:.05em;text-transform:uppercase;color:var(--gold);margin-bottom:9px;}
+  #p2pos .osx-moments{margin-top:18px;border:1px solid var(--gstroke);border-radius:14px;padding:11px 15px;background:rgba(5,10,16,.45);}
+  #p2pos .mo-title{font:700 10px/1.2 system-ui;letter-spacing:.05em;text-transform:uppercase;color:var(--gold);margin-bottom:6px;}
   #p2pos .mo-star{color:var(--gold-bright);}
   #p2pos .mo-grad{background:var(--aurora);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:p2pos-shift 20s linear infinite;}
-  #p2pos .mo-text{font:italic 400 15px/1.5 Georgia,serif;color:var(--text);margin:0 0 7px;min-height:2.9em;}
+  #p2pos .mo-text{font:italic 400 14px/1.45 Georgia,serif;color:var(--text);margin:0 0 5px;min-height:2.4em;}
   #p2pos .mo-source{font:600 11.5px/1.3 system-ui;color:var(--muted);font-style:normal;}
-  #p2pos .mo-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px;}
+  #p2pos .mo-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:8px;}
   #p2pos .mo-dots{display:flex;gap:7px;}
   #p2pos .mo-dot{width:7px;height:7px;border-radius:50%;border:0;padding:0;background:rgba(255,255,255,.22);cursor:pointer;transition:background .15s,transform .15s;}
   #p2pos .mo-dot.on{background:var(--gold-bright);transform:scale(1.25);}
@@ -572,7 +573,9 @@
     background:var(--aurora);background-size:300% 100%;animation:p2pos-shift 20s linear infinite;box-shadow:0 12px 30px rgba(0,0,0,.35);transition:transform .12s;}
   #p2pos .osx-cta:hover{transform:translateY(-2px);}
   #p2pos .osx-cta.as-link{margin-top:8px;}
-  #p2pos .osx-hero-btns{display:flex;gap:12px;flex-wrap:wrap;}
+  #p2pos .osx-hero-btns{display:flex;gap:12px;flex-wrap:wrap;align-items:center;}
+  #p2pos .osx-help{width:46px;height:46px;flex:none;border-radius:50%;border:1px solid var(--gstroke);background:transparent;color:var(--gold-bright);font:italic 700 20px/1 Georgia,serif;cursor:pointer;transition:background .15s,border-color .15s,transform .12s;}
+  #p2pos .osx-help:hover{background:rgba(216,180,90,.1);border-color:var(--gold-bright);transform:translateY(-2px);}
   #p2pos .osx-cta.ghost{background:transparent;border:1px solid var(--gstroke);color:var(--gold-bright);box-shadow:none;animation:none;}
   #p2pos .osx-cta.ghost:hover{border-color:var(--gold-bright);background:rgba(216,180,90,.08);}
 
@@ -939,6 +942,9 @@
       var nav = Array.prototype.filter.call(items, function(x){ return x.getAttribute('data-target') === t; })[0];
       if(nav) nav.click();
     }); });
+    // hero 'i' help button -> open the Haus Helper
+    var helpBtn = root.querySelector('[data-osx-help]');
+    if(helpBtn) helpBtn.addEventListener('click', function(){ var h = document.querySelector('[data-p2ph-launch]'); if(h) h.click(); });
     // deep-link: /pages/p2p-os?v=<view> opens that view directly
     // (the shared rail on the Haus pages links here for view-mode items like Checkpoint / Notebook)
     (function(){
@@ -1148,7 +1154,8 @@
     { "type": "checkbox", "id": "show_moment", "label": "Load progress engine", "default": true },
     { "type": "text", "id": "journey_access_tag", "label": "Journey access tag", "default": "p2p-learning" },
     { "type": "text", "id": "reassure_title", "label": "Reassurance title", "default": "Born an Original." },
-    { "type": "textarea", "id": "reassure_body", "label": "Reassurance body", "default": "There are a lot of ideas and businesses out there. There is only one YOU — and that's not just a nice thought, it is your actual advantage. Nobody can copy your spark." },
+    { "type": "textarea", "id": "reassure_body", "label": "Reassurance body", "default": "There are a lot of ideas and businesses out there. There is only one YOU — and that's not just a nice thought, it is your actual advantage." },
+    { "type": "text", "id": "reassure_spark", "label": "Reassurance spark line (2nd line)", "default": "Nobody can copy your spark." },
     { "type": "text", "id": "reassure_note", "label": "Reassurance note (italic)", "default": "One step at a time. We're glad to be here with you." },
     { "type": "text", "id": "faq_heading", "label": "FAQ heading", "default": "Need help?" },
     { "type": "header", "content": "Checkpoint view" },
