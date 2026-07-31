@@ -310,6 +310,20 @@
       </div>
 
       <div class="osx-mate-note">✦ Frank and Ruth live in ChatGPT and open in a new tab, so your OS stays right here.</div>
+
+      {%- comment -%} external-site heads-up (dismissible + "don't show again") {%- endcomment -%}
+      <div class="osx-modal" data-osx-extmodal hidden>
+        <div class="osx-modal-card" role="dialog" aria-modal="true" aria-labelledby="osx-ext-title">
+          <div class="osx-modal-ic">↗</div>
+          <h3 class="osx-modal-title" id="osx-ext-title" data-osx-ext-title>You're heading to ChatGPT</h3>
+          <p class="osx-modal-body" data-osx-ext-body>Your Haus Mate lives in ChatGPT and opens in a new tab — your OS stays right here.</p>
+          <label class="osx-modal-check"><input type="checkbox" data-osx-ext-dontshow><span class="osx-modal-cbx"></span>Don't show this again</label>
+          <div class="osx-modal-btns">
+            <button class="osx-modal-cancel" type="button" data-osx-ext-cancel>Stay here</button>
+            <a class="osx-modal-go" data-osx-ext-go href="#" target="_blank" rel="noopener">Continue <i>→</i></a>
+          </div>
+        </div>
+      </div>
     </section>
 
     {%- comment -%} ===== generic placeholder + embed frame ===== {%- endcomment -%}
@@ -510,6 +524,30 @@
   #p2pos .osx-mate-note::first-letter{color:var(--gold-bright);}
   @media (prefers-reduced-motion: reduce){#p2pos .osx-mate-name,#p2pos .osx-mate-cta{animation:none;}}
 
+  /* external-site heads-up modal */
+  #p2pos .osx-modal{position:fixed;inset:0;z-index:1100;display:grid;place-items:center;padding:20px;background:rgba(3,7,10,.66);backdrop-filter:blur(3px);}
+  #p2pos .osx-modal[hidden]{display:none;}
+  #p2pos .osx-modal-card{width:min(420px,100%);border:1px solid var(--gstroke);border-radius:20px;padding:28px 26px 24px;text-align:center;
+    background:radial-gradient(120% 100% at 50% 0%,#0e1c28,#0a141c);box-shadow:0 24px 70px rgba(0,0,0,.6);}
+  #p2pos .osx-modal-ic{width:48px;height:48px;margin:0 auto 14px;display:grid;place-items:center;border-radius:50%;font:800 22px/1 system-ui;color:#0a1410;
+    background:var(--aurora);background-size:300% 100%;animation:p2pos-shift 20s linear infinite;}
+  #p2pos .osx-modal-title{font:700 20px/1.2 Georgia,serif;margin:0 0 8px;color:var(--text);}
+  #p2pos .osx-modal-body{font:400 14px/1.6 system-ui;color:#c6d6d0;margin:0 0 16px;}
+  #p2pos .osx-modal-check{display:inline-flex;align-items:center;gap:9px;cursor:pointer;font:500 13px/1 system-ui;color:var(--muted);margin-bottom:20px;user-select:none;}
+  #p2pos .osx-modal-check input{position:absolute;opacity:0;pointer-events:none;}
+  #p2pos .osx-modal-cbx{flex:0 0 18px;width:18px;height:18px;border:1.5px solid var(--stroke);border-radius:5px;position:relative;transition:background .15s,border-color .15s;}
+  #p2pos .osx-modal-check input:checked + .osx-modal-cbx{background:var(--emerald);border-color:var(--emerald);}
+  #p2pos .osx-modal-check input:checked + .osx-modal-cbx:after{content:"✓";position:absolute;inset:0;display:grid;place-items:center;font:800 11px/1 system-ui;color:#06120e;}
+  #p2pos .osx-modal-check input:focus-visible + .osx-modal-cbx{outline:2px solid var(--gold-bright);outline-offset:2px;}
+  #p2pos .osx-modal-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+  #p2pos .osx-modal-cancel{cursor:pointer;padding:12px 20px;border-radius:11px;font:700 13px/1 system-ui;color:var(--muted);background:rgba(255,255,255,.05);border:1px solid var(--stroke);transition:.15s;}
+  #p2pos .osx-modal-cancel:hover{color:var(--text);border-color:var(--gstroke);}
+  #p2pos .osx-modal-go{display:inline-flex;align-items:center;gap:8px;cursor:pointer;padding:12px 24px;border-radius:11px;font:800 13px/1 system-ui;color:#0a1410;text-decoration:none;
+    background:var(--aurora);background-size:300% 100%;animation:p2pos-shift 20s linear infinite;box-shadow:0 10px 26px rgba(0,0,0,.35);transition:transform .12s;}
+  #p2pos .osx-modal-go:hover{transform:translateY(-2px);}
+  #p2pos .osx-modal-go i{font-style:normal;}
+  @media (prefers-reduced-motion: reduce){#p2pos .osx-modal-ic,#p2pos .osx-modal-go{animation:none;}}
+
   /* notebook (shared jr/je engine — ported from the Learning Journey) */
   #p2pos .jr-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:4px;}
   #p2pos .jr-export-all{flex:none;font:700 12px/1 system-ui;color:var(--gold-bright);background:rgba(216,180,90,.1);border:1px solid var(--gstroke);border-radius:30px;padding:10px 16px;cursor:pointer;transition:.15s;}
@@ -659,6 +697,44 @@
           onSave: function(kind){ if(kind === 'reflection' && window.P2P){ window.P2P.checkJournal(); window.P2P.addJournalPoint(); } }
         });
       }
+    })();
+
+    // External-site heads-up — the Haus Mate buttons open ChatGPT in a new tab.
+    // Confirm once (with a "don't show again" that's remembered) before leaving.
+    (function(){
+      var modal = root.querySelector('[data-osx-extmodal]'); if(!modal) return;
+      var EXT_KEY = 'p2p_ext_ok';
+      var titleEl = modal.querySelector('[data-osx-ext-title]');
+      var bodyEl = modal.querySelector('[data-osx-ext-body]');
+      var goBtn = modal.querySelector('[data-osx-ext-go]');
+      var cancel = modal.querySelector('[data-osx-ext-cancel]');
+      var dontShow = modal.querySelector('[data-osx-ext-dontshow]');
+      function skip(){ try{ return localStorage.getItem(EXT_KEY) === '1'; }catch(e){ return false; } }
+      function close(){ modal.hidden = true; }
+      function open(href, name){
+        var who = name && name !== 'your Haus Mate' ? name : 'Your Haus Mate';
+        if(titleEl) titleEl.textContent = 'You’re heading to ChatGPT';
+        if(bodyEl) bodyEl.textContent = who + ' lives in ChatGPT and opens in a new tab — your OS stays right here.';
+        goBtn.setAttribute('href', href);
+        if(dontShow) dontShow.checked = false;
+        modal.hidden = false;
+      }
+      root.querySelectorAll('.osx-mate-cta').forEach(function(a){
+        a.addEventListener('click', function(e){
+          if(skip()) return; // preference remembered — let the link through
+          e.preventDefault();
+          var card = a.closest('.osx-mate');
+          var nameEl = card && card.querySelector('.osx-mate-name');
+          open(a.getAttribute('href'), nameEl ? nameEl.textContent.trim() : 'your Haus Mate');
+        });
+      });
+      if(goBtn) goBtn.addEventListener('click', function(){
+        if(dontShow && dontShow.checked){ try{ localStorage.setItem(EXT_KEY, '1'); }catch(e){} }
+        close(); // the anchor still opens its href in a new tab (real user click)
+      });
+      if(cancel) cancel.addEventListener('click', close);
+      modal.addEventListener('click', function(e){ if(e.target === modal) close(); });
+      document.addEventListener('keydown', function(e){ if(e.key === 'Escape' && !modal.hidden) close(); });
     })();
 
     // Personalized Brand DNA panel — reads p2p_archetype (set when the Founders Assessment completes)
