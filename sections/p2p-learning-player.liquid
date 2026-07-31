@@ -57,6 +57,12 @@
           {%- elsif block.settings.video_label != blank -%}
             <div class="video"><div class="play"></div><div class="lbl">{{ block.settings.video_label }}</div></div>
           {%- endif -%}
+          {%- if block.settings.embed_url != blank -%}
+            {%- if block.settings.embed_label != blank -%}<div class="embed-label">{{ block.settings.embed_label }}</div>{%- endif -%}
+            <div class="embed" style="aspect-ratio:{{ block.settings.embed_ratio | default: '16/10' }};">
+              <iframe src="{{ block.settings.embed_url }}" allow="fullscreen; clipboard-write" allowfullscreen loading="lazy" title="{{ block.settings.embed_label | default: block.settings.title | escape }}"></iframe>
+            </div>
+          {%- endif -%}
           <div class="rt">{{ block.settings.body }}</div>
           {%- assign has_links = false -%}
           {%- if block.settings.link_1_url != blank or block.settings.link_2_url != blank or block.settings.link_3_url != blank -%}{%- assign has_links = true -%}{%- endif -%}
@@ -222,7 +228,12 @@
         { "type": "text", "id": "dl_2_type", "label": "Download 2 type", "default": "PDF" },
         { "type": "text", "id": "dl_3_label", "label": "Download 3 label" },
         { "type": "url", "id": "dl_3_url", "label": "Download 3 URL" },
-        { "type": "text", "id": "dl_3_type", "label": "Download 3 type", "default": "PDF" }
+        { "type": "text", "id": "dl_3_type", "label": "Download 3 type", "default": "PDF" },
+        { "type": "header", "content": "Embed (flip-book, Canva, etc.)" },
+        { "type": "text", "id": "embed_label", "label": "Embed label (optional)" },
+        { "type": "text", "id": "embed_url", "label": "Embed URL", "info": "A flip-book / Canva / any iframe embed URL. Host it (iSpring Space, Cloudflare Pages, etc.) and paste the link." },
+        { "type": "select", "id": "embed_ratio", "label": "Embed shape", "default": "16/10", "options": [
+          { "value": "16/9", "label": "Wide (16:9)" }, { "value": "16/10", "label": "Flip-book (16:10)" }, { "value": "4/3", "label": "Standard (4:3)" }, { "value": "3/4", "label": "Tall (3:4)" } ] }
       ]
     }
   ],
