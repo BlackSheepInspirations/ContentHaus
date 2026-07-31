@@ -78,6 +78,27 @@
               {%- endfor -%}
             </div>
           {%- endif -%}
+          {%- assign has_dl = false -%}
+          {%- if block.settings.dl_1_url != blank or block.settings.dl_2_url != blank or block.settings.dl_3_url != blank -%}{%- assign has_dl = true -%}{%- endif -%}
+          {%- if has_dl -%}
+            <div class="downloads">
+              <div class="dl-label">Downloads</div>
+              <div class="dl-row">
+                {%- for n in (1..3) -%}
+                  {%- assign k_url = 'dl_' | append: n | append: '_url' -%}
+                  {%- assign k_label = 'dl_' | append: n | append: '_label' -%}
+                  {%- assign k_type = 'dl_' | append: n | append: '_type' -%}
+                  {%- assign durl = block.settings[k_url] -%}
+                  {%- if durl != blank -%}
+                    <a class="dl" href="{{ durl }}" download target="_blank" rel="noopener">
+                      <span class="dl-ic">↓</span>
+                      <span class="dl-txt"><b>{{ block.settings[k_label] | default: 'Download' }}</b><i>{{ block.settings[k_type] | default: 'File' }}</i></span>
+                    </a>
+                  {%- endif -%}
+                {%- endfor -%}
+              </div>
+            </div>
+          {%- endif -%}
           <button class="markbtn">Mark lesson complete</button>
           <div class="navrow">
             <button data-nav="prev"{% if forloop.first %} disabled{% endif %}>← Previous</button>
@@ -191,7 +212,17 @@
         { "type": "text", "id": "link_2_tag", "label": "Link 2 tag" },
         { "type": "text", "id": "link_3_label", "label": "Link 3 label" },
         { "type": "url", "id": "link_3_url", "label": "Link 3 URL" },
-        { "type": "text", "id": "link_3_tag", "label": "Link 3 tag" }
+        { "type": "text", "id": "link_3_tag", "label": "Link 3 tag" },
+        { "type": "header", "content": "Downloads", "info": "Files students can grab (host on Canva / Drive / R2 / etc. and paste the link)." },
+        { "type": "text", "id": "dl_1_label", "label": "Download 1 label" },
+        { "type": "url", "id": "dl_1_url", "label": "Download 1 URL" },
+        { "type": "text", "id": "dl_1_type", "label": "Download 1 type", "default": "PDF", "info": "Pill text — e.g. PDF, Worksheet, Template, Checklist, Audio." },
+        { "type": "text", "id": "dl_2_label", "label": "Download 2 label" },
+        { "type": "url", "id": "dl_2_url", "label": "Download 2 URL" },
+        { "type": "text", "id": "dl_2_type", "label": "Download 2 type", "default": "PDF" },
+        { "type": "text", "id": "dl_3_label", "label": "Download 3 label" },
+        { "type": "url", "id": "dl_3_url", "label": "Download 3 URL" },
+        { "type": "text", "id": "dl_3_type", "label": "Download 3 type", "default": "PDF" }
       ]
     }
   ],
