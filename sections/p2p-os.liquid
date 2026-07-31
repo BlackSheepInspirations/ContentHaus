@@ -204,15 +204,25 @@
 
       {%- comment -%} meet cards baked in (icon^title^blurb) {%- endcomment -%}
       <div class="osx-kick" style="margin-top:28px">{{ section.settings.meet_heading | default: 'Meet your Hausen & Haus Mates' }}</div>
-      {%- capture os_meets -%}crown^Brand Haus^Your identity — brand card, logo, and kit. Start here so everything else sounds like you.|prompt^Content Haus^Your words — prompts and copy that carry your voice everywhere you show up.|palette^Graphics Haus^Your look — on-brand visuals and design without the degree.|box^Project Haus^Your build — turn the idea into a real product, step by step.|megaphone^Marketing Haus^Your reach — posts, ads and campaigns that get you seen.|rocket^Growth Haus^Your launch — generators that execute the ROOTED method and scale what works.|mates^Frank & Ruth — your Haus Mates^Frank, your Creative Director, and Ruth, your ruthless Design Meister. Ask them anything as you go.{%- endcapture -%}
+      {%- comment -%} fields: icon^name^front blurb^back detail (flip)^link {%- endcomment -%}
+      {%- capture os_meets -%}crown^Brand Haus^Your identity — brand card, logo, and kit. Start here so everything else sounds like you.^Take the Founders Assessment to reveal your archetype, then save a Brand Kit — colors, fonts and voice — that every other Haus reuses.^/pages/brand-haus|prompt^Content Haus^Your words — prompts and copy that carry your voice everywhere you show up.^Generate on-brand prompts and copy for art, products and captions — Character, Text, Couples and Combined modes.^/pages/content-haus|palette^Graphics Haus^Your look — on-brand visuals and design without the degree.^Create clipart, characters and seasonal art from detailed prompts, kept consistent with a Look Lock.^/pages/graphics-haus|box^Project Haus^Your build — turn the idea into a real product, step by step.^Turn a concept into a finished, sellable digital product — invitations, cards, journals and planners.^/pages/project-haus|megaphone^Marketing Haus^Your reach — posts, ads and campaigns that get you seen.^Make mockups, social posts, ads, emails and listing copy that get you seen and sell your work.^/pages/marketing-haus|rocket^Growth Haus^Your launch — generators that execute the ROOTED method and scale what works.^Run the ROOTED launch method with generators that build your full launch kit and scale what works.^/pages/growth-haus|mates^Frank & Ruth — your Haus Mates^Frank, your Creative Director, and Ruth, your ruthless Design Meister. Ask them anything as you go.^Frank sharpens your ideas like a blunt Creative Director; Ruth makes them production-ready. Open either any time you are stuck.^/pages/p2p-os?v=mates{%- endcapture -%}
       {%- assign os_meet_items = os_meets | split: '|' -%}
       <div class="osx-meet">
         {%- for mt in os_meet_items -%}
           {%- assign mf = mt | split: '^' -%}
-          <div class="osx-meetcard">
-            <span class="osx-meic">{%- case mf[0] -%}{%- when 'crown' -%}👑{%- when 'prompt' -%}✍️{%- when 'palette' -%}🎨{%- when 'box' -%}📦{%- when 'megaphone' -%}📣{%- when 'rocket' -%}🚀{%- when 'mates' -%}🤝{%- else -%}✦{%- endcase -%}</span>
-            <b>{{ mf[1] }}</b>
-            {%- if mf[2] != blank -%}<p>{{ mf[2] }}</p>{%- endif -%}
+          <div class="osx-meetcard" role="button" tabindex="0" aria-label="{{ mf[1] | escape }} — tap to learn more">
+            <div class="osx-meetcard-inner">
+              <div class="osx-meetface osx-meetfront">
+                <span class="osx-flip-ic" aria-hidden="true">↻</span>
+                <span class="osx-meic">{%- case mf[0] -%}{%- when 'crown' -%}👑{%- when 'prompt' -%}✍️{%- when 'palette' -%}🎨{%- when 'box' -%}📦{%- when 'megaphone' -%}📣{%- when 'rocket' -%}🚀{%- when 'mates' -%}🤝{%- else -%}✦{%- endcase -%}</span>
+                <b>{{ mf[1] }}</b>
+                {%- if mf[2] != blank -%}<p>{{ mf[2] }}</p>{%- endif -%}
+              </div>
+              <div class="osx-meetface osx-meetback">
+                {%- if mf[3] != blank -%}<p class="osx-meetmore">{{ mf[3] }}</p>{%- endif -%}
+                {%- if mf[4] != blank -%}<a class="osx-meetlink" href="{{ mf[4] }}">Take me there →</a>{%- endif -%}
+              </div>
+            </div>
           </div>
         {%- endfor -%}
       </div>
@@ -673,10 +683,19 @@
   #p2pos .osx-check-done{margin-top:14px;padding:14px 16px;border-radius:12px;background:linear-gradient(120deg,rgba(39,174,110,.18),rgba(57,197,192,.1));border:1px solid rgba(39,174,110,.4);font:400 14px/1.5 system-ui;color:#dbeee4;}
   #p2pos .osx-check-done b{color:#8be0b0;}
   #p2pos .osx-meet{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;}
-  #p2pos .osx-meetcard{padding:16px 16px 18px;border:1px solid var(--stroke);border-radius:14px;background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(9,17,24,.4));}
+  #p2pos .osx-meetcard{position:relative;min-height:162px;perspective:1000px;cursor:pointer;border:0;background:none;padding:0;text-align:left;font:inherit;color:inherit;}
+  #p2pos .osx-meetcard:focus-visible{outline:2px solid var(--gold-bright);outline-offset:3px;border-radius:15px;}
+  #p2pos .osx-meetcard-inner{position:absolute;inset:0;transition:transform .55s cubic-bezier(.4,.15,.2,1);transform-style:preserve-3d;}
+  #p2pos .osx-meetcard.flipped .osx-meetcard-inner{transform:rotateY(180deg);}
+  #p2pos .osx-meetface{position:absolute;inset:0;display:flex;flex-direction:column;padding:16px 16px 18px;border:1px solid var(--stroke);border-radius:14px;background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(9,17,24,.4));-webkit-backface-visibility:hidden;backface-visibility:hidden;overflow:hidden;}
+  #p2pos .osx-meetback{transform:rotateY(180deg);justify-content:center;background:linear-gradient(180deg,rgba(216,180,90,.1),rgba(9,17,24,.55));border-color:var(--gstroke);}
   #p2pos .osx-meic{font-size:22px;line-height:1;}
   #p2pos .osx-meetcard b{display:block;margin:10px 0 5px;font:700 14.5px/1.2 system-ui;}
-  #p2pos .osx-meetcard p{margin:0;font:400 12.5px/1.5 system-ui;color:var(--muted);}
+  #p2pos .osx-meetfront p{margin:0;font:400 12.5px/1.5 system-ui;color:var(--muted);}
+  #p2pos .osx-meetmore{margin:0 0 12px;font:400 12.5px/1.5 system-ui;color:#dbe7e2;}
+  #p2pos .osx-meetlink{align-self:flex-start;font:700 12px/1 system-ui;color:var(--gold-bright);text-decoration:none;}
+  #p2pos .osx-meetlink:hover{text-decoration:underline;}
+  @media (prefers-reduced-motion:reduce){#p2pos .osx-meetcard-inner{transition:none;}}
 
   /* ROOTED — Light the Path (the lit 6-stage trail) */
   #p2pos .osx-rooted{list-style:none;margin:0 0 26px;padding:0;position:relative;}
@@ -1243,6 +1262,15 @@
         }, 500);
       }
       setInterval(tick, 11000);
+    })();
+
+    // Checkpoint "Meet your Hausen" — flip a card to reveal more + a link (link click still navigates).
+    (function(){
+      root.querySelectorAll('.osx-meetcard').forEach(function(card){
+        function flip(){ card.classList.toggle('flipped'); }
+        card.addEventListener('click', function(e){ if(e.target.closest('.osx-meetlink')){ return; } flip(); });
+        card.addEventListener('keydown', function(e){ if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); flip(); } });
+      });
     })();
 
     // "Your road ahead" — light up each step from real cross-Haus signals (same localStorage the Vault reads)
