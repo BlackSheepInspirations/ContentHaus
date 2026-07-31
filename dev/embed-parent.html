@@ -1,0 +1,11 @@
+<!doctype html><html><head><meta charset="utf-8"><title>OS embed mode test</title><style>body{margin:0;background:#050a10;padding:24px;font-family:system-ui;color:#e7efeb;}</style></head><body>
+<p style="color:#8aa;font:600 13px system-ui;">OS content pane — the Haus below is loaded in an iframe. Header, announcement, haus-links, and footer should all be gone; only the tool should show.</p>
+<iframe src="embed-child.html" style="width:100%;height:340px;border:1px solid #1f3540;border-radius:14px;background:#0b1620;"></iframe>
+<hr style="border-color:#1f3540;margin:24px 0;">
+<p style="color:#8aa;font:600 13px system-ui;">For contrast — the SAME page standalone (not embedded) keeps its chrome:</p>
+<iframe src="about:blank" id="raw" style="width:100%;height:120px;border:1px solid #1f3540;border-radius:14px;"></iframe>
+<script>
+  // load the child raw in a way that it thinks it's top-level: not possible in iframe, so just note it.
+  document.getElementById('raw').outerHTML='<div style="border:1px solid #1f3540;border-radius:14px;padding:14px;color:#8aa;font:400 13px system-ui;">(Open embed-child.html directly in a tab to see the un-embedded version with full chrome.)</div>';
+</script>
+</body></html>

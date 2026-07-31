@@ -1,0 +1,21 @@
+<!doctype html><html><head><meta charset="utf-8"><title>embed child</title><style>body{margin:0;font-family:system-ui;}</style></head><body>
+<div class="shopify-section-group-header-group"><header style="background:#f3f3f3;color:#111;padding:18px;border-bottom:1px solid #ddd;">🐑 BLACK SHEEP — theme header + nav (should HIDE when embedded)</header></div>
+<div class="announcement-bar" style="background:#222;color:#fff;padding:8px;text-align:center;">announcement bar (should HIDE)</div>
+<main style="padding:34px;background:#0b1620;color:#e7efeb;min-height:220px;">
+  <h1 style="margin-top:0;">Brand Haus tool</h1>
+  <p>This is the actual Haus app content — it should REMAIN visible inside the OS.</p>
+  <div style="border:1px solid #2a3f4a;border-radius:12px;padding:20px;background:rgba(255,255,255,.03);">A tool panel.</div>
+</main>
+<div class="haus-links" style="background:#eee;color:#111;padding:18px;">Haus Tools cross-nav pills (should HIDE when embedded)</div>
+<div class="shopify-section-group-footer-group"><footer style="background:#f3f3f3;color:#111;padding:18px;border-top:1px solid #ddd;">theme footer (should HIDE when embedded)</footer></div>
+<script>
+  (function(){
+    var framed=false; try{ framed=window.self!==window.top; }catch(e){ framed=true; }
+    if(!framed) return;
+    document.documentElement.classList.add('p2p-embedded');
+    var s=document.createElement('style');
+    s.textContent='.p2p-embedded .shopify-section-group-header-group,.p2p-embedded .shopify-section-group-footer-group,.p2p-embedded #shopify-section-header,.p2p-embedded #shopify-section-footer,.p2p-embedded [role="banner"],.p2p-embedded [role="contentinfo"],.p2p-embedded .announcement-bar-section,.p2p-embedded .announcement-bar,.p2p-embedded .header-wrapper,.p2p-embedded .site-header,.p2p-embedded .site-footer,.p2p-embedded .haus-links,.p2p-embedded .utility-bar{display:none !important;}html.p2p-embedded,html.p2p-embedded body{background:#04070a !important;}';
+    (document.head||document.documentElement).appendChild(s);
+  })();
+</script>
+</body></html>

@@ -18,6 +18,30 @@
 {% endcomment %}
 {% assign haus_current = current | default: '' %}
 
+{%- comment -%} Embedded mode: when a Haus page is loaded inside the P2P Operating System
+   frame (same-origin iframe), hide the theme header/footer/announcement + this haus-links
+   block so only the tool shows. Runs on every Haus page (this snippet is on all of them). {%- endcomment -%}
+<script>
+  (function(){
+    var framed = false;
+    try { framed = window.self !== window.top; } catch(e){ framed = true; }
+    if(!framed) return;
+    document.documentElement.classList.add('p2p-embedded');
+    var s = document.createElement('style');
+    s.textContent =
+      '.p2p-embedded .shopify-section-group-header-group,' +
+      '.p2p-embedded .shopify-section-group-footer-group,' +
+      '.p2p-embedded #shopify-section-header,.p2p-embedded #shopify-section-footer,' +
+      '.p2p-embedded [role="banner"],.p2p-embedded [role="contentinfo"],' +
+      '.p2p-embedded .announcement-bar-section,.p2p-embedded .announcement-bar,' +
+      '.p2p-embedded .header-wrapper,.p2p-embedded .site-header,.p2p-embedded .site-footer,' +
+      '.p2p-embedded .haus-links,.p2p-embedded .utility-bar' +
+      '{display:none !important;}' +
+      'html.p2p-embedded,html.p2p-embedded body{background:#04070a !important;}';
+    (document.head || document.documentElement).appendChild(s);
+  })();
+</script>
+
 <div class="haus-links">
   <p class="haus-links__label">Haus Tools</p>
   <div class="haus-links__row">

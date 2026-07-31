@@ -1402,6 +1402,11 @@
   // Sidebar wizard + step router
   // ---------------------------------------------------------------------
   var STEPS = ["archetypeGuide", "welcome", "conversation", "brandDNA", "blueprint", "pathIntake", "brandingStudio"];
+  // Focus mode (?bh_focus=1) — used when the P2P Operating System embeds this as the
+  // "Founders Assessment": hide the Branding Studio step so it's assessment-only.
+  var BH_FOCUS = false;
+  try { BH_FOCUS = new URLSearchParams(window.location.search).get("bh_focus") === "1"; } catch (e) {}
+  function visibleSteps() { return BH_FOCUS ? STEPS.filter(function (s) { return s !== "brandingStudio"; }) : STEPS; }
   var STEP_LABELS = {
     archetypeGuide: "The Archetype Guide",
     welcome: "Welcome",
@@ -1461,7 +1466,7 @@
 
   function renderSidebar(root) {
     var list = el("div", { class: "bh-sidebar__steps" });
-    STEPS.forEach(function (step, index) {
+    visibleSteps().forEach(function (step, index) {
       var isActive = step === activeStep;
       var btn = el("button", {
         type: "button",
