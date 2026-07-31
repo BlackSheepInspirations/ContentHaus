@@ -584,6 +584,22 @@
   if(recapModal){
     var rx = recapModal.querySelector('[data-recap-close]'); if(rx) rx.addEventListener('click', function(){ recapModal.classList.remove('show'); });
     recapModal.addEventListener('click', function(e){ if(e.target === recapModal) recapModal.classList.remove('show'); });
+    var shareBtn = recapModal.querySelector('[data-recap-share]');
+    if(shareBtn) shareBtn.addEventListener('click', function(){
+      var P = window.P2P; if(!P) return;
+      var s = P.streak ? P.streak() : { longest:0, count:0 }, t = P.tier ? P.tier() : { name:'Dreamer' };
+      var text = "I'm a " + t.name + " on my Purpose 2 Profit journey — " + P.points() + " points, " + P.coursesDone() + " courses done, " + badgeCount() + " badges, and a " + (s.longest || s.count || 0) + "-day best streak. ✦";
+      var url = window.location.origin;
+      function flash(msg){ var o = shareBtn.innerHTML; shareBtn.innerHTML = msg; shareBtn.disabled = true; setTimeout(function(){ shareBtn.innerHTML = o; shareBtn.disabled = false; }, 1800); }
+      if(navigator.share){
+        navigator.share({ title:'My Purpose 2 Profit Journey', text:text, url:url }).catch(function(){});
+      } else if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(text + ' ' + url).then(function(){ flash('Copied to clipboard ✓'); }).catch(function(){ flash('Copy failed'); });
+      } else {
+        var ta = document.createElement('textarea'); ta.value = text + ' ' + url; document.body.appendChild(ta); ta.select();
+        try{ document.execCommand('copy'); flash('Copied to clipboard ✓'); }catch(e){ flash('Copy failed'); } document.body.removeChild(ta);
+      }
+    });
   }
 
   /* ---- Guided tour (spotlight walkthrough of the live page) ---- */
@@ -598,12 +614,12 @@
       { sel:'.nav', scroll:'top', title:'Getting around', body:'These tabs move you between your map, courses, progress, bonuses and journal.' },
       { sel:'.nav a[data-panel="directory"]', scroll:'top', title:'All Courses', body:'Jump straight to any course across every realm — no hunting on the map.' },
       { sel:'.nav a[data-panel="progress"]', scroll:'top', title:'Your Progress', body:'Points, badges, streak and your Merit rank. Tap any tile there for the full breakdown.' },
-      { sel:'.nav a[data-panel="bonuses"]', scroll:'top', title:'Bonus Checks', body:'Quick Mindset, Purpose & Heart check-ins to keep you steady between courses.' },
+      { sel:'.nav a[data-panel="bonuses"]', scroll:'top', title:'Status Checks', body:'Quick Mindset, Purpose & Heart status checks to keep you steady between courses.' },
       { sel:'.nav a[href*="badges"]', scroll:'top', title:'Milestones', body:'Every badge you earn lives here — realms cleared, streaks, reflections and more.' },
       { sel:'.nav a[data-panel="journal"]', scroll:'top', title:'Journal', body:'Jot notes and reflections as you go. Your first entry each day earns points too.' },
       { sel:'.stats', scroll:'top', title:'Your live stats', body:'Points, badges, streak and Merit — always in view, updating as you go.' },
       { sel:'.bar-realms', scroll:'top', title:'The five realms', body:'Hop between realms here as you unlock them — from Open Water all the way to Evergreen.' },
-      { sel:'.mindset-moment', scroll:'center', title:'Daily Mindset Moment', body:'A fresh affirmation, verse or quote every day to start you off right.' },
+      { sel:'.mindset-moment', scroll:'center', title:'Daily Boosters', body:'A fresh Heart, Purpose or Mindset booster every day to start you off right.' },
       { center:true, title:"You're all set!", body:'Tap any glowing marker to begin. Replay this tour anytime from the ⓘ Help menu. Enjoy the journey!' }
     ];
     var i = 0, active = STEPS, curTarget = null;
