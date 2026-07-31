@@ -76,17 +76,24 @@ the LAST — push files SEPARATELY.** 3. Copy each file to the mirror
 - Misc OS: "Born an Original" reassurance, hero 'i' help, "Show me around" → tutorial,
   scroll-jump + refresh(?v=) bug fixes, os_url → /pages/p2p-os.
 
-## OPEN DOCKET (next up — nothing started)
-1. **Course build-out (likely critical path):** Open Water (Realm 1) has 11 course
-   PAGES live at `/pages/courses-<handle>` but they're on the DEFAULT template (no
-   player). Each course needs its OWN template (lessons live in the template).
-   Plan: auto-generate `templates/page.courses-<handle>.json` from `assets/p2p-journey-map.js`
-   (pre-wired: course player section, course_title, course_handle=map handle,
-   access_tag `p2p-learning`, back_url /pages/p2p-learning, os_url /pages/p2p-os,
-   empty lesson slots) → Andrea assigns each page its template + adds lessons.
-   Also: **`what-every-product-needs`** appears in Realm 2 (digital) AND Realm 3
-   (POD) with the SAME handle — Andrea will give two distinct handles; update the
-   map AND the realm-2/3 board-marker templates in sync.
+## OPEN DOCKET
+1. **Course build-out — TEMPLATES DONE (2026-07-31).** Generated all **52**
+   `templates/page.courses-<handle>.json` (Realm1=11, R2=15, R3=8, R4=10, R5=8)
+   from `assets/p2p-journey-map.js`, pushed live + mirrored + committed (5454d26).
+   Each is pre-wired to the P2P Course Player: kicker "Realm N · Name", course_title,
+   course_handle, realm back_url, os_url /pages/p2p-os, access_tag `p2p-learning`,
+   one starter lesson slot. Duplicate handle resolved: Realm 3's POD "What Every
+   Product Needs" → **`what-pod-products-need`** (map + realm-3 marker updated).
+   Generator script: scratchpad/gen_courses.py.
+   **ANDREA'S REMAINING MANUAL STEPS (Shopify admin, per course):** (a) create the
+   page at handle `courses-<handle>` if it doesn't exist yet — Realm 1's 11 pages
+   already exist but on the DEFAULT template; (b) in the page editor, assign template
+   `page.courses-<handle>`; (c) open the theme customizer for that page and fill the
+   lesson blocks (video embed, body, links, downloads, flip-book embed). Templates
+   are NOT browser-verifiable until a page is assigned — nothing consumes them yet
+   except the demo `page.p2p-course`.
+   NOTE: course `marketing-haus` (Realm 5) → page `/pages/courses-marketing-haus`,
+   distinct from the Marketing Haus TOOL at `/pages/marketing-haus`. No collision.
 2. **Haus rebuilds (luxe):** rebuild the 6 Haus tool standalone pages to the OS
    aesthetic + fix stale naming still in `sections/p2p-haus.liquid` (Growth) &
    `sections/prompt-builder.liquid` (Content) — ~15 visible strings ("Prompt to
