@@ -1,0 +1,173 @@
+{% comment %}
+  Purpose 2 Profit — SHARED OS RAIL (the persistent left sidebar).
+
+  Rendered on every Haus tool page (via snippets/haus-links.liquid) so navigating
+  between the Hausen feels like one app — the same rail is always there. It is a
+  position:fixed left rail; a small JS adds `p2p-hasnav` to <html> which shifts the
+  page right with body padding (the theme header is sticky, so it shifts too).
+
+  On the OS page itself (/pages/p2p-os) the sidebar is the section's own in-page
+  view-switcher — this rail is NOT rendered there (haus-links isn't on that page).
+
+  Nav items:
+    view mode  -> link to the OS page's matching view: /pages/p2p-os?v=<target>
+    link mode  -> the Haus page if the customer owns it, else its preview page (gated)
+
+  ── KEEP IN SYNC ──────────────────────────────────────────────────────────────
+  The `os_nav` string below MUST match the one in sections/p2p-os.liquid (same
+  targets/labels/icons/tags/urls). Two contexts render it differently (buttons +
+  view-router there, links here) but the DATA is one list — edit both together.
+  ────────────────────────────────────────────────────────────────────────────
+
+  Usage: {% render 'p2p-os-nav', current: 'brand-haus' %}
+  `current` (optional) highlights the matching Haus. Valid: brand-haus,
+  content-haus, graphics-haus, product-haus, marketing-haus, p2p-haus.
+{% endcomment %}
+
+{%- assign all_tag = 'all-access' -%}
+{%- assign owns_all = false -%}
+{%- if customer and customer.tags contains all_tag -%}{%- assign owns_all = true -%}{%- endif -%}
+{%- if request.design_mode -%}{%- assign owns_all = true -%}{%- endif -%}
+
+{%- comment -%} map the haus-links `current` key to the rail item it should highlight {%- endcomment -%}
+{%- assign cur = current | default: '' -%}
+{%- assign cur_target = '' -%}
+{%- if cur == 'brand-haus' -%}{%- assign cur_target = '/pages/brand-haus' -%}
+{%- elsif cur == 'content-haus' -%}{%- assign cur_target = '/pages/content-haus' -%}
+{%- elsif cur == 'graphics-haus' -%}{%- assign cur_target = '/pages/graphics-haus' -%}
+{%- elsif cur == 'product-haus' -%}{%- assign cur_target = '/pages/project-haus' -%}
+{%- elsif cur == 'marketing-haus' -%}{%- assign cur_target = '/pages/marketing-haus' -%}
+{%- elsif cur == 'p2p-haus' -%}{%- assign cur_target = '/pages/growth-haus' -%}
+{%- endif -%}
+
+<button class="p2posnav-burger" type="button" aria-label="Open Purpose 2 Profit menu" data-p2posnav-burger>
+  <span></span><span></span><span></span>
+</button>
+<div class="p2posnav-scrim" data-p2posnav-scrim hidden></div>
+
+<aside id="p2posnav" data-p2posnav aria-label="Purpose 2 Profit navigation">
+  <a class="p2posnav-brand" href="/pages/p2p-os">
+    <span class="p2posnav-mark">Purpose <span class="p2posnav-2">2</span> Profit</span>
+    <span class="p2posnav-sub">powered by Black Sheep</span>
+  </a>
+  <nav class="p2posnav-nav">
+    {%- capture os_nav -%}start^Your Journey Starts Here^spark^view^^|checkpoint^Checkpoint^check^view^^|/pages/brand-haus?bh_focus=1^Founders Assessment^fingerprint^link^brand-haus-access^/pages/brand-haus-preview|/pages/brand-haus^Brand Haus^crown^link^brand-haus-access^/pages/brand-haus-preview|/pages/content-haus^Content Haus^prompt^link^prompt-haus-access^/pages/content-haus-preview|/pages/graphics-haus^Graphics Haus^palette^link^graphics-haus-access^/pages/graphics-haus-preview|/pages/project-haus^Project Haus^box^link^product-haus-access^/pages/project-haus-preview|/pages/marketing-haus^Marketing Haus^megaphone^link^marketing-haus-access^/pages/marketing-haus-preview|/pages/growth-haus^Growth Haus^rocket^link^P2P-haus-access^/pages/growth-haus-preview|rooted^ROOTED — Light the Path^path^view^^|mates^Haus Mates^mates^view^^|tools^Tools & Resources^tools^view^^|notebook^Notebook^notebook^view^^|bonus^Bonus Resources^gift^view^^{%- endcapture -%}
+    {%- assign os_nav_items = os_nav | split: '|' -%}
+    {%- for it in os_nav_items -%}
+      {%- assign f = it | split: '^' -%}
+      {%- assign target = f[0] -%}
+      {%- assign label = f[1] -%}
+      {%- assign icon = f[2] -%}
+      {%- assign mode = f[3] -%}
+      {%- assign it_tag = f[4] -%}
+      {%- assign get_url = f[5] -%}
+
+      {%- comment -%} resolve gating + destination {%- endcomment -%}
+      {%- assign owns = owns_all -%}
+      {%- if it_tag == blank -%}{%- assign owns = true -%}{%- endif -%}
+      {%- if customer and it_tag != blank and customer.tags contains it_tag -%}{%- assign owns = true -%}{%- endif -%}
+      {%- if request.design_mode -%}{%- assign owns = true -%}{%- endif -%}
+
+      {%- assign href = '#' -%}
+      {%- assign locked = false -%}
+      {%- if mode == 'view' -%}
+        {%- if target == 'start' -%}{%- assign href = '/pages/p2p-os' -%}
+        {%- else -%}{%- assign href = '/pages/p2p-os?v=' | append: target -%}{%- endif -%}
+      {%- elsif mode == 'link' -%}
+        {%- if owns -%}{%- assign href = target -%}
+        {%- else -%}{%- assign href = get_url | default: '#' -%}{%- assign locked = true -%}{%- endif -%}
+      {%- endif -%}
+
+      {%- assign is_active = false -%}
+      {%- if cur_target != blank and target == cur_target -%}{%- assign is_active = true -%}{%- endif -%}
+
+      <a class="p2posnav-item{% if is_active %} on{% endif %}{% if locked %} locked{% endif %}" href="{{ href }}"{% if locked %} title="Preview — add this Haus to unlock"{% endif %}>
+        <span class="p2posnav-ico">
+          {%- case icon -%}
+            {%- when 'spark' -%}<svg viewBox="0 0 24 24"><path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.9 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/></svg>
+            {%- when 'check' -%}<svg viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg>
+            {%- when 'fingerprint' -%}<svg viewBox="0 0 24 24"><path d="M12 11v3m-4-3a4 4 0 018 0v2M6 12a6 6 0 0112 0v3m-9 0a3 3 0 006 0"/></svg>
+            {%- when 'crown' -%}<svg viewBox="0 0 24 24"><path d="M4 8l4 4 4-6 4 6 4-4v9H4z"/></svg>
+            {%- when 'prompt' -%}<svg viewBox="0 0 24 24"><path d="M4 5h16v11H8l-4 3z"/><path d="M8 9h8M8 12h5"/></svg>
+            {%- when 'palette' -%}<svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 100 18c1.5 0 2-1 2-2 0-1.3-1-1.5-1-2.5S14 15 15 15h2a4 4 0 004-4c0-4.4-4-8-9-8z"/></svg>
+            {%- when 'box' -%}<svg viewBox="0 0 24 24"><path d="M12 3l8 4v10l-8 4-8-4V7z"/><path d="M4 7l8 4 8-4M12 11v10"/></svg>
+            {%- when 'megaphone' -%}<svg viewBox="0 0 24 24"><path d="M3 10v4h3l7 4V6l-7 4z"/><path d="M17 8a5 5 0 010 8"/></svg>
+            {%- when 'rocket' -%}<svg viewBox="0 0 24 24"><path d="M12 3c4 2 6 6 6 10l-3 3H9l-3-3c0-4 2-8 6-10z"/><circle cx="12" cy="10" r="1.6"/><path d="M9 19l-2 2M15 19l2 2"/></svg>
+            {%- when 'path' -%}<svg viewBox="0 0 24 24"><path d="M6 20c0-6 12-4 12-10a4 4 0 00-8 0"/><circle cx="6" cy="20" r="1.4"/><circle cx="14" cy="6" r="1.4"/></svg>
+            {%- when 'mates' -%}<svg viewBox="0 0 24 24"><circle cx="8.5" cy="9" r="3"/><circle cx="16" cy="10" r="2.4"/><path d="M3 20c0-3 2.5-5 5.5-5S14 17 14 20M14.5 20c0-2 1.5-3.5 3.5-3.5s3 1.3 3 3"/></svg>
+            {%- when 'tools' -%}<svg viewBox="0 0 24 24"><path d="M14 7a3 3 0 00-4 4l-6 6 2 2 6-6a3 3 0 004-4l-2 2-2-2z"/></svg>
+            {%- when 'notebook' -%}<svg viewBox="0 0 24 24"><path d="M6 4h12v16H6z"/><path d="M6 9h12M9 4v16"/></svg>
+            {%- when 'gift' -%}<svg viewBox="0 0 24 24"><path d="M4 11h16v9H4z"/><path d="M4 8h16v3H4zM12 8v12M12 8c-2-4-6-1-3 0 3 1 3 0 3 0zm0 0c2-4 6-1 3 0-3 1-3 0-3 0z"/></svg>
+            {%- else -%}<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></svg>
+          {%- endcase -%}
+        </span>
+        <span class="p2posnav-lbl">{{ label }}</span>
+        {%- if locked -%}<span class="p2posnav-lock">🔒</span>{%- endif -%}
+      </a>
+    {%- endfor -%}
+  </nav>
+</aside>
+
+<style>
+  :root{--p2posnav-w:264px;}
+  #p2posnav{--text:#e7efeb;--muted:#8aa0a6;--gold:#c9a24a;--gold-bright:#f4c534;--stroke:rgba(255,255,255,.09);--gstroke:rgba(216,180,90,.38);
+    --side:#081119;--aurora:linear-gradient(100deg,#f4e2a6,#8f6fd6,#27ae6e,#39c5c0,#2563eb,#d6336c,#f4e2a6);
+    position:fixed;left:0;top:0;bottom:0;width:var(--p2posnav-w);z-index:120;
+    background:linear-gradient(180deg,var(--side),#060d14);border-right:1px solid var(--stroke);
+    padding:20px 14px;box-sizing:border-box;display:flex;flex-direction:column;gap:6px;overflow-y:auto;
+    color:var(--text);font-family:system-ui,-apple-system,sans-serif;}
+  @keyframes p2posnav-shift{0%{background-position:0% 50%;}100%{background-position:300% 50%;}}
+
+  /* shift the whole page right so nothing hides behind the rail (header is sticky, so it shifts too) */
+  html.p2p-hasnav body{padding-left:var(--p2posnav-w);}
+
+  #p2posnav .p2posnav-brand{display:block;text-decoration:none;border-bottom:1px solid var(--stroke);padding:6px 10px 16px;margin-bottom:8px;border-radius:8px;transition:background .15s;}
+  #p2posnav .p2posnav-brand:hover{background:rgba(255,255,255,.03);}
+  #p2posnav .p2posnav-mark{display:block;font:700 19px/1.1 Georgia,serif;letter-spacing:.01em;color:var(--text);}
+  #p2posnav .p2posnav-2{background:var(--aurora);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:p2posnav-shift 20s linear infinite;font-style:italic;}
+  #p2posnav .p2posnav-sub{display:block;margin-top:5px;font:600 9.5px/1.3 system-ui;letter-spacing:.03em;text-transform:uppercase;color:var(--muted);}
+  #p2posnav .p2posnav-nav{display:flex;flex-direction:column;gap:3px;}
+  #p2posnav .p2posnav-item{display:flex;align-items:center;gap:11px;width:100%;padding:11px 12px;border:1px solid transparent;border-radius:11px;background:none;color:#cdd9dd;font:600 13.5px/1.2 system-ui;text-align:left;text-decoration:none;cursor:pointer;transition:background .15s,border-color .15s,color .15s;}
+  #p2posnav .p2posnav-item:hover{background:rgba(255,255,255,.04);color:var(--text);}
+  #p2posnav .p2posnav-item.on{background:linear-gradient(100deg,rgba(216,180,90,.16),rgba(143,111,214,.12));border-color:var(--gstroke);color:#fff;}
+  #p2posnav .p2posnav-ico{flex:0 0 20px;height:20px;display:grid;place-items:center;}
+  #p2posnav .p2posnav-ico svg{width:18px;height:18px;fill:none;stroke:var(--gold-bright);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;}
+  #p2posnav .p2posnav-item.locked{opacity:.62;}
+  #p2posnav .p2posnav-item.locked .p2posnav-ico svg{stroke:var(--muted);}
+  #p2posnav .p2posnav-lbl{flex:1;min-width:0;}
+  #p2posnav .p2posnav-lock{font-size:11px;opacity:.7;}
+
+  /* burger + scrim — hidden until the mobile drawer is open */
+  .p2posnav-burger{display:none;}
+  .p2posnav-scrim{display:none;position:fixed;inset:0;background:rgba(3,7,10,.55);z-index:1001;border:0;}
+
+  @media (prefers-reduced-motion: reduce){#p2posnav .p2posnav-2{animation:none;}}
+
+  @media (max-width:900px){
+    /* off-canvas drawer on small screens; page is not shifted */
+    html.p2p-hasnav body{padding-left:0;}
+    #p2posnav{transform:translateX(-100%);transition:transform .25s ease;box-shadow:0 0 46px rgba(0,0,0,.6);width:min(84vw,300px);z-index:1002;}
+    html.p2posnav-open #p2posnav{transform:translateX(0);}
+    html.p2posnav-open .p2posnav-scrim{display:block;}
+    .p2posnav-burger{display:flex;flex-direction:column;justify-content:center;gap:4px;position:fixed;left:12px;bottom:84px;z-index:1000;width:52px;height:52px;border:1px solid var(--gstroke,rgba(216,180,90,.38));border-radius:50%;background:linear-gradient(180deg,#0b1620,#060d14);box-shadow:0 8px 22px rgba(0,0,0,.45);cursor:pointer;}
+    .p2posnav-burger span{display:block;height:2px;width:20px;margin:0 auto;background:#f4c534;border-radius:2px;}
+  }
+</style>
+
+<script>
+  (function(){
+    var el = document.getElementById('p2posnav'); if(!el) return;
+    var html = document.documentElement;
+    html.classList.add('p2p-hasnav');
+    var burger = document.querySelector('[data-p2posnav-burger]');
+    var scrim  = document.querySelector('[data-p2posnav-scrim]');
+    function open(){ html.classList.add('p2posnav-open'); if(scrim) scrim.hidden = false; }
+    function close(){ html.classList.remove('p2posnav-open'); if(scrim) scrim.hidden = true; }
+    function toggle(){ html.classList.contains('p2posnav-open') ? close() : open(); }
+    if(burger) burger.addEventListener('click', toggle);
+    if(scrim)  scrim.addEventListener('click', close);
+    document.addEventListener('keydown', function(e){ if(e.key === 'Escape') close(); });
+    // close the drawer when a nav item is tapped (it's navigating away anyway)
+    el.querySelectorAll('.p2posnav-item, .p2posnav-brand').forEach(function(a){ a.addEventListener('click', close); });
+  })();
+</script>

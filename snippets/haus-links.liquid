@@ -18,6 +18,11 @@
 {% endcomment %}
 {% assign haus_current = current | default: '' %}
 
+{%- comment -%} The persistent Purpose 2 Profit OS rail — the shared left sidebar that
+   makes every Haus page feel like one app. position:fixed, so it renders correctly
+   from here regardless of where in the page this snippet sits. {%- endcomment -%}
+{% render 'p2p-os-nav', current: haus_current %}
+
 {%- comment -%} Embedded mode: when a Haus page is loaded inside the P2P Operating System
    frame (same-origin iframe), hide the theme header/footer/announcement + this haus-links
    block so only the tool shows. Runs on every Haus page (this snippet is on all of them). {%- endcomment -%}
@@ -49,9 +54,9 @@
   <div class="haus-links__row">
     {% unless haus_current == 'p2p-haus' %}
       {% if customer and customer.tags contains 'P2P-haus-access' %}
-        <a href="/pages/p2p-haus" class="haus-links__pill haus-links__pill--crown">Prompt to Profit Haus</a>
+        <a href="/pages/growth-haus" class="haus-links__pill haus-links__pill--crown">Growth Haus</a>
       {% else %}
-        <a href="/pages/p2p-haus-preview" class="haus-links__pill haus-links__pill--crown">Prompt to Profit Haus</a>
+        <a href="/pages/growth-haus-preview" class="haus-links__pill haus-links__pill--crown">Growth Haus</a>
       {% endif %}
     {% endunless %}
 
@@ -73,9 +78,9 @@
 
     {% unless haus_current == 'product-haus' %}
       {% if customer and customer.tags contains 'product-haus-access' %}
-        <a href="/pages/product-haus" class="haus-links__pill">Project Haus</a>
+        <a href="/pages/project-haus" class="haus-links__pill">Project Haus</a>
       {% else %}
-        <a href="/pages/product-haus-preview" class="haus-links__pill">Project Haus</a>
+        <a href="/pages/project-haus-preview" class="haus-links__pill">Project Haus</a>
       {% endif %}
     {% endunless %}
 

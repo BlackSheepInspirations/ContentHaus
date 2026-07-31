@@ -532,6 +532,14 @@
       var nav = Array.prototype.filter.call(items, function(x){ return x.getAttribute('data-target') === t; })[0];
       if(nav) nav.click();
     }); });
+    // deep-link: /pages/p2p-os?v=<view> opens that view directly
+    // (the shared rail on the Haus pages links here for view-mode items like Checkpoint / Notebook)
+    (function(){
+      var m = /[?&]v=([^&]+)/.exec(window.location.search); if(!m) return;
+      var want = decodeURIComponent(m[1]).replace(/[^a-z0-9_-]/gi, '');
+      var nav = Array.prototype.filter.call(items, function(x){ return x.getAttribute('data-target') === want; })[0];
+      if(nav){ activate(nav); if(main && main.scrollIntoView) main.scrollIntoView({block:'start'}); }
+    })();
     // mobile drawer
     var side = root.querySelector('[data-osx-side]'), burger = root.querySelector('[data-osx-burger]');
     function closeSide(){ if(side) side.classList.remove('open'); }
