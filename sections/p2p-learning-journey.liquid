@@ -52,9 +52,10 @@
         {%- if section.settings.moment_show -%}
         <aside class="hero-aside">
           <div class="mindset-moment" id="p2pj-moment" hidden>
-            <div class="mm-label"><span class="mm-star">✦</span> {{ section.settings.moment_label | default: 'Daily Mindset Moment' | replace: 'Mindset', '<span class="mm-grad">Mindset</span>' }}</div>
+            <div class="mm-label" data-mm-title><span class="mm-star">✦</span> <span class="mm-grad">Mindset</span> Booster</div>
             <blockquote class="mm-text"></blockquote>
             <cite class="mm-source"></cite>
+            <div class="mm-foot"><div class="mm-dots" data-mm-dots></div><button class="mm-next" type="button" data-mm-next aria-label="Next booster">›</button></div>
           </div>
         </aside>
         {%- endif -%}
@@ -607,7 +608,12 @@
 <script src="{{ 'p2p-notebook.js' | asset_url }}" defer="defer"></script>
 <script src="{{ 'p2p-journey-map.js' | asset_url }}" defer="defer"></script>
 <script src="{{ 'p2p-moments.js' | asset_url }}" defer="defer"></script>
+<script src="{{ 'p2p-purpose.js' | asset_url }}" defer="defer"></script>
+<script src="{{ 'p2p-heart.js' | asset_url }}" defer="defer"></script>
 <script src="{{ 'p2p-journey.js' | asset_url }}" defer="defer"></script>
+
+{%- comment -%} floating Haus Helper on every realm map {%- endcomment -%}
+{% render 'p2p-helper' %}
 {%- endif -%}
 
 {% schema %}

@@ -78,7 +78,7 @@
           {%- if section.settings.hero_body != blank -%}<p class="osx-hero-body">{{ section.settings.hero_body }}</p>{%- endif -%}
           {%- assign os_journey_url = section.settings.journey_url | default: '/pages/p2p-learning' -%}
           <div class="osx-hero-btns">
-            {%- if section.settings.hero_cta_label != blank -%}<button class="osx-cta" type="button" data-osx-goto="{{ section.settings.hero_cta_target | default: 'checkpoint' }}">{{ section.settings.hero_cta_label }}</button>{%- endif -%}
+            {%- if section.settings.hero_cta_label != blank -%}<a class="osx-cta" href="{{ section.settings.hero_cta_url | default: '/pages/p2p-tutorial' }}">{{ section.settings.hero_cta_label }}</a>{%- endif -%}
             {%- if os_journey_url != blank -%}<a class="osx-cta ghost" href="{{ os_journey_url }}">{{ section.settings.journey_label | default: 'Enter your Learning Journey →' }}</a>{%- endif -%}
             <button class="osx-help" type="button" data-osx-help aria-label="Get help">i</button>
           </div>
@@ -1146,7 +1146,7 @@
     { "type": "text", "id": "hero_title", "label": "Hero title", "default": "Your journey starts here" },
     { "type": "textarea", "id": "hero_body", "label": "Hero body", "default": "This is your home — built around you. Your fingerprint, your spark, your story. Everything you need to go from idea to income lives right here. Let's make it yours." },
     { "type": "text", "id": "hero_cta_label", "label": "Hero button label", "default": "Show me around →" },
-    { "type": "text", "id": "hero_cta_target", "label": "Hero button target (nav target)", "default": "checkpoint" },
+    { "type": "text", "id": "hero_cta_url", "label": "Hero button link", "info": "Where 'Show me around' goes — the walkthrough. Defaults to /pages/p2p-tutorial.", "default": "/pages/p2p-tutorial" },
     { "type": "url", "id": "journey_url", "label": "Learning Journey URL", "info": "Adds a link on the hero to the gamified Learning Journey." },
     { "type": "text", "id": "journey_label", "label": "Learning Journey button label", "default": "Enter your Learning Journey →" },
     { "type": "url", "id": "assessment_url", "label": "Founders Assessment URL", "info": "Where the hero Brand DNA panel links (defaults to /pages/p2p-assessment)." },

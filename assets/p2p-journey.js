@@ -69,18 +69,37 @@
   }
   renderStats();
 
-  /* ---- Mindset Moment (one item per day, rotating through the whole library) ---- */
-  var mm = document.getElementById('p2pj-moment');
-  if(mm && window.P2P_MOMENTS && window.P2P_MOMENTS.length){
-    var day = Math.floor(Date.now() / 864e5);              // days since epoch
-    var item = window.P2P_MOMENTS[day % window.P2P_MOMENTS.length];
-    if(item && item.t){
-      var mt = mm.querySelector('.mm-text'), ms = mm.querySelector('.mm-source');
-      if(mt) mt.textContent = '“' + item.t + '”';
-      if(ms) ms.textContent = item.s || '';
-      mm.hidden = false;
+  /* ---- Daily Boosters — one item per pillar per day; rotate Heart/Purpose/Mindset (matches the OS) ---- */
+  (function(){
+    var mm = document.getElementById('p2pj-moment'); if(!mm) return;
+    var day = Math.floor(Date.now() / 864e5);
+    var pillars = [
+      { label:'Mindset', pool: window.P2P_MOMENTS },
+      { label:'Purpose', pool: window.P2P_PURPOSE },
+      { label:'Heart', pool: window.P2P_HEART }
+    ].filter(function(p){ return p.pool && p.pool.length; });
+    if(!pillars.length) return;
+    var titleEl = mm.querySelector('[data-mm-title]'), textEl = mm.querySelector('.mm-text'), srcEl = mm.querySelector('.mm-source');
+    var dotsWrap = mm.querySelector('[data-mm-dots]');
+    if(dotsWrap) dotsWrap.innerHTML = pillars.map(function(_, di){ return '<button class="mm-dot' + (di === 0 ? ' on' : '') + '" type="button" aria-label="Booster ' + (di + 1) + '"></button>'; }).join('');
+    var dots = dotsWrap ? dotsWrap.querySelectorAll('.mm-dot') : [];
+    var i = 0, timer = null;
+    function render(){
+      var p = pillars[i], it = p.pool[day % p.pool.length] || {};
+      if(titleEl) titleEl.innerHTML = '<span class="mm-star">✦</span> <span class="mm-grad">' + p.label + '</span> Booster';
+      if(textEl) textEl.textContent = it.t ? ('“' + it.t + '”') : '';
+      if(srcEl) srcEl.textContent = it.s || '';
+      dots.forEach(function(d, di){ d.classList.toggle('on', di === i); });
     }
-  }
+    function go(n){ i = ((n % pillars.length) + pillars.length) % pillars.length; render(); }
+    function next(){ go(i + 1); }
+    function stop(){ if(timer){ clearInterval(timer); timer = null; } }
+    function start(){ stop(); timer = setInterval(next, 9000); }
+    var nb = mm.querySelector('[data-mm-next]'); if(nb) nb.addEventListener('click', function(){ next(); start(); });
+    dots.forEach(function(d, di){ d.addEventListener('click', function(){ go(di); start(); }); });
+    mm.addEventListener('mouseenter', stop); mm.addEventListener('mouseleave', start);
+    render(); mm.hidden = false; start();
+  })();
 
   /* ---- welcome pop-up ---- */
   var welcome = document.getElementById('p2pj-welcome');
