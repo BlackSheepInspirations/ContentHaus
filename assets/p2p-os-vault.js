@@ -148,17 +148,25 @@
     }).join("");
     var voice = fieldVal(kit.voice);
     var name = kit.name || "Your brand kit";
-    var othersHtml = others.length ? (
+    function kitRow(o) {
+      var sw = (o.colors || []).filter(isHex).slice(0, 5).map(function (c) {
+        var hex = c.charAt(0) === "#" ? c : "#" + c;
+        return '<span class="ov-swatch ov-swatch--sm" style="background:' + esc(hex) + '"></span>';
+      }).join("");
+      return '<a class="ov-kit-other" href="/pages/brand-haus" title="Open in Brand Haus">' +
+        '<span class="ov-kit-other-name">' + esc(o.name || "Kit") + '</span>' +
+        '<span class="ov-kit-other-sw">' + sw + '</span></a>';
+    }
+    // Up to 4 others (5-kit vault: 1 active + 4), split into two columns divided by
+    // a light vertical line — matching the vault's own 5-kit limit.
+    var lim = others.slice(0, 4);
+    var leftKits = lim.slice(0, 2), rightKits = lim.slice(2, 4);
+    var othersHtml = lim.length ? (
       '<div class="ov-kit-others"><span class="ov-kit-others-lbl">Also in your vault</span>' +
-      others.map(function (o) {
-        var sw = (o.colors || []).filter(isHex).slice(0, 5).map(function (c) {
-          var hex = c.charAt(0) === "#" ? c : "#" + c;
-          return '<span class="ov-swatch ov-swatch--sm" style="background:' + esc(hex) + '"></span>';
-        }).join("");
-        return '<a class="ov-kit-other" href="/pages/brand-haus" title="Open in Brand Haus">' +
-          '<span class="ov-kit-other-name">' + esc(o.name || "Kit") + '</span>' +
-          '<span class="ov-kit-other-sw">' + sw + '</span></a>';
-      }).join("") + '</div>'
+      '<div class="ov-kit-cols' + (rightKits.length ? ' has-right' : '') + '">' +
+        '<div class="ov-kit-col">' + leftKits.map(kitRow).join("") + '</div>' +
+        (rightKits.length ? '<div class="ov-kit-col">' + rightKits.map(kitRow).join("") + '</div>' : '') +
+      '</div></div>'
     ) : "";
     return '<div class="ov-card ov-card--kit">' +
       '<div class="ov-card-head"><span class="ov-ic">🎨</span><b>Brand Kit</b></div>' +
