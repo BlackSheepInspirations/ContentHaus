@@ -1928,8 +1928,8 @@
   padding: 52px 40px 46px;
   background:
     radial-gradient(60% 120% at 18% 8%, rgba(184, 30, 70, 0.52), transparent 60%),
-    radial-gradient(55% 120% at 82% 12%, rgba(201, 168, 76, 0.22), transparent 62%),
-    radial-gradient(50% 130% at 60% 108%, rgba(143, 111, 214, 0.22), transparent 60%),
+    radial-gradient(55% 120% at 82% 12%, rgba(140, 24, 52, 0.40), transparent 62%),
+    radial-gradient(50% 130% at 60% 108%, rgba(120, 18, 44, 0.34), transparent 60%),
     linear-gradient(135deg, #3a0e1c 0%, #250a13 42%, #14090c 100%);
   box-shadow: 0 24px 60px -28px rgba(6, 10, 14, 0.72), inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
@@ -1941,10 +1941,10 @@
   z-index: -1;
   pointer-events: none;
   background: linear-gradient(115deg,
-    transparent 6%, rgba(21, 166, 172, 0.42) 20%, transparent 32%,
-    rgba(59, 125, 216, 0.30) 46%, transparent 58%,
-    rgba(201, 168, 76, 0.34) 70%, transparent 82%,
-    rgba(200, 92, 158, 0.26) 92%, transparent 100%);
+    transparent 6%, rgba(190, 40, 80, 0.36) 20%, transparent 32%,
+    rgba(160, 30, 66, 0.32) 46%, transparent 58%,
+    rgba(210, 70, 110, 0.30) 70%, transparent 82%,
+    rgba(150, 24, 54, 0.28) 92%, transparent 100%);
   background-size: 300% 300%;
   animation: bh-aurora 11s ease-in-out infinite;
   filter: blur(6px);
@@ -1988,7 +1988,7 @@
 .bh-marketing__hero .bh-marketing__eyebrow { color: #f2c9d6; letter-spacing: 0.14em; }
 .bh-marketing__hero .bh-marketing__heading { color: #f5f7fb; font-size: 38px; line-height: 1.1; letter-spacing: -0.02em; }
 .bh-marketing__hero .bh-heading-accent {
-  background: linear-gradient(100deg, #E0457B, #f7b6cf 28%, #C9A84C 60%, #f0d488 78%, #E0457B);
+  background: linear-gradient(100deg, #E0457B, #ffcfdf 30%, #b83052 64%, #E0457B);
   background-size: 220% auto;
   -webkit-background-clip: text;
   background-clip: text;
@@ -1999,7 +1999,7 @@
 .bh-marketing__hero .bh-marketing__subheading { color: #cdd7e3; }
 .bh-marketing__hero .bh-marketing__cta {
   color: #06121f;
-  background: linear-gradient(100deg, #E0457B, #f7b6cf 45%, #C9A84C);
+  background: linear-gradient(100deg, #E0457B, #ffcfdf 50%, #c23a62);
   background-size: 180% auto;
   border: 0;
   box-shadow: 0 10px 26px -10px rgba(184, 30, 70, 0.6);
