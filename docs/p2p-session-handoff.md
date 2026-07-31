@@ -125,13 +125,15 @@ the LAST — push files SEPARATELY.** 3. Copy each file to the mirror
    (buttons/tabs) — held per "don't compromise widgets"; (b) Brand's INTERIOR tool
    controls still use teal (only its branding/chrome went gold) — recolor to gold
    if Andrea wants the whole Brand tool gold, not just its hero.
-3. **#9 Haus Helper free-type search:** KB source MAPPED — each Haus keeps a
-   `FAQ_ITEMS` array ([{q,a}]) + `TIPS` array in its `*-ui.js` (Content
-   prompt-builder-ui.js = 9 TIPS + ~25 FAQ; brand-haus-ui.js = FAQ_ITEMS(10)+tips;
-   p2p-haus.js ~15; product/marketing/graphics-haus-ui.js a few) + OS FAQ (7 in
-   p2p-os.liquid) + Brand preview FAQ (7 in page.brand-haus-preview.json) + Journey
-   info_body. BUILD: compile → `assets/p2p-faq-kb.js`; add "type your question" box
-   to p2p-helper.liquid that keyword-matches; misses → mailto. No FAQ writing needed.
+3. **#9 Haus Helper free-type search — DONE (2026-07-31, commit 90c4504).** Added
+   a persistent "Type your question…" box to `snippets/p2p-helper.liquid` (no AI).
+   New `assets/p2p-faq-kb.js` = 56 deduped entries auto-harvested from Content
+   FAQ_ITEMS(25)+TIPS(9), Brand FAQ_ITEMS, OS + Brand-preview template FAQ blocks,
+   + curated common answers. Keyword scoring (question hits 3x, answer 1x), top
+   answer + source Haus + Open link + 2 related + human fallback; gibberish →
+   guided options + email. Harvest script: scratchpad/extract_kb.js (rerun to
+   refresh the KB when FAQs change). Live-verified on the OS page. NOTE: the other
+   3 Hausen (product/marketing/graphics-ui.js) have NO FAQ_ITEMS arrays to harvest.
 4. **#11 Brand identity → OS:** archetype hero card only populates when the Founders
    Assessment completes (writes `p2p_archetype` via publish hook in
    brand-haus-founderinterview.js). Saving a brand kit does NOT. Wire brand-kit
