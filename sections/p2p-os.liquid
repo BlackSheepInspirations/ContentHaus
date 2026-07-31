@@ -98,7 +98,7 @@
       </header>
       <script>
         window.P2P_ARCHETYPE = window.P2P_ARCHETYPE || {};
-        window.P2P_ARCHETYPE.assessUrl = {{ section.settings.assessment_url | default: '/pages/p2p-assessment' | json }};
+        window.P2P_ARCHETYPE.assessUrl = {{ section.settings.assessment_url | default: '/pages/brand-haus?bh_focus=1' | json }};
         window.P2P_ARCHETYPE.img = {
           "bold-pioneer": {{ 'brand-haus-hero-bold-pioneer.jpg' | asset_url | json }},
           "trusted-guide": {{ 'brand-haus-hero-trusted-guide.jpg' | asset_url | json }},
@@ -1084,7 +1084,7 @@
     // Personalized Brand DNA panel — reads p2p_archetype (set when the Founders Assessment completes)
     (function(){
       var dna = root.querySelector('[data-osx-dna]'); if(!dna) return;
-      var A = window.P2P_ARCHETYPE || {}, imgs = A.img || {}, assessUrl = A.assessUrl || '/pages/p2p-assessment';
+      var A = window.P2P_ARCHETYPE || {}, imgs = A.img || {}, assessUrl = A.assessUrl || '/pages/brand-haus?bh_focus=1';
       var rec = null; try{ rec = JSON.parse(localStorage.getItem('p2p_archetype') || 'null'); }catch(e){}
       function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
       if(rec && rec.name){
@@ -1193,7 +1193,7 @@
     { "type": "text", "id": "hero_cta_url", "label": "Hero button link", "info": "Where 'Show me around' goes — the walkthrough. Defaults to /pages/p2p-tutorial.", "default": "/pages/p2p-tutorial" },
     { "type": "url", "id": "journey_url", "label": "Learning Journey URL", "info": "Adds a link on the hero to the gamified Learning Journey." },
     { "type": "text", "id": "journey_label", "label": "Learning Journey button label", "default": "Enter your Learning Journey →" },
-    { "type": "url", "id": "assessment_url", "label": "Founders Assessment URL", "info": "Where the hero Brand DNA panel links (defaults to /pages/p2p-assessment)." },
+    { "type": "text", "id": "assessment_url", "label": "Founders Assessment URL", "info": "Where the hero Brand DNA panel links. Defaults to the real assessment: /pages/brand-haus?bh_focus=1 (Brand Haus in assessment-only focus mode). Text field so the ?bh_focus=1 query param is preserved." },
     { "type": "checkbox", "id": "show_stats", "label": "Show live stats (ring + points/badges/streak/tier)", "default": true },
     { "type": "checkbox", "id": "show_moment", "label": "Load progress engine", "default": true },
     { "type": "text", "id": "journey_access_tag", "label": "Journey access tag", "default": "p2p-learning" },
