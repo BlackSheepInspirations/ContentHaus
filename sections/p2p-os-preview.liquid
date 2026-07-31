@@ -1,0 +1,164 @@
+{% comment %}
+  Purpose 2 Profit — Operating System PREVIEW / sales page (ungated).
+  Non-members land here: a black-opal marketing page with a free 10-question
+  mini Brand DNA assessment (real engine, surface-level result) that hooks into
+  the full assessment + the OS Access Pass. Assign to /pages/p2p-os-preview via
+  templates/page.p2p-os-preview.json. Scoped to #p2posprev / #p2pmini.
+{% endcomment %}
+
+{%- assign cta_url = section.settings.access_product.url | default: '/products/p2p-os-access' -%}
+
+<div id="p2posprev" class="pmv">
+  <header class="pmv-hero">
+    <span class="pmv-eyebrow">{{ section.settings.eyebrow | default: 'Black Sheep Creations &amp; Inspirations' }}</span>
+    <h1 class="pmv-h1">Purpose <span class="pmv-2">2</span> Profit</h1>
+    <p class="pmv-tag">{{ section.settings.hero_tagline | default: 'The operating system that takes you from idea to income — built around the one thing no one can copy: you.' }}</p>
+    <div class="pmv-hero-cta">
+      <a class="pmv-btn pmv-btn--primary" href="{{ cta_url }}">{{ section.settings.cta_label | default: 'Get the Access Pass' }}{% if section.settings.access_product.price %} — {{ section.settings.access_product.price | money }}{% endif %}</a>
+      <a class="pmv-btn pmv-btn--ghost" href="#pmv-quiz">Try the free mini quiz ↓</a>
+    </div>
+  </header>
+
+  {%- comment -%} FREE MINI ASSESSMENT — the hook {%- endcomment -%}
+  <section class="pmv-block" id="pmv-quiz">
+    <div class="pmv-kick">Start here · free</div>
+    <h2 class="pmv-h2">Meet the brand only you could build</h2>
+    <p class="pmv-lede">Answer ten quick questions and get a first read on your Brand DNA archetype — a taste of the assessment that anchors the entire system.</p>
+    <div id="p2pmini"></div>
+  </section>
+
+  {%- comment -%} WHAT IT IS {%- endcomment -%}
+  <section class="pmv-block">
+    <div class="pmv-kick">What it is</div>
+    <h2 class="pmv-h2">Your whole business, in one home base</h2>
+    <p class="pmv-lede">Six connected Hausen, a gamified learning journey, and a launch method — all speaking one brand language: yours.</p>
+    {%- if section.settings.shot_dashboard != blank -%}
+      <div class="pmv-shot"><img src="{{ section.settings.shot_dashboard | image_url: width: 1600 }}" alt="The Purpose 2 Profit dashboard" loading="lazy"></div>
+    {%- endif -%}
+    <div class="pmv-grid">
+      <div class="pmv-feat"><span class="pmv-fic">👑</span><b>Brand Haus</b><p>Define your identity — archetype, colors, fonts and voice — so everything else sounds like you.</p></div>
+      <div class="pmv-feat"><span class="pmv-fic">✍️</span><b>Content · Graphics · Project · Marketing</b><p>Generate on-brand prompts, visuals, products and campaigns, all tuned to your Brand Kit.</p></div>
+      <div class="pmv-feat"><span class="pmv-fic">🚀</span><b>Growth Haus + ROOTED</b><p>Run a proven 6-stage launch method that turns everything you built into a launch.</p></div>
+      <div class="pmv-feat"><span class="pmv-fic">🗺️</span><b>The Learning Journey</b><p>Realms, courses, badges and streaks that teach the whole thing — one step at a time.</p></div>
+    </div>
+    {%- if section.settings.shot_realms != blank -%}
+      <div class="pmv-shot"><img src="{{ section.settings.shot_realms | image_url: width: 1600 }}" alt="The Learning Journey realms" loading="lazy"></div>
+    {%- endif -%}
+  </section>
+
+  {%- comment -%} FINAL CTA {%- endcomment -%}
+  <section class="pmv-final">
+    <h2 class="pmv-h2">Ready to make this Haus your home?</h2>
+    <p class="pmv-lede">{{ section.settings.final_sub | default: 'Unlock the full Brand DNA assessment, every Haus, the courses and the launch method — the entire Purpose 2 Profit Operating System.' }}</p>
+    <a class="pmv-btn pmv-btn--primary pmv-btn--lg" href="{{ cta_url }}">{{ section.settings.cta_label | default: 'Get the Access Pass' }}{% if section.settings.access_product.price %} — {{ section.settings.access_product.price | money }}{% endif %}</a>
+  </section>
+</div>
+
+<script>
+  window.P2P_MINI_CTA = { url: {{ cta_url | json }}, label: {{ section.settings.mini_cta_label | default: 'Unlock the full assessment' | json }} };
+  window.P2P_MINI_IMG = {
+    "bold-pioneer": {{ 'brand-haus-hero-bold-pioneer.jpg' | asset_url | json }},
+    "trusted-guide": {{ 'brand-haus-hero-trusted-guide.jpg' | asset_url | json }},
+    "cozy-craftsman": {{ 'brand-haus-hero-cozy-craftsman.jpg' | asset_url | json }},
+    "elevated-icon": {{ 'brand-haus-hero-elevated-icon.jpg' | asset_url | json }},
+    "free-spirit": {{ 'brand-haus-hero-free-spirit.jpg' | asset_url | json }},
+    "joyful-connector": {{ 'brand-haus-hero-joyful-connector.jpg' | asset_url | json }},
+    "quiet-authority": {{ 'brand-haus-hero-quiet-authority.jpg' | asset_url | json }},
+    "modern-minimalist": {{ 'brand-haus-hero-modern-minimalist.jpg' | asset_url | json }},
+    "community-builder": {{ 'brand-haus-hero-community-builder.jpg' | asset_url | json }},
+    "luxe-rebel": {{ 'brand-haus-hero-luxe-rebel.jpg' | asset_url | json }},
+    "trail-forger": {{ 'brand-haus-hero-trail-forger.jpg' | asset_url | json }}
+  };
+  window.BrandHaus = window.BrandHaus || {};
+</script>
+<script src="{{ 'brand-haus-branddna.js' | asset_url }}"></script>
+<script src="{{ 'p2p-mini-assessment.js' | asset_url }}"></script>
+
+<style>
+  #p2posprev{--gold:#f4c534;--text:#eef6f3;--muted:#9fb3ad;--stroke:rgba(255,255,255,.10);--gstroke:rgba(216,180,90,.34);
+    --aurora:linear-gradient(100deg,#f4e2a6,#8f6fd6,#27ae6e,#39c5c0,#2563eb,#d6336c,#f4e2a6);
+    max-width:1080px;margin:0 auto;padding:0 18px 80px;color:var(--text);
+    font-family:system-ui,-apple-system,"Segoe UI",sans-serif;}
+  @keyframes pmv-shift{0%{background-position:0% 50%;}100%{background-position:300% 50%;}}
+  #p2posprev .pmv-hero{text-align:center;padding:60px 24px 52px;border-radius:24px;margin:22px 0 40px;position:relative;overflow:hidden;
+    background:radial-gradient(60% 120% at 18% 6%,rgba(39,174,110,.30),transparent 60%),radial-gradient(55% 120% at 84% 12%,rgba(37,99,235,.24),transparent 60%),radial-gradient(50% 120% at 60% 110%,rgba(214,51,108,.20),transparent 60%),linear-gradient(150deg,#0a0f0c,#101613 46%,#0c1310);
+    border:1px solid var(--stroke);}
+  #p2posprev .pmv-eyebrow{display:inline-block;font:700 12px/1 system-ui;letter-spacing:.16em;text-transform:uppercase;color:#7fe3b8;margin-bottom:16px;}
+  #p2posprev .pmv-h1{font:800 clamp(38px,7vw,66px)/1 Georgia,serif;margin:0 0 16px;letter-spacing:-.02em;}
+  #p2posprev .pmv-2{background:var(--aurora);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:pmv-shift 20s linear infinite;font-style:italic;}
+  #p2posprev .pmv-tag{max-width:600px;margin:0 auto 28px;font:400 17px/1.6 system-ui;color:#c9e6da;}
+  #p2posprev .pmv-hero-cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+  #p2posprev .pmv-btn{display:inline-flex;align-items:center;padding:14px 26px;border-radius:999px;font:700 15px/1 system-ui;text-decoration:none;transition:transform .14s ease,filter .14s ease;}
+  #p2posprev .pmv-btn--primary{color:#0a1410;background:linear-gradient(100deg,#f4e2a6,#c9a24a);box-shadow:0 12px 30px -12px rgba(216,180,90,.6);}
+  #p2posprev .pmv-btn--ghost{color:var(--text);border:1px solid var(--gstroke);}
+  #p2posprev .pmv-btn:hover{transform:translateY(-2px);filter:brightness(1.04);}
+  #p2posprev .pmv-btn--lg{font-size:17px;padding:16px 34px;}
+  #p2posprev .pmv-block{margin:0 0 56px;}
+  #p2posprev .pmv-kick{font:700 11px/1 system-ui;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:10px;}
+  #p2posprev .pmv-h2{font:700 clamp(24px,4vw,34px)/1.15 Georgia,serif;margin:0 0 10px;}
+  #p2posprev .pmv-lede{max-width:640px;font:400 16px/1.6 system-ui;color:var(--muted);margin:0 0 22px;}
+  #p2posprev .pmv-shot{border-radius:16px;overflow:hidden;border:1px solid var(--stroke);margin:22px 0;box-shadow:0 24px 60px -30px rgba(0,0,0,.7);}
+  #p2posprev .pmv-shot img{width:100%;display:block;}
+  #p2posprev .pmv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px;}
+  #p2posprev .pmv-feat{padding:18px 18px 20px;border:1px solid var(--stroke);border-radius:14px;background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(9,17,24,.4));}
+  #p2posprev .pmv-fic{font-size:24px;line-height:1;}
+  #p2posprev .pmv-feat b{display:block;margin:10px 0 5px;font:700 15px/1.2 system-ui;}
+  #p2posprev .pmv-feat p{margin:0;font:400 13px/1.5 system-ui;color:var(--muted);}
+  #p2posprev .pmv-final{text-align:center;padding:52px 24px;border-radius:22px;border:1px solid var(--gstroke);
+    background:linear-gradient(120deg,rgba(216,180,90,.1),rgba(57,197,192,.06));}
+  #p2posprev .pmv-final .pmv-lede{margin-left:auto;margin-right:auto;}
+
+  /* ---- mini assessment ---- */
+  #p2pmini{max-width:560px;}
+  #p2pmini .pm-card{border:1px solid var(--gstroke);border-radius:18px;padding:28px 26px;background:radial-gradient(120% 80% at 100% 0%,#0e1c28,#070f16);}
+  #p2pmini .pm-kick{display:inline-block;font:700 11px/1 system-ui;letter-spacing:.14em;text-transform:uppercase;color:#7fe3b8;margin-bottom:12px;}
+  #p2pmini .pm-h{font:700 22px/1.2 Georgia,serif;margin:0 0 10px;color:var(--text);}
+  #p2pmini .pm-sub{margin:0 0 20px;font:400 14px/1.6 system-ui;color:var(--muted);}
+  #p2pmini .pm-btn{border:0;cursor:pointer;padding:13px 24px;border-radius:999px;font:700 14px/1 system-ui;color:#0a1410;background:linear-gradient(100deg,#f4e2a6,#c9a24a);}
+  #p2pmini .pm-prog{height:5px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden;margin-bottom:14px;}
+  #p2pmini .pm-prog-bar{height:100%;background:var(--aurora);background-size:300% 100%;animation:pmv-shift 20s linear infinite;transition:width .3s ease;}
+  #p2pmini .pm-count{font:700 11px/1 system-ui;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;}
+  #p2pmini .pm-lead{margin:0 0 6px;font:italic 400 13.5px/1.5 system-ui;color:#c9e6da;}
+  #p2pmini .pm-q{font:700 19px/1.3 Georgia,serif;margin:0 0 16px;color:var(--text);}
+  #p2pmini .pm-opts{display:flex;flex-direction:column;gap:9px;}
+  #p2pmini .pm-opt{text-align:left;cursor:pointer;padding:13px 16px;border:1px solid var(--stroke);border-radius:12px;background:rgba(255,255,255,.03);color:#dbe7e2;font:600 14px/1.35 system-ui;transition:background .14s,border-color .14s,transform .1s;}
+  #p2pmini .pm-opt:hover{background:rgba(216,180,90,.1);border-color:var(--gstroke);transform:translateX(2px);}
+  #p2pmini .pm-opt.is-on{border-color:var(--gold);background:rgba(216,180,90,.14);}
+  #p2pmini .pm-navrow{display:flex;justify-content:flex-start;margin-top:16px;}
+  #p2pmini .pm-back{border:0;background:none;color:var(--muted);cursor:pointer;font:600 13px/1 system-ui;}
+  #p2pmini .pm-back:hover{color:var(--text);}
+  #p2pmini .pm-result{text-align:center;}
+  #p2pmini .pm-img{border-radius:14px;overflow:hidden;aspect-ratio:4/3;margin:6px 0 16px;border:1px solid var(--stroke);background:#0b1620;}
+  #p2pmini .pm-img img{width:100%;height:100%;object-fit:cover;display:block;}
+  #p2pmini .pm-leaning{font:600 12px/1 system-ui;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+  #p2pmini .pm-name{font:800 28px/1.1 Georgia,serif;margin:0;background:var(--aurora);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:pmv-shift 20s linear infinite;}
+  #p2pmini .pm-word{font:800 12px/1 system-ui;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-top:8px;}
+  #p2pmini .pm-tags{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:12px;}
+  #p2pmini .pm-tag{font:600 11px/1 system-ui;color:#dbe7e2;background:rgba(255,255,255,.06);border:1px solid var(--stroke);border-radius:20px;padding:6px 11px;}
+  #p2pmini .pm-blurb{margin:16px auto 0;max-width:420px;font:400 14.5px/1.6 system-ui;color:#c9e6da;}
+  #p2pmini .pm-caveat{margin:18px 0;padding:14px 16px;border-radius:12px;border:1px dashed var(--gstroke);background:rgba(216,180,90,.06);font:400 13px/1.55 system-ui;color:var(--muted);}
+  #p2pmini .pm-cta{display:inline-block;padding:14px 28px;border-radius:999px;font:700 15px/1 system-ui;color:#0a1410;text-decoration:none;background:linear-gradient(100deg,#f4e2a6,#c9a24a);box-shadow:0 12px 30px -12px rgba(216,180,90,.6);}
+  #p2pmini .pm-restart{display:block;margin:14px auto 0;border:0;background:none;color:var(--muted);cursor:pointer;font:600 12.5px/1 system-ui;}
+  #p2pmini .pm-restart:hover{color:var(--text);}
+  @media (prefers-reduced-motion:reduce){#p2posprev .pmv-2,#p2posprev .pmv-prog-bar,#p2pmini .pm-name,#p2pmini .pm-prog-bar{animation:none;}}
+</style>
+
+{% schema %}
+{
+  "name": "P2P OS Preview",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Black Sheep Creations & Inspirations" },
+    { "type": "textarea", "id": "hero_tagline", "label": "Hero tagline", "default": "The operating system that takes you from idea to income — built around the one thing no one can copy: you." },
+    { "type": "header", "content": "Access / CTA" },
+    { "type": "product", "id": "access_product", "label": "Access Pass product", "info": "The P2P Operating System - ACCESS PASS product. Falls back to /products/p2p-os-access." },
+    { "type": "text", "id": "cta_label", "label": "CTA button label", "default": "Get the Access Pass" },
+    { "type": "text", "id": "mini_cta_label", "label": "Mini-quiz result CTA label", "default": "Unlock the full assessment" },
+    { "type": "header", "content": "Screenshots" },
+    { "type": "image_picker", "id": "shot_dashboard", "label": "Dashboard screenshot" },
+    { "type": "image_picker", "id": "shot_realms", "label": "Realms / Journey screenshot" },
+    { "type": "header", "content": "Final CTA" },
+    { "type": "textarea", "id": "final_sub", "label": "Final CTA subtext", "default": "Unlock the full Brand DNA assessment, every Haus, the courses and the launch method — the entire Purpose 2 Profit Operating System." }
+  ],
+  "presets": [{ "name": "P2P OS Preview" }]
+}
+{% endschema %}

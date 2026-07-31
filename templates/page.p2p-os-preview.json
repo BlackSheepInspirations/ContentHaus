@@ -1,0 +1,9 @@
+{
+  "sections": {
+    "main": {
+      "type": "p2p-os-preview",
+      "settings": {}
+    }
+  },
+  "order": ["main"]
+}
