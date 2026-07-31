@@ -23,6 +23,9 @@
    from here regardless of where in the page this snippet sits. {%- endcomment -%}
 {% render 'p2p-os-nav', current: haus_current %}
 
+{%- comment -%} Floating rule-based Haus Helper on every Haus page (the OS page renders it itself). {%- endcomment -%}
+{% render 'p2p-helper' %}
+
 {%- comment -%} Embedded mode: when a Haus page is loaded inside the P2P Operating System
    frame (same-origin iframe), hide the theme header/footer/announcement + this haus-links
    block so only the tool shows. Runs on every Haus page (this snippet is on all of them). {%- endcomment -%}

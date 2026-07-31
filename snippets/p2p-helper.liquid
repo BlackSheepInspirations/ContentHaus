@@ -95,10 +95,11 @@
       root: { msg: "Hi! I'm your **Haus Helper** 🐑 Pick what you need and I'll point you the right way.", opts: [
         { t: "Which Haus should I use?", to: "which" },
         { t: "How do I get started?", to: "start" },
+        { t: "Is this for me?", to: "fit" },
         { t: "Get better results from the tools", to: "tips" },
         { t: "What's ROOTED?", to: "rooted" },
-        { t: "Meet Frank & Ruth", to: "mates" },
-        { t: "Login or access problem", to: "access" }
+        { t: "Billing, account & access", to: "billing" },
+        { t: "Meet Frank & Ruth", to: "mates" }
       ]},
       which: { msg: "What are you trying to do right now?", opts: [
         { t: "Figure out my brand", to: "w_brand" },
@@ -135,7 +136,24 @@
       mates: { msg: "**Frank** (Idea Haus) sparks and sharpens ideas; **Ruth** (Build Haus) makes them sellable. They're your AI partners — open either any time you're stuck.", opts: [
         { t: "Meet your Haus Mates", url: "/pages/p2p-os?v=mates" }, { t: "← Back", to: "root" } ]},
       access: { msg: "Login or access hiccup? It's almost always a billing blip — updating your payment info usually restores access right away. If not, email us and we'll sort it fast.", opts: [
-        { t: "Email support", url: "mailto:" + SUPPORT }, { t: "← Back", to: "root" } ]}
+        { t: "Update payment / email support", url: "mailto:" + SUPPORT }, { t: "← Back", to: "billing" } ]},
+      fit: { msg: "Purpose 2 Profit is built for creators and sellers who want to go from idea to income — especially if you're not techy. Everything is plain language, one step at a time, with help all the way. If you can follow a recipe, you can do this.", opts: [
+        { t: "How do I get started?", to: "start" }, { t: "Which Haus should I use?", to: "which" }, { t: "← Back", to: "root" } ]},
+      billing: { msg: "Billing, account, or access — what do you need a hand with?", opts: [
+        { t: "What's included / my plan", to: "included" },
+        { t: "Login or access problem", to: "access" },
+        { t: "Something's not working", to: "tech" },
+        { t: "Cancel or change my plan", to: "cancel" },
+        { t: "Refunds", to: "refunds" },
+        { t: "← Back", to: "root" } ]},
+      included: { msg: "Each Haus is its own tool you can unlock, and the Learning Journey is the full step-by-step course path. For exactly what's in your plan and current pricing, the clearest answer is on that Haus's page — or just ask us and we'll spell it out.", opts: [
+        { t: "Email us", url: "mailto:" + SUPPORT }, { t: "← Back", to: "billing" } ]},
+      tech: { msg: "Sorry about that! Quick fixes that solve most things: refresh the page, try a different browser, or sign out and back in — your progress is saved to your account, not the browser. Still stuck? Tell us what you were doing and we'll jump on it.", opts: [
+        { t: "Email support", url: "mailto:" + SUPPORT }, { t: "← Back", to: "billing" } ]},
+      cancel: { msg: "You're always in control — no hoops. To cancel or change a plan, sign in to your account, or email us and we'll take care of it for you.", opts: [
+        { t: "Email us", url: "mailto:" + SUPPORT }, { t: "← Back", to: "billing" } ]},
+      refunds: { msg: "For anything to do with refunds or a billing question, the fastest path is to email us with your account email — a real person will look after it personally.", opts: [
+        { t: "Email support", url: "mailto:" + SUPPORT }, { t: "← Back", to: "billing" } ]}
     };
 
     function fmt(s){ return String(s).replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>"); }
