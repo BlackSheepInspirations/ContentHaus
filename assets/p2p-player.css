@@ -30,13 +30,18 @@
 #p2pp .pbody{display:grid; grid-template-columns:300px 1fr; gap:22px; max-width:1180px; margin:0 auto; padding:22px;}
 @media(max-width:760px){#p2pp .pbody{grid-template-columns:1fr;}}
 #p2pp .side{align-self:start; position:sticky; top:calc(var(--p2pp-sticky,0) + 78px); background:var(--panel); border:1px solid var(--stroke);
-  border-radius:18px; padding:18px; backdrop-filter:blur(6px);}
+  border-radius:18px; padding:18px; backdrop-filter:blur(6px);
+  max-height:calc(100vh - var(--p2pp-sticky,0) - 100px); display:flex; flex-direction:column;}
+@media(max-width:760px){#p2pp .side{max-height:none; display:block;}}
 #p2pp .side .st{font:700 11px/1 system-ui; letter-spacing:.2em; text-transform:uppercase; color:var(--gold); margin-bottom:12px;}
 #p2pp .sbar{height:9px; border-radius:20px; background:rgba(255,255,255,.10); overflow:hidden; margin-bottom:6px;}
 #p2pp .sbar i{display:block; height:100%; width:0; border-radius:20px; transition:width .5s cubic-bezier(.4,0,.2,1);
   background:linear-gradient(90deg,var(--emerald),var(--teal) 60%,var(--gold));}
 #p2pp .spct{font:800 11px/1 system-ui; color:var(--emerald); margin-bottom:16px; display:block;}
-#p2pp .lessons{list-style:none; display:flex; flex-direction:column; gap:4px;}
+#p2pp .lessons{list-style:none; display:flex; flex-direction:column; gap:4px; flex:1; min-height:0; overflow-y:auto; margin:0 -6px; padding:2px 6px;}
+#p2pp .lessons::-webkit-scrollbar{width:8px;}
+#p2pp .lessons::-webkit-scrollbar-thumb{background:rgba(216,180,90,.32); border-radius:8px;}
+#p2pp .lessons{scrollbar-width:thin; scrollbar-color:rgba(216,180,90,.32) transparent;}
 #p2pp .lessons li{display:flex; align-items:center; gap:11px; padding:11px 12px; border-radius:11px; cursor:pointer;
   font:600 13.5px/1.3 system-ui; color:#cdddd6; transition:.15s;}
 #p2pp .lessons li:hover{background:rgba(255,255,255,.05);}
