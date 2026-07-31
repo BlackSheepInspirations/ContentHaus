@@ -7,6 +7,13 @@
 {%- endcomment -%}
 
 <div id="p2pt">
+  <div class="p2pt-nav">
+    <span class="p2pt-back-group">
+      {%- if section.settings.os_url != blank -%}<a class="p2pt-back" href="{{ section.settings.os_url }}">← Operating System</a>{%- endif -%}
+      {%- if section.settings.map_url != blank -%}<a class="p2pt-back" href="{{ section.settings.map_url }}">← Journey Map</a>{%- endif -%}
+    </span>
+    <button class="p2pt-help" type="button" data-p2pt-help aria-label="Get help">i</button>
+  </div>
   <header class="p2pt-hero">
     {%- if section.settings.eyebrow != blank -%}<div class="p2pt-eyebrow">{{ section.settings.eyebrow }}</div>{%- endif -%}
     <h1>{{ section.settings.title | default: 'How Your Learning Journey Works' }}</h1>
@@ -51,6 +58,16 @@
   {%- endif -%}
 </div>
 
+{%- comment -%} floating rule-based Haus Helper on the tutorial page too {%- endcomment -%}
+{% render 'p2p-helper' %}
+
+<script>
+  (function(){
+    var h = document.querySelector('#p2pt [data-p2pt-help]');
+    if(h) h.addEventListener('click', function(){ var l = document.querySelector('[data-p2ph-launch]'); if(l) l.click(); });
+  })();
+</script>
+
 <style>
   #p2pt{--bg:#04070a;--text:#e7efeb;--muted:#8aa0a6;--gold:#c9a24a;--gold-bright:#f4c534;--stroke:rgba(255,255,255,.09);--gstroke:rgba(216,180,90,.4);
     --aurora:linear-gradient(100deg,#f4e2a6,#8f6fd6,#27ae6e,#39c5c0,#2563eb,#d6336c,#f4e2a6);
@@ -63,6 +80,12 @@
   /* animated aurora — filled (buttons, numbered badges) */
   #p2pt .aurora-fill{background:var(--aurora);background-size:300% 100%;animation:p2pt-shift 20s linear infinite;color:#0a1410;}
 
+  #p2pt .p2pt-nav{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:28px;flex-wrap:wrap;}
+  #p2pt .p2pt-back-group{display:flex;gap:8px;flex-wrap:wrap;}
+  #p2pt .p2pt-back{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border:1px solid var(--gstroke);border-radius:10px;color:var(--gold-bright);font:700 12.5px/1 system-ui;text-decoration:none;transition:background .15s;}
+  #p2pt .p2pt-back:hover{background:rgba(216,180,90,.1);}
+  #p2pt .p2pt-help{width:40px;height:40px;flex:none;border-radius:50%;border:1px solid var(--gstroke);background:transparent;color:var(--gold-bright);font:italic 700 18px/1 Georgia,serif;cursor:pointer;transition:background .15s,border-color .15s;}
+  #p2pt .p2pt-help:hover{background:rgba(216,180,90,.1);border-color:var(--gold-bright);}
   #p2pt .p2pt-hero{text-align:center;margin-bottom:44px;}
   #p2pt .p2pt-eyebrow{font:700 12px/1 system-ui;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:12px;}
   #p2pt .p2pt-hero h1{font:700 clamp(28px,5vw,42px)/1.1 Georgia,serif;margin:0 0 14px;
@@ -113,6 +136,9 @@
     { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Learning Journey" },
     { "type": "text", "id": "title", "label": "Title", "default": "How Your Learning Journey Works" },
     { "type": "textarea", "id": "intro", "label": "Intro", "default": "A quick, friendly walkthrough of everything on your journey — the map, your courses, points, badges, streaks and more. Take it at your own pace." },
+    { "type": "header", "content": "Back links" },
+    { "type": "text", "id": "os_url", "label": "Operating System URL", "default": "/pages/p2p-os" },
+    { "type": "text", "id": "map_url", "label": "Journey Map URL", "default": "/pages/p2p-learning" },
     { "type": "header", "content": "Guided-tour link" },
     { "type": "url", "id": "tour_url", "label": "Journey page URL", "info": "Links to the Journey page where members can tap 'Take the tour'." },
     { "type": "text", "id": "tour_label", "label": "Guided-tour link label", "default": "Prefer a guided tour? Open the Journey and tap “Take the tour.”" },

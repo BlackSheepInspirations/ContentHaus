@@ -1079,7 +1079,7 @@
       var i = 0, timer = null;
       function render(){
         var p = pillars[i], it = p.pool[day % p.pool.length] || {};
-        titleEl.innerHTML = '<span class="mo-star">✦</span> <span class="mo-grad">' + p.label + '</span> Check';
+        titleEl.innerHTML = '<span class="mo-star">✦</span> <span class="mo-grad">' + p.label + '</span> Booster';
         textEl.textContent = it.t ? ('“' + it.t + '”') : '';
         srcEl.textContent = it.s || '';
         dots.forEach(function(d, di){ d.classList.toggle('on', di === i); });
