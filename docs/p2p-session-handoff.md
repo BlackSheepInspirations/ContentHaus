@@ -102,10 +102,23 @@ the LAST — push files SEPARATELY.** 3. Copy each file to the mirror
    Haus**; a "Product Haus" ref → **Project Haus**. Comment headers note "formerly".
    localStorage keys `promptToProfit.*` left untouched (member data). The ~62 JS
    "Prompt Haus" hits are code-architecture COMMENTS (invisible) — intentionally left.
-   **STILL TODO — the luxe VISUAL rebuild:** the 6 Haus tool pages are functional
-   but not yet restyled to the OS aesthetic. This needs Andrea's design direction
-   (scope: full reskin vs. lighter polish; whether to keep each Haus's own palette
-   like Growth's "Black Opal" or unify). Gated pages — verify via store unlock.
+   **VISUAL REBUILD — HERO PASS DONE (2026-07-31).** Direction from Andrea: pilot
+   one, then roll out; reskin the CHROME only (never the widgets); per-Haus palette
+   made shimmery — each Haus's signature color DOMINANT + shared aurora/opal
+   highlights. Delivered: the shared `.XX-marketing__hero` is now a black-opal band
+   with a signature-dominant aurora shimmer + opal "fire" specks (moving sheen +
+   specks are the shared layer; band/glows/accent/CTA use the dominant). Colors:
+   Content=teal, Brand=teal, Graphics=violet, Project=blue, Marketing=magenta.
+   Growth (crown jewel) already had the fullest opal-aurora hero — left as-is (it's
+   the reference the others were brought up to). Shimmer accent scoped inside the
+   hero so locked-state headings keep their on-cream color; per-prefix keyframes;
+   prefers-reduced-motion respected; brand-header overflow relaxed for the shadow.
+   Commits: b8eb5f6 (Content), 02ce440 (4 siblings), d6730ba (Project accent-word
+   fix). Live-verified all six. Generator: scratchpad/reskin_hausen.py; harness:
+   dev/haus-reskin.html. NOTE for Andrea: Brand + Content both run teal today (Brand
+   genuinely uses teal everywhere) — say if you want Brand a distinct color.
+   NOT YET DONE (optional next): extend the subtle sheen INTO tool controls
+   (buttons/tabs) — held back per "don't compromise the widgets" until Andrea okays.
 3. **#9 Haus Helper free-type search:** KB source MAPPED — each Haus keeps a
    `FAQ_ITEMS` array ([{q,a}]) + `TIPS` array in its `*-ui.js` (Content
    prompt-builder-ui.js = 9 TIPS + ~25 FAQ; brand-haus-ui.js = FAQ_ITEMS(10)+tips;
