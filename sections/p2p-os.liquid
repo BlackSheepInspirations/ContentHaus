@@ -115,12 +115,12 @@
 
       {%- if section.settings.show_stats -%}
       <div class="osx-stats" data-osx-stats hidden>
-        <div class="osx-ring" data-osx-ring style="--p:0"><div class="osx-ringin"><b class="p2pos-ringpct">0%</b><small>Complete</small></div></div>
+        <button class="osx-ring" type="button" data-osx-ring data-prog="courses" style="--p:0" aria-label="See your course progress"><div class="osx-ringin"><b class="p2pos-ringpct">0%</b><small>Complete</small></div></button>
         <div class="osx-chips">
-          <div class="osx-chip"><span class="osx-cico">⭐</span><span><b class="p2pos-points">0</b><small>Points</small></span></div>
-          <div class="osx-chip"><span class="osx-cico">🏅</span><span><b class="p2pos-badges">0</b><small>Badges</small></span></div>
-          <div class="osx-chip"><span class="osx-cico">🔥</span><span><b class="p2pos-streak">0</b><small>Day streak</small></span></div>
-          <div class="osx-chip"><span class="osx-cico">✦</span><span><b class="p2pos-tier">Dreamer</b><small>Merit tier</small></span></div>
+          <button class="osx-chip" type="button" data-prog="points" aria-label="See where your points came from"><span class="osx-cico">⭐</span><span><b class="p2pos-points">0</b><small>Points</small></span></button>
+          <button class="osx-chip" type="button" data-prog="badges" aria-label="See your badges"><span class="osx-cico">🏅</span><span><b class="p2pos-badges">0</b><small>Badges</small></span></button>
+          <button class="osx-chip" type="button" data-prog="streak" aria-label="See your streak"><span class="osx-cico">🔥</span><span><b class="p2pos-streak">0</b><small>Day streak</small></span></button>
+          <button class="osx-chip" type="button" data-prog="merit" aria-label="See Merit and Tiers"><span class="osx-cico">✦</span><span><b class="p2pos-tier">Dreamer</b><small>Merit tier</small></span></button>
         </div>
       </div>
       {%- endif -%}
@@ -577,12 +577,14 @@
 
   /* stat strip */
   #p2pos .osx-stats{display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin-bottom:26px;}
-  #p2pos .osx-ring{flex:0 0 104px;width:104px;height:104px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(from -90deg,#39c5c0,#8f6fd6,#f4c534 calc(var(--p)*1%),rgba(255,255,255,.08) calc(var(--p)*1%));}
+  #p2pos .osx-ring{flex:0 0 104px;width:104px;height:104px;border:0;padding:0;cursor:pointer;border-radius:50%;display:grid;place-items:center;background:conic-gradient(from -90deg,#39c5c0,#8f6fd6,#f4c534 calc(var(--p)*1%),rgba(255,255,255,.08) calc(var(--p)*1%));transition:transform .12s;}
+  #p2pos .osx-ring:hover{transform:scale(1.03);}
   #p2pos .osx-ringin{width:80px;height:80px;border-radius:50%;background:var(--panel);display:grid;place-items:center;text-align:center;}
   #p2pos .osx-ringin b{font:800 20px/1 system-ui;color:var(--gold-bright);}
   #p2pos .osx-ringin small{display:block;margin-top:2px;font:600 8.5px/1 system-ui;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);}
   #p2pos .osx-chips{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:11px;flex:1;min-width:240px;}
-  #p2pos .osx-chip{display:flex;align-items:center;gap:10px;padding:11px 13px;border:1px solid var(--stroke);border-radius:13px;background:rgba(255,255,255,.03);}
+  #p2pos .osx-chip{display:flex;align-items:center;gap:10px;padding:11px 13px;border:1px solid var(--stroke);border-radius:13px;background:rgba(255,255,255,.03);cursor:pointer;text-align:left;color:inherit;font:inherit;transition:border-color .15s,transform .12s,background .15s;}
+  #p2pos .osx-chip:hover{border-color:var(--gstroke);background:rgba(216,180,90,.06);transform:translateY(-1px);}
   #p2pos .osx-cico{font-size:17px;}
   #p2pos .osx-chip b{display:block;font:800 18px/1 system-ui;color:var(--gold-bright);}
   #p2pos .osx-chip .p2pos-tier{font:700 14px/1.1 Georgia,serif;background:var(--aurora);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:p2pos-shift 20s linear infinite;}
@@ -875,6 +877,8 @@
 <script src="{{ 'p2p-progress.js' | asset_url }}" defer="defer"></script>
 <script src="{{ 'p2p-notebook.js' | asset_url }}" defer="defer"></script>
 <script src="{{ 'p2p-journey-map.js' | asset_url }}" defer="defer"></script>
+{{ 'p2p-progress-popups.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'p2p-progress-popups.js' | asset_url }}" defer="defer"></script>
 {%- endif -%}
 {%- comment -%} read-only cross-Haus vault dashboard for the home view {%- endcomment -%}
 <script src="{{ 'p2p-os-vault.js' | asset_url }}" defer="defer"></script>
@@ -1097,6 +1101,9 @@
       }
       root.querySelector('[data-osx-stats]').hidden = false;
     }
+
+    // clickable stat chips + ring -> shared Progress detail pop-ups (Points/Badges/Streak/Merit/Courses)
+    if(window.P2PProgressPopups){ window.P2PProgressPopups.mount(root); }
   });
 </script>
 
