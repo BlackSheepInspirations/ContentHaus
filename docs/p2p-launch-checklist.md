@@ -97,10 +97,31 @@ the realm templates. Then wire Shopify Flow to add `all-access` on the all-acces
 purchase. NOTE: this is small + low-risk (one OR-branch per section) and could be done
 now if Andrea wants, but she's scoped it as an after-everything-is-built sweep.
 
-**Also decide:** (a) should the OS PAGE itself require login to view the shell (today
-it renders to anonymous; only the tools inside gate)? (b) should gated pages be
-excluded from storefront search / `noindex` so they don't surface at all — separate
-from content gating, and the actual reason this matters (pages are storefront-searchable).
+### 3a. OS page must require login — DECIDED (Andrea 2026-07-31)
+
+The OS page (`/pages/p2p-os`) must gate like the Hausen: logged-out / non-members see a
+**preview** (marketing + "get access" purchase link), not the shell. TO BUILD: (a) add
+the shared `has_access` gate to `sections/p2p-os.liquid` (currently ungated — renders the
+shell to anyone); (b) build an **OS preview page/section** modeled on the Haus previews
+(`sections/p2p-haus-preview.liquid` + `templates/page.*-preview.json`) — needs an **OS
+access product** for the "Get Access" button; (c) the locked state links to that preview.
+The OS itself STAYS searchable (entry point; non-members get the preview).
+
+### 3b. Hide gated pages from search — DECIDED (Andrea 2026-07-31)
+
+**Keep searchable:** P2P OS + the 6 Haus tool pages only. **Hide everything else P2P:**
+the 52 `courses-*`, realms, Journey, Milestones, tutorial, demo course (decide: Haus
+*preview* pages — likely keep, they're the sales pages). Two layers, BOTH in the BASE
+THEME (which lives in the staging mirror `/BSC-BSI-Store-theme`, NOT this repo):
+- **Shopify storefront search** (the real concern): `sections/main-search.liquid` builds
+  `search_pages_list = search.results | where:"object_type","page"` and renders it ~L518
+  (`{% for page in search_pages_list %}`); also `sections/hdt_predictive-search*.liquid`.
+  Add a skip for gated handles (prefixes `courses-`, `realm-`, `p2p-learning`,
+  `p2p-tutorial`, `p2p-course`), keeping p2p-os + the Hausen.
+- **SEO / Google** (secondary): `<meta name="robots" content="noindex">` in
+  `layout/theme.liquid` head, conditional on the gated page templates.
+- CAVEAT: base-theme files are mirror-only (not in this repo) — consider bringing them
+  under version control if we edit them.
 
 **At launch:** sweep every page template + section, confirm the tag-gate (+ all-access)
 is present, and that Flow grants the right tags on purchase.
