@@ -145,11 +145,11 @@
       {%- comment -%} you've got this — reassurance {%- endcomment -%}
       {%- if section.settings.reassure_body != blank -%}
       <div class="osx-reassure">
-        <div class="osx-reassure-ic">🛶</div>
+        <img class="osx-reassure-ic" src="{{ 'bsc-sheep-mark.png' | asset_url }}" alt="" width="46" height="46" loading="lazy">
         <div>
-          <b>{{ section.settings.reassure_title | default: "You've got this." }}</b>
+          <b>{{ section.settings.reassure_title | default: 'Born an Original.' }}</b>
           <p>{{ section.settings.reassure_body }}</p>
-          <div class="osx-rjourney"><span>Get on the raft</span><i>→</i><span>Float</span><i>→</i><span>Sail</span><i>→</i><span>Thrive</span></div>
+          <div class="osx-reassure-note">{{ section.settings.reassure_note | default: "One step at a time. We're glad to be here with you." }}</div>
         </div>
       </div>
       {%- endif -%}
@@ -603,11 +603,10 @@
 
   /* reassurance */
   #p2pos .osx-reassure{display:flex;gap:16px;align-items:flex-start;padding:20px 22px;border:1px solid var(--gstroke);border-radius:16px;margin-bottom:26px;background:linear-gradient(120deg,rgba(216,180,90,.1),rgba(57,197,192,.06));}
-  #p2pos .osx-reassure-ic{font-size:30px;line-height:1;}
-  #p2pos .osx-reassure b{font:700 16px/1.2 Georgia,serif;}
-  #p2pos .osx-reassure p{margin:6px 0 12px;font:400 14px/1.6 system-ui;color:#dbe7e2;}
-  #p2pos .osx-rjourney{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font:700 12px/1 system-ui;color:var(--gold-bright);}
-  #p2pos .osx-rjourney i{color:var(--muted);font-style:normal;}
+  #p2pos .osx-reassure-ic{flex:none;width:46px;height:46px;border-radius:50%;object-fit:cover;background:#0a1410;border:1px solid var(--gstroke);}
+  #p2pos .osx-reassure b{font:700 18px/1.2 Georgia,serif;}
+  #p2pos .osx-reassure p{margin:7px 0 10px;font:400 14px/1.6 system-ui;color:#dbe7e2;}
+  #p2pos .osx-reassure-note{font:italic 400 13.5px/1.5 system-ui;color:var(--muted);}
 
   /* faq */
   #p2pos .osx-faq{display:flex;flex-direction:column;gap:8px;}
@@ -1120,8 +1119,9 @@
     { "type": "checkbox", "id": "show_stats", "label": "Show live stats (ring + points/badges/streak/tier)", "default": true },
     { "type": "checkbox", "id": "show_moment", "label": "Load progress engine", "default": true },
     { "type": "text", "id": "journey_access_tag", "label": "Journey access tag", "default": "p2p-learning" },
-    { "type": "text", "id": "reassure_title", "label": "Reassurance title", "default": "You've got this." },
-    { "type": "textarea", "id": "reassure_body", "label": "Reassurance body", "default": "You don't have to know it all today. Take one step at a time — we'll get you on the raft, help you float, then sail, and thrive as you grow." },
+    { "type": "text", "id": "reassure_title", "label": "Reassurance title", "default": "Born an Original." },
+    { "type": "textarea", "id": "reassure_body", "label": "Reassurance body", "default": "There are a lot of ideas and businesses out there. There is only one YOU — and that's not just a nice thought, it is your actual advantage. Nobody can copy your spark." },
+    { "type": "text", "id": "reassure_note", "label": "Reassurance note (italic)", "default": "One step at a time. We're glad to be here with you." },
     { "type": "text", "id": "faq_heading", "label": "FAQ heading", "default": "Need help?" },
     { "type": "header", "content": "Checkpoint view" },
     { "type": "text", "id": "checkpoint_title", "label": "Checkpoint title", "default": "Set yourself up before you go" },
