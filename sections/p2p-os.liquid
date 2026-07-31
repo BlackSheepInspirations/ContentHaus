@@ -153,6 +153,9 @@
       </div>
       {%- endif -%}
 
+      {%- comment -%} Your Vault — read-only cross-Haus dashboard (filled by p2p-os-vault.js) {%- endcomment -%}
+      <div class="osx-vault" data-osx-vault hidden></div>
+
       {%- comment -%} need help / FAQ {%- endcomment -%}
       <div class="osx-block">
         <div class="osx-kick">{{ section.settings.faq_heading | default: 'Need help?' }}</div>
@@ -684,6 +687,47 @@
   #p2pos .osx-bonus-empty b{display:block;font:700 18px/1.2 Georgia,serif;color:var(--text);margin-bottom:6px;}
   #p2pos .osx-bonus-empty p{margin:0;font:400 13.5px/1.6 system-ui;color:var(--muted);}
 
+  /* Your Vault — cross-Haus dashboard */
+  #p2pos .osx-vault{margin-bottom:28px;}
+  #p2pos .ov-head{margin-bottom:16px;}
+  #p2pos .ov-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-bottom:14px;}
+  #p2pos .ov-grid--two{grid-template-columns:repeat(auto-fit,minmax(240px,1fr));}
+  #p2pos .ov-card{border:1px solid var(--stroke);border-radius:16px;padding:18px 18px 16px;background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(9,17,24,.4));}
+  #p2pos .ov-card-head{display:flex;align-items:center;gap:9px;margin-bottom:12px;font:700 13px/1 system-ui;color:var(--text);}
+  #p2pos .ov-card-head .ov-ic{font-size:16px;}
+  #p2pos .ov-card-head .ov-count{margin-left:auto;font:800 11px/1 system-ui;color:#0a1410;background:linear-gradient(145deg,#f4e2a6,var(--gold));padding:4px 8px;border-radius:20px;}
+  #p2pos .ov-kit-name{font:700 16px/1.2 Georgia,serif;color:var(--gold-bright);margin-bottom:10px;}
+  #p2pos .ov-swatches{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
+  #p2pos .ov-swatch{width:22px;height:22px;border-radius:6px;border:1px solid rgba(255,255,255,.18);}
+  #p2pos .ov-kit-voice{font:400 12.5px/1.5 system-ui;color:var(--muted);margin-bottom:12px;}
+  #p2pos .ov-kit-voice i{color:#c6d6d0;font-style:italic;}
+  #p2pos .ov-link{font:700 12px/1 system-ui;color:var(--gold-bright);text-decoration:none;}
+  #p2pos .ov-link:hover{text-decoration:underline;}
+  #p2pos .ov-recent-list{display:flex;flex-direction:column;gap:2px;}
+  #p2pos .ov-recent-row{display:flex;align-items:center;gap:10px;padding:8px 8px;border-radius:9px;text-decoration:none;transition:background .15s;}
+  #p2pos .ov-recent-row:hover{background:rgba(255,255,255,.04);}
+  #p2pos .ov-chip{flex:0 0 auto;font:700 9.5px/1 system-ui;letter-spacing:.03em;text-transform:uppercase;color:var(--gold);background:rgba(216,180,90,.12);border:1px solid var(--gstroke);border-radius:20px;padding:5px 8px;}
+  #p2pos .ov-recent-text{flex:1;min-width:0;font:500 13px/1.35 system-ui;color:#dbe7e2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  #p2pos .ov-recent-time{flex:0 0 auto;font:500 11px/1 system-ui;color:var(--muted);}
+  #p2pos .ov-mini-list{display:flex;flex-direction:column;gap:6px;}
+  #p2pos .ov-mini-row{display:block;padding:9px 11px;border:1px solid var(--stroke);border-radius:10px;text-decoration:none;transition:border-color .15s,background .15s;}
+  #p2pos .ov-mini-row:hover{border-color:var(--gstroke);background:rgba(255,255,255,.03);}
+  #p2pos .ov-mini-row b{display:block;font:700 13px/1.25 system-ui;color:var(--text);}
+  #p2pos .ov-mini-row span{display:block;margin-top:2px;font:400 11.5px/1.4 system-ui;color:var(--muted);}
+  #p2pos .ov-totals{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:14px 18px;border:1px solid var(--stroke);border-radius:14px;background:rgba(255,255,255,.02);}
+  #p2pos .ov-totals-lead{font:700 13px/1.3 system-ui;color:var(--text);}
+  #p2pos .ov-total-chips{display:flex;flex-wrap:wrap;gap:8px;}
+  #p2pos .ov-total-chip{display:flex;align-items:baseline;gap:6px;padding:6px 11px;border:1px solid var(--stroke);border-radius:20px;text-decoration:none;transition:border-color .15s;}
+  #p2pos .ov-total-chip:hover{border-color:var(--gstroke);}
+  #p2pos .ov-total-chip b{font:800 14px/1 system-ui;color:var(--gold-bright);}
+  #p2pos .ov-total-chip span{font:600 11px/1 system-ui;color:var(--muted);}
+  #p2pos .ov-empty{max-width:520px;margin:10px 0;padding:26px 24px;border:1px dashed var(--gstroke);border-radius:18px;background:rgba(216,180,90,.05);}
+  #p2pos .ov-empty-ic{font-size:32px;margin-bottom:10px;}
+  #p2pos .ov-empty b{display:block;font:700 17px/1.2 Georgia,serif;color:var(--text);margin-bottom:6px;}
+  #p2pos .ov-empty p{margin:0 0 12px;font:400 13.5px/1.6 system-ui;color:var(--muted);}
+  #p2pos .ov-empty-links a{font:700 12.5px/1 system-ui;color:var(--gold-bright);text-decoration:none;}
+  #p2pos .ov-empty-links a:hover{text-decoration:underline;}
+
   /* Haus Mates — Frank (Idea) & Ruth (Build) */
   #p2pos .osx-mates{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;margin-bottom:18px;}
   #p2pos .osx-mate{position:relative;display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;
@@ -802,6 +846,8 @@
 <script src="{{ 'p2p-notebook.js' | asset_url }}" defer="defer"></script>
 <script src="{{ 'p2p-journey-map.js' | asset_url }}" defer="defer"></script>
 {%- endif -%}
+{%- comment -%} read-only cross-Haus vault dashboard for the home view {%- endcomment -%}
+<script src="{{ 'p2p-os-vault.js' | asset_url }}" defer="defer"></script>
 {%- comment -%} daily Mindset · Purpose · Heart content for the hero carousel {%- endcomment -%}
 <script src="{{ 'p2p-moments.js' | asset_url }}" defer="defer"></script>
 <script src="{{ 'p2p-purpose.js' | asset_url }}" defer="defer"></script>
@@ -893,6 +939,12 @@
           onSave: function(kind){ if(kind === 'reflection' && window.P2P){ window.P2P.checkJournal(); window.P2P.addJournalPoint(); } }
         });
       }
+    })();
+
+    // Your Vault — read-only cross-Haus dashboard (assets/p2p-os-vault.js)
+    (function(){
+      var vRoot = root.querySelector('[data-osx-vault]');
+      if(vRoot && window.P2POSVault){ try{ window.P2POSVault.mount(vRoot); }catch(e){} }
     })();
 
     // External-site heads-up — the Haus Mate buttons open ChatGPT in a new tab.
