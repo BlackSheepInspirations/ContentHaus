@@ -1,0 +1,33 @@
+{
+  "sections": {
+    "main": {
+      "type": "p2p-learning-player",
+      "settings": {
+        "course_kicker": "Realm 4 · Golden Harvest",
+        "course_title": "Music & Playlists",
+        "course_handle": "music-playlists",
+        "sidebar_label": "Lessons",
+        "back_url": "/pages/realm-4",
+        "os_url": "/pages/p2p-os",
+        "os_label": "P2P Operating System",
+        "access_tag": "p2p-learning"
+      },
+      "blocks": {
+        "l1": {
+          "type": "lesson",
+          "settings": {
+            "title": "Lesson 1",
+            "video_label": "Watch the lesson",
+            "body": "<p>Welcome to <strong>Music & Playlists</strong>. Lesson content is on the way — add your video, notes, downloads, or a flip-book here.</p>"
+          }
+        }
+      },
+      "block_order": [
+        "l1"
+      ]
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

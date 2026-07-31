@@ -1,0 +1,33 @@
+{
+  "sections": {
+    "main": {
+      "type": "p2p-learning-player",
+      "settings": {
+        "course_kicker": "Realm 5 · Evergreen",
+        "course_title": "Pricing Your Products",
+        "course_handle": "pricing-your-products",
+        "sidebar_label": "Lessons",
+        "back_url": "/pages/realm-5",
+        "os_url": "/pages/p2p-os",
+        "os_label": "P2P Operating System",
+        "access_tag": "p2p-learning"
+      },
+      "blocks": {
+        "l1": {
+          "type": "lesson",
+          "settings": {
+            "title": "Lesson 1",
+            "video_label": "Watch the lesson",
+            "body": "<p>Welcome to <strong>Pricing Your Products</strong>. Lesson content is on the way — add your video, notes, downloads, or a flip-book here.</p>"
+          }
+        }
+      },
+      "block_order": [
+        "l1"
+      ]
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

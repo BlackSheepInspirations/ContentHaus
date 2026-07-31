@@ -37,7 +37,7 @@ window.P2P_MAP = [
   ]},
   { n:3, name:'Desert Blooms', url:'/pages/realm-3', gate:'', courses:[
     { t:'POD Foundations', h:'pod-foundations' },
-    { t:'What Every Product Needs', h:'what-every-product-needs' },
+    { t:'What Every Product Needs', h:'what-pod-products-need' },
     { t:'Trademark Traps in POD', h:'trademark-traps-in-pod' },
     { t:'T-Shirts & Apparel', h:'t-shirts-apparel', o:true },
     { t:'Mugs & Drinkware', h:'mugs-drinkware', o:true },

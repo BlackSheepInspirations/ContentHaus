@@ -4,7 +4,7 @@
       "type": "p2p-learning-journey",
       "blocks": {
         "pod-foundations": { "type": "course", "settings": { "title": "POD Foundations", "handle": "pod-foundations", "body": "What print-on-demand really means, choosing a print partner, and realistic margins.", "pos_left": 32.2, "pos_top": 11.25, "pos_width": 20, "pos_height": 6.5 } },
-        "product-needs": { "type": "course", "settings": { "title": "What Every Product Needs", "handle": "what-every-product-needs", "body": "The essentials every sellable product must have before it ships.", "pos_left": 66, "pos_top": 25, "pos_width": 20, "pos_height": 6.5 } },
+        "product-needs": { "type": "course", "settings": { "title": "What Every Product Needs", "handle": "what-pod-products-need", "body": "The essentials every sellable product must have before it ships.", "pos_left": 66, "pos_top": 25, "pos_width": 20, "pos_height": 6.5 } },
         "trademark-traps": { "type": "course", "settings": { "title": "Trademark Traps in POD", "handle": "trademark-traps-in-pod", "body": "The highest-risk zone on the map — logos, characters, and likeness rules that can suspend a whole POD account.", "pos_left": 65.5, "pos_top": 36.5, "pos_width": 20, "pos_height": 6.5 } },
         "tshirts-apparel": { "type": "offshoot", "settings": { "title": "T-Shirts & Apparel", "handle": "t-shirts-apparel", "body": "Print-ready apparel design, placement, and listing.", "pos_left": 20, "pos_top": 40, "pos_width": 18, "pos_height": 6 } },
         "mugs-drinkware": { "type": "offshoot", "settings": { "title": "Mugs & Drinkware", "handle": "mugs-drinkware", "body": "Wraparound design basics and mockups that sell.", "pos_left": 19, "pos_top": 52, "pos_width": 18, "pos_height": 6 } },
