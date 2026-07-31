@@ -87,8 +87,13 @@ appears is the OS *nav* (`snippets/p2p-os-nav.liquid`, `sections/p2p-os.liquid`:
 sidebar item LOOKS locked. It does NOT gate the destination page. So an all-access
 member still hits each page's own tag-gate and is locked out.
 
-**Launch task:** extend the shared framework so every gated section's `has_access`
-also honors all-access, i.e. add to each:
+**DONE (2026-07-31, commit 8a905e3):** every gated section now honors `all-access` —
+the course player (all 52 courses), Journey, Milestones, and all 6 Haus tools (crown
+jewel via its case-insensitive match). Realms inherit via the journey section. Only
+remaining for this: Shopify Flow must add the `all-access` tag on that purchase.
+
+~~**Launch task:** extend the shared framework so every gated section's `has_access`
+also honors all-access, i.e. add to each:~~
 `{%- if customer and customer.tags contains 'all-access' -%}{%- assign has_access = true -%}{%- endif -%}`
 (ideally via a shared `all_access_tag` setting, default `all-access`). Sweep: the 6
 Haus tools + preview pages, `p2p-learning-*` (journey/player/badges), all 52
