@@ -1643,11 +1643,9 @@
   padding: 48px 24px 80px;
   overflow: hidden;
 }
-/* Reskinned hero (2026-07-31): a black-opal band with a teal-DOMINANT aurora
-   shimmer + fine opal "fire" specks. Chrome only — the tool widgets below the
-   hero are untouched. Renders on both the standalone marketing page and the
-   tool page's branded header. Teal is Content Haus's signature; the aurora/
-   opal highlights (emerald, blue, violet, gold) are the shared shimmer layer. */
+/* Reskinned hero (2026-07-31, fun-shimmer): black-opal band + ph dominant (teal)
+   aurora with a livelier moving sheen and twinkling opal 'fire' specks. Chrome
+   only — tool widgets untouched. Sheen + specks are the shared highlight layer. */
 .ph-marketing__hero {
   position: relative;
   text-align: center;
@@ -1661,9 +1659,9 @@
     radial-gradient(55% 120% at 82% 12%, rgba(39, 174, 110, 0.34), transparent 62%),
     radial-gradient(50% 130% at 60% 108%, rgba(143, 111, 214, 0.30), transparent 60%),
     linear-gradient(135deg, #0e3b38 0%, #0b2d2b 42%, #0b1615 100%);
-  box-shadow: 0 24px 60px -28px rgba(8, 30, 28, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  box-shadow: 0 24px 60px -28px rgba(6, 10, 14, 0.72), inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
-/* moving aurora sheen laid over the opal base */
+/* livelier moving aurora sheen */
 .ph-marketing__hero::before {
   content: "";
   position: absolute;
@@ -1671,92 +1669,71 @@
   z-index: -1;
   pointer-events: none;
   background: linear-gradient(115deg,
-    transparent 8%, rgba(21, 166, 172, 0.30) 22%, transparent 34%,
-    rgba(59, 125, 216, 0.20) 48%, transparent 60%,
-    rgba(201, 168, 76, 0.22) 72%, transparent 84%);
+    transparent 6%, rgba(21, 166, 172, 0.42) 20%, transparent 32%,
+    rgba(59, 125, 216, 0.30) 46%, transparent 58%,
+    rgba(201, 168, 76, 0.34) 70%, transparent 82%,
+    rgba(200, 92, 158, 0.26) 92%, transparent 100%);
   background-size: 300% 300%;
-  animation: ph-aurora 14s ease-in-out infinite;
+  animation: ph-aurora 11s ease-in-out infinite;
   filter: blur(6px);
 }
-/* fine opal fire specks */
+/* twinkling opal fire specks */
 .ph-marketing__hero::after {
   content: "";
   position: absolute;
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  opacity: 0.5;
   border-radius: inherit;
   background:
-    radial-gradient(2px 2px at 20% 30%, rgba(39, 174, 110, 0.7), transparent 60%),
-    radial-gradient(2px 2px at 70% 24%, rgba(59, 125, 216, 0.6), transparent 60%),
-    radial-gradient(1.6px 1.6px at 44% 66%, rgba(201, 168, 76, 0.7), transparent 60%),
-    radial-gradient(1.6px 1.6px at 86% 60%, rgba(200, 92, 158, 0.6), transparent 60%),
-    radial-gradient(1.6px 1.6px at 32% 84%, rgba(21, 166, 172, 0.7), transparent 60%);
+    radial-gradient(2.2px 2.2px at 18% 28%, rgba(39, 174, 110, 0.85), transparent 60%),
+    radial-gradient(2px 2px at 70% 22%, rgba(59, 125, 216, 0.80), transparent 60%),
+    radial-gradient(1.8px 1.8px at 44% 64%, rgba(201, 168, 76, 0.90), transparent 60%),
+    radial-gradient(1.8px 1.8px at 86% 58%, rgba(200, 92, 158, 0.80), transparent 60%),
+    radial-gradient(1.8px 1.8px at 30% 82%, rgba(21, 166, 172, 0.85), transparent 60%),
+    radial-gradient(1.6px 1.6px at 58% 40%, rgba(255, 255, 255, 0.70), transparent 60%),
+    radial-gradient(1.6px 1.6px at 8% 60%, rgba(201, 168, 76, 0.70), transparent 60%),
+    radial-gradient(1.6px 1.6px at 92% 80%, rgba(39, 174, 110, 0.70), transparent 60%);
+  animation: ph-twinkle 3.6s ease-in-out infinite;
 }
 @keyframes ph-aurora {
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
 }
+@keyframes ph-twinkle {
+  0%, 100% { opacity: 0.45; transform: scale(1); }
+  50% { opacity: 0.90; transform: scale(1.04); }
+}
+@keyframes ph-shine { to { background-position: 220% center; } }
 @media (prefers-reduced-motion: reduce) {
-  .ph-marketing__hero::before { animation: none; }
+  .ph-marketing__hero::before,
+  .ph-marketing__hero::after,
+  .ph-marketing__hero .ph-heading-accent { animation: none; }
 }
-.ph-marketing__eyebrow {
-  color: #bfefec;
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-  font-size: 12.5px;
-  font-weight: 700;
-  margin: 0 0 14px;
-}
-.ph-marketing__heading {
-  color: #f3fbfa;
-  font-size: 38px;
-  line-height: 1.1;
-  letter-spacing: -0.02em;
-  margin: 0 0 14px;
-}
-/* shimmer accent ONLY inside the hero — the locked-state heading reuses
-   .ph-heading-accent on cream and must keep its readable gold-on-light. */
+/* light-on-opal text + shimmer accent, scoped to the hero so the locked-state
+   heading keeps its readable on-cream color. */
+.ph-marketing__hero .ph-marketing__eyebrow { color: #bfefec; letter-spacing: 0.14em; }
+.ph-marketing__hero .ph-marketing__heading { color: #f5f7fb; font-size: 38px; line-height: 1.1; letter-spacing: -0.02em; }
 .ph-marketing__hero .ph-heading-accent {
-  background: linear-gradient(100deg, #15A6AC, #7fe3df 30%, #C9A84C 70%, #f0d488);
-  background-size: 200% auto;
+  background: linear-gradient(100deg, #15A6AC, #7fe3df 28%, #C9A84C 60%, #f0d488 78%, #15A6AC);
+  background-size: 220% auto;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  animation: ph-shine 6s linear infinite;
+  animation: ph-shine 4.5s linear infinite;
 }
-@keyframes ph-shine {
-  to { background-position: 200% center; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .ph-marketing__hero .ph-heading-accent { animation: none; }
-}
-.ph-heading-accent {
-  color: var(--ph-gold-on-light);
-}
-.ph-marketing__subheading {
-  color: #c9e6e3;
-  font-size: 17px;
-  line-height: 1.6;
-  max-width: 640px;
-  margin: 0 auto 24px;
-}
-/* hero CTA picks up the teal->gold sheen; scoped to the hero so the marketing
-   page's footer CTA (on cream) is unaffected. */
+.ph-marketing__hero .ph-marketing__tagline { color: #dbe4ee; }
+.ph-marketing__hero .ph-marketing__subheading { color: #cdd7e3; }
 .ph-marketing__hero .ph-marketing__cta {
-  color: #04201e;
-  background: linear-gradient(100deg, #15A6AC, #43cfc9 45%, #C9A84C);
+  color: #06121f;
+  background: linear-gradient(100deg, #15A6AC, #7fe3df 45%, #C9A84C);
   background-size: 180% auto;
   border: 0;
   box-shadow: 0 10px 26px -10px rgba(21, 166, 172, 0.7);
   transition: transform 0.15s ease, background-position 0.4s ease;
 }
-.ph-marketing__hero .ph-marketing__cta:hover {
-  transform: translateY(-1px);
-  background-position: 100% center;
-}
+.ph-marketing__hero .ph-marketing__cta:hover { transform: translateY(-1px); background-position: 100% center; }
 .ph-marketing__cta {
   display: inline-block;
 }

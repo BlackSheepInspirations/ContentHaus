@@ -1709,9 +1709,9 @@
   padding: 48px 24px 80px;
   overflow: hidden;
 }
-/* Reskinned hero (2026-07-31): black-opal band + pdh-signature-dominant aurora
-   shimmer with fine opal fire specks. Chrome only — tool widgets untouched.
-   The ::before sheen and ::after specks are the shared aurora highlight layer. */
+/* Reskinned hero (2026-07-31, fun-shimmer): black-opal band + pdh dominant (blue)
+   aurora with a livelier moving sheen and twinkling opal 'fire' specks. Chrome
+   only — tool widgets untouched. Sheen + specks are the shared highlight layer. */
 .pdh-marketing__hero {
   position: relative;
   text-align: center;
@@ -1727,6 +1727,7 @@
     linear-gradient(135deg, #123a6e 0%, #0f2749 42%, #0b1220 100%);
   box-shadow: 0 24px 60px -28px rgba(6, 10, 14, 0.72), inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
+/* livelier moving aurora sheen */
 .pdh-marketing__hero::before {
   content: "";
   position: absolute;
@@ -1734,36 +1735,46 @@
   z-index: -1;
   pointer-events: none;
   background: linear-gradient(115deg,
-    transparent 8%, rgba(21, 166, 172, 0.30) 22%, transparent 34%,
-    rgba(59, 125, 216, 0.20) 48%, transparent 60%,
-    rgba(201, 168, 76, 0.22) 72%, transparent 84%);
+    transparent 6%, rgba(21, 166, 172, 0.42) 20%, transparent 32%,
+    rgba(59, 125, 216, 0.30) 46%, transparent 58%,
+    rgba(201, 168, 76, 0.34) 70%, transparent 82%,
+    rgba(200, 92, 158, 0.26) 92%, transparent 100%);
   background-size: 300% 300%;
-  animation: pdh-aurora 14s ease-in-out infinite;
+  animation: pdh-aurora 11s ease-in-out infinite;
   filter: blur(6px);
 }
+/* twinkling opal fire specks */
 .pdh-marketing__hero::after {
   content: "";
   position: absolute;
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  opacity: 0.5;
   border-radius: inherit;
   background:
-    radial-gradient(2px 2px at 20% 30%, rgba(39, 174, 110, 0.7), transparent 60%),
-    radial-gradient(2px 2px at 70% 24%, rgba(59, 125, 216, 0.6), transparent 60%),
-    radial-gradient(1.6px 1.6px at 44% 66%, rgba(201, 168, 76, 0.7), transparent 60%),
-    radial-gradient(1.6px 1.6px at 86% 60%, rgba(200, 92, 158, 0.6), transparent 60%),
-    radial-gradient(1.6px 1.6px at 32% 84%, rgba(21, 166, 172, 0.7), transparent 60%);
+    radial-gradient(2.2px 2.2px at 18% 28%, rgba(39, 174, 110, 0.85), transparent 60%),
+    radial-gradient(2px 2px at 70% 22%, rgba(59, 125, 216, 0.80), transparent 60%),
+    radial-gradient(1.8px 1.8px at 44% 64%, rgba(201, 168, 76, 0.90), transparent 60%),
+    radial-gradient(1.8px 1.8px at 86% 58%, rgba(200, 92, 158, 0.80), transparent 60%),
+    radial-gradient(1.8px 1.8px at 30% 82%, rgba(21, 166, 172, 0.85), transparent 60%),
+    radial-gradient(1.6px 1.6px at 58% 40%, rgba(255, 255, 255, 0.70), transparent 60%),
+    radial-gradient(1.6px 1.6px at 8% 60%, rgba(201, 168, 76, 0.70), transparent 60%),
+    radial-gradient(1.6px 1.6px at 92% 80%, rgba(39, 174, 110, 0.70), transparent 60%);
+  animation: pdh-twinkle 3.6s ease-in-out infinite;
 }
 @keyframes pdh-aurora {
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
 }
-@keyframes pdh-shine { to { background-position: 200% center; } }
+@keyframes pdh-twinkle {
+  0%, 100% { opacity: 0.45; transform: scale(1); }
+  50% { opacity: 0.90; transform: scale(1.04); }
+}
+@keyframes pdh-shine { to { background-position: 220% center; } }
 @media (prefers-reduced-motion: reduce) {
   .pdh-marketing__hero::before,
+  .pdh-marketing__hero::after,
   .pdh-marketing__hero .pdh-heading-accent { animation: none; }
 }
 /* light-on-opal text + shimmer accent, scoped to the hero so the locked-state
@@ -1771,12 +1782,12 @@
 .pdh-marketing__hero .pdh-marketing__eyebrow { color: #cfe0ff; letter-spacing: 0.14em; }
 .pdh-marketing__hero .pdh-marketing__heading { color: #f5f7fb; font-size: 38px; line-height: 1.1; letter-spacing: -0.02em; }
 .pdh-marketing__hero .pdh-heading-accent {
-  background: linear-gradient(100deg, #4d84f5, #a9c6ff 30%, #C9A84C 70%, #f0d488);
-  background-size: 200% auto;
+  background: linear-gradient(100deg, #4d84f5, #a9c6ff 28%, #C9A84C 60%, #f0d488 78%, #4d84f5);
+  background-size: 220% auto;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  animation: pdh-shine 6s linear infinite;
+  animation: pdh-shine 4.5s linear infinite;
 }
 .pdh-marketing__hero .pdh-marketing__tagline { color: #dbe4ee; }
 .pdh-marketing__hero .pdh-marketing__subheading { color: #cdd7e3; }
