@@ -113,12 +113,18 @@ the LAST — push files SEPARATELY.** 3. Copy each file to the mirror
    the reference the others were brought up to). Shimmer accent scoped inside the
    hero so locked-state headings keep their on-cream color; per-prefix keyframes;
    prefers-reduced-motion respected; brand-header overflow relaxed for the shadow.
-   Commits: b8eb5f6 (Content), 02ce440 (4 siblings), d6730ba (Project accent-word
-   fix). Live-verified all six. Generator: scratchpad/reskin_hausen.py; harness:
-   dev/haus-reskin.html. NOTE for Andrea: Brand + Content both run teal today (Brand
-   genuinely uses teal everywhere) — say if you want Brand a distinct color.
-   NOT YET DONE (optional next): extend the subtle sheen INTO tool controls
-   (buttons/tabs) — held back per "don't compromise the widgets" until Andrea okays.
+   FUN-SHIMMER v2 (779d4ad): livelier moving sheen, TWINKLING opal specks
+   (opacity+scale pulse), white sparkles, shinier accent — all 5 siblings.
+   Brand flipped teal -> GOLD (the one unused aurora color) so it no longer
+   overlaps Content's teal; Brand hero + locked accent + locked heading base
+   are gold/neutral now. Colors final: Content=teal, Brand=GOLD, Graphics=violet,
+   Project=blue, Marketing=magenta, Growth=emerald/opal (crown jewel, already fun).
+   Commits: b8eb5f6, 02ce440, d6730ba, 779d4ad. Scripts: scratchpad/reskin_hausen.py
+   + fun_shimmer.py; harness dev/haus-reskin.html. Live-verified.
+   NOT YET DONE (optional next): (a) extend the sheen INTO tool controls
+   (buttons/tabs) — held per "don't compromise widgets"; (b) Brand's INTERIOR tool
+   controls still use teal (only its branding/chrome went gold) — recolor to gold
+   if Andrea wants the whole Brand tool gold, not just its hero.
 3. **#9 Haus Helper free-type search:** KB source MAPPED — each Haus keeps a
    `FAQ_ITEMS` array ([{q,a}]) + `TIPS` array in its `*-ui.js` (Content
    prompt-builder-ui.js = 9 TIPS + ~25 FAQ; brand-haus-ui.js = FAQ_ITEMS(10)+tips;
