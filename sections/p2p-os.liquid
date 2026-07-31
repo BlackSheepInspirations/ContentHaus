@@ -74,7 +74,8 @@
         <div class="osx-hero-glow"></div>
         <div class="osx-hero-in">
           {%- if section.settings.hero_eyebrow != blank -%}<div class="osx-eyebrow">{{ section.settings.hero_eyebrow }}</div>{%- endif -%}
-          <h1>{{ section.settings.hero_title | default: 'Welcome home' }}{%- if customer.first_name != blank -%}<span class="osx-name">, {{ customer.first_name }}</span>{%- endif -%}</h1>
+          {%- assign hero_phrase = section.settings.hero_title | default: 'Make this Haus Your Home' -%}
+          <h1>{%- if customer.first_name != blank -%}<span class="osx-name">{{ customer.first_name }}</span>, {{ hero_phrase | slice: 0 | downcase }}{{ hero_phrase | slice: 1, 400 }}{%- else -%}{{ hero_phrase }}{%- endif -%}</h1>
           {%- if section.settings.hero_body != blank -%}<p class="osx-hero-body">{{ section.settings.hero_body }}</p>{%- endif -%}
           {%- assign os_journey_url = section.settings.journey_url | default: '/pages/p2p-learning' -%}
           <div class="osx-hero-btns">
@@ -1189,7 +1190,7 @@
     { "type": "header", "content": "Your Journey Starts Here (landing)" },
     { "type": "image_picker", "id": "hero_image", "label": "Hero image (your premium PNG)" },
     { "type": "text", "id": "hero_eyebrow", "label": "Hero eyebrow", "default": "Purpose 2 Profit" },
-    { "type": "text", "id": "hero_title", "label": "Hero title", "default": "Your journey starts here" },
+    { "type": "text", "id": "hero_title", "label": "Hero title", "default": "Make this Haus Your Home", "info": "A logged-in member's first name is prepended: 'Andrea, make this Haus Your Home.' Shown as-is when there's no name: 'Make this Haus Your Home.'" },
     { "type": "textarea", "id": "hero_body", "label": "Hero body", "default": "This is your home — built around you. Your fingerprint, your spark, your story. Everything you need to go from idea to income lives right here. Let's make it yours." },
     { "type": "text", "id": "hero_cta_label", "label": "Hero button label", "default": "Show me around →" },
     { "type": "text", "id": "hero_cta_url", "label": "Hero button link", "info": "Where 'Show me around' goes — the walkthrough. Defaults to /pages/p2p-tutorial.", "default": "/pages/p2p-tutorial" },
