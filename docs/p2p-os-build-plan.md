@@ -118,8 +118,12 @@ Marketing Haus · Growth Haus. Must map each to the existing section/URL. Open: 
   "Your Journey Starts Here" landing (hero w/ image slot, live stat strip, gamified step-map w/
   step 1 pre-done, reassurance, FAQ). `sections/p2p-os.liquid` + `templates/page.p2p-os.json`.
   Other views show placeholders until built. Verified in `dev/os-check.html`.
-- **P2 — Assessment & Brand:** Checkpoint ✅ DONE. Founders Assessment peel-out plan below.
-  Brand Haus embed + brand-card upload/version history (later).
+- **P2 — Assessment & Brand:** ✅ DONE. Checkpoint; personalized hero **Brand DNA card** (reads
+  `p2p_archetype`, published on assessment completion); daily **Mindset·Purpose·Heart carousel**
+  (+ `p2p-purpose.js`/`p2p-heart.js`, 150 each); **embedded mode** (all 6 Hausen embed cleanly via
+  `haus-links`); **Founders Assessment surfaced** (embeds `/pages/brand-haus?bh_focus=1`, Branding
+  Studio hidden); **quiet-authority onboarding copy** (Archetype Guide / Welcome / Find Your Direction).
+  Remaining nicety: brand-card upload/version history; restore-path archetype publish.
 - **P3 — Build Hauses:** Content, Graphics, Project (luxe rework + embed).
 - **P4 — Market & Grow:** Marketing Haus, Growth Haus, transitions.
 - **P5 — PROFIT Path + Certificate** (confetti, branded, personalizable).
