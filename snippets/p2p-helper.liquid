@@ -15,14 +15,14 @@
 
 <div id="p2phelp" data-p2phelp>
   <button class="p2ph-launch" type="button" data-p2ph-launch aria-label="Open the Haus Helper">
-    <span class="p2ph-launch-ic" aria-hidden="true">🐑</span>
+    <img class="p2ph-launch-ic" src="{{ 'bsc-sheep-mark.png' | asset_url }}" alt="" aria-hidden="true" width="24" height="24">
     <span class="p2ph-launch-lbl">Need help?</span>
   </button>
 
   <div class="p2ph-panel" data-p2ph-panel hidden role="dialog" aria-label="Haus Helper">
     <div class="p2ph-head">
       <div class="p2ph-head-l">
-        <span class="p2ph-avatar" aria-hidden="true">🐑</span>
+        <img class="p2ph-avatar" src="{{ 'bsc-sheep-mark.png' | asset_url }}" alt="" aria-hidden="true">
         <div><b>Haus Helper</b><small>Quick answers, no waiting</small></div>
       </div>
       <button class="p2ph-close" type="button" data-p2ph-close aria-label="Close">✕</button>
@@ -42,7 +42,7 @@
     background:linear-gradient(180deg,#0d1a24,#081019);color:#e7efeb;font:700 14px/1 system-ui;
     box-shadow:0 10px 28px rgba(0,0,0,.4);transition:transform .14s ease,box-shadow .14s ease;}
   #p2phelp .p2ph-launch:hover{transform:translateY(-2px);box-shadow:0 14px 34px rgba(0,0,0,.5);}
-  #p2phelp .p2ph-launch-ic{font-size:20px;line-height:1;}
+  #p2phelp .p2ph-launch-ic{width:24px;height:24px;border-radius:50%;object-fit:cover;display:block;background:#0a1410;}
   #p2phelp.is-open .p2ph-launch{transform:scale(.9);opacity:0;pointer-events:none;}
 
   #p2phelp .p2ph-panel{position:fixed;right:22px;bottom:22px;z-index:1201;width:min(370px,calc(100vw - 32px));
@@ -54,7 +54,7 @@
   #p2phelp .p2ph-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:15px 16px;border-bottom:1px solid var(--hstroke);
     background:linear-gradient(100deg,rgba(216,180,90,.14),rgba(143,111,214,.1));}
   #p2phelp .p2ph-head-l{display:flex;align-items:center;gap:11px;}
-  #p2phelp .p2ph-avatar{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-size:20px;background:rgba(255,255,255,.06);border:1px solid var(--hstroke);}
+  #p2phelp .p2ph-avatar{width:38px;height:38px;border-radius:50%;object-fit:cover;display:block;background:#0a1410;border:1px solid var(--hstroke);}
   #p2phelp .p2ph-head b{display:block;font:700 15px/1.1 system-ui;color:#e7efeb;}
   #p2phelp .p2ph-head small{font:500 11.5px/1.2 system-ui;color:var(--hmuted);}
   #p2phelp .p2ph-close{border:0;background:rgba(255,255,255,.06);color:#cdd9dd;width:30px;height:30px;border-radius:50%;cursor:pointer;font:700 13px/1 system-ui;transition:background .15s;}
