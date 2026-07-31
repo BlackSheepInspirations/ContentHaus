@@ -44,8 +44,9 @@
   background: var(--gh-cream);
   max-width: 1280px;
   margin: 0 auto;
-  padding: 40px 16px 16px;
-  overflow: hidden;
+  padding: 40px 16px 28px;
+  /* overflow visible so the reskinned hero drop shadow can breathe */
+  overflow: visible;
 }
 /* .gh-marketing__hero's own margin-bottom (spacing before its video/CTA on
    the marketing page) would otherwise leave a gap of the theme's page
@@ -1752,37 +1753,86 @@
   padding: 48px 24px 80px;
   overflow: hidden;
 }
+/* Reskinned hero (2026-07-31): black-opal band + gh-signature-dominant aurora
+   shimmer with fine opal fire specks. Chrome only — tool widgets untouched.
+   The ::before sheen and ::after specks are the shared aurora highlight layer. */
 .gh-marketing__hero {
   position: relative;
   text-align: center;
   margin-bottom: 40px;
+  overflow: hidden;
+  isolation: isolate;
+  border-radius: 22px;
+  padding: 52px 40px 46px;
+  background:
+    radial-gradient(60% 120% at 18% 8%, rgba(143, 111, 214, 0.52), transparent 60%),
+    radial-gradient(55% 120% at 82% 12%, rgba(59, 125, 216, 0.32), transparent 62%),
+    radial-gradient(50% 130% at 60% 108%, rgba(200, 92, 158, 0.28), transparent 60%),
+    linear-gradient(135deg, #2a1c4a 0%, #1c1236 42%, #120e1f 100%);
+  box-shadow: 0 24px 60px -28px rgba(6, 10, 14, 0.72), inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
-/* Soft decorative corner accents — purely cosmetic (negative z-index keeps
-   them behind the heading/eyebrow/subheading, pointer-events off keeps
-   them out of the way of clicks), applies wherever this hero renders: the
-   standalone marketing page and the gated tool page's branded header. */
-.gh-marketing__hero::before,
+.gh-marketing__hero::before {
+  content: "";
+  position: absolute;
+  inset: -40%;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(115deg,
+    transparent 8%, rgba(21, 166, 172, 0.30) 22%, transparent 34%,
+    rgba(59, 125, 216, 0.20) 48%, transparent 60%,
+    rgba(201, 168, 76, 0.22) 72%, transparent 84%);
+  background-size: 300% 300%;
+  animation: gh-aurora 14s ease-in-out infinite;
+  filter: blur(6px);
+}
 .gh-marketing__hero::after {
   content: "";
   position: absolute;
+  inset: 0;
   z-index: -1;
-  border-radius: 50%;
   pointer-events: none;
+  opacity: 0.5;
+  border-radius: inherit;
+  background:
+    radial-gradient(2px 2px at 20% 30%, rgba(39, 174, 110, 0.7), transparent 60%),
+    radial-gradient(2px 2px at 70% 24%, rgba(59, 125, 216, 0.6), transparent 60%),
+    radial-gradient(1.6px 1.6px at 44% 66%, rgba(201, 168, 76, 0.7), transparent 60%),
+    radial-gradient(1.6px 1.6px at 86% 60%, rgba(200, 92, 158, 0.6), transparent 60%),
+    radial-gradient(1.6px 1.6px at 32% 84%, rgba(21, 166, 172, 0.7), transparent 60%);
 }
-.gh-marketing__hero::before {
-  width: 240px;
-  height: 240px;
-  top: -20px;
-  left: -40px;
-  background: radial-gradient(circle, rgba(201, 168, 76, 0.3), transparent 70%);
+@keyframes gh-aurora {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
-.gh-marketing__hero::after {
-  width: 280px;
-  height: 280px;
-  top: -30px;
-  right: -60px;
-  background: radial-gradient(circle, rgba(13, 115, 119, 0.24), transparent 70%);
+@keyframes gh-shine { to { background-position: 200% center; } }
+@media (prefers-reduced-motion: reduce) {
+  .gh-marketing__hero::before,
+  .gh-marketing__hero .gh-heading-accent { animation: none; }
 }
+/* light-on-opal text + shimmer accent, scoped to the hero so the locked-state
+   heading keeps its readable on-cream color. */
+.gh-marketing__hero .gh-marketing__eyebrow { color: #ddd3f5; letter-spacing: 0.14em; }
+.gh-marketing__hero .gh-marketing__heading { color: #f5f7fb; font-size: 38px; line-height: 1.1; letter-spacing: -0.02em; }
+.gh-marketing__hero .gh-heading-accent {
+  background: linear-gradient(100deg, #9a6fe0, #c9b3f2 30%, #C9A84C 70%, #f0d488);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: gh-shine 6s linear infinite;
+}
+.gh-marketing__hero .gh-marketing__tagline { color: #dbe4ee; }
+.gh-marketing__hero .gh-marketing__subheading { color: #cdd7e3; }
+.gh-marketing__hero .gh-marketing__cta {
+  color: #06121f;
+  background: linear-gradient(100deg, #9a6fe0, #c9b3f2 45%, #C9A84C);
+  background-size: 180% auto;
+  border: 0;
+  box-shadow: 0 10px 26px -10px rgba(143, 111, 214, 0.6);
+  transition: transform 0.15s ease, background-position 0.4s ease;
+}
+.gh-marketing__hero .gh-marketing__cta:hover { transform: translateY(-1px); background-position: 100% center; }
 .gh-marketing__eyebrow {
   color: var(--gh-gold-on-light);
   text-transform: uppercase;
