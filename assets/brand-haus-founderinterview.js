@@ -169,6 +169,29 @@
     };
     store.setState({ step: "results", results: results });
     recordHistoryVersion(results);
+    publishArchetype(results);
+  }
+
+  // Publish a compact archetype record to localStorage (p2p_archetype) so the
+  // Purpose 2 Profit Operating System hero can show the founder's Brand DNA.
+  // Additive + self-contained (WHEEL_WORDS mirrored) — no coupling to engine internals.
+  function publishArchetype(results) {
+    try {
+      var profile = results && results.match && results.match.best && results.match.best.profile;
+      if (!profile || !profile.name) return;
+      var WORDS = {
+        "The Trusted Guide": "Trust", "The Community Builder": "Belonging", "The Joyful Connector": "Joy",
+        "The Free Spirit": "Freedom", "The Luxe Rebel": "Boldness", "The Trail Forger": "Grit",
+        "The Bold Pioneer": "Courage", "The Cozy Craftsman": "Craft", "The Elevated Icon": "Excellence",
+        "The Quiet Authority": "Credibility", "The Modern Minimalist": "Clarity"
+      };
+      var slug = profile.name.toLowerCase().replace(/^the /, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+      var vals = (results.founderOutput && results.founderOutput.values) || [];
+      var traits = vals.map(function (v) { return v && v.name; }).filter(Boolean).slice(0, 3);
+      var rec = { slug: slug, name: profile.name, word: WORDS[profile.name] || "", traits: traits, ts: Date.now() };
+      localStorage.setItem("p2p_archetype", JSON.stringify(rec));
+      if (window.P2P && window.P2P.push) window.P2P.push();
+    } catch (e) {}
   }
 
   // Every completed assessment gets saved as a timestamped version under
