@@ -24,7 +24,7 @@
 
   var STORAGE_KEY = "brandHausBrandKits";
   var SHARED_STORAGE_KEY = "blackSheepBrandKitVault";
-  var MAX_KITS = 3;
+  var MAX_KITS = 5;
   var MAX_COLORS = 6;
   var MAX_VALUES = 5;
 

@@ -148,16 +148,17 @@
     }).join("");
     var voice = fieldVal(kit.voice);
     var name = kit.name || "Your brand kit";
-    // name + swatches are separate grid cells so every column's swatches line up
-    // on one vertical edge (the name track sizes to the longest name).
+    // swatches stack directly UNDER each name (keeps the card narrow so it never
+    // pushes into the neighbouring widget); left-aligned so they still line up.
     function kitRow(o) {
       var sw = (o.colors || []).filter(isHex).slice(0, 5).map(function (c) {
         var hex = c.charAt(0) === "#" ? c : "#" + c;
         return '<span class="ov-swatch ov-swatch--sm" style="background:' + esc(hex) + '"></span>';
       }).join("");
       var nm = o.name || "Kit";
-      return '<span class="ov-kit-other-name" title="' + esc(nm) + '">' + esc(nm) + '</span>' +
-        '<span class="ov-kit-other-sw">' + sw + '</span>';
+      return '<div class="ov-kit-other">' +
+        '<span class="ov-kit-other-name" title="' + esc(nm) + '">' + esc(nm) + '</span>' +
+        '<span class="ov-kit-other-sw">' + sw + '</span></div>';
     }
     // Up to 4 others (5-kit vault: 1 active + 4), split into two columns divided by
     // a light vertical line — matching the vault's own 5-kit limit.
@@ -176,7 +177,7 @@
       (swatches ? '<div class="ov-swatches">' + swatches + '</div>' : '') +
       (voice ? '<div class="ov-kit-voice">Voice: <i>' + esc(voice) + '</i></div>' : '') +
       othersHtml +
-      '<a class="ov-link" href="/pages/brand-haus">Open in Brand Haus →</a>' +
+      '<a class="ov-link" href="/pages/brand-haus">Open or switch kits in the Brand Haus →</a>' +
       '</div>';
   }
 
