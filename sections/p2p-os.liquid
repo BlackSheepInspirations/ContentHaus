@@ -25,19 +25,23 @@
       <div class="osx-brandsub">{{ section.settings.brand_sub | default: 'powered by Black Sheep Creations &amp; Inspirations' }}</div>
     </button>
     <nav class="osx-nav">
-      {%- for block in section.blocks -%}
-        {%- if block.type == 'navitem' -%}
-          {%- assign owns = owns_all -%}
-          {%- if block.settings.access_tag == blank -%}{%- assign owns = true -%}{%- endif -%}
-          {%- if customer and block.settings.access_tag != blank and customer.tags contains block.settings.access_tag -%}{%- assign owns = true -%}{%- endif -%}
-          {%- if request.design_mode -%}{%- assign owns = true -%}{%- endif -%}
+      {%- comment -%} Sidebar nav is baked into the section (target^label^icon^mode^access_tag^get_url) so a
+         theme-editor template revert can never empty it. Edit here in code, not the customizer. {%- endcomment -%}
+      {%- capture os_nav -%}start^Your Journey Starts Here^spark^view^^|checkpoint^Checkpoint^check^view^^|assessment^Founders Assessment^fingerprint^view^^|/pages/brand-haus^Brand Haus^crown^embed^brand-haus-access^/pages/brand-haus-preview|/pages/content-haus^Content Haus^prompt^embed^prompt-haus-access^/pages/content-haus-preview|/pages/graphics-haus^Graphics Haus^palette^embed^graphics-haus-access^/pages/graphics-haus-preview|/pages/project-haus^Project Haus^box^embed^product-haus-access^/pages/project-haus-preview|/pages/marketing-haus^Marketing Haus^megaphone^embed^marketing-haus-access^/pages/marketing-haus-preview|/pages/growth-haus^Growth Haus^rocket^embed^P2P-haus-access^/pages/growth-haus-preview|rooted^ROOTED — Light the Path^path^view^^|mates^Haus Mates^mates^view^^|tools^Tools & Resources^tools^view^^|notebook^Notebook^notebook^view^^|bonus^Bonus Resources^gift^view^^{%- endcapture -%}
+      {%- assign os_nav_items = os_nav | split: '|' -%}
+      {%- for it in os_nav_items -%}
+        {%- assign f = it | split: '^' -%}
+        {%- assign it_tag = f[4] -%}
+        {%- assign owns = owns_all -%}
+        {%- if it_tag == blank -%}{%- assign owns = true -%}{%- endif -%}
+        {%- if customer and it_tag != blank and customer.tags contains it_tag -%}{%- assign owns = true -%}{%- endif -%}
+        {%- if request.design_mode -%}{%- assign owns = true -%}{%- endif -%}
           <button class="osx-item{% if forloop.first %} on{% endif %}{% unless owns %} locked{% endunless %}" type="button"
-            data-mode="{{ block.settings.mode | default: 'view' }}"
-            data-target="{{ block.settings.target }}"
-            {% unless owns %}data-get="{{ block.settings.get_url }}"{% endunless %}
-            {{ block.shopify_attributes }}>
+            data-mode="{{ f[3] }}"
+            data-target="{{ f[0] }}"
+            {% unless owns %}data-get="{{ f[5] }}"{% endunless %}>
             <span class="osx-ico">
-              {%- case block.settings.icon -%}
+              {%- case f[2] -%}
                 {%- when 'spark' -%}<svg viewBox="0 0 24 24"><path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.9 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/></svg>
                 {%- when 'check' -%}<svg viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg>
                 {%- when 'fingerprint' -%}<svg viewBox="0 0 24 24"><path d="M12 11v3m-4-3a4 4 0 018 0v2M6 12a6 6 0 0112 0v3m-9 0a3 3 0 006 0"/></svg>
@@ -55,10 +59,9 @@
                 {%- else -%}<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></svg>
               {%- endcase -%}
             </span>
-            <span class="osx-lbl">{{ block.settings.label }}</span>
+            <span class="osx-lbl">{{ f[1] }}</span>
             {%- unless owns -%}<span class="osx-lock">🔒</span>{%- endunless -%}
           </button>
-        {%- endif -%}
       {%- endfor -%}
     </nav>
   </aside>
@@ -92,26 +95,22 @@
       </div>
       {%- endif -%}
 
-      {%- comment -%} gamified step map {%- endcomment -%}
-      {%- assign steps = section.blocks | where: 'type', 'step' -%}
-      {%- if steps.size > 0 -%}
+      {%- comment -%} gamified step map (baked into the section — label^note) {%- endcomment -%}
+      {%- capture os_steps -%}You made it!^Your journey begins — first step complete.|Find your direction^Founders Assessment|Brand^Your identity|Content^Your words|Graphics^Your look|Project^Your build|Marketing^Your reach|Growth^Launch with ROOTED{%- endcapture -%}
+      {%- assign os_step_items = os_steps | split: '|' -%}
       <div class="osx-block">
         <div class="osx-kick">Your road ahead</div>
         <div class="osx-map">
-          {%- assign i = 0 -%}
-          {%- for block in section.blocks -%}
-            {%- if block.type == 'step' -%}
-              {%- assign i = i | plus: 1 -%}
-              <div class="osx-node{% if forloop.first %} done{% endif %}" {{ block.shopify_attributes }}>
-                <span class="osx-dot">{% if forloop.first %}✓{% else %}{{ i }}{% endif %}</span>
-                <span class="osx-nlbl">{{ block.settings.label }}</span>
-                {%- if block.settings.note != blank -%}<span class="osx-nnote">{{ block.settings.note }}</span>{%- endif -%}
-              </div>
-            {%- endif -%}
+          {%- for st in os_step_items -%}
+            {%- assign sf = st | split: '^' -%}
+            <div class="osx-node{% if forloop.first %} done{% endif %}">
+              <span class="osx-dot">{% if forloop.first %}✓{% else %}{{ forloop.index }}{% endif %}</span>
+              <span class="osx-nlbl">{{ sf[0] }}</span>
+              {%- if sf[1] != blank -%}<span class="osx-nnote">{{ sf[1] }}</span>{%- endif -%}
+            </div>
           {%- endfor -%}
         </div>
       </div>
-      {%- endif -%}
 
       {%- comment -%} you've got this — reassurance {%- endcomment -%}
       {%- if section.settings.reassure_body != blank -%}
@@ -126,19 +125,15 @@
       {%- endif -%}
 
       {%- comment -%} need help / FAQ {%- endcomment -%}
-      {%- assign faqs = section.blocks | where: 'type', 'faq' -%}
-      {%- if faqs.size > 0 -%}
       <div class="osx-block">
         <div class="osx-kick">{{ section.settings.faq_heading | default: 'Need help?' }}</div>
         <div class="osx-faq">
-          {%- for block in section.blocks -%}
-            {%- if block.type == 'faq' -%}
-              <details {{ block.shopify_attributes }}><summary>{{ block.settings.q }}</summary><div class="osx-fa">{{ block.settings.a }}</div></details>
-            {%- endif -%}
-          {%- endfor -%}
+          <details><summary>Where do I start?</summary><div class="osx-fa"><p>Right here. Work top to bottom down the sidebar — each step builds on the last, from finding your direction all the way to launching with ROOTED.</p></div></details>
+          <details><summary>What if I only have one Haus?</summary><div class="osx-fa"><p>You'll still see everything here. What you own is unlocked; the rest shows a lock with a way to add it whenever you're ready.</p></div></details>
+          <details><summary>I'm not techy — is that okay?</summary><div class="osx-fa"><p>Completely. This home base was built for exactly that. One step at a time, plain language, and your Haus Mates are here to help.</p></div></details>
+          <details><summary>How do I get better results from the generators?</summary><div class="osx-fa"><p>Be specific, give an example of what &ldquo;good&rdquo; looks like, and tell it who it's for. Small, clear details beat long vague ones every time.</p></div></details>
         </div>
       </div>
-      {%- endif -%}
     </section>
 
     {%- comment -%} ===== VIEW: Checkpoint ===== {%- endcomment -%}
@@ -147,37 +142,32 @@
       <h2 class="osx-h2">{{ section.settings.checkpoint_title | default: "Set yourself up before you go" }}</h2>
       {%- if section.settings.checkpoint_intro != blank -%}<p class="osx-lede">{{ section.settings.checkpoint_intro }}</p>{%- endif -%}
 
-      {%- assign checks = section.blocks | where: 'type', 'checkitem' -%}
-      {%- if checks.size > 0 -%}
+      {%- comment -%} checklist baked in (id^label^note) — ids stay stable for saved state {%- endcomment -%}
+      {%- capture os_checks -%}ck1^Take the Founders Assessment^Find your direction before you build.|ck2^Create your brand identity in Brand Haus^Your card, logo and kit.|ck3^Peek into each Haus^See what's inside and where it helps.|ck4^Say hi to your Haus Mates^Frank and Ruth are here to help.|ck5^Jot your first idea in the Notebook^Capture the spark while it's hot.|ck6^Come back tomorrow^Keep your streak alive.{%- endcapture -%}
+      {%- assign os_check_items = os_checks | split: '|' -%}
       <div class="osx-check" data-osx-check>
-        <div class="osx-check-top"><div class="osx-check-bar"><i data-osx-check-bar style="width:0%"></i></div><div class="osx-check-count"><b data-osx-check-done>0</b>/<span data-osx-check-total>{{ checks.size }}</span></div></div>
+        <div class="osx-check-top"><div class="osx-check-bar"><i data-osx-check-bar style="width:0%"></i></div><div class="osx-check-count"><b data-osx-check-done>0</b>/<span data-osx-check-total>{{ os_check_items.size }}</span></div></div>
         <ul class="osx-check-list">
-          {%- for block in section.blocks -%}
-            {%- if block.type == 'checkitem' -%}
-              <li {{ block.shopify_attributes }}><label><input type="checkbox" data-osx-checkitem="{{ block.id }}"><span class="osx-check-box"></span><span class="osx-check-txt"><b>{{ block.settings.label }}</b>{% if block.settings.note != blank %}<i>{{ block.settings.note }}</i>{% endif %}</span></label></li>
-            {%- endif -%}
+          {%- for ck in os_check_items -%}
+            {%- assign cf = ck | split: '^' -%}
+            <li><label><input type="checkbox" data-osx-checkitem="{{ cf[0] }}"><span class="osx-check-box"></span><span class="osx-check-txt"><b>{{ cf[1] }}</b>{% if cf[2] != blank %}<i>{{ cf[2] }}</i>{% endif %}</span></label></li>
           {%- endfor -%}
         </ul>
         <div class="osx-check-done" data-osx-check-msg hidden>🎉 <b>You're ready for the next steps.</b> Off you go — your journey's waiting.</div>
       </div>
-      {%- endif -%}
 
-      {%- assign meets = section.blocks | where: 'type', 'meet' -%}
-      {%- if meets.size > 0 -%}
+      {%- comment -%} meet cards baked in (icon^title^blurb) {%- endcomment -%}
       <div class="osx-kick" style="margin-top:28px">{{ section.settings.meet_heading | default: 'Meet your Hausen & Haus Mates' }}</div>
+      {%- capture os_meets -%}crown^Brand Haus^Your identity — brand card, logo, and kit. Start here so everything else sounds like you.|prompt^Content Haus^Your words — prompts and copy that carry your voice everywhere you show up.|palette^Graphics Haus^Your look — on-brand visuals and design without the degree.|box^Project Haus^Your build — turn the idea into a real product, step by step.|megaphone^Marketing Haus^Your reach — posts, ads and campaigns that get you seen.|rocket^Growth Haus^Your launch — generators that execute the ROOTED method and scale what works.|mates^Frank & Ruth — your Haus Mates^Frank, your Creative Director, and Ruth, your ruthless Design Meister. Ask them anything as you go.{%- endcapture -%}
+      {%- assign os_meet_items = os_meets | split: '|' -%}
       <div class="osx-meet">
-        {%- for block in section.blocks -%}
-          {%- if block.type == 'meet' -%}
-            <div class="osx-meetcard" {{ block.shopify_attributes }}>
-              <span class="osx-meic">
-                {%- case block.settings.icon -%}
-                  {%- when 'crown' -%}👑{%- when 'prompt' -%}✍️{%- when 'palette' -%}🎨{%- when 'box' -%}📦{%- when 'megaphone' -%}📣{%- when 'rocket' -%}🚀{%- when 'mates' -%}🤝{%- else -%}✦
-                {%- endcase -%}
-              </span>
-              <b>{{ block.settings.title }}</b>
-              {%- if block.settings.blurb != blank -%}<p>{{ block.settings.blurb }}</p>{%- endif -%}
-            </div>
-          {%- endif -%}
+        {%- for mt in os_meet_items -%}
+          {%- assign mf = mt | split: '^' -%}
+          <div class="osx-meetcard">
+            <span class="osx-meic">{%- case mf[0] -%}{%- when 'crown' -%}👑{%- when 'prompt' -%}✍️{%- when 'palette' -%}🎨{%- when 'box' -%}📦{%- when 'megaphone' -%}📣{%- when 'rocket' -%}🚀{%- when 'mates' -%}🤝{%- else -%}✦{%- endcase -%}</span>
+            <b>{{ mf[1] }}</b>
+            {%- if mf[2] != blank -%}<p>{{ mf[2] }}</p>{%- endif -%}
+          </div>
         {%- endfor -%}
       </div>
       {%- endif -%}
