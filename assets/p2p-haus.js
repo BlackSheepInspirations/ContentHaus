@@ -4831,7 +4831,7 @@ function buildFullExport() {
   const productName = readValue("productName") || "Untitled Product";
 
   const parts = [
-    "PROMPT TO PROFIT — FULL EXPORT",
+    "GROWTH HAUS — FULL EXPORT",
     `Product: ${productName}`,
     `Generated: ${new Date().toLocaleString()}`,
     "",
@@ -4933,7 +4933,7 @@ function printLaunchKit() {
 
   doc.write(
     "<!doctype html><html><head><meta charset='utf-8'><title>" +
-      escapeHtml(`Prompt to Profit — ${title}`) +
+      escapeHtml(`Growth Haus — ${title}`) +
       "</title><style>" +
       "@page{margin:28px;}" +
       "*{box-sizing:border-box;}" +
@@ -4946,10 +4946,10 @@ function printLaunchKit() {
       "pre{font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:11.5px;line-height:1.6;white-space:pre-wrap;word-wrap:break-word;margin:0;}" +
       ".foot{padding:14px 40px 30px;color:#8a9b97;font-size:11px;}" +
       "</style></head><body>" +
-      "<div class='brandbar'><div class='wm'>Prompt to <b>Profit</b></div>" +
+      "<div class='brandbar'><div class='wm'>Growth <b>Haus</b></div>" +
       `<div class='meta'>Launch Kit &nbsp;&middot;&nbsp; ${escapeHtml(title)} &nbsp;&middot;&nbsp; ${escapeHtml(when)}</div></div>` +
       `<div class='content'><pre>${escapeHtml(buildFullExport())}</pre></div>` +
-      "<div class='foot'>Generated with Prompt to Profit</div>" +
+      "<div class='foot'>Generated with Growth Haus</div>" +
       "</body></html>"
   );
 
