@@ -161,7 +161,7 @@
         <img class="osx-reassure-ic" src="{{ 'bsc-sheep-mark.png' | asset_url }}" alt="" width="46" height="46" loading="lazy">
         <div>
           <b>{{ section.settings.reassure_title | default: 'Born an Original.' }}</b>
-          <p>{{ section.settings.reassure_body }}{%- if section.settings.reassure_spark != blank -%}<br>{{ section.settings.reassure_spark }}{%- endif -%}</p>
+          <div class="osx-reassure-roll" data-osx-reassure><p class="osx-reassure-line">{{ section.settings.reassure_body }}{%- if section.settings.reassure_spark != blank -%}<br>{{ section.settings.reassure_spark }}{%- endif -%}</p></div>
           <div class="osx-reassure-note">{{ section.settings.reassure_note | default: "One step at a time. We're glad to be here with you." }}</div>
         </div>
       </div>
@@ -636,7 +636,11 @@
   #p2pos .osx-reassure{display:flex;gap:16px;align-items:flex-start;padding:20px 22px;border:1px solid var(--gstroke);border-radius:16px;margin-bottom:26px;background:linear-gradient(120deg,rgba(216,180,90,.1),rgba(57,197,192,.06));}
   #p2pos .osx-reassure-ic{flex:none;width:46px;height:46px;border-radius:50%;object-fit:cover;background:#0a1410;border:1px solid var(--gstroke);}
   #p2pos .osx-reassure b{font:700 18px/1.2 Georgia,serif;}
-  #p2pos .osx-reassure p{margin:7px 0 10px;font:400 14px/1.6 system-ui;color:#dbe7e2;}
+  #p2pos .osx-reassure-roll{position:relative;min-height:46px;margin:7px 0 10px;overflow:hidden;}
+  #p2pos .osx-reassure-line{margin:0;font:400 14px/1.6 system-ui;color:#dbe7e2;transition:transform .5s cubic-bezier(.4,.1,.2,1),opacity .5s ease;}
+  #p2pos .osx-reassure-line.is-out{transform:translateY(-16px);opacity:0;}
+  #p2pos .osx-reassure-line.is-in{transform:translateY(16px);opacity:0;transition:none;}
+  @media (prefers-reduced-motion:reduce){#p2pos .osx-reassure-line{transition:opacity .4s ease;}#p2pos .osx-reassure-line.is-out,#p2pos .osx-reassure-line.is-in{transform:none;}}
   #p2pos .osx-reassure-note{font:italic 500 13.5px/1.5 system-ui;color:var(--gold-bright);}
 
   /* faq */
@@ -1182,6 +1186,52 @@
 
     // clickable stat chips + ring -> shared Progress detail pop-ups (Points/Badges/Streak/Merit/Courses)
     if(window.P2PProgressPopups){ window.P2PProgressPopups.mount(root); }
+
+    // "Born an Original" — rotate the middle line every 11s (up-slide). Mark, title & gold note stay fixed.
+    (function(){
+      var box = root.querySelector('[data-osx-reassure]'); if(!box) return;
+      var line = box.querySelector('.osx-reassure-line'); if(!line) return;
+      var LINES = [
+        "There is only one YOU — and that's not just a nice thought, it is your actual advantage.",
+        "Nobody can copy your spark.",
+        "The world has enough echoes. Be the original sound.",
+        "There's no competition when you refuse to be a copy.",
+        "You're not too much. They're just not used to someone like you.",
+        "Plot twist: the thing that makes you different is the whole point.",
+        "Nobody can out-you you. That is your unfair advantage.",
+        "Trends fade. Originals get remembered.",
+        "Your weird is your worth. Spend it boldly.",
+        "Be so unapologetically you that they have to invent a new category.",
+        "The market has room for a lot of good. It only has room for one you.",
+        "You don't have to be everything. Just be unmistakably you.",
+        "Your fingerprint has never existed before. Neither has your voice.",
+        "Comparison is rent paid on a version of you that isn't even real.",
+        "The right people are searching for exactly what only you can make.",
+        "You are not behind. You are on your own road, at your own pace.",
+        "Build the thing only you can build. The world is waiting for it.",
+        "Your story is the one credential no one else can ever claim.",
+        "You were made on purpose, for a purpose — original from the very first breath.",
+        "The world needs your particular light in its particular corner.",
+        "Being yourself isn't the risk. It's the only sure thing you've got.",
+        "You are enough to begin, and original enough to matter.",
+        "One of a kind is not a slogan. It is simply the truth about you.",
+        "Dare to be the first draft that no one else could ever write.",
+        "Somewhere, someone is waiting for a spark that only you carry."
+      ];
+      var i = 0;
+      function tick(){
+        var next = LINES[i];
+        line.classList.add('is-out');
+        setTimeout(function(){
+          line.textContent = next;
+          line.classList.remove('is-out'); line.classList.add('is-in');
+          void line.offsetWidth; // reflow so the in-animation starts from below
+          line.classList.remove('is-in');
+          i = (i + 1) % LINES.length;
+        }, 500);
+      }
+      setInterval(tick, 11000);
+    })();
 
     // "Your road ahead" — light up each step from real cross-Haus signals (same localStorage the Vault reads)
     (function(){
