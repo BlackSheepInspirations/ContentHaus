@@ -73,6 +73,7 @@
       <header class="osx-hero"{% if section.settings.hero_image != blank %} style="--hero:url('{{ section.settings.hero_image | image_url: width: 2000 }}')"{% endif %}>
         <div class="osx-hero-glow"></div>
         <div class="osx-hero-in">
+          {%- if section.settings.hero_brand_mark != blank -%}<div class="osx-hero-mark"><img src="{{ section.settings.hero_brand_mark | image_url: width: 360 }}" alt="Purpose 2 Profit" loading="lazy"></div>{%- endif -%}
           {%- if section.settings.hero_eyebrow != blank -%}<div class="osx-eyebrow">{{ section.settings.hero_eyebrow }}</div>{%- endif -%}
           {%- assign hero_phrase = section.settings.hero_title | default: 'Make this Haus Your Home' -%}
           <h1>{%- if customer.first_name != blank -%}<span class="osx-name">{{ customer.first_name }}</span>,<br>{{ hero_phrase | slice: 0 | downcase }}{{ hero_phrase | slice: 1, 400 }}{%- else -%}{{ hero_phrase }}{%- endif -%}</h1>
@@ -556,6 +557,7 @@
   #p2pos .osx-hero[style*="--hero"]{background:linear-gradient(180deg,rgba(5,10,16,.55),rgba(5,10,16,.82)),var(--hero) center/cover no-repeat;}
   #p2pos .osx-hero-glow{position:absolute;inset:-40% -10% auto -10%;height:60%;background:radial-gradient(50% 100% at 30% 0%,rgba(143,111,214,.5),transparent 70%),radial-gradient(50% 100% at 75% 10%,rgba(57,197,192,.4),transparent 70%);filter:blur(20px);opacity:.6;pointer-events:none;}
   #p2pos .osx-hero-in{position:relative;flex:1;min-width:280px;}
+  #p2pos .osx-hero-mark img{height:clamp(84px,10vw,120px);width:auto;display:block;margin:0 0 12px;filter:drop-shadow(0 8px 22px rgba(120,80,220,.4));}
   #p2pos .osx-hero-tagline{margin:10px 0 0;font:italic 600 clamp(14px,2vw,17px)/1.4 Georgia,serif;
     background:var(--aurora);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:p2pos-shift 26s linear infinite;}
   @media (prefers-reduced-motion:reduce){#p2pos .osx-hero-tagline{animation:none;}}
@@ -1386,6 +1388,7 @@
     { "type": "text", "id": "all_access_tag", "label": "All-access tag", "default": "all-access" },
     { "type": "header", "content": "Your Journey Starts Here (landing)" },
     { "type": "image_picker", "id": "hero_image", "label": "Hero image (your premium PNG)" },
+    { "type": "image_picker", "id": "hero_brand_mark", "label": "Brand mark / logo", "info": "The rooted-fingerprint tree logo. Shown above the greeting. Leave blank to hide." },
     { "type": "text", "id": "hero_eyebrow", "label": "Hero eyebrow", "default": "Purpose 2 Profit" },
     { "type": "text", "id": "hero_title", "label": "Hero title", "default": "Make this Haus Your Home", "info": "A logged-in member's first name is prepended: 'Andrea, make this Haus Your Home.' Shown as-is when there's no name: 'Make this Haus Your Home.'" },
     { "type": "text", "id": "hero_brand_tagline", "label": "Brand tagline", "default": "Where Your originality is rooted and ready to grow.", "info": "The Purpose 2 Profit tagline, shown under the greeting. Leave blank to hide." },
