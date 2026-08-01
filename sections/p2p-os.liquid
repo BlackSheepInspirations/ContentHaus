@@ -459,6 +459,7 @@
         <select class="osx-suggest-kind" data-suggest-kind>
           <option value="Suggestion">Suggestion</option>
           <option value="Question">Question</option>
+          <option value="Kudos">Kudos / Praise</option>
         </select>
         <textarea class="osx-cw-text" data-suggest-text maxlength="2000" rows="3" placeholder="Share your thoughts…"></textarea>
         <div class="osx-suggest-row"><span class="osx-suggest-status" data-suggest-status></span><button class="osx-cw-postbtn" type="button" data-suggest-send>Send</button></div>
@@ -1019,7 +1020,9 @@
   #p2pos .osx-suggest{max-width:560px;margin-top:34px;padding:18px;border:1px solid var(--stroke);border-radius:16px;background:rgba(255,255,255,.03);}
   #p2pos .osx-suggest-h{font:700 15px/1.2 system-ui;color:var(--text);margin-bottom:6px;}
   #p2pos .osx-suggest-sub{font:400 13px/1.5 system-ui;color:var(--muted);margin:0 0 12px;}
-  #p2pos .osx-suggest-kind{display:block;margin-bottom:10px;background:rgba(9,17,24,.5);border:1px solid var(--stroke);border-radius:10px;padding:8px 11px;color:var(--text);font:600 13px/1 system-ui;}
+  #p2pos .osx-suggest-kind{display:block;margin-bottom:10px;background:rgba(9,17,24,.5);border:1px solid var(--stroke);border-radius:10px;padding:9px 34px 9px 12px;color:var(--text);font:600 13px/1.5 system-ui;
+    -webkit-appearance:none;appearance:none;cursor:pointer;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239fb3ad' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 11px center;}
   #p2pos .osx-suggest-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:10px;}
   #p2pos .osx-suggest-status{font:600 12.5px/1.3 system-ui;color:var(--gold-bright);}
   /* members · map · profile */
