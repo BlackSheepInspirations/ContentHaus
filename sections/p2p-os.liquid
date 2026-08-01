@@ -83,13 +83,17 @@
       <header class="osx-hero"{% if section.settings.hero_image != blank %} style="--hero:url('{{ section.settings.hero_image | image_url: width: 2000 }}')"{% endif %}>
         <div class="osx-hero-glow"></div>
         <div class="osx-hero-in">
-          {%- if section.settings.hero_brand_mark != blank -%}<div class="osx-hero-mark"><img src="{{ section.settings.hero_brand_mark | image_url: width: 360 }}" alt="Purpose 2 Profit" loading="lazy"></div>
-          {%- else -%}<div class="osx-hero-mark"><img src="{{ 'p2p-brand-mark.png' | asset_url }}" alt="Purpose 2 Profit" loading="lazy"></div>{%- endif -%}
-          {%- if section.settings.hero_eyebrow != blank -%}<div class="osx-eyebrow">{{ section.settings.hero_eyebrow }}</div>{%- endif -%}
           {%- assign hero_phrase = section.settings.hero_title | default: 'Make this Haus Your Home' -%}
-          <h1>{%- if customer.first_name != blank -%}<span class="osx-name">{{ customer.first_name }}</span>,<br>{{ hero_phrase | slice: 0 | downcase }}{{ hero_phrase | slice: 1, 400 }}{%- else -%}{{ hero_phrase }}{%- endif -%}</h1>
           {%- assign os_brand_tagline = section.settings.hero_brand_tagline | default: 'Where Your originality is rooted and ready to grow.' -%}
-          {%- if os_brand_tagline != blank -%}<p class="osx-hero-tagline">{{ os_brand_tagline }}</p>{%- endif -%}
+          <div class="osx-hero-lockup">
+            {%- if section.settings.hero_brand_mark != blank -%}<img class="osx-hero-mark" src="{{ section.settings.hero_brand_mark | image_url: width: 360 }}" alt="Purpose 2 Profit" loading="lazy">
+            {%- else -%}<img class="osx-hero-mark" src="{{ 'p2p-brand-mark.png' | asset_url }}" alt="Purpose 2 Profit" loading="lazy">{%- endif -%}
+            <div class="osx-hero-head">
+              {%- if section.settings.hero_eyebrow != blank -%}<div class="osx-eyebrow">{{ section.settings.hero_eyebrow }}</div>{%- endif -%}
+              <h1>{%- if customer.first_name != blank -%}<span class="osx-name">{{ customer.first_name }}</span>,<br>{{ hero_phrase | slice: 0 | downcase }}{{ hero_phrase | slice: 1, 400 }}{%- else -%}{{ hero_phrase }}{%- endif -%}</h1>
+              {%- if os_brand_tagline != blank -%}<p class="osx-hero-tagline">{{ os_brand_tagline }}</p>{%- endif -%}
+            </div>
+          </div>
           {%- if section.settings.hero_body != blank -%}<p class="osx-hero-body">{{ section.settings.hero_body }}</p>{%- endif -%}
           {%- assign os_journey_url = section.settings.journey_url | default: '/pages/p2p-learning' -%}
           <div class="osx-hero-btns">
@@ -585,12 +589,16 @@
   #p2pos .osx-hero[style*="--hero"]{background:linear-gradient(180deg,rgba(5,10,16,.55),rgba(5,10,16,.82)),var(--hero) center/cover no-repeat;}
   #p2pos .osx-hero-glow{position:absolute;inset:-40% -10% auto -10%;height:60%;background:radial-gradient(50% 100% at 30% 0%,rgba(143,111,214,.5),transparent 70%),radial-gradient(50% 100% at 75% 10%,rgba(57,197,192,.4),transparent 70%);filter:blur(20px);opacity:.6;pointer-events:none;}
   #p2pos .osx-hero-in{position:relative;flex:1;min-width:280px;}
-  #p2pos .osx-hero-mark img{height:clamp(84px,10vw,120px);width:auto;display:block;margin:0 0 12px;filter:drop-shadow(0 8px 22px rgba(120,80,220,.4));}
+  #p2pos .osx-hero-lockup{display:flex;align-items:center;gap:20px;margin-bottom:2px;}
+  #p2pos .osx-hero-head{min-width:0;}
+  #p2pos .osx-hero-mark{height:clamp(88px,11vw,142px);width:auto;flex:none;display:block;
+    filter:drop-shadow(0 0 3px rgba(255,255,255,.9)) drop-shadow(0 0 12px rgba(255,255,255,.4)) drop-shadow(0 8px 20px rgba(120,80,220,.35));}
+  @media (max-width:560px){#p2pos .osx-hero-lockup{gap:12px;} #p2pos .osx-hero-mark{height:88px;}}
   /* non-member preview gate */
   #p2pos .osx-gate{min-height:70vh;display:flex;align-items:center;justify-content:center;padding:52px 20px;
     background:radial-gradient(46% 40% at 12% 4%,rgba(39,174,110,.14),transparent 60%),radial-gradient(42% 36% at 88% 8%,rgba(37,99,235,.12),transparent 60%),radial-gradient(50% 40% at 60% 100%,rgba(214,51,108,.10),transparent 60%),linear-gradient(180deg,#080d0b,#0a1310 50%,#080d0b);}
   #p2pos .osx-gate-in{max-width:560px;text-align:center;}
-  #p2pos .osx-gate-mark{height:clamp(120px,26vw,196px);width:auto;display:block;margin:0 auto 18px;filter:drop-shadow(0 14px 34px rgba(120,80,220,.42));}
+  #p2pos .osx-gate-mark{height:clamp(120px,26vw,196px);width:auto;display:block;margin:0 auto 18px;filter:drop-shadow(0 0 4px rgba(255,255,255,.85)) drop-shadow(0 0 14px rgba(255,255,255,.38)) drop-shadow(0 14px 34px rgba(120,80,220,.4));}
   #p2pos .osx-gate-eyebrow{display:inline-block;font:700 12px/1 system-ui;letter-spacing:.16em;text-transform:uppercase;color:#7fe3b8;margin-bottom:14px;}
   #p2pos .osx-gate-h1{font:800 clamp(30px,6vw,46px)/1.05 Georgia,serif;margin:0 0 12px;color:var(--text);}
   #p2pos .osx-gate-tag{font:italic 600 clamp(15px,2.4vw,19px)/1.4 Georgia,serif;margin:0 0 18px;

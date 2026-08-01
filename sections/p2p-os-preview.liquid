@@ -10,11 +10,15 @@
 
 <div id="p2posprev" class="pmv">
   <header class="pmv-hero">
-    {%- if section.settings.brand_mark != blank -%}<div class="pmv-mark"><img src="{{ section.settings.brand_mark | image_url: width: 500 }}" alt="Purpose 2 Profit" loading="eager"></div>
-    {%- else -%}<div class="pmv-mark"><img src="{{ 'p2p-brand-mark.png' | asset_url }}" alt="Purpose 2 Profit" loading="eager"></div>{%- endif -%}
-    <span class="pmv-eyebrow">{{ section.settings.eyebrow | default: 'Black Sheep Creations &amp; Inspirations' }}</span>
-    <h1 class="pmv-h1">Purpose <span class="pmv-2">2</span> Profit</h1>
-    <p class="pmv-tagline">{{ section.settings.tagline | default: 'Where Your originality is rooted and ready to grow.' }}</p>
+    <div class="pmv-lockup">
+      {%- if section.settings.brand_mark != blank -%}<img class="pmv-mark" src="{{ section.settings.brand_mark | image_url: width: 500 }}" alt="Purpose 2 Profit" loading="eager">
+      {%- else -%}<img class="pmv-mark" src="{{ 'p2p-brand-mark.png' | asset_url }}" alt="Purpose 2 Profit" loading="eager">{%- endif -%}
+      <div class="pmv-lockup-head">
+        <span class="pmv-eyebrow">{{ section.settings.eyebrow | default: 'Black Sheep Creations &amp; Inspirations' }}</span>
+        <h1 class="pmv-h1">Purpose <span class="pmv-2">2</span> Profit</h1>
+        <p class="pmv-tagline">{{ section.settings.tagline | default: 'Where Your originality is rooted and ready to grow.' }}</p>
+      </div>
+    </div>
     <p class="pmv-tag">{{ section.settings.hero_tagline | default: 'The operating system that takes you from idea to income — built around the one thing no one can copy: you.' }}</p>
     <div class="pmv-hero-cta">
       <a class="pmv-btn pmv-btn--primary" href="{{ cta_url }}">{{ section.settings.cta_label | default: 'Get the Access Pass' }}{% if section.settings.access_product.price %} — {{ section.settings.access_product.price | money }}{% endif %}</a>
@@ -139,8 +143,13 @@
   #p2posprev .pmv-hero{text-align:center;padding:56px 24px 40px;border-radius:22px;margin:6px 0 40px;position:relative;overflow:hidden;
     background:radial-gradient(60% 120% at 18% 6%,rgba(39,174,110,.30),transparent 60%),radial-gradient(55% 120% at 84% 12%,rgba(37,99,235,.24),transparent 60%),radial-gradient(50% 120% at 60% 110%,rgba(214,51,108,.20),transparent 60%),linear-gradient(150deg,#0a0f0c,#101613 46%,#0c1310);
     border:1px solid var(--stroke);}
-  #p2posprev .pmv-mark img{height:clamp(120px,22vw,184px);width:auto;display:block;margin:0 auto 16px;
-    filter:drop-shadow(0 14px 34px rgba(120,80,220,.4));animation:pmv-float 7s ease-in-out infinite;}
+  #p2posprev .pmv-lockup{display:flex;align-items:center;justify-content:center;gap:24px;flex-wrap:wrap;margin-bottom:20px;}
+  #p2posprev .pmv-lockup-head{text-align:left;min-width:0;}
+  #p2posprev .pmv-lockup-head .pmv-eyebrow{margin-bottom:10px;}
+  #p2posprev .pmv-lockup-head .pmv-h1{margin:0 0 8px;}
+  #p2posprev .pmv-lockup-head .pmv-tagline{margin:0;max-width:520px;}
+  #p2posprev .pmv-mark{height:clamp(120px,20vw,182px);width:auto;display:block;flex:none;
+    filter:drop-shadow(0 0 4px rgba(255,255,255,.85)) drop-shadow(0 0 14px rgba(255,255,255,.38)) drop-shadow(0 14px 34px rgba(120,80,220,.4));animation:pmv-float 7s ease-in-out infinite;}
   #p2posprev .pmv-eyebrow{display:inline-block;font:700 12px/1 system-ui;letter-spacing:.16em;text-transform:uppercase;color:#7fe3b8;margin-bottom:16px;}
   #p2posprev .pmv-h1{font:800 clamp(38px,7vw,66px)/1 Georgia,serif;margin:0 0 12px;letter-spacing:-.02em;}
   #p2posprev .pmv-2{background:var(--aurora);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:pmv-shift 20s linear infinite;font-style:italic;}

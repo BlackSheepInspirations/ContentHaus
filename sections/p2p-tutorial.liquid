@@ -15,8 +15,13 @@
     <button class="p2pt-help" type="button" data-p2pt-help aria-label="Get help">i</button>
   </div>
   <header class="p2pt-hero">
-    {%- if section.settings.eyebrow != blank -%}<div class="p2pt-eyebrow">{{ section.settings.eyebrow }}</div>{%- endif -%}
-    <h1>{{ section.settings.title | default: 'How Your Learning Journey Works' }}</h1>
+    <div class="p2pt-lockup">
+      <img class="p2pt-mark" src="{{ 'p2p-brand-mark.png' | asset_url }}" alt="Purpose 2 Profit" loading="lazy">
+      <div class="p2pt-lockup-head">
+        {%- if section.settings.eyebrow != blank -%}<div class="p2pt-eyebrow">{{ section.settings.eyebrow }}</div>{%- endif -%}
+        <h1>{{ section.settings.title | default: 'How Your Learning Journey Works' }}</h1>
+      </div>
+    </div>
     {%- if section.settings.intro != blank -%}<p class="p2pt-intro">{{ section.settings.intro }}</p>{%- endif -%}
     {%- if section.settings.tour_url != blank -%}
       <a class="p2pt-tourbtn" href="{{ section.settings.tour_url }}#tour"><svg viewBox="0 0 24 24" width="16" height="16"><path d="M8 5v14l11-7z" fill="currentColor" stroke="none"/></svg> {{ section.settings.tour_label | default: 'Take the guided tour →' }}</a>
@@ -87,6 +92,11 @@
   #p2pt .p2pt-help{width:40px;height:40px;flex:none;border-radius:50%;border:1px solid var(--gstroke);background:transparent;color:var(--gold-bright);font:italic 700 18px/1 Georgia,serif;cursor:pointer;transition:background .15s,border-color .15s;}
   #p2pt .p2pt-help:hover{background:rgba(216,180,90,.1);border-color:var(--gold-bright);}
   #p2pt .p2pt-hero{text-align:center;margin-bottom:44px;}
+  #p2pt .p2pt-lockup{display:flex;align-items:center;justify-content:center;gap:18px;margin-bottom:16px;flex-wrap:wrap;}
+  #p2pt .p2pt-lockup-head{text-align:left;min-width:0;}
+  #p2pt .p2pt-lockup-head .p2pt-eyebrow{margin-bottom:8px;}
+  #p2pt .p2pt-lockup-head h1{margin:0;}
+  #p2pt .p2pt-mark{height:clamp(76px,10vw,116px);width:auto;flex:none;display:block;filter:drop-shadow(0 0 3px rgba(255,255,255,.9)) drop-shadow(0 0 12px rgba(255,255,255,.4)) drop-shadow(0 8px 20px rgba(120,80,220,.35));}
   #p2pt .p2pt-eyebrow{font:700 12px/1 system-ui;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:12px;}
   #p2pt .p2pt-hero h1{font:700 clamp(28px,5vw,42px)/1.1 Georgia,serif;margin:0 0 14px;
     background:var(--aurora);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:p2pt-shift 20s linear infinite;}
