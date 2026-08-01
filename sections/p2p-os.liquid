@@ -1569,6 +1569,23 @@
   #p2pos .osx-tip-pick:hover{border-color:var(--gstroke);background:rgba(216,180,90,.1);}
   #p2pos .osx-lv-card.osx-dupe{border-color:rgba(224,69,123,.6);box-shadow:0 0 0 1px rgba(224,69,123,.3);}
   #p2pos .osx-lv-dupebadge{font:700 11px/1.3 system-ui;color:#ffc2d8;background:rgba(224,69,123,.12);border-top:1px solid rgba(224,69,123,.3);padding:8px 14px;}
+  /* lives vaults + bulk actions */
+  #p2pos .osx-lv-vaultnav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
+  #p2pos .osx-lv-vaultb{border:1px solid var(--stroke);background:rgba(255,255,255,.03);color:var(--muted);cursor:pointer;border-radius:999px;padding:8px 14px;font:700 12.5px/1 system-ui;}
+  #p2pos .osx-lv-vaultb.on{color:#0a1410;background:linear-gradient(100deg,#f4e2a6,#c9a24a);border-color:transparent;}
+  #p2pos .osx-lv-vaultb b{opacity:.65;font-weight:800;}
+  #p2pos .osx-lv-uprow{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+  #p2pos .osx-lv-selcount{font:700 11.5px/1 system-ui;color:var(--gold-bright);}
+  #p2pos .osx-lv-bulkmenu{position:relative;margin-left:auto;}
+  #p2pos .osx-lv-bulkmenu .osx-menu-dots{background:none;border:1px solid var(--stroke);color:var(--text);cursor:pointer;font:800 15px/1 system-ui;padding:4px 11px;border-radius:8px;letter-spacing:1px;}
+  #p2pos .osx-lv-bulkmenu .osx-menu-dots[disabled]{opacity:.4;cursor:default;}
+  #p2pos .osx-lv-bulkmenu .osx-menu-pop{position:absolute;top:calc(100% + 4px);right:0;z-index:40;min-width:150px;background:#0e1c28;border:1px solid var(--gstroke);border-radius:11px;box-shadow:0 10px 28px rgba(0,0,0,.5);padding:5px;display:flex;flex-direction:column;}
+  #p2pos .osx-lv-bulkmenu .osx-menu-pop button{background:none;border:0;text-align:left;color:var(--text);cursor:pointer;font:600 13px/1 system-ui;padding:9px 11px;border-radius:8px;white-space:nowrap;}
+  #p2pos .osx-lv-bulkmenu .osx-menu-pop button:hover{background:rgba(255,255,255,.07);}
+  #p2pos .osx-lv-check{flex:none;width:16px;height:16px;cursor:pointer;accent-color:#c9a24a;margin-right:2px;}
+  #p2pos .osx-lv-vaultacts{display:flex;gap:6px;flex:none;flex-wrap:wrap;}
+  #p2pos .osx-lv-vaultacts button{border:1px solid var(--stroke);background:rgba(255,255,255,.04);color:var(--muted);cursor:pointer;border-radius:999px;padding:6px 12px;font:700 11.5px/1 system-ui;}
+  #p2pos .osx-lv-vaultacts button:hover{border-color:var(--gstroke);color:var(--text);}
   #p2pos .osx-lv-cd{flex:none;text-align:right;border:1px solid var(--gstroke);border-radius:11px;background:rgba(216,180,90,.08);padding:8px 12px;display:flex;flex-direction:column;gap:2px;min-width:120px;}
   #p2pos .osx-lv-cd-l{font:700 8.5px/1.1 system-ui;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);}
   #p2pos .osx-lv-cd b{font:800 17px/1 Georgia,serif;color:var(--gold-bright);}

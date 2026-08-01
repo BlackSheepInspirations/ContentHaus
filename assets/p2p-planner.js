@@ -18,7 +18,7 @@
                ['s', 'S', 'Success Vision', 'What "done" looks like — specific enough to know when you\'ve arrived.']];
   var ROOTED_STEPS = ['R · Reach — warm up the right people', 'O · Open — build anticipation', 'O · Offer — make the offer', 'T · Trigger — proof + urgency', 'E · Escalate — the close', 'D · Deepen — keep it going after'];
 
-  var view = 'dash', active = 'week', expanded = {};
+  var view = 'dash', active = 'week', expanded = {}, selected = {}, livesTab = 'lives';
 
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function p2(n) { return (n < 10 ? '0' : '') + n; }
@@ -30,7 +30,8 @@
 
   var data; try { data = JSON.parse(localStorage.getItem(KEY)) || null; } catch (e) { data = null; }
   if (!data) data = {}; if (!data.done) data.done = []; if (!data.goals) data.goals = []; if (!data.lives) data.lives = []; if (!data.posts) data.posts = []; if (!data.snaps) data.snaps = []; if (!data.ideas) data.ideas = [];
-  if (!data.products) data.products = []; if (!data.ctype) data.ctype = 'both'; if (!data.raft) data.raft = { cycles: [] }; if (!data.northstar) data.northstar = {};
+  if (!data.products) data.products = []; if (!data.ctype) data.ctype = 'both'; if (!data.raft) data.raft = { cycles: [] }; if (!data.northstar) data.northstar = {}; if (!data.templates) data.templates = [];
+  data.lives.forEach(function (l) { if (!l.archived && !l.deleted && l.date && daysTo(l.date) < 0) l.archived = true; });   // past-dated lives auto-archive
   var milestoneBaseline = (data.milestones === undefined); if (!data.milestones) data.milestones = {};
   TFS.forEach(function (t) {
     var tf = t[0]; if (!data[tf]) data[tf] = { period: periodKey(tf), top: [], todo: [] };
@@ -197,6 +198,9 @@
     lab.classList.remove('met', 'miss');
     if (g !== undefined && g !== '' && r !== undefined && r !== '') lab.classList.add(num(r) >= num(g) ? 'met' : 'miss');
   }
+  function selectedIds() { return Object.keys(selected).filter(function (id) { return selected[id]; }); }
+  function dupeOf(l) { var c = JSON.parse(JSON.stringify(l)); c.id = uid(); c.date = ''; c.hour = ''; c.platforms = []; c.done = false; c.results = {}; c.win = ''; c.blocker = ''; c.action = ''; c.mood = ''; c.moodNote = ''; c.reflect = {}; c.archived = false; c.deleted = false; c._dupe = true; return c; }
+  function makeTemplate(l) { var c = JSON.parse(JSON.stringify(l)); c.id = uid(); c.date = ''; c.hour = ''; c.results = {}; c.done = false; c.win = ''; c.blocker = ''; c.action = ''; c.mood = ''; c.moodNote = ''; c.reflect = {}; c.archived = false; c.deleted = false; delete c._dupe; return c; }
   function liveCountdown(l) {
     var d = daysTo(l.date), t = liveTimeStr(l), soon = (d !== null && d >= 0 && d <= 1);
     var big = (d === null) ? 'Set a date' : (d > 1 ? d + ' days' : d === 1 ? 'Tomorrow' : d === 0 ? 'Today!' : liveDateLabel(l));
@@ -234,7 +238,7 @@
   }
   function liveCard(l) {
     var open = !!expanded['L' + l.id], plats = livePlats(l);
-    var head = '<div class="osx-lv-h" data-ltoggle="' + esc(l.id) + '"><span class="osx-lv-plats">' + plats.map(function (p) { return platPill(p, l.otherPlat); }).join('') + '</span>' +
+    var head = '<div class="osx-lv-h" data-ltoggle="' + esc(l.id) + '"><input type="checkbox" class="osx-lv-check" data-lvsel="' + esc(l.id) + '"' + (selected[l.id] ? ' checked' : '') + ' aria-label="Select"><span class="osx-lv-plats">' + plats.map(function (p) { return platPill(p, l.otherPlat); }).join('') + '</span>' +
       '<span class="osx-lv-hb"><b class="osx-lv-title">' + esc(l.title || l.topic || 'Untitled live') + '</b>' + (l.done ? '<span class="osx-lv-hm">✓ Logged · +' + liveFollowers(l) + ' followers</span>' : '') + '</span>' +
       liveCountdown(l) + '</div>';
     if (!open) return '<div class="osx-lv-card' + (l._dupe ? ' osx-dupe' : '') + '">' + head + (l._dupe ? '<div class="osx-lv-dupebadge">⚠ Duplicate — update date, time &amp; platform to save</div>' : '') + '</div>';
@@ -272,7 +276,33 @@
       timeRow + pitchRow + hook + mktBtn + script + promptBox + goalsBlock + postBlock +
       '<div class="osx-lv-del"><button data-lvdel="' + esc(l.id) + '">Delete live</button></div></div></div>';
   }
+  function vaultCard(l, kind) {
+    var acts = kind === 'archive' ? '<button data-lvrestore="' + esc(l.id) + '">↩ Restore</button><button data-lvtrash="' + esc(l.id) + '">🗑️ Delete</button>'
+      : kind === 'trash' ? '<button data-lvrestore="' + esc(l.id) + '">↩ Restore</button><button data-lvpurge="' + esc(l.id) + '">Delete forever</button>' : '';
+    return '<div class="osx-lv-card"><div class="osx-lv-h"><span class="osx-lv-plats">' + livePlats(l).map(function (p) { return platPill(p, l.otherPlat); }).join('') + '</span>' +
+      '<span class="osx-lv-hb"><b class="osx-lv-title">' + esc(l.title || l.topic || 'Untitled live') + '</b><span class="osx-lv-hm">' + esc(liveDateLabel(l)) + (l.done ? ' · +' + liveFollowers(l) + ' followers' : '') + '</span></span>' +
+      '<span class="osx-lv-vaultacts">' + acts + '</span></div></div>';
+  }
+  function vaultListHTML(kind) {
+    var rows = data.lives.filter(function (l) { return kind === 'archive' ? (l.archived && !l.deleted) : l.deleted; });
+    rows.sort(function (a, b) { return (b.date || '').localeCompare(a.date || ''); });
+    if (!rows.length) return '<div class="osx-pl-empty">' + (kind === 'archive' ? 'Nothing archived yet — past lives land here automatically.' : 'Trash is empty.') + '</div>';
+    return rows.map(function (l) { return vaultCard(l, kind); }).join('');
+  }
+  function templatesHTML() {
+    if (!data.templates.length) return '<div class="osx-pl-empty">No templates yet — select a live and choose "Make template" to save its setup for reuse.</div>';
+    return data.templates.map(function (tp) {
+      return '<div class="osx-lv-card"><div class="osx-lv-h"><span class="osx-lv-plats">' + livePlats(tp).map(function (p) { return platPill(p, tp.otherPlat); }).join('') + '</span>' +
+        '<span class="osx-lv-hb"><b class="osx-lv-title">' + esc(tp.title || tp.topic || 'Template') + '</b><span class="osx-lv-hm">' + esc(tp.pitch || 'Live template') + '</span></span>' +
+        '<span class="osx-lv-vaultacts"><button data-tpuse="' + esc(tp.id) + '">＋ Use</button><button data-tpdel="' + esc(tp.id) + '">Delete</button></span></div></div>';
+    }).join('');
+  }
   function livesHTML() {
+    var counts = { lives: data.lives.filter(function (l) { return !l.archived && !l.deleted; }).length, templates: data.templates.length, archive: data.lives.filter(function (l) { return l.archived && !l.deleted; }).length, trash: data.lives.filter(function (l) { return l.deleted; }).length };
+    var nav = '<div class="osx-lv-vaultnav">' + [['lives', '📡 Lives'], ['templates', '📋 Templates'], ['archive', '🗄️ Archive'], ['trash', '🗑️ Trash']].map(function (t) { return '<button class="osx-lv-vaultb' + (livesTab === t[0] ? ' on' : '') + '" data-livestab="' + t[0] + '">' + t[1] + ' <b>' + counts[t[0]] + '</b></button>'; }).join('') + '</div>';
+    if (livesTab === 'templates') return nav + templatesHTML();
+    if (livesTab === 'archive') return nav + vaultListHTML('archive');
+    if (livesTab === 'trash') return nav + vaultListHTML('trash');
     var t = livesTrend(), sp = sparkline();
     var trend = t.count ? '<div class="osx-lv-trend">' +
       '<div class="osx-lv-stat"><b>' + t.count + '</b><span>lives logged</span></div>' +
@@ -280,14 +310,18 @@
       '<div class="osx-lv-stat"><b>+' + t.avgF + '</b><span>avg / live</span></div>' +
       '<div class="osx-lv-stat"><b>' + esc(t.best) + '</b><span>best time</span></div>' +
       (sp ? '<div class="osx-lv-sparkwrap"><span>followers trend</span>' + sp + '</div>' : '') + '</div>' : '';
-    var up = data.lives.filter(function (l) { return !l.done; }), past = data.lives.filter(function (l) { return l.done; });
+    var active2 = data.lives.filter(function (l) { return !l.archived && !l.deleted; });
+    var up = active2.filter(function (l) { return !l.done; }), past = active2.filter(function (l) { return l.done; });
     up.sort(function (a, b) { return (a.date || '~').localeCompare(b.date || '~'); });
     past.sort(function (a, b) { return (b.date || '').localeCompare(a.date || ''); });
-    var list = (up.length ? '<div class="osx-pl-sech">📡 Upcoming</div>' + up.map(liveCard).join('') : '') +
-               (past.length ? '<div class="osx-pl-sech" style="margin-top:16px;">✓ Past lives</div>' + past.map(liveCard).join('') : '');
-    if (!data.lives.length) list = '<div class="osx-pl-empty">Plan your first live — script the hook, set a goal, then log how it went. The trends build themselves.</div>';
+    var sel = Object.keys(selected).filter(function (id) { return selected[id]; }).length;
+    var bulk = '<div class="osx-lv-uprow"><span class="osx-pl-sech" style="margin:0;">📡 Upcoming</span>' + (sel ? '<span class="osx-lv-selcount">' + sel + ' selected</span>' : '') +
+      '<span class="osx-lv-bulkmenu"><button class="osx-menu-dots" data-lvbulk' + (sel ? '' : ' disabled') + '>⋯</button><span class="osx-menu-pop" hidden><button type="button" data-bulk="duplicate">⧉ Duplicate</button><button type="button" data-bulk="template">📋 Make template</button><button type="button" data-bulk="archive">🗄️ Archive</button><button type="button" data-bulk="delete">🗑️ Delete</button></span></span></div>';
+    var list = (up.length ? bulk + up.map(liveCard).join('') : bulk) +
+               (past.length ? '<div class="osx-pl-sech" style="margin-top:16px;">✓ Recent lives</div>' + past.map(liveCard).join('') : '');
+    if (!active2.length) list = bulk + '<div class="osx-pl-empty">Plan your first live — script the hook, set a goal, then log how it went. The trends build themselves.</div>';
     var tools = '<div class="osx-lv-tools"><button class="osx-lv-tool" data-northstar>⭐ North Star</button><button class="osx-lv-tool anchor" data-beanchored>⚓ Be Anchored</button></div>';
-    return tools + trend + '<button class="osx-pl-newgoal" data-newlive>＋ Plan a live</button>' + list;
+    return nav + tools + trend + '<button class="osx-pl-newgoal" data-newlive>＋ Plan a live</button>' + list;
   }
 
   /* ---------- posts (daily social post log + weekly review) ---------- */
@@ -590,9 +624,19 @@
     host.querySelectorAll('[data-lplat]').forEach(function (b) { b.addEventListener('click', function () { var p = b.getAttribute('data-lplat').split('|'), l = liveObj(p[0]); if (!l) return; l.platforms = l.platforms || []; var i = l.platforms.indexOf(p[1]); if (i > -1) l.platforms.splice(i, 1); else l.platforms.push(p[1]); if (l._dupe && dupeReady(l)) l._dupe = false; save(); render(); }); });
     host.querySelectorAll('[data-lprompt]').forEach(function (el) { el.addEventListener('change', function () { var p = el.getAttribute('data-lprompt').split('|'), l = liveObj(p[0]); if (l) { l.prompts = l.prompts || ['', '', '', '', '']; l.prompts[+p[1]] = el.value; save(); } }); });
     host.querySelectorAll('[data-lmood]').forEach(function (b) { b.addEventListener('click', function () { var p = b.getAttribute('data-lmood').split('|'), l = liveObj(p[0]); if (!l) return; l.mood = (l.mood === p[1]) ? '' : p[1]; save(); b.parentNode.querySelectorAll('.osx-lv-mood').forEach(function (x) { x.classList.toggle('on', x.getAttribute('data-lmood').split('|')[1] === l.mood); }); }); });
-    host.querySelectorAll('[data-ldupe]').forEach(function (b) { b.addEventListener('click', function () { var src = liveObj(b.getAttribute('data-ldupe')); if (!src) return; var c = JSON.parse(JSON.stringify(src)); c.id = uid(); c.date = ''; c.hour = ''; c.platforms = []; c.done = false; c.results = {}; c.win = ''; c.blocker = ''; c.action = ''; c.mood = ''; c.moodNote = ''; c.reflect = {}; c._dupe = true; data.lives.unshift(c); expanded['L' + c.id] = true; save(); render(); }); });
+    host.querySelectorAll('[data-ldupe]').forEach(function (b) { b.addEventListener('click', function () { var src = liveObj(b.getAttribute('data-ldupe')); if (!src) return; var c = dupeOf(src); data.lives.unshift(c); expanded['L' + c.id] = true; save(); render(); }); });
     host.querySelectorAll('[data-ldone]').forEach(function (b) { b.addEventListener('click', function () { var l = liveObj(b.getAttribute('data-ldone')); if (!l) return; if (l._dupe) { alert('Change the highlighted Date, Time and Platform first — this is a duplicate.'); return; } l.done = !l.done; save(); render(); }); });
-    host.querySelectorAll('[data-lvdel]').forEach(function (b) { b.addEventListener('click', function () { if (!window.confirm('Delete this live?')) return; data.lives = data.lives.filter(function (x) { return x.id !== b.getAttribute('data-lvdel'); }); save(); render(); }); });
+    host.querySelectorAll('[data-lvdel]').forEach(function (b) { b.addEventListener('click', function () { var l = liveObj(b.getAttribute('data-lvdel')); if (l) { l.deleted = true; save(); render(); } }); });
+    // vault sub-tabs + bulk actions + template/archive/trash ops
+    host.querySelectorAll('[data-livestab]').forEach(function (b) { b.addEventListener('click', function () { livesTab = b.getAttribute('data-livestab'); render(); }); });
+    host.querySelectorAll('[data-lvsel]').forEach(function (c) { c.addEventListener('change', function () { selected[c.getAttribute('data-lvsel')] = c.checked; render(); }); });
+    var lvb = host.querySelector('[data-lvbulk]'); if (lvb) lvb.addEventListener('click', function (e) { e.stopPropagation(); var pop = lvb.nextElementSibling; if (pop) pop.hidden = !pop.hidden; });
+    host.querySelectorAll('[data-bulk]').forEach(function (b) { b.addEventListener('click', function () { var act = b.getAttribute('data-bulk'), ids = selectedIds(); if (!ids.length) return; ids.forEach(function (id) { var l = liveObj(id); if (!l) return; if (act === 'archive') l.archived = true; else if (act === 'delete') l.deleted = true; else if (act === 'template') data.templates.unshift(makeTemplate(l)); else if (act === 'duplicate') data.lives.unshift(dupeOf(l)); }); selected = {}; save(); render(); }); });
+    host.querySelectorAll('[data-tpuse]').forEach(function (b) { b.addEventListener('click', function () { var tp = data.templates.filter(function (x) { return x.id === b.getAttribute('data-tpuse'); })[0]; if (!tp) return; var c = JSON.parse(JSON.stringify(tp)); c.id = uid(); c.date = ''; c.done = false; c.results = {}; c.archived = false; c.deleted = false; data.lives.unshift(c); livesTab = 'lives'; expanded['L' + c.id] = true; save(); render(); }); });
+    host.querySelectorAll('[data-tpdel]').forEach(function (b) { b.addEventListener('click', function () { data.templates = data.templates.filter(function (x) { return x.id !== b.getAttribute('data-tpdel'); }); save(); render(); }); });
+    host.querySelectorAll('[data-lvrestore]').forEach(function (b) { b.addEventListener('click', function () { var l = liveObj(b.getAttribute('data-lvrestore')); if (l) { l.archived = false; l.deleted = false; save(); render(); } }); });
+    host.querySelectorAll('[data-lvtrash]').forEach(function (b) { b.addEventListener('click', function () { var l = liveObj(b.getAttribute('data-lvtrash')); if (l) { l.deleted = true; l.archived = false; save(); render(); } }); });
+    host.querySelectorAll('[data-lvpurge]').forEach(function (b) { b.addEventListener('click', function () { if (!window.confirm('Delete this live forever? This cannot be undone.')) return; data.lives = data.lives.filter(function (x) { return x.id !== b.getAttribute('data-lvpurge'); }); save(); render(); }); });
     // posts
     var np = host.querySelector('[data-newpost]'); if (np) np.addEventListener('click', function () { var p = { id: uid(), topic: 'New post', platform: 'TikTok', type: 'Video', date: '', time: '', hook: '', cta: '', length: '', music: '', done: false, s: {} }; data.posts.unshift(p); expanded['P' + p.id] = true; save(); render(); });
     host.querySelectorAll('[data-ptoggle]').forEach(function (b) { b.addEventListener('click', function (e) { if (e.target.closest('input,select,textarea,button,a')) return; var id = b.getAttribute('data-ptoggle'); expanded['P' + id] = !expanded['P' + id]; render(); }); });
