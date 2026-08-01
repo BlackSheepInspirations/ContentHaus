@@ -29,7 +29,7 @@
   function weekKey() { return periodKey('week'); }
 
   var data; try { data = JSON.parse(localStorage.getItem(KEY)) || null; } catch (e) { data = null; }
-  if (!data) data = {}; if (!data.done) data.done = []; if (!data.goals) data.goals = []; if (!data.lives) data.lives = []; if (!data.posts) data.posts = []; if (!data.snaps) data.snaps = [];
+  if (!data) data = {}; if (!data.done) data.done = []; if (!data.goals) data.goals = []; if (!data.lives) data.lives = []; if (!data.posts) data.posts = []; if (!data.snaps) data.snaps = []; if (!data.ideas) data.ideas = [];
   TFS.forEach(function (t) {
     var tf = t[0]; if (!data[tf]) data[tf] = { period: periodKey(tf), top: [], todo: [] };
     if (!data[tf].top) data[tf].top = []; if (!data[tf].todo) data[tf].todo = [];
@@ -62,6 +62,7 @@
       '<button class="osx-pl-navb' + (view === 'goals' ? ' on' : '') + '" data-view="goals">🎯 Goals</button>' +
       '<button class="osx-pl-navb' + (view === 'lives' ? ' on' : '') + '" data-view="lives">📡 Lives</button>' +
       '<button class="osx-pl-navb' + (view === 'posts' ? ' on' : '') + '" data-view="posts">📝 Posts</button>' +
+      '<button class="osx-pl-navb' + (view === 'ideas' ? ' on' : '') + '" data-view="ideas">💡 Ideas</button>' +
       '<button class="osx-pl-navb' + (view === 'growth' ? ' on' : '') + '" data-view="growth">📈 Growth</button>' +
       '<button class="osx-pl-navb' + (view === 'lists' ? ' on' : '') + '" data-view="lists">✅ Lists</button></div>';
   }
@@ -267,8 +268,18 @@
     return head + form + history;
   }
 
+  /* ---------- ideas (content idea vault → plan into posts) ---------- */
+  function ideasHTML() {
+    var list = data.ideas.length ? data.ideas.map(function (i) {
+      return '<div class="osx-idea"><span class="osx-idea-t' + (i.used ? ' used' : '') + '">' + esc(i.text) + '</span><div class="osx-idea-a">' +
+        (i.used ? '<span class="osx-idea-badge">✓ planned</span>' : '<button class="osx-idea-plan" data-idea="' + esc(i.id) + '">→ Plan as post</button>') +
+        '<button class="osx-pl-del" data-iddel="' + esc(i.id) + '" aria-label="Remove">✕</button></div></div>';
+    }).join('') : '<div class="osx-pl-empty">Dump every content idea here — the shower thoughts, the trends, the "I should make a video about…". Plan them into posts when you\'re ready.</div>';
+    return '<div class="osx-pl-add"><input class="osx-pl-in" data-newidea placeholder="Capture a content idea…" maxlength="160"><button class="osx-pl-addbtn" data-newideab>Add</button></div>' + list;
+  }
+
   function render() {
-    var body = view === 'dash' ? dashHTML() : view === 'goals' ? goalsHTML() : view === 'lives' ? livesHTML() : view === 'posts' ? postsHTML() : view === 'growth' ? growthHTML() : listsHTML();
+    var body = view === 'dash' ? dashHTML() : view === 'goals' ? goalsHTML() : view === 'lives' ? livesHTML() : view === 'posts' ? postsHTML() : view === 'ideas' ? ideasHTML() : view === 'growth' ? growthHTML() : listsHTML();
     host.innerHTML = '<div class="osx-pl">' + navHTML() + '<div class="osx-pl-view">' + body + '</div></div>';
     wire();
   }
@@ -333,6 +344,12 @@
     var ns = host.querySelector('[data-newsnap]'); if (ns) ns.addEventListener('click', function () { data.snaps.push({ id: uid(), week: weekKey(), followers: '', likes: '', diamonds: '', revenue: '' }); save(); render(); });
     host.querySelectorAll('[data-snf]').forEach(function (el) { el.addEventListener('change', function () { var p = el.getAttribute('data-snf').split('|'), o = snapObj(p[0]); if (o) { o[p[1]] = el.value; save(); } }); });
     host.querySelectorAll('[data-sndel]').forEach(function (b) { b.addEventListener('click', function () { data.snaps = data.snaps.filter(function (x) { return x.id !== b.getAttribute('data-sndel'); }); save(); render(); }); });
+    // ideas
+    function addIdea() { var inp = host.querySelector('[data-newidea]'); var v = (inp && inp.value || '').trim(); if (!v) return; data.ideas.unshift({ id: uid(), text: v.slice(0, 160), used: false }); save(); render(); }
+    var nib = host.querySelector('[data-newideab]'); if (nib) nib.addEventListener('click', addIdea);
+    var ni = host.querySelector('[data-newidea]'); if (ni) ni.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); addIdea(); } });
+    host.querySelectorAll('[data-idea]').forEach(function (b) { b.addEventListener('click', function () { var i = data.ideas.filter(function (x) { return x.id === b.getAttribute('data-idea'); })[0]; if (i) { i.used = true; data.posts.unshift({ id: uid(), topic: i.text, platform: 'TikTok', type: 'Video', date: '', time: '', hook: '', cta: '', length: '', music: '', done: false, s: {} }); save(); view = 'posts'; render(); } }); });
+    host.querySelectorAll('[data-iddel]').forEach(function (b) { b.addEventListener('click', function () { data.ideas = data.ideas.filter(function (x) { return x.id !== b.getAttribute('data-iddel'); }); save(); render(); }); });
   }
   function addRoad(gid) { var inp = host.querySelector('[data-radd="' + gid + '"]'); var v = (inp && inp.value || '').trim(); if (!v) return; var g = goal(gid); if (g) { g.roadmap = g.roadmap || []; g.roadmap.push({ id: uid(), text: v.slice(0, 120), pct: 0 }); save(); render(); } }
   function addList(bucket) { var inp = host.querySelector('[data-ladd="' + bucket + '"]'); var v = (inp && inp.value || '').trim(); if (!v) return; if (bucket === 'top' && data[active].top.length >= 3) return; data[active][bucket].push({ id: uid(), text: v.slice(0, 120), pct: 0 }); save(); render(); }
