@@ -21,13 +21,28 @@
   function initial(n) { n = String(n || '').trim(); return n ? n.charAt(0).toUpperCase() : '🐑'; }
   function since(iso) { if (!iso) return ''; try { return 'Member since ' + new Date(iso).toLocaleDateString(undefined, { month: 'short', year: 'numeric' }); } catch (e) { return ''; } }
   function loc(p) { return [p.city, p.region || p.country].filter(Boolean).join(', '); }
+  function badgeEmoji(name) {
+    var n = String(name || '').toLowerCase();
+    if (/streak|comeback/.test(n)) return '🔥';
+    if (/master/.test(n)) return '🎓';
+    if (/cleared/.test(n)) return '🏆';
+    if (/freedom|reached/.test(n)) return '👑';
+    if (/first|win/.test(n)) return '🥇';
+    return '🏅';
+  }
+  function recentBadges() {
+    var P = window.P2P || {};
+    var e = (P.earnedSet ? P.earnedSet() : []) || [];
+    return e.slice(-3).reverse().map(function (nm) { return { label: nm, emoji: badgeEmoji(nm) }; });
+  }
   function stats() {
     var P = window.P2P || {};
     return {
       name: window.P2P_MEMBER_NAME || '',
       tier: (P.tier ? (P.tier().name || '') : ''),
       points: (P.points ? P.points() : 0),
-      badges: (P.earnedSet ? P.earnedSet().length : 0)
+      badges: (P.earnedSet ? P.earnedSet().length : 0),
+      recentBadges: recentBadges()
     };
   }
   var SICON = { website: '🌐', instagram: '📷', facebook: '📘', youtube: '▶️', x: '✖', linkedin: 'in', tiktok: '🎵' };
@@ -106,7 +121,7 @@
     var s = stats(), social = {};
     Object.keys(socialEls).forEach(function (k) { var v = (socialEls[k].value || '').trim(); if (v) social[k] = v; });
     return {
-      name: s.name, tier: s.tier, points: s.points, badges: s.badges,
+      name: s.name, tier: s.tier, points: s.points, badges: s.badges, recentBadges: s.recentBadges,
       photo: (f.photo ? f.photo.value.trim() : ''), quote: (f.quote ? f.quote.value.trim() : ''), about: (f.about ? f.about.value.trim() : ''),
       social: social, hidden: hidden
     };

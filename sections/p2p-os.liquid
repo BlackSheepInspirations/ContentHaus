@@ -1050,6 +1050,11 @@
   #p2pos .osx-love{border:1px solid var(--stroke);background:rgba(255,255,255,.04);color:var(--muted);cursor:pointer;border-radius:999px;padding:5px 12px;font:700 12px/1 system-ui;transition:.15s;display:inline-flex;align-items:center;gap:5px;}
   #p2pos .osx-love:hover{border-color:rgba(224,69,123,.5);color:#ff9ec7;}
   #p2pos .osx-love.on{color:#ff6b9d;border-color:rgba(224,69,123,.6);background:rgba(224,69,123,.12);}
+  #p2pos .osx-react{display:inline-flex;gap:6px;align-items:center;flex-wrap:wrap;}
+  #p2pos .osx-react-b{border:1px solid var(--stroke);background:rgba(255,255,255,.04);color:var(--muted);cursor:pointer;border-radius:999px;padding:5px 10px;font:700 12px/1 system-ui;transition:.15s;display:inline-flex;align-items:center;gap:5px;}
+  #p2pos .osx-react-b:hover{border-color:var(--gstroke);color:var(--text);}
+  #p2pos .osx-react-b.on{color:var(--gold-bright);border-color:var(--gstroke);background:rgba(216,180,90,.14);}
+  #p2pos .osx-react-b[data-rtype="love"].on{color:#ff6b9d;border-color:rgba(224,69,123,.6);background:rgba(224,69,123,.12);}
   #p2pos .osx-cw-report{margin-left:auto;border:0;background:none;color:var(--muted);cursor:pointer;font:600 13px/1 system-ui;opacity:.5;transition:.15s;padding:5px 4px;}
   #p2pos .osx-cw-report:hover{opacity:1;color:#ff9e9e;}
   /* rotating wins spotlight */
@@ -1160,7 +1165,11 @@
   #p2pos .osx-gb{min-height:352px;}
   #p2pos .osx-gb-name{display:block;font:700 12px/1.15 system-ui;color:var(--text);}
   #p2pos .osx-gb-tier{display:block;font:600 10px/1.2 system-ui;color:var(--muted);margin-top:2px;}
-  #p2pos .osx-gb-pts{margin-left:auto;font:800 12.5px/1 system-ui;color:var(--gold-bright);}
+  #p2pos .osx-gb-who{flex:1;min-width:0;}
+  #p2pos .osx-gb-badges{display:inline-flex;gap:2px;align-items:center;}
+  #p2pos .osx-gb-badge{background:none;border:0;padding:0 1px;cursor:pointer;font-size:13px;line-height:1;transition:transform .12s;}
+  #p2pos .osx-gb-badge:hover{transform:scale(1.3);}
+  #p2pos .osx-gb-pts{margin-left:6px;font:800 12.5px/1 system-ui;color:var(--gold-bright);}
   #p2pos .osx-spot-body{display:flex;align-items:center;gap:12px;}
   #p2pos .osx-cw-post-text.clamp{display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden;}
   #p2pos .osx-cw-more{display:inline-block;margin-top:4px;font:700 12px/1 system-ui;color:var(--gold-bright);background:none;border:0;cursor:pointer;padding:0;}

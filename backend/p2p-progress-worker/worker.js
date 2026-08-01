@@ -70,6 +70,7 @@ export default {
             tier: String(body.tier || '').slice(0, 40),
             points: Number(body.points) || 0,
             badges: Number(body.badges) || 0,
+            recentBadges: sanitizeBadges(body.recentBadges),
             since: info.createdAt || (prev && prev.since) || null,
             photo: sanitizeUrl(body.photo),
             quote: String(body.quote || '').slice(0, 140),
@@ -107,8 +108,8 @@ export default {
           for (const k of list.keys) {
             const p = await kv.get(k.name, 'json');
             if (!p) continue;
-            const by = p.likedBy || [];
-            posts.push({ id: p.id, name: p.name, text: p.text, kind: p.kind, ts: p.ts, likes: by.length, liked: by.indexOf(customerId) > -1 });
+            const rs = reactState(p, customerId);
+            posts.push({ id: p.id, name: p.name, text: p.text, kind: p.kind, ts: p.ts, reactions: rs.counts, mine: rs.mine, likes: rs.counts.love, liked: rs.mine.love });
           }
           posts.sort((a, b) => b.ts - a.ts);
           return json({ ok: true, posts });
@@ -136,12 +137,15 @@ export default {
         if (!pid) return json({ error: 'no_id' }, 400);
         const p = await kv.get('post:' + pid, 'json');
         if (!p) return json({ error: 'not_found' }, 404);
-        const by = p.likedBy || [];
-        const i = by.indexOf(customerId);
-        if (i > -1) by.splice(i, 1); else by.push(customerId);
-        p.likedBy = by;
+        const type = ['love', 'thumb', 'party'].indexOf(body && body.type) > -1 ? body.type : 'love';
+        const r = normalizeReactions(p);
+        const arr = r[type];
+        const i = arr.indexOf(customerId);
+        if (i > -1) arr.splice(i, 1); else arr.push(customerId);
+        p.reactions = r; delete p.likedBy;
         await kv.put('post:' + pid, JSON.stringify(p));
-        return json({ ok: true, likes: by.length, liked: i === -1 });
+        const rs = reactState(p, customerId);
+        return json({ ok: true, reactions: rs.counts, mine: rs.mine, likes: rs.counts.love, liked: rs.mine.love });
       }
 
       /* ---------- suggestions / questions (private → email you) ---------- */
@@ -194,6 +198,30 @@ function sanitizeSocial(s) {
     const v = sanitizeUrl(s[k]); if (v) out[k] = v;
   });
   return out;
+}
+// A member's most-recent earned badges (for the Growth Board): [{label, emoji}], max 3.
+function sanitizeBadges(a) {
+  if (!Array.isArray(a)) return [];
+  return a.slice(0, 3).map(function (b) {
+    b = b || {};
+    return { label: String(b.label || '').slice(0, 60), emoji: String(b.emoji || '🏅').slice(0, 8) };
+  }).filter(function (b) { return b.label; });
+}
+// Reactions: {love:[ids], thumb:[ids], party:[ids]}. Migrates legacy p.likedBy → love.
+function normalizeReactions(p) {
+  const r = (p && p.reactions) || {};
+  return {
+    love: Array.isArray(r.love) ? r.love : ((p && p.likedBy) || []),
+    thumb: Array.isArray(r.thumb) ? r.thumb : [],
+    party: Array.isArray(r.party) ? r.party : []
+  };
+}
+function reactState(p, customerId) {
+  const r = normalizeReactions(p);
+  return {
+    counts: { love: r.love.length, thumb: r.thumb.length, party: r.party.length },
+    mine: { love: r.love.indexOf(customerId) > -1, thumb: r.thumb.indexOf(customerId) > -1, party: r.party.indexOf(customerId) > -1 }
+  };
 }
 async function sendEmail(env, subject, text) {
   if (!env.resend_key || !env.alert_email) return;

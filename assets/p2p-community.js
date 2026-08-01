@@ -22,7 +22,12 @@
     var d = Math.floor(h / 24); if (d < 7) return d + 'd ago';
     return new Date(ts).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
   }
-  function loveBtn(p) { return '<button class="osx-love' + (p.liked ? ' on' : '') + '" data-love="' + esc(p.id) + '" type="button" aria-label="Love this">❤ <span>' + (p.likes || 0) + '</span></button>'; }
+  var RTYPES = [['love', '❤'], ['thumb', '👍'], ['party', '🎉']];
+  function rcount(p, t) { return (p.reactions && p.reactions[t] != null) ? p.reactions[t] : (t === 'love' ? (p.likes || 0) : 0); }
+  function ron(p, t) { return p.mine ? !!p.mine[t] : (t === 'love' && !!p.liked); }
+  function rbtn(p, t, emoji) { return '<button class="osx-react-b' + (ron(p, t) ? ' on' : '') + '" data-react="' + esc(p.id) + '" data-rtype="' + t + '" type="button" aria-label="React ' + t + '">' + emoji + ' <span>' + rcount(p, t) + '</span></button>'; }
+  function reactBar(p) { return '<div class="osx-react">' + RTYPES.map(function (r) { return rbtn(p, r[0], r[1]); }).join('') + '</div>'; }
+  function loveChip(p) { return rbtn(p, 'love', '❤'); }
   function wins() { return posts.filter(function (p) { return p.kind === 'win'; }); }
   function general() { return posts.filter(function (p) { return p.kind !== 'win'; }); }
   function stopTimer() { if (winTimer) { clearInterval(winTimer); winTimer = null; } }
@@ -37,11 +42,11 @@
         '<div class="osx-cw-post-top"><b>' + esc(p.name || 'Member') + '</b><span class="osx-cw-time">' + ago(p.ts) + '</span></div>' +
         '<div class="osx-cw-post-text' + (lng ? ' clamp' : '') + '">' + esc(p.text) + '</div>' +
         (lng ? '<button class="osx-cw-more" type="button" data-more>Read more ▾</button>' : '') +
-        '<div class="osx-cw-post-acts">' + loveBtn(p) +
+        '<div class="osx-cw-post-acts">' + reactBar(p) +
           '<button class="osx-cw-report" type="button" data-report="' + esc(p.id) + '" title="Report this post" aria-label="Report post">⚑</button>' +
         '</div></div>';
     }).join('');
-    wireLoves(feed);
+    wireReacts(feed);
     feed.querySelectorAll('[data-more]').forEach(function (b) {
       b.addEventListener('click', function () {
         var t = b.previousElementSibling; if (!t) return;
@@ -73,26 +78,26 @@
     winsFeed.innerHTML =
       '<div class="osx-wside">' +
         '<p class="osx-wside-text">' + esc(p.text) + '</p>' +
-        '<div class="osx-wside-foot"><span class="osx-wside-by">' + esc(p.name || 'Member') + '</span>' + loveBtn(p) + '</div>' +
+        '<div class="osx-wside-foot"><span class="osx-wside-by">' + esc(p.name || 'Member') + '</span>' + loveChip(p) + '</div>' +
       '</div>' +
       (w.length > 1 ? '<div class="osx-win-dots">' + w.map(function (_, i) { return '<span class="' + (i === winIdx ? 'on' : '') + '" data-win-dot="' + i + '"></span>'; }).join('') + '</div>' : '');
-    wireLoves(winsFeed);
+    wireReacts(winsFeed);
     winsFeed.querySelectorAll('[data-win-dot]').forEach(function (d) { d.addEventListener('click', function () { winIdx = +d.getAttribute('data-win-dot'); renderWinsSide(); }); });
     stopTimer();
     if (w.length > 1) winTimer = setInterval(function () { winIdx = (winIdx + 1) % wins().length; renderWinsSide(); }, 8000);
   }
 
-  function wireLoves(container) {
-    container.querySelectorAll('[data-love]').forEach(function (btn) {
+  function wireReacts(container) {
+    container.querySelectorAll('[data-react]').forEach(function (btn) {
       btn.addEventListener('click', function () {
-        var id = btn.getAttribute('data-love');
-        fetch(REACT, { method: 'POST', headers: { 'content-type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify({ id: id }) })
+        var id = btn.getAttribute('data-react'), type = btn.getAttribute('data-rtype');
+        fetch(REACT, { method: 'POST', headers: { 'content-type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify({ id: id, type: type }) })
           .then(function (r) { return r.json(); })
           .then(function (res) {
             if (res && res.ok) {
-              posts.forEach(function (p) { if (p.id === id) { p.likes = res.likes; p.liked = res.liked; } });
-              btn.classList.toggle('on', res.liked);
-              var c = btn.querySelector('span'); if (c) c.textContent = res.likes;
+              posts.forEach(function (p) { if (p.id === id) { p.reactions = res.reactions; p.mine = res.mine; p.likes = res.likes; p.liked = res.liked; } });
+              btn.classList.toggle('on', res.mine && res.mine[type]);
+              var c = btn.querySelector('span'); if (c) c.textContent = res.reactions ? res.reactions[type] : 0;
             }
           }).catch(function () {});
       });
@@ -113,6 +118,28 @@
 
   function avatar(p) { return p.photo ? '<img src="' + esc(p.photo) + '" alt="" loading="lazy" onerror="this.style.display=\'none\'">' : esc((p.name || '?').trim().charAt(0).toUpperCase() || '🐑'); }
 
+  function popup(inner) {
+    var pop = document.createElement('div'); pop.className = 'osx-cal-pop';
+    pop.innerHTML = '<div class="osx-cal-pop-in"><button class="osx-cal-pop-x" type="button" aria-label="Close">✕</button>' + inner + '</div>';
+    document.body.appendChild(pop);
+    function close() { pop.remove(); }
+    pop.addEventListener('click', function (e) { if (e.target === pop) close(); });
+    pop.querySelector('.osx-cal-pop-x').addEventListener('click', close);
+  }
+  function badgePopup(label, emoji) {
+    popup('<div class="osx-cal-pop-ban" style="font-size:40px;">' + esc(emoji || '🏅') + '</div>' +
+      '<div class="osx-cal-pop-b"><div class="osx-cal-pop-t">' + esc(label) + '</div>' +
+      '<div class="osx-cal-pop-meta">🏅 Badge earned</div>' +
+      '<div class="osx-cal-pop-desc">Earn your own by showing up daily, finishing courses, and keeping your streak alive. See them all under Checkpoint → Badges.</div></div>');
+  }
+  function badgeChips(p) {
+    var b = (p.recentBadges || []).slice(0, 3);
+    if (!b.length) return '';
+    return '<span class="osx-gb-badges">' + b.map(function (bd) {
+      return '<button class="osx-gb-badge" type="button" data-badge="' + esc(bd.label) + '" data-bemoji="' + esc(bd.emoji || '🏅') + '" title="' + esc(bd.label) + '">' + esc(bd.emoji || '🏅') + '</button>';
+    }).join('') + '</span>';
+  }
+
   function renderGrowth(m) {
     var el = root.querySelector('[data-gb]'); if (!el) return;
     if (!m.length) { el.innerHTML = empty('No members yet.'); return; }
@@ -120,9 +147,13 @@
     el.innerHTML = top.map(function (p, i) {
       return '<div class="osx-gb-row"><span class="osx-gb-rank' + (i < 3 ? ' top' : '') + '">' + (i + 1) + '</span>' +
         '<span class="osx-gb-av">' + avatar(p) + '</span>' +
-        '<span><span class="osx-gb-name">' + esc(p.name || 'Member') + '</span>' + (p.tier ? '<span class="osx-gb-tier">' + esc(p.tier) + '</span>' : '') + '</span>' +
+        '<span class="osx-gb-who"><span class="osx-gb-name">' + esc(p.name || 'Member') + '</span>' + (p.tier ? '<span class="osx-gb-tier">' + esc(p.tier) + '</span>' : '') + '</span>' +
+        badgeChips(p) +
         '<span class="osx-gb-pts">' + (p.points || 0).toLocaleString() + '</span></div>';
     }).join('');
+    el.querySelectorAll('[data-badge]').forEach(function (b) {
+      b.addEventListener('click', function () { badgePopup(b.getAttribute('data-badge'), b.getAttribute('data-bemoji')); });
+    });
   }
 
   function renderSpotlight(m) {
