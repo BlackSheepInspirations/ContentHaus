@@ -237,3 +237,16 @@ Worker re-paste required + a NEW Cron Trigger for Frank/Ruth.
 - **Frank & Ruth:** worker `scheduled()` — Mon→Frank "Did you know" (FRANK_POSTS), Thu→Ruth insight (RUTH_POSTS), advancing a KV cursor, 1/author/day. Author ids house-frank/house-ruth, name Frank/Ruth, `house:true` → gold "✦ Haus" tag. **REQUIRES a Cron Trigger** (e.g. `0 15 * * *`). No cron = they never post.
 - **Confetti:** canvas burst on a shared win (no dependency).
 - Still open: the "Something else" Andrea flagged (undefined). Cross-device already live. Email alerts still need resend_key/alert_email (optional).
+
+## 2026-08-01 (later 2) — house voices x4, admin pin, walkthrough, quick polish
+- **House voices:** now 4 — Mon Frank ("Let me be Frank with you…"), Wed Drea ("Drea's Mid‑Week Heart Check"), Thu Ruth ("A Word from Ruth"), Fri Eric ("Uncle Eric's Baaad Jokes"). Config in `HOUSE[]`; scheduled() loops it by UTC day. **Starter banks only (~8–16 each) — needs expansion to 150 each.**
+- **Post titles:** posts now carry `title` (house posts titled; user posts optional — full user title UI comes with the rich composer).
+- **Admin pin:** community GET returns `isAdmin`; `moderate` gained action pin/unpin; pinned posts sort to top (below WoW). Admin sees 📌 buttons. **Andrea must add her Shopify customer id to Cloudflare var `admin_ids`.**
+- **Welcome:** added first item "Take the community walkthrough" (data-wc=tour) → openTour() stepped modal (7 steps), marks p2p_wc_tour. Done items now show a ✓ inside the dot.
+- **Gradient 'flock?'** via `.osx-flock-grad` (aurora clip).
+- **STILL NEEDS:** Cron Trigger for house voices; admin_ids for pin.
+
+## NEXT BIG BUILD — Channels/Categories system (Skool-parity)
+Andrea wants: category channels + filter tabs, post search, sort (New→Old with Day/Week/Month/Year/All-time; New(last week); Unread), and a POP-UP rich composer (title + body + photo + gif + link + emoji + category select; small collapsed line that expands on click). Wins auto-copy into a Wins channel + the rotating box. Graph/youtube optional.
+Proposed categories (confirm): General Discussion · Introductions 👋 · Wins•Habits•Growth 🏆 (auto-copy wins) · Questions & Help 🙏 · Testimonials 🙌 · P2P Announcements 📣 (admin/house-only). Optional Daily Check-Ins.
+Content vaults: Frank/Ruth/Eric/Drea × 150 posts each (600 total) — generate as a dedicated content pass; consider KV-seeding to keep the worker paste small.
