@@ -277,3 +277,21 @@ New top-level OS tab **My Success** (nav `success^My Success^rocket^view^^`; her
 - **✅ Lists** — Top3+To-dos per timeframe, gauges, carry-over + Completed archive (unchanged engine).
 Also earlier: personal CALENDAR (visit stars via p2p_visit_days + p2p_my_events plans; window.P2P_CAL_REFRESH) lives in the Community mini-modal + Members inline.
 STILL QUEUED: 📓 Journal-everywhere (needs p2p-notebook.js multi-instance refactor); calendar "posted today?" checkbox → Posts (cross-file localStorage sync caveat); RAFT framework template (needs the RAFT worksheet content — GROWS + ROOTED already templated).
+
+## 2026-08-01 (later 6) — command center: gamification, products/creator-mode, RAFT + reframed dashboard
+- **Gamification:** 17 MILESTONES[] in p2p-planner.js (id,label,emoji,check) + confetti + celebration modal (queue) + dashboard medal strip. Baseline-silent on first run (data.milestones). Data lives in p2p_planner.
+- **Creator mode:** data.ctype = content|product|both; TABS[] filtered by tabShown(); selector on Dashboard. Content hides Products; Product hides Lives/Posts/Ideas; Both = all.
+- **Products (📦):** data.products[] (name/type/price/status idea→building→live→retired/launch/sold/revenue). "Plan launch with ROOTED" seeds a GROWS goal w/ ROOTED_STEPS_P roadmap. Status badge colors s-idea/building/live/retired.
+- **Growth metrics expanded:** SNAP_STATS now followers/email/likes/diamonds/visits/engagement/sold/testimonials/revenue.
+- **RAFT weekly loop:** data.raft.cycles[] {week,relieve,actText,act(0-3),fastWin,corrected}; raftCycle() auto-creates current week; T→next R via lastCycleWithWin()/tractionStreak(). Leads the Dashboard.
+- **Dashboard reframed (Andrea's rule):** controllable-first — RAFT loop + artifactCount() ("things shipped" = lives done+posts done+products live+roadmap steps done+fastWins) + 8-week barChart() of artifacts + horizon rings + goals + milestones. Lagging metrics (followers/likes/revenue) DEMOTED to a quiet dashed .osx-lag panel with a grey follower line. Traction label mode-swaps by ctype.
+- All private (localStorage p2p_planner, synced via p2p_ metafield). NO worker paste for any of this.
+
+### STILL OPEN (morning):
+1. **📓 Journal-everywhere** — copy the 4-tab notebook into My Success (needs p2p-notebook.js multi-instance refactor).
+2. **Calendar "posted today?" checkbox** → auto-create a Post (cross-file localStorage sync caveat: planner.js holds data in memory; community.js writing p2p_planner directly won't reflect until reload — do it inside planner or via a shared setter).
+3. **RAFT as onboarding vs recurring** — currently built as recurring weekly loop (option b, Andrea's framing). Confirm.
+4. **Richer viz полиш** — bar chart done; consider a semicircle gauge + TIME-tracking (auto time-on-view) — Andrea flagged wanting "time spent" viz; deferred per her own sequencing note (ship tracker, see if Traction gets filled, then decide on heavier infra).
+5. **RAFT/ROOTED/GROWS template menu** — GROWS(goal builder)+ROOTED(templated) done; wire a proper template dropdown (currently confirm dialogs).
+6. **Content Planner calendar drag** — Idea Vault → "Plan as post" done; dragging ideas onto calendar days is the fuller version.
+7. **Beta test w/ real members**, **Frank/Ruth/Eric/Drea 150-post vaults**, **Cloudflare R2 uploads**, **Shopify Flow all-access tag** (pre-existing backlog).
