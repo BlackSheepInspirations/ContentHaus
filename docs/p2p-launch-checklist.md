@@ -30,9 +30,13 @@ inside their app and giving up the custom journey. So this is **build, not buy**
    progress on page open** and **debounced-saves on every change**, keeping
    localStorage as an offline cache. Guests keep localStorage only.
 
-**STATUS (2026-07-31): backend code written.** Worker + wrangler config live in
-`backend/p2p-progress-worker/`; the theme client (`assets/p2p-progress.js`) already
-speaks the contract. Remaining work is account setup + deploy — full walkthrough in
+**STATUS (2026-08-01): BUILT & LIVE.** Worker deployed, App Proxy configured,
+signature check passing — verified live: `GET /apps/p2p/progress` →
+`{"ok":true,"progress":null,"guest":true}`. Deployed Worker mints its Admin token via
+the client_credentials grant (no separate store token needed); vars live in the
+Cloudflare dashboard. Repo copy in `backend/p2p-progress-worker/` matches the live
+version. **Only remaining check: a logged-in round-trip** (guest path proven; the
+metafield read/write path needs a signed-in customer to exercise) — steps in
 **`docs/p2p-progress-backend-setup.md`**.
 
 **Correction:** App Proxy CANNOT be configured on a store "Develop apps" custom app

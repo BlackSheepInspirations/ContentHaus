@@ -1,5 +1,38 @@
 # P2P cross-device progress — backend setup
 
+> ## ✅ STATUS (2026-08-01): BUILT & LIVE
+> The Worker is **deployed**, the Shopify **App Proxy is configured**, and the
+> **signature check passes** — verified live: `GET https://blacksheepcreations.com/apps/p2p/progress`
+> returns `{"ok":true,"progress":null,"guest":true}` (the correct anonymous answer).
+>
+> The deployed Worker (see `worker.js`) mints its Admin token on the fly via the
+> **client_credentials** grant from the app's `client_id` + `client_secret`, so no
+> separate store custom-app token was needed. Variables live in the Cloudflare
+> dashboard (Workers & Pages → **p2p-progress** → Settings → Variables):
+> `shop`, `client_id`, `client_secret` (encrypted), optional `admin_token`.
+>
+> **Only remaining check — the logged-in round-trip.** The guest path is proven; the
+> read/write-a-metafield path only runs for a signed-in customer. To confirm it:
+> 1. Log into the storefront as a real **customer** (not admin preview).
+> 2. Visit `/pages/p2p-learning` and do something that earns progress (open a
+>    course, add a journal note).
+> 3. Check it worked either way:
+>    - **Cloudflare** → Workers & Pages → p2p-progress → **Logs**: a `200` on the
+>      `progress` POST = success; a `500` with `"token …"` or `"gql …"` = the admin
+>      token/scope needs a look.
+>    - **Shopify admin** → that Customer → **Metafields** → `custom.p2p_progress`
+>      should hold a JSON blob.
+> 4. Open the same account in a **different browser/device** → progress should load
+>    in (one quiet auto-refresh pulls the server copy).
+>
+> If the POST 500s on a token error, the fix is to add an `admin_token` secret
+> (a `shpat_…` from a 2-min store custom app with `write_customers`) — the Worker
+> already prefers it over client_credentials when present.
+>
+> Everything below is the original build reference.
+
+---
+
 **Goal:** make a member's progress (courses done, points, badges, streak, journal,
 certificates) follow them across devices and browsers, instead of living only in
 one browser.

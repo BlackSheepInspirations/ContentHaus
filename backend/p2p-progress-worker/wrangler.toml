@@ -1,17 +1,19 @@
-# Cloudflare Worker config for the P2P cross-device progress backend.
-# Deploy: cd backend/p2p-progress-worker && npx wrangler deploy
+# Reference config for the P2P cross-device progress Worker.
 #
-# Secrets (NEVER put these here — set them once with wrangler, they live encrypted
-# in Cloudflare, never in git or chat):
-#   npx wrangler secret put SHOPIFY_APP_SECRET     # the app's API secret key
-#   npx wrangler secret put SHOPIFY_ADMIN_TOKEN    # Admin API access token
+# NOTE: the live Worker was created/deployed through the Cloudflare DASHBOARD, and
+# its variables are set there (Workers & Pages → p2p-progress → Settings → Variables),
+# NOT via this file. This toml is kept only as documentation / for optional CLI use.
 #
-# The two [vars] below are NOT secret and are fine to keep here.
+# Worker variables (dashboard → Settings → Variables and Secrets):
+#   shop           = blacksheepcreationsllc.myshopify.com   (plain text)
+#   client_id      = <the app's Client ID>                  (plain text)
+#   client_secret  = <the app's Secret>                     (Encrypt / secret)
+#   admin_token    = <optional shpat_…>                     (Encrypt / secret; optional)
+# API version is hardcoded in worker.js (const API_VERSION = '2026-07').
 
 name = "p2p-progress"
 main = "worker.js"
 compatibility_date = "2025-01-01"
 
 [vars]
-SHOP = "blacksheepcreationsllc.myshopify.com"
-API_VERSION = "2025-01"
+shop = "blacksheepcreationsllc.myshopify.com"
