@@ -162,6 +162,44 @@
     pop.querySelector('.osx-cal-pop-x').addEventListener('click', close);
     pop.querySelector('.osx-cele-x').addEventListener('click', close);
   }
+  /* ---------- social snapshot widgets (creator side) ---------- */
+  function liveStat(l, key) { var r = l.results || {}, s = 0; Object.keys(r).forEach(function (p) { s += num((r[p] || {})[key]); }); return s; }
+  function liveStatAvg(l, key) { var r = l.results || {}, s = 0, n = 0; Object.keys(r).forEach(function (p) { var v = num((r[p] || {})[key]); if (v > 0) { s += v; n++; } }); return n ? Math.round(s / n) : 0; }
+  function lastLive() { return data.lives.filter(function (l) { return l.done && l.date; }).sort(function (a, b) { return (b.date || '').localeCompare(a.date || ''); })[0]; }
+  function liveMet(l) { var met = 0, total = 0, g = l.goals || {}, r = l.results || {}; Object.keys(g).forEach(function (p) { var gp = g[p] || {}, rp = r[p] || {}; Object.keys(gp).forEach(function (k) { if (gp[k] !== '' && gp[k] != null) { total++; if (num(rp[k]) >= num(gp[k])) met++; } }); }); return { met: met, total: total }; }
+  function topPlatform() { var by = {}; data.lives.filter(function (l) { return l.done; }).forEach(function (l) { var r = l.results || {}; Object.keys(r).forEach(function (p) { var nm = p === 'Other' ? (l.otherPlat || 'Other') : p; by[nm] = (by[nm] || 0) + liveStatKeyForPlat(r[p]); }); }); var best = '', bv = -1; Object.keys(by).forEach(function (p) { if (by[p] > bv) { bv = by[p]; best = p; } }); return bv > 0 ? best : ''; }
+  function liveStatKeyForPlat(rp) { rp = rp || {}; return num(rp.viewers) + num(rp.followers); }
+  function weekActivity(wk) { var c = 0; data.lives.forEach(function (l) { if (!l.deleted && l.date && periodKey('week', dfromiso(l.date)) === wk) c++; }); data.posts.forEach(function (p) { if (p.date && periodKey('week', dfromiso(p.date)) === wk) c++; }); return c; }
+  function snapSparkSVG(vals) {
+    if (vals.length < 2) return '';
+    var max = Math.max.apply(null, vals) || 1, min = Math.min.apply(null, vals), w = 240, h = 46, step = w / (vals.length - 1), rng = (max - min) || 1;
+    var pts = vals.map(function (v, i) { return (i * step).toFixed(1) + ',' + (h - ((v - min) / rng) * (h - 6) - 3).toFixed(1); }).join(' ');
+    return '<svg class="osx-sw-spark" viewBox="0 0 ' + w + ' ' + h + '" preserveAspectRatio="none"><polyline points="' + pts + '" fill="none" stroke="var(--gold-bright)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/></svg>';
+  }
+  function socialWidgetsHTML() {
+    if ((data.ctype || 'both') === 'product') return '';
+    var ll = lastLive();
+    // 1 · last-live recap
+    var recap;
+    if (ll) { var mm = liveMet(ll), fol = liveFollowers(ll), vw = liveStat(ll, 'viewers'), wt = liveStatAvg(ll, 'watch'); recap = '<button type="button" class="osx-sw-card osx-sw-recap" data-openitem="live|' + esc(ll.id) + '"><div class="osx-sw-t">📡 Last live<span>' + esc(liveDateLabel ? liveDateLabel(ll) : (ll.date || '')) + '</span></div><div class="osx-sw-recap-g"><div><b>' + num(vw) + '</b><span>viewers</span></div><div><b>+' + fol + '</b><span>followers</span></div><div><b>' + wt + '<i>m</i></b><span>avg watch</span></div></div>' + (mm.total ? '<div class="osx-sw-met"><span class="osx-sw-metp' + (mm.met >= mm.total ? ' all' : mm.met ? ' some' : '') + '">' + mm.met + ' / ' + mm.total + ' goals met</span></div>' : '') + '</button>'; }
+    else { recap = '<div class="osx-sw-card"><div class="osx-sw-t">📡 Last live</div><div class="osx-sw-empty">Log a live to see your recap here.</div></div>'; }
+    // 2 · follower-growth sparkline (weekly snapshots)
+    var snaps = data.snaps.slice().sort(function (a, b) { return (a.week || '').localeCompare(b.week || ''); });
+    var fvals = snaps.map(function (s) { return num(s.followers); }).filter(function (v, i) { return true; });
+    var grow;
+    if (snaps.length >= 2 && fvals.some(function (v) { return v > 0; })) {
+      var cur = fvals[fvals.length - 1], prev = fvals[fvals.length - 2], delta = cur - prev;
+      grow = '<div class="osx-sw-card"><div class="osx-sw-t">📈 Follower growth<span>' + snaps.length + ' weeks</span></div><div class="osx-sw-big">' + num(cur) + ' <em class="' + (delta >= 0 ? 'up' : 'dn') + '">' + (delta >= 0 ? '▲ +' : '▼ ') + num(delta) + '</em></div>' + snapSparkSVG(fvals) + '</div>';
+    } else { grow = '<div class="osx-sw-card"><div class="osx-sw-t">📈 Follower growth</div><div class="osx-sw-empty">Log weekly numbers in <b>Growth</b> to see your trend.</div></div>'; }
+    // 3 · consistency heatmap (lives + posts / week, last 12)
+    var wks = weekList(12), acts = wks.map(weekActivity), amax = Math.max.apply(null, acts.concat([1]));
+    var showed = acts.filter(function (v) { return v > 0; }).length;
+    var heat = '<div class="osx-sw-card"><div class="osx-sw-t">🔥 Consistency<span>' + showed + ' / 12 wks active</span></div><div class="osx-sw-heat">' + acts.map(function (v, i) { var lv = v === 0 ? 0 : v >= amax ? 4 : Math.ceil(v / amax * 3); return '<span class="osx-sw-hc l' + lv + '" title="' + esc(wks[i].slice(-3)) + ': ' + v + ' shipped"></span>'; }).join('') + '</div><div class="osx-sw-heatlbl"><span>12 wks ago</span><span>now</span></div></div>';
+    // 4 · top platform / best time
+    var tp = topPlatform(), bt = livesTrend().best;
+    var tops = '<div class="osx-sw-card"><div class="osx-sw-t">🏆 What\'s working</div><div class="osx-sw-kv"><span>Top platform</span><b>' + (tp ? esc(tp) : '—') + '</b></div><div class="osx-sw-kv"><span>Best time to go live</span><b>' + (bt && bt !== '—' ? esc(bt) : '—') + '</b></div>' + (!tp ? '<div class="osx-sw-empty" style="margin-top:6px;">Log a couple of lives with results to unlock this.</div>' : '') + '</div>';
+    return '<div class="osx-pl-sech">📣 Your social snapshot</div><div class="osx-sw-grid">' + recap + grow + heat + tops + '</div>';
+  }
   function dashHTML() {
     var ct = data.ctype || 'both';
     var sel = '<div class="osx-ct-sel"><span class="osx-ct-l">I create:</span>' + [['content', '📱 Content'], ['product', '📦 Products'], ['both', '✨ Both']].map(function (c) { return '<button class="osx-ct-b' + (ct === c[0] ? ' on' : '') + '" data-ctype="' + c[0] + '">' + c[1] + '</button>'; }).join('') + '</div>';
@@ -180,7 +218,7 @@
         '<span class="osx-pl-gsum-b"><b>' + esc(g.title || 'Untitled goal') + '</b>' +
         '<span class="osx-pl-gsum-m"><span class="osx-pl-stage-b">' + st[1] + ' ' + st[2] + '</span> · ' + esc(countdownText(g.w)) + '</span></span></button>';
     }).join('') : '<div class="osx-pl-empty">No goals yet — head to 🎯 Goals to build one with the GROWS formula.</div>';
-    return sel + '<div class="osx-dash-grid"><div class="osx-dash-left">' + cd + raftHTML() + stats +
+    return sel + '<div class="osx-dash-grid"><div class="osx-dash-left">' + cd + raftHTML() + stats + socialWidgetsHTML() +
       '<div class="osx-pl-sech">📊 What you shipped — last 8 weeks</div>' + barChart() +
       '<div class="osx-pl-sech">🎚️ Progress by horizon</div><div class="osx-pl-strip">' + rings + '</div>' +
       '<div class="osx-pl-sech" style="margin-top:10px;">🎯 Your goals</div>' + goals + milestonesStrip() + '</div>' +
