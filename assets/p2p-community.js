@@ -791,7 +791,21 @@
   var NOTIFS = '/apps/p2p/notifs', notifs = [];
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function ago(ts) { var s = Math.floor((Date.now() - ts) / 1000); if (s < 60) return 'just now'; var m = Math.floor(s / 60); if (m < 60) return m + 'm'; var h = Math.floor(m / 60); if (h < 24) return h + 'h'; return Math.floor(h / 24) + 'd'; }
+  /* self-set reminders (planner writes p2p_reminders; fired ids tracked so they show once) */
+  function firedSet() { try { return JSON.parse(localStorage.getItem('p2p_rem_fired') || '[]') || []; } catch (e) { return []; } }
+  function markFired(nids) { try { var s = firedSet(); nids.forEach(function (n) { if (s.indexOf(n) < 0) s.push(n); }); localStorage.setItem('p2p_rem_fired', JSON.stringify(s.slice(-200))); } catch (e) {} }
+  function dueReminders() {
+    var out = [], now = Date.now(), fired = firedSet();
+    try { (JSON.parse(localStorage.getItem('p2p_reminders') || '[]') || []).forEach(function (r) { if (r.fireAt <= now && r.startAt >= now - 7200000 && fired.indexOf(r.nid) < 0) out.push(r); }); } catch (e) {}
+    out.sort(function (a, b) { return a.startAt - b.startAt; });
+    return out;
+  }
   function line(n) {
+    if (n.reminder) {
+      var ic = n.kind === 'live' ? '📡' : n.kind === 'goal' ? '🎯' : '📦', dt = n.startAt - Date.now();
+      var when = dt <= 0 ? 'now' : dt < 3600000 ? 'in ' + Math.round(dt / 60000) + ' min' : dt < 86400000 ? 'in ' + Math.round(dt / 3600000) + ' hr' : 'in ' + Math.round(dt / 86400000) + ' days';
+      return '<div class="osx-bell-item unread osx-bell-rem"><div class="osx-bell-line">' + ic + ' <b>' + esc(n.title) + '</b></div><div class="osx-bell-snip">' + esc(n.label) + ' · starts ' + when + '</div></div>';
+    }
     var verb = n.type === 'comment' ? 'commented on your post' : (n.rtype === 'party' ? 'celebrated your post 🎉' : n.rtype === 'thumb' ? 'gave your post a 👍' : 'loved your post ❤');
     return '<div class="osx-bell-item' + (n.read ? '' : ' unread') + '"><div class="osx-bell-line"><b>' + esc(n.name || 'Someone') + '</b> ' + verb + '</div>' +
       (n.snippet ? '<div class="osx-bell-snip">“' + esc(n.snippet) + '”</div>' : '') +
@@ -799,14 +813,17 @@
   }
   function renderMenu() {
     if (!menu) return;
-    menu.innerHTML = '<div class="osx-bell-h">Notifications</div>' + (notifs.length ? notifs.map(line).join('') : '<div class="osx-bell-empty">Nothing yet — reactions & replies to your posts show up here. 🔔</div>');
+    var rem = dueReminders().map(function (r) { return { reminder: true, kind: r.kind, title: r.title, label: r.label, startAt: r.startAt }; });
+    var all = rem.concat(notifs);
+    menu.innerHTML = '<div class="osx-bell-h">Notifications</div>' + (all.length ? all.map(line).join('') : '<div class="osx-bell-empty">Nothing yet — reminders you set and reactions to your posts show up here. 🔔</div>');
   }
   function setCount(u) { if (!countEl) return; if (u > 0) { countEl.textContent = u > 9 ? '9+' : u; countEl.hidden = false; } else countEl.hidden = true; }
+  function refreshCount() { setCount(notifs.filter(function (n) { return !n.read; }).length + dueReminders().length); }
   function fetchNotifs() {
     fetch(NOTIFS, { credentials: 'same-origin' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
-      if (!j || j.guest) return;
-      notifs = j.notifs || []; setCount(j.unread || 0); if (menu && !menu.hidden) renderMenu();
-    }).catch(function () {});
+      if (j && !j.guest) notifs = j.notifs || [];
+      refreshCount(); if (menu && !menu.hidden) renderMenu();
+    }).catch(function () { refreshCount(); });
   }
   if (roleEl && window.P2P && window.P2P.tier) { try { var t = window.P2P.tier(); if (t && t.name) roleEl.textContent = t.name; } catch (e) {} }
   if (bell) bell.addEventListener('click', function (e) {
@@ -814,8 +831,9 @@
     var opening = menu.hidden; menu.hidden = !menu.hidden;
     if (opening) {
       renderMenu();
-      fetch(NOTIFS, { method: 'POST', headers: { 'content-type': 'application/json' }, credentials: 'same-origin', body: '{}' })
-        .then(function () { setCount(0); notifs.forEach(function (n) { n.read = true; }); }).catch(function () {});
+      var due = dueReminders(); markFired(due.map(function (r) { return r.nid; }));
+      notifs.forEach(function (n) { n.read = true; }); setCount(0);
+      fetch(NOTIFS, { method: 'POST', headers: { 'content-type': 'application/json' }, credentials: 'same-origin', body: '{}' }).catch(function () {});
     }
   });
   document.addEventListener('click', function (e) { if (menu && !menu.hidden && !menu.contains(e.target) && e.target !== bell && !bell.contains(e.target)) menu.hidden = true; });

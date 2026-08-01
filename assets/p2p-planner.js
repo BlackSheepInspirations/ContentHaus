@@ -23,7 +23,7 @@
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function p2(n) { return (n < 10 ? '0' : '') + n; }
   function uid() { return String(Date.now()) + Math.random().toString(36).slice(2, 6); }
-  function save() { try { localStorage.setItem(KEY, JSON.stringify(data)); } catch (e) {} }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(data)); } catch (e) {} try { rebuildReminders(); } catch (e) {} }
   function isoWeek(d) { var dt = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())); var day = dt.getUTCDay() || 7; dt.setUTCDate(dt.getUTCDate() + 4 - day); var ys = new Date(Date.UTC(dt.getUTCFullYear(), 0, 1)); return { y: dt.getUTCFullYear(), w: Math.ceil((((dt - ys) / 86400000) + 1) / 7) }; }
   function periodKey(tf, d) { d = d || new Date(); var y = d.getFullYear(); if (tf === 'day') return y + '-' + p2(d.getMonth() + 1) + '-' + p2(d.getDate()); if (tf === 'week') { var wk = isoWeek(d); return wk.y + '-W' + p2(wk.w); } if (tf === 'month') return y + '-' + p2(d.getMonth() + 1); if (tf === 'quarter') return y + '-Q' + (Math.floor(d.getMonth() / 3) + 1); return '' + y; }
   function weekKey() { return periodKey('week'); }
@@ -213,6 +213,7 @@
         '<button class="osx-pl-owntog' + (ownedThisWeek(g) ? ' on' : '') + '" data-otog="' + esc(g.id) + '">' + (ownedThisWeek(g) ? '✓ Done this week' : 'Mark done') + '</button></div></div>' +
       '<div class="osx-pl-flabel">W · Window of Time <span>a real deadline</span></div>' +
         '<input class="osx-pl-date" type="date" data-wf="' + esc(g.id) + '" value="' + esc(g.w || '') + '">' +
+      remindRow('goal', g.id, g) +
       field(g, 's') +
       '</div>';
     return '<div class="osx-pl-goal open">' + head + body + '</div>';
@@ -309,6 +310,33 @@
       return '<label class="osx-lv-f' + cls + '"><span>' + esc(s[1]) + '</span><input class="osx-pl-in" ' + attr + '="' + esc(l.id) + '|' + plat + '|' + s[0] + '" value="' + esc(map[s[0]] || '') + '" inputmode="numeric" maxlength="12"></label>';
     }).join('') + '</div>';
   }
+  var REMIND_OFFS = [['start', 'At start', 0], ['15m', '15 min before', 900], ['1h', '1 hr before', 3600], ['3h', '3 hrs before', 10800], ['1d', '1 day before', 86400], ['3d', '3 days before', 259200], ['1w', '1 week before', 604800]];
+  function remItem(kind, id) { var a = kind === 'live' ? data.lives : kind === 'goal' ? data.goals : data.products; return a.filter(function (x) { return x.id === id; })[0]; }
+  function itemStart(kind, item) {
+    var iso = kind === 'live' ? item.date : kind === 'goal' ? item.w : item.launch;
+    if (!iso) return null;
+    var p = iso.split('-'), h = 9, mi = 0;
+    if (kind === 'live' && item.hour) { h = (+item.hour) % 12; if ((item.ampm || 'PM') === 'PM') h += 12; mi = +(item.min || 0); }
+    return new Date(+p[0], +p[1] - 1, +p[2], h, mi, 0, 0);
+  }
+  var _remSync;
+  function rebuildReminders() {
+    var out = [];
+    function push(kind, item) {
+      var base = itemStart(kind, item); if (!base) return;
+      (item.reminders || []).forEach(function (k) { var o = REMIND_OFFS.filter(function (x) { return x[0] === k; })[0]; if (!o) return; out.push({ nid: 'rem-' + kind + '-' + item.id + '-' + k, id: item.id, kind: kind, title: item.title || item.name || item.topic || ('Your ' + kind), label: o[1], fireAt: base.getTime() - o[2] * 1000, startAt: base.getTime() }); });
+    }
+    data.lives.forEach(function (l) { if (!l.deleted && !l.done) push('live', l); });
+    data.goals.forEach(function (g) { push('goal', g); });
+    data.products.forEach(function (p) { if (p.status !== 'live') push('product', p); });
+    try { localStorage.setItem('p2p_reminders', JSON.stringify(out)); } catch (e) {}
+    clearTimeout(_remSync); _remSync = setTimeout(function () { try { fetch('/apps/p2p/reminders', { method: 'POST', headers: { 'content-type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify({ items: out }) }).catch(function () {}); } catch (e) {} }, 1500);
+  }
+  function remindRow(kind, id, item) {
+    var set = item.reminders || [];
+    return '<div class="osx-rem"><div class="osx-pl-flabel">🔔 Remind me <span>ring my bell before this — pick any</span></div><div class="osx-rem-chips">' +
+      REMIND_OFFS.map(function (o) { var on = set.indexOf(o[0]) > -1; return '<button type="button" class="osx-rem-chip' + (on ? ' on' : '') + '" data-remind="' + kind + '|' + esc(id) + '|' + o[0] + '">' + o[1] + '</button>'; }).join('') + '</div></div>';
+  }
   function liveCard(l) {
     var open = !!expanded['L' + l.id], plats = livePlats(l);
     var head = '<div class="osx-lv-h" data-ltoggle="' + esc(l.id) + '"><input type="checkbox" class="osx-lv-check" data-lvsel="' + esc(l.id) + '"' + (selected[l.id] ? ' checked' : '') + ' aria-label="Select"><span class="osx-lv-plats">' + plats.map(function (p) { return platPill(p, l.otherPlat); }).join('') + '</span>' +
@@ -346,7 +374,7 @@
       '<div class="osx-lv-top"><button class="osx-lv-duppill" data-ldupe="' + esc(l.id) + '">⧉ Duplicate</button></div>' +
       '<div class="osx-pl-flabel">Name this live</div><input class="osx-pl-in osx-lv-titlein" data-lf="' + esc(l.id) + '|title" value="' + esc(l.title || '') + '" placeholder="e.g. Tuesday Planner Party" maxlength="80">' + dupWarn +
       '<div class="osx-pl-flabel">Platforms <span>pick one or more — going live on YT + TikTok at once? both show up</span></div><div class="osx-plat-chips' + req + '">' + platChips + '</div>' + otherIn +
-      timeRow + pitchRow + hook + mktBtn + script + promptBox + goalsBlock + postBlock +
+      timeRow + remindRow('live', l.id, l) + pitchRow + hook + mktBtn + script + promptBox + goalsBlock + postBlock +
       '<div class="osx-lv-del"><button data-lvdel="' + esc(l.id) + '">Delete live</button></div></div></div>';
   }
   function vaultCard(l, kind) {
@@ -501,6 +529,7 @@
       '<label class="osx-lv-f"><span>Launch date</span><input type="date" class="osx-pl-date" data-prf="' + esc(p.id) + '|launch" value="' + esc(p.launch || '') + '"></label>' +
       '<label class="osx-lv-f"><span>Units sold</span><input class="osx-pl-in" data-prf="' + esc(p.id) + '|sold" value="' + esc(p.sold || '') + '" inputmode="numeric" maxlength="10"></label>' +
       '<label class="osx-lv-f"><span>Revenue ($)</span><input class="osx-pl-in" data-prf="' + esc(p.id) + '|revenue" value="' + esc(p.revenue || '') + '" inputmode="numeric" maxlength="12"></label></div>' +
+      remindRow('product', p.id, p) +
       '<button class="osx-lv-mkt" data-prlaunch="' + esc(p.id) + '" style="background:none;cursor:pointer;">🚀 Plan this launch with ROOTED →</button>' +
       '<div class="osx-lv-del"><button data-prdel="' + esc(p.id) + '">Delete product</button></div>';
     return '<div class="osx-lv-card open">' + head + '<div class="osx-lv-body">' + body + '</div></div>';
@@ -736,6 +765,7 @@
     host.querySelectorAll('[data-dcday]').forEach(function (b) { b.addEventListener('click', function () { openDcDay(b.getAttribute('data-dcday')); }); });
     host.querySelectorAll('[data-shipweek]').forEach(function (b) { b.addEventListener('click', function () { openShipWeek(b.getAttribute('data-shipweek')); }); });
     host.querySelectorAll('[data-openitem]').forEach(function (b) { b.addEventListener('click', function () { var p = b.getAttribute('data-openitem').split('|'); openItemDetail(p[0], p[1]); }); });
+    host.querySelectorAll('[data-remind]').forEach(function (b) { b.addEventListener('click', function () { var p = b.getAttribute('data-remind').split('|'), it = remItem(p[0], p[1]); if (!it) return; it.reminders = it.reminders || []; var i = it.reminders.indexOf(p[2]); if (i > -1) it.reminders.splice(i, 1); else it.reminders.push(p[2]); b.classList.toggle('on'); save(); }); });
     // RAFT weekly loop
     host.querySelectorAll('[data-raft]').forEach(function (el) { var k = el.getAttribute('data-raft'); var ev = (el.type === 'checkbox') ? 'change' : 'change'; el.addEventListener(ev, function () { var c = raftCycle(); if (el.type === 'checkbox') c[k] = el.checked; else c[k] = el.value; save(); if (k === 'fastWin' || k === 'corrected') render(); }); });
     host.querySelectorAll('[data-act]').forEach(function (b) { b.addEventListener('click', function () { var c = raftCycle(), n = +b.getAttribute('data-act'); c.act = (c.act === n) ? n - 1 : n; save(); render(); }); });
@@ -750,4 +780,5 @@
   function addList(bucket) { var inp = host.querySelector('[data-ladd="' + bucket + '"]'); var v = (inp && inp.value || '').trim(); if (!v) return; if (bucket === 'top' && data[active].top.length >= 3) return; data[active][bucket].push({ id: uid(), text: v.slice(0, 120), pct: 0 }); save(); render(); }
 
   render();
+  try { rebuildReminders(); } catch (e) {}
 })();
