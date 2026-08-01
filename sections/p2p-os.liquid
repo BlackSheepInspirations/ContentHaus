@@ -437,11 +437,19 @@
       {%- if community_embed != blank -%}
         <div class="osx-community-embed"><iframe src="{{ community_embed }}" title="Community" loading="lazy" allow="fullscreen; clipboard-write"></iframe></div>
       {%- else -%}
-        <div class="osx-community-ph">
-          <div class="osx-community-ph-ic">💬</div>
-          <b>Your community is on the way</b>
-          <p>A warm place to share your wins, ask questions, and grow with other creators walking the same path — right here inside your OS. We're setting it up now.</p>
-          {%- if community_link != blank -%}<a class="osx-cta" href="{{ community_link }}" target="_blank" rel="noopener">Join the community →</a>{%- endif -%}
+        <div class="osx-cw" data-cw>
+          <div class="osx-cw-compose">
+            <textarea class="osx-cw-text" data-cw-text maxlength="1000" rows="2" placeholder="Share a win, a question, or an encouragement with the community…"></textarea>
+            <div class="osx-cw-compose-row">
+              <label class="osx-cw-wintoggle"><input type="checkbox" data-cw-win> Share as a win 🏆</label>
+              <button class="osx-cw-postbtn" type="button" data-cw-post>Post</button>
+            </div>
+          </div>
+          <div class="osx-cw-tabs">
+            <button class="osx-cw-tab on" type="button" data-cw-tab="wall">Wall</button>
+            <button class="osx-cw-tab" type="button" data-cw-tab="wins">Wins 🏆</button>
+          </div>
+          <div class="osx-cw-feed" data-cw-feed><div class="osx-cw-empty">Loading the wall…</div></div>
         </div>
       {%- endif -%}
     </section>
@@ -922,6 +930,28 @@
   #p2pos .osx-event-join:hover{filter:brightness(1.05);transform:translateY(-1px);}
   @keyframes p2pos-pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
   @media (max-width:560px){#p2pos .osx-event-when{flex-basis:auto;border-right:0;flex-direction:row;gap:8px;}}
+  /* community wall + wins board */
+  #p2pos .osx-cw{max-width:640px;}
+  #p2pos .osx-cw-compose{border:1px solid var(--stroke);border-radius:16px;padding:14px;background:rgba(255,255,255,.03);margin-bottom:18px;}
+  #p2pos .osx-cw-text{width:100%;box-sizing:border-box;resize:vertical;min-height:52px;background:rgba(9,17,24,.5);border:1px solid var(--stroke);border-radius:11px;padding:11px 13px;color:var(--text);font:400 14px/1.5 system-ui;}
+  #p2pos .osx-cw-text:focus{outline:none;border-color:var(--gstroke);}
+  #p2pos .osx-cw-compose-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:10px;}
+  #p2pos .osx-cw-wintoggle{display:inline-flex;align-items:center;gap:7px;font:600 13px/1 system-ui;color:var(--muted);cursor:pointer;}
+  #p2pos .osx-cw-postbtn{border:0;cursor:pointer;padding:11px 22px;border-radius:999px;font:700 14px/1 system-ui;color:#0a1410;background:linear-gradient(100deg,#f4e2a6,#c9a24a);transition:filter .14s;}
+  #p2pos .osx-cw-postbtn:hover{filter:brightness(1.05);}
+  #p2pos .osx-cw-postbtn:disabled{opacity:.6;cursor:default;}
+  #p2pos .osx-cw-tabs{display:flex;gap:8px;margin-bottom:14px;}
+  #p2pos .osx-cw-tab{border:1px solid var(--stroke);background:transparent;color:var(--muted);cursor:pointer;padding:8px 16px;border-radius:999px;font:700 13px/1 system-ui;transition:background .14s,color .14s,border-color .14s;}
+  #p2pos .osx-cw-tab.on{color:#0a1410;background:linear-gradient(100deg,#f4e2a6,#c9a24a);border-color:transparent;}
+  #p2pos .osx-cw-feed{display:flex;flex-direction:column;gap:12px;}
+  #p2pos .osx-cw-post{border:1px solid var(--stroke);border-radius:14px;padding:14px 16px;background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(9,17,24,.4));}
+  #p2pos .osx-cw-post.is-win{border-color:rgba(216,180,90,.5);background:linear-gradient(180deg,rgba(216,180,90,.08),rgba(9,17,24,.4));}
+  #p2pos .osx-cw-post-top{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+  #p2pos .osx-cw-post-top b{font:700 14px/1.2 system-ui;color:var(--text);}
+  #p2pos .osx-cw-winbadge{font:800 10px/1 system-ui;letter-spacing:.04em;color:var(--gold-bright);}
+  #p2pos .osx-cw-time{margin-left:auto;font:500 12px/1 system-ui;color:var(--muted);}
+  #p2pos .osx-cw-post-text{font:400 14px/1.55 system-ui;color:#dbe7e2;white-space:pre-wrap;word-break:break-word;}
+  #p2pos .osx-cw-empty{padding:26px 16px;text-align:center;font:400 14px/1.5 system-ui;color:var(--muted);}
   #p2pos .osx-community-ph{max-width:520px;margin:20px auto;text-align:center;padding:38px 28px;border:1px dashed var(--gstroke);border-radius:20px;background:rgba(57,197,192,.05);}
   #p2pos .osx-community-ph-ic{font-size:40px;margin-bottom:12px;}
   #p2pos .osx-community-ph b{display:block;font:700 20px/1.2 Georgia,serif;color:var(--text);margin-bottom:8px;}
@@ -1049,6 +1079,9 @@
 {%- endif -%}
 {%- comment -%} read-only cross-Haus vault dashboard for the home view {%- endcomment -%}
 <script src="{{ 'p2p-os-vault.js' | asset_url }}" defer="defer"></script>
+{%- comment -%} community wall + wins board (talks to the App Proxy /apps/p2p/community) {%- endcomment -%}
+<script>window.P2P_MEMBER_NAME = {{ customer.first_name | default: '' | json }};</script>
+<script src="{{ 'p2p-community.js' | asset_url }}" defer="defer"></script>
 {%- comment -%} daily Mindset · Purpose · Heart content for the hero carousel {%- endcomment -%}
 <script src="{{ 'p2p-moments.js' | asset_url }}" defer="defer"></script>
 <script src="{{ 'p2p-purpose.js' | asset_url }}" defer="defer"></script>
