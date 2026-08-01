@@ -411,59 +411,64 @@
       <h2 class="osx-h2">{{ section.settings.community_title | default: 'Better together' }}</h2>
       <p class="osx-lede">{{ section.settings.community_intro | default: "Share wins, ask questions, and build alongside other creators — without leaving your OS." }}</p>
 
-      {%- comment -%} Upcoming live sessions — owner adds a "Live session" block per class {%- endcomment -%}
-      {%- assign event_blocks = section.blocks | where: 'type', 'event' -%}
-      {%- if event_blocks.size > 0 -%}
-        <div class="osx-events">
-          <div class="osx-events-h">📅 {{ section.settings.events_title | default: 'Upcoming live sessions' }}</div>
-          <div class="osx-events-grid">
-            {%- for b in event_blocks -%}
-              <div class="osx-event{% if b.settings.live_now %} is-live{% endif %}" {{ b.shopify_attributes }}>
-                <div class="osx-event-when">
-                  {%- if b.settings.date != blank -%}<b>{{ b.settings.date }}</b>{%- endif -%}
-                  {%- if b.settings.time != blank -%}<span>{{ b.settings.time }}</span>{%- endif -%}
-                </div>
-                <div class="osx-event-body">
-                  <div class="osx-event-title">{{ b.settings.title | default: 'Live class' }}{% if b.settings.live_now %} <span class="osx-event-live">● LIVE</span>{% endif %}</div>
-                  {%- if b.settings.desc != blank -%}<p>{{ b.settings.desc }}</p>{%- endif -%}
-                </div>
-                {%- if b.settings.join_url != blank -%}<a class="osx-event-join" href="{{ b.settings.join_url }}" target="_blank" rel="noopener">{{ b.settings.join_label | default: 'Join the call' }} →</a>{%- endif -%}
-              </div>
-            {%- endfor -%}
-          </div>
-        </div>
-      {%- endif -%}
-
       {%- if community_embed != blank -%}
         <div class="osx-community-embed"><iframe src="{{ community_embed }}" title="Community" loading="lazy" allow="fullscreen; clipboard-write"></iframe></div>
       {%- else -%}
-        <div class="osx-cw" data-cw>
-          <div class="osx-cw-compose">
-            <textarea class="osx-cw-text" data-cw-text maxlength="1000" rows="2" placeholder="Share a win, a question, or an encouragement with the community…"></textarea>
-            <div class="osx-cw-compose-row">
-              <span class="osx-cw-hint">Wins get shared from your Notebook → Wins 🏆</span>
-              <button class="osx-cw-postbtn" type="button" data-cw-post>Post</button>
+        {%- comment -%} Upcoming live sessions — owner adds a "Live session" block per class {%- endcomment -%}
+        {%- assign event_blocks = section.blocks | where: 'type', 'event' -%}
+        {%- if event_blocks.size > 0 -%}
+          <div class="osx-events">
+            <div class="osx-events-h">📅 {{ section.settings.events_title | default: 'Upcoming live sessions' }}</div>
+            <div class="osx-events-grid">
+              {%- for b in event_blocks -%}
+                <div class="osx-event{% if b.settings.live_now %} is-live{% endif %}" {{ b.shopify_attributes }}>
+                  <div class="osx-event-when">
+                    {%- if b.settings.date != blank -%}<b>{{ b.settings.date }}</b>{%- endif -%}
+                    {%- if b.settings.time != blank -%}<span>{{ b.settings.time }}</span>{%- endif -%}
+                  </div>
+                  <div class="osx-event-body">
+                    <div class="osx-event-title">{{ b.settings.title | default: 'Live class' }}{% if b.settings.live_now %} <span class="osx-event-live">● LIVE</span>{% endif %}</div>
+                    {%- if b.settings.desc != blank -%}<p>{{ b.settings.desc }}</p>{%- endif -%}
+                  </div>
+                  {%- if b.settings.join_url != blank -%}<a class="osx-event-join" href="{{ b.settings.join_url }}" target="_blank" rel="noopener">{{ b.settings.join_label | default: 'Join the call' }} →</a>{%- endif -%}
+                </div>
+              {%- endfor -%}
             </div>
           </div>
-          <div class="osx-cw-tabs">
-            <button class="osx-cw-tab on" type="button" data-cw-tab="wall">Wall</button>
-            <button class="osx-cw-tab" type="button" data-cw-tab="wins">Wins 🏆</button>
+        {%- endif -%}
+
+        <div class="osx-comm">
+          <div class="osx-comm-main">
+            <div class="osx-cw" data-cw>
+              <div class="osx-cw-compose">
+                <textarea class="osx-cw-text" data-cw-text maxlength="1000" rows="2" placeholder="Share a win, a question, or an encouragement with the community…"></textarea>
+                <div class="osx-cw-compose-row">
+                  <span class="osx-cw-hint">Wins get shared from your Notebook → Wins 🏆</span>
+                  <button class="osx-cw-postbtn" type="button" data-cw-post>Post</button>
+                </div>
+              </div>
+              <div class="osx-cw-feed" data-cw-feed><div class="osx-cw-empty">Loading the wall…</div></div>
+            </div>
           </div>
-          <div class="osx-cw-feed" data-cw-feed><div class="osx-cw-empty">Loading the wall…</div></div>
+          <aside class="osx-comm-side">
+            <div class="osx-comm-counts">
+              <button class="osx-comm-count" type="button" data-go-members><b data-count-members>—</b><span>Members</span></button>
+              <button class="osx-comm-count" type="button" data-go-members><b data-count-active>—</b><span>Active now</span></button>
+            </div>
+            <button class="osx-comm-invite" type="button" data-comm-invite>＋ Invite a friend</button>
+            <div class="osx-wins-side">
+              <div class="osx-wins-side-h">🏆 Recent wins</div>
+              <div class="osx-wins-side-body" data-wins-feed><div class="osx-cw-empty">—</div></div>
+            </div>
+          </aside>
+        </div>
+
+        <div class="osx-comm-mapwrap">
+          <div class="osx-comm-map-h">📍 Where the flock is</div>
+          <div class="osx-mb-map" data-mb-map></div>
+          <p class="osx-mb-mapnote">Pins are approximate (city‑level) — never your exact address. Hide yourself anytime under Members → My Profile.</p>
         </div>
       {%- endif -%}
-
-      <div class="osx-suggest" data-suggest>
-        <div class="osx-suggest-h">💡 Help us be better</div>
-        <p class="osx-suggest-sub">A question, or an idea to make this better? Send it straight to the team — it comes to us privately, not to the community.</p>
-        <select class="osx-suggest-kind" data-suggest-kind>
-          <option value="Suggestion">Suggestion</option>
-          <option value="Question">Question</option>
-          <option value="Kudos">Kudos / Praise</option>
-        </select>
-        <textarea class="osx-cw-text" data-suggest-text maxlength="2000" rows="3" placeholder="Share your thoughts…"></textarea>
-        <div class="osx-suggest-row"><span class="osx-suggest-status" data-suggest-status></span><button class="osx-cw-postbtn" type="button" data-suggest-send>Send</button></div>
-      </div>
     </section>
 
     {%- comment -%} ===== VIEW: Members (directory · map · my profile) ===== {%- endcomment -%}
@@ -474,15 +479,10 @@
       <div class="osx-mb" data-mb>
         <div class="osx-mb-tabs">
           <button class="osx-mb-tab on" type="button" data-mb-tab="directory">Members</button>
-          <button class="osx-mb-tab" type="button" data-mb-tab="map">Map</button>
           <button class="osx-mb-tab" type="button" data-mb-tab="profile">My Profile</button>
         </div>
         <div class="osx-mb-panel on" data-mb-panel="directory">
           <div class="osx-mb-grid" data-mb-grid><div class="osx-cw-empty">Loading members…</div></div>
-        </div>
-        <div class="osx-mb-panel" data-mb-panel="map">
-          <div class="osx-mb-map" data-mb-map></div>
-          <p class="osx-mb-mapnote">📍 Pins are approximate (city‑level) — never your exact address. Hide yourself anytime under My Profile.</p>
         </div>
         <div class="osx-mb-panel" data-mb-panel="profile">
           <div class="osx-mb-form">
@@ -501,6 +501,18 @@
             <div class="osx-mb-saverow"><span class="osx-mb-status" data-mb-status></span><button class="osx-cw-postbtn" type="button" data-mb-save>Save my profile</button></div>
           </div>
         </div>
+      </div>
+
+      <div class="osx-suggest" data-suggest>
+        <div class="osx-suggest-h">💡 Help us be better</div>
+        <p class="osx-suggest-sub">A question, an idea, or a bit of praise? Send it straight to the team — it comes to us privately, not to the community.</p>
+        <select class="osx-suggest-kind" data-suggest-kind>
+          <option value="Suggestion">Suggestion</option>
+          <option value="Question">Question</option>
+          <option value="Kudos">Kudos / Praise</option>
+        </select>
+        <textarea class="osx-cw-text" data-suggest-text maxlength="2000" rows="3" placeholder="Share your thoughts…"></textarea>
+        <div class="osx-suggest-row"><span class="osx-suggest-status" data-suggest-status></span><button class="osx-cw-postbtn" type="button" data-suggest-send>Send</button></div>
       </div>
     </section>
 
@@ -1025,6 +1037,26 @@
     background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239fb3ad' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 11px center;}
   #p2pos .osx-suggest-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:10px;}
   #p2pos .osx-suggest-status{font:600 12.5px/1.3 system-ui;color:var(--gold-bright);}
+  /* community two-column layout */
+  #p2pos .osx-comm{display:flex;gap:22px;align-items:flex-start;}
+  #p2pos .osx-comm-main{flex:1;min-width:0;}
+  #p2pos .osx-comm-main .osx-cw{max-width:none;}
+  #p2pos .osx-comm-side{flex:0 0 258px;display:flex;flex-direction:column;gap:16px;}
+  #p2pos .osx-comm-counts{display:flex;gap:12px;}
+  #p2pos .osx-comm-count{flex:1;border:1px solid var(--stroke);border-radius:14px;background:rgba(255,255,255,.03);padding:14px 10px;text-align:center;cursor:pointer;transition:.15s;}
+  #p2pos .osx-comm-count:hover{border-color:var(--gstroke);background:rgba(216,180,90,.08);}
+  #p2pos .osx-comm-count b{display:block;font:800 22px/1 Georgia,serif;color:var(--gold-bright);}
+  #p2pos .osx-comm-count span{display:block;margin-top:4px;font:600 11px/1 system-ui;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);}
+  #p2pos .osx-comm-invite{border:1px solid var(--gstroke);background:rgba(216,180,90,.08);color:var(--gold-bright);cursor:pointer;border-radius:999px;padding:11px 16px;font:700 13px/1 system-ui;transition:.15s;}
+  #p2pos .osx-comm-invite:hover{background:rgba(216,180,90,.16);}
+  #p2pos .osx-wins-side{border:1px solid var(--gstroke);border-radius:16px;padding:14px;background:radial-gradient(120% 120% at 0% 0%,rgba(216,180,90,.1),rgba(9,17,24,.5));}
+  #p2pos .osx-wins-side-h{font:800 12px/1 system-ui;letter-spacing:.04em;color:var(--gold-bright);margin-bottom:10px;}
+  #p2pos .osx-wside-text{font:500 14px/1.5 Georgia,serif;color:var(--text);margin:0 0 10px;white-space:pre-wrap;word-break:break-word;}
+  #p2pos .osx-wside-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+  #p2pos .osx-wside-by{font:600 12px/1.3 system-ui;color:var(--muted);}
+  #p2pos .osx-comm-mapwrap{margin-top:28px;}
+  #p2pos .osx-comm-map-h{font:700 15px/1.2 system-ui;color:var(--text);margin-bottom:12px;}
+  @media (max-width:820px){#p2pos .osx-comm{flex-direction:column;} #p2pos .osx-comm-side{flex-basis:auto;width:100%;}}
   /* members · map · profile */
   #p2pos .osx-mb{max-width:840px;}
   #p2pos .osx-mb-tabs{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;}

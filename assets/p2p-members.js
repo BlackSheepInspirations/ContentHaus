@@ -143,9 +143,18 @@
       var k = t.getAttribute('data-mb-tab');
       tabs.forEach(function (x) { x.classList.toggle('on', x === t); });
       panels.forEach(function (p) { p.classList.toggle('on', p.getAttribute('data-mb-panel') === k); });
-      if (k === 'map') openMap();
     });
   });
+
+  // the map now lives on the Community view — build it lazily when it scrolls into view
+  if (mapEl) {
+    if ('IntersectionObserver' in window) {
+      var mio = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) { if (e.isIntersecting) { openMap(); mio.disconnect(); } });
+      }, { threshold: 0.02 });
+      mio.observe(mapEl);
+    } else { openMap(); }
+  }
 
   initProfile();
 })();
