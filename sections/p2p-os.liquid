@@ -1516,6 +1516,16 @@
   #p2pos .osx-idea-a{display:flex;align-items:center;gap:9px;flex:none;}
   #p2pos .osx-idea-plan{border:1px solid var(--gstroke);background:rgba(216,180,90,.1);color:var(--gold-bright);cursor:pointer;border-radius:999px;padding:6px 12px;font:700 11.5px/1 system-ui;white-space:nowrap;}
   #p2pos .osx-idea-badge{font:700 11px/1 system-ui;color:var(--emerald);white-space:nowrap;}
+  /* milestones + celebration */
+  #p2pos .osx-ms-row{display:flex;flex-wrap:wrap;gap:8px;}
+  #p2pos .osx-ms{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:19px;background:rgba(255,255,255,.04);border:1px solid var(--stroke);filter:grayscale(1);opacity:.4;transition:.15s;}
+  #p2pos .osx-ms.on{filter:none;opacity:1;border-color:var(--gstroke);background:rgba(216,180,90,.12);box-shadow:0 0 12px rgba(216,180,90,.25);}
+  .osx-cele{width:min(380px,100%);text-align:center;padding:30px 26px;}
+  .osx-cele-emoji{font-size:66px;line-height:1;margin-bottom:10px;animation:osx-cele-pop .5s cubic-bezier(.2,1.4,.4,1);}
+  .osx-cele-k{font:800 12px/1 system-ui;letter-spacing:.1em;text-transform:uppercase;color:#f4c534;margin-bottom:8px;}
+  .osx-cele-l{font:800 22px/1.2 Georgia,serif;color:#f0f5f2;margin-bottom:20px;}
+  .osx-cele-x{background:linear-gradient(100deg,#f4e2a6,#c9a24a);border:0;color:#0a1410;border-radius:999px;padding:12px 26px;font:800 14px/1 system-ui;cursor:pointer;}
+  @keyframes osx-cele-pop{0%{transform:scale(0) rotate(-20deg);}100%{transform:scale(1) rotate(0);}}
   @media (max-width:900px){#p2pos .osx-members-grid{grid-template-columns:1fr;}}
   /* community walkthrough modal */
   .osx-tour-in{width:min(400px,100%);text-align:center;padding:26px 24px 22px;}

@@ -30,6 +30,7 @@
 
   var data; try { data = JSON.parse(localStorage.getItem(KEY)) || null; } catch (e) { data = null; }
   if (!data) data = {}; if (!data.done) data.done = []; if (!data.goals) data.goals = []; if (!data.lives) data.lives = []; if (!data.posts) data.posts = []; if (!data.snaps) data.snaps = []; if (!data.ideas) data.ideas = [];
+  var milestoneBaseline = (data.milestones === undefined); if (!data.milestones) data.milestones = {};
   TFS.forEach(function (t) {
     var tf = t[0]; if (!data[tf]) data[tf] = { period: periodKey(tf), top: [], todo: [] };
     if (!data[tf].top) data[tf].top = []; if (!data[tf].todo) data[tf].todo = [];
@@ -84,7 +85,7 @@
         '<span class="osx-pl-gsum-m"><span class="osx-pl-stage-b">' + st[1] + ' ' + st[2] + '</span> · ' + esc(countdownText(g.w)) + '</span></span></button>';
     }).join('') : '<div class="osx-pl-empty">No goals yet — head to 🎯 Goals to build one with the GROWS formula.</div>';
     return cd + stats + '<div class="osx-pl-sech">📊 Progress by horizon</div><div class="osx-pl-strip">' + rings + '</div>' +
-      '<div class="osx-pl-sech" style="margin-top:10px;">🎯 Your goals</div>' + goals;
+      '<div class="osx-pl-sech" style="margin-top:10px;">🎯 Your goals</div>' + goals + milestonesStrip();
   }
   function growsRow(g) {
     return '<div class="osx-pl-grows">' + GROWS.map(function (r) {
@@ -241,7 +242,7 @@
   }
 
   /* ---------- growth (weekly snapshot of account totals + trend) ---------- */
-  var SNAP_STATS = [['followers', 'Total followers'], ['likes', 'Total likes'], ['diamonds', 'Diamonds'], ['revenue', 'Revenue ($)']];
+  var SNAP_STATS = [['followers', 'Total followers'], ['email', 'Email subscribers'], ['likes', 'Total likes'], ['diamonds', 'Diamonds'], ['visits', 'Site / shop visits'], ['engagement', 'Engagement %'], ['sold', 'Products sold'], ['testimonials', 'Testimonials'], ['revenue', 'Revenue ($)']];
   function snapObj(id) { return data.snaps.filter(function (s) { return s.id === id; })[0]; }
   function livesInWeek(wk) { return data.lives.filter(function (l) { return l.date && periodKey('week', new Date(l.date.split('-')[0], l.date.split('-')[1] - 1, l.date.split('-')[2])) === wk; }).length; }
   function postsInWeek(wk) { return data.posts.filter(function (p) { return p.date && periodKey('week', new Date(p.date.split('-')[0], p.date.split('-')[1] - 1, p.date.split('-')[2])) === wk; }).length; }
@@ -278,10 +279,58 @@
     return '<div class="osx-pl-add"><input class="osx-pl-in" data-newidea placeholder="Capture a content idea…" maxlength="160"><button class="osx-pl-addbtn" data-newideab>Add</button></div>' + list;
   }
 
+  /* ---------- gamification: milestones + celebrations ---------- */
+  var MILESTONES = [
+    ['first_goal', 'First goal set', '🎯', function () { return data.goals.length >= 1; }],
+    ['first_road', 'First step complete', '🧭', function () { return data.goals.some(function (g) { return (g.roadmap || []).some(function (x) { return x.pct >= 100; }); }); }],
+    ['goal_done', 'A goal fully reached!', '🏆', function () { return data.goals.some(function (g) { var r = g.roadmap || []; return r.length && r.every(function (x) { return x.pct >= 100; }); }); }],
+    ['launched', 'Launched — you hit 🚀 Rooted', '🚀', function () { return data.goals.some(function (g) { return g.stage === 'rooted' || g.stage === 'evergreen'; }); }],
+    ['evergreen', 'Evergreen — sustaining a launch', '🌲', function () { return data.goals.some(function (g) { return g.stage === 'evergreen'; }); }],
+    ['first_live', 'First live logged', '📡', function () { return data.lives.some(function (l) { return l.done; }); }],
+    ['ten_lives', '10 lives — you show up!', '🎙️', function () { return data.lives.filter(function (l) { return l.done; }).length >= 10; }],
+    ['first_post', 'First post logged', '📝', function () { return data.posts.some(function (p) { return p.done; }); }],
+    ['fifty_posts', '50 posts — consistency!', '✍️', function () { return data.posts.filter(function (p) { return p.done; }).length >= 50; }],
+    ['first_idea', 'First idea captured', '💡', function () { return data.ideas.length >= 1; }],
+    ['first_sale', 'First sale 💰', '💰', function () { return data.snaps.some(function (s) { return num(s.revenue) > 0 || num(s.sold) > 0; }) || data.lives.concat(data.posts).some(function (x) { return num((x.s || {}).sales) > 0; }); }],
+    ['hundred', '100 followers', '⭐', function () { return data.snaps.some(function (s) { return num(s.followers) >= 100; }); }],
+    ['k_followers', '1,000 followers 🌟', '🌟', function () { return data.snaps.some(function (s) { return num(s.followers) >= 1000; }); }],
+    ['ten_k', '10,000 followers!', '👑', function () { return data.snaps.some(function (s) { return num(s.followers) >= 10000; }); }],
+    ['week_perfect', 'A perfect week — 100%', '📅', function () { return (data.week.top.length + data.week.todo.length) > 0 && periodPct('week') >= 100; }]
+  ];
+  function confetti() {
+    var c = document.createElement('canvas'); c.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:3400;'; document.body.appendChild(c);
+    var ctx = c.getContext('2d'), W = c.width = window.innerWidth, H = c.height = window.innerHeight, cols = ['#f4c534', '#e0457b', '#39c5c0', '#8f6fd6', '#f4e2a6'], P = [];
+    for (var i = 0; i < 150; i++) P.push({ x: W / 2 + (Math.random() - .5) * 200, y: H / 3, vx: (Math.random() - .5) * 11, vy: Math.random() * -12 - 4, r: Math.random() * 7 + 3, c: cols[i % cols.length], a: 1, rot: Math.random() * 6 });
+    var t0 = Date.now(); (function fr() { ctx.clearRect(0, 0, W, H); P.forEach(function (p) { p.vy += .3; p.x += p.vx; p.y += p.vy; p.rot += .16; p.a -= .008; ctx.save(); ctx.globalAlpha = Math.max(0, p.a); ctx.translate(p.x, p.y); ctx.rotate(p.rot); ctx.fillStyle = p.c; ctx.fillRect(-p.r / 2, -p.r / 2, p.r, p.r * .6); ctx.restore(); }); if (Date.now() - t0 < 2600) requestAnimationFrame(fr); else c.remove(); })();
+  }
+  var celebrateQueue = [];
+  function celebrateNext() {
+    if (!celebrateQueue.length) return; var m = celebrateQueue.shift();
+    var pop = document.createElement('div'); pop.className = 'osx-cal-pop';
+    pop.innerHTML = '<div class="osx-cal-pop-in osx-cele"><div class="osx-cele-emoji">' + m[2] + '</div><div class="osx-cele-k">Milestone unlocked!</div><div class="osx-cele-l">' + esc(m[1]) + '</div><button class="osx-cele-x" type="button">Keep going 🔥</button></div>';
+    root.appendChild(pop); confetti();
+    function close() { pop.remove(); setTimeout(celebrateNext, 200); }
+    pop.addEventListener('click', function (e) { if (e.target === pop) close(); });
+    pop.querySelector('.osx-cele-x').addEventListener('click', close);
+  }
+  function checkMilestones() {
+    var fresh = [];
+    MILESTONES.forEach(function (m) { if (!data.milestones[m[0]]) { var ok = false; try { ok = m[3](); } catch (e) {} if (ok) { data.milestones[m[0]] = Date.now(); if (!milestoneBaseline) fresh.push(m); } } });
+    if (fresh.length || milestoneBaseline) save();
+    if (fresh.length) { var wasEmpty = !celebrateQueue.length; celebrateQueue = celebrateQueue.concat(fresh); if (wasEmpty) celebrateNext(); }
+    milestoneBaseline = false;
+  }
+  function milestonesStrip() {
+    var earned = MILESTONES.filter(function (m) { return data.milestones[m[0]]; });
+    var badges = MILESTONES.map(function (m) { return '<span class="osx-ms' + (data.milestones[m[0]] ? ' on' : '') + '" title="' + esc(m[1]) + '">' + m[2] + '</span>'; }).join('');
+    return '<div class="osx-pl-sech" style="margin-top:14px;">🏅 Milestones <span style="text-transform:none;letter-spacing:0;color:var(--muted);font-weight:600;">' + earned.length + ' / ' + MILESTONES.length + '</span></div><div class="osx-ms-row">' + badges + '</div>';
+  }
+
   function render() {
     var body = view === 'dash' ? dashHTML() : view === 'goals' ? goalsHTML() : view === 'lives' ? livesHTML() : view === 'posts' ? postsHTML() : view === 'ideas' ? ideasHTML() : view === 'growth' ? growthHTML() : listsHTML();
     host.innerHTML = '<div class="osx-pl">' + navHTML() + '<div class="osx-pl-view">' + body + '</div></div>';
     wire();
+    checkMilestones();
   }
   function renderArchive() {
     var by = {}; data.done.slice().reverse().forEach(function (d) { var k = d.tf + ' · ' + d.period; (by[k] = by[k] || []).push(d); });
