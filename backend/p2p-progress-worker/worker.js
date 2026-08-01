@@ -227,7 +227,7 @@ export default {
             const p = await kv.get(k.name, 'json');
             if (!p) continue;
             const rs = reactState(p, customerId);
-            all.push({ id: p.id, name: p.name, title: p.title || '', text: p.text, kind: p.kind, category: p.category || (p.kind === 'win' ? 'wins' : 'general'), attachments: p.attachments || [], ts: p.ts, streak: p.streak || 0, house: !!p.house, pinned: !!p.pinned, comments: (p.comments || []), reactions: rs.counts, mine: rs.mine, likes: rs.counts.love, liked: rs.mine.love });
+            all.push({ id: p.id, name: p.name, title: p.title || '', text: p.text, kind: p.kind, category: p.category || (p.kind === 'win' ? 'wins' : 'general'), attachments: p.attachments || [], ts: p.ts, streak: p.streak || 0, house: !!p.house, pinned: !!p.pinned, edited: !!p.edited, owner: p.author === customerId, comments: (p.comments || []).map(c => ({ id: c.id, name: c.name, text: c.text, ts: c.ts, edited: !!c.edited, owner: c.author === customerId })), reactions: rs.counts, mine: rs.mine, likes: rs.counts.love, liked: rs.mine.love });
           }
           all.sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0) || b.ts - a.ts);
           const cat = url.searchParams.get('category') || 'all';
@@ -312,7 +312,7 @@ export default {
         if (p.author && p.author !== customerId && String(p.author).indexOf('house-') !== 0) {
           await pushNotif(kv, p.author, { type: 'comment', name: c.name, postId: pid, snippet: c.text.slice(0, 80), ts: Date.now() });
         }
-        return json({ ok: true, comment: c });
+        return json({ ok: true, comment: { id: c.id, name: c.name, text: c.text, ts: c.ts, edited: false, owner: true } });
       }
 
       /* ---------- notifications (bell) ---------- */
@@ -380,6 +380,62 @@ export default {
           p.pinned = (action === 'pin');
           await kv.put('post:' + pid, JSON.stringify(p));
           return json({ ok: true, pinned: p.pinned });
+        }
+        return json({ error: 'bad_action' }, 400);
+      }
+
+      /* ---------- author (or admin) edit/delete of a post ---------- */
+      if (seg === 'postmod') {
+        if (!kv) return json({ error: 'no_store' }, 501);
+        const body = await request.json().catch(() => null);
+        const pid = body && body.id, action = body && body.action;
+        if (!pid) return json({ error: 'no_id' }, 400);
+        const p = await kv.get('post:' + pid, 'json');
+        if (!p) return json({ error: 'not_found' }, 404);
+        const owner = p.author === customerId, admin = isAdmin(env, customerId);
+        if (action === 'delete') {
+          if (!owner && !admin) return json({ error: 'forbidden' }, 403);
+          await kv.delete('post:' + pid);
+          return json({ ok: true, deleted: true });
+        }
+        if (action === 'edit') {
+          if (!owner) return json({ error: 'forbidden' }, 403);   // admins can remove, but not reword, a member's post
+          const text = String((body && body.text) || '').trim();
+          if (!text) return json({ error: 'empty' }, 400);
+          p.title = String((body && body.title) || '').slice(0, 120);
+          p.text = text.slice(0, 1000);
+          p.edited = true; p.editedTs = Date.now();
+          await kv.put('post:' + pid, JSON.stringify(p));
+          return json({ ok: true });
+        }
+        return json({ error: 'bad_action' }, 400);
+      }
+
+      /* ---------- author (or admin / post-owner) edit/delete of a comment ---------- */
+      if (seg === 'commentmod') {
+        if (!kv) return json({ error: 'no_store' }, 501);
+        const body = await request.json().catch(() => null);
+        const pid = body && body.id, cid = body && body.cid, action = body && body.action;
+        if (!pid || !cid) return json({ error: 'no_id' }, 400);
+        const p = await kv.get('post:' + pid, 'json');
+        if (!p || !Array.isArray(p.comments)) return json({ error: 'not_found' }, 404);
+        const idx = p.comments.findIndex(c => c.id === cid);
+        if (idx < 0) return json({ error: 'not_found' }, 404);
+        const c = p.comments[idx];
+        const owner = c.author === customerId, admin = isAdmin(env, customerId), postOwner = p.author === customerId;
+        if (action === 'delete') {
+          if (!owner && !admin && !postOwner) return json({ error: 'forbidden' }, 403);
+          p.comments.splice(idx, 1);
+          await kv.put('post:' + pid, JSON.stringify(p));
+          return json({ ok: true, deleted: true });
+        }
+        if (action === 'edit') {
+          if (!owner) return json({ error: 'forbidden' }, 403);
+          const text = String((body && body.text) || '').trim();
+          if (!text) return json({ error: 'empty' }, 400);
+          c.text = text.slice(0, 600); c.edited = true; c.editedTs = Date.now();
+          await kv.put('post:' + pid, JSON.stringify(p));
+          return json({ ok: true });
         }
         return json({ error: 'bad_action' }, 400);
       }
@@ -560,5 +616,5 @@ async function writeProgress(env, customerId, progress) {
   const errs = data && data.metafieldsSet && data.metafieldsSet.userErrors;
   if (errs && errs.length) throw new Error('set ' + JSON.stringify(errs));
 }
-function json(obj, status = 200) { return new Response(JSON.stringify(obj), { status, headers: { 'content-type': 'application/json', ...cors() } }); }
+function json(obj, status = 200) { return new Response(JSON.stringify(obj), { status, headers: { 'content-type': 'application/json; charset=utf-8', ...cors() } }); }
 function cors() { return { 'access-control-allow-origin': '*', 'access-control-allow-methods': 'GET,POST,OPTIONS', 'access-control-allow-headers': 'content-type' }; }

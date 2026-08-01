@@ -1281,6 +1281,22 @@
   .osx-giphy-item img{width:100%;display:block;border-radius:8px;}
   .osx-giphy-note{grid-column:1/-1;text-align:center;color:#8aa0a6;font:500 12.5px/1.5 system-ui;padding:22px 10px;}
   .osx-giphy-cred{padding:6px 12px;font:800 9px/1 system-ui;letter-spacing:.09em;color:#6f858c;text-align:right;}
+  /* ⋯ post/comment menu */
+  #p2pos .osx-menu{position:relative;flex:none;}
+  #p2pos .osx-menu-dots{background:none;border:0;color:var(--muted);cursor:pointer;font:800 16px/1 system-ui;padding:2px 6px;border-radius:7px;letter-spacing:1px;}
+  #p2pos .osx-menu-dots:hover{background:rgba(255,255,255,.08);color:var(--text);}
+  #p2pos .osx-menu-pop{position:absolute;top:calc(100% + 4px);right:0;z-index:40;min-width:130px;background:#0e1c28;border:1px solid var(--gstroke);border-radius:11px;box-shadow:0 10px 28px rgba(0,0,0,.5);padding:5px;display:flex;flex-direction:column;}
+  #p2pos .osx-menu-pop button{background:none;border:0;text-align:left;color:var(--text);cursor:pointer;font:600 13px/1 system-ui;padding:9px 11px;border-radius:8px;white-space:nowrap;}
+  #p2pos .osx-menu-pop button:hover{background:rgba(255,255,255,.07);}
+  #p2pos .osx-cw-head .osx-menu{margin-left:2px;}
+  /* comment header row + inline edit */
+  #p2pos .osx-cm-itop{display:flex;align-items:center;gap:7px;}
+  #p2pos .osx-cm-itop .osx-menu{margin-left:auto;}
+  #p2pos .osx-cm-itop .osx-menu-dots{font-size:14px;padding:0 5px;}
+  #p2pos .osx-cm-edit{width:100%;box-sizing:border-box;min-height:54px;resize:vertical;background:rgba(9,17,24,.5);border:1px solid var(--gstroke);border-radius:10px;padding:8px 11px;color:var(--text);font:400 13px/1.5 system-ui;margin-top:4px;}
+  #p2pos .osx-cm-erow{display:flex;gap:8px;justify-content:flex-end;margin-top:7px;}
+  #p2pos .osx-cm-erow button{border:1px solid var(--stroke);background:rgba(255,255,255,.04);color:var(--muted);cursor:pointer;border-radius:999px;padding:6px 13px;font:700 12px/1 system-ui;}
+  #p2pos .osx-cm-erow .osx-cm-esave{border-color:var(--gstroke);background:rgba(216,180,90,.12);color:var(--gold-bright);}
   /* community walkthrough modal */
   .osx-tour-in{width:min(400px,100%);text-align:center;padding:26px 24px 22px;}
   .osx-tour-emoji{font-size:44px;line-height:1;margin-bottom:12px;}

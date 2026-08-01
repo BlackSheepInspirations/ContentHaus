@@ -12,7 +12,7 @@
   var filter = { category: 'all', range: 'all', sort: 'new', q: '', offset: 0, limit: 20, hasMore: false };
   var CATS = { general: { label: 'General Discussion', emoji: '💬' }, intro: { label: 'Introductions', emoji: '👋' }, wins: { label: 'Wins • Habits • Growth', emoji: '🏆' }, help: { label: 'Questions & Help', emoji: '🙏' }, testimonial: { label: 'Testimonials', emoji: '🙌' }, announce: { label: 'P2P Announcements', emoji: '📣' } };
   function catMeta(k) { return (catList && catList.filter(function (x) { return x.key === k; })[0]) || CATS[k] || null; }
-  function catLabel(k) { var c = catMeta(k); return c ? c.label : ''; }
+  function catLabel(k) { return (CATS[k] && CATS[k].label) || (catMeta(k) && catMeta(k).label) || ''; }
   // Always source the emoji from this UTF-8 file (never the JSON response) so it renders consistently on every device.
   function catEmoji(k) { return (CATS[k] && CATS[k].emoji) || (catMeta(k) && catMeta(k).emoji) || ''; }
   function seenTs() { var v = 0; try { v = parseInt(localStorage.getItem('p2p_comm_seen') || '0', 10) || 0; } catch (e) {} return v; }
@@ -77,19 +77,95 @@
   function myStreak() { var P = window.P2P || {}; return (P.streak ? (P.streak().count || 0) : 0); }
   function flame(n) { n = +n || 0; return n >= 2 ? '<span class="osx-flame" title="' + n + '-day streak">🔥' + n + '</span>' : ''; }
   function houseTag(p) { return p.house ? '<span class="osx-house-tag">✦ Haus</span>' : ''; }
-  function cmItem(c) { return '<div class="osx-cm-item"><b>' + esc(c.name || 'Member') + '</b><span class="osx-cm-time">' + ago(c.ts) + '</span><div class="osx-cm-text">' + esc(c.text) + '</div></div>'; }
+  function cmItem(c, pid) {
+    var menu = '';
+    if (c.owner || isAdmin) {
+      var mi = (c.owner ? '<button type="button" data-cedit="' + esc(pid) + '|' + esc(c.id) + '">✏️ Edit</button>' : '') + '<button type="button" data-cdel="' + esc(pid) + '|' + esc(c.id) + '">🗑️ Delete</button>';
+      menu = '<span class="osx-menu"><button type="button" class="osx-menu-dots" data-menu aria-label="More">⋯</button><span class="osx-menu-pop" hidden>' + mi + '</span></span>';
+    }
+    return '<div class="osx-cm-item" data-cm-item="' + esc(c.id) + '"><div class="osx-cm-itop"><b>' + esc(c.name || 'Member') + '</b><span class="osx-cm-time">' + ago(c.ts) + (c.edited ? ' · edited' : '') + '</span>' + menu + '</div><div class="osx-cm-text">' + esc(c.text) + '</div></div>';
+  }
   function commentsHTML(p) {
     var cs = p.comments || [];
     return '<div class="osx-cm" data-cm="' + esc(p.id) + '" hidden>' +
-      '<div class="osx-cm-list">' + cs.map(cmItem).join('') + '</div>' +
+      '<div class="osx-cm-list">' + cs.map(function (c) { return cmItem(c, p.id); }).join('') + '</div>' +
       '<div class="osx-cm-add"><input class="osx-cm-input" data-cm-input="' + esc(p.id) + '" maxlength="600" placeholder="Write a reply…"><button class="osx-cm-send" type="button" data-cm-send="' + esc(p.id) + '">Reply</button></div>' +
     '</div>';
   }
-  function actsHTML(p, withReport) {
+  function actsHTML(p) {
     return '<div class="osx-cw-post-acts">' + reactBar(p) +
       '<button class="osx-cw-cbtn" type="button" data-ctoggle="' + esc(p.id) + '">💬 <span>' + ((p.comments || []).length) + '</span></button>' +
-      (withReport ? '<button class="osx-cw-report" type="button" data-report="' + esc(p.id) + '" title="Report this post" aria-label="Report post">⚑</button>' : '') +
     '</div>';
+  }
+  function postMenu(p) {
+    var items = '';
+    if (p.owner) items += '<button type="button" data-pedit="' + esc(p.id) + '">✏️ Edit</button>';
+    if (p.owner || isAdmin) items += '<button type="button" data-pdel="' + esc(p.id) + '">🗑️ Delete</button>';
+    if (!p.owner) items += '<button type="button" data-preport="' + esc(p.id) + '">⚑ Report</button>';
+    if (!items) return '';
+    return '<span class="osx-menu"><button type="button" class="osx-menu-dots" data-menu aria-label="More">⋯</button><span class="osx-menu-pop" hidden>' + items + '</span></span>';
+  }
+  function closeMenus() { Array.prototype.forEach.call(document.querySelectorAll('.osx-menu-pop'), function (m) { m.hidden = true; }); }
+  function wireMenus(container) {
+    container.querySelectorAll('[data-menu]').forEach(function (b) {
+      b.addEventListener('click', function (e) { e.stopPropagation(); var pop = b.nextElementSibling; var open = pop.hidden; closeMenus(); pop.hidden = !open; });
+    });
+  }
+  function findPost(id) { if (wowPost && wowPost.id === id) return wowPost; return posts.filter(function (p) { return p.id === id; })[0]; }
+  function reportPost(id, btn) {
+    if (btn && btn.disabled) return;
+    if (!window.confirm('Report this post to the team for review?')) return;
+    var post = findPost(id);
+    var txt = post ? ('Reported wall post by ' + (post.name || 'Member') + ':\n\n"' + post.text + '"') : ('Reported post ' + id);
+    if (btn) btn.disabled = true;
+    fetch('/apps/p2p/suggest', { method: 'POST', headers: { 'content-type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify({ text: txt, kind: 'Report' }) })
+      .then(function (r) { return r.json(); }).then(function () { if (btn) btn.textContent = 'reported ✓'; }).catch(function () { if (btn) btn.disabled = false; });
+  }
+  function deletePost(id) {
+    if (!window.confirm('Delete this post? This can\'t be undone.')) return;
+    fetch('/apps/p2p/postmod', { method: 'POST', headers: { 'content-type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify({ id: id, action: 'delete' }) })
+      .then(function (r) { return r.json(); }).then(function (res) { if (res && res.ok) { load(false); loadWins(); } }).catch(function () {});
+  }
+  function openEditPost(id) {
+    var p = findPost(id); if (!p) return;
+    var pop = document.createElement('div'); pop.className = 'osx-cal-pop';
+    pop.innerHTML = '<div class="osx-cal-pop-in osx-composer"><button class="osx-cal-pop-x" type="button" aria-label="Close">✕</button>' +
+      '<div class="osx-comp-h">Edit post</div>' +
+      '<input class="osx-comp-title" data-e-title maxlength="120" placeholder="Title (optional)">' +
+      '<textarea class="osx-comp-body" data-e-body maxlength="1000"></textarea>' +
+      '<div class="osx-comp-foot"><button type="button" class="osx-comp-cancel">Cancel</button><button type="button" class="osx-comp-post">Save</button></div></div>';
+    document.body.appendChild(pop);
+    var tI = pop.querySelector('[data-e-title]'), bI = pop.querySelector('[data-e-body]'), saveB = pop.querySelector('.osx-comp-post');
+    tI.value = p.title || ''; bI.value = p.text || '';
+    function close() { pop.remove(); }
+    pop.addEventListener('click', function (e) { if (e.target === pop) close(); });
+    pop.querySelector('.osx-cal-pop-x').addEventListener('click', close);
+    pop.querySelector('.osx-comp-cancel').addEventListener('click', close);
+    saveB.addEventListener('click', function () {
+      var text = (bI.value || '').trim(); if (!text) return;
+      saveB.disabled = true; saveB.textContent = 'Saving…';
+      fetch('/apps/p2p/postmod', { method: 'POST', headers: { 'content-type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify({ id: id, action: 'edit', title: (tI.value || '').trim(), text: text }) })
+        .then(function (r) { return r.json(); }).then(function (res) { if (res && res.ok) { close(); load(false); loadWins(); } else { saveB.disabled = false; saveB.textContent = 'Save'; } })
+        .catch(function () { saveB.disabled = false; saveB.textContent = 'Save'; });
+    });
+    setTimeout(function () { bI.focus(); }, 40);
+  }
+  function deleteComment(pid, cid) {
+    if (!window.confirm('Delete this comment?')) return;
+    fetch('/apps/p2p/commentmod', { method: 'POST', headers: { 'content-type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify({ id: pid, cid: cid, action: 'delete' }) })
+      .then(function (r) { return r.json(); }).then(function (res) { if (res && res.ok) load(false); }).catch(function () {});
+  }
+  function openEditComment(pid, cid) {
+    var el = document.querySelector('[data-cm-item="' + cid + '"] .osx-cm-text'); if (!el) return;
+    var old = el.textContent;
+    el.innerHTML = '<textarea class="osx-cm-edit" maxlength="600"></textarea><div class="osx-cm-erow"><button type="button" class="osx-cm-ecancel">Cancel</button><button type="button" class="osx-cm-esave">Save</button></div>';
+    var ta = el.querySelector('.osx-cm-edit'); ta.value = old; ta.focus();
+    el.querySelector('.osx-cm-ecancel').addEventListener('click', function () { load(false); });
+    el.querySelector('.osx-cm-esave').addEventListener('click', function () {
+      var text = (ta.value || '').trim(); if (!text) return;
+      fetch('/apps/p2p/commentmod', { method: 'POST', headers: { 'content-type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify({ id: pid, cid: cid, action: 'edit', text: text }) })
+        .then(function (r) { return r.json(); }).then(function (res) { if (res && res.ok) load(false); }).catch(function () {});
+    });
   }
   function confetti() {
     var c = document.createElement('canvas'); c.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:3000;';
@@ -131,7 +207,7 @@
   function headHTML(p) {
     return '<div class="osx-cw-head">' + postAvatar(p) +
       '<div class="osx-cw-hmeta"><div class="osx-cw-nameline">' + unreadDot(p) + '<b>' + esc(p.name || 'Member') + '</b>' + flame(p.streak) + houseTag(p) + '</div>' +
-      '<div class="osx-cw-sub">' + ago(p.ts) + ' · ' + catChip(p) + '</div></div>' + pinBtn(p) + '</div>';
+      '<div class="osx-cw-sub">' + ago(p.ts) + ' · ' + catChip(p) + (p.edited ? ' · edited' : '') + '</div></div>' + pinBtn(p) + postMenu(p) + '</div>';
   }
   function postHTML(p) {
     var lng = (p.text || '').length > 280;
@@ -139,7 +215,7 @@
       headHTML(p) + titleHTML(p) +
       '<div class="osx-cw-post-text' + (lng ? ' clamp' : '') + '">' + esc(p.text) + '</div>' +
       (lng ? '<button class="osx-cw-more" type="button" data-more>Read more ▾</button>' : '') +
-      attHTML(p.attachments) + actsHTML(p, true) + commentsHTML(p) +
+      attHTML(p.attachments) + actsHTML(p) + commentsHTML(p) +
     '</div>';
   }
   function wowHTML(p) {
@@ -147,7 +223,7 @@
       '<div class="osx-wow-ribbon">🏆 Win of the Week</div>' +
       headHTML(p) + titleHTML(p) +
       '<div class="osx-cw-post-text">' + esc(p.text) + '</div>' +
-      attHTML(p.attachments) + actsHTML(p, false) + commentsHTML(p) +
+      attHTML(p.attachments) + actsHTML(p) + commentsHTML(p) +
     '</div>';
   }
   function emptyMsg() {
@@ -180,21 +256,14 @@
         b.textContent = t.classList.contains('clamp') ? 'Read more ▾' : 'Show less ▴';
       });
     });
-    feed.querySelectorAll('[data-report]').forEach(function (b) {
-      b.addEventListener('click', function () {
-        if (b.disabled) return;
-        if (!window.confirm('Report this post to the team for review?')) return;
-        var id = b.getAttribute('data-report');
-        var post = posts.filter(function (p) { return p.id === id; })[0];
-        var txt = post ? ('Reported wall post by ' + (post.name || 'Member') + ':\n\n"' + post.text + '"') : ('Reported post ' + id);
-        b.disabled = true;
-        fetch('/apps/p2p/suggest', { method: 'POST', headers: { 'content-type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify({ text: txt, kind: 'Report' }) })
-          .then(function (r) { return r.json(); }).then(function () { b.textContent = 'reported ✓'; })
-          .catch(function () { b.disabled = false; });
-      });
-    });
+    wireMenus(feed);
+    feed.querySelectorAll('[data-pedit]').forEach(function (b) { b.addEventListener('click', function () { openEditPost(b.getAttribute('data-pedit')); }); });
+    feed.querySelectorAll('[data-pdel]').forEach(function (b) { b.addEventListener('click', function () { deletePost(b.getAttribute('data-pdel')); }); });
+    feed.querySelectorAll('[data-preport]').forEach(function (b) { b.addEventListener('click', function () { reportPost(b.getAttribute('data-preport'), b); }); });
   }
   function wireComments(container) {
+    container.querySelectorAll('[data-cedit]').forEach(function (b) { b.addEventListener('click', function () { var pr = b.getAttribute('data-cedit').split('|'); openEditComment(pr[0], pr[1]); }); });
+    container.querySelectorAll('[data-cdel]').forEach(function (b) { b.addEventListener('click', function () { var pr = b.getAttribute('data-cdel').split('|'); deleteComment(pr[0], pr[1]); }); });
     container.querySelectorAll('[data-ctoggle]').forEach(function (b) {
       b.addEventListener('click', function () {
         var id = b.getAttribute('data-ctoggle');
@@ -219,7 +288,7 @@
         if (btn) btn.disabled = false;
         if (res && res.ok && res.comment) {
           if (inp) inp.value = '';
-          var list = box.querySelector('.osx-cm-list'); if (list) list.insertAdjacentHTML('beforeend', cmItem(res.comment));
+          var list = box.querySelector('.osx-cm-list'); if (list) { list.insertAdjacentHTML('beforeend', cmItem(res.comment, id)); wireMenus(list); list.querySelectorAll('[data-cdel]').forEach(function (bd) { bd.addEventListener('click', function () { var pr = bd.getAttribute('data-cdel').split('|'); deleteComment(pr[0], pr[1]); }); }); list.querySelectorAll('[data-cedit]').forEach(function (bd) { bd.addEventListener('click', function () { var pr = bd.getAttribute('data-cedit').split('|'); openEditComment(pr[0], pr[1]); }); }); }
           var pp = posts.filter(function (p) { return p.id === id; })[0];
           if (pp) { pp.comments = pp.comments || []; pp.comments.push(res.comment); var cnt = container.querySelector('[data-ctoggle="' + id + '"] span'); if (cnt) cnt.textContent = pp.comments.length; }
         }
@@ -430,7 +499,7 @@
     if (!tabsEl) return;
     var cats = catList || Object.keys(CATS).map(function (k) { return { key: k, label: CATS[k].label, emoji: CATS[k].emoji }; });
     tabsEl.innerHTML = '<button class="osx-cat-tab' + (filter.category === 'all' ? ' on' : '') + '" data-cat="all">All</button>' +
-      cats.map(function (c) { return '<button class="osx-cat-tab' + (filter.category === c.key ? ' on' : '') + '" data-cat="' + c.key + '">' + esc(catEmoji(c.key)) + ' ' + esc(c.label) + '</button>'; }).join('');
+      cats.map(function (c) { return '<button class="osx-cat-tab' + (filter.category === c.key ? ' on' : '') + '" data-cat="' + c.key + '">' + esc(catEmoji(c.key)) + ' ' + esc(catLabel(c.key)) + '</button>'; }).join('');
     tabsEl.querySelectorAll('[data-cat]').forEach(function (b) {
       b.addEventListener('click', function () { filter.category = b.getAttribute('data-cat'); filter.offset = 0; renderTabs(); load(false); });
     });
@@ -513,7 +582,7 @@
         '<button type="button" class="osx-comp-tool" data-tool="video" title="Add video (YouTube/Loom/Vimeo)">▶️</button>' +
         '<button type="button" class="osx-comp-tool" data-tool="link" title="Add link">🔗</button>' +
       '</div>' +
-      '<select class="osx-comp-cat" data-comp-cat>' + cats.map(function (c) { return '<option value="' + c.key + '"' + (c.key === selCat ? ' selected' : '') + '>' + esc(catEmoji(c.key) + ' ' + c.label) + '</option>'; }).join('') + '</select></div>' +
+      '<select class="osx-comp-cat" data-comp-cat>' + cats.map(function (c) { return '<option value="' + c.key + '"' + (c.key === selCat ? ' selected' : '') + '>' + esc(catEmoji(c.key) + ' ' + catLabel(c.key)) + '</option>'; }).join('') + '</select></div>' +
       '<div class="osx-comp-foot"><button type="button" class="osx-comp-cancel">Cancel</button><button type="button" class="osx-comp-post">Post</button></div></div>';
     document.body.appendChild(pop);
     var body = pop.querySelector('[data-comp-body]'), titleI = pop.querySelector('[data-comp-title]'), catSel = pop.querySelector('[data-comp-cat]'), attWrap = pop.querySelector('[data-comp-atts]'), postB = pop.querySelector('.osx-comp-post');
@@ -563,6 +632,7 @@
       .catch(function () { winShare.disabled = false; winShare.textContent = 'Share win'; });
   });
 
+  document.addEventListener('click', closeMenus);
   renderTabs(); load(false); loadWins(); loadMembersData();
 })();
 
