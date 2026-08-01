@@ -88,6 +88,8 @@ window.P2P = (function(){
       if(da == null) da = Math.max(0, (s.longest || 0) - 1); // seed existing members from their record
       set(K.daysActive, da + 1);                              // one more distinct active day
     }
+    // log every day the member shows up — powers the personal calendar's "showed up" stars
+    var vd = get('p2p_visit_days', {}); if (!vd[t]) { vd[t] = 1; set('p2p_visit_days', vd); }
     s.graced = graced; // transient flag for this load (not persisted meaningfully)
     return s;
   }

@@ -712,7 +712,8 @@
   });
 })();
 
-/* ---- Month calendar (from window.P2P_EVENTS) — one instance per [data-cal] ---- */
+/* ---- Personal calendar: events (window.P2P_EVENTS) + your own plans + "showed up" stars.
+       One instance per [data-cal]; window.P2P_CAL_REFRESH re-renders them all. ---- */
 (function () {
   var root = document.getElementById('p2pos'); if (!root) return;
   var MO = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -720,22 +721,38 @@
   var byDay = {}; events.forEach(function (e) { (byDay[e.iso] = byDay[e.iso] || []).push(e); });
   function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
   function pad(n){ return (n<10?'0':'')+n; }
-  function openEvent(evs) {
-    if (!evs || !evs.length) return;
-    var e = evs[0];
+  function getVisits(){ try { return JSON.parse(localStorage.getItem('p2p_visit_days') || '{}') || {}; } catch(e){ return {}; } }
+  function getMine(){ try { return JSON.parse(localStorage.getItem('p2p_my_events') || '[]') || []; } catch(e){ return []; } }
+  function setMine(a){ try { localStorage.setItem('p2p_my_events', JSON.stringify(a)); } catch(e){} }
+  function mineByDay(){ var m = {}; getMine().forEach(function(e){ if(e.iso) (m[e.iso]=m[e.iso]||[]).push(e); }); return m; }
+  function prettyDate(iso){ var p = iso.split('-'); var dt = new Date(+p[0], +p[1]-1, +p[2]); return dt.toLocaleDateString(undefined,{ weekday:'long', month:'long', day:'numeric', year:'numeric' }); }
+
+  var renders = [];
+  window.P2P_CAL_REFRESH = function(){ renders.forEach(function(fn){ try{ fn(); }catch(e){} }); };
+
+  function openDay(iso) {
+    var g = byDay[iso] || [], mine = mineByDay()[iso] || [], visited = !!getVisits()[iso];
     var pop = document.createElement('div'); pop.className = 'osx-cal-pop';
-    pop.innerHTML = '<div class="osx-cal-pop-in"><button class="osx-cal-pop-x" type="button" aria-label="Close">✕</button>' +
-      '<div class="osx-cal-pop-ban">' + esc(e.title || 'Live session') + '</div>' +
-      '<div class="osx-cal-pop-b"><div class="osx-cal-pop-t">' + esc(e.title || 'Live session') + '</div>' +
-      '<div class="osx-cal-pop-meta">📅 ' + esc(e.date || '') + (e.time ? ' · ' + esc(e.time) : '') + '</div>' +
-      (e.desc ? '<div class="osx-cal-pop-desc">' + esc(e.desc) + '</div>' : '') +
-      (e.join ? '<a class="osx-cal-pop-join" href="' + esc(e.join) + '" target="_blank" rel="noopener">Join the call →</a>' : '') +
-      '</div></div>';
+    var gHtml = g.map(function(e){ return '<div class="osx-day-ev"><div class="osx-day-evt"><b>'+esc(e.title||'Live session')+'</b>'+(e.time?' · '+esc(e.time):'')+(e.live?' <em class="osx-event-live">● LIVE</em>':'')+'</div>'+(e.desc?'<div class="osx-day-desc">'+esc(e.desc)+'</div>':'')+(e.join?'<a class="osx-day-join" href="'+esc(e.join)+'" target="_blank" rel="noopener">Join the call →</a>':'')+'</div>'; }).join('');
+    var mHtml = mine.map(function(e){ return '<div class="osx-day-ev mine"><div class="osx-day-evt"><b>'+esc(e.title)+'</b>'+(e.time?' · '+esc(e.time):'')+'<button class="osx-day-del" data-del="'+esc(e.id)+'" title="Remove" aria-label="Remove">✕</button></div>'+(e.note?'<div class="osx-day-desc">'+esc(e.note)+'</div>':'')+'</div>'; }).join('');
+    pop.innerHTML = '<div class="osx-cal-pop-in osx-day-pop"><button class="osx-cal-pop-x" type="button" aria-label="Close">✕</button>' +
+      '<div class="osx-day-h">'+esc(prettyDate(iso))+(visited?' <span class="osx-day-visit">★ you showed up</span>':'')+'</div>' +
+      (g.length ? '<div class="osx-day-sec">📅 Events</div>'+gHtml : '') +
+      '<div class="osx-day-sec">✎ Your plans</div>' + (mHtml || '<div class="osx-day-empty">Nothing planned yet — add one below.</div>') +
+      '<div class="osx-day-add"><input class="osx-day-title" placeholder="e.g. Launch day, Go live 7pm, Batch content" maxlength="90"><input class="osx-day-time" placeholder="Time (optional)" maxlength="24"><button class="osx-day-save" type="button">Add plan</button></div>' +
+      '</div>';
     document.body.appendChild(pop);
     function close() { pop.remove(); }
+    function reopen() { close(); openDay(iso); }
     pop.addEventListener('click', function (ev) { if (ev.target === pop) close(); });
     pop.querySelector('.osx-cal-pop-x').addEventListener('click', close);
+    pop.querySelectorAll('[data-del]').forEach(function (b) { b.addEventListener('click', function () { var id = b.getAttribute('data-del'); setMine(getMine().filter(function (e) { return String(e.id) !== id; })); window.P2P_CAL_REFRESH(); reopen(); }); });
+    var save = pop.querySelector('.osx-day-save'), ti = pop.querySelector('.osx-day-title'), tm = pop.querySelector('.osx-day-time');
+    function add() { var title = (ti.value||'').trim(); if(!title) return; var arr = getMine(); arr.push({ id: String(Date.now())+Math.random().toString(36).slice(2,6), iso: iso, title: title.slice(0,90), time: (tm.value||'').trim().slice(0,24) }); setMine(arr); window.P2P_CAL_REFRESH(); reopen(); }
+    save.addEventListener('click', add);
+    ti.addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); add(); } });
   }
+
   function initCal(cal) {
     if (cal.dataset.calInit) return; cal.dataset.calInit = '1';
     var grid = cal.querySelector('[data-cal-grid]'), title = cal.querySelector('[data-cal-title]');
@@ -743,19 +760,23 @@
     var now = new Date(), curY = now.getFullYear(), curM = now.getMonth();
     function render() {
       title.textContent = MO[curM] + ' ' + curY;
+      var visits = getVisits(), mine = mineByDay();
       var first = new Date(curY, curM, 1).getDay(), days = new Date(curY, curM + 1, 0).getDate();
       var t = new Date(), tISO = t.getFullYear()+'-'+pad(t.getMonth()+1)+'-'+pad(t.getDate()), html = '';
       for (var i = 0; i < first; i++) html += '<span class="osx-cal-d empty"></span>';
       for (var d = 1; d <= days; d++) {
-        var iso = curY + '-' + pad(curM+1) + '-' + pad(d), evs = byDay[iso];
-        html += '<button type="button" class="osx-cal-d' + (evs?' ev':'') + (iso===tISO?' today':'') + '"' + (evs?' data-cal-day="'+iso+'"':' disabled') + '>' + d + '</button>';
+        var iso = curY + '-' + pad(curM+1) + '-' + pad(d);
+        var hasG = byDay[iso], hasM = mine[iso], vis = visits[iso];
+        var marks = (vis?'<i class="osx-cal-star">★</i>':'') + (hasG?'<i class="osx-cal-dot g"></i>':'') + (hasM?'<i class="osx-cal-dot m"></i>':'');
+        html += '<button type="button" class="osx-cal-d' + (hasG||hasM?' ev':'') + (iso===tISO?' today':'') + '" data-cal-day="'+iso+'">' + d + (marks?'<span class="osx-cal-marks">'+marks+'</span>':'') + '</button>';
       }
       grid.innerHTML = html;
-      grid.querySelectorAll('[data-cal-day]').forEach(function (b) { b.addEventListener('click', function () { openEvent(byDay[b.getAttribute('data-cal-day')]); }); });
+      grid.querySelectorAll('[data-cal-day]').forEach(function (b) { b.addEventListener('click', function () { openDay(b.getAttribute('data-cal-day')); }); });
     }
     var pv = cal.querySelector('[data-cal-prev]'), nx = cal.querySelector('[data-cal-next]');
     if (pv) pv.addEventListener('click', function () { curM--; if (curM < 0) { curM = 11; curY--; } render(); });
     if (nx) nx.addEventListener('click', function () { curM++; if (curM > 11) { curM = 0; curY++; } render(); });
+    renders.push(render);
     render();
   }
   root.querySelectorAll('[data-cal]').forEach(initCal);
