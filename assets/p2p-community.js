@@ -811,14 +811,19 @@
       (n.snippet ? '<div class="osx-bell-snip">“' + esc(n.snippet) + '”</div>' : '') +
       '<span class="osx-bell-time">' + ago(n.ts) + ' ago</span></div>';
   }
+  function serverNotifs(localNids) {
+    var fired = firedSet();
+    return notifs.filter(function (n) { if (n.reminder) { if (localNids[n.nid]) return false; if (fired.indexOf(n.nid) > -1) return false; } return true; });
+  }
   function renderMenu() {
     if (!menu) return;
-    var rem = dueReminders().map(function (r) { return { reminder: true, kind: r.kind, title: r.title, label: r.label, startAt: r.startAt }; });
-    var all = rem.concat(notifs);
+    var due = dueReminders(), localNids = {}; due.forEach(function (r) { localNids[r.nid] = 1; });
+    var rem = due.map(function (r) { return { reminder: true, kind: r.kind, title: r.title, label: r.label, startAt: r.startAt }; });
+    var all = rem.concat(serverNotifs(localNids));
     menu.innerHTML = '<div class="osx-bell-h">Notifications</div>' + (all.length ? all.map(line).join('') : '<div class="osx-bell-empty">Nothing yet — reminders you set and reactions to your posts show up here. 🔔</div>');
   }
   function setCount(u) { if (!countEl) return; if (u > 0) { countEl.textContent = u > 9 ? '9+' : u; countEl.hidden = false; } else countEl.hidden = true; }
-  function refreshCount() { setCount(notifs.filter(function (n) { return !n.read; }).length + dueReminders().length); }
+  function refreshCount() { var due = dueReminders(), localNids = {}; due.forEach(function (r) { localNids[r.nid] = 1; }); setCount(serverNotifs(localNids).filter(function (n) { return !n.read; }).length + due.length); }
   function fetchNotifs() {
     fetch(NOTIFS, { credentials: 'same-origin' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
       if (j && !j.guest) notifs = j.notifs || [];

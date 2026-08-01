@@ -337,6 +337,22 @@ export default {
         return json({ error: 'method' }, 405);
       }
 
+      /* ---------- reminders (planner writes its schedule; cron fires them into the bell) ---------- */
+      if (seg === 'reminders') {
+        if (!kv) return json({ ok: true });
+        if (request.method === 'POST') {
+          const body = await request.json().catch(() => null);
+          const items = (body && Array.isArray(body.items)) ? body.items.slice(0, 200).map(it => ({
+            nid: String(it.nid || '').slice(0, 80), id: String(it.id || '').slice(0, 40), kind: String(it.kind || '').slice(0, 12),
+            title: String(it.title || 'Reminder').slice(0, 120), label: String(it.label || '').slice(0, 40),
+            fireAt: Number(it.fireAt) || 0, startAt: Number(it.startAt) || 0
+          })).filter(it => it.nid && it.fireAt) : [];
+          await kv.put('rem:' + customerId, JSON.stringify(items));
+          return json({ ok: true, n: items.length });
+        }
+        return json({ error: 'method' }, 405);
+      }
+
       /* ---------- GIF search (Giphy proxy — key stays server-side) ---------- */
       if (seg === 'giphy') {
         if (!env.giphy_key) return json({ ok: false, error: 'no_key', gifs: [] });
@@ -466,6 +482,71 @@ export default {
       await kv.put(h.cursor, String(idx + 1));
       await kv.put('house-last:' + h.id, today);
     }
+
+    /* Fire due reminders into each member's bell (works even when they're away). */
+    try {
+      const now = Date.now();
+      const rl = await kv.list({ prefix: 'rem:' });
+      for (const k of rl.keys) {
+        const uid = k.name.slice(4);
+        const items = (await kv.get(k.name, 'json')) || [];
+        if (!items.length) continue;
+        const firedKey = 'remfired:' + uid;
+        const fired = (await kv.get(firedKey, 'json')) || [];
+        let changed = false;
+        for (const it of items) {
+          if (it.fireAt <= now && it.startAt >= now - 7200000 && fired.indexOf(it.nid) < 0) {
+            await pushNotif(kv, uid, { type: 'reminder', reminder: true, kind: it.kind, title: it.title, label: it.label, startAt: it.startAt, nid: it.nid, ts: now });
+            fired.push(it.nid); changed = true;
+          }
+        }
+        if (changed) await kv.put(firedKey, JSON.stringify(fired.slice(-300)));
+      }
+    } catch (e) {}
+
+    /* House voices warm up recent member posts with a react (sometimes a comment) → lights the bell. */
+    try {
+      const HOUSE_REACTS = ['love', 'love', 'love', 'thumb', 'party'];
+      const HOUSE_COMMENTS = {
+        'house-frank': ['Now that’s the kind of honesty that moves the needle. Proud of you.', 'Straight talk: this is good work. Keep going.'],
+        'house-drea': ['My heart — look at you showing up. 💛', 'This is exactly the kind of courage the Haus is about.'],
+        'house-ruth': ['Beautifully said. You’re right where you need to be.', 'Steady steps, friend. This is how it gets built.'],
+        'house-eric': ['Love this! (I’ll spare you a joke… this time. 😄)', 'Proof over promises — you did the thing!']
+      };
+      const HV = HOUSE.filter(h => HOUSE_COMMENTS[h.id]);
+      const plist = await kv.list({ prefix: 'post:' });
+      const recent = [];
+      for (const k of plist.keys) {
+        const p = await kv.get(k.name, 'json');
+        if (!p || p.house || !p.author) continue;
+        if (String(p.author).indexOf('house-') === 0) continue;
+        if (Date.now() - (p.ts || 0) > 4 * 864e5) continue;
+        recent.push(p);
+      }
+      recent.sort((a, b) => b.ts - a.ts);
+      for (const p of recent.slice(0, 6)) {
+        const r = normalizeReactions(p);
+        const already = new Set([].concat(r.love, r.thumb, r.party));
+        const avail = HV.filter(h => !already.has(h.id));
+        if (!avail.length) continue;
+        const h = avail[(p.ts + p.id.length) % avail.length];
+        const type = HOUSE_REACTS[p.ts % HOUSE_REACTS.length];
+        r[type].push(h.id); p.reactions = r; delete p.likedBy;
+        let commented = false;
+        if ((p.ts % 3) === 0) {
+          p.comments = Array.isArray(p.comments) ? p.comments : [];
+          if (!p.comments.some(c => c.author === h.id)) {
+            const bank = HOUSE_COMMENTS[h.id];
+            p.comments.push({ id: Date.now() + '-' + h.id, author: h.id, name: h.name, text: bank[p.ts % bank.length], ts: Date.now() });
+            commented = true;
+          }
+        }
+        await kv.put('post:' + p.id, JSON.stringify(p));
+        await pushNotif(kv, p.author, commented
+          ? { type: 'comment', name: h.name, postId: p.id, snippet: (p.text || '').slice(0, 80), ts: Date.now() }
+          : { type: 'react', rtype: type, name: h.name, postId: p.id, snippet: (p.text || '').slice(0, 80), ts: Date.now() });
+      }
+    } catch (e) {}
   }
 };
 
