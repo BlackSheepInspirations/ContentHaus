@@ -80,7 +80,8 @@
     pts.forEach(function (p) {
       L.marker([p.lat, p.lng]).addTo(leafMap).bindPopup('<div class="osx-mb-pop">' + cardHTML(p, true) + '</div>');
     });
-    setTimeout(function () { leafMap.invalidateSize(); }, 60);
+    setTimeout(function () { if (leafMap) leafMap.invalidateSize(); }, 60);
+    setTimeout(function () { if (leafMap) leafMap.invalidateSize(); }, 350);
   }
   function openMap() {
     if (mapReady) { if (leafMap) setTimeout(function () { leafMap.invalidateSize(); }, 60); return; }
@@ -146,14 +147,20 @@
     });
   });
 
-  // the map now lives on the Community view — build it lazily when it scrolls into view
+  // the map now lives on the Community view — build it when that view opens or scrolls in
   if (mapEl) {
+    var commView = mapEl.closest('.osx-view');
+    if (commView) {
+      var mo = new MutationObserver(function () { if (commView.classList.contains('on')) setTimeout(openMap, 120); });
+      mo.observe(commView, { attributes: true, attributeFilter: ['class'] });
+      if (commView.classList.contains('on')) setTimeout(openMap, 120);
+    }
     if ('IntersectionObserver' in window) {
       var mio = new IntersectionObserver(function (entries) {
         entries.forEach(function (e) { if (e.isIntersecting) { openMap(); mio.disconnect(); } });
       }, { threshold: 0.02 });
       mio.observe(mapEl);
-    } else { openMap(); }
+    } else { setTimeout(openMap, 200); }
   }
 
   initProfile();

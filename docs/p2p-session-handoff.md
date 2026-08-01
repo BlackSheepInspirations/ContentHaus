@@ -4,6 +4,33 @@ Read this first in a fresh conversation, alongside the auto-loaded memory
 (`memory/MEMORY.md` + files), `docs/p2p-os-build-plan.md`, and
 `docs/p2p-launch-checklist.md`. Everything below is committed + live.
 
+## Community build — approved plan (2026-08-01, mockup v3 approved)
+Mockup: scratchpad/community-mockup.html (dark-opal). Header **"P2P Community"** +
+tagline "Where Your originality is rooted and ready to grow. From thought to thrive."
+Layout: feed 3/5 (left) + narrow sidebar (right); map(3fr)+calendar(2fr) row below.
+- **Sidebar order:** Upcoming events (scroll) → **P2P card** (rectangle logo
+  `assets/p2p-community-logo.png` + Members/Active counts + Invite/Members) → Recent
+  wins (leave as-is) → **Growth Board** (top 10; toggle pills **Weekly/Monthly/All-time**).
+- **Main:** compact one-row Welcome checklist → cohesive composer+Wall feed; **long
+  posts collapse** ("Read more"); feed stretches to align its bottom with the Growth Board.
+- **Reactions on wall posts:** ❤ + 👍 + 🎉 (wins keep ❤ only).
+- **Comments** on wall posts; **admin pin**; **Win of the week** pinned to top of wall
+  with a fancy border (most-loved win in 7 days).
+- **Bell notifications:** ping the author when their post/win is liked or commented on.
+- **Auto welcome post** on new member: ~30 name-personalized templates (goal 100).
+- **Growth Board rows:** rank · avatar · name · tier · **3 most-recent badges** (click →
+  popup w/ badge + why earned) · points. (Dropped "Merit N".)
+- **Streak flame 🔥** next to names on Growth Board + wall; **on the map** a pin shows a
+  flame if on a streak, or a **🎉 celebration icon** if they just posted a win; clicking the
+  pin shows streak days / most recent win.
+- **Rotating member spotlight** in the sidebar. **Confetti** when a win is shared.
+- Map: smaller (~300px) + fix the render bug (inits while panel hidden).
+- "Report post" = member flags a post for admin review (optional; TBD).
+Build order: A) layout+card+logo+growth(all-time)+welcome+collapsible+map-fix+upcoming
++spotlight+confetti (frontend). B) ONE Worker re-paste: comments, 3 reactions, pin,
+notifications, welcome-posts, win-of-week, point-history (weekly/monthly), badge lists,
+streak+celebration state. C) frontend for B.
+
 ## Latest session close-out (2026-07-31)
 - **Daily libraries +100 net-new each** (deduped, PD-safe): `p2p-moments.js` 552→652,
   `p2p-purpose.js` 217→318, `p2p-heart.js` 220→320. Public-domain quotes (authors

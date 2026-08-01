@@ -32,12 +32,21 @@
     var items = general();
     if (!items.length) { feed.innerHTML = empty('Nothing here yet — be the first to say hello. 👋'); return; }
     feed.innerHTML = items.map(function (p) {
+      var lng = (p.text || '').length > 280;
       return '<div class="osx-cw-post">' +
         '<div class="osx-cw-post-top"><b>' + esc(p.name || 'Member') + '</b><span class="osx-cw-time">' + ago(p.ts) + '</span></div>' +
-        '<div class="osx-cw-post-text">' + esc(p.text) + '</div>' +
+        '<div class="osx-cw-post-text' + (lng ? ' clamp' : '') + '">' + esc(p.text) + '</div>' +
+        (lng ? '<button class="osx-cw-more" type="button" data-more>Read more ▾</button>' : '') +
         '<div class="osx-cw-post-acts">' + loveBtn(p) + '</div></div>';
     }).join('');
     wireLoves(feed);
+    feed.querySelectorAll('[data-more]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var t = b.previousElementSibling; if (!t) return;
+        t.classList.toggle('clamp');
+        b.textContent = t.classList.contains('clamp') ? 'Read more ▾' : 'Show less ▴';
+      });
+    });
   }
 
   function renderWinsSide() {
@@ -87,14 +96,40 @@
       .catch(function () { if (feed) feed.innerHTML = empty('Couldn\'t load the wall just now — try again in a moment.'); });
   }
 
-  function loadCounts() {
-    var mEl = root.querySelector('[data-count-members]'), aEl = root.querySelector('[data-count-active]');
-    if (!mEl && !aEl) return;
+  function avatar(p) { return p.photo ? '<img src="' + esc(p.photo) + '" alt="" loading="lazy" onerror="this.style.display=\'none\'">' : esc((p.name || '?').trim().charAt(0).toUpperCase() || '🐑'); }
+
+  function renderGrowth(m) {
+    var el = root.querySelector('[data-gb]'); if (!el) return;
+    if (!m.length) { el.innerHTML = empty('No members yet.'); return; }
+    var top = m.slice().sort(function (a, b) { return (b.points || 0) - (a.points || 0); }).slice(0, 10);
+    el.innerHTML = top.map(function (p, i) {
+      return '<div class="osx-gb-row"><span class="osx-gb-rank' + (i < 3 ? ' top' : '') + '">' + (i + 1) + '</span>' +
+        '<span class="osx-gb-av">' + avatar(p) + '</span>' +
+        '<span><span class="osx-gb-name">' + esc(p.name || 'Member') + '</span>' + (p.tier ? '<span class="osx-gb-tier">' + esc(p.tier) + '</span>' : '') + '</span>' +
+        '<span class="osx-gb-pts">' + (p.points || 0).toLocaleString() + '</span></div>';
+    }).join('');
+  }
+
+  function renderSpotlight(m) {
+    var card = root.querySelector('[data-spotlight]'), body = root.querySelector('[data-spot-body]'); if (!card || !body) return;
+    var pool = m.filter(function (x) { return x.quote || x.about || x.photo; });
+    if (!pool.length) { card.hidden = true; return; }
+    var p = pool[Math.floor(Math.random() * pool.length)];
+    body.innerHTML = '<span class="osx-gb-av" style="width:44px;height:44px;font-size:16px;">' + avatar(p) + '</span>' +
+      '<span><span class="osx-gb-name" style="font-size:14px;">' + esc(p.name || 'Member') + '</span>' +
+      (p.tier ? '<span class="osx-gb-tier">' + esc(p.tier) + '</span>' : '') +
+      (p.quote ? '<span class="osx-gb-tier" style="font-style:italic;margin-top:5px;color:#c9e6da;">“' + esc(p.quote) + '”</span>' : '') + '</span>';
+    card.hidden = false;
+  }
+
+  function loadMembersData() {
     fetch(MEMBERS, { credentials: 'same-origin' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
       if (!j || j.guest) return;
       var m = j.members || [], now = Date.now();
+      var mEl = root.querySelector('[data-count-members]'), aEl = root.querySelector('[data-count-active]');
       if (mEl) mEl.textContent = m.length;
       if (aEl) aEl.textContent = m.filter(function (x) { return x.ts && (now - x.ts) < 5 * 60 * 1000; }).length;
+      renderGrowth(m); renderSpotlight(m);
     }).catch(function () {});
   }
 
@@ -123,7 +158,7 @@
       .catch(function () { postBtn.disabled = false; postBtn.textContent = 'Post'; });
   });
 
-  load(); loadCounts();
+  load(); loadMembersData();
 })();
 
 /* ---- Help us be better — private suggestions/questions/kudos (emails the team) ---- */
