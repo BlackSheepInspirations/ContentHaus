@@ -235,8 +235,11 @@
   function openCheck(h){
     if(!checkModal) return;
     var ctitle = h.getAttribute('data-title') || '';
-    // engaging a pulse Check is its side-quest completion — +points once per distinct check
-    if(ctitle && window.P2P && window.P2P.completeCheck){ window.P2P.completeCheck('check:' + ctitle); if(window.P2P.push) window.P2P.push(); renderStats(); checkRankUp(); }
+    // engaging a pulse Check is its side-quest completion — +points once per distinct check.
+    // data-check-id is category-encoded + realm-unique (check:<cat>:<blockid>) so the
+    // per-category badges (Mindset/Purpose/Heart I·II·all) can count across realms.
+    var cid = h.getAttribute('data-check-id') || ('check:' + ctitle);
+    if(ctitle && window.P2P && window.P2P.completeCheck){ window.P2P.completeCheck(cid); if(window.P2P.push) window.P2P.push(); renderStats(); checkRankUp(); }
     document.getElementById('p2pj-ct').textContent = ctitle;
     var items = (h.getAttribute('data-pulse-items') || '').split('\n').map(function(s){ return s.trim(); }).filter(Boolean);
     var list = document.getElementById('p2pj-cb');

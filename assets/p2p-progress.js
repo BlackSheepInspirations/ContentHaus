@@ -145,7 +145,21 @@ window.P2P = (function(){
   function level(){ return merits(); } // legacy alias
 
   /* side-quest completion (checks) — +R.side once per distinct check id */
-  function completeCheck(id){ id = String(id || ''); var d = get(K.checksDone, []); if(id && d.indexOf(id) === -1){ d.push(id); set(K.checksDone, d); } return d.length; }
+  function completeCheck(id){ id = String(id || ''); var d = get(K.checksDone, []); if(id && d.indexOf(id) === -1){ d.push(id); set(K.checksDone, d); } reconcileCheckBadges(); return d.length; }
+  /* Status-Check badges — Mindset/Purpose/Heart each have one check per realm (×5).
+     Check ids are category-encoded (check:<cat>:<blockid>) so we count distinct
+     completions per category: 1st → "I", 2nd → "II", all → the gold "all" badge.
+     CHECK_TOTAL = realms with a check of each category (5). Legacy constant ids
+     (check:Mindset Check) still match by keyword and count as one. */
+  var CHECK_TOTAL = 5;
+  function reconcileCheckBadges(){
+    var done = get(K.checksDone, []);
+    function n(kw){ var c = 0; done.forEach(function(id){ if(String(id).toLowerCase().indexOf(kw) !== -1) c++; }); return c; }
+    var m = n('mindset'), p = n('purpose'), h = n('heart');
+    if(m >= 1) earnBadge('Mindset I'); if(m >= 2) earnBadge('Mindset II'); if(m >= CHECK_TOTAL) earnBadge('Clear Mind');
+    if(p >= 1) earnBadge('Purpose I'); if(p >= 2) earnBadge('Purpose II'); if(p >= CHECK_TOTAL) earnBadge('True Purpose');
+    if(h >= 1) earnBadge('Heart I');   if(h >= 2) earnBadge('Heart II');   if(h >= CHECK_TOTAL) earnBadge('Open Heart');
+  }
   /* certificate award — +R.cert once per course handle */
   function awardCert(handle){ handle = String(handle || ''); var a = get(K.certsAwarded, []); if(handle && a.indexOf(handle) === -1){ a.push(handle); set(K.certsAwarded, a); } return a.length; }
 
@@ -228,6 +242,7 @@ window.P2P = (function(){
 
   var current = tick();     // any P2P page load counts as showing up today
   checkJournal();           // reconcile journal badges on every load
+  reconcileCheckBadges();   // reconcile Mindset/Purpose/Heart check badges from checksDone
   reconcileMapBadges();     // reconcile realm/framework/capstone badges (where the map is loaded)
 
   return {
@@ -238,6 +253,7 @@ window.P2P = (function(){
     earnedSet: earnedSet,
     checkJournal: checkJournal,
     reconcileMapBadges: reconcileMapBadges,
+    reconcileCheckBadges: reconcileCheckBadges,
     addJournalPoint: addJournalPoint,
     completeCourse: completeCourse,
     isCourseDone: isCourseDone,

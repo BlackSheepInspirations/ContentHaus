@@ -156,7 +156,9 @@
             {%- if unlock_handle == blank -%}{%- assign unlock_handle = section.settings.offshoot_hub_handle -%}{%- endif -%}
             <button class="hs hs--offshoot" style="{{ pos }}" data-type="offshoot" data-handle="{{ b.handle }}" data-unlock-after="{{ unlock_handle }}" data-title="{{ b.title }}" data-body="{{ b.body }}" data-cta="Open course" data-url="{{ node_url }}"{{ block.shopify_attributes }}></button>
           {%- when 'check' -%}
-            <button class="hs hs--check" style="{{ pos }}" data-type="check" data-title="{{ b.title }}" data-pulse-items="{{ b.pulse_items | strip_newlines | escape }}" data-link-url="{{ b.link_url }}" data-link-label="{{ b.link_label | default: 'Open' }}"{{ block.shopify_attributes }}></button>
+            {%- assign ctl = b.title | downcase -%}
+            {%- if ctl contains 'mindset' -%}{%- assign ccat = 'mindset' -%}{%- elsif ctl contains 'purpose' -%}{%- assign ccat = 'purpose' -%}{%- elsif ctl contains 'heart' -%}{%- assign ccat = 'heart' -%}{%- else -%}{%- assign ccat = 'check' -%}{%- endif -%}
+            <button class="hs hs--check" style="{{ pos }}" data-type="check" data-check-id="check:{{ ccat }}:{{ block.id }}" data-title="{{ b.title }}" data-pulse-items="{{ b.pulse_items | strip_newlines | escape }}" data-link-url="{{ b.link_url }}" data-link-label="{{ b.link_label | default: 'Open' }}"{{ block.shopify_attributes }}></button>
         {%- endcase -%}
       {%- endfor -%}
 
@@ -218,7 +220,9 @@
         {%- for block in section.blocks -%}
           {%- if block.type == 'check' -%}
             {%- assign b = block.settings -%}
-            <div class="bqcard" data-type="check" data-title="{{ b.title }}" data-pulse-items="{{ b.pulse_items | strip_newlines | escape }}" data-link-url="{{ b.link_url }}" data-link-label="{{ b.link_label | default: 'Open' }}">
+            {%- assign ctl = b.title | downcase -%}
+            {%- if ctl contains 'mindset' -%}{%- assign ccat = 'mindset' -%}{%- elsif ctl contains 'purpose' -%}{%- assign ccat = 'purpose' -%}{%- elsif ctl contains 'heart' -%}{%- assign ccat = 'heart' -%}{%- else -%}{%- assign ccat = 'check' -%}{%- endif -%}
+            <div class="bqcard" data-type="check" data-check-id="check:{{ ccat }}:{{ block.id }}" data-title="{{ b.title }}" data-pulse-items="{{ b.pulse_items | strip_newlines | escape }}" data-link-url="{{ b.link_url }}" data-link-label="{{ b.link_label | default: 'Open' }}">
               <b>{{ b.title }}</b><span class="bq-go">Enter →</span>
             </div>
           {%- endif -%}
