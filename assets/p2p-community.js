@@ -13,7 +13,8 @@
   var CATS = { general: { label: 'General Discussion', emoji: '💬' }, intro: { label: 'Introductions', emoji: '👋' }, wins: { label: 'Wins • Habits • Growth', emoji: '🏆' }, help: { label: 'Questions & Help', emoji: '🙏' }, testimonial: { label: 'Testimonials', emoji: '🙌' }, announce: { label: 'P2P Announcements', emoji: '📣' } };
   function catMeta(k) { return (catList && catList.filter(function (x) { return x.key === k; })[0]) || CATS[k] || null; }
   function catLabel(k) { var c = catMeta(k); return c ? c.label : ''; }
-  function catEmoji(k) { var c = catMeta(k); return c ? c.emoji : ''; }
+  // Always source the emoji from this UTF-8 file (never the JSON response) so it renders consistently on every device.
+  function catEmoji(k) { return (CATS[k] && CATS[k].emoji) || (catMeta(k) && catMeta(k).emoji) || ''; }
   function seenTs() { var v = 0; try { v = parseInt(localStorage.getItem('p2p_comm_seen') || '0', 10) || 0; } catch (e) {} return v; }
 
   function myName() { return (window.P2P_MEMBER_NAME || '').trim().toLowerCase(); }
@@ -429,7 +430,7 @@
     if (!tabsEl) return;
     var cats = catList || Object.keys(CATS).map(function (k) { return { key: k, label: CATS[k].label, emoji: CATS[k].emoji }; });
     tabsEl.innerHTML = '<button class="osx-cat-tab' + (filter.category === 'all' ? ' on' : '') + '" data-cat="all">All</button>' +
-      cats.map(function (c) { return '<button class="osx-cat-tab' + (filter.category === c.key ? ' on' : '') + '" data-cat="' + c.key + '">' + esc(c.emoji) + ' ' + esc(c.label) + '</button>'; }).join('');
+      cats.map(function (c) { return '<button class="osx-cat-tab' + (filter.category === c.key ? ' on' : '') + '" data-cat="' + c.key + '">' + esc(catEmoji(c.key)) + ' ' + esc(c.label) + '</button>'; }).join('');
     tabsEl.querySelectorAll('[data-cat]').forEach(function (b) {
       b.addEventListener('click', function () { filter.category = b.getAttribute('data-cat'); filter.offset = 0; renderTabs(); load(false); });
     });
@@ -512,7 +513,7 @@
         '<button type="button" class="osx-comp-tool" data-tool="video" title="Add video (YouTube/Loom/Vimeo)">▶️</button>' +
         '<button type="button" class="osx-comp-tool" data-tool="link" title="Add link">🔗</button>' +
       '</div>' +
-      '<select class="osx-comp-cat" data-comp-cat>' + cats.map(function (c) { return '<option value="' + c.key + '"' + (c.key === selCat ? ' selected' : '') + '>' + esc(c.emoji + ' ' + c.label) + '</option>'; }).join('') + '</select></div>' +
+      '<select class="osx-comp-cat" data-comp-cat>' + cats.map(function (c) { return '<option value="' + c.key + '"' + (c.key === selCat ? ' selected' : '') + '>' + esc(catEmoji(c.key) + ' ' + c.label) + '</option>'; }).join('') + '</select></div>' +
       '<div class="osx-comp-foot"><button type="button" class="osx-comp-cancel">Cancel</button><button type="button" class="osx-comp-post">Post</button></div></div>';
     document.body.appendChild(pop);
     var body = pop.querySelector('[data-comp-body]'), titleI = pop.querySelector('[data-comp-title]'), catSel = pop.querySelector('[data-comp-cat]'), attWrap = pop.querySelector('[data-comp-atts]'), postB = pop.querySelector('.osx-comp-post');

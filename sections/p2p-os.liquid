@@ -1149,7 +1149,7 @@
   #p2pos .osx-cw-top .osx-spot{flex:1;min-width:0;border:1px solid var(--stroke);border-radius:14px;background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(9,17,24,.35));padding:14px;}
   /* gold framing + soft glow on the spotlight & recent-wins cards */
   #p2pos .osx-cw-top .osx-spot,
-  #p2pos .osx-wins-card{border-color:var(--gstroke);box-shadow:inset 0 0 0 1px rgba(216,180,90,.12),0 0 22px rgba(216,180,90,.14);}
+  #p2pos .osx-side-card.osx-wins-card{border:1.5px solid var(--gstroke);box-shadow:0 0 0 1px rgba(216,180,90,.22),0 0 26px rgba(216,180,90,.22);}
   #p2pos .osx-cw-top .osx-spot .osx-spot-body{flex-direction:column;align-items:flex-start;gap:10px;margin-top:10px;}
   @media (max-width:640px){#p2pos .osx-cw-top{flex-direction:column;}}
   #p2pos .osx-comm-side{flex:0 0 258px;display:flex;flex-direction:column;gap:16px;}
@@ -1158,8 +1158,8 @@
   #p2pos .osx-comm-count:hover{border-color:var(--gstroke);background:rgba(216,180,90,.08);}
   #p2pos .osx-comm-count b{display:block;font:800 22px/1 Georgia,serif;color:var(--gold-bright);}
   #p2pos .osx-comm-count span{display:block;margin-top:4px;font:600 11px/1 system-ui;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);}
-  #p2pos .osx-comm-invite{border:1px solid var(--gstroke);background:rgba(216,180,90,.08);color:var(--gold-bright);cursor:pointer;border-radius:999px;padding:11px 16px;font:700 13px/1 system-ui;transition:.15s;}
-  #p2pos .osx-comm-invite:hover{background:rgba(216,180,90,.16);}
+  #p2pos .osx-comm-invite{border:0;background:linear-gradient(100deg,#f4e2a6,#c9a24a);color:#0a1410;cursor:pointer;border-radius:999px;padding:11px 16px;font:800 13px/1 system-ui;transition:.15s;}
+  #p2pos .osx-comm-invite:hover{filter:brightness(1.06);}
   #p2pos .osx-wins-side{border:1px solid var(--gstroke);border-radius:16px;padding:14px;background:radial-gradient(120% 120% at 0% 0%,rgba(216,180,90,.1),rgba(9,17,24,.5));}
   #p2pos .osx-wins-side-h{font:800 12px/1 system-ui;letter-spacing:.04em;color:var(--gold-bright);margin-bottom:10px;}
   #p2pos .osx-wside-text{font:500 14px/1.5 Georgia,serif;color:var(--text);margin:0 0 10px;white-space:pre-wrap;word-break:break-word;}
