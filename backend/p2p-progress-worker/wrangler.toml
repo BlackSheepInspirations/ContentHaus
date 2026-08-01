@@ -1,0 +1,17 @@
+# Cloudflare Worker config for the P2P cross-device progress backend.
+# Deploy: cd backend/p2p-progress-worker && npx wrangler deploy
+#
+# Secrets (NEVER put these here — set them once with wrangler, they live encrypted
+# in Cloudflare, never in git or chat):
+#   npx wrangler secret put SHOPIFY_APP_SECRET     # the app's API secret key
+#   npx wrangler secret put SHOPIFY_ADMIN_TOKEN    # Admin API access token
+#
+# The two [vars] below are NOT secret and are fine to keep here.
+
+name = "p2p-progress"
+main = "worker.js"
+compatibility_date = "2025-01-01"
+
+[vars]
+SHOP = "blacksheepcreationsllc.myshopify.com"
+API_VERSION = "2025-01"

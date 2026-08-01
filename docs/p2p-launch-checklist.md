@@ -30,11 +30,25 @@ inside their app and giving up the custom journey. So this is **build, not buy**
    progress on page open** and **debounced-saves on every change**, keeping
    localStorage as an offline cache. Guests keep localStorage only.
 
-**What Andrea needs to provide when we start:**
-- Turn on **Settings → Apps and sales channels → Develop apps** in the store admin
-  and create a custom app (owner permission — no Shopify Partner account needed).
-- Hand over one API key/token from that app.
-- Pick metafield-vs-database (recommend **metafield** to start).
+**STATUS (2026-07-31): backend code written.** Worker + wrangler config live in
+`backend/p2p-progress-worker/`; the theme client (`assets/p2p-progress.js`) already
+speaks the contract. Remaining work is account setup + deploy — full walkthrough in
+**`docs/p2p-progress-backend-setup.md`**.
+
+**Correction:** App Proxy CANNOT be configured on a store "Develop apps" custom app
+— it needs a **free Shopify Partner-dashboard app** (no fees/review). The Admin API
+token still comes from installing that app on the store.
+
+**What Andrea needs to do (see the setup doc for click-by-click):**
+- Create a free **Cloudflare** account (hosts the Worker) and a free **Shopify
+  Partner** account (hosts the app with App Proxy).
+- Create the Partner app: scopes `read_customers` + `write_customers`, App Proxy
+  subpath `apps/p2p`, install on the store.
+- Deploy the Worker (`wrangler deploy`) and set two secrets in Cloudflare
+  (`SHOPIFY_APP_SECRET`, `SHOPIFY_ADMIN_TOKEN`) — **never pasted in chat**.
+- Point the App Proxy URL at the deployed Worker; (recommended) add the
+  `custom.p2p_progress` JSON metafield definition on Customers.
+- Storage decision: **metafield** to start (chosen).
 
 **When:** matters once real customers log in from more than one device — i.e.,
 just before public launch. Not urgent while password-locked.
