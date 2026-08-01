@@ -9,7 +9,7 @@
   var PROFILE = '/apps/p2p/profile', MEMBERS = '/apps/p2p/members';
 
   var tabs = mb.querySelectorAll('[data-mb-tab]'), panels = mb.querySelectorAll('[data-mb-panel]');
-  var grid = mb.querySelector('[data-mb-grid]'), mapEl = mb.querySelector('[data-mb-map]');
+  var grid = mb.querySelector('[data-mb-grid]'), mapEl = root.querySelector('[data-mb-map]');
   var f = {
     photo: mb.querySelector('[data-mb-photo]'), quote: mb.querySelector('[data-mb-quote]'), about: mb.querySelector('[data-mb-about]'),
     hidden: mb.querySelector('[data-mb-hidden]'), save: mb.querySelector('[data-mb-save]'), status: mb.querySelector('[data-mb-status]')

@@ -1,0 +1,47 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Testimonials harness</title>
+<style>
+  body{margin:0;font-family:system-ui;}
+  .bsc-tst{--gold:#c9a24a;--gold-bright:#e0b23e;padding:56px 20px;}
+  .bsc-tst--cream{--bg:#faf8f3;--card:#ffffff;--text:#1a1815;--muted:#6b6660;--stroke:rgba(46,42,38,.14);background:var(--bg);}
+  .bsc-tst--dark{--bg:#070f16;--card:#0d1a24;--text:#e7efeb;--muted:#8aa0a6;--stroke:rgba(255,255,255,.1);background:radial-gradient(120% 80% at 0% 0%,#0d1a26,#050a10);}
+  .bsc-tst__in{max-width:1180px;margin:0 auto;}
+  .bsc-tst__kicker{text-align:center;font:700 12px/1 system-ui;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin:0 0 12px;}
+  .bsc-tst__h{text-align:center;font:700 clamp(26px,4vw,38px)/1.15 Georgia,serif;color:var(--text);margin:0 0 12px;}
+  .bsc-tst__intro{text-align:center;font:400 16px/1.6 system-ui;color:var(--muted);max-width:620px;margin:0 auto 40px;}
+  .bsc-tst__grid{display:grid;grid-template-columns:repeat(var(--cols),1fr);gap:18px;}
+  @media (max-width:900px){.bsc-tst__grid{grid-template-columns:repeat(2,1fr);}}
+  @media (max-width:600px){.bsc-tst__grid{grid-template-columns:1fr;}}
+  .bsc-tst__card{display:flex;flex-direction:column;gap:12px;padding:24px 22px;border:1px solid var(--stroke);border-radius:18px;background:var(--card);box-shadow:0 10px 30px rgba(0,0,0,.05);}
+  .bsc-tst--dark .bsc-tst__card{box-shadow:0 12px 34px rgba(0,0,0,.35);}
+  .bsc-tst__card.is-featured{border-color:var(--gold);box-shadow:0 14px 40px rgba(201,162,74,.18);}
+  .bsc-tst__stars{display:flex;gap:3px;font-size:16px;line-height:1;color:var(--stroke);}
+  .bsc-tst__stars .on{color:var(--gold-bright);}
+  .bsc-tst__quote{margin:0;font:400 16px/1.6 Georgia,serif;color:var(--text);font-style:italic;}
+  .bsc-tst--dark .bsc-tst__quote{color:#dbe7e2;}
+  .bsc-tst__by{display:flex;align-items:center;gap:12px;margin-top:auto;padding-top:6px;}
+  .bsc-tst__avatar img{width:44px;height:44px;border-radius:50%;object-fit:cover;display:block;border:1px solid var(--stroke);}
+  .bsc-tst__meta{display:flex;flex-direction:column;min-width:0;}
+  .bsc-tst__meta b{font:700 14px/1.2 system-ui;color:var(--text);}
+  .bsc-tst__meta span{font:400 12.5px/1.3 system-ui;color:var(--muted);}
+  .bsc-tst__source{margin-left:auto;font:700 10px/1.2 system-ui;letter-spacing:.04em;text-transform:uppercase;color:var(--gold);border:1px solid var(--stroke);border-radius:20px;padding:5px 9px;white-space:nowrap;}
+</style></head><body>
+<script>
+  var CARDS=[
+    {r:5,q:"I finally sound like myself. Brand Haus gave me words I'd been circling for years.",n:"Danielle R.",role:"Journal creator",src:"Brand Haus",feat:true},
+    {r:5,q:"I went from a blank page to a full launch plan in an afternoon. This is the map I needed.",n:"Marcus T.",role:"New seller",src:"Growth Haus"},
+    {r:4,q:"Not techy at all, and I still made something I'm proud of. The steps just make sense.",n:"Priya S.",role:"Learning Journey member",src:""}
+  ];
+  function stars(r){var h='';for(var i=1;i<=5;i++)h+='<span'+(i<=r?' class="on"':'')+'>★</span>';return h;}
+  function card(c){return '<figure class="bsc-tst__card'+(c.feat?' is-featured':'')+'">'+
+    '<div class="bsc-tst__stars">'+stars(c.r)+'</div>'+
+    '<blockquote class="bsc-tst__quote">'+c.q+'</blockquote>'+
+    '<figcaption class="bsc-tst__by"><span class="bsc-tst__meta"><b>'+c.n+'</b><span>'+c.role+'</span></span>'+
+    (c.src?'<span class="bsc-tst__source">'+c.src+'</span>':'')+'</figcaption></figure>';}
+  function sec(scheme){return '<section class="bsc-tst bsc-tst--'+scheme+'" style="--cols:3"><div class="bsc-tst__in">'+
+    '<p class="bsc-tst__kicker">In their words</p><h2 class="bsc-tst__h">Loved by creators like you</h2>'+
+    '<p class="bsc-tst__intro">Real words from real members. We only ever share the ones we’ve been given permission to.</p>'+
+    '<div class="bsc-tst__grid">'+CARDS.map(card).join('')+'</div></div></section>';}
+  document.body.innerHTML=sec('cream')+sec('dark');
+</script>
+</body></html>

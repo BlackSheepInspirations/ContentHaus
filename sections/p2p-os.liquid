@@ -424,11 +424,17 @@
               <span class="osx-wc-item" data-wc="win"><i class="osx-wc-dot"></i> Share a win</span>
             </div>
             <div class="osx-cw" data-cw>
-              <div class="osx-cw-compose">
-                <textarea class="osx-cw-text" data-cw-text maxlength="1000" rows="2" placeholder="Share a win, a question, or an encouragement…"></textarea>
-                <div class="osx-cw-compose-row">
-                  <span class="osx-cw-hint">Wins get shared from your Notebook → Wins 🏆</span>
-                  <button class="osx-cw-postbtn" type="button" data-cw-post>Post</button>
+              <div class="osx-cw-top">
+                <div class="osx-cw-compose">
+                  <textarea class="osx-cw-text" data-cw-text maxlength="1000" rows="2" placeholder="Share a win, a question, or an encouragement…"></textarea>
+                  <div class="osx-cw-compose-row">
+                    <span class="osx-cw-hint">Wins get shared from your Notebook → Wins 🏆</span>
+                    <button class="osx-cw-postbtn" type="button" data-cw-post>Post</button>
+                  </div>
+                </div>
+                <div class="osx-spot" data-spotlight hidden>
+                  <div class="osx-side-h">✨ Member spotlight</div>
+                  <div class="osx-spot-body" data-spot-body></div>
                 </div>
               </div>
               <div class="osx-cw-feed" data-cw-feed><div class="osx-cw-empty">Loading the wall…</div></div>
@@ -472,10 +478,6 @@
             <div class="osx-side-card">
               <div class="osx-side-h">🌱 Growth Board</div>
               <div class="osx-gb" data-gb><div class="osx-cw-empty">—</div></div>
-            </div>
-            <div class="osx-side-card osx-spot" data-spotlight hidden>
-              <div class="osx-side-h">✨ Member spotlight</div>
-              <div class="osx-spot-body" data-spot-body></div>
             </div>
           </aside>
         </div>
@@ -1069,7 +1071,13 @@
   /* community two-column layout */
   #p2pos .osx-comm{display:flex;gap:22px;align-items:flex-start;}
   #p2pos .osx-comm-main{flex:1;min-width:0;}
-  #p2pos .osx-comm-main .osx-cw{max-width:none;}
+  /* main column is ONE big box wrapping composer + spotlight + the wall */
+  #p2pos .osx-comm-main .osx-cw{max-width:none;border:1px solid var(--stroke);border-radius:18px;background:rgba(255,255,255,.03);padding:16px;}
+  #p2pos .osx-cw-top{display:flex;gap:16px;align-items:stretch;margin-bottom:16px;}
+  #p2pos .osx-comm-main .osx-cw-compose{flex:1.7;min-width:0;border:0;background:none;padding:0;margin-bottom:0;}
+  #p2pos .osx-cw-top .osx-spot{flex:1;min-width:0;border:1px solid var(--stroke);border-radius:14px;background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(9,17,24,.35));padding:14px;}
+  #p2pos .osx-cw-top .osx-spot .osx-spot-body{flex-direction:column;align-items:flex-start;gap:10px;margin-top:10px;}
+  @media (max-width:640px){#p2pos .osx-cw-top{flex-direction:column;}}
   #p2pos .osx-comm-side{flex:0 0 258px;display:flex;flex-direction:column;gap:16px;}
   #p2pos .osx-comm-counts{display:flex;gap:12px;}
   #p2pos .osx-comm-count{flex:1;border:1px solid var(--stroke);border-radius:14px;background:rgba(255,255,255,.03);padding:14px 10px;text-align:center;cursor:pointer;transition:.15s;}

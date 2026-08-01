@@ -1,0 +1,78 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Haus Mates harness</title>
+<style>
+  body{margin:0;background:radial-gradient(120% 80% at 0% 0%,#0d1a26,#050a10);min-height:100vh;}
+  #p2pos{--text:#e7efeb;--muted:#8aa0a6;--gold:#c9a24a;--gold-bright:#f4c534;--stroke:rgba(255,255,255,.09);--gstroke:rgba(216,180,90,.38);
+    --aurora:linear-gradient(100deg,#f4e2a6,#8f6fd6,#27ae6e,#39c5c0,#2563eb,#d6336c,#f4e2a6);color:var(--text);font-family:system-ui;}
+  @keyframes p2pos-shift{0%{background-position:0% 50%;}100%{background-position:300% 50%;}}
+  .osx-view{padding:30px 34px 44px;}
+  .osx-kick{font:700 12px/1 system-ui;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;}
+  .osx-h2{font:700 26px/1.15 Georgia,serif;margin:0 0 8px;}
+  .osx-lede{font:400 15px/1.6 system-ui;color:#c6d6d0;max-width:640px;margin:0 0 22px;}
+
+  #p2pos .osx-mates{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;margin-bottom:18px;}
+  #p2pos .osx-mate{position:relative;display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;
+    padding:30px 26px 28px;border:1px solid var(--stroke);border-radius:22px;overflow:hidden;
+    background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(9,17,24,.45));transition:transform .18s ease,border-color .18s ease;}
+  #p2pos .osx-mate:hover{transform:translateY(-3px);}
+  #p2pos .osx-mate::before{content:"";position:absolute;inset:-40% -20% auto -20%;height:70%;filter:blur(34px);opacity:.55;pointer-events:none;z-index:0;}
+  #p2pos .osx-mate--idea{border-color:rgba(58,86,150,.4);}
+  #p2pos .osx-mate--idea::before{background:radial-gradient(60% 100% at 50% 0%,rgba(58,86,150,.7),transparent 70%),radial-gradient(50% 100% at 70% 0%,rgba(201,162,74,.5),transparent 70%);}
+  #p2pos .osx-mate--idea:hover{border-color:rgba(84,120,196,.75);}
+  #p2pos .osx-mate--build{border-color:rgba(122,40,72,.42);}
+  #p2pos .osx-mate--build::before{background:radial-gradient(60% 100% at 50% 0%,rgba(122,40,72,.7),transparent 70%),radial-gradient(50% 100% at 70% 0%,rgba(201,162,74,.5),transparent 70%);}
+  #p2pos .osx-mate--build:hover{border-color:rgba(163,58,96,.8);}
+  #p2pos .osx-mate > *{position:relative;z-index:1;}
+  #p2pos .osx-mate-badge{width:130px;height:130px;border-radius:50%;margin-bottom:6px;box-shadow:0 10px 34px rgba(0,0,0,.5);}
+  #p2pos .osx-mate-badge img{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;}
+  #p2pos .osx-mate-fallback{width:100%;height:100%;border-radius:50%;place-items:center;font:800 34px/1 Georgia,serif;color:#0a1410;background:linear-gradient(145deg,#f4e2a6,var(--gold));}
+  #p2pos .osx-mate-kick{font:700 10px/1.1 system-ui;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);}
+  #p2pos .osx-mate-name{font:700 30px/1.05 Georgia,serif;margin:2px 0 0;
+    background:var(--aurora);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:p2pos-shift 20s linear infinite;}
+  #p2pos .osx-mate-haus{font:600 12.5px/1.4 system-ui;color:#dbe7e2;}
+  #p2pos .osx-mate-haus i{color:var(--muted);font-style:italic;}
+  #p2pos .osx-mate-dot{color:var(--gold);}
+  #p2pos .osx-mate p{font:400 13.5px/1.6 system-ui;color:#c6d6d0;margin:8px 0 0;max-width:34ch;}
+  #p2pos .osx-mate-for{font:400 12px/1.55 system-ui;color:var(--muted);margin-top:10px;max-width:36ch;}
+  #p2pos .osx-mate-for b{color:var(--gold-bright);font-weight:700;}
+  #p2pos .osx-mate-cta{display:inline-flex;align-items:center;gap:8px;margin-top:16px;padding:12px 24px;border-radius:11px;
+    font:800 13px/1 system-ui;color:#0a1410;text-decoration:none;background:var(--aurora);background-size:300% 100%;
+    animation:p2pos-shift 20s linear infinite;box-shadow:0 10px 26px rgba(0,0,0,.35);transition:transform .12s;}
+  #p2pos .osx-mate-cta:hover{transform:translateY(-2px);}
+  #p2pos .osx-mate-cta i{font-style:normal;transition:transform .15s;}
+  #p2pos .osx-mate-cta:hover i{transform:translateX(3px);}
+  #p2pos .osx-mate-note{font:400 12.5px/1.5 system-ui;color:var(--muted);text-align:center;margin-top:4px;}
+  #p2pos .osx-mate-note::first-letter{color:var(--gold-bright);}
+</style>
+</head><body>
+<div id="p2pos"><div class="osx-view">
+  <div class="osx-kick">Your Haus Mates</div>
+  <h2 class="osx-h2">Two partners, always on call</h2>
+  <p class="osx-lede">Stuck on what to make, or how to make it beautiful? Frank and Ruth are your AI partners — one to spark the idea, one to build it right. Open either any time you need a second brain.</p>
+  <div class="osx-mates">
+    <article class="osx-mate osx-mate--idea">
+      <div class="osx-mate-badge"><img src="broken-idea.png" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='grid';"><span class="osx-mate-fallback" style="display:none">IH</span></div>
+      <div class="osx-mate-body">
+        <div class="osx-mate-kick">Your no-fluff Creative Director</div>
+        <h3 class="osx-mate-name">Frank</h3>
+        <div class="osx-mate-haus">The Idea Haus <span class="osx-mate-dot">•</span> <i>Where brilliant ideas begin</i></div>
+        <p>Blunt, no-fluff, and built for sellers. Bring Frank a raw idea and he turns it into sellable designs, content and copy — filtering the weak concepts and sharpening the strong ones.</p>
+        <div class="osx-mate-for"><b>Ask him for</b> marketing, writing, e-commerce and product-design direction &mdash; profit over generic creativity.</div>
+        <a class="osx-mate-cta" href="#">Chat with Frank <i>→</i></a>
+      </div>
+    </article>
+    <article class="osx-mate osx-mate--build">
+      <div class="osx-mate-badge"><img src="broken-build.png" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='grid';"><span class="osx-mate-fallback" style="display:none">BH</span></div>
+      <div class="osx-mate-body">
+        <div class="osx-mate-kick">Your ruthless Design Meister</div>
+        <h3 class="osx-mate-name">Ruth</h3>
+        <div class="osx-mate-haus">The Build Haus <span class="osx-mate-dot">•</span> <i>Building brilliant designs</i></div>
+        <p>Your prompt is done — now make it sellable. Ruth knows print production cold: trim, bleed, margins, licensing and file prep, plus why some products sell and others sit.</p>
+        <div class="osx-mate-for"><b>Ask her for</b> planners, coloring books, apparel and ebooks &mdash; built to spec, not guesswork.</div>
+        <a class="osx-mate-cta" href="#">Chat with Ruth <i>→</i></a>
+      </div>
+    </article>
+  </div>
+  <div class="osx-mate-note">✦ Frank and Ruth live in ChatGPT and open in a new tab, so your OS stays right here.</div>
+</div></div>
+</body></html>
