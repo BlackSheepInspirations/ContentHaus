@@ -66,6 +66,15 @@
       '<button class="osx-pl-navb' + (view === 'lists' ? ' on' : '') + '" data-view="lists">✅ Lists</button></div>';
   }
   function dashHTML() {
+    var upcoming = data.goals.filter(function (g) { return g.w && daysTo(g.w) !== null && daysTo(g.w) >= 0; }).sort(function (a, b) { return daysTo(a.w) - daysTo(b.w); })[0];
+    var cd = upcoming ? '<button class="osx-dash-cd" data-open="' + esc(upcoming.id) + '"><div class="osx-dash-cd-n">' + Math.max(0, daysTo(upcoming.w)) + '</div><div class="osx-dash-cd-t"><b>days to launch</b><span>' + esc(upcoming.title || 'your goal') + '</span></div></button>' : '';
+    var snaps = data.snaps.slice().sort(function (a, b) { return (a.week || '').localeCompare(b.week || ''); });
+    var fNow = snaps.length ? num(snaps[snaps.length - 1].followers) : 0;
+    var stats = '<div class="osx-lv-trend">' +
+      '<div class="osx-lv-stat"><b>' + fNow + '</b><span>followers</span></div>' +
+      '<div class="osx-lv-stat"><b>' + data.lives.filter(function (l) { return l.done; }).length + '</b><span>total lives</span></div>' +
+      '<div class="osx-lv-stat"><b>' + data.posts.filter(function (p) { return p.done; }).length + '</b><span>total posts</span></div>' +
+      '<div class="osx-lv-stat"><b>' + livesInWeek(weekKey()) + ' / ' + postsInWeek(weekKey()) + '</b><span>lives / posts this wk</span></div></div>';
     var rings = TFS.map(function (t) { return '<div class="osx-pl-dring">' + ring(periodPct(t[0]), '') + '<span class="osx-pl-drl">' + t[1] + '</span></div>'; }).join('');
     var goals = data.goals.length ? data.goals.map(function (g) {
       var st = STAGES.filter(function (s) { return s[0] === (g.stage || 'grows'); })[0];
@@ -73,8 +82,8 @@
         '<span class="osx-pl-gsum-b"><b>' + esc(g.title || 'Untitled goal') + '</b>' +
         '<span class="osx-pl-gsum-m"><span class="osx-pl-stage-b">' + st[1] + ' ' + st[2] + '</span> · ' + esc(countdownText(g.w)) + '</span></span></button>';
     }).join('') : '<div class="osx-pl-empty">No goals yet — head to 🎯 Goals to build one with the GROWS formula.</div>';
-    return '<div class="osx-pl-strip">' + rings + '</div>' +
-      '<div class="osx-pl-sech" style="margin-top:6px;">🎯 Your goals</div>' + goals;
+    return cd + stats + '<div class="osx-pl-sech">📊 Progress by horizon</div><div class="osx-pl-strip">' + rings + '</div>' +
+      '<div class="osx-pl-sech" style="margin-top:10px;">🎯 Your goals</div>' + goals;
   }
   function growsRow(g) {
     return '<div class="osx-pl-grows">' + GROWS.map(function (r) {
