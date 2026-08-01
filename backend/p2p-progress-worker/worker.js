@@ -113,7 +113,8 @@ export default {
           if (!text) return json({ error: 'empty' }, 400);
           const info = await customerInfo(env, customerId);
           const id = Date.now() + '-' + customerId;
-          const post = { id, author: customerId, name: String((body && body.name) || info.firstName || 'Member').slice(0, 40), text: text.slice(0, 1000), ts: Date.now() };
+          const kind = ((body && body.kind) === 'win') ? 'win' : 'post';   // wins get their own board
+          const post = { id, author: customerId, name: String((body && body.name) || info.firstName || 'Member').slice(0, 40), text: text.slice(0, 1000), kind: kind, ts: Date.now() };
           await kv.put('post:' + id, JSON.stringify(post));   // live immediately (unmoderated)
           await alertAdmin(env, post).catch(() => {});         // optional email ping to you
           return json({ ok: true });
