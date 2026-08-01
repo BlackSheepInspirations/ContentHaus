@@ -89,6 +89,41 @@ const RUTH_POSTS = [
   'A thought: the flock grows stronger when we celebrate each other loudly. Whose win can you cheer today?',
   'Gentle truth: you were made original on purpose, for a purpose. Don\'t shrink to fit someone else\'s box.'
 ];
+const ERIC_POSTS = [
+  'Why did the entrepreneur bring a ladder to the sales meeting? He heard the projections were through the roof. 😂',
+  'I told my email list a joke about a broken pencil… it was pointless. But hey, at least I showed up. 📧✏️',
+  'Why don\'t marketers ever get locked out? They always know the best entry points. 🚪',
+  'I tried to come up with a joke about passive income… but it just made money while I wasn\'t working on it. 💰',
+  'What do you call a sheep that can sell anything? Baaa-rilliant. 🐑',
+  'My accountant said I needed to be more careful with puns. I said I\'d weigh the pros and cons — turns out there\'s no accounting for taste.',
+  'Why did the scarecrow start a business? He was outstanding in his field. 🌾',
+  'I bought a boat with my first sale. It was a sales-boat. I\'m so sorry. ⛵',
+  'What\'s a copywriter\'s favorite exercise? The word count. 💪',
+  'Why did the coffee file a complaint at the coworking space? It got mugged every single morning. ☕',
+  'I told my wife I\'d finally automated everything. She said, "Great, now automate taking out the trash." Fair. 🗑️',
+  'Why did the website go to therapy? Too many unresolved issues in its tabs. 🧠',
+  'What do you call a fake noodle running an ad agency? An impasta with great pasta-tential. 🍝',
+  'My startup idea? A gym for dad jokes. It\'s all about the puns and reps. 🏋️',
+  'Why don\'t we ever tell secrets in the community? Because too many people are… followers. 👀',
+  'I entered the annual pun contest and submitted ten. I figured no pun in ten did — but I showed up anyway. That\'s the whole lesson, kid. 😉'
+];
+const DREA_POSTS = [
+  'Hey friend. I know this week might have felt heavier than you let on. I just want you to hear this: you are not behind. You are not too late. The very fact that you\'re here, still building, still believing — that is the win. Take a breath with me. You\'re doing better than you think. 🤍',
+  'Mid-week check-in from my heart to yours. Somewhere along the way we got convinced that our worth is tied to our output. It isn\'t. You were loved before you produced a single thing, and you\'ll be loved long after. Build from that place — not to earn it, but because you already have it. 🌱',
+  'Can I be honest with you for a second? Some of you are one small step away from a breakthrough and you\'re thinking about quitting. Please don\'t. The seed doesn\'t look like much the day before it breaks the soil. Water it one more day. I\'m in your corner. 💛',
+  'I was thinking about you today. Yes, you — the one reading this wondering if anyone notices the quiet effort. God does. This flock does. And that thing you\'re working on in the dark? It\'s going to bless people you haven\'t even met yet. Keep going, gently. ✨',
+  'Wednesday reminder: comparison will rob you blind if you let it. Someone else\'s chapter twenty is not a rebuke of your chapter two. Run YOUR race, at your pace, with your heart wide open. That\'s where the magic — and the peace — actually lives. 🏃‍♀️🤍',
+  'A soft word for the tired ones: rest is not quitting. Sometimes the most productive, faithful thing you can do is close the laptop, hug someone you love, and remember why you started. The work will be there tomorrow. Refill your cup first. ☕🤍',
+  'Here\'s what I know for sure this week: you were made original, on purpose, for a purpose. The world doesn\'t need a watered-down copy of someone else. It needs the real, brave, imperfect you. Show up as her. She\'s the whole point. 🖤🐑',
+  'Checking in on your heart, not just your hustle. How ARE you — really? If today all you did was keep going, that counts. If today you rested, that counts too. Grace over grind, always. I\'m so proud of you. 💛'
+];
+// House voices: which day (0 Sun..6 Sat), byline, title, and content bank.
+const HOUSE = [
+  { day: 1, id: 'house-frank', name: 'Frank', title: 'Let me be Frank with you…', bank: FRANK_POSTS, cursor: 'house-cursor:frank' },
+  { day: 3, id: 'house-drea', name: 'Drea', title: 'Drea\'s Mid‑Week Heart Check', bank: DREA_POSTS, cursor: 'house-cursor:drea' },
+  { day: 4, id: 'house-ruth', name: 'Ruth', title: 'A Word from Ruth', bank: RUTH_POSTS, cursor: 'house-cursor:ruth' },
+  { day: 5, id: 'house-eric', name: 'Uncle Eric', title: 'Uncle Eric\'s Baaad Jokes', bank: ERIC_POSTS, cursor: 'house-cursor:eric' }
+];
 
 export default {
   async fetch(request, env) {
@@ -178,9 +213,9 @@ export default {
             const p = await kv.get(k.name, 'json');
             if (!p) continue;
             const rs = reactState(p, customerId);
-            posts.push({ id: p.id, name: p.name, text: p.text, kind: p.kind, ts: p.ts, streak: p.streak || 0, house: !!p.house, comments: (p.comments || []), reactions: rs.counts, mine: rs.mine, likes: rs.counts.love, liked: rs.mine.love });
+            posts.push({ id: p.id, name: p.name, title: p.title || '', text: p.text, kind: p.kind, ts: p.ts, streak: p.streak || 0, house: !!p.house, pinned: !!p.pinned, comments: (p.comments || []), reactions: rs.counts, mine: rs.mine, likes: rs.counts.love, liked: rs.mine.love });
           }
-          posts.sort((a, b) => b.ts - a.ts);
+          posts.sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0) || b.ts - a.ts);
           // Win of the Week: best-loved win in the last 7 days (tie → newest)
           const weekAgo = Date.now() - 7 * 864e5;
           let wow = null, best = -1;
@@ -189,7 +224,7 @@ export default {
             const s = p.reactions.love || 0;
             if (s > best || (s === best && (!wow || p.ts > wow.ts))) { best = s; wow = p; }
           }
-          return json({ ok: true, posts, winOfWeek: wow ? wow.id : null });
+          return json({ ok: true, posts, winOfWeek: wow ? wow.id : null, isAdmin: isAdmin(env, customerId) });
         }
         if (request.method === 'POST') {
           const body = await request.json().catch(() => null);
@@ -198,7 +233,7 @@ export default {
           const info = await customerInfo(env, customerId);
           const id = Date.now() + '-' + customerId;
           const kind = ((body && body.kind) === 'win') ? 'win' : 'post';   // wins get their own board
-          const post = { id, author: customerId, name: String((body && body.name) || info.firstName || 'Member').slice(0, 40), text: text.slice(0, 1000), kind: kind, streak: Number(body && body.streak) || 0, ts: Date.now() };
+          const post = { id, author: customerId, name: String((body && body.name) || info.firstName || 'Member').slice(0, 40), title: String((body && body.title) || '').slice(0, 120), text: text.slice(0, 1000), kind: kind, streak: Number(body && body.streak) || 0, ts: Date.now() };
           await kv.put('post:' + id, JSON.stringify(post));   // live immediately (unmoderated)
           await alertAdmin(env, post).catch(() => {});         // optional email ping to you
           return json({ ok: true });
@@ -285,7 +320,15 @@ export default {
         const body = await request.json().catch(() => null);
         const pid = body && body.id;
         if (!pid) return json({ error: 'no_id' }, 400);
-        if ((body && body.action) === 'delete') { await kv.delete('post:' + pid); return json({ ok: true }); }
+        const action = body && body.action;
+        if (action === 'delete') { await kv.delete('post:' + pid); return json({ ok: true }); }
+        if (action === 'pin' || action === 'unpin') {
+          const p = await kv.get('post:' + pid, 'json');
+          if (!p) return json({ error: 'not_found' }, 404);
+          p.pinned = (action === 'pin');
+          await kv.put('post:' + pid, JSON.stringify(p));
+          return json({ ok: true, pinned: p.pinned });
+        }
         return json({ error: 'bad_action' }, 400);
       }
 
@@ -293,25 +336,22 @@ export default {
     } catch (e) { return json({ error: 'server', detail: String((e && e.message) || e) }, 500); }
   },
 
-  // Frank & Ruth house posts — needs a Cron Trigger (e.g. daily "0 15 * * *").
-  // Monday → Frank's "Did you know"; Thursday → Ruth's insight. Advances through the bank; one per author per day max.
+  // House voices (Frank/Drea/Ruth/Eric) — needs a Cron Trigger (e.g. daily "0 15 * * *").
+  // Mon→Frank, Wed→Drea, Thu→Ruth, Fri→Eric. Advances through each bank; one post per voice per day max.
   async scheduled(event, env, ctx) {
     const kv = env.P2P_KV; if (!kv) return;
     const now = new Date();
     const dow = now.getUTCDay();                 // 0 Sun .. 6 Sat
     const today = now.toISOString().slice(0, 10);
-    async function housePost(authorId, name, bank, cursorKey) {
-      if (!bank.length) return;
-      if ((await kv.get('house-last:' + authorId)) === today) return;   // already posted today
-      const idx = parseInt((await kv.get(cursorKey)) || '0', 10) || 0;
-      const text = bank[idx % bank.length];
-      const id = Date.now() + '-' + authorId;
-      await kv.put('post:' + id, JSON.stringify({ id, author: authorId, name, text, kind: 'post', house: true, ts: Date.now() }));
-      await kv.put(cursorKey, String(idx + 1));
-      await kv.put('house-last:' + authorId, today);
+    for (const h of HOUSE) {
+      if (h.day !== dow || !h.bank.length) continue;
+      if ((await kv.get('house-last:' + h.id)) === today) continue;   // already posted today
+      const idx = parseInt((await kv.get(h.cursor)) || '0', 10) || 0;
+      const id = Date.now() + '-' + h.id;
+      await kv.put('post:' + id, JSON.stringify({ id, author: h.id, name: h.name, title: h.title, text: h.bank[idx % h.bank.length], kind: 'post', house: true, ts: Date.now() }));
+      await kv.put(h.cursor, String(idx + 1));
+      await kv.put('house-last:' + h.id, today);
     }
-    if (dow === 1) await housePost('house-frank', 'Frank', FRANK_POSTS, 'house-cursor:frank');   // Monday
-    if (dow === 4) await housePost('house-ruth', 'Ruth', RUTH_POSTS, 'house-cursor:ruth');       // Thursday
   }
 };
 

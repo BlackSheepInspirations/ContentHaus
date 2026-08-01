@@ -10,7 +10,7 @@
   var winsFeed = root.querySelector('[data-wins-feed]');
   var ta = wrap ? wrap.querySelector('[data-cw-text]') : null;
   var postBtn = wrap ? wrap.querySelector('[data-cw-post]') : null;
-  var posts = [], winIdx = 0, winTimer = null, welcomeProfileDone = false, wowId = null;
+  var posts = [], winIdx = 0, winTimer = null, welcomeProfileDone = false, wowId = null, isAdmin = false;
 
   function myName() { return (window.P2P_MEMBER_NAME || '').trim().toLowerCase(); }
   function setWc(k, on) { var el = root.querySelector('[data-wc="' + k + '"]'); if (el) el.classList.toggle('done', !!on); }
@@ -18,9 +18,39 @@
     if (!root.querySelector('[data-welcome]')) return;
     var nm = myName();
     var mineIs = function (kindWin) { return nm && posts.some(function (p) { return (kindWin ? p.kind === 'win' : p.kind !== 'win') && String(p.name || '').trim().toLowerCase() === nm; }); };
+    setWc('tour', localStorage.getItem('p2p_wc_tour') === '1');
     setWc('profile', localStorage.getItem('p2p_wc_profile') === '1' || welcomeProfileDone);
     setWc('hello', localStorage.getItem('p2p_wc_hello') === '1' || mineIs(false));
     setWc('win', localStorage.getItem('p2p_wc_win') === '1' || mineIs(true));
+  }
+  var TOUR = [
+    { emoji: '🐑', title: 'Welcome to the Community', body: 'This is the Haus — where the flock builds together. Here\'s the 30-second tour.' },
+    { emoji: '💬', title: 'The Wall', body: 'Share a win, ask a question, or drop some encouragement. React with ❤ 👍 🎉 and reply to anyone.' },
+    { emoji: '🏆', title: 'Wins & Win of the Week', body: 'Post wins here or from your Notebook. The most-loved win each week gets pinned to the top in gold.' },
+    { emoji: '🌱', title: 'The Growth Board', body: 'Earn points and badges, climb the ranks, and keep your 🔥 streak alive by showing up.' },
+    { emoji: '📍', title: 'Where\'s the Flock', body: 'See creators all over the map. Tap any pin to meet the maker behind it.' },
+    { emoji: '📅', title: 'Events', body: 'Upcoming live classes show in the sidebar and on the calendar — never miss one.' },
+    { emoji: '🎉', title: 'You\'re ready!', body: 'Say hello on the wall to finish your welcome. We\'re so glad you\'re here.' }
+  ];
+  function openTour() {
+    var i = 0, pop = document.createElement('div'); pop.className = 'osx-cal-pop';
+    document.body.appendChild(pop);
+    function finish() { try { localStorage.setItem('p2p_wc_tour', '1'); } catch (e) {} updateWelcome(); pop.remove(); }
+    function draw() {
+      var s = TOUR[i];
+      pop.innerHTML = '<div class="osx-cal-pop-in osx-tour-in"><button class="osx-cal-pop-x" type="button" aria-label="Close">✕</button>' +
+        '<div class="osx-tour-emoji">' + s.emoji + '</div>' +
+        '<div class="osx-tour-title">' + esc(s.title) + '</div>' +
+        '<div class="osx-tour-body">' + esc(s.body) + '</div>' +
+        '<div class="osx-tour-dots">' + TOUR.map(function (_, k) { return '<span class="' + (k === i ? 'on' : '') + '"></span>'; }).join('') + '</div>' +
+        '<div class="osx-tour-nav">' + (i > 0 ? '<button class="osx-tour-back" type="button">Back</button>' : '<span></span>') +
+        '<button class="osx-tour-next" type="button">' + (i === TOUR.length - 1 ? 'Let\'s go 🎉' : 'Next →') + '</button></div></div>';
+      pop.querySelector('.osx-cal-pop-x').addEventListener('click', finish);
+      var back = pop.querySelector('.osx-tour-back'); if (back) back.addEventListener('click', function () { i--; draw(); });
+      pop.querySelector('.osx-tour-next').addEventListener('click', function () { if (i === TOUR.length - 1) finish(); else { i++; draw(); } });
+    }
+    pop.addEventListener('click', function (e) { if (e.target === pop) finish(); });
+    draw();
   }
 
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
@@ -73,10 +103,16 @@
   function general() { return posts.filter(function (p) { return p.kind !== 'win'; }); }
   function stopTimer() { if (winTimer) { clearInterval(winTimer); winTimer = null; } }
 
+  function titleHTML(p) { return p.title ? '<div class="osx-cw-post-title">' + esc(p.title) + '</div>' : ''; }
+  function pinBtn(p) {
+    if (isAdmin) return '<button class="osx-pin-btn' + (p.pinned ? ' on' : '') + '" type="button" data-pin="' + esc(p.id) + '" title="' + (p.pinned ? 'Unpin' : 'Pin to top') + '">📌</button>';
+    return p.pinned ? '<span class="osx-pin-badge" title="Pinned">📌</span>' : '';
+  }
   function postHTML(p) {
     var lng = (p.text || '').length > 280;
-    return '<div class="osx-cw-post' + (p.house ? ' house' : '') + '">' +
-      '<div class="osx-cw-post-top"><b>' + esc(p.name || 'Member') + '</b>' + flame(p.streak) + houseTag(p) + '<span class="osx-cw-time">' + ago(p.ts) + '</span></div>' +
+    return '<div class="osx-cw-post' + (p.house ? ' house' : '') + (p.pinned ? ' pinned' : '') + '">' +
+      '<div class="osx-cw-post-top"><b>' + esc(p.name || 'Member') + '</b>' + flame(p.streak) + houseTag(p) + pinBtn(p) + '<span class="osx-cw-time">' + ago(p.ts) + '</span></div>' +
+      titleHTML(p) +
       '<div class="osx-cw-post-text' + (lng ? ' clamp' : '') + '">' + esc(p.text) + '</div>' +
       (lng ? '<button class="osx-cw-more" type="button" data-more>Read more ▾</button>' : '') +
       actsHTML(p, true) + commentsHTML(p) +
@@ -86,6 +122,7 @@
     return '<div class="osx-wow">' +
       '<div class="osx-wow-ribbon">🏆 Win of the Week</div>' +
       '<div class="osx-cw-post-top"><b>' + esc(p.name || 'Member') + '</b>' + flame(p.streak) + '<span class="osx-cw-time">' + ago(p.ts) + '</span></div>' +
+      titleHTML(p) +
       '<div class="osx-cw-post-text">' + esc(p.text) + '</div>' +
       actsHTML(p, false) + commentsHTML(p) +
     '</div>';
@@ -97,6 +134,16 @@
     if (!items.length && !wow) { feed.innerHTML = empty('Nothing here yet — be the first to say hello. 👋'); return; }
     feed.innerHTML = (wow ? wowHTML(wow) : '') + items.map(postHTML).join('');
     wireReacts(feed); wireComments(feed);
+    feed.querySelectorAll('[data-pin]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var id = b.getAttribute('data-pin');
+        var post = posts.filter(function (p) { return p.id === id; })[0];
+        b.disabled = true;
+        fetch('/apps/p2p/moderate', { method: 'POST', headers: { 'content-type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify({ id: id, action: (post && post.pinned) ? 'unpin' : 'pin' }) })
+          .then(function (r) { return r.json(); }).then(function (res) { if (res && res.ok) load(); else b.disabled = false; })
+          .catch(function () { b.disabled = false; });
+      });
+    });
     feed.querySelectorAll('[data-more]').forEach(function (b) {
       b.addEventListener('click', function () {
         var t = b.previousElementSibling; if (!t) return;
@@ -215,7 +262,7 @@
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (j) {
         if (j && j.guest) { stopTimer(); if (feed) feed.innerHTML = empty('Log in to see and share with the community.'); return; }
-        posts = (j && j.posts) || []; wowId = (j && j.winOfWeek) || null; render();
+        posts = (j && j.posts) || []; wowId = (j && j.winOfWeek) || null; isAdmin = !!(j && j.isAdmin); render();
       })
       .catch(function () { if (feed) feed.innerHTML = empty('Couldn\'t load the wall just now — try again in a moment.'); });
   }
@@ -284,6 +331,9 @@
       renderGrowth(m); renderSpotlight(m); updateWelcome();
     }).catch(function () {});
   }
+
+  var tourItem = root.querySelector('[data-wc="tour"]');
+  if (tourItem) { tourItem.style.cursor = 'pointer'; tourItem.addEventListener('click', openTour); }
 
   var inviteBtn = root.querySelector('[data-comm-invite]');
   if (inviteBtn) inviteBtn.addEventListener('click', function () {
