@@ -35,6 +35,7 @@
 </div>
 
 {% if ph_has_access %}
+  {% render 'p2p-os-rail', current: 'content', push: '#prompt-haus-app' %}
   <div id="prompt-haus-app" data-section-id="{{ section.id }}"></div>
 
   <script src="{{ 'prompt-builder-styledna.js' | asset_url }}" defer="defer"></script>

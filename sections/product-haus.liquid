@@ -34,6 +34,7 @@
 </div>
 
 {% if ch_has_access %}
+  {% render 'p2p-os-rail', current: 'project', push: '#product-haus-app' %}
   <div id="product-haus-app" data-section-id="{{ section.id }}"></div>
 
   <script src="{{ 'product-haus-util.js' | asset_url }}" defer="defer"></script>

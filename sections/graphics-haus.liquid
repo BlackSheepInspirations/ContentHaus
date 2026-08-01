@@ -33,6 +33,7 @@
 </div>
 
 {% if gh_has_access %}
+  {% render 'p2p-os-rail', current: 'graphics', push: '#graphics-haus-app' %}
   <div id="graphics-haus-app" data-section-id="{{ section.id }}"></div>
 
   <script src="{{ 'graphics-haus-util.js' | asset_url }}" defer="defer"></script>

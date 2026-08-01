@@ -34,6 +34,7 @@
 </div>
 
 {% if mh_has_access %}
+  {% render 'p2p-os-rail', current: 'marketing', push: '#marketing-haus-app' %}
   <div id="marketing-haus-app" data-section-id="{{ section.id }}"></div>
 
   <script src="{{ 'marketing-haus-util.js' | asset_url }}" defer="defer"></script>
