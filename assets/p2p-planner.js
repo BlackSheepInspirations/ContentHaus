@@ -169,6 +169,24 @@
   var TZS = ['ET', 'CT', 'MT', 'PT', 'AKT', 'HT', 'GMT', 'CET', 'AEST'];
   var HRS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'], MINS = ['00', '15', '30', '45'];
   var MOODS = ['🔥', '😄', '😊', '😌', '😅', '😐', '😬', '😢', '😤', '🙏'];
+  var MOOD_LABELS = ['On fire!', 'Buzzing', 'Good vibes', 'Calm & centered', 'Survived it', 'Meh', 'A bit rocky', 'Tender today', 'Determined', 'Grateful'];
+  var HOOK_IDEAS = ['"Stop scrolling — in the next 10 minutes I\'ll show you [outcome]."', '"If you\'ve ever struggled with [pain], this LIVE is for you."', '"I wasn\'t going to share this, but…"', '"Comment [word] and I\'ll [give/show] you [thing]."', '"Here\'s the mistake almost everyone makes with [topic]…"', '"By the end of this LIVE you\'ll know exactly how to [result]."', '"New here? Drop where you\'re watching from and I\'ll say hi."', '"I\'m doing something I\'ve never done on LIVE before…"', '"Would you rather [A] or [B]? Comment now."', '"Stick around — I\'m dropping [surprise] at the end."'];
+  var SCRIPT_TIPS = ['Open with your hook in the first 10 seconds — energy + eye contact.', 'Say your name + today\'s ONE promise (your Room Promise).', 'Invite new viewers to comment where they\'re watching from.', 'Tie every segment back to your hook — one clear thread.', 'Drop an engagement prompt every few minutes ("Drop a 1", "A or B?").', 'Re-introduce yourself + the promise as new people join.', 'Signpost the payoff: "stick around, at the end I\'ll…"', 'Close with one clear call-to-action — a single next step.'];
+  function listPop(title, items) {
+    var pop = document.createElement('div'); pop.className = 'osx-cal-pop'; root.appendChild(pop);
+    pop.innerHTML = '<div class="osx-cal-pop-in osx-ns"><button class="osx-cal-pop-x" type="button" aria-label="Close">✕</button><div class="osx-ns-h">' + esc(title) + '</div>' + items.map(function (t) { return '<div class="osx-tip-item">' + esc(t) + '</div>'; }).join('') + '<button class="osx-cele-x" type="button" style="margin-top:12px;">Got it 🔥</button></div>';
+    function close() { pop.remove(); }
+    pop.addEventListener('click', function (e) { if (e.target === pop) close(); });
+    pop.querySelector('.osx-cal-pop-x').addEventListener('click', close);
+    pop.querySelector('.osx-cele-x').addEventListener('click', close);
+  }
+  function openHookIdeas() { listPop('💡 Hook ideas', HOOK_IDEAS); }
+  function openScriptTips() { listPop('💡 Opening-script tips', SCRIPT_TIPS); }
+  function liveCountdown(l) {
+    var d = daysTo(l.date), t = liveTimeStr(l);
+    var big = (d === null) ? 'Set a date' : (d > 1 ? d + ' days' : d === 1 ? 'Tomorrow' : d === 0 ? 'Today!' : liveDateLabel(l));
+    return '<div class="osx-lv-cd"><span class="osx-lv-cd-l">Countdown to LIVE</span><b>' + esc(big) + '</b><span class="osx-lv-cd-d">' + (l.date ? esc(liveDateLabel(l)) + (t ? ' · ' + esc(t) : '') : 'no date yet') + '</span></div>';
+  }
   function livePlats(l) { var p = l.platforms || (l.platform ? [l.platform] : []); return p.length ? p : ['TikTok']; }
   function platPill(name, other) { var lbl = (name === 'Other' && other) ? other : name; return '<span class="osx-plat-pill">' + (PLAT_META[name] || '🔗') + ' ' + esc(lbl) + '</span>'; }
   function liveTimeStr(l) { return (l.hour ? l.hour + ':' + (l.min || '00') + ' ' + (l.ampm || '') + ' ' + (l.tz || '') : (l.time || '')).trim(); }
@@ -201,10 +219,9 @@
   }
   function liveCard(l) {
     var open = !!expanded['L' + l.id], plats = livePlats(l);
-    var kv = l.done ? ('+' + liveFollowers(l) + ' followers') : (liveDateLabel(l) + (liveTimeStr(l) ? ' · ' + esc(liveTimeStr(l)) : ''));
     var head = '<div class="osx-lv-h" data-ltoggle="' + esc(l.id) + '"><span class="osx-lv-plats">' + plats.map(function (p) { return platPill(p, l.otherPlat); }).join('') + '</span>' +
-      '<span class="osx-lv-hb"><b>' + esc(l.title || l.topic || 'Untitled live') + '</b><span class="osx-lv-hm">' + (l.done ? '✓ Done · ' : '📡 ') + esc(kv) + '</span></span>' +
-      '<span class="osx-lv-when">' + esc(liveDateLabel(l)) + '</span></div>';
+      '<span class="osx-lv-hb"><b class="osx-lv-title">' + esc(l.title || l.topic || 'Untitled live') + '</b>' + (l.done ? '<span class="osx-lv-hm">✓ Logged · +' + liveFollowers(l) + ' followers</span>' : '') + '</span>' +
+      liveCountdown(l) + '</div>';
     if (!open) return '<div class="osx-lv-card">' + head + '</div>';
     var req = l._dupe ? ' osx-req' : '';
     function selOpts(arr, cur) { return arr.map(function (o) { return '<option' + (o === cur ? ' selected' : '') + '>' + o + '</option>'; }).join(''); }
@@ -218,26 +235,27 @@
       '<label class="osx-lv-f"><span>Zone</span><select class="osx-pl-date" data-lf="' + esc(l.id) + '|tz">' + selOpts(TZS, l.tz || 'ET') + '</select></label></div>';
     var pitchRow = '<div class="osx-lv-grid"><label class="osx-lv-f"><span>What I\'m pitching</span><select class="osx-pl-date" data-lf="' + esc(l.id) + '|pitch"><option value="">Choose…</option>' + PITCH_ITEMS.map(function (p) { return '<option' + (p === l.pitch ? ' selected' : '') + '>' + p + '</option>'; }).join('') + '<option value="Other"' + (l.pitch === 'Other' ? ' selected' : '') + '>Other…</option></select>' + (l.pitch === 'Other' ? '<input class="osx-pl-in" data-lf="' + esc(l.id) + '|pitchOther" value="' + esc(l.pitchOther || '') + '" placeholder="Type your pitch" maxlength="80" style="margin-top:6px;">' : '') + '</label>' +
       '<label class="osx-lv-f"><span>Room Promise</span><textarea class="osx-pl-ta" rows="2" data-lf="' + esc(l.id) + '|roomPromise" placeholder="When someone enters this LIVE, what will they feel, learn, or get to be part of?" maxlength="240">' + esc(l.roomPromise || '') + '</textarea></label></div>';
-    var hook = '<div class="osx-pl-flabel">My hook <a class="osx-idea-link" href="/pages/marketing-haus" target="_blank" rel="noopener">💡 ideas</a></div><input class="osx-pl-in" data-lf="' + esc(l.id) + '|hook" value="' + esc(l.hook || '') + '" placeholder="The first 10 seconds that stop the scroll" maxlength="200">';
-    var mktBtn = '<a class="osx-lv-mkt" href="/pages/marketing-haus" target="_blank" rel="noopener">🎨 Build my hook, script &amp; promo in Marketing Haus →</a>';
-    var script = '<div class="osx-pl-flabel">Opening script <a class="osx-idea-link" href="/pages/marketing-haus" target="_blank" rel="noopener">💡 ideas</a></div><textarea class="osx-pl-ta" rows="3" data-lf="' + esc(l.id) + '|script" placeholder="Hi everyone, welcome in. I\'m [name], and today we\'re talking about [topic]. If you\'re new, comment where you\'re watching from so I can say hello." maxlength="400">' + esc(l.script || '') + '</textarea>';
+    var hook = '<div class="osx-pl-flabel">My hook <button type="button" class="osx-idea-link" data-hookideas>💡 ideas</button></div><textarea class="osx-pl-ta osx-lv-hookbox" rows="2" data-lf="' + esc(l.id) + '|hook" placeholder="Your first 10 seconds that stop the scroll — the line that makes someone stay. Tip: promise a payoff, tease a surprise, or ask a question." maxlength="240">' + esc(l.hook || '') + '</textarea>';
+    var mktBtn = '<a class="osx-lv-mkt" href="/pages/marketing-haus" target="_blank" rel="noopener">🎨 Build my hook, script &amp; promo in Marketing Haus →</a><div class="osx-lv-mktnote">Heads up: this opens Marketing Haus in a new tab — everything you\'ve entered here is saved. 💾</div>';
+    var script = '<div class="osx-pl-flabel">Opening script <button type="button" class="osx-idea-link" data-scripttips>💡 tips</button></div><textarea class="osx-pl-ta" rows="3" data-lf="' + esc(l.id) + '|script" placeholder="Hi everyone, welcome in. I\'m [name], and today we\'re talking about [topic]. If you\'re new, comment where you\'re watching from so I can say hello." maxlength="400">' + esc(l.script || '') + '</textarea>';
     var prompts = l.prompts || ['', '', '', '', ''];
     var promptBox = '<div class="osx-pl-flabel">Engagement prompts <span>up to 5 — "Drop a 1 if you agree", "A or B?"</span></div>' + [0, 1, 2, 3, 4].map(function (i) { return '<input class="osx-pl-in osx-lv-prompt" data-lprompt="' + esc(l.id) + '|' + i + '" value="' + esc(prompts[i] || '') + '" placeholder="Prompt ' + (i + 1) + '" maxlength="120">'; }).join('');
     var goalsBlock = '<div class="osx-pl-flabel" style="margin-top:16px;">🎯 My goals for this live</div><input class="osx-pl-in" data-lf="' + esc(l.id) + '|goalNote" value="' + esc(l.goalNote || '') + '" placeholder="In one line — what would make this a win?" maxlength="140">' +
       plats.map(function (p) { return '<div class="osx-lv-platblk"><div class="osx-lv-platlbl">' + platPill(p, l.otherPlat) + ' goals</div>' + statGrid(l, p, 'goal') + '</div>'; }).join('');
     var postBlock = '<div class="osx-lv-post"><div class="osx-lv-posth">✅ Post-live check-in — how did it go?</div><div class="osx-lv-hint2">Boxes turn <b class="g">green</b> when you hit a goal, <b class="y">yellow</b> when there\'s room to grow (no goal set = no color).</div>' +
       plats.map(function (p) { return '<div class="osx-lv-platblk"><div class="osx-lv-platlbl">' + platPill(p, l.otherPlat) + ' results</div>' + statGrid(l, p, 'result') + '<textarea class="osx-pl-ta" rows="2" data-lf="' + esc(l.id) + '|reflect_' + p + '" placeholder="Where did I fall short of a goal — and what can I learn, grow, or thrive from?" maxlength="300">' + esc((l.reflect || {})[p] || '') + '</textarea></div>'; }).join('') +
-      '<div class="osx-lv-grid3"><label class="osx-lv-f"><span>🏆 Win — what improved?</span><textarea class="osx-pl-ta" rows="2" data-lf="' + esc(l.id) + '|win" maxlength="240">' + esc(l.win || '') + '</textarea></label>' +
-        '<label class="osx-lv-f"><span>🧱 Blocker — biggest constraint</span><textarea class="osx-pl-ta" rows="2" data-lf="' + esc(l.id) + '|blocker" maxlength="240">' + esc(l.blocker || '') + '</textarea></label>' +
-        '<label class="osx-lv-f"><span>⚡ Action — one thing next live</span><textarea class="osx-pl-ta" rows="2" data-lf="' + esc(l.id) + '|action" maxlength="240">' + esc(l.action || '') + '</textarea></label></div>' +
-      '<div class="osx-lv-heart"><div class="osx-lv-posth" style="color:var(--gold-bright);">💛 Purpose — Mindset &amp; Heart Check</div><div class="osx-lv-hint2">How did you feel? Your worth isn\'t the numbers — it\'s that you showed up. 🐑</div><div class="osx-lv-moods">' + MOODS.map(function (m) { return '<button type="button" class="osx-lv-mood' + (l.mood === m ? ' on' : '') + '" data-lmood="' + esc(l.id) + '|' + m + '">' + m + '</button>'; }).join('') + '</div><textarea class="osx-pl-ta" rows="2" data-lf="' + esc(l.id) + '|moodNote" placeholder="A word to your future self…" maxlength="240">' + esc(l.moodNote || '') + '</textarea></div>' +
+      '<div class="osx-lv-grid3"><label class="osx-lv-f"><span>🏆 Win — what improved?</span><textarea class="osx-pl-ta" rows="2" data-lf="' + esc(l.id) + '|win" placeholder="e.g. My opening was smoother and I hit my follower goal" maxlength="240">' + esc(l.win || '') + '</textarea></label>' +
+        '<label class="osx-lv-f"><span>🧱 Blocker — biggest constraint</span><textarea class="osx-pl-ta" rows="2" data-lf="' + esc(l.id) + '|blocker" placeholder="e.g. Viewers dropped off in the first 5 minutes" maxlength="240">' + esc(l.blocker || '') + '</textarea></label>' +
+        '<label class="osx-lv-f"><span>⚡ Action — one thing next live</span><textarea class="osx-pl-ta" rows="2" data-lf="' + esc(l.id) + '|action" placeholder="e.g. Go live 15 min earlier to build the room first" maxlength="240">' + esc(l.action || '') + '</textarea></label></div>' +
+      '<div class="osx-lv-heart"><div class="osx-lv-posth" style="color:var(--gold-bright);">💛 Purpose — Mindset &amp; Heart Check</div><div class="osx-lv-hint2">How did you feel? Your worth isn\'t the numbers — it\'s that you showed up. 🐑</div><div class="osx-lv-moods">' + MOODS.map(function (m, mi) { return '<button type="button" class="osx-lv-mood' + (l.mood === m ? ' on' : '') + '" data-lmood="' + esc(l.id) + '|' + m + '" title="' + esc(MOOD_LABELS[mi]) + '">' + m + '</button>'; }).join('') + '</div><textarea class="osx-pl-ta" rows="2" data-lf="' + esc(l.id) + '|moodNote" placeholder="A word to your future self…" maxlength="240">' + esc(l.moodNote || '') + '</textarea></div>' +
       '<button class="osx-lv-donebtn' + (l.done ? ' on' : '') + '" data-ldone="' + esc(l.id) + '">' + (l.done ? '✓ Logged — tap to reopen' : 'Save results') + '</button></div>';
     var dupWarn = l._dupe ? '<div class="osx-pl-warn">⚠ Duplicated live — change the highlighted <b>Date</b>, <b>Time</b> and <b>Platform</b> before it saves.</div>' : '';
     return '<div class="osx-lv-card open">' + head + '<div class="osx-lv-body">' +
-      '<div class="osx-pl-flabel" style="margin-top:14px;">Name this live</div><input class="osx-pl-in" data-lf="' + esc(l.id) + '|title" value="' + esc(l.title || '') + '" placeholder="e.g. Tuesday Planner Party" maxlength="80">' + dupWarn +
+      '<div class="osx-lv-top"><button class="osx-lv-duppill" data-ldupe="' + esc(l.id) + '">⧉ Duplicate</button></div>' +
+      '<div class="osx-pl-flabel">Name this live</div><input class="osx-pl-in osx-lv-titlein" data-lf="' + esc(l.id) + '|title" value="' + esc(l.title || '') + '" placeholder="e.g. Tuesday Planner Party" maxlength="80">' + dupWarn +
       '<div class="osx-pl-flabel">Platforms <span>pick one or more — going live on YT + TikTok at once? both show up</span></div><div class="osx-plat-chips' + req + '">' + platChips + '</div>' + otherIn +
       timeRow + pitchRow + hook + mktBtn + script + promptBox + goalsBlock + postBlock +
-      '<div class="osx-lv-del"><button data-ldupe="' + esc(l.id) + '">⧉ Duplicate</button> <button data-lvdel="' + esc(l.id) + '">Delete live</button></div></div></div>';
+      '<div class="osx-lv-del"><button data-lvdel="' + esc(l.id) + '">Delete live</button></div></div></div>';
   }
   function livesHTML() {
     var t = livesTrend(), sp = sparkline();
@@ -547,6 +565,8 @@
     // lives
     var nsb = host.querySelector('[data-northstar]'); if (nsb) nsb.addEventListener('click', openNorthStar);
     var bab = host.querySelector('[data-beanchored]'); if (bab) bab.addEventListener('click', openBeAnchored);
+    host.querySelectorAll('[data-hookideas]').forEach(function (b) { b.addEventListener('click', function (e) { e.stopPropagation(); openHookIdeas(); }); });
+    host.querySelectorAll('[data-scripttips]').forEach(function (b) { b.addEventListener('click', function (e) { e.stopPropagation(); openScriptTips(); }); });
     var nl = host.querySelector('[data-newlive]'); if (nl) nl.addEventListener('click', function () { var l = { id: uid(), title: '', platforms: ['TikTok'], otherPlat: '', date: '', hour: '', min: '00', ampm: 'PM', tz: 'ET', pitch: '', pitchOther: '', roomPromise: '', hook: '', script: '', prompts: ['', '', '', '', ''], goals: {}, results: {}, reflect: {}, win: '', blocker: '', action: '', mood: '', moodNote: '', done: false }; data.lives.unshift(l); expanded['L' + l.id] = true; save(); render(); });
     host.querySelectorAll('[data-ltoggle]').forEach(function (b) { b.addEventListener('click', function (e) { if (e.target.closest('input,select,textarea,button,a')) return; var id = b.getAttribute('data-ltoggle'); expanded['L' + id] = !expanded['L' + id]; render(); }); });
     host.querySelectorAll('[data-lf]').forEach(function (el) { el.addEventListener('change', function () { var p = el.getAttribute('data-lf').split('|'), l = liveObj(p[0]); if (!l) return; if (p[1].indexOf('reflect_') === 0) { l.reflect = l.reflect || {}; l.reflect[p[1].slice(8)] = el.value; } else l[p[1]] = el.value; if (l._dupe && dupeReady(l)) l._dupe = false; save(); if (/^(date|hour|pitch)$/.test(p[1])) render(); }); });
