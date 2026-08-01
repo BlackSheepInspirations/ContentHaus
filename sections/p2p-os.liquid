@@ -1534,6 +1534,29 @@
   #p2pos .osx-idea-link:hover{text-decoration:underline;}
   #p2pos .osx-lv-prompt{margin-bottom:7px;}
   #p2pos .osx-req{outline:2px solid rgba(224,69,123,.7);outline-offset:2px;border-radius:8px;}
+  /* North Star + Be Anchored */
+  #p2pos .osx-lv-tools{display:flex;gap:8px;justify-content:flex-end;margin-bottom:12px;flex-wrap:wrap;}
+  #p2pos .osx-lv-tool{border:1px solid var(--gstroke);background:rgba(216,180,90,.1);color:var(--gold-bright);cursor:pointer;border-radius:999px;padding:8px 15px;font:700 12.5px/1 system-ui;}
+  #p2pos .osx-lv-tool:hover{background:rgba(216,180,90,.18);}
+  #p2pos .osx-lv-tool.anchor{background:linear-gradient(100deg,#f4e2a6,#c9a24a);color:#0a1410;border-color:transparent;}
+  .osx-ns{width:min(460px,100%);text-align:left;padding:24px;max-height:86vh;overflow:auto;}
+  .osx-ns-h{font:800 20px/1.2 Georgia,serif;color:#f4c534;margin-bottom:4px;}
+  .osx-ns-sub{font:500 12.5px/1.5 system-ui;color:#9fb3ad;margin-bottom:16px;}
+  .osx-ns-sub b{color:#f4c534;}
+  .osx-ns-item{display:flex;align-items:flex-start;gap:11px;border:1px solid rgba(255,255,255,.1);border-radius:11px;padding:12px 14px;margin-bottom:8px;cursor:pointer;font:600 13.5px/1.4 system-ui;color:#dbe7e2;}
+  .osx-ns-item input{margin-top:2px;flex:none;}
+  .osx-ns-item.on{border-color:rgba(216,180,90,.5);background:rgba(216,180,90,.08);}
+  .osx-ba{width:min(920px,100%);text-align:center;padding:18px;max-height:90vh;overflow:auto;}
+  .osx-ba-img{width:100%;border-radius:12px;display:block;}
+  .osx-ba-ghm{display:flex;align-items:center;gap:16px;text-align:left;margin-top:16px;border:1px solid var(--gstroke);border-radius:14px;background:rgba(216,180,90,.06);padding:14px 16px;}
+  .osx-ba-ghmlogo{width:72px;height:72px;object-fit:contain;border-radius:10px;flex:none;background:#fff;padding:4px;}
+  .osx-ba-ghmt{display:flex;flex-direction:column;gap:4px;min-width:0;}
+  .osx-ba-ghmt b{font:800 15px/1.2 system-ui;color:#f0f5f2;}
+  .osx-ba-ghmt span{font:500 12.5px/1.5 system-ui;color:#9fb3ad;}
+  .osx-ba-apply{align-self:flex-start;margin-top:8px;border:0;background:linear-gradient(100deg,#f4e2a6,#c9a24a);color:#0a1410;border-radius:999px;padding:10px 18px;font:800 12.5px/1 system-ui;cursor:pointer;}
+  .osx-info-btns{display:flex;gap:10px;justify-content:flex-end;margin-top:8px;}
+  .osx-info-cancel{border:1px solid rgba(255,255,255,.18);background:none;color:#c9e6da;border-radius:999px;padding:10px 18px;font:700 13px/1 system-ui;cursor:pointer;}
+  .osx-info-go{border:0;background:linear-gradient(100deg,#f4e2a6,#c9a24a);color:#0a1410;border-radius:999px;padding:11px 22px;font:800 13px/1 system-ui;cursor:pointer;}
   #p2pos .osx-formula{display:inline-block;font:700 clamp(17px,2.6vw,26px)/1.15 Georgia,serif;color:var(--gold-bright);margin-left:10px;vertical-align:middle;letter-spacing:.02em;}
   #p2pos .osx-gr-row{display:flex;align-items:center;gap:10px;border:1px solid var(--stroke);border-radius:11px;background:rgba(255,255,255,.03);padding:10px 13px;margin-bottom:7px;}
   #p2pos .osx-gr-row b{font:800 12px/1 system-ui;color:var(--gold-bright);flex:none;}
@@ -1834,6 +1857,7 @@ window.P2P_EVENTS = [{%- for b in ev_blocks -%}{"iso":{{ b.settings.iso_date | d
 {{ 'leaflet.css' | asset_url | stylesheet_tag }}
 <script src="{{ 'p2p-community.js' | asset_url }}" defer="defer"></script>
 <script src="{{ 'p2p-members.js' | asset_url }}" defer="defer"></script>
+<script>window.P2P_BEANCHORED="{{ 'p2p-be-anchored.jpg' | asset_url }}";window.P2P_GHM="{{ 'p2p-ghm-logo.png' | asset_url }}";</script>
 <script src="{{ 'p2p-planner.js' | asset_url }}" defer="defer"></script>
 {%- comment -%} daily Mindset · Purpose · Heart content for the hero carousel {%- endcomment -%}
 <script src="{{ 'p2p-moments.js' | asset_url }}" defer="defer"></script>

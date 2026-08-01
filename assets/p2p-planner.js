@@ -30,7 +30,7 @@
 
   var data; try { data = JSON.parse(localStorage.getItem(KEY)) || null; } catch (e) { data = null; }
   if (!data) data = {}; if (!data.done) data.done = []; if (!data.goals) data.goals = []; if (!data.lives) data.lives = []; if (!data.posts) data.posts = []; if (!data.snaps) data.snaps = []; if (!data.ideas) data.ideas = [];
-  if (!data.products) data.products = []; if (!data.ctype) data.ctype = 'both'; if (!data.raft) data.raft = { cycles: [] };
+  if (!data.products) data.products = []; if (!data.ctype) data.ctype = 'both'; if (!data.raft) data.raft = { cycles: [] }; if (!data.northstar) data.northstar = {};
   var milestoneBaseline = (data.milestones === undefined); if (!data.milestones) data.milestones = {};
   TFS.forEach(function (t) {
     var tf = t[0]; if (!data[tf]) data[tf] = { period: periodKey(tf), top: [], todo: [] };
@@ -253,7 +253,8 @@
     var list = (up.length ? '<div class="osx-pl-sech">📡 Upcoming</div>' + up.map(liveCard).join('') : '') +
                (past.length ? '<div class="osx-pl-sech" style="margin-top:16px;">✓ Past lives</div>' + past.map(liveCard).join('') : '');
     if (!data.lives.length) list = '<div class="osx-pl-empty">Plan your first live — script the hook, set a goal, then log how it went. The trends build themselves.</div>';
-    return trend + '<button class="osx-pl-newgoal" data-newlive>＋ Plan a live</button>' + list;
+    var tools = '<div class="osx-lv-tools"><button class="osx-lv-tool" data-northstar>⭐ North Star</button><button class="osx-lv-tool anchor" data-beanchored>⚓ Be Anchored</button></div>';
+    return tools + trend + '<button class="osx-pl-newgoal" data-newlive>＋ Plan a live</button>' + list;
   }
 
   /* ---------- posts (daily social post log + weekly review) ---------- */
@@ -446,6 +447,47 @@
     pop.querySelector('.osx-cal-pop-x').addEventListener('click', close);
     pop.querySelector('.osx-cele-x').addEventListener('click', close);
   }
+  var NORTHSTAR = ['Fixed LIVE days & start times', 'No long gaps between sessions', 'Lighting, camera angle, background & sound ready', 'Clear content positioning & audience promise', 'A simple incentive goal for the first 15 days', 'A repeatable opening script ready to go', 'Engagement prompts prepped ("Drop a 1", "A or B?")', 'A clear call-to-action for the room', 'Promo posted within 30 min of going live', 'A plan to reset & re-engage new joiners'];
+  function openNorthStar() {
+    data.northstar = data.northstar || {};
+    var pop = document.createElement('div'); pop.className = 'osx-cal-pop'; root.appendChild(pop);
+    function close() { pop.remove(); }
+    function draw() {
+      var done = NORTHSTAR.filter(function (_, i) { return data.northstar[i]; }).length;
+      pop.innerHTML = '<div class="osx-cal-pop-in osx-ns"><button class="osx-cal-pop-x" type="button" aria-label="Close">✕</button>' +
+        '<div class="osx-ns-h">⭐ The North Star</div><div class="osx-ns-sub">LIVE set-up checklist — a repeatable starting point for every live. <b>' + done + ' / ' + NORTHSTAR.length + '</b></div>' +
+        NORTHSTAR.map(function (t, i) { return '<label class="osx-ns-item' + (data.northstar[i] ? ' on' : '') + '"><input type="checkbox" data-ns="' + i + '"' + (data.northstar[i] ? ' checked' : '') + '><span>' + esc(t) + '</span></label>'; }).join('') +
+        '<button class="osx-cele-x" type="button" style="margin-top:14px;">Done</button></div>';
+      pop.querySelector('.osx-cal-pop-x').addEventListener('click', close);
+      pop.querySelector('.osx-cele-x').addEventListener('click', close);
+      pop.querySelectorAll('[data-ns]').forEach(function (c) { c.addEventListener('change', function () { data.northstar[+c.getAttribute('data-ns')] = c.checked; save(); draw(); }); });
+    }
+    pop.addEventListener('click', function (e) { if (e.target === pop) close(); });
+    draw();
+  }
+  var GHM_URL = 'https://www.tiktok.com/tcn/scout_creators?use_spark=1&agency_scout_source=qr_code_leads&ShareLinkID=7631032554648371213';
+  function openBeAnchored() {
+    var pop = document.createElement('div'); pop.className = 'osx-cal-pop'; root.appendChild(pop);
+    pop.innerHTML = '<div class="osx-cal-pop-in osx-ba"><button class="osx-cal-pop-x" type="button" aria-label="Close">✕</button>' +
+      '<img class="osx-ba-img" src="' + (window.P2P_BEANCHORED || '') + '" alt="The BE ANCHORED Live Method">' +
+      '<div class="osx-ba-ghm"><img class="osx-ba-ghmlogo" src="' + (window.P2P_GHM || '') + '" alt="Grace Harbor Media">' +
+      '<div class="osx-ba-ghmt"><b>Grace Harbor Media — Creator Network</b><span>Protect what you\'re growing. A Creator Network agency gives you support, structure and reach as you scale your LIVEs.</span>' +
+      '<button class="osx-ba-apply" data-ghmapply>Apply to Grace Harbor Media →</button></div></div></div>';
+    function close() { pop.remove(); }
+    pop.addEventListener('click', function (e) { if (e.target === pop) close(); });
+    pop.querySelector('.osx-cal-pop-x').addEventListener('click', close);
+    pop.querySelector('[data-ghmapply]').addEventListener('click', openGhmDisclaimer);
+  }
+  function openGhmDisclaimer() {
+    var pop = document.createElement('div'); pop.className = 'osx-cal-pop'; root.appendChild(pop);
+    pop.innerHTML = '<div class="osx-cal-pop-in osx-info"><div class="osx-info-h">Heads up — you\'re leaving the Haus</div>' +
+      '<p class="osx-info-p">This opens an external site (TikTok\'s Creator Network form for <b>Grace Harbor Media</b>). Black Sheep Creations &amp; Inspirations is <b>not directly affiliated</b> with Grace Harbor Media — we\'re sharing it as a helpful resource.</p>' +
+      '<div class="osx-info-btns"><button class="osx-info-cancel" type="button">Cancel</button><button class="osx-info-go" type="button">Continue →</button></div></div>';
+    function close() { pop.remove(); }
+    pop.addEventListener('click', function (e) { if (e.target === pop) close(); });
+    pop.querySelector('.osx-info-cancel').addEventListener('click', close);
+    pop.querySelector('.osx-info-go').addEventListener('click', function () { window.open(GHM_URL, '_blank', 'noopener'); close(); });
+  }
   function milestonesStrip() {
     var earned = MILESTONES.filter(function (m) { return data.milestones[m[0]]; });
     var badges = MILESTONES.map(function (m) { return '<span class="osx-ms' + (data.milestones[m[0]] ? ' on' : '') + '" title="' + esc(m[1]) + '">' + m[2] + '</span>'; }).join('');
@@ -503,6 +545,8 @@
     var lt = host.querySelector('[data-ltmpl]'); if (lt) lt.addEventListener('click', function () { if (!window.confirm('Add the ROOTED launch roadmap (6 steps) to your To-dos for this ' + active + '?')) return; ROOTED_STEPS.forEach(function (t) { data[active].todo.push({ id: uid(), text: t, pct: 0 }); }); save(); render(); });
     var arch = host.querySelector('[data-arch]'); if (arch) arch.addEventListener('click', renderArchive);
     // lives
+    var nsb = host.querySelector('[data-northstar]'); if (nsb) nsb.addEventListener('click', openNorthStar);
+    var bab = host.querySelector('[data-beanchored]'); if (bab) bab.addEventListener('click', openBeAnchored);
     var nl = host.querySelector('[data-newlive]'); if (nl) nl.addEventListener('click', function () { var l = { id: uid(), title: '', platforms: ['TikTok'], otherPlat: '', date: '', hour: '', min: '00', ampm: 'PM', tz: 'ET', pitch: '', pitchOther: '', roomPromise: '', hook: '', script: '', prompts: ['', '', '', '', ''], goals: {}, results: {}, reflect: {}, win: '', blocker: '', action: '', mood: '', moodNote: '', done: false }; data.lives.unshift(l); expanded['L' + l.id] = true; save(); render(); });
     host.querySelectorAll('[data-ltoggle]').forEach(function (b) { b.addEventListener('click', function (e) { if (e.target.closest('input,select,textarea,button,a')) return; var id = b.getAttribute('data-ltoggle'); expanded['L' + id] = !expanded['L' + id]; render(); }); });
     host.querySelectorAll('[data-lf]').forEach(function (el) { el.addEventListener('change', function () { var p = el.getAttribute('data-lf').split('|'), l = liveObj(p[0]); if (!l) return; if (p[1].indexOf('reflect_') === 0) { l.reflect = l.reflect || {}; l.reflect[p[1].slice(8)] = el.value; } else l[p[1]] = el.value; if (l._dupe && dupeReady(l)) l._dupe = false; save(); if (/^(date|hour|pitch)$/.test(p[1])) render(); }); });
