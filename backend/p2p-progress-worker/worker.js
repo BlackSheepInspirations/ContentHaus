@@ -117,6 +117,19 @@ const DREA_POSTS = [
   'Here\'s what I know for sure this week: you were made original, on purpose, for a purpose. The world doesn\'t need a watered-down copy of someone else. It needs the real, brave, imperfect you. Show up as her. She\'s the whole point. 🖤🐑',
   'Checking in on your heart, not just your hustle. How ARE you — really? If today all you did was keep going, that counts. If today you rested, that counts too. Grace over grind, always. I\'m so proud of you. 💛'
 ];
+// Community channels. `post` = who may post: 'all' or 'admin' (admin/house only).
+const CATEGORIES = {
+  general:     { label: 'General Discussion', emoji: '💬', post: 'all' },
+  intro:       { label: 'Introductions', emoji: '👋', post: 'all' },
+  wins:        { label: 'Wins • Habits • Growth', emoji: '🏆', post: 'all' },
+  help:        { label: 'Questions & Help', emoji: '🙏', post: 'all' },
+  testimonial: { label: 'Testimonials', emoji: '🙌', post: 'all' },
+  announce:    { label: 'P2P Announcements', emoji: '📣', post: 'admin' }
+};
+const CAT_ORDER = ['general', 'intro', 'wins', 'help', 'testimonial', 'announce'];
+const CAT_LIST = CAT_ORDER.map(k => ({ key: k, label: CATEGORIES[k].label, emoji: CATEGORIES[k].emoji, post: CATEGORIES[k].post }));
+const RANGES = { day: 864e5, week: 7 * 864e5, month: 30 * 864e5, year: 365 * 864e5 };
+
 // House voices: which day (0 Sun..6 Sat), byline, title, and content bank.
 const HOUSE = [
   { day: 1, id: 'house-frank', name: 'Frank', title: 'Let me be Frank with you…', bank: FRANK_POSTS, cursor: 'house-cursor:frank' },
@@ -165,6 +178,7 @@ export default {
             id: customerId,
             name: String(body.name || info.firstName || 'Member').slice(0, 40),
             tier: String(body.tier || '').slice(0, 40),
+            tierNum: Number(body.tierNum) || 0,
             points: Number(body.points) || 0,
             badges: Number(body.badges) || 0,
             recentBadges: sanitizeBadges(body.recentBadges),
@@ -184,7 +198,7 @@ export default {
           if (!prev && rec.name && rec.name !== 'Member') {
             const line = WELCOME_LINES[Math.floor(Math.random() * WELCOME_LINES.length)].replace('{name}', rec.name);
             const wid = Date.now() + '-welcome-' + customerId;
-            await kv.put('post:' + wid, JSON.stringify({ id: wid, author: 'house-welcome', name: 'P2P', text: line, kind: 'post', house: true, ts: Date.now() })).catch(() => {});
+            await kv.put('post:' + wid, JSON.stringify({ id: wid, author: 'house-welcome', name: 'P2P', text: line, kind: 'post', category: 'intro', house: true, ts: Date.now() })).catch(() => {});
           }
           return json({ ok: true });
         }
@@ -208,23 +222,39 @@ export default {
         if (!kv) return json({ ok: true, posts: [] });
         if (request.method === 'GET') {
           const list = await kv.list({ prefix: 'post:' });
-          const posts = [];
+          const all = [];
           for (const k of list.keys) {
             const p = await kv.get(k.name, 'json');
             if (!p) continue;
             const rs = reactState(p, customerId);
-            posts.push({ id: p.id, name: p.name, title: p.title || '', text: p.text, kind: p.kind, ts: p.ts, streak: p.streak || 0, house: !!p.house, pinned: !!p.pinned, comments: (p.comments || []), reactions: rs.counts, mine: rs.mine, likes: rs.counts.love, liked: rs.mine.love });
+            all.push({ id: p.id, name: p.name, title: p.title || '', text: p.text, kind: p.kind, category: p.category || (p.kind === 'win' ? 'wins' : 'general'), attachments: p.attachments || [], ts: p.ts, streak: p.streak || 0, house: !!p.house, pinned: !!p.pinned, comments: (p.comments || []), reactions: rs.counts, mine: rs.mine, likes: rs.counts.love, liked: rs.mine.love });
           }
-          posts.sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0) || b.ts - a.ts);
-          // Win of the Week: best-loved win in the last 7 days (tie → newest)
-          const weekAgo = Date.now() - 7 * 864e5;
-          let wow = null, best = -1;
-          for (const p of posts) {
-            if (p.kind !== 'win' || p.ts < weekAgo) continue;
-            const s = p.reactions.love || 0;
-            if (s > best || (s === best && (!wow || p.ts > wow.ts))) { best = s; wow = p; }
+          all.sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0) || b.ts - a.ts);
+          const cat = url.searchParams.get('category') || 'all';
+          const q = (url.searchParams.get('q') || '').trim().toLowerCase();
+          const range = url.searchParams.get('range') || 'all';
+          const unreadSince = parseInt(url.searchParams.get('unreadSince') || '0', 10) || 0;
+          const limit = Math.min(50, Math.max(1, parseInt(url.searchParams.get('limit') || '20', 10) || 20));
+          const offset = Math.max(0, parseInt(url.searchParams.get('offset') || '0', 10) || 0);
+          const isDefault = (cat === 'all' && !q && range === 'all' && !unreadSince && offset === 0);
+          let rows = all;
+          if (cat !== 'all') rows = rows.filter(p => p.category === cat);
+          if (range !== 'all' && RANGES[range]) { const cut = Date.now() - RANGES[range]; rows = rows.filter(p => p.ts >= cut); }
+          if (unreadSince) rows = rows.filter(p => p.ts > unreadSince);
+          if (q) rows = rows.filter(p => (p.title + ' ' + p.text + ' ' + p.name).toLowerCase().indexOf(q) > -1);
+          const total = rows.length;
+          const page = rows.slice(offset, offset + limit);
+          // Win of the Week (home view only): best-loved win in the last 7 days (tie → newest)
+          let wow = null;
+          if (isDefault) {
+            const weekAgo = Date.now() - 7 * 864e5; let best = -1;
+            for (const p of all) {
+              if (p.kind !== 'win' || p.ts < weekAgo) continue;
+              const s = p.reactions.love || 0;
+              if (s > best || (s === best && (!wow || p.ts > wow.ts))) { best = s; wow = p; }
+            }
           }
-          return json({ ok: true, posts, winOfWeek: wow ? wow.id : null, isAdmin: isAdmin(env, customerId) });
+          return json({ ok: true, posts: page, total, hasMore: offset + limit < total, winOfWeek: wow ? wow.id : null, wowPost: wow || null, isAdmin: isAdmin(env, customerId), categories: CAT_LIST });
         }
         if (request.method === 'POST') {
           const body = await request.json().catch(() => null);
@@ -233,7 +263,8 @@ export default {
           const info = await customerInfo(env, customerId);
           const id = Date.now() + '-' + customerId;
           const kind = ((body && body.kind) === 'win') ? 'win' : 'post';   // wins get their own board
-          const post = { id, author: customerId, name: String((body && body.name) || info.firstName || 'Member').slice(0, 40), title: String((body && body.title) || '').slice(0, 120), text: text.slice(0, 1000), kind: kind, streak: Number(body && body.streak) || 0, ts: Date.now() };
+          const category = catFor((body && body.category) || 'general', kind, isAdmin(env, customerId));
+          const post = { id, author: customerId, name: String((body && body.name) || info.firstName || 'Member').slice(0, 40), title: String((body && body.title) || '').slice(0, 120), text: text.slice(0, 1000), kind: kind, category: category, attachments: sanitizeAttachments(body && body.attachments), streak: Number(body && body.streak) || 0, ts: Date.now() };
           await kv.put('post:' + id, JSON.stringify(post));   // live immediately (unmoderated)
           await alertAdmin(env, post).catch(() => {});         // optional email ping to you
           return json({ ok: true });
@@ -348,7 +379,7 @@ export default {
       if ((await kv.get('house-last:' + h.id)) === today) continue;   // already posted today
       const idx = parseInt((await kv.get(h.cursor)) || '0', 10) || 0;
       const id = Date.now() + '-' + h.id;
-      await kv.put('post:' + id, JSON.stringify({ id, author: h.id, name: h.name, title: h.title, text: h.bank[idx % h.bank.length], kind: 'post', house: true, ts: Date.now() }));
+      await kv.put('post:' + id, JSON.stringify({ id, author: h.id, name: h.name, title: h.title, text: h.bank[idx % h.bank.length], kind: 'post', category: 'general', house: true, ts: Date.now() }));
       await kv.put(h.cursor, String(idx + 1));
       await kv.put('house-last:' + h.id, today);
     }
@@ -384,6 +415,32 @@ function sanitizeBadges(a) {
     b = b || {};
     return { label: String(b.label || '').slice(0, 60), emoji: String(b.emoji || '🏅').slice(0, 8) };
   }).filter(function (b) { return b.label; });
+}
+// Post attachments: [{type:'image'|'gif'|'youtube'|'link', url, ...}], max 6, http(s) only.
+function sanitizeAttachments(a) {
+  if (!Array.isArray(a)) return [];
+  const out = [];
+  for (const raw of a.slice(0, 6)) {
+    if (!raw || typeof raw !== 'object') continue;
+    const type = ['image', 'gif', 'youtube', 'link'].indexOf(raw.type) > -1 ? raw.type : 'link';
+    const url = sanitizeUrl(raw.url);
+    if (!url) continue;
+    const att = { type, url };
+    if (type === 'youtube') { const vid = youTubeId(url); if (!vid) continue; att.vid = vid; }
+    if (type === 'link' && raw.title) att.title = String(raw.title).slice(0, 160);
+    out.push(att);
+  }
+  return out;
+}
+function youTubeId(u) {
+  const m = String(u).match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{6,})/);
+  return m ? m[1] : '';
+}
+function catFor(cat, kind, isAdminPoster) {
+  if (kind === 'win') return 'wins';                          // wins always land in the Wins channel
+  if (!CATEGORIES[cat]) return 'general';
+  if (CATEGORIES[cat].post === 'admin' && !isAdminPoster) return 'general';  // announce is admin-only
+  return cat;
 }
 // Reactions: {love:[ids], thumb:[ids], party:[ids]}. Migrates legacy p.likedBy → love.
 function normalizeReactions(p) {

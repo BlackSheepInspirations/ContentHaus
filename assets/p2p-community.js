@@ -8,9 +8,13 @@
   var PROXY = '/apps/p2p/community', REACT = '/apps/p2p/react', MEMBERS = '/apps/p2p/members';
   var feed = root.querySelector('[data-cw-feed]');
   var winsFeed = root.querySelector('[data-wins-feed]');
-  var ta = wrap ? wrap.querySelector('[data-cw-text]') : null;
-  var postBtn = wrap ? wrap.querySelector('[data-cw-post]') : null;
-  var posts = [], winIdx = 0, winTimer = null, welcomeProfileDone = false, wowId = null, isAdmin = false;
+  var posts = [], winPosts = [], winIdx = 0, winTimer = null, welcomeProfileDone = false, wowPost = null, isAdmin = false, catList = null, memberMap = {};
+  var filter = { category: 'all', range: 'all', sort: 'new', q: '', offset: 0, limit: 20, hasMore: false };
+  var CATS = { general: { label: 'General Discussion', emoji: '💬' }, intro: { label: 'Introductions', emoji: '👋' }, wins: { label: 'Wins • Habits • Growth', emoji: '🏆' }, help: { label: 'Questions & Help', emoji: '🙏' }, testimonial: { label: 'Testimonials', emoji: '🙌' }, announce: { label: 'P2P Announcements', emoji: '📣' } };
+  function catMeta(k) { return (catList && catList.filter(function (x) { return x.key === k; })[0]) || CATS[k] || null; }
+  function catLabel(k) { var c = catMeta(k); return c ? c.label : ''; }
+  function catEmoji(k) { var c = catMeta(k); return c ? c.emoji : ''; }
+  function seenTs() { var v = 0; try { v = parseInt(localStorage.getItem('p2p_comm_seen') || '0', 10) || 0; } catch (e) {} return v; }
 
   function myName() { return (window.P2P_MEMBER_NAME || '').trim().toLowerCase(); }
   function setWc(k, on) { var el = root.querySelector('[data-wc="' + k + '"]'); if (el) el.classList.toggle('done', !!on); }
@@ -99,8 +103,7 @@
       if (Date.now() - t0 < 2300) requestAnimationFrame(frame); else c.remove();
     })();
   }
-  function wins() { return posts.filter(function (p) { return p.kind === 'win'; }); }
-  function general() { return posts.filter(function (p) { return p.kind !== 'win'; }); }
+  function wins() { return winPosts; }
   function stopTimer() { if (winTimer) { clearInterval(winTimer); winTimer = null; } }
 
   function titleHTML(p) { return p.title ? '<div class="osx-cw-post-title">' + esc(p.title) + '</div>' : ''; }
@@ -108,32 +111,57 @@
     if (isAdmin) return '<button class="osx-pin-btn' + (p.pinned ? ' on' : '') + '" type="button" data-pin="' + esc(p.id) + '" title="' + (p.pinned ? 'Unpin' : 'Pin to top') + '">📌</button>';
     return p.pinned ? '<span class="osx-pin-badge" title="Pinned">📌</span>' : '';
   }
+  function postAvatar(p) {
+    var mm = memberMap[String(p.name || '').trim().toLowerCase()];
+    var inner = (mm && mm.photo) ? '<img src="' + esc(mm.photo) + '" alt="" loading="lazy" onerror="this.style.display=\'none\'">' : esc((p.name || '?').trim().charAt(0).toUpperCase() || '🐑');
+    var tier = (mm && mm.tierNum) ? '<span class="osx-pa-tier">' + mm.tierNum + '</span>' : '';
+    return '<span class="osx-pa">' + inner + tier + '</span>';
+  }
+  function attHTML(atts) {
+    if (!atts || !atts.length) return '';
+    return '<div class="osx-att">' + atts.map(function (a) {
+      if (a.type === 'image' || a.type === 'gif') return '<img class="osx-att-img" src="' + esc(a.url) + '" alt="" loading="lazy" data-lightbox="' + esc(a.url) + '">';
+      if (a.type === 'youtube') return '<div class="osx-att-yt"><iframe src="https://www.youtube.com/embed/' + esc(a.vid || '') + '" title="video" frameborder="0" allow="encrypted-media" allowfullscreen loading="lazy"></iframe></div>';
+      return '<a class="osx-att-link" href="' + esc(a.url) + '" target="_blank" rel="noopener">🔗 ' + esc(a.title || a.url) + '</a>';
+    }).join('') + '</div>';
+  }
+  function catChip(p) { var k = p.category || 'general'; return '<span class="osx-cw-cat">' + esc(catEmoji(k)) + ' ' + esc(catLabel(k)) + '</span>'; }
+  function unreadDot(p) { return (p.ts > seenTs() && String(p.name || '').trim().toLowerCase() !== myName()) ? '<span class="osx-unread" title="New"></span>' : ''; }
+  function headHTML(p) {
+    return '<div class="osx-cw-head">' + postAvatar(p) +
+      '<div class="osx-cw-hmeta"><div class="osx-cw-nameline">' + unreadDot(p) + '<b>' + esc(p.name || 'Member') + '</b>' + flame(p.streak) + houseTag(p) + '</div>' +
+      '<div class="osx-cw-sub">' + ago(p.ts) + ' · ' + catChip(p) + '</div></div>' + pinBtn(p) + '</div>';
+  }
   function postHTML(p) {
     var lng = (p.text || '').length > 280;
-    return '<div class="osx-cw-post' + (p.house ? ' house' : '') + (p.pinned ? ' pinned' : '') + '">' +
-      '<div class="osx-cw-post-top"><b>' + esc(p.name || 'Member') + '</b>' + flame(p.streak) + houseTag(p) + pinBtn(p) + '<span class="osx-cw-time">' + ago(p.ts) + '</span></div>' +
-      titleHTML(p) +
+    return '<div class="osx-cw-post' + (p.house ? ' house' : '') + (p.pinned ? ' pinned' : '') + '" data-post="' + esc(p.id) + '">' +
+      headHTML(p) + titleHTML(p) +
       '<div class="osx-cw-post-text' + (lng ? ' clamp' : '') + '">' + esc(p.text) + '</div>' +
       (lng ? '<button class="osx-cw-more" type="button" data-more>Read more ▾</button>' : '') +
-      actsHTML(p, true) + commentsHTML(p) +
+      attHTML(p.attachments) + actsHTML(p, true) + commentsHTML(p) +
     '</div>';
   }
   function wowHTML(p) {
-    return '<div class="osx-wow">' +
+    return '<div class="osx-wow" data-post="' + esc(p.id) + '">' +
       '<div class="osx-wow-ribbon">🏆 Win of the Week</div>' +
-      '<div class="osx-cw-post-top"><b>' + esc(p.name || 'Member') + '</b>' + flame(p.streak) + '<span class="osx-cw-time">' + ago(p.ts) + '</span></div>' +
-      titleHTML(p) +
+      headHTML(p) + titleHTML(p) +
       '<div class="osx-cw-post-text">' + esc(p.text) + '</div>' +
-      actsHTML(p, false) + commentsHTML(p) +
+      attHTML(p.attachments) + actsHTML(p, false) + commentsHTML(p) +
     '</div>';
+  }
+  function emptyMsg() {
+    if (filter.q) return 'No posts match “' + esc(filter.q) + '.”';
+    if (filter.sort === 'unread') return 'You\'re all caught up — no unread posts. 🎉';
+    if (filter.category !== 'all') return 'Nothing in this channel yet — start the conversation. 👋';
+    return 'Nothing here yet — be the first to say hello. 👋';
   }
   function renderWall() {
     if (!feed) return;
-    var items = general();
-    var wow = wowId ? posts.filter(function (p) { return p.id === wowId; })[0] : null;
-    if (!items.length && !wow) { feed.innerHTML = empty('Nothing here yet — be the first to say hello. 👋'); return; }
-    feed.innerHTML = (wow ? wowHTML(wow) : '') + items.map(postHTML).join('');
+    var list = wowPost ? posts.filter(function (p) { return p.id !== wowPost.id; }) : posts;
+    if (!list.length && !wowPost) { feed.innerHTML = empty(emptyMsg()); return; }
+    feed.innerHTML = (wowPost ? wowHTML(wowPost) : '') + list.map(postHTML).join('');
     wireReacts(feed); wireComments(feed);
+    feed.querySelectorAll('[data-lightbox]').forEach(function (im) { im.addEventListener('click', function () { openLightbox(im.getAttribute('data-lightbox')); }); });
     feed.querySelectorAll('[data-pin]').forEach(function (b) {
       b.addEventListener('click', function () {
         var id = b.getAttribute('data-pin');
@@ -257,14 +285,55 @@
 
   function render() { renderWall(); renderWinsSide(); updateWelcome(); }
 
-  function load() {
-    fetch(PROXY, { credentials: 'same-origin' })
+  function buildQuery(offset) {
+    var qp = ['category=' + encodeURIComponent(filter.category), 'range=' + encodeURIComponent(filter.range), 'limit=' + filter.limit, 'offset=' + offset];
+    if (filter.q) qp.push('q=' + encodeURIComponent(filter.q));
+    if (filter.sort === 'unread') qp.push('unreadSince=' + seenTs());
+    return PROXY + '?' + qp.join('&');
+  }
+  function updateSeen() {
+    try {
+      var newest = seenTs();
+      posts.forEach(function (p) { if (p.ts > newest) newest = p.ts; });
+      if (wowPost && wowPost.ts > newest) newest = wowPost.ts;
+      localStorage.setItem('p2p_comm_seen', String(newest));
+    } catch (e) {}
+  }
+  function load(append) {
+    var offset = append ? filter.offset : 0;
+    var moreBtn = root.querySelector('[data-loadmore]');
+    if (moreBtn) moreBtn.disabled = true;
+    fetch(buildQuery(offset), { credentials: 'same-origin' })
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (j) {
+        if (moreBtn) moreBtn.disabled = false;
         if (j && j.guest) { stopTimer(); if (feed) feed.innerHTML = empty('Log in to see and share with the community.'); return; }
-        posts = (j && j.posts) || []; wowId = (j && j.winOfWeek) || null; isAdmin = !!(j && j.isAdmin); render();
+        if (!j) { if (feed && !append) feed.innerHTML = empty('Couldn\'t load the wall just now — try again in a moment.'); return; }
+        if (j.categories) { catList = j.categories; renderTabs(); }
+        isAdmin = !!j.isAdmin;
+        wowPost = j.wowPost || null;
+        var page = j.posts || [];
+        posts = append ? posts.concat(page) : page;
+        filter.offset = offset + page.length;
+        filter.hasMore = !!j.hasMore;
+        render();
+        updateSeen();
+        var mb = root.querySelector('[data-loadmore]'); if (mb) mb.hidden = !filter.hasMore;
       })
-      .catch(function () { if (feed) feed.innerHTML = empty('Couldn\'t load the wall just now — try again in a moment.'); });
+      .catch(function () { var mb = root.querySelector('[data-loadmore]'); if (mb) mb.disabled = false; if (feed && !append) feed.innerHTML = empty('Couldn\'t load the wall just now — try again in a moment.'); });
+  }
+  function loadWins() {
+    fetch(PROXY + '?category=wins&limit=8', { credentials: 'same-origin' })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) { if (!j || j.guest) return; winPosts = j.posts || []; if (winIdx >= winPosts.length) winIdx = 0; renderWinsSide(); })
+      .catch(function () {});
+  }
+  function openLightbox(url) {
+    var pop = document.createElement('div'); pop.className = 'osx-lightbox';
+    pop.innerHTML = '<button class="osx-lb-x" type="button" aria-label="Close">✕</button><img src="' + esc(url) + '" alt="">';
+    document.body.appendChild(pop);
+    function close() { pop.remove(); }
+    pop.addEventListener('click', function (e) { if (e.target === pop || (e.target.className || '').indexOf('osx-lb-x') > -1) close(); });
   }
 
   function avatar(p) { return p.photo ? '<img src="' + esc(p.photo) + '" alt="" loading="lazy" onerror="this.style.display=\'none\'">' : esc((p.name || '?').trim().charAt(0).toUpperCase() || '🐑'); }
@@ -328,7 +397,10 @@
       if (aEl) aEl.textContent = m.filter(function (x) { return x.ts && (now - x.ts) < 5 * 60 * 1000; }).length;
       var nm = myName();
       if (nm && m.some(function (x) { return String(x.name || '').trim().toLowerCase() === nm && (x.photo || x.quote || x.about); })) welcomeProfileDone = true;
+      memberMap = {};
+      m.forEach(function (x) { if (x.name) memberMap[String(x.name).trim().toLowerCase()] = { photo: x.photo || '', tier: x.tier || '', tierNum: x.tierNum || 0 }; });
       renderGrowth(m); renderSpotlight(m); updateWelcome();
+      if (posts.length || wowPost) renderWall();   // now that we have photos/tiers, repaint the feed
     }).catch(function () {});
   }
 
@@ -351,14 +423,103 @@
     });
   });
 
-  if (postBtn) postBtn.addEventListener('click', function () {
-    var text = (ta && ta.value || '').trim(); if (!text) return;
-    postBtn.disabled = true; postBtn.textContent = 'Posting…';
-    fetch(PROXY, { method: 'POST', headers: { 'content-type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify({ text: text, kind: 'post', name: window.P2P_MEMBER_NAME || '', streak: myStreak() }) })
-      .then(function (r) { return r.json(); })
-      .then(function (res) { postBtn.disabled = false; postBtn.textContent = 'Post'; if (res && res.ok) { ta.value = ''; try { localStorage.setItem('p2p_wc_hello', '1'); } catch (e) {} load(); } })
-      .catch(function () { postBtn.disabled = false; postBtn.textContent = 'Post'; });
-  });
+  /* ---- channel tabs ---- */
+  var tabsEl = root.querySelector('[data-cat-tabs]');
+  function renderTabs() {
+    if (!tabsEl) return;
+    var cats = catList || Object.keys(CATS).map(function (k) { return { key: k, label: CATS[k].label, emoji: CATS[k].emoji }; });
+    tabsEl.innerHTML = '<button class="osx-cat-tab' + (filter.category === 'all' ? ' on' : '') + '" data-cat="all">All</button>' +
+      cats.map(function (c) { return '<button class="osx-cat-tab' + (filter.category === c.key ? ' on' : '') + '" data-cat="' + c.key + '">' + esc(c.emoji) + ' ' + esc(c.label) + '</button>'; }).join('');
+    tabsEl.querySelectorAll('[data-cat]').forEach(function (b) {
+      b.addEventListener('click', function () { filter.category = b.getAttribute('data-cat'); filter.offset = 0; renderTabs(); load(false); });
+    });
+  }
+
+  /* ---- search + sort ---- */
+  var searchEl = root.querySelector('[data-search]'), sortEl = root.querySelector('[data-sort]'), searchT = null;
+  if (searchEl) searchEl.addEventListener('input', function () { clearTimeout(searchT); searchT = setTimeout(function () { filter.q = searchEl.value.trim(); filter.offset = 0; load(false); }, 350); });
+  if (sortEl) sortEl.addEventListener('change', function () { var v = sortEl.value.split('|'); filter.sort = v[0]; filter.range = v[1] || 'all'; filter.offset = 0; load(false); });
+  var moreBtnEl = root.querySelector('[data-loadmore]');
+  if (moreBtnEl) moreBtnEl.addEventListener('click', function () { load(true); });
+
+  /* ---- pop-up rich composer ---- */
+  var composeAv = root.querySelector('[data-compose-av]');
+  if (composeAv) { var mn = (window.P2P_MEMBER_NAME || '').trim(); composeAv.textContent = mn ? mn.charAt(0).toUpperCase() : '🐑'; }
+  var openLine = root.querySelector('[data-compose-open]');
+  if (openLine) openLine.addEventListener('click', function () { openComposer(); });
+
+  var EMOJIS = '😀 😁 😂 🤣 😊 😍 🥰 😎 🤩 🥳 👍 🙏 🔥 💪 🎉 ✨ 🚀 💡 ❤️ 💛 🖤 🐑 🌱 🏆 📈 ✅ 👀 😅 🤔 🙌 👏 💯 😢 😮 😉 🤝 📣 🎯 💰 ⭐'.split(' ');
+  function insertAtCursor(el, txt) {
+    var s = el.selectionStart || 0, e = el.selectionEnd || 0, v = el.value;
+    el.value = v.slice(0, s) + txt + v.slice(e); el.selectionStart = el.selectionEnd = s + txt.length; el.focus();
+  }
+  function openEmoji(anchor, target) {
+    var ex = document.querySelector('.osx-emoji-pop'); if (ex) { ex.remove(); return; }
+    var pop = document.createElement('div'); pop.className = 'osx-emoji-pop';
+    pop.innerHTML = EMOJIS.map(function (e) { return '<button type="button">' + e + '</button>'; }).join('');
+    document.body.appendChild(pop);
+    var r = anchor.getBoundingClientRect();
+    pop.style.top = (r.bottom + 6) + 'px'; pop.style.left = Math.max(8, r.left) + 'px';
+    pop.querySelectorAll('button').forEach(function (b) { b.addEventListener('click', function () { insertAtCursor(target, b.textContent); pop.remove(); }); });
+    setTimeout(function () { document.addEventListener('click', function h(ev) { if (!pop.contains(ev.target) && ev.target !== anchor) { pop.remove(); document.removeEventListener('click', h); } }); }, 0);
+  }
+  function composerCats() {
+    var cats = catList || Object.keys(CATS).map(function (k) { return { key: k, label: CATS[k].label, emoji: CATS[k].emoji, post: 'all' }; });
+    return cats.filter(function (c) { return c.post !== 'admin' || isAdmin; });
+  }
+  function openComposer() {
+    var atts = [];
+    var selCat = (filter.category !== 'all' && (CATS[filter.category])) ? filter.category : 'general';
+    var cats = composerCats();
+    var pop = document.createElement('div'); pop.className = 'osx-cal-pop';
+    pop.innerHTML = '<div class="osx-cal-pop-in osx-composer"><button class="osx-cal-pop-x" type="button" aria-label="Close">✕</button>' +
+      '<div class="osx-comp-h">New post</div>' +
+      '<input class="osx-comp-title" data-comp-title maxlength="120" placeholder="Title (optional)">' +
+      '<textarea class="osx-comp-body" data-comp-body maxlength="1000" placeholder="Write something…"></textarea>' +
+      '<div class="osx-comp-atts" data-comp-atts></div>' +
+      '<div class="osx-comp-bar"><div class="osx-comp-tools">' +
+        '<button type="button" class="osx-comp-tool" data-tool="emoji" title="Emoji">😀</button>' +
+        '<button type="button" class="osx-comp-tool" data-tool="image" title="Add image (URL)">🖼️</button>' +
+        '<button type="button" class="osx-comp-tool" data-tool="gif" title="Add GIF (URL)">GIF</button>' +
+        '<button type="button" class="osx-comp-tool" data-tool="video" title="Add video (YouTube/Loom/Vimeo)">▶️</button>' +
+        '<button type="button" class="osx-comp-tool" data-tool="link" title="Add link">🔗</button>' +
+      '</div>' +
+      '<select class="osx-comp-cat" data-comp-cat>' + cats.map(function (c) { return '<option value="' + c.key + '"' + (c.key === selCat ? ' selected' : '') + '>' + esc(c.emoji + ' ' + c.label) + '</option>'; }).join('') + '</select></div>' +
+      '<div class="osx-comp-foot"><button type="button" class="osx-comp-cancel">Cancel</button><button type="button" class="osx-comp-post">Post</button></div></div>';
+    document.body.appendChild(pop);
+    var body = pop.querySelector('[data-comp-body]'), titleI = pop.querySelector('[data-comp-title]'), catSel = pop.querySelector('[data-comp-cat]'), attWrap = pop.querySelector('[data-comp-atts]'), postB = pop.querySelector('.osx-comp-post');
+    function close() { pop.remove(); }
+    pop.addEventListener('click', function (e) { if (e.target === pop) close(); });
+    pop.querySelector('.osx-cal-pop-x').addEventListener('click', close);
+    pop.querySelector('.osx-comp-cancel').addEventListener('click', close);
+    function renderAtts() {
+      attWrap.innerHTML = atts.map(function (a, i) { return '<span class="osx-comp-att">' + (a.type === 'youtube' ? '▶️' : a.type === 'link' ? '🔗' : '🖼️') + ' ' + esc((a.title || a.url).slice(0, 42)) + '<button type="button" data-att-rm="' + i + '" aria-label="Remove">✕</button></span>'; }).join('');
+      attWrap.querySelectorAll('[data-att-rm]').forEach(function (b) { b.addEventListener('click', function () { atts.splice(+b.getAttribute('data-att-rm'), 1); renderAtts(); }); });
+    }
+    pop.querySelectorAll('[data-tool]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var t = b.getAttribute('data-tool');
+        if (t === 'emoji') { openEmoji(b, body); return; }
+        if (atts.length >= 6) { alert('Up to 6 attachments per post.'); return; }
+        var label = t === 'video' ? 'Paste a YouTube, Loom, or Vimeo link:' : t === 'gif' ? 'Paste a GIF image URL:' : t === 'image' ? 'Paste an image URL:' : 'Paste a link URL:';
+        var url = window.prompt(label, 'https://'); if (!url) return; url = url.trim(); if (!/^https?:\/\//i.test(url)) { alert('Please paste a full http(s) link.'); return; }
+        atts.push({ type: t, url: url }); renderAtts();
+      });
+    });
+    postB.addEventListener('click', function () {
+      var text = (body.value || '').trim(), ttl = (titleI.value || '').trim();
+      if (!text && !ttl && !atts.length) return;
+      postB.disabled = true; postB.textContent = 'Posting…';
+      fetch(PROXY, { method: 'POST', headers: { 'content-type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify({ text: text || ' ', title: ttl, category: catSel.value, attachments: atts, kind: 'post', name: window.P2P_MEMBER_NAME || '', streak: myStreak() }) })
+        .then(function (r) { return r.json(); })
+        .then(function (res) {
+          if (res && res.ok) { try { localStorage.setItem('p2p_wc_hello', '1'); } catch (e) {} close(); if (filter.category !== 'all' && filter.category !== catSel.value) filter.category = catSel.value; filter.offset = 0; renderTabs(); load(false); loadWins(); }
+          else { postB.disabled = false; postB.textContent = 'Post'; }
+        })
+        .catch(function () { postB.disabled = false; postB.textContent = 'Post'; });
+    });
+    setTimeout(function () { titleI.focus(); }, 40);
+  }
 
   var winAdd = root.querySelector('[data-win-add]'), winBox = root.querySelector('[data-win-addbox]'),
       winText = root.querySelector('[data-win-addtext]'), winShare = root.querySelector('[data-win-share]');
@@ -368,11 +529,11 @@
     winShare.disabled = true; winShare.textContent = 'Sharing…';
     fetch(PROXY, { method: 'POST', headers: { 'content-type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify({ text: t, kind: 'win', name: window.P2P_MEMBER_NAME || '', streak: myStreak() }) })
       .then(function (r) { return r.json(); })
-      .then(function (res) { winShare.disabled = false; winShare.textContent = 'Share win'; if (res && res.ok) { winText.value = ''; if (winBox) winBox.hidden = true; try { localStorage.setItem('p2p_wc_win', '1'); } catch (e) {} confetti(); load(); } })
+      .then(function (res) { winShare.disabled = false; winShare.textContent = 'Share win'; if (res && res.ok) { winText.value = ''; if (winBox) winBox.hidden = true; try { localStorage.setItem('p2p_wc_win', '1'); } catch (e) {} confetti(); load(false); loadWins(); } })
       .catch(function () { winShare.disabled = false; winShare.textContent = 'Share win'; });
   });
 
-  load(); loadMembersData();
+  renderTabs(); load(false); loadWins(); loadMembersData();
 })();
 
 /* ---- Help us be better — private suggestions/questions/kudos (emails the team) ---- */

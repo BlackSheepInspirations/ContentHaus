@@ -37,9 +37,11 @@
   }
   function stats() {
     var P = window.P2P || {};
+    var t = (P.tier ? P.tier() : null);
     return {
       name: window.P2P_MEMBER_NAME || '',
-      tier: (P.tier ? (P.tier().name || '') : ''),
+      tier: (t ? (t.name || '') : ''),
+      tierNum: (t ? (t.index || 0) : 0),
       points: (P.points ? P.points() : 0),
       badges: (P.earnedSet ? P.earnedSet().length : 0),
       recentBadges: recentBadges(),
@@ -122,7 +124,7 @@
     var s = stats(), social = {};
     Object.keys(socialEls).forEach(function (k) { var v = (socialEls[k].value || '').trim(); if (v) social[k] = v; });
     return {
-      name: s.name, tier: s.tier, points: s.points, badges: s.badges, recentBadges: s.recentBadges, streak: s.streak,
+      name: s.name, tier: s.tier, tierNum: s.tierNum, points: s.points, badges: s.badges, recentBadges: s.recentBadges, streak: s.streak,
       photo: (f.photo ? f.photo.value.trim() : ''), quote: (f.quote ? f.quote.value.trim() : ''), about: (f.about ? f.about.value.trim() : ''),
       social: social, hidden: hidden
     };
