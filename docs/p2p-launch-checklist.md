@@ -30,14 +30,12 @@ inside their app and giving up the custom journey. So this is **build, not buy**
    progress on page open** and **debounced-saves on every change**, keeping
    localStorage as an offline cache. Guests keep localStorage only.
 
-**STATUS (2026-08-01): BUILT & LIVE.** Worker deployed, App Proxy configured,
-signature check passing — verified live: `GET /apps/p2p/progress` →
-`{"ok":true,"progress":null,"guest":true}`. Deployed Worker mints its Admin token via
-the client_credentials grant (no separate store token needed); vars live in the
-Cloudflare dashboard. Repo copy in `backend/p2p-progress-worker/` matches the live
-version. **Only remaining check: a logged-in round-trip** (guest path proven; the
-metafield read/write path needs a signed-in customer to exercise) — steps in
-**`docs/p2p-progress-backend-setup.md`**.
+**STATUS (2026-08-01): ✅ DONE & VERIFIED.** Worker deployed, App Proxy configured,
+signature check passing, AND the logged-in round-trip **tested by Andrea — progress
+follows across devices.** Deployed Worker mints its Admin token via the
+client_credentials grant (no separate store token needed); vars live in the Cloudflare
+dashboard. Repo copy in `backend/p2p-progress-worker/` matches the live version. Full
+notes in **`docs/p2p-progress-backend-setup.md`**. Nothing left here.
 
 **Correction:** App Proxy CANNOT be configured on a store "Develop apps" custom app
 — it needs a **free Shopify Partner-dashboard app** (no fees/review). The Admin API
