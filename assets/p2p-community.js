@@ -463,6 +463,34 @@
     pop.querySelectorAll('button').forEach(function (b) { b.addEventListener('click', function () { insertAtCursor(target, b.textContent); pop.remove(); }); });
     setTimeout(function () { document.addEventListener('click', function h(ev) { if (!pop.contains(ev.target) && ev.target !== anchor) { pop.remove(); document.removeEventListener('click', h); } }); }, 0);
   }
+  function openGiphy(anchor, onPick) {
+    var ex = document.querySelector('.osx-giphy-pop'); if (ex) { ex.remove(); return; }
+    var pop = document.createElement('div'); pop.className = 'osx-giphy-pop';
+    pop.innerHTML = '<div class="osx-giphy-search"><input type="search" placeholder="Search GIPHY…" data-giphy-q></div>' +
+      '<div class="osx-giphy-grid" data-giphy-grid><div class="osx-giphy-note">Loading…</div></div>' +
+      '<div class="osx-giphy-cred">POWERED BY GIPHY</div>';
+    document.body.appendChild(pop);
+    var r = anchor.getBoundingClientRect();
+    pop.style.top = Math.min(r.bottom + 6, window.innerHeight - 420) + 'px';
+    pop.style.left = Math.max(8, Math.min(r.left, window.innerWidth - 330)) + 'px';
+    var grid = pop.querySelector('[data-giphy-grid]'), inp = pop.querySelector('[data-giphy-q]'), t = null;
+    function search(q) {
+      grid.innerHTML = '<div class="osx-giphy-note">Loading…</div>';
+      fetch('/apps/p2p/giphy?q=' + encodeURIComponent(q || ''), { credentials: 'same-origin' })
+        .then(function (res) { return res.json(); })
+        .then(function (j) {
+          if (!j || j.error === 'no_key') { grid.innerHTML = '<div class="osx-giphy-note">GIF search isn\'t set up yet.</div>'; return; }
+          var gifs = j.gifs || [];
+          if (!gifs.length) { grid.innerHTML = '<div class="osx-giphy-note">No GIFs found.</div>'; return; }
+          grid.innerHTML = gifs.map(function (g) { return '<button type="button" class="osx-giphy-item" data-gif="' + esc(g.url) + '"><img src="' + esc(g.preview) + '" alt="" loading="lazy"></button>'; }).join('');
+          grid.querySelectorAll('[data-gif]').forEach(function (b) { b.addEventListener('click', function () { onPick(b.getAttribute('data-gif')); pop.remove(); }); });
+        })
+        .catch(function () { grid.innerHTML = '<div class="osx-giphy-note">Couldn\'t reach GIPHY.</div>'; });
+    }
+    inp.addEventListener('input', function () { clearTimeout(t); t = setTimeout(function () { search(inp.value.trim()); }, 350); });
+    search('');
+    setTimeout(function () { inp.focus(); document.addEventListener('click', function h(ev) { if (!pop.contains(ev.target) && ev.target !== anchor) { pop.remove(); document.removeEventListener('click', h); } }); }, 0);
+  }
   function composerCats() {
     var cats = catList || Object.keys(CATS).map(function (k) { return { key: k, label: CATS[k].label, emoji: CATS[k].emoji, post: 'all' }; });
     return cats.filter(function (c) { return c.post !== 'admin' || isAdmin; });
@@ -500,8 +528,9 @@
       b.addEventListener('click', function () {
         var t = b.getAttribute('data-tool');
         if (t === 'emoji') { openEmoji(b, body); return; }
+        if (t === 'gif') { openGiphy(b, function (u) { if (atts.length < 6) { atts.push({ type: 'gif', url: u }); renderAtts(); } else alert('Up to 6 attachments per post.'); }); return; }
         if (atts.length >= 6) { alert('Up to 6 attachments per post.'); return; }
-        var label = t === 'video' ? 'Paste a YouTube, Loom, or Vimeo link:' : t === 'gif' ? 'Paste a GIF image URL:' : t === 'image' ? 'Paste an image URL:' : 'Paste a link URL:';
+        var label = t === 'video' ? 'Paste a YouTube, Loom, or Vimeo link:' : t === 'image' ? 'Paste an image URL:' : 'Paste a link URL:';
         var url = window.prompt(label, 'https://'); if (!url) return; url = url.trim(); if (!/^https?:\/\//i.test(url)) { alert('Please paste a full http(s) link.'); return; }
         atts.push({ type: t, url: url }); renderAtts();
       });

@@ -331,6 +331,27 @@ export default {
         return json({ error: 'method' }, 405);
       }
 
+      /* ---------- GIF search (Giphy proxy — key stays server-side) ---------- */
+      if (seg === 'giphy') {
+        if (!env.giphy_key) return json({ ok: false, error: 'no_key', gifs: [] });
+        const term = (url.searchParams.get('q') || '').trim();
+        const api = term
+          ? 'https://api.giphy.com/v1/gifs/search?api_key=' + env.giphy_key + '&q=' + encodeURIComponent(term) + '&limit=24&rating=pg-13'
+          : 'https://api.giphy.com/v1/gifs/trending?api_key=' + env.giphy_key + '&limit=24&rating=pg-13';
+        try {
+          const r = await fetch(api);
+          const j = await r.json();
+          const gifs = (j.data || []).map(g => {
+            const im = g.images || {};
+            return {
+              preview: (im.fixed_width && im.fixed_width.url) || (im.preview_gif && im.preview_gif.url) || '',
+              url: (im.downsized_medium && im.downsized_medium.url) || (im.original && im.original.url) || ''
+            };
+          }).filter(g => g.url && g.preview);
+          return json({ ok: true, gifs });
+        } catch (e) { return json({ ok: false, error: 'giphy_fail', gifs: [] }); }
+      }
+
       /* ---------- suggestions / questions (private → email you) ---------- */
       if (seg === 'suggest') {
         const body = await request.json().catch(() => null);
