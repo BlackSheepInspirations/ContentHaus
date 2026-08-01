@@ -1360,6 +1360,11 @@
   #p2pos .osx-members-side .osx-lower-card{border:1px solid var(--stroke);border-radius:16px;background:rgba(255,255,255,.03);padding:16px 18px;}
   #p2pos .osx-members-map{height:min(460px,52vh);}
   #p2pos .osx-members-side .osx-suggest{max-width:none;margin-top:0;}
+  /* engagement toast (appended to body — global colors) */
+  .osx-toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(14px);z-index:3200;background:#0e1c28;border:1px solid rgba(216,180,90,.4);color:#e7efeb;font:700 13px/1.3 system-ui;padding:11px 18px;border-radius:999px;box-shadow:0 10px 30px rgba(0,0,0,.5);opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;max-width:88vw;text-align:center;}
+  .osx-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  .osx-toast.pts{border-color:rgba(216,180,90,.7);color:#f4c534;}
+  .osx-toast.warn{border-color:rgba(224,69,123,.6);color:#ffc2d8;background:#2a0f1a;}
   @media (max-width:900px){#p2pos .osx-members-grid{grid-template-columns:1fr;}}
   /* community walkthrough modal */
   .osx-tour-in{width:min(400px,100%);text-align:center;padding:26px 24px 22px;}

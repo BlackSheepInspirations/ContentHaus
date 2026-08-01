@@ -68,6 +68,19 @@
     var d = Math.floor(h / 24); if (d < 7) return d + 'd ago';
     return new Date(ts).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
   }
+  function toast(msg, kind) {
+    var t = document.createElement('div'); t.className = 'osx-toast' + (kind ? ' ' + kind : '');
+    t.textContent = msg; document.body.appendChild(t);
+    requestAnimationFrame(function () { t.classList.add('show'); });
+    setTimeout(function () { t.classList.remove('show'); setTimeout(function () { t.remove(); }, 300); }, kind === 'warn' ? 2800 : 1500);
+  }
+  function syncEngage(total) { if (typeof total !== 'undefined' && total !== null) { try { localStorage.setItem('p2p_engage_points', total); } catch (e) {} } }
+  function handleEngage(e) {
+    if (!e) return;
+    syncEngage(e.total);
+    if (e.cooldown) toast('Whoa — liking too fast! Points paused for a few minutes ⏳', 'warn');
+    else if (e.awarded > 0) toast('+' + e.awarded + ' pts', 'pts');
+  }
   var RTYPES = [['love', '❤'], ['thumb', '👍'], ['party', '🎉']];
   function rcount(p, t) { return (p.reactions && p.reactions[t] != null) ? p.reactions[t] : (t === 'love' ? (p.likes || 0) : 0); }
   function ron(p, t) { return p.mine ? !!p.mine[t] : (t === 'love' && !!p.liked); }
@@ -326,6 +339,7 @@
           var list = box.querySelector('.osx-cm-list'); if (list) { list.insertAdjacentHTML('beforeend', cmItem(res.comment, id)); wireMenus(list); list.querySelectorAll('[data-cdel]').forEach(function (bd) { bd.addEventListener('click', function () { var pr = bd.getAttribute('data-cdel').split('|'); deleteComment(pr[0], pr[1]); }); }); list.querySelectorAll('[data-cedit]').forEach(function (bd) { bd.addEventListener('click', function () { var pr = bd.getAttribute('data-cedit').split('|'); openEditComment(pr[0], pr[1]); }); }); }
           var pp = posts.filter(function (p) { return p.id === id; })[0];
           if (pp) { pp.comments = pp.comments || []; pp.comments.push(res.comment); var cnt = container.querySelector('[data-ctoggle="' + id + '"] span'); if (cnt) cnt.textContent = pp.comments.length; }
+          if (res.engage) handleEngage(res.engage);
         }
       }).catch(function () { if (btn) btn.disabled = false; });
   }
@@ -383,6 +397,7 @@
               if (typeof res.likes !== 'undefined') p.likes = res.likes;
               if (typeof res.liked !== 'undefined') p.liked = res.liked;
             });
+            if (res.engage) handleEngage(res.engage);
           }).catch(function () { delete btn.dataset.busy; setReactBtn(btn, wasOn, cur); });
       });
     });
@@ -417,6 +432,7 @@
         if (j.categories) { catList = j.categories; renderTabs(); }
         isAdmin = !!j.isAdmin;
         wowPost = j.wowPost || null;
+        syncEngage(j.engageTotal);
         var page = j.posts || [];
         posts = append ? posts.concat(page) : page;
         filter.offset = offset + page.length;
@@ -649,7 +665,7 @@
       fetch(PROXY, { method: 'POST', headers: { 'content-type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify({ text: text || ' ', title: ttl, category: catSel.value, attachments: atts, kind: 'post', name: window.P2P_MEMBER_NAME || '', streak: myStreak() }) })
         .then(function (r) { return r.json(); })
         .then(function (res) {
-          if (res && res.ok) { try { localStorage.setItem('p2p_wc_hello', '1'); } catch (e) {} close(); if (filter.category !== 'all' && filter.category !== catSel.value) filter.category = catSel.value; filter.offset = 0; renderTabs(); load(false); loadWins(); }
+          if (res && res.ok) { try { localStorage.setItem('p2p_wc_hello', '1'); } catch (e) {} if (res.engage) handleEngage(res.engage); close(); if (filter.category !== 'all' && filter.category !== catSel.value) filter.category = catSel.value; filter.offset = 0; renderTabs(); load(false); loadWins(); }
           else { postB.disabled = false; postB.textContent = 'Post'; }
         })
         .catch(function () { postB.disabled = false; postB.textContent = 'Post'; });
@@ -665,7 +681,7 @@
     winShare.disabled = true; winShare.textContent = 'Sharing…';
     fetch(PROXY, { method: 'POST', headers: { 'content-type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify({ text: t, kind: 'win', name: window.P2P_MEMBER_NAME || '', streak: myStreak() }) })
       .then(function (r) { return r.json(); })
-      .then(function (res) { winShare.disabled = false; winShare.textContent = 'Share win'; if (res && res.ok) { winText.value = ''; if (winBox) winBox.hidden = true; try { localStorage.setItem('p2p_wc_win', '1'); } catch (e) {} confetti(); load(false); loadWins(); } })
+      .then(function (res) { winShare.disabled = false; winShare.textContent = 'Share win'; if (res && res.ok) { winText.value = ''; if (winBox) winBox.hidden = true; try { localStorage.setItem('p2p_wc_win', '1'); } catch (e) {} if (res.engage) handleEngage(res.engage); confetti(); load(false); loadWins(); } })
       .catch(function () { winShare.disabled = false; winShare.textContent = 'Share win'; });
   });
 

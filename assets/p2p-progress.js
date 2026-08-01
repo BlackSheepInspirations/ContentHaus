@@ -111,6 +111,7 @@ window.P2P = (function(){
     p += eligibleBadgeCount() * R.badge;                           // eligible badges (+25 each)
     p += (get(K.ptsStreak, 0) || 0) + (get(K.ptsJournal, 0) || 0); // streak + journal ledgers
     p += (get(K.ptsWeekBonus, 0) || 0);                            // weekly-goal bonuses
+    p += (get('p2p_engage_points', 0) || 0);                       // community engagement (server-awarded)
     return p;
   }
   function pointsBreakdown(){
@@ -123,7 +124,8 @@ window.P2P = (function(){
       badges:  eligibleBadgeCount() * R.badge,
       streak:  get(K.ptsStreak, 0) || 0,
       journal: get(K.ptsJournal, 0) || 0,
-      weekly:  get(K.ptsWeekBonus, 0) || 0
+      weekly:  get(K.ptsWeekBonus, 0) || 0,
+      engage:  get('p2p_engage_points', 0) || 0
     };
   }
 

@@ -254,7 +254,7 @@ export default {
               if (s > best || (s === best && (!wow || p.ts > wow.ts))) { best = s; wow = p; }
             }
           }
-          return json({ ok: true, posts: page, total, hasMore: offset + limit < total, winOfWeek: wow ? wow.id : null, wowPost: wow || null, isAdmin: isAdmin(env, customerId), categories: CAT_LIST });
+          return json({ ok: true, posts: page, total, hasMore: offset + limit < total, winOfWeek: wow ? wow.id : null, wowPost: wow || null, isAdmin: isAdmin(env, customerId), categories: CAT_LIST, engageTotal: await readEngageTotal(env, customerId) });
         }
         if (request.method === 'POST') {
           const body = await request.json().catch(() => null);
@@ -267,7 +267,8 @@ export default {
           const post = { id, author: customerId, name: String((body && body.name) || info.firstName || 'Member').slice(0, 40), title: String((body && body.title) || '').slice(0, 120), text: text.slice(0, 1000), kind: kind, category: category, attachments: sanitizeAttachments(body && body.attachments), streak: Number(body && body.streak) || 0, ts: Date.now() };
           await kv.put('post:' + id, JSON.stringify(post));   // live immediately (unmoderated)
           await alertAdmin(env, post).catch(() => {});         // optional email ping to you
-          return json({ ok: true });
+          const engage = await awardEngage(env, customerId, 'post');
+          return json({ ok: true, engage: engage });
         }
         return json({ error: 'method' }, 405);
       }
@@ -287,12 +288,16 @@ export default {
         if (i > -1) arr.splice(i, 1); else arr.push(customerId);
         p.reactions = r; delete p.likedBy;
         await kv.put('post:' + pid, JSON.stringify(p));
-        if (i === -1 && p.author && p.author !== customerId && String(p.author).indexOf('house-') !== 0) {
-          const rinfo = await customerInfo(env, customerId);
-          await pushNotif(kv, p.author, { type: 'react', rtype: type, name: rinfo.firstName || 'Someone', postId: pid, snippet: (p.text || '').slice(0, 80), ts: Date.now() });
+        let engage = null;
+        if (i === -1) {
+          if (p.author && p.author !== customerId && String(p.author).indexOf('house-') !== 0) {
+            const rinfo = await customerInfo(env, customerId);
+            await pushNotif(kv, p.author, { type: 'react', rtype: type, name: rinfo.firstName || 'Someone', postId: pid, snippet: (p.text || '').slice(0, 80), ts: Date.now() });
+          }
+          engage = await awardEngage(env, customerId, 'like');
         }
         const rs = reactState(p, customerId);
-        return json({ ok: true, reactions: rs.counts, mine: rs.mine, likes: rs.counts.love, liked: rs.mine.love });
+        return json({ ok: true, reactions: rs.counts, mine: rs.mine, likes: rs.counts.love, liked: rs.mine.love, engage: engage });
       }
 
       /* ---------- comments on a post ---------- */
@@ -312,7 +317,8 @@ export default {
         if (p.author && p.author !== customerId && String(p.author).indexOf('house-') !== 0) {
           await pushNotif(kv, p.author, { type: 'comment', name: c.name, postId: pid, snippet: c.text.slice(0, 80), ts: Date.now() });
         }
-        return json({ ok: true, comment: { id: c.id, name: c.name, text: c.text, ts: c.ts, edited: false, owner: true } });
+        const engage = await awardEngage(env, customerId, 'comment');
+        return json({ ok: true, comment: { id: c.id, name: c.name, text: c.text, ts: c.ts, edited: false, owner: true }, engage: engage });
       }
 
       /* ---------- notifications (bell) ---------- */
@@ -550,6 +556,32 @@ async function sendEmail(env, subject, text) {
 }
 async function alertAdmin(env, post) {
   await sendEmail(env, 'New post on your community wall', post.name + ' just posted:\n\n' + post.text + '\n\nSee it in your OS → Community.');
+}
+// Engagement points — server-authoritative, with per-day caps + a like-farming cooldown.
+const ENGAGE_CAPS = { like: 20, comment: 20, post: 15 };   // max awards per day, per kind
+const ENGAGE_PTS = { like: 1, comment: 2, post: 3 };        // points per award
+async function awardEngage(env, customerId, kind) {
+  const kv = env.P2P_KV;
+  if (!kv || !customerId) return { total: 0, awarded: 0, cooldown: false };
+  const key = 'engage:' + customerId, now = Date.now(), today = new Date().toISOString().slice(0, 10);
+  let e = (await kv.get(key, 'json')) || { total: 0, day: today, like: 0, comment: 0, post: 0, lastLikeTs: 0, rapid: 0, cooldownUntil: 0 };
+  if (e.day !== today) { e.day = today; e.like = 0; e.comment = 0; e.post = 0; }   // daily reset (running total persists)
+  let awarded = 0, cooldown = false;
+  if (kind === 'like') {
+    e.rapid = (e.lastLikeTs && (now - e.lastLikeTs) < 1500) ? (e.rapid || 0) + 1 : 0;
+    e.lastLikeTs = now;
+    if (e.cooldownUntil && now < e.cooldownUntil) cooldown = true;                 // in timeout
+    else if (e.rapid >= 4) { e.cooldownUntil = now + 5 * 60 * 1000; e.rapid = 0; cooldown = true; }  // farming → 5-min timeout
+    else if (e.like < ENGAGE_CAPS.like) { awarded = ENGAGE_PTS.like; e.like++; e.total += awarded; }
+  } else if (kind === 'comment' && e.comment < ENGAGE_CAPS.comment) { awarded = ENGAGE_PTS.comment; e.comment++; e.total += awarded; }
+  else if (kind === 'post' && e.post < ENGAGE_CAPS.post) { awarded = ENGAGE_PTS.post; e.post++; e.total += awarded; }
+  await kv.put(key, JSON.stringify(e));
+  return { total: e.total, awarded: awarded, cooldown: cooldown };
+}
+async function readEngageTotal(env, customerId) {
+  const kv = env.P2P_KV; if (!kv || !customerId) return 0;
+  const e = await kv.get('engage:' + customerId, 'json');
+  return e ? (e.total || 0) : 0;
 }
 // Bell notifications — newest first, capped at 40 per member.
 async function pushNotif(kv, uid, n) {
