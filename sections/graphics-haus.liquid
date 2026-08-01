@@ -33,11 +33,7 @@
 </div>
 
 {% if gh_has_access %}
-  <div class="p2posr-shell">
-  {% render 'p2p-os-rail', current: 'graphics' %}
-  <div class="p2posr-main">
   <div id="graphics-haus-app" data-section-id="{{ section.id }}"></div>
-  </div></div>
 
   <script src="{{ 'graphics-haus-util.js' | asset_url }}" defer="defer"></script>
   <script src="{{ 'graphics-haus-engine.js' | asset_url }}" defer="defer"></script>

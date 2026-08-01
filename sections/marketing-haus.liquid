@@ -34,11 +34,7 @@
 </div>
 
 {% if mh_has_access %}
-  <div class="p2posr-shell">
-  {% render 'p2p-os-rail', current: 'marketing' %}
-  <div class="p2posr-main">
   <div id="marketing-haus-app" data-section-id="{{ section.id }}"></div>
-  </div></div>
 
   <script src="{{ 'marketing-haus-util.js' | asset_url }}" defer="defer"></script>
   <script src="{{ 'marketing-haus-engine.js' | asset_url }}" defer="defer"></script>

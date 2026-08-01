@@ -35,11 +35,7 @@
 </div>
 
 {% if ph_has_access %}
-  <div class="p2posr-shell">
-  {% render 'p2p-os-rail', current: 'content' %}
-  <div class="p2posr-main">
   <div id="prompt-haus-app" data-section-id="{{ section.id }}"></div>
-  </div></div>
 
   <script src="{{ 'prompt-builder-styledna.js' | asset_url }}" defer="defer"></script>
   <script src="{{ 'prompt-builder-engine.js' | asset_url }}" defer="defer"></script>
