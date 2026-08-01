@@ -162,10 +162,10 @@
   }
 
   /* ---------- lives (going-live planner + post-live check-in + trends) ---------- */
-  var LIVE_STATS = [['followers', 'New followers'], ['gifts', 'Gifts / diamonds'], ['hearts', 'Likes / hearts'], ['comments', 'Comments'], ['shares', 'Shares'], ['peak', 'Peak viewers'], ['duration', 'Duration (min)'], ['sales', 'Sales ($)']];
+  var LIVE_STATS = [['followers', 'New followers'], ['gifts', 'Gifts / diamonds'], ['hearts', 'Likes / hearts'], ['comments', 'Comments'], ['shares', 'Shares'], ['viewers', 'Total viewers'], ['peak', 'Peak viewers'], ['watch', 'Avg watch (min)'], ['duration', 'Duration (min)'], ['sales', 'Sales ($)']];
   var PLATFORMS = ['TikTok', 'Instagram', 'YouTube', 'Facebook', 'Other'];
   var PLAT_META = { TikTok: '🎵', Instagram: '📷', YouTube: '▶️', Facebook: '📘', Other: '🔗' };
-  var PITCH_ITEMS = ['Product demo / showcase', 'Live sale / flash deal', 'Q&A / Ask Me Anything', 'Tutorial / How-to', 'Behind the scenes', 'Storytime / testimony', 'Get Ready With Me', 'Unboxing / haul', 'Challenge / game', 'Community hangout'];
+  var PITCH_ITEMS = ['Grow Room', 'Product demo / showcase', 'Live sale / flash deal', 'Q&A / Ask Me Anything', 'Tutorial / How-to', 'Behind the scenes', 'Storytime / testimony', 'Get Ready With Me', 'Unboxing / haul', 'Challenge / game', 'Community hangout'];
   var TZS = ['ET', 'CT', 'MT', 'PT', 'AKT', 'HT', 'GMT', 'CET', 'AEST'];
   var HRS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'], MINS = ['00', '15', '30', '45'];
   var MOODS = ['🔥', '😄', '😊', '😌', '😅', '😐', '😬', '😢', '😤', '🙏'];
@@ -180,12 +180,27 @@
     pop.querySelector('.osx-cal-pop-x').addEventListener('click', close);
     pop.querySelector('.osx-cele-x').addEventListener('click', close);
   }
-  function openHookIdeas() { listPop('💡 Hook ideas', HOOK_IDEAS); }
+  function openHookIdeas(liveId) {
+    var pop = document.createElement('div'); pop.className = 'osx-cal-pop'; root.appendChild(pop);
+    pop.innerHTML = '<div class="osx-cal-pop-in osx-ns"><button class="osx-cal-pop-x" type="button" aria-label="Close">✕</button><div class="osx-ns-h">💡 Hook ideas</div><div class="osx-ns-sub">Tap one to drop it into your hook — then make it yours.</div>' + HOOK_IDEAS.map(function (t, i) { return '<button type="button" class="osx-tip-item osx-tip-pick" data-pick="' + i + '">' + esc(t) + '</button>'; }).join('') + '<button class="osx-cele-x" type="button" style="margin-top:12px;">Close</button></div>';
+    function close() { pop.remove(); }
+    pop.addEventListener('click', function (e) { if (e.target === pop) close(); });
+    pop.querySelector('.osx-cal-pop-x').addEventListener('click', close);
+    pop.querySelector('.osx-cele-x').addEventListener('click', close);
+    pop.querySelectorAll('[data-pick]').forEach(function (b) { b.addEventListener('click', function () { var l = liveObj(liveId); if (l) { l.hook = HOOK_IDEAS[+b.getAttribute('data-pick')]; save(); render(); } close(); }); });
+  }
   function openScriptTips() { listPop('💡 Opening-script tips', SCRIPT_TIPS); }
+  function applyStatColor(l, plat, stat) {
+    var g = ((l.goals || {})[plat] || {})[stat], r = ((l.results || {})[plat] || {})[stat];
+    var el = host.querySelector('[data-lr="' + l.id + '|' + plat + '|' + stat + '"]'); if (!el) return;
+    var lab = el.closest('.osx-lv-f'); if (!lab) return;
+    lab.classList.remove('met', 'miss');
+    if (g !== undefined && g !== '' && r !== undefined && r !== '') lab.classList.add(num(r) >= num(g) ? 'met' : 'miss');
+  }
   function liveCountdown(l) {
-    var d = daysTo(l.date), t = liveTimeStr(l);
+    var d = daysTo(l.date), t = liveTimeStr(l), soon = (d !== null && d >= 0 && d <= 1);
     var big = (d === null) ? 'Set a date' : (d > 1 ? d + ' days' : d === 1 ? 'Tomorrow' : d === 0 ? 'Today!' : liveDateLabel(l));
-    return '<div class="osx-lv-cd"><span class="osx-lv-cd-l">Countdown to LIVE</span><b>' + esc(big) + '</b><span class="osx-lv-cd-d">' + (l.date ? esc(liveDateLabel(l)) + (t ? ' · ' + esc(t) : '') : 'no date yet') + '</span></div>';
+    return '<div class="osx-lv-cd' + (soon ? ' soon' : '') + '"><span class="osx-lv-cd-l">Countdown to LIVE</span><b>' + esc(big) + '</b><span class="osx-lv-cd-d">' + (l.date ? esc(liveDateLabel(l)) + (t ? ' · ' + esc(t) : '') : 'no date yet') + '</span></div>';
   }
   function livePlats(l) { var p = l.platforms || (l.platform ? [l.platform] : []); return p.length ? p : ['TikTok']; }
   function platPill(name, other) { var lbl = (name === 'Other' && other) ? other : name; return '<span class="osx-plat-pill">' + (PLAT_META[name] || '🔗') + ' ' + esc(lbl) + '</span>'; }
@@ -222,7 +237,7 @@
     var head = '<div class="osx-lv-h" data-ltoggle="' + esc(l.id) + '"><span class="osx-lv-plats">' + plats.map(function (p) { return platPill(p, l.otherPlat); }).join('') + '</span>' +
       '<span class="osx-lv-hb"><b class="osx-lv-title">' + esc(l.title || l.topic || 'Untitled live') + '</b>' + (l.done ? '<span class="osx-lv-hm">✓ Logged · +' + liveFollowers(l) + ' followers</span>' : '') + '</span>' +
       liveCountdown(l) + '</div>';
-    if (!open) return '<div class="osx-lv-card">' + head + '</div>';
+    if (!open) return '<div class="osx-lv-card' + (l._dupe ? ' osx-dupe' : '') + '">' + head + (l._dupe ? '<div class="osx-lv-dupebadge">⚠ Duplicate — update date, time &amp; platform to save</div>' : '') + '</div>';
     var req = l._dupe ? ' osx-req' : '';
     function selOpts(arr, cur) { return arr.map(function (o) { return '<option' + (o === cur ? ' selected' : '') + '>' + o + '</option>'; }).join(''); }
     var platChips = PLATFORMS.map(function (p) { var on = (l.platforms || []).indexOf(p) > -1; return '<button type="button" class="osx-plat-chip' + (on ? ' on' : '') + '" data-lplat="' + esc(l.id) + '|' + p + '">' + (PLAT_META[p] || '') + ' ' + p + '</button>'; }).join('');
@@ -235,12 +250,12 @@
       '<label class="osx-lv-f"><span>Zone</span><select class="osx-pl-date" data-lf="' + esc(l.id) + '|tz">' + selOpts(TZS, l.tz || 'ET') + '</select></label></div>';
     var pitchRow = '<div class="osx-lv-grid"><label class="osx-lv-f"><span>What I\'m pitching</span><select class="osx-pl-date" data-lf="' + esc(l.id) + '|pitch"><option value="">Choose…</option>' + PITCH_ITEMS.map(function (p) { return '<option' + (p === l.pitch ? ' selected' : '') + '>' + p + '</option>'; }).join('') + '<option value="Other"' + (l.pitch === 'Other' ? ' selected' : '') + '>Other…</option></select>' + (l.pitch === 'Other' ? '<input class="osx-pl-in" data-lf="' + esc(l.id) + '|pitchOther" value="' + esc(l.pitchOther || '') + '" placeholder="Type your pitch" maxlength="80" style="margin-top:6px;">' : '') + '</label>' +
       '<label class="osx-lv-f"><span>Room Promise</span><textarea class="osx-pl-ta" rows="2" data-lf="' + esc(l.id) + '|roomPromise" placeholder="When someone enters this LIVE, what will they feel, learn, or get to be part of?" maxlength="240">' + esc(l.roomPromise || '') + '</textarea></label></div>';
-    var hook = '<div class="osx-pl-flabel">My hook <button type="button" class="osx-idea-link" data-hookideas>💡 ideas</button></div><textarea class="osx-pl-ta osx-lv-hookbox" rows="2" data-lf="' + esc(l.id) + '|hook" placeholder="Your first 10 seconds that stop the scroll — the line that makes someone stay. Tip: promise a payoff, tease a surprise, or ask a question." maxlength="240">' + esc(l.hook || '') + '</textarea>';
+    var hook = '<div class="osx-pl-flabel">My hook <button type="button" class="osx-idea-link" data-hookideas="' + esc(l.id) + '">💡 ideas</button></div><textarea class="osx-pl-ta osx-lv-hookbox" rows="2" data-lf="' + esc(l.id) + '|hook" placeholder="Your first 10 seconds that stop the scroll — the line that makes someone stay. Tip: promise a payoff, tease a surprise, or ask a question." maxlength="240">' + esc(l.hook || '') + '</textarea>';
     var mktBtn = '<a class="osx-lv-mkt" href="/pages/marketing-haus" target="_blank" rel="noopener">🎨 Build my hook, script &amp; promo in Marketing Haus →</a><div class="osx-lv-mktnote">Heads up: this opens Marketing Haus in a new tab — everything you\'ve entered here is saved. 💾</div>';
     var script = '<div class="osx-pl-flabel">Opening script <button type="button" class="osx-idea-link" data-scripttips>💡 tips</button></div><textarea class="osx-pl-ta" rows="3" data-lf="' + esc(l.id) + '|script" placeholder="Hi everyone, welcome in. I\'m [name], and today we\'re talking about [topic]. If you\'re new, comment where you\'re watching from so I can say hello." maxlength="400">' + esc(l.script || '') + '</textarea>';
     var prompts = l.prompts || ['', '', '', '', ''];
     var promptBox = '<div class="osx-pl-flabel">Engagement prompts <span>up to 5 — "Drop a 1 if you agree", "A or B?"</span></div>' + [0, 1, 2, 3, 4].map(function (i) { return '<input class="osx-pl-in osx-lv-prompt" data-lprompt="' + esc(l.id) + '|' + i + '" value="' + esc(prompts[i] || '') + '" placeholder="Prompt ' + (i + 1) + '" maxlength="120">'; }).join('');
-    var goalsBlock = '<div class="osx-pl-flabel" style="margin-top:16px;">🎯 My goals for this live</div><input class="osx-pl-in" data-lf="' + esc(l.id) + '|goalNote" value="' + esc(l.goalNote || '') + '" placeholder="In one line — what would make this a win?" maxlength="140">' +
+    var goalsBlock = '<div class="osx-pl-flabel" style="margin-top:16px;">🎯 My goals for this live</div><textarea class="osx-pl-ta osx-lv-hookbox" rows="2" data-lf="' + esc(l.id) + '|goalNote" placeholder="What would make this a win? (connection, momentum, sales — not just the numbers). Update this every live." maxlength="240">' + esc(l.goalNote || '') + '</textarea>' +
       plats.map(function (p) { return '<div class="osx-lv-platblk"><div class="osx-lv-platlbl">' + platPill(p, l.otherPlat) + ' goals</div>' + statGrid(l, p, 'goal') + '</div>'; }).join('');
     var postBlock = '<div class="osx-lv-post"><div class="osx-lv-posth">✅ Post-live check-in — how did it go?</div><div class="osx-lv-hint2">Boxes turn <b class="g">green</b> when you hit a goal, <b class="y">yellow</b> when there\'s room to grow (no goal set = no color).</div>' +
       plats.map(function (p) { return '<div class="osx-lv-platblk"><div class="osx-lv-platlbl">' + platPill(p, l.otherPlat) + ' results</div>' + statGrid(l, p, 'result') + '<textarea class="osx-pl-ta" rows="2" data-lf="' + esc(l.id) + '|reflect_' + p + '" placeholder="Where did I fall short of a goal — and what can I learn, grow, or thrive from?" maxlength="300">' + esc((l.reflect || {})[p] || '') + '</textarea></div>'; }).join('') +
@@ -565,16 +580,16 @@
     // lives
     var nsb = host.querySelector('[data-northstar]'); if (nsb) nsb.addEventListener('click', openNorthStar);
     var bab = host.querySelector('[data-beanchored]'); if (bab) bab.addEventListener('click', openBeAnchored);
-    host.querySelectorAll('[data-hookideas]').forEach(function (b) { b.addEventListener('click', function (e) { e.stopPropagation(); openHookIdeas(); }); });
+    host.querySelectorAll('[data-hookideas]').forEach(function (b) { b.addEventListener('click', function (e) { e.stopPropagation(); openHookIdeas(b.getAttribute('data-hookideas')); }); });
     host.querySelectorAll('[data-scripttips]').forEach(function (b) { b.addEventListener('click', function (e) { e.stopPropagation(); openScriptTips(); }); });
     var nl = host.querySelector('[data-newlive]'); if (nl) nl.addEventListener('click', function () { var l = { id: uid(), title: '', platforms: ['TikTok'], otherPlat: '', date: '', hour: '', min: '00', ampm: 'PM', tz: 'ET', pitch: '', pitchOther: '', roomPromise: '', hook: '', script: '', prompts: ['', '', '', '', ''], goals: {}, results: {}, reflect: {}, win: '', blocker: '', action: '', mood: '', moodNote: '', done: false }; data.lives.unshift(l); expanded['L' + l.id] = true; save(); render(); });
     host.querySelectorAll('[data-ltoggle]').forEach(function (b) { b.addEventListener('click', function (e) { if (e.target.closest('input,select,textarea,button,a')) return; var id = b.getAttribute('data-ltoggle'); expanded['L' + id] = !expanded['L' + id]; render(); }); });
     host.querySelectorAll('[data-lf]').forEach(function (el) { el.addEventListener('change', function () { var p = el.getAttribute('data-lf').split('|'), l = liveObj(p[0]); if (!l) return; if (p[1].indexOf('reflect_') === 0) { l.reflect = l.reflect || {}; l.reflect[p[1].slice(8)] = el.value; } else l[p[1]] = el.value; if (l._dupe && dupeReady(l)) l._dupe = false; save(); if (/^(date|hour|pitch)$/.test(p[1])) render(); }); });
-    host.querySelectorAll('[data-lg]').forEach(function (el) { el.addEventListener('change', function () { var p = el.getAttribute('data-lg').split('|'), l = liveObj(p[0]); if (l) { l.goals = l.goals || {}; l.goals[p[1]] = l.goals[p[1]] || {}; l.goals[p[1]][p[2]] = el.value; save(); render(); } }); });
-    host.querySelectorAll('[data-lr]').forEach(function (el) { el.addEventListener('change', function () { var p = el.getAttribute('data-lr').split('|'), l = liveObj(p[0]); if (l) { l.results = l.results || {}; l.results[p[1]] = l.results[p[1]] || {}; l.results[p[1]][p[2]] = el.value; save(); render(); } }); });
+    host.querySelectorAll('[data-lg]').forEach(function (el) { el.addEventListener('change', function () { var p = el.getAttribute('data-lg').split('|'), l = liveObj(p[0]); if (l) { l.goals = l.goals || {}; l.goals[p[1]] = l.goals[p[1]] || {}; l.goals[p[1]][p[2]] = el.value; save(); applyStatColor(l, p[1], p[2]); } }); });
+    host.querySelectorAll('[data-lr]').forEach(function (el) { el.addEventListener('change', function () { var p = el.getAttribute('data-lr').split('|'), l = liveObj(p[0]); if (l) { l.results = l.results || {}; l.results[p[1]] = l.results[p[1]] || {}; l.results[p[1]][p[2]] = el.value; save(); applyStatColor(l, p[1], p[2]); } }); });
     host.querySelectorAll('[data-lplat]').forEach(function (b) { b.addEventListener('click', function () { var p = b.getAttribute('data-lplat').split('|'), l = liveObj(p[0]); if (!l) return; l.platforms = l.platforms || []; var i = l.platforms.indexOf(p[1]); if (i > -1) l.platforms.splice(i, 1); else l.platforms.push(p[1]); if (l._dupe && dupeReady(l)) l._dupe = false; save(); render(); }); });
     host.querySelectorAll('[data-lprompt]').forEach(function (el) { el.addEventListener('change', function () { var p = el.getAttribute('data-lprompt').split('|'), l = liveObj(p[0]); if (l) { l.prompts = l.prompts || ['', '', '', '', '']; l.prompts[+p[1]] = el.value; save(); } }); });
-    host.querySelectorAll('[data-lmood]').forEach(function (b) { b.addEventListener('click', function () { var p = b.getAttribute('data-lmood').split('|'), l = liveObj(p[0]); if (l) { l.mood = (l.mood === p[1]) ? '' : p[1]; save(); render(); } }); });
+    host.querySelectorAll('[data-lmood]').forEach(function (b) { b.addEventListener('click', function () { var p = b.getAttribute('data-lmood').split('|'), l = liveObj(p[0]); if (!l) return; l.mood = (l.mood === p[1]) ? '' : p[1]; save(); b.parentNode.querySelectorAll('.osx-lv-mood').forEach(function (x) { x.classList.toggle('on', x.getAttribute('data-lmood').split('|')[1] === l.mood); }); }); });
     host.querySelectorAll('[data-ldupe]').forEach(function (b) { b.addEventListener('click', function () { var src = liveObj(b.getAttribute('data-ldupe')); if (!src) return; var c = JSON.parse(JSON.stringify(src)); c.id = uid(); c.date = ''; c.hour = ''; c.platforms = []; c.done = false; c.results = {}; c.win = ''; c.blocker = ''; c.action = ''; c.mood = ''; c.moodNote = ''; c.reflect = {}; c._dupe = true; data.lives.unshift(c); expanded['L' + c.id] = true; save(); render(); }); });
     host.querySelectorAll('[data-ldone]').forEach(function (b) { b.addEventListener('click', function () { var l = liveObj(b.getAttribute('data-ldone')); if (!l) return; if (l._dupe) { alert('Change the highlighted Date, Time and Platform first — this is a duplicate.'); return; } l.done = !l.done; save(); render(); }); });
     host.querySelectorAll('[data-lvdel]').forEach(function (b) { b.addEventListener('click', function () { if (!window.confirm('Delete this live?')) return; data.lives = data.lives.filter(function (x) { return x.id !== b.getAttribute('data-lvdel'); }); save(); render(); }); });
