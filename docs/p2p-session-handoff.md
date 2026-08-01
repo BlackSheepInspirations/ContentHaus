@@ -218,3 +218,11 @@ the LAST — push files SEPARATELY.** 3. Copy each file to the mirror
 - **Files/downloads:** external (Canva link works; Cloudflare R2 free 10GB, free
   egress). Player lessons have Download fields + a generic Embed slot for flipbooks.
 - **Community:** embed Circle/Bettermode into the OS Community view (external embed OK).
+
+## 2026-08-01 — Map fixed + layout align + Phase B part 1 (reactions + badges)
+- **Map bug fixed:** `[data-mb-map]` lives in the community view but p2p-members.js queried it via `mb.querySelector` (members view) → mapEl was null → map never ran. Now `root.querySelector('[data-mb-map]')`. Confirmed rendering by Andrea.
+- **Layout:** main column is one bordered box (composer + Member Spotlight side-by-side + wall), stretched to align with sidebar/Growth Board bottom. Lower row map+calendar cards stretch to equal height; map flex-fills; new "Where's the flock?" title block.
+- **Phase B part 1 (NEEDS Cloudflare worker re-paste):**
+  - Reactions: ❤ 👍 🎉 per wall post. Worker `react` now takes `{type}`; stores `p.reactions={love,thumb,party}` (migrates legacy likedBy→love). community GET returns `reactions` + `mine`. Frontend: reactBar/wireReacts. Wins-side keeps a single ❤ (loveChip).
+  - Badges: members.js publishes `recentBadges` (last 3 earned, emoji-mapped via badgeEmoji). Worker stores `sanitizeBadges`. Growth Board rows show up to 3 badge chips → click = badgePopup. `.osx-gb-who` flex + `.osx-gb-badge` CSS added.
+- **Still Phase B (not started):** comments, 🔔 bell + profile bubble, Frank/Ruth house posts, 30 welcome msgs + auto-welcome, Win of the Week pin, Weekly/Monthly Growth toggle, streak flames, celebration map pin, confetti.
