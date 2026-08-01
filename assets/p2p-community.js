@@ -501,6 +501,7 @@
       var mEl = root.querySelector('[data-count-members]'), aEl = root.querySelector('[data-count-active]');
       if (mEl) mEl.textContent = m.length;
       if (aEl) aEl.textContent = m.filter(function (x) { return x.ts && (now - x.ts) < 5 * 60 * 1000; }).length;
+      var mmc = root.querySelector('[data-mini-map-count]'); if (mmc) mmc.textContent = '📍 ' + m.length + (m.length === 1 ? ' creator' : ' creators');
       var nm = myName();
       if (nm && m.some(function (x) { return String(x.name || '').trim().toLowerCase() === nm && (x.photo || x.quote || x.about); })) welcomeProfileDone = true;
       memberMap = {};
@@ -779,4 +780,28 @@
   document.addEventListener('click', function (e) { if (menu && !menu.hidden && !menu.contains(e.target) && e.target !== bell && !bell.contains(e.target)) menu.hidden = true; });
   fetchNotifs();
   setInterval(fetchNotifs, 60000);
+})();
+
+/* ---- mini calendar / map cards → expand into a modal (moves the real widget in, back on close) ---- */
+(function () {
+  var root = document.getElementById('p2pos'); if (!root) return;
+  var MO = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  var mc = root.querySelector('[data-mini-cal-month]');
+  if (mc) { var d = new Date(); mc.textContent = MO[d.getMonth()] + ' ' + d.getFullYear(); }
+  function openHolderModal(holderSel, extraClass, onShow) {
+    var holder = root.querySelector(holderSel); if (!holder || !holder.firstChild) return;
+    var pop = document.createElement('div'); pop.className = 'osx-cal-pop';
+    pop.innerHTML = '<div class="osx-cal-pop-in osx-expand ' + (extraClass || '') + '"><button class="osx-cal-pop-x" type="button" aria-label="Close">✕</button><div class="osx-expand-body"></div></div>';
+    root.appendChild(pop);
+    var body = pop.querySelector('.osx-expand-body');
+    while (holder.firstChild) body.appendChild(holder.firstChild);
+    function close() { while (body.firstChild) holder.appendChild(body.firstChild); pop.remove(); }
+    pop.addEventListener('click', function (e) { if (e.target === pop) close(); });
+    pop.querySelector('.osx-cal-pop-x').addEventListener('click', close);
+    if (onShow) onShow();
+  }
+  var calBtn = root.querySelector('[data-cal-open]');
+  if (calBtn) calBtn.addEventListener('click', function () { openHolderModal('[data-cal-holder]', 'osx-expand-cal'); });
+  var mapBtn = root.querySelector('[data-map-open]');
+  if (mapBtn) mapBtn.addEventListener('click', function () { openHolderModal('[data-map-holder]', 'osx-expand-map', function () { if (window.P2P_MAP_REFRESH) window.P2P_MAP_REFRESH(); }); });
 })();

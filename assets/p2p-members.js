@@ -110,6 +110,11 @@
     if (mapEl) mapEl.innerHTML = '<div class="osx-cw-empty">Loading the map…</div>';
     ensureLeaflet(function () { if (mapEl) mapEl.innerHTML = ''; buildMap(); });
   }
+  // Called by the community mini-map card when it moves the map into its expand modal.
+  window.P2P_MAP_REFRESH = function () {
+    openMap();
+    if (leafMap) { setTimeout(function () { leafMap.invalidateSize(); }, 60); setTimeout(function () { leafMap.invalidateSize(); }, 320); }
+  };
 
   /* ---- my profile ---- */
   function fillForm(p) {
@@ -169,21 +174,8 @@
     });
   });
 
-  // the map now lives on the Community view — build it when that view opens or scrolls in
-  if (mapEl) {
-    var commView = mapEl.closest('.osx-view');
-    if (commView) {
-      var mo = new MutationObserver(function () { if (commView.classList.contains('on')) setTimeout(openMap, 120); });
-      mo.observe(commView, { attributes: true, attributeFilter: ['class'] });
-      if (commView.classList.contains('on')) setTimeout(openMap, 120);
-    }
-    if ('IntersectionObserver' in window) {
-      var mio = new IntersectionObserver(function (entries) {
-        entries.forEach(function (e) { if (e.isIntersecting) { openMap(); mio.disconnect(); } });
-      }, { threshold: 0.02 });
-      mio.observe(mapEl);
-    } else { setTimeout(openMap, 200); }
-  }
+  // The map lives hidden in a holder and is built only when the community mini-map card
+  // moves it into its expand modal (window.P2P_MAP_REFRESH) — never while it's display:none.
 
   initProfile();
 })();

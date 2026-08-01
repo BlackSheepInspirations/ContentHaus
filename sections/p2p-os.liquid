@@ -31,9 +31,19 @@
 
   <aside class="osx-side" data-osx-side>
     <button class="osx-brand" type="button" data-osx-home aria-label="Back to Operating System home">
-      <div class="osx-brandmark">Purpose <span class="osx-2">2</span> Profit</div>
-      <div class="osx-brandsub">{{ section.settings.brand_sub | default: 'powered by Black Sheep Creations &amp; Inspirations' }}</div>
+      <div class="osx-brandsub osx-brandsub-solo">{{ section.settings.brand_sub | default: 'Black Sheep Creations &amp; Inspirations' | replace: 'powered by ', '' }}</div>
     </button>
+    <div class="osx-side-p2p">
+      <button class="osx-side-p2p-logo" type="button" data-osx-home aria-label="Purpose 2 Profit — home"><img src="{{ 'p2p-community-logo.png' | asset_url }}" alt="Purpose 2 Profit"></button>
+      <div class="osx-comm-counts">
+        <button class="osx-comm-count" type="button" data-go-members><b data-count-members>—</b><span>Members</span></button>
+        <button class="osx-comm-count" type="button" data-go-members><b data-count-active>—</b><span>Active</span></button>
+      </div>
+      <div class="osx-p2p-btns">
+        <button class="osx-comm-invite" type="button" data-comm-invite>＋ Invite</button>
+        <button class="osx-comm-invite ghost" type="button" data-go-members>Members</button>
+      </div>
+    </div>
     <div class="osx-userbar" data-userbar>
       <span class="osx-userbubble">{% if customer.first_name != blank %}{{ customer.first_name | slice: 0 | upcase }}{% else %}🐑{% endif %}</span>
       <div class="osx-userinfo">
@@ -480,17 +490,10 @@
                 {%- endif -%}
               </div>
             </div>
-            <div class="osx-side-card osx-p2pcard">
-              <img class="osx-p2p-logo" src="{{ 'p2p-community-logo.png' | asset_url }}" alt="Purpose 2 Profit">
-              <div class="osx-comm-counts">
-                <button class="osx-comm-count" type="button" data-go-members><b data-count-members>—</b><span>Members</span></button>
-                <button class="osx-comm-count" type="button" data-go-members><b data-count-active>—</b><span>Active</span></button>
-              </div>
-              <div class="osx-p2p-btns">
-                <button class="osx-comm-invite" type="button" data-comm-invite>＋ Invite</button>
-                <button class="osx-comm-invite ghost" type="button" data-go-members>Members</button>
-              </div>
-            </div>
+            <button class="osx-side-card osx-mini" type="button" data-cal-open>
+              <div class="osx-side-h">📅 Events calendar</div>
+              <div class="osx-mini-body"><b data-mini-cal-month>—</b><span class="osx-mini-hint">Tap to browse events →</span></div>
+            </button>
             <div class="osx-side-card osx-wins-card">
               <div class="osx-side-h">🏆 Recent wins <button class="osx-win-add" type="button" data-win-add>＋ Add</button></div>
               <div class="osx-win-addbox" data-win-addbox hidden>
@@ -503,24 +506,29 @@
               <div class="osx-side-h">🌱 Growth Board</div>
               <div class="osx-gb" data-gb><div class="osx-cw-empty">—</div></div>
             </div>
+            <button class="osx-side-card osx-mini osx-mini-map" type="button" data-map-open>
+              <div class="osx-side-h">📍 Where's the <span class="osx-flock-grad">flock?</span></div>
+              <div class="osx-mini-body"><b data-mini-map-count>📍</b><span class="osx-mini-hint">Tap to explore the map →</span></div>
+            </button>
           </aside>
         </div>
 
-        <div class="osx-comm-lower">
-          <div class="osx-lower-card">
+        {%- comment -%} Full calendar + map live here (hidden); the mini cards move them into a modal on tap {%- endcomment -%}
+        <div class="osx-comm-holders" hidden aria-hidden="true">
+          <div data-cal-holder>
+            <div class="osx-cal" data-cal>
+              <div class="osx-cal-head"><button type="button" class="osx-cal-nav" data-cal-prev aria-label="Previous month">‹</button><b data-cal-title>—</b><button type="button" class="osx-cal-nav" data-cal-next aria-label="Next month">›</button></div>
+              <div class="osx-cal-dows"><span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span></div>
+              <div class="osx-cal-grid" data-cal-grid></div>
+            </div>
+          </div>
+          <div data-map-holder>
             <div class="osx-flock-head">
               <div class="osx-flock-title">🐑 Where's the <span class="osx-flock-grad">flock?</span></div>
               <div class="osx-flock-sub">Creators building right alongside you — scattered all over the map. Tap any pin to meet the maker behind it. 📍</div>
             </div>
             <div class="osx-mb-map" data-mb-map></div>
             <p class="osx-mb-mapnote">Pins are approximate (city‑level) — never your exact address. Hide yourself anytime under Members → My Profile.</p>
-          </div>
-          <div class="osx-lower-card">
-            <div class="osx-cal" data-cal>
-              <div class="osx-cal-head"><button type="button" class="osx-cal-nav" data-cal-prev aria-label="Previous month">‹</button><b data-cal-title>—</b><button type="button" class="osx-cal-nav" data-cal-next aria-label="Next month">›</button></div>
-              <div class="osx-cal-dows"><span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span></div>
-              <div class="osx-cal-grid" data-cal-grid></div>
-            </div>
           </div>
         </div>
       {%- endif -%}
@@ -1307,6 +1315,23 @@
   #p2pos .osx-pm .osx-cw-post-text{font:400 15px/1.65 system-ui;color:#dce7e2;}
   #p2pos .osx-pm .osx-cm{margin-top:16px;border-top:1px solid var(--stroke);padding-top:14px;}
   #p2pos .osx-pm-copy{margin-left:auto;}
+  /* ===== left-nav parent brand + P2P widget ===== */
+  #p2pos .osx-brandsub-solo{font:800 11px/1.4 system-ui;letter-spacing:.06em;text-transform:uppercase;color:var(--text);margin:0;}
+  #p2pos .osx-side-p2p{border:1px solid var(--gstroke);border-radius:14px;background:rgba(255,255,255,.03);padding:11px;margin:12px 0 10px;box-shadow:0 0 18px rgba(216,180,90,.1);}
+  #p2pos .osx-side-p2p-logo{display:block;width:100%;border:0;background:none;padding:0;margin:0 0 10px;cursor:pointer;border-radius:8px;overflow:hidden;}
+  #p2pos .osx-side-p2p-logo img{width:100%;display:block;border-radius:8px;}
+  /* ===== mini expandable cards (calendar / map) ===== */
+  #p2pos .osx-mini{-webkit-appearance:none;appearance:none;font:inherit;color:inherit;cursor:pointer;text-align:left;width:100%;transition:.15s;}
+  #p2pos .osx-mini:hover{border-color:var(--gstroke);background:rgba(216,180,90,.06);}
+  #p2pos .osx-mini .osx-side-h{margin-bottom:8px;}
+  #p2pos .osx-mini-body{display:flex;flex-direction:column;gap:3px;}
+  #p2pos .osx-mini-body b{font:700 15px/1.2 Georgia,serif;color:var(--text);}
+  #p2pos .osx-mini-hint{font:600 12px/1.3 system-ui;color:var(--gold-bright);}
+  /* ===== expand modal (holds the full calendar / map) ===== */
+  .osx-cal-pop-in.osx-expand{width:min(760px,100%);max-height:88vh;overflow:auto;padding:22px;text-align:left;}
+  .osx-cal-pop-in.osx-expand-map{width:min(880px,100%);}
+  #p2pos .osx-expand-map .osx-mb-map{height:62vh;min-height:320px;}
+  #p2pos .osx-expand-cal .osx-cal{max-width:none;}
   /* community walkthrough modal */
   .osx-tour-in{width:min(400px,100%);text-align:center;padding:26px 24px 22px;}
   .osx-tour-emoji{font-size:44px;line-height:1;margin-bottom:12px;}
