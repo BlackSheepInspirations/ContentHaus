@@ -265,3 +265,15 @@ NEEDS worker re-paste (620 lines) for edit/delete + charset.
 - **Garbled category text fix:** category emoji AND label now sourced from the UTF-8 JS file (CATS) not the JSON; worker json() now sends `charset=utf-8` (root fix for the `•` bullets in "Wins • Habits • Growth" on some devices).
 - **Gold polish:** spotlight + Recent-Wins gold outline/glow fixed (specificity was overridden by `.osx-side-card`; now `.osx-side-card.osx-wins-card` + stronger). Invite button now filled gold (Members stays ghost).
 - **Trusted Guide logo:** new transparent grayscale tree/fingerprint art `assets/p2p-trusted-guide.png` (592x1526, sheep is black → invisible on dark bg by design). Hero mark swapped to it (`.osx-tg-mark`, drop-shadow glow). A glowing `.osx-tlogo` is injected before the first `.osx-h2` of every `.osx-view` via inline script — glow uses `--gold-bright` so it follows the recolor. Recolor var confirmed: recolor writes Stand Out hue into `--gold`/`--gold-bright`/`--gstroke`/`--aurora` (p2p-os.liquid ~line 1707+).
+
+## 2026-08-01 (later 5) — "My Success" command center (all private, localStorage synced via p2p_ metafield; NO worker paste)
+New top-level OS tab **My Success** (nav `success^My Success^rocket^view^^`; hero h2 "My Success (G + R) × O × W = S"). Everything renders from assets/p2p-planner.js into `[data-planner]` (moved out of the Members tab). Data key `p2p_planner`. Sub-views (osx-pl-nav):
+- **📊 Dashboard** — launch-countdown banner (nearest GROWS Window) + activity strip (followers from latest snap / total lives / total posts / this-week lives+posts) + roll-up rings (Day/Week/Month/Qtr/Year via periodPct) + goal summaries.
+- **🎯 Goals (GROWS)** — data.goals[]; fields g/r/o/w/s + roadmap[] (gauges) + stage(grows/rooted/evergreen) + Window date; momentum = ((G01+R01)/2)×O×W (multiplicative → 0 warning); ROOTED roadmap template.
+- **📡 Lives** — data.lives[]; plan (date/time/platform/topic/hook/goal + Marketing Haus link) + post-live stats (followers/gifts/hearts/comments/peak/duration/sales) + trends (totals/avg/best-time/follower sparkline).
+- **📝 Posts** — data.posts[]; type(Video/Reel/Carousel/Photo/Story/Text)/hook/CTA/length/music/topic/time + stats(views/likes/comments/shares/saves/followers) + best-type trend. Reuses osx-lv-* card CSS.
+- **💡 Ideas** — data.ideas[]; capture + "Plan as post" (creates a data.posts entry) + delete.
+- **📈 Growth** — data.snaps[] weekly snapshots (followers/likes/diamonds/revenue) + follower sparkline + week delta + auto livesInWeek/postsInWeek.
+- **✅ Lists** — Top3+To-dos per timeframe, gauges, carry-over + Completed archive (unchanged engine).
+Also earlier: personal CALENDAR (visit stars via p2p_visit_days + p2p_my_events plans; window.P2P_CAL_REFRESH) lives in the Community mini-modal + Members inline.
+STILL QUEUED: 📓 Journal-everywhere (needs p2p-notebook.js multi-instance refactor); calendar "posted today?" checkbox → Posts (cross-file localStorage sync caveat); RAFT framework template (needs the RAFT worksheet content — GROWS + ROOTED already templated).
