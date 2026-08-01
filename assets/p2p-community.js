@@ -107,3 +107,26 @@
 
   load();
 })();
+
+/* ---- Help us be better — private suggestions/questions (emails the team) ---- */
+(function () {
+  var root = document.getElementById('p2pos'); if (!root) return;
+  var box = root.querySelector('[data-suggest]'); if (!box) return;
+  var text = box.querySelector('[data-suggest-text]'),
+      kind = box.querySelector('[data-suggest-kind]'),
+      send = box.querySelector('[data-suggest-send]'),
+      status = box.querySelector('[data-suggest-status]');
+  if (!send) return;
+  send.addEventListener('click', function () {
+    var t = (text && text.value || '').trim(); if (!t) return;
+    send.disabled = true; if (status) status.textContent = 'Sending…';
+    fetch('/apps/p2p/suggest', { method: 'POST', headers: { 'content-type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify({ text: t, kind: (kind ? kind.value : 'Suggestion') }) })
+      .then(function (r) { return r.json(); })
+      .then(function (res) {
+        send.disabled = false;
+        if (res && res.ok) { text.value = ''; if (status) { status.textContent = 'Thanks — sent to the team ✓'; setTimeout(function () { status.textContent = ''; }, 4000); } }
+        else if (status) { status.textContent = 'Try again'; }
+      })
+      .catch(function () { send.disabled = false; if (status) status.textContent = 'Try again'; });
+  });
+})();
