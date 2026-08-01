@@ -10,7 +10,7 @@
   var host = root.querySelector('[data-planner]'); if (!host) return;
   var KEY = 'p2p_planner';
   var TFS = [['day', 'Day'], ['week', 'Week'], ['month', 'Month'], ['quarter', 'Quarter'], ['year', 'Year']];
-  var STAGES = [['grows', '🌱', 'GROWS'], ['rooted', '🚀', 'Rooted'], ['evergreen', '🌲', 'Evergreen']];
+  var STAGES = [['grows', '🌱', 'Planning'], ['rooted', '🚀', 'Launching'], ['evergreen', '🌲', 'Evergreen']];
   var GROWS = [['g', 'G', 'Ground Zero', 'Where you actually stand right now — not where you wish you stood.'],
                ['r', 'R', 'Roadmap', 'The specific, ordered steps between here and your Success Vision.'],
                ['o', 'O', 'Ownership', 'What will you personally ship this week — not once it feels ready?'],
@@ -129,8 +129,9 @@
     var road = (g.roadmap || []).map(function (x) { return '<div class="osx-pl-item">' + gauge(x.pct, g.id + '|' + x.id) + '<span class="osx-pl-text">' + esc(x.text) + '</span><span class="osx-pl-pct">' + (x.pct || 0) + '%</span><button class="osx-pl-del" data-rdel="' + esc(g.id + '|' + x.id) + '" aria-label="Remove">✕</button></div>'; }).join('');
     var warn = (mo === 0 && g.s) ? '<div class="osx-pl-warn">⚠ The formula multiplies to zero — set an <b>Ownership</b> action and a <b>Window</b> date to get momentum.</div>' : '';
     var body = '<div class="osx-pl-gbody">' +
-      '<div class="osx-pl-stages">' + stageBtns + '<button class="osx-pl-gdel" data-gdel="' + esc(g.id) + '">Delete goal</button></div>' + warn +
-      field(g, 'g') + field(g, 's') +
+      '<div class="osx-pl-flabel" style="margin-top:14px;">Name this goal</div><input class="osx-pl-in" data-gf="' + esc(g.id) + '|title" value="' + esc(g.title === 'New goal' ? '' : (g.title || '')) + '" placeholder="e.g. Launch my digital planner" maxlength="90">' +
+      '<div class="osx-pl-stages"><span class="osx-pl-stagelbl">Stage:</span>' + stageBtns + '<button class="osx-pl-gdel" data-gdel="' + esc(g.id) + '">Delete goal</button></div>' + warn +
+      field(g, 'g') +
       '<div class="osx-pl-flabel">R · Roadmap <span>the ordered steps — each tracks its own progress</span></div>' + road +
       '<div class="osx-pl-add"><input class="osx-pl-in" data-radd="' + esc(g.id) + '" placeholder="Add a roadmap step…" maxlength="120"><button class="osx-pl-addbtn" data-raddb="' + esc(g.id) + '">Add</button> <button class="osx-pl-tmpl" data-rtmpl="' + esc(g.id) + '">＋ ROOTED launch</button></div>' +
       '<div class="osx-pl-own"><div class="osx-pl-flabel">O · Ownership <span>your committed action this week</span></div>' +
@@ -138,6 +139,7 @@
         '<button class="osx-pl-owntog' + (ownedThisWeek(g) ? ' on' : '') + '" data-otog="' + esc(g.id) + '">' + (ownedThisWeek(g) ? '✓ Done this week' : 'Mark done') + '</button></div></div>' +
       '<div class="osx-pl-flabel">W · Window of Time <span>a real deadline</span></div>' +
         '<input class="osx-pl-date" type="date" data-wf="' + esc(g.id) + '" value="' + esc(g.w || '') + '">' +
+      field(g, 's') +
       '</div>';
     return '<div class="osx-pl-goal open">' + head + body + '</div>';
   }
@@ -334,7 +336,7 @@
 
   /* ---------- gamification: milestones + celebrations ---------- */
   var MILESTONES = [
-    ['first_goal', 'First goal set', '🎯', function () { return data.goals.length >= 1; }],
+    ['first_goal', 'First goal set', '🎯', function () { return data.goals.some(function (g) { return (g.roadmap && g.roadmap.length) || g.w || (g.title && g.title !== 'New goal'); }); }],
     ['first_road', 'First step complete', '🧭', function () { return data.goals.some(function (g) { return (g.roadmap || []).some(function (x) { return x.pct >= 100; }); }); }],
     ['goal_done', 'A goal fully reached!', '🏆', function () { return data.goals.some(function (g) { var r = g.roadmap || []; return r.length && r.every(function (x) { return x.pct >= 100; }); }); }],
     ['launched', 'Launched — you hit 🚀 Rooted', '🚀', function () { return data.goals.some(function (g) { return g.stage === 'rooted' || g.stage === 'evergreen'; }); }],
@@ -344,7 +346,6 @@
     ['first_post', 'First post logged', '📝', function () { return data.posts.some(function (p) { return p.done; }); }],
     ['fifty_posts', '50 posts — consistency!', '✍️', function () { return data.posts.filter(function (p) { return p.done; }).length >= 50; }],
     ['first_idea', 'First idea captured', '💡', function () { return data.ideas.length >= 1; }],
-    ['first_product', 'First product added', '📦', function () { return data.products.length >= 1; }],
     ['product_live', 'A product went LIVE! 🟢', '🛍️', function () { return data.products.some(function (p) { return p.status === 'live'; }); }],
     ['first_sale', 'First sale 💰', '💰', function () { return data.snaps.some(function (s) { return num(s.revenue) > 0 || num(s.sold) > 0; }) || data.lives.concat(data.posts).some(function (x) { return num((x.s || {}).sales) > 0; }); }],
     ['hundred', '100 followers', '⭐', function () { return data.snaps.some(function (s) { return num(s.followers) >= 100; }); }],
@@ -362,7 +363,7 @@
   function celebrateNext() {
     if (!celebrateQueue.length) return; var m = celebrateQueue.shift();
     var pop = document.createElement('div'); pop.className = 'osx-cal-pop';
-    pop.innerHTML = '<div class="osx-cal-pop-in osx-cele"><div class="osx-cele-emoji">' + m[2] + '</div><div class="osx-cele-k">Milestone unlocked!</div><div class="osx-cele-l">' + esc(m[1]) + '</div><button class="osx-cele-x" type="button">Keep going 🔥</button></div>';
+    pop.innerHTML = '<div class="osx-cal-pop-in osx-cele"><div class="osx-cele-emoji">' + m[2] + '</div><div class="osx-cele-k">' + esc(m[3] || 'Milestone unlocked!') + '</div><div class="osx-cele-l">' + esc(m[1]) + '</div><button class="osx-cele-x" type="button">Keep going 🔥</button></div>';
     root.appendChild(pop); confetti();
     function close() { pop.remove(); setTimeout(celebrateNext, 200); }
     pop.addEventListener('click', function (e) { if (e.target === pop) close(); });
@@ -375,10 +376,42 @@
     if (fresh.length) { var wasEmpty = !celebrateQueue.length; celebrateQueue = celebrateQueue.concat(fresh); if (wasEmpty) celebrateNext(); }
     milestoneBaseline = false;
   }
+  var ENCOURAGE = [
+    'You showed up — that\'s the whole game. 🔥', 'Reps build rooms. Keep going.', 'Consistency is your superpower.',
+    'Every live makes the next one easier.', 'The flock is watching you rise. 🐑', 'Proof, not promises — look at you go.',
+    'You\'re not dabbling, you\'re building.', 'Momentum loves the ones who return.', 'Born an original — and it shows.',
+    'Small reps, massive compounding.', 'You did the hard part: you came back.', 'This is what "rooted" looks like. 🌱',
+    'Your future self is cheering right now.', 'Showing up scared still counts. 💪', 'One more live than yesterday. That\'s growth.',
+    'You\'re coaching your own confidence.', 'The algorithm rewards the relentless.', 'Keep watering it — the bloom is coming.',
+    'You\'re turning nervous into natural.', 'Purpose over perfection, always. 🖤'
+  ];
+  function checkLiveCele() {
+    var n = data.lives.filter(function (l) { return l.done; }).length;
+    if (data.liveCele === undefined) { data.liveCele = n; save(); return; }   // silent baseline
+    if (n <= data.liveCele) return;
+    var t = -1; for (var k = data.liveCele + 1; k <= n; k++) { if (k === 1 || k === 5 || k === 10 || (k > 10 && k % 10 === 0)) t = k; }
+    data.liveCele = n; save();
+    if (t > -1) { var wasEmpty = !celebrateQueue.length; celebrateQueue.push(['live' + t, ENCOURAGE[Math.floor(Math.random() * ENCOURAGE.length)], '📡', (t === 1 ? 'First live logged!' : t + ' lives logged!')]); if (wasEmpty) celebrateNext(); }
+  }
+  function openInfo() {
+    var earned = MILESTONES.filter(function (m) { return data.milestones[m[0]]; }).length;
+    var pop = document.createElement('div'); pop.className = 'osx-cal-pop';
+    pop.innerHTML = '<div class="osx-cal-pop-in osx-info"><button class="osx-cal-pop-x" type="button" aria-label="Close">✕</button>' +
+      '<div class="osx-info-h">🏅 How the wins work</div>' +
+      '<p class="osx-info-p"><b>Milestones</b> unlock automatically when you actually <b>do the work</b> — set a real goal, complete a roadmap step, log a live or a post <em>with results</em>, take a product live, hit follower marks. You\'ve earned <b>' + earned + ' of ' + MILESTONES.length + '</b> so far. Each one throws confetti. 🎉</p>' +
+      '<p class="osx-info-p"><b>Live celebrations</b> fire when you come back and <b>log your results</b> — your 1st, 5th, 10th, then every 10 — each with a little encouragement.</p>' +
+      '<p class="osx-info-p"><b>Goal stages</b> (not the GROWS formula — that\'s how you <em>build</em> the goal): <b>🌱 Planning</b> → you\'re shaping it · <b>🚀 Launching</b> → doors open, run ROOTED · <b>🌲 Evergreen</b> → it\'s live and you\'re sustaining it. Just a status you set as the goal grows up.</p>' +
+      '<button class="osx-cele-x" type="button">Got it 🔥</button></div>';
+    root.appendChild(pop);
+    function close() { pop.remove(); }
+    pop.addEventListener('click', function (e) { if (e.target === pop) close(); });
+    pop.querySelector('.osx-cal-pop-x').addEventListener('click', close);
+    pop.querySelector('.osx-cele-x').addEventListener('click', close);
+  }
   function milestonesStrip() {
     var earned = MILESTONES.filter(function (m) { return data.milestones[m[0]]; });
     var badges = MILESTONES.map(function (m) { return '<span class="osx-ms' + (data.milestones[m[0]] ? ' on' : '') + '" title="' + esc(m[1]) + '">' + m[2] + '</span>'; }).join('');
-    return '<div class="osx-pl-sech" style="margin-top:14px;">🏅 Milestones <span style="text-transform:none;letter-spacing:0;color:var(--muted);font-weight:600;">' + earned.length + ' / ' + MILESTONES.length + '</span></div><div class="osx-ms-row">' + badges + '</div>';
+    return '<div class="osx-pl-sech" style="margin-top:14px;">🏅 Milestones <span style="text-transform:none;letter-spacing:0;color:var(--muted);font-weight:600;">' + earned.length + ' / ' + MILESTONES.length + '</span> <button class="osx-ms-info" data-msinfo>ⓘ How this works</button></div><div class="osx-ms-row">' + badges + '</div>';
   }
 
   function render() {
@@ -386,6 +419,7 @@
     host.innerHTML = '<div class="osx-pl">' + navHTML() + '<div class="osx-pl-view">' + body + '</div></div>';
     wire();
     checkMilestones();
+    checkLiveCele();
   }
   function renderArchive() {
     var by = {}; data.done.slice().reverse().forEach(function (d) { var k = d.tf + ' · ' + d.period; (by[k] = by[k] || []).push(d); });
@@ -454,8 +488,9 @@
     var ni = host.querySelector('[data-newidea]'); if (ni) ni.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); addIdea(); } });
     host.querySelectorAll('[data-idea]').forEach(function (b) { b.addEventListener('click', function () { var i = data.ideas.filter(function (x) { return x.id === b.getAttribute('data-idea'); })[0]; if (i) { i.used = true; data.posts.unshift({ id: uid(), topic: i.text, platform: 'TikTok', type: 'Video', date: '', time: '', hook: '', cta: '', length: '', music: '', done: false, s: {} }); save(); view = 'posts'; render(); } }); });
     host.querySelectorAll('[data-iddel]').forEach(function (b) { b.addEventListener('click', function () { data.ideas = data.ideas.filter(function (x) { return x.id !== b.getAttribute('data-iddel'); }); save(); render(); }); });
-    // creator mode
+    // creator mode + info
     host.querySelectorAll('[data-ctype]').forEach(function (b) { b.addEventListener('click', function () { data.ctype = b.getAttribute('data-ctype'); save(); render(); }); });
+    var msi = host.querySelector('[data-msinfo]'); if (msi) msi.addEventListener('click', openInfo);
     // RAFT weekly loop
     host.querySelectorAll('[data-raft]').forEach(function (el) { var k = el.getAttribute('data-raft'); var ev = (el.type === 'checkbox') ? 'change' : 'change'; el.addEventListener(ev, function () { var c = raftCycle(); if (el.type === 'checkbox') c[k] = el.checked; else c[k] = el.value; save(); if (k === 'fastWin' || k === 'corrected') render(); }); });
     host.querySelectorAll('[data-act]').forEach(function (b) { b.addEventListener('click', function () { var c = raftCycle(), n = +b.getAttribute('data-act'); c.act = (c.act === n) ? n - 1 : n; save(); render(); }); });

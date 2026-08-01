@@ -1338,6 +1338,14 @@
   #p2pos .osx-tlogo::before{content:"";position:absolute;left:50%;top:48%;transform:translate(-50%,-50%);width:210%;height:130%;border-radius:50%;background:radial-gradient(ellipse,var(--gold-bright),transparent 62%);opacity:.3;z-index:0;pointer-events:none;}
   #p2pos .osx-tlogo img{position:relative;z-index:1;height:100%;width:auto;display:block;filter:drop-shadow(0 0 5px var(--gold-bright)) drop-shadow(0 0 2px var(--gold-bright));}
   #p2pos .osx-tg-mark{filter:drop-shadow(0 0 26px var(--gold-bright)) drop-shadow(0 0 10px var(--gold-bright));}
+  /* big hero logo on the left, eyebrow/title/subtext stacked to the right */
+  #p2pos .osx-hero-lockrow{display:flex;align-items:center;gap:22px;margin-bottom:16px;}
+  #p2pos .osx-hero-biglogo{flex:none;display:flex;}
+  #p2pos .osx-hero-biglogo img{height:clamp(96px,15vw,158px);width:auto;filter:drop-shadow(0 0 22px var(--gold-bright)) drop-shadow(0 0 8px var(--gold-bright));}
+  #p2pos .osx-hero-textcol{min-width:0;}
+  #p2pos .osx-hero-textcol .osx-kick{margin-top:0;}
+  #p2pos .osx-hero-textcol .osx-h2,#p2pos .osx-hero-textcol .osx-lede,#p2pos .osx-hero-textcol .osx-comm-tag{margin-left:0;}
+  @media(max-width:640px){#p2pos .osx-hero-lockrow{gap:14px;}#p2pos .osx-hero-biglogo img{height:78px;}}
   /* click-to-open post modal */
   #p2pos .osx-pm{width:min(640px,100%);text-align:left;max-height:88vh;overflow-y:auto;padding:24px;background:var(--panel);}
   #p2pos .osx-pm .osx-cw-post-text{font:400 15px/1.65 system-ui;color:#dce7e2;}
@@ -1566,6 +1574,14 @@
   #p2pos .osx-lag-s span{font:600 10px/1 system-ui;text-transform:uppercase;letter-spacing:.03em;color:#6b7d84;margin-top:4px;}
   #p2pos .osx-lag-linewrap{margin-left:auto;}
   #p2pos .osx-lag-line{width:160px;height:30px;}
+  #p2pos .osx-pl-stagelbl{font:700 11px/1 system-ui;color:var(--muted);align-self:center;margin-right:2px;}
+  #p2pos .osx-ms-info{border:1px solid var(--stroke);background:none;color:var(--muted);cursor:pointer;border-radius:999px;padding:4px 10px;font:600 11px/1 system-ui;text-transform:none;letter-spacing:0;margin-left:4px;}
+  #p2pos .osx-ms-info:hover{border-color:var(--gstroke);color:var(--gold-bright);}
+  .osx-info{width:min(460px,100%);text-align:left;padding:24px;}
+  .osx-info-h{font:800 18px/1.2 Georgia,serif;color:#f4c534;margin-bottom:14px;}
+  .osx-info-p{font:400 13.5px/1.6 system-ui;color:#d7e3de;margin:0 0 12px;}
+  .osx-info-p b{color:#fff;}
+  .osx-info .osx-cele-x{margin-top:6px;}
   @media (max-width:900px){#p2pos .osx-members-grid{grid-template-columns:1fr;}}
   /* community walkthrough modal */
   .osx-tour-in{width:min(400px,100%);text-align:center;padding:26px 24px 22px;}
@@ -1992,13 +2008,23 @@ window.P2P_EVENTS = [{%- for b in ev_blocks -%}{"iso":{{ b.settings.iso_date | d
       root.style.setProperty('--aurora', 'linear-gradient(100deg,' + stops.concat(stops[0]).join(',') + ')');
     })();
 
-    // Trusted Guide logo next to each view's title (Hauses are external pages, so they're untouched)
+    // Trusted Guide logo — large on the LEFT, with each view's eyebrow/title/subtext stacked to its right.
     (function(){
       var src = "{{ 'p2p-trusted-guide.png' | asset_url }}";
-      var logo = '<span class="osx-tlogo"><img src="' + src + '" alt="" aria-hidden="true"></span>';
       root.querySelectorAll('.osx-view').forEach(function(v){
         var h = v.querySelector('.osx-h2');
-        if(h && !h.querySelector('.osx-tlogo')) h.insertAdjacentHTML('afterbegin', logo);
+        if(!h || h.closest('.osx-hero-lockrow')) return;
+        var kick = (h.previousElementSibling && h.previousElementSibling.classList.contains('osx-kick')) ? h.previousElementSibling : null;
+        var follow = [], n = h.nextElementSibling;
+        while(n && (n.classList.contains('osx-comm-tag') || n.classList.contains('osx-lede'))){ var nx = n.nextElementSibling; follow.push(n); n = nx; }
+        var row = document.createElement('div'); row.className = 'osx-hero-lockrow';
+        var col = document.createElement('div'); col.className = 'osx-hero-textcol';
+        v.insertBefore(row, kick || h);
+        row.innerHTML = '<span class="osx-hero-biglogo"><img src="' + src + '" alt="" aria-hidden="true"></span>';
+        row.appendChild(col);
+        if(kick) col.appendChild(kick);
+        col.appendChild(h);
+        follow.forEach(function(f){ col.appendChild(f); });
       });
     })();
 
