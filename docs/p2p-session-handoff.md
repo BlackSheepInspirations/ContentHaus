@@ -1,4 +1,4 @@
-# Purpose 2 Profit — Session Handoff (2026-07-31)
+# Purpose 2 Profit — Session Handoff (2026-08-01)
 
 Read this first in a fresh conversation, alongside the auto-loaded memory
 (`memory/MEMORY.md` + files), `docs/p2p-os-build-plan.md`, and
@@ -295,3 +295,18 @@ STILL QUEUED: 📓 Journal-everywhere (needs p2p-notebook.js multi-instance refa
 5. **RAFT/ROOTED/GROWS template menu** — GROWS(goal builder)+ROOTED(templated) done; wire a proper template dropdown (currently confirm dialogs).
 6. **Content Planner calendar drag** — Idea Vault → "Plan as post" done; dragging ideas onto calendar days is the fuller version.
 7. **Beta test w/ real members**, **Frank/Ruth/Eric/Drea 150-post vaults**, **Cloudflare R2 uploads**, **Shopify Flow all-access tag** (pre-existing backlog).
+
+## 2026-08-01 (later 7) — dashboard Chunk 4, reminders, bell fix, social widgets, OS rail everywhere
+All committed + live. Worker WAS re-pasted this session (Andrea deployed) — reminder-firing + house engagement.
+- **Dashboard reworked to two columns** (`.osx-dash-grid` in p2p-planner.js): left = RAFT/stats/social widgets/shipped chart/rings/goals/milestones; right = radar + full month calendar.
+  - **Full calendar** `dashCalHTML()` reads lives/goals/products + window.P2P_EVENTS + p2p_my_events (plans) + p2p_visit_days (★), colored markers (live/goal/launch/event/plan), today ring, ‹›month nav, day-click popup `openDcDay(iso)`.
+  - **"Coming up" radar** `radarHTML()` — next-14-day lives/launches/goals, MOVED above the calendar, capped at 5 with `.osx-radar-scroll` for more; rows are buttons → `openItemDetail(kind,id)` (jumps to the item + scrolls it into view).
+  - **Clickable "What you shipped" bars** → `openShipWeek(wk)` lists that week's exact lives/posts/fast-wins, each with an "open & update" link (`weekArtifacts()`).
+- **Social snapshot widgets** `socialWidgetsHTML()` (hidden for ctype=product): last-live recap (viewers/followers/avg-watch + goals-met pill, clicks through), follower-growth sparkline (from data.snaps), 12-week consistency heatmap (lives+posts), top-platform/best-time. CSS `.osx-sw-*`.
+- **Reminders** (bell alerts before lives/goals/launches): `REMIND_OFFS` chips (`remindRow`) on live/goal/product cards; `rebuildReminders()` (called in save()) writes flat `localStorage.p2p_reminders` [{nid,id,kind,title,label,fireAt,startAt}] + debounced best-effort `POST /apps/p2p/reminders`. **Bell client** (p2p-community.js) `dueReminders()` fires due+unfired into the menu/count, `p2p_rem_fired` dedupes (once), marked on bell-open. **Worker**: `POST /apps/p2p/reminders` stores `rem:<id>`; `scheduled()` fires due into the bell (`remfired:<id>` dedupe) so they arrive cross-device/away. Client dedupes local vs server-fired by nid.
+- **Bell now lights up** — root cause was NO triggers in solo testing (house voices only posted; can't self-notify). Fix: reminders drive it + **house voices now react to (and ~1/3 comment on) recent member posts** in `scheduled()` (HOUSE_REACTS/HOUSE_COMMENTS, guarded per-house so idempotent). Bell IIFE generalized: finds `[data-userbar]` anywhere (works on the rail too).
+- **OS shell everywhere** — see memory `p2p-os-rail.md`. `snippets/p2p-os-rail.liquid` + `assets/p2p-os-shell.css` (scoped #p2posrail) render the sidebar on the OS + all 5 built Haus tools (brand/content(prompt-builder)/graphics/project(product-haus)/marketing), gated per-page, `push:'#<mount>-app'` margin-shift. **NOT on the Journey realms** (Andrea's call — reverted). Rail sits below the sticky theme header via `.shopify-section-group-header-group` measurement (JS in the snippet). View nav items deep-link `/pages/p2p-os?v=<view>` (OS handler already existed ~line 2044).
+- **Transparent hero images** verified (WebP alpha=yes) + re-pushed: brand-haus-hero-{trail-forger,quiet-authority}.jpg.
+- **Confirmed already-done** (were stale in this doc): courses built; all-access Flow in testing; mini Founders Assessment = lead magnet on OS Preview (full stays gated); realm unlock IMPLEMENTED (`unlock_after_handle` anchors, e.g. Realm 5 after `rooted`); tagline live ("Where Your originality is rooted and ready to grow. From thought to thrive." / short "thought to thrive").
+- **⚠️ Andrea's Cloudflare to-dos:** cron Trigger → **every 15 min** (runs reminder-firing + house engagement); add `admin_ids` = her customer id (post pinning). Optional: Giphy key, resend_key/alert_email.
+- **STILL OPEN carries forward:** journal-everywhere, calendar "posted today?"→Post, template dropdown, idea→calendar drag, "goals mandatory each live" hard gate, time-on-view viz; Community channels big build (post-detail modal, follow/hover card, engagement points, R2 uploads, live Giphy, 600-post house vaults); check-badge taxonomy input (for cert/check badges); Checkpoint flip cards (#12). Growth Haus + standalone Bonus page don't exist as sections yet (rail extends to them once built).
