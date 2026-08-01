@@ -30,7 +30,7 @@
 
   var data; try { data = JSON.parse(localStorage.getItem(KEY)) || null; } catch (e) { data = null; }
   if (!data) data = {}; if (!data.done) data.done = []; if (!data.goals) data.goals = []; if (!data.lives) data.lives = []; if (!data.posts) data.posts = []; if (!data.snaps) data.snaps = []; if (!data.ideas) data.ideas = [];
-  if (!data.products) data.products = []; if (!data.ctype) data.ctype = 'both';
+  if (!data.products) data.products = []; if (!data.ctype) data.ctype = 'both'; if (!data.raft) data.raft = { cycles: [] };
   var milestoneBaseline = (data.milestones === undefined); if (!data.milestones) data.milestones = {};
   TFS.forEach(function (t) {
     var tf = t[0]; if (!data[tf]) data[tf] = { period: periodKey(tf), top: [], todo: [] };
@@ -58,6 +58,30 @@
   function gauge(pct, id) { var f = Math.round((pct || 0) / 25), s = ''; for (var i = 0; i < 4; i++) s += '<span class="osx-pl-seg' + (i < f ? ' on' : '') + '" data-seg="' + i + '"></span>'; return '<span class="osx-pl-gauge" data-gid="' + esc(id) + '" title="' + (pct || 0) + '%">' + s + '</span>'; }
 
   /* ---------- views ---------- */
+  /* ---------- RAFT weekly loop + artifacts (controllable-first) ---------- */
+  function dfromiso(iso) { var p = iso.split('-'); return new Date(+p[0], +p[1] - 1, +p[2]); }
+  function raftCycle() { var wk = weekKey(); var c = data.raft.cycles.filter(function (x) { return x.week === wk; })[0]; if (!c) { c = { week: wk, relieve: '', actText: '', act: 0, fastWin: '', corrected: false }; data.raft.cycles.unshift(c); save(); } return c; }
+  function lastCycleWithWin() { var s = data.raft.cycles.slice().sort(function (a, b) { return (b.week || '').localeCompare(a.week || ''); }); for (var i = 0; i < s.length; i++) if (s[i].week !== weekKey() && s[i].fastWin) return s[i]; return null; }
+  function tractionStreak() { var wins = data.raft.cycles.filter(function (c) { return c.fastWin; }).map(function (c) { return c.week; }); var n = 0, d = new Date(); for (var i = 0; i < 60; i++) { if (wins.indexOf(periodKey('week', d)) > -1) { n++; d.setDate(d.getDate() - 7); } else if (i === 0) { d.setDate(d.getDate() - 7); } else break; } return n; }
+  function artifactCount() { var road = 0; data.goals.forEach(function (g) { (g.roadmap || []).forEach(function (x) { if (x.pct >= 100) road++; }); }); return data.lives.filter(function (l) { return l.done; }).length + data.posts.filter(function (p) { return p.done; }).length + data.products.filter(function (p) { return p.status === 'live'; }).length + road + data.raft.cycles.filter(function (c) { return c.fastWin; }).length; }
+  function weekList(n) { var arr = [], d = new Date(); for (var i = 0; i < n; i++) { arr.unshift(periodKey('week', d)); d.setDate(d.getDate() - 7); } return arr; }
+  function artifactsInWeek(wk) { var c = 0; data.lives.forEach(function (l) { if (l.done && l.date && periodKey('week', dfromiso(l.date)) === wk) c++; }); data.posts.forEach(function (p) { if (p.done && p.date && periodKey('week', dfromiso(p.date)) === wk) c++; }); if (data.raft.cycles.filter(function (x) { return x.week === wk && x.fastWin; })[0]) c++; return c; }
+  function barChart() { var wks = weekList(8), vals = wks.map(artifactsInWeek), max = Math.max.apply(null, vals.concat([1])); return '<div class="osx-barchart">' + vals.map(function (v, i) { return '<div class="osx-bar-col"><div class="osx-bar" style="height:' + Math.max(5, Math.round((v / max) * 100)) + '%" title="' + v + ' shipped"></div><span>' + esc(wks[i].slice(-3)) + '</span></div>'; }).join('') + '</div>'; }
+  function raftHTML() {
+    var c = raftCycle(), last = lastCycleWithWin(), ct = data.ctype || 'both';
+    var actL = ['Not chosen', '① Chosen', '② Started', '③ Done'], trac = ct === 'product' ? 'products w/ repeat' : 'weeks unbroken';
+    return '<div class="osx-raft"><div class="osx-raft-h">🧭 This week\'s loop · RAFT <span>Relieve → Act → Fast Win → Traction</span></div><div class="osx-raft-grid">' +
+      '<div class="osx-raft-b"><div class="osx-raft-l">R · Relieve</div><div class="osx-raft-hint">Where am I? What did last week prove?' + (last ? ' <em>Last win: ' + esc(last.fastWin) + '</em>' : '') + '</div><textarea class="osx-pl-ta" rows="2" data-raft="relieve" maxlength="300">' + esc(c.relieve) + '</textarea></div>' +
+      '<div class="osx-raft-b"><div class="osx-raft-l">A · Act <span class="osx-raft-act-s">' + actL[c.act || 0] + '</span></div><input class="osx-pl-in" data-raft="actText" value="' + esc(c.actText) + '" placeholder="The one committed move this week" maxlength="160"><div class="osx-raft-acts"><button class="osx-raft-ab' + ((c.act || 0) >= 1 ? ' on' : '') + '" data-act="1">Chosen</button><button class="osx-raft-ab' + ((c.act || 0) >= 2 ? ' on' : '') + '" data-act="2">Started</button><button class="osx-raft-ab' + ((c.act || 0) >= 3 ? ' on' : '') + '" data-act="3">Done</button></div></div>' +
+      '<div class="osx-raft-b"><div class="osx-raft-l">F · Fast Win</div><div class="osx-raft-hint">What shipped that didn\'t exist before?</div><input class="osx-pl-in" data-raft="fastWin" value="' + esc(c.fastWin) + '" placeholder="The thing you made — proof, not promise" maxlength="160"></div>' +
+      '<div class="osx-raft-b"><div class="osx-raft-l">T · Traction</div><div class="osx-raft-hint"><b>' + tractionStreak() + '</b> ' + trac + ' · did you correct something?</div><label class="osx-raft-corr"><input type="checkbox" data-raft="corrected"' + (c.corrected ? ' checked' : '') + '> I made a correction from last week</label></div>' +
+      '</div></div>';
+  }
+  function laggingHTML() {
+    var snaps = data.snaps.slice().sort(function (a, b) { return (a.week || '').localeCompare(b.week || ''); }), last = snaps[snaps.length - 1] || {}, vals = snaps.map(function (s) { return num(s.followers); });
+    var line = ''; if (vals.length > 1) { var max = Math.max.apply(null, vals) || 1, w = 160, h = 30, step = w / (vals.length - 1); line = '<svg class="osx-lag-line" viewBox="0 0 ' + w + ' ' + h + '" preserveAspectRatio="none"><polyline points="' + vals.map(function (v, i) { return (i * step).toFixed(1) + ',' + (h - (v / max) * (h - 2) - 1).toFixed(1); }).join(' ') + '" fill="none" stroke="#6b7d84" stroke-width="1.5"/></svg>'; }
+    return '<div class="osx-lag"><div class="osx-lag-h">Lagging indicators <span>— not fully in your hands; the work above is what moves them</span></div><div class="osx-lag-row"><div class="osx-lag-s"><b>' + num(last.followers) + '</b><span>followers</span></div><div class="osx-lag-s"><b>' + num(last.likes) + '</b><span>likes</span></div><div class="osx-lag-s"><b>$' + num(last.revenue) + '</b><span>revenue</span></div>' + (line ? '<div class="osx-lag-linewrap">' + line + '</div>' : '') + '</div></div>';
+  }
   var TABS = [['dash', '📊 Dashboard', 'all'], ['goals', '🎯 Goals', 'all'], ['products', '📦 Products', 'product'], ['lives', '📡 Lives', 'content'], ['posts', '📝 Posts', 'content'], ['ideas', '💡 Ideas', 'content'], ['growth', '📈 Growth', 'all'], ['lists', '✅ Lists', 'all']];
   function tabShown(cat) { var ct = data.ctype || 'both'; if (cat === 'all') return true; if (cat === 'product') return ct !== 'content'; return ct !== 'product'; }
   function navHTML() {
@@ -70,12 +94,11 @@
     var sel = '<div class="osx-ct-sel"><span class="osx-ct-l">I create:</span>' + [['content', '📱 Content'], ['product', '📦 Products'], ['both', '✨ Both']].map(function (c) { return '<button class="osx-ct-b' + (ct === c[0] ? ' on' : '') + '" data-ctype="' + c[0] + '">' + c[1] + '</button>'; }).join('') + '</div>';
     var upcoming = data.goals.filter(function (g) { return g.w && daysTo(g.w) !== null && daysTo(g.w) >= 0; }).sort(function (a, b) { return daysTo(a.w) - daysTo(b.w); })[0];
     var cd = upcoming ? '<button class="osx-dash-cd" data-open="' + esc(upcoming.id) + '"><div class="osx-dash-cd-n">' + Math.max(0, daysTo(upcoming.w)) + '</div><div class="osx-dash-cd-t"><b>days to launch</b><span>' + esc(upcoming.title || 'your goal') + '</span></div></button>' : '';
-    var snaps = data.snaps.slice().sort(function (a, b) { return (a.week || '').localeCompare(b.week || ''); });
-    var fNow = snaps.length ? num(snaps[snaps.length - 1].followers) : 0;
+    var c = raftCycle();
     var stats = '<div class="osx-lv-trend">' +
-      '<div class="osx-lv-stat"><b>' + fNow + '</b><span>followers</span></div>' +
-      '<div class="osx-lv-stat"><b>' + data.lives.filter(function (l) { return l.done; }).length + '</b><span>total lives</span></div>' +
-      '<div class="osx-lv-stat"><b>' + data.posts.filter(function (p) { return p.done; }).length + '</b><span>total posts</span></div>' +
+      '<div class="osx-lv-stat"><b>' + artifactCount() + '</b><span>things shipped</span></div>' +
+      '<div class="osx-lv-stat"><b>' + ['—', 'Chosen', 'Started', 'Done'][c.act || 0] + '</b><span>this week\'s Act</span></div>' +
+      '<div class="osx-lv-stat"><b>' + tractionStreak() + '</b><span>traction streak</span></div>' +
       '<div class="osx-lv-stat"><b>' + livesInWeek(weekKey()) + ' / ' + postsInWeek(weekKey()) + '</b><span>lives / posts this wk</span></div></div>';
     var rings = TFS.map(function (t) { return '<div class="osx-pl-dring">' + ring(periodPct(t[0]), '') + '<span class="osx-pl-drl">' + t[1] + '</span></div>'; }).join('');
     var goals = data.goals.length ? data.goals.map(function (g) {
@@ -84,8 +107,10 @@
         '<span class="osx-pl-gsum-b"><b>' + esc(g.title || 'Untitled goal') + '</b>' +
         '<span class="osx-pl-gsum-m"><span class="osx-pl-stage-b">' + st[1] + ' ' + st[2] + '</span> · ' + esc(countdownText(g.w)) + '</span></span></button>';
     }).join('') : '<div class="osx-pl-empty">No goals yet — head to 🎯 Goals to build one with the GROWS formula.</div>';
-    return sel + cd + stats + '<div class="osx-pl-sech">📊 Progress by horizon</div><div class="osx-pl-strip">' + rings + '</div>' +
-      '<div class="osx-pl-sech" style="margin-top:10px;">🎯 Your goals</div>' + goals + milestonesStrip();
+    return sel + cd + raftHTML() + stats +
+      '<div class="osx-pl-sech">📊 What you shipped — last 8 weeks</div>' + barChart() +
+      '<div class="osx-pl-sech">🎚️ Progress by horizon</div><div class="osx-pl-strip">' + rings + '</div>' +
+      '<div class="osx-pl-sech" style="margin-top:10px;">🎯 Your goals</div>' + goals + milestonesStrip() + laggingHTML();
   }
   function growsRow(g) {
     return '<div class="osx-pl-grows">' + GROWS.map(function (r) {
@@ -431,6 +456,9 @@
     host.querySelectorAll('[data-iddel]').forEach(function (b) { b.addEventListener('click', function () { data.ideas = data.ideas.filter(function (x) { return x.id !== b.getAttribute('data-iddel'); }); save(); render(); }); });
     // creator mode
     host.querySelectorAll('[data-ctype]').forEach(function (b) { b.addEventListener('click', function () { data.ctype = b.getAttribute('data-ctype'); save(); render(); }); });
+    // RAFT weekly loop
+    host.querySelectorAll('[data-raft]').forEach(function (el) { var k = el.getAttribute('data-raft'); var ev = (el.type === 'checkbox') ? 'change' : 'change'; el.addEventListener(ev, function () { var c = raftCycle(); if (el.type === 'checkbox') c[k] = el.checked; else c[k] = el.value; save(); if (k === 'fastWin' || k === 'corrected') render(); }); });
+    host.querySelectorAll('[data-act]').forEach(function (b) { b.addEventListener('click', function () { var c = raftCycle(), n = +b.getAttribute('data-act'); c.act = (c.act === n) ? n - 1 : n; save(); render(); }); });
     // products
     var npr = host.querySelector('[data-newprod]'); if (npr) npr.addEventListener('click', function () { var p = { id: uid(), name: 'New product', type: '', price: '', status: 'idea', launch: '', sold: '', revenue: '' }; data.products.unshift(p); expanded['PR' + p.id] = true; save(); render(); });
     host.querySelectorAll('[data-prtoggle]').forEach(function (b) { b.addEventListener('click', function (e) { if (e.target.closest('input,select,textarea,button,a')) return; var id = b.getAttribute('data-prtoggle'); expanded['PR' + id] = !expanded['PR' + id]; render(); }); });
