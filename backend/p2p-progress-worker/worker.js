@@ -4,7 +4,8 @@
      progress  GET/POST  -> per-customer metafield custom.p2p_progress (UNCHANGED)
      profile   GET/POST   -> this member's own PUBLIC card (KV), incl. opt-out + geo
      members   GET        -> all non-hidden public cards (directory + map)
-     community GET/POST    -> GET the wall; POST publishes a post IMMEDIATELY (unmoderated)
+     community GET/POST    -> GET the wall (with love counts); POST publishes IMMEDIATELY
+     react     POST         -> toggle a love on a post {id} -> {likes, liked}
      suggest   POST         -> private question/suggestion -> emails hello@ (+ KV log)
      moderate  POST        -> ADMIN (optional): {id, action:'delete'} — spam safety valve
 
@@ -103,7 +104,12 @@ export default {
         if (request.method === 'GET') {
           const list = await kv.list({ prefix: 'post:' });
           const posts = [];
-          for (const k of list.keys) { const p = await kv.get(k.name, 'json'); if (p) posts.push(p); }
+          for (const k of list.keys) {
+            const p = await kv.get(k.name, 'json');
+            if (!p) continue;
+            const by = p.likedBy || [];
+            posts.push({ id: p.id, name: p.name, text: p.text, kind: p.kind, ts: p.ts, likes: by.length, liked: by.indexOf(customerId) > -1 });
+          }
           posts.sort((a, b) => b.ts - a.ts);
           return json({ ok: true, posts });
         }
@@ -120,6 +126,22 @@ export default {
           return json({ ok: true });
         }
         return json({ error: 'method' }, 405);
+      }
+
+      /* ---------- love/react on a post (toggle) ---------- */
+      if (seg === 'react') {
+        if (!kv) return json({ error: 'no_store' }, 501);
+        const body = await request.json().catch(() => null);
+        const pid = body && body.id;
+        if (!pid) return json({ error: 'no_id' }, 400);
+        const p = await kv.get('post:' + pid, 'json');
+        if (!p) return json({ error: 'not_found' }, 404);
+        const by = p.likedBy || [];
+        const i = by.indexOf(customerId);
+        if (i > -1) by.splice(i, 1); else by.push(customerId);
+        p.likedBy = by;
+        await kv.put('post:' + pid, JSON.stringify(p));
+        return json({ ok: true, likes: by.length, liked: i === -1 });
       }
 
       /* ---------- suggestions / questions (private → email you) ---------- */
