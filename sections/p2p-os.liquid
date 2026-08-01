@@ -484,7 +484,10 @@
 
         <div class="osx-comm-lower">
           <div class="osx-lower-card">
-            <div class="osx-comm-map-h">📍 Where the flock is</div>
+            <div class="osx-flock-head">
+              <div class="osx-flock-title">🐑 Where's the flock?</div>
+              <div class="osx-flock-sub">Creators building right alongside you — scattered all over the map. Tap any pin to meet the maker behind it. 📍</div>
+            </div>
             <div class="osx-mb-map" data-mb-map></div>
             <p class="osx-mb-mapnote">Pins are approximate (city‑level) — never your exact address. Hide yourself anytime under Members → My Profile.</p>
           </div>
@@ -1034,7 +1037,7 @@
   #p2pos .osx-cw-tabs{display:flex;gap:8px;margin-bottom:14px;}
   #p2pos .osx-cw-tab{border:1px solid var(--stroke);background:transparent;color:var(--muted);cursor:pointer;padding:8px 16px;border-radius:999px;font:700 13px/1 system-ui;transition:background .14s,color .14s,border-color .14s;}
   #p2pos .osx-cw-tab.on{color:#0a1410;background:linear-gradient(100deg,#f4e2a6,#c9a24a);border-color:transparent;}
-  #p2pos .osx-cw-feed{display:flex;flex-direction:column;gap:12px;min-height:340px;}
+  #p2pos .osx-cw-feed{display:flex;flex-direction:column;gap:12px;min-height:340px;flex:1;}
   #p2pos .osx-cw-post{border:1px solid var(--stroke);border-radius:14px;padding:14px 16px;background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(9,17,24,.4));}
   #p2pos .osx-cw-post.is-win{border-color:rgba(216,180,90,.5);background:linear-gradient(180deg,rgba(216,180,90,.08),rgba(9,17,24,.4));}
   #p2pos .osx-cw-post-top{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
@@ -1069,10 +1072,10 @@
   #p2pos .osx-suggest-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:10px;}
   #p2pos .osx-suggest-status{font:600 12.5px/1.3 system-ui;color:var(--gold-bright);}
   /* community two-column layout */
-  #p2pos .osx-comm{display:flex;gap:22px;align-items:flex-start;}
-  #p2pos .osx-comm-main{flex:1;min-width:0;}
-  /* main column is ONE big box wrapping composer + spotlight + the wall */
-  #p2pos .osx-comm-main .osx-cw{max-width:none;border:1px solid var(--stroke);border-radius:18px;background:rgba(255,255,255,.03);padding:16px;}
+  #p2pos .osx-comm{display:flex;gap:22px;align-items:stretch;}
+  #p2pos .osx-comm-main{flex:1;min-width:0;display:flex;flex-direction:column;}
+  /* main column is ONE big box wrapping composer + spotlight + the wall, stretched to the sidebar's bottom */
+  #p2pos .osx-comm-main .osx-cw{max-width:none;border:1px solid var(--stroke);border-radius:18px;background:rgba(255,255,255,.03);padding:16px;flex:1;display:flex;flex-direction:column;}
   #p2pos .osx-cw-top{display:flex;gap:16px;align-items:stretch;margin-bottom:16px;}
   #p2pos .osx-comm-main .osx-cw-compose{flex:1.7;min-width:0;border:0;background:none;padding:0;margin-bottom:0;}
   #p2pos .osx-cw-top .osx-spot{flex:1;min-width:0;border:1px solid var(--stroke);border-radius:14px;background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(9,17,24,.35));padding:14px;}
@@ -1091,9 +1094,12 @@
   #p2pos .osx-wside-text{font:500 14px/1.5 Georgia,serif;color:var(--text);margin:0 0 10px;white-space:pre-wrap;word-break:break-word;}
   #p2pos .osx-wside-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;}
   #p2pos .osx-wside-by{font:600 12px/1.3 system-ui;color:var(--muted);}
-  #p2pos .osx-comm-lower{display:grid;grid-template-columns:3fr 2fr;gap:20px;margin-top:24px;align-items:start;}
-  #p2pos .osx-lower-card{border:1px solid var(--stroke);border-radius:16px;background:rgba(255,255,255,.03);padding:15px 16px;}
-  #p2pos .osx-comm-map-h{font:700 14px/1.2 system-ui;color:var(--text);margin-bottom:12px;}
+  #p2pos .osx-comm-lower{display:grid;grid-template-columns:3fr 2fr;gap:20px;margin-top:24px;align-items:stretch;}
+  #p2pos .osx-lower-card{border:1px solid var(--stroke);border-radius:16px;background:rgba(255,255,255,.03);padding:15px 16px;display:flex;flex-direction:column;}
+  #p2pos .osx-flock-head{margin-bottom:14px;}
+  #p2pos .osx-flock-title{font:800 20px/1.15 Georgia,serif;color:var(--text);}
+  #p2pos .osx-flock-title:before{content:none;}
+  #p2pos .osx-flock-sub{font:500 12.5px/1.5 system-ui;color:var(--muted);margin-top:6px;max-width:52ch;}
   #p2pos .osx-cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
   #p2pos .osx-cal-head b{font:700 14px/1 system-ui;color:var(--text);}
   #p2pos .osx-cal-nav{border:1px solid var(--stroke);background:rgba(255,255,255,.04);color:var(--text);cursor:pointer;width:28px;height:28px;border-radius:8px;font:700 15px/1 system-ui;}
@@ -1180,7 +1186,7 @@
   #p2pos .osx-mb-social{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:10px;}
   #p2pos .osx-mb-social a{width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font:600 12px/1 system-ui;color:#dbe7e2;background:rgba(255,255,255,.06);border:1px solid var(--stroke);text-decoration:none;transition:.14s;}
   #p2pos .osx-mb-social a:hover{border-color:var(--gstroke);background:rgba(216,180,90,.12);}
-  #p2pos .osx-mb-map{height:300px;border-radius:16px;overflow:hidden;border:1px solid var(--stroke);background:#0b1620;}
+  #p2pos .osx-mb-map{flex:1;min-height:300px;border-radius:16px;overflow:hidden;border:1px solid var(--stroke);background:#0b1620;}
   #p2pos .osx-mb-mapnote{font:500 12px/1.4 system-ui;color:var(--muted);margin:10px 2px 0;}
   #p2pos .osx-mb-pop{min-width:168px;}
   #p2pos .leaflet-popup-content-wrapper{background:#0e1c28;color:var(--text);border:1px solid var(--gstroke);border-radius:14px;}
