@@ -410,6 +410,30 @@
       <div class="osx-kick">Community</div>
       <h2 class="osx-h2">{{ section.settings.community_title | default: 'Better together' }}</h2>
       <p class="osx-lede">{{ section.settings.community_intro | default: "Share wins, ask questions, and build alongside other creators — without leaving your OS." }}</p>
+
+      {%- comment -%} Upcoming live sessions — owner adds a "Live session" block per class {%- endcomment -%}
+      {%- assign event_blocks = section.blocks | where: 'type', 'event' -%}
+      {%- if event_blocks.size > 0 -%}
+        <div class="osx-events">
+          <div class="osx-events-h">📅 {{ section.settings.events_title | default: 'Upcoming live sessions' }}</div>
+          <div class="osx-events-grid">
+            {%- for b in event_blocks -%}
+              <div class="osx-event{% if b.settings.live_now %} is-live{% endif %}" {{ b.shopify_attributes }}>
+                <div class="osx-event-when">
+                  {%- if b.settings.date != blank -%}<b>{{ b.settings.date }}</b>{%- endif -%}
+                  {%- if b.settings.time != blank -%}<span>{{ b.settings.time }}</span>{%- endif -%}
+                </div>
+                <div class="osx-event-body">
+                  <div class="osx-event-title">{{ b.settings.title | default: 'Live class' }}{% if b.settings.live_now %} <span class="osx-event-live">● LIVE</span>{% endif %}</div>
+                  {%- if b.settings.desc != blank -%}<p>{{ b.settings.desc }}</p>{%- endif -%}
+                </div>
+                {%- if b.settings.join_url != blank -%}<a class="osx-event-join" href="{{ b.settings.join_url }}" target="_blank" rel="noopener">{{ b.settings.join_label | default: 'Join the call' }} →</a>{%- endif -%}
+              </div>
+            {%- endfor -%}
+          </div>
+        </div>
+      {%- endif -%}
+
       {%- if community_embed != blank -%}
         <div class="osx-community-embed"><iframe src="{{ community_embed }}" title="Community" loading="lazy" allow="fullscreen; clipboard-write"></iframe></div>
       {%- else -%}
@@ -880,6 +904,24 @@
   /* Community */
   #p2pos .osx-community-embed{border:1px solid var(--stroke);border-radius:16px;overflow:hidden;background:#0b1620;}
   #p2pos .osx-community-embed iframe{width:100%;height:72vh;min-height:520px;border:0;display:block;}
+  /* live sessions schedule */
+  #p2pos .osx-events{margin:6px 0 30px;}
+  #p2pos .osx-events-h{font:700 15px/1.2 system-ui;color:var(--text);margin-bottom:14px;}
+  #p2pos .osx-events-grid{display:grid;gap:12px;}
+  #p2pos .osx-event{display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:16px 18px;border:1px solid var(--stroke);border-radius:14px;
+    background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(9,17,24,.4));transition:border-color .15s;}
+  #p2pos .osx-event.is-live{border-color:rgba(224,69,123,.6);background:linear-gradient(180deg,rgba(224,69,123,.08),rgba(9,17,24,.4));}
+  #p2pos .osx-event-when{flex:0 0 108px;display:flex;flex-direction:column;gap:2px;padding-right:14px;border-right:1px solid var(--stroke);}
+  #p2pos .osx-event-when b{font:800 14px/1.2 system-ui;color:var(--gold-bright);}
+  #p2pos .osx-event-when span{font:600 12px/1.2 system-ui;color:var(--muted);}
+  #p2pos .osx-event-body{flex:1;min-width:180px;}
+  #p2pos .osx-event-title{font:700 15px/1.3 system-ui;color:var(--text);}
+  #p2pos .osx-event-live{font:800 10px/1 system-ui;letter-spacing:.08em;color:#ff7aa8;margin-left:6px;vertical-align:middle;animation:p2pos-pulse 1.6s ease-in-out infinite;}
+  #p2pos .osx-event-body p{margin:5px 0 0;font:400 13px/1.5 system-ui;color:var(--muted);}
+  #p2pos .osx-event-join{flex:none;padding:11px 18px;border-radius:999px;font:700 13px/1 system-ui;text-decoration:none;color:#0a1410;background:linear-gradient(100deg,#f4e2a6,#c9a24a);transition:filter .14s,transform .14s;}
+  #p2pos .osx-event-join:hover{filter:brightness(1.05);transform:translateY(-1px);}
+  @keyframes p2pos-pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+  @media (max-width:560px){#p2pos .osx-event-when{flex-basis:auto;border-right:0;flex-direction:row;gap:8px;}}
   #p2pos .osx-community-ph{max-width:520px;margin:20px auto;text-align:center;padding:38px 28px;border:1px dashed var(--gstroke);border-radius:20px;background:rgba(57,197,192,.05);}
   #p2pos .osx-community-ph-ic{font-size:40px;margin-bottom:12px;}
   #p2pos .osx-community-ph b{display:block;font:700 20px/1.2 Georgia,serif;color:var(--text);margin-bottom:8px;}
@@ -1478,6 +1520,7 @@
     { "type": "url", "id": "rooted_growth_url", "label": "Growth Haus URL", "info": "The 'run it now' link. Defaults to /pages/growth-haus." },
     { "type": "header", "content": "Community view" },
     { "type": "text", "id": "community_title", "label": "Community title", "default": "Better together" },
+    { "type": "text", "id": "events_title", "label": "Live-sessions heading", "default": "Upcoming live sessions", "info": "Add a 'Live session (Community)' block for each class in the blocks list below." },
     { "type": "textarea", "id": "community_intro", "label": "Community intro", "default": "Share wins, ask questions, and build alongside other creators — without leaving your OS." },
     { "type": "text", "id": "community_embed_url", "label": "Community embed URL", "info": "Paste the embed src from Circle / Bettermode / etc. Leave blank to show the placeholder." },
     { "type": "url", "id": "community_link_url", "label": "Community 'Join' link (fallback)", "info": "Optional link shown on the placeholder if you're linking out instead of embedding." },
@@ -1562,6 +1605,19 @@
         { "type": "text", "id": "badge", "label": "Type label", "default": "PDF", "info": "Small pill on the card — e.g. PDF, Checklist, Template." },
         { "type": "url", "id": "file_url", "label": "File / download URL", "info": "Upload the PDF in Shopify admin → Content → Files, then paste its URL here." },
         { "type": "image_picker", "id": "thumb", "label": "Cover thumbnail (optional)" }
+      ]
+    },
+    {
+      "type": "event",
+      "name": "Live session (Community)",
+      "settings": [
+        { "type": "text", "id": "date", "label": "Date", "info": "e.g. Thu · Aug 15" },
+        { "type": "text", "id": "time", "label": "Time", "info": "e.g. 6:00 PM ET" },
+        { "type": "text", "id": "title", "label": "Title", "default": "Live class" },
+        { "type": "textarea", "id": "desc", "label": "What it is" },
+        { "type": "url", "id": "join_url", "label": "Join link (Zoom / Google Meet)", "info": "Paste the meeting link members click to join." },
+        { "type": "text", "id": "join_label", "label": "Join button label", "default": "Join the call" },
+        { "type": "checkbox", "id": "live_now", "label": "Show as LIVE now", "default": false }
       ]
     }
   ],

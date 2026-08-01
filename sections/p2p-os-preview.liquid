@@ -108,6 +108,7 @@
     <p class="pmv-lede">{{ section.settings.final_sub | default: 'Unlock the full Brand DNA assessment, every Haus, the AI Partners, the courses, the launch method, and the bonuses — the entire Purpose 2 Profit Operating System.' }}</p>
     <a class="pmv-btn pmv-btn--primary pmv-btn--lg" href="{{ cta_url }}">{{ section.settings.cta_label | default: 'Get the Access Pass' }}{% if section.settings.access_product.price %} — {{ section.settings.access_product.price | money }}{% endif %}</a>
     <p class="pmv-fineprint">{{ section.settings.tagline | default: 'Where Your originality is rooted and ready to grow.' }}</p>
+    <a class="pmv-already" href="{{ section.settings.member_url | default: '/pages/p2p-os' }}">{{ section.settings.member_label | default: 'Already in? Come on home' }} →</a>
   </section>
 </div>
 
@@ -198,6 +199,9 @@
   #p2posprev .pmv-final .pmv-kick{margin-bottom:8px;}
   #p2posprev .pmv-final .pmv-lede{margin-left:auto;margin-right:auto;}
   #p2posprev .pmv-fineprint{margin:20px auto 0;font:italic 600 13px/1.4 Georgia,serif;color:var(--gold);opacity:.9;}
+  #p2posprev .pmv-already{display:inline-block;margin:18px auto 0;padding:10px 20px;border-radius:999px;border:1px solid var(--gstroke);
+    font:700 13.5px/1 system-ui;color:#c9e6da;text-decoration:none;transition:background .14s,border-color .14s,color .14s;}
+  #p2posprev .pmv-already:hover{background:rgba(216,180,90,.1);border-color:var(--gold);color:var(--text);}
 
   /* ---- mini assessment ---- */
   #p2pmini{max-width:560px;}
@@ -250,7 +254,9 @@
     { "type": "image_picker", "id": "shot_dashboard", "label": "Dashboard screenshot" },
     { "type": "image_picker", "id": "shot_realms", "label": "Realms / Journey screenshot" },
     { "type": "header", "content": "Final CTA" },
-    { "type": "textarea", "id": "final_sub", "label": "Final CTA subtext", "default": "Unlock the full Brand DNA assessment, every Haus, the AI Partners, the courses, the launch method, and the bonuses — the entire Purpose 2 Profit Operating System." }
+    { "type": "textarea", "id": "final_sub", "label": "Final CTA subtext", "default": "Unlock the full Brand DNA assessment, every Haus, the AI Partners, the courses, the launch method, and the bonuses — the entire Purpose 2 Profit Operating System." },
+    { "type": "text", "id": "member_label", "label": "Existing-member link label", "default": "Already in? Come on home" },
+    { "type": "text", "id": "member_url", "label": "Existing-member link URL", "default": "/pages/p2p-os" }
   ],
   "presets": [{ "name": "P2P OS Preview" }]
 }
