@@ -28,6 +28,68 @@ const API_VERSION = '2026-07';
 const NS = 'custom', KEY = 'p2p_progress';
 let cachedToken = null, cachedAt = 0;
 
+/* ---- content banks (house voices + welcomes) ---- */
+const WELCOME_LINES = [
+  'The flock just grew — welcome, {name}! 🐑 What win are you chasing first?',
+  'Welcome home, {name}. You were born an original — glad you didn\'t die a copy. 🖤',
+  'A new face in the Haus! Everybody say hey to {name}. 👋',
+  '{name} just joined the flock. Drop a 👋 and make \'em feel at home.',
+  'Welcome, {name}! Every expert started as a beginner who kept showing up.',
+  'So glad you\'re here, {name}. Your purpose has a place at this table. 🌱',
+  'The Haus doors just opened for {name} — welcome to the build. 🔨',
+  'New member alert: {name} is in! What are you creating right now?',
+  'Welcome, {name}. Small steps, shared out loud, become big stories here.',
+  'Hey {name} — you found your people. Pull up a chair. ☕',
+  'The flock says welcome, {name}! Tell us one thing you\'re working on.',
+  'Welcome aboard, {name}. Progress over perfection — always. 💪',
+  '{name} just walked in. This is your sign to introduce yourself back. 😊',
+  'Glad you\'re here, {name}! Purpose first, profit follows.',
+  'Welcome to the Haus, {name}. Your originality is exactly what we needed.',
+  'A warm Black Sheep welcome to {name}! 🐑 What brought you here?',
+  'New in the flock: {name}. Say hi and share your first goal!',
+  '{name}, welcome! The best time to start was yesterday — the second best is now.',
+  'Welcome, {name}. You bring something no one else can. Let\'s build it.',
+  'The Haus just got better — welcome, {name}! ✨',
+  'Hey {name}, welcome in! What\'s the dream you\'re turning into a plan?',
+  'Welcome, {name}! Every win in here started as a nervous first post.',
+  '{name} joined the journey. From thought to thrive — let\'s go. 🚀',
+  'So happy to have you, {name}. This flock roots for each other, hard.',
+  'Welcome, {name}! Consistency beats intensity. Glad you\'re here for the long game.',
+  'New member {name} is in the building! 🎉 Give \'em a warm hello.',
+  'Welcome home, {name}. Your seat was waiting. 🪑',
+  'Hey {name} — the flock is stronger with you in it. Welcome!',
+  'Welcome, {name}! Post your first win the moment you get one. We\'ll celebrate loud.',
+  '{name}, you made it. Take a breath, look around, and say hello. 🐑🖤'
+];
+const FRANK_POSTS = [
+  'Did you know? Your first offer only needs ONE buyer to prove it works. Aim for one, not a hundred.',
+  'Did you know? Most people quit right before the compounding kicks in. Post 30 times before you judge the results.',
+  'Did you know? Price is a message. Too cheap and people assume it\'s low value. Charge what the transformation is worth.',
+  'Did you know? You don\'t need a bigger audience — you need a clearer offer. Clarity outsells reach.',
+  'Did you know? The riches are in the follow-up. 80% of sales happen after the 5th touch, yet most stop at one.',
+  'Did you know? A confused mind says no. If your pitch needs a paragraph, it needs another rewrite.',
+  'Did you know? Testimonials sell better than you do. Ask every happy customer for one sentence.',
+  'Did you know? Done and shared beats perfect and hidden. Ship it, then improve it in public.',
+  'Did you know? Your email list is the only audience you actually own. Start it today, even at zero.',
+  'Did you know? People buy outcomes, not features. Sell the after, not the tool.',
+  'Did you know? The best marketing is a product people can\'t stop talking about. Make the first version remarkable.',
+  'Did you know? Consistency is a business strategy. The algorithm rewards the person who shows up on the boring days.'
+];
+const RUTH_POSTS = [
+  'A gentle reminder: comparison is a thief. The only fair race is against who you were yesterday. 🌱',
+  'Something to sit with: rest is not the reward for finished work — it\'s part of the work. Protect it.',
+  'Your worth isn\'t measured in output. You are already enough; the building is just the overflow. 🖤',
+  'A thought for today: the dream that scares you a little is usually the one worth chasing.',
+  'Remember: every no is redirecting you toward the right yes. Keep your heart soft and your aim steady.',
+  'A gentle nudge: progress you can\'t see is still progress. Roots grow in the dark before anything blooms.',
+  'Something true: courage isn\'t the absence of fear — it\'s showing up shaky and doing it anyway.',
+  'Today\'s reminder: you don\'t have to have it all figured out to take the next faithful step.',
+  'A soft word: be as kind to yourself as you\'d be to a friend starting exactly where you are.',
+  'Remember why you started. On the hard days, purpose is the thing that carries the plan. ✨',
+  'A thought: the flock grows stronger when we celebrate each other loudly. Whose win can you cheer today?',
+  'Gentle truth: you were made original on purpose, for a purpose. Don\'t shrink to fit someone else\'s box.'
+];
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -71,6 +133,7 @@ export default {
             points: Number(body.points) || 0,
             badges: Number(body.badges) || 0,
             recentBadges: sanitizeBadges(body.recentBadges),
+            streak: Number(body.streak) || 0,
             since: info.createdAt || (prev && prev.since) || null,
             photo: sanitizeUrl(body.photo),
             quote: String(body.quote || '').slice(0, 140),
@@ -82,6 +145,12 @@ export default {
             ts: Date.now()
           };
           await kv.put('member:' + customerId, JSON.stringify(rec));
+          // brand-new member (no prior card) → drop a one-time welcome post on the wall
+          if (!prev && rec.name && rec.name !== 'Member') {
+            const line = WELCOME_LINES[Math.floor(Math.random() * WELCOME_LINES.length)].replace('{name}', rec.name);
+            const wid = Date.now() + '-welcome-' + customerId;
+            await kv.put('post:' + wid, JSON.stringify({ id: wid, author: 'house-welcome', name: 'P2P', text: line, kind: 'post', house: true, ts: Date.now() })).catch(() => {});
+          }
           return json({ ok: true });
         }
         return json({ error: 'method' }, 405);
@@ -109,10 +178,18 @@ export default {
             const p = await kv.get(k.name, 'json');
             if (!p) continue;
             const rs = reactState(p, customerId);
-            posts.push({ id: p.id, name: p.name, text: p.text, kind: p.kind, ts: p.ts, reactions: rs.counts, mine: rs.mine, likes: rs.counts.love, liked: rs.mine.love });
+            posts.push({ id: p.id, name: p.name, text: p.text, kind: p.kind, ts: p.ts, streak: p.streak || 0, house: !!p.house, comments: (p.comments || []), reactions: rs.counts, mine: rs.mine, likes: rs.counts.love, liked: rs.mine.love });
           }
           posts.sort((a, b) => b.ts - a.ts);
-          return json({ ok: true, posts });
+          // Win of the Week: best-loved win in the last 7 days (tie → newest)
+          const weekAgo = Date.now() - 7 * 864e5;
+          let wow = null, best = -1;
+          for (const p of posts) {
+            if (p.kind !== 'win' || p.ts < weekAgo) continue;
+            const s = p.reactions.love || 0;
+            if (s > best || (s === best && (!wow || p.ts > wow.ts))) { best = s; wow = p; }
+          }
+          return json({ ok: true, posts, winOfWeek: wow ? wow.id : null });
         }
         if (request.method === 'POST') {
           const body = await request.json().catch(() => null);
@@ -121,7 +198,7 @@ export default {
           const info = await customerInfo(env, customerId);
           const id = Date.now() + '-' + customerId;
           const kind = ((body && body.kind) === 'win') ? 'win' : 'post';   // wins get their own board
-          const post = { id, author: customerId, name: String((body && body.name) || info.firstName || 'Member').slice(0, 40), text: text.slice(0, 1000), kind: kind, ts: Date.now() };
+          const post = { id, author: customerId, name: String((body && body.name) || info.firstName || 'Member').slice(0, 40), text: text.slice(0, 1000), kind: kind, streak: Number(body && body.streak) || 0, ts: Date.now() };
           await kv.put('post:' + id, JSON.stringify(post));   // live immediately (unmoderated)
           await alertAdmin(env, post).catch(() => {});         // optional email ping to you
           return json({ ok: true });
@@ -144,8 +221,48 @@ export default {
         if (i > -1) arr.splice(i, 1); else arr.push(customerId);
         p.reactions = r; delete p.likedBy;
         await kv.put('post:' + pid, JSON.stringify(p));
+        if (i === -1 && p.author && p.author !== customerId && String(p.author).indexOf('house-') !== 0) {
+          const rinfo = await customerInfo(env, customerId);
+          await pushNotif(kv, p.author, { type: 'react', rtype: type, name: rinfo.firstName || 'Someone', postId: pid, snippet: (p.text || '').slice(0, 80), ts: Date.now() });
+        }
         const rs = reactState(p, customerId);
         return json({ ok: true, reactions: rs.counts, mine: rs.mine, likes: rs.counts.love, liked: rs.mine.love });
+      }
+
+      /* ---------- comments on a post ---------- */
+      if (seg === 'comment') {
+        if (!kv) return json({ error: 'no_store' }, 501);
+        const body = await request.json().catch(() => null);
+        const pid = body && body.id;
+        const text = String((body && body.text) || '').trim();
+        if (!pid || !text) return json({ error: 'bad' }, 400);
+        const p = await kv.get('post:' + pid, 'json');
+        if (!p) return json({ error: 'not_found' }, 404);
+        const info = await customerInfo(env, customerId);
+        const c = { id: Date.now() + '-' + customerId, author: customerId, name: String((body && body.name) || info.firstName || 'Member').slice(0, 40), text: text.slice(0, 600), ts: Date.now() };
+        p.comments = Array.isArray(p.comments) ? p.comments : [];
+        p.comments.push(c);
+        await kv.put('post:' + pid, JSON.stringify(p));
+        if (p.author && p.author !== customerId && String(p.author).indexOf('house-') !== 0) {
+          await pushNotif(kv, p.author, { type: 'comment', name: c.name, postId: pid, snippet: c.text.slice(0, 80), ts: Date.now() });
+        }
+        return json({ ok: true, comment: c });
+      }
+
+      /* ---------- notifications (bell) ---------- */
+      if (seg === 'notifs') {
+        if (!kv) return json({ ok: true, notifs: [], unread: 0 });
+        if (request.method === 'GET') {
+          const list = (await kv.get('notif:' + customerId, 'json')) || [];
+          return json({ ok: true, notifs: list, unread: list.filter(n => !n.read).length });
+        }
+        if (request.method === 'POST') {
+          const list = (await kv.get('notif:' + customerId, 'json')) || [];
+          list.forEach(n => { n.read = true; });
+          await kv.put('notif:' + customerId, JSON.stringify(list));
+          return json({ ok: true });
+        }
+        return json({ error: 'method' }, 405);
       }
 
       /* ---------- suggestions / questions (private → email you) ---------- */
@@ -174,6 +291,27 @@ export default {
 
       return json({ error: 'not_found' }, 404);
     } catch (e) { return json({ error: 'server', detail: String((e && e.message) || e) }, 500); }
+  },
+
+  // Frank & Ruth house posts — needs a Cron Trigger (e.g. daily "0 15 * * *").
+  // Monday → Frank's "Did you know"; Thursday → Ruth's insight. Advances through the bank; one per author per day max.
+  async scheduled(event, env, ctx) {
+    const kv = env.P2P_KV; if (!kv) return;
+    const now = new Date();
+    const dow = now.getUTCDay();                 // 0 Sun .. 6 Sat
+    const today = now.toISOString().slice(0, 10);
+    async function housePost(authorId, name, bank, cursorKey) {
+      if (!bank.length) return;
+      if ((await kv.get('house-last:' + authorId)) === today) return;   // already posted today
+      const idx = parseInt((await kv.get(cursorKey)) || '0', 10) || 0;
+      const text = bank[idx % bank.length];
+      const id = Date.now() + '-' + authorId;
+      await kv.put('post:' + id, JSON.stringify({ id, author: authorId, name, text, kind: 'post', house: true, ts: Date.now() }));
+      await kv.put(cursorKey, String(idx + 1));
+      await kv.put('house-last:' + authorId, today);
+    }
+    if (dow === 1) await housePost('house-frank', 'Frank', FRANK_POSTS, 'house-cursor:frank');   // Monday
+    if (dow === 4) await housePost('house-ruth', 'Ruth', RUTH_POSTS, 'house-cursor:ruth');       // Thursday
   }
 };
 
@@ -238,6 +376,16 @@ async function sendEmail(env, subject, text) {
 }
 async function alertAdmin(env, post) {
   await sendEmail(env, 'New post on your community wall', post.name + ' just posted:\n\n' + post.text + '\n\nSee it in your OS → Community.');
+}
+// Bell notifications — newest first, capped at 40 per member.
+async function pushNotif(kv, uid, n) {
+  if (!kv || !uid) return;
+  const key = 'notif:' + uid;
+  const list = (await kv.get(key, 'json')) || [];
+  n.read = false;
+  n.id = n.ts + '-' + Math.random().toString(36).slice(2, 7);
+  list.unshift(n);
+  await kv.put(key, JSON.stringify(list.slice(0, 40)));
 }
 
 async function verifyProxySignature(url, secret) {

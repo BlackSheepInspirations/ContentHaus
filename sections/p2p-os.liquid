@@ -34,6 +34,15 @@
       <div class="osx-brandmark">Purpose <span class="osx-2">2</span> Profit</div>
       <div class="osx-brandsub">{{ section.settings.brand_sub | default: 'powered by Black Sheep Creations &amp; Inspirations' }}</div>
     </button>
+    <div class="osx-userbar" data-userbar>
+      <span class="osx-userbubble">{% if customer.first_name != blank %}{{ customer.first_name | slice: 0 | upcase }}{% else %}🐑{% endif %}</span>
+      <div class="osx-userinfo">
+        <span class="osx-username">{{ customer.first_name | default: 'Member' }}</span>
+        <span class="osx-usermeta" data-userrole>Member</span>
+      </div>
+      <button class="osx-bell" type="button" data-bell aria-label="Notifications">🔔<span class="osx-bell-dot" data-bell-count hidden>0</span></button>
+      <div class="osx-bell-menu" data-bell-menu hidden></div>
+    </div>
     <nav class="osx-nav">
       {%- comment -%} Sidebar nav is baked into the section (target^label^icon^mode^access_tag^get_url) so a
          theme-editor template revert can never empty it. Edit here in code, not the customizer. {%- endcomment -%}
@@ -1055,6 +1064,45 @@
   #p2pos .osx-react-b:hover{border-color:var(--gstroke);color:var(--text);}
   #p2pos .osx-react-b.on{color:var(--gold-bright);border-color:var(--gstroke);background:rgba(216,180,90,.14);}
   #p2pos .osx-react-b[data-rtype="love"].on{color:#ff6b9d;border-color:rgba(224,69,123,.6);background:rgba(224,69,123,.12);}
+  /* streak flame + house tag on posts */
+  #p2pos .osx-flame{margin-left:7px;font:800 11px/1 system-ui;color:#ffb454;}
+  #p2pos .osx-house-tag{margin-left:7px;font:800 9.5px/1 system-ui;letter-spacing:.05em;text-transform:uppercase;color:#0a1410;background:linear-gradient(100deg,#f4e2a6,#c9a24a);border-radius:999px;padding:3px 7px;vertical-align:middle;}
+  #p2pos .osx-cw-post.house{border-color:var(--gstroke);background:linear-gradient(180deg,rgba(216,180,90,.06),rgba(9,17,24,.25));}
+  /* comment button + thread */
+  #p2pos .osx-cw-cbtn{border:1px solid var(--stroke);background:rgba(255,255,255,.04);color:var(--muted);cursor:pointer;border-radius:999px;padding:5px 11px;font:700 12px/1 system-ui;transition:.15s;display:inline-flex;align-items:center;gap:5px;}
+  #p2pos .osx-cw-cbtn:hover{border-color:var(--gstroke);color:var(--text);}
+  #p2pos .osx-cw-post-acts{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  #p2pos .osx-cm{margin-top:12px;border-top:1px solid var(--stroke);padding-top:12px;}
+  #p2pos .osx-cm-list{display:flex;flex-direction:column;gap:10px;margin-bottom:10px;}
+  #p2pos .osx-cm-item{background:rgba(255,255,255,.03);border:1px solid var(--stroke);border-radius:11px;padding:8px 11px;}
+  #p2pos .osx-cm-item b{font:700 12.5px/1.2 system-ui;color:var(--text);}
+  #p2pos .osx-cm-time{margin-left:7px;font:500 11px/1 system-ui;color:var(--muted);}
+  #p2pos .osx-cm-text{font:400 13px/1.5 system-ui;color:#d7e3de;margin-top:4px;}
+  #p2pos .osx-cm-add{display:flex;gap:8px;}
+  #p2pos .osx-cm-input{flex:1;min-width:0;background:rgba(9,17,24,.5);border:1px solid var(--stroke);border-radius:999px;padding:9px 14px;color:var(--text);font:400 13px/1.3 system-ui;}
+  #p2pos .osx-cm-input:focus{outline:none;border-color:var(--gstroke);}
+  #p2pos .osx-cm-send{border:1px solid var(--gstroke);background:rgba(216,180,90,.12);color:var(--gold-bright);cursor:pointer;border-radius:999px;padding:9px 15px;font:700 12.5px/1 system-ui;}
+  /* Win of the Week — pinned gold card */
+  #p2pos .osx-wow{position:relative;border:1.5px solid var(--gstroke);border-radius:16px;background:linear-gradient(180deg,rgba(216,180,90,.12),rgba(9,17,24,.35));padding:22px 16px 16px;margin-bottom:14px;box-shadow:0 0 26px rgba(216,180,90,.18);}
+  #p2pos .osx-wow-ribbon{position:absolute;top:-11px;left:16px;font:800 11px/1 system-ui;letter-spacing:.05em;text-transform:uppercase;color:#0a1410;background:linear-gradient(100deg,#f4e2a6,#c9a24a);border-radius:999px;padding:5px 12px;box-shadow:0 3px 10px rgba(0,0,0,.35);}
+  /* sidebar profile bubble + bell */
+  #p2pos .osx-userbar{position:relative;display:flex;align-items:center;gap:10px;padding:4px 10px 12px;margin-bottom:8px;border-bottom:1px solid var(--stroke);}
+  #p2pos .osx-userbubble{flex:none;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:800 15px/1 Georgia,serif;color:var(--gold-bright);background:radial-gradient(circle at 50% 30%,#2a3b52,#12202b);border:1.5px solid var(--gstroke);}
+  #p2pos .osx-userinfo{flex:1;min-width:0;line-height:1.2;}
+  #p2pos .osx-username{display:block;font:700 13px/1.2 system-ui;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  #p2pos .osx-usermeta{display:block;font:600 10px/1.2 system-ui;letter-spacing:.03em;text-transform:uppercase;color:var(--gold-bright);}
+  #p2pos .osx-bell{position:relative;flex:none;background:none;border:0;cursor:pointer;font-size:18px;line-height:1;padding:4px;filter:grayscale(.2);transition:transform .12s;}
+  #p2pos .osx-bell:hover{transform:scale(1.12);}
+  #p2pos .osx-bell-dot{position:absolute;top:-2px;right:-3px;min-width:16px;height:16px;padding:0 4px;box-sizing:border-box;border-radius:999px;background:#e0457b;color:#fff;font:800 10px/16px system-ui;text-align:center;}
+  #p2pos .osx-bell-menu{position:absolute;top:calc(100% - 4px);left:8px;width:250px;max-height:340px;overflow-y:auto;z-index:60;background:#0e1c28;border:1px solid var(--gstroke);border-radius:14px;box-shadow:0 12px 34px rgba(0,0,0,.5);padding:6px;}
+  #p2pos .osx-bell-h{font:800 11px/1 system-ui;letter-spacing:.05em;text-transform:uppercase;color:var(--gold-bright);padding:9px 10px 8px;}
+  #p2pos .osx-bell-empty{font:500 12.5px/1.5 system-ui;color:var(--muted);padding:6px 10px 12px;}
+  #p2pos .osx-bell-item{padding:9px 10px;border-radius:10px;}
+  #p2pos .osx-bell-item.unread{background:rgba(216,180,90,.09);}
+  #p2pos .osx-bell-line{font:500 12.5px/1.4 system-ui;color:#d7e3de;}
+  #p2pos .osx-bell-line b{color:var(--text);font-weight:700;}
+  #p2pos .osx-bell-snip{font:italic 400 12px/1.4 Georgia,serif;color:var(--muted);margin-top:2px;}
+  #p2pos .osx-bell-time{font:600 10px/1 system-ui;color:var(--muted);}
   #p2pos .osx-cw-report{margin-left:auto;border:0;background:none;color:var(--muted);cursor:pointer;font:600 13px/1 system-ui;opacity:.5;transition:.15s;padding:5px 4px;}
   #p2pos .osx-cw-report:hover{opacity:1;color:#ff9e9e;}
   /* rotating wins spotlight */

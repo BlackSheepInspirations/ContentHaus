@@ -42,7 +42,8 @@
       tier: (P.tier ? (P.tier().name || '') : ''),
       points: (P.points ? P.points() : 0),
       badges: (P.earnedSet ? P.earnedSet().length : 0),
-      recentBadges: recentBadges()
+      recentBadges: recentBadges(),
+      streak: (P.streak ? (P.streak().count || 0) : 0)
     };
   }
   var SICON = { website: '🌐', instagram: '📷', facebook: '📘', youtube: '▶️', x: '✖', linkedin: 'in', tiktok: '🎵' };
@@ -121,7 +122,7 @@
     var s = stats(), social = {};
     Object.keys(socialEls).forEach(function (k) { var v = (socialEls[k].value || '').trim(); if (v) social[k] = v; });
     return {
-      name: s.name, tier: s.tier, points: s.points, badges: s.badges, recentBadges: s.recentBadges,
+      name: s.name, tier: s.tier, points: s.points, badges: s.badges, recentBadges: s.recentBadges, streak: s.streak,
       photo: (f.photo ? f.photo.value.trim() : ''), quote: (f.quote ? f.quote.value.trim() : ''), about: (f.about ? f.about.value.trim() : ''),
       social: social, hidden: hidden
     };

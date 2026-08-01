@@ -10,7 +10,7 @@
   var winsFeed = root.querySelector('[data-wins-feed]');
   var ta = wrap ? wrap.querySelector('[data-cw-text]') : null;
   var postBtn = wrap ? wrap.querySelector('[data-cw-post]') : null;
-  var posts = [], winIdx = 0, winTimer = null, welcomeProfileDone = false;
+  var posts = [], winIdx = 0, winTimer = null, welcomeProfileDone = false, wowId = null;
 
   function myName() { return (window.P2P_MEMBER_NAME || '').trim().toLowerCase(); }
   function setWc(k, on) { var el = root.querySelector('[data-wc="' + k + '"]'); if (el) el.classList.toggle('done', !!on); }
@@ -39,25 +39,64 @@
   function rbtn(p, t, emoji) { return '<button class="osx-react-b' + (ron(p, t) ? ' on' : '') + '" data-react="' + esc(p.id) + '" data-rtype="' + t + '" type="button" aria-label="React ' + t + '">' + emoji + ' <span>' + rcount(p, t) + '</span></button>'; }
   function reactBar(p) { return '<div class="osx-react">' + RTYPES.map(function (r) { return rbtn(p, r[0], r[1]); }).join('') + '</div>'; }
   function loveChip(p) { return rbtn(p, 'love', '❤'); }
+  function myStreak() { var P = window.P2P || {}; return (P.streak ? (P.streak().count || 0) : 0); }
+  function flame(n) { n = +n || 0; return n >= 2 ? '<span class="osx-flame" title="' + n + '-day streak">🔥' + n + '</span>' : ''; }
+  function houseTag(p) { return p.house ? '<span class="osx-house-tag">✦ Haus</span>' : ''; }
+  function cmItem(c) { return '<div class="osx-cm-item"><b>' + esc(c.name || 'Member') + '</b><span class="osx-cm-time">' + ago(c.ts) + '</span><div class="osx-cm-text">' + esc(c.text) + '</div></div>'; }
+  function commentsHTML(p) {
+    var cs = p.comments || [];
+    return '<div class="osx-cm" data-cm="' + esc(p.id) + '" hidden>' +
+      '<div class="osx-cm-list">' + cs.map(cmItem).join('') + '</div>' +
+      '<div class="osx-cm-add"><input class="osx-cm-input" data-cm-input="' + esc(p.id) + '" maxlength="600" placeholder="Write a reply…"><button class="osx-cm-send" type="button" data-cm-send="' + esc(p.id) + '">Reply</button></div>' +
+    '</div>';
+  }
+  function actsHTML(p, withReport) {
+    return '<div class="osx-cw-post-acts">' + reactBar(p) +
+      '<button class="osx-cw-cbtn" type="button" data-ctoggle="' + esc(p.id) + '">💬 <span>' + ((p.comments || []).length) + '</span></button>' +
+      (withReport ? '<button class="osx-cw-report" type="button" data-report="' + esc(p.id) + '" title="Report this post" aria-label="Report post">⚑</button>' : '') +
+    '</div>';
+  }
+  function confetti() {
+    var c = document.createElement('canvas'); c.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:3000;';
+    document.body.appendChild(c);
+    var ctx = c.getContext('2d'), W = c.width = window.innerWidth, H = c.height = window.innerHeight;
+    var cols = ['#f4c534', '#e0457b', '#39c5c0', '#8f6fd6', '#f4e2a6'], parts = [];
+    for (var i = 0; i < 130; i++) parts.push({ x: W / 2 + (Math.random() - .5) * 160, y: H / 3, vx: (Math.random() - .5) * 9, vy: Math.random() * -10 - 4, r: Math.random() * 6 + 3, c: cols[i % cols.length], a: 1, rot: Math.random() * 6 });
+    var t0 = Date.now();
+    (function frame() {
+      ctx.clearRect(0, 0, W, H);
+      parts.forEach(function (p) { p.vy += .3; p.x += p.vx; p.y += p.vy; p.rot += .16; p.a -= .008; ctx.save(); ctx.globalAlpha = Math.max(0, p.a); ctx.translate(p.x, p.y); ctx.rotate(p.rot); ctx.fillStyle = p.c; ctx.fillRect(-p.r / 2, -p.r / 2, p.r, p.r * .6); ctx.restore(); });
+      if (Date.now() - t0 < 2300) requestAnimationFrame(frame); else c.remove();
+    })();
+  }
   function wins() { return posts.filter(function (p) { return p.kind === 'win'; }); }
   function general() { return posts.filter(function (p) { return p.kind !== 'win'; }); }
   function stopTimer() { if (winTimer) { clearInterval(winTimer); winTimer = null; } }
 
+  function postHTML(p) {
+    var lng = (p.text || '').length > 280;
+    return '<div class="osx-cw-post' + (p.house ? ' house' : '') + '">' +
+      '<div class="osx-cw-post-top"><b>' + esc(p.name || 'Member') + '</b>' + flame(p.streak) + houseTag(p) + '<span class="osx-cw-time">' + ago(p.ts) + '</span></div>' +
+      '<div class="osx-cw-post-text' + (lng ? ' clamp' : '') + '">' + esc(p.text) + '</div>' +
+      (lng ? '<button class="osx-cw-more" type="button" data-more>Read more ▾</button>' : '') +
+      actsHTML(p, true) + commentsHTML(p) +
+    '</div>';
+  }
+  function wowHTML(p) {
+    return '<div class="osx-wow">' +
+      '<div class="osx-wow-ribbon">🏆 Win of the Week</div>' +
+      '<div class="osx-cw-post-top"><b>' + esc(p.name || 'Member') + '</b>' + flame(p.streak) + '<span class="osx-cw-time">' + ago(p.ts) + '</span></div>' +
+      '<div class="osx-cw-post-text">' + esc(p.text) + '</div>' +
+      actsHTML(p, false) + commentsHTML(p) +
+    '</div>';
+  }
   function renderWall() {
     if (!feed) return;
     var items = general();
-    if (!items.length) { feed.innerHTML = empty('Nothing here yet — be the first to say hello. 👋'); return; }
-    feed.innerHTML = items.map(function (p) {
-      var lng = (p.text || '').length > 280;
-      return '<div class="osx-cw-post">' +
-        '<div class="osx-cw-post-top"><b>' + esc(p.name || 'Member') + '</b><span class="osx-cw-time">' + ago(p.ts) + '</span></div>' +
-        '<div class="osx-cw-post-text' + (lng ? ' clamp' : '') + '">' + esc(p.text) + '</div>' +
-        (lng ? '<button class="osx-cw-more" type="button" data-more>Read more ▾</button>' : '') +
-        '<div class="osx-cw-post-acts">' + reactBar(p) +
-          '<button class="osx-cw-report" type="button" data-report="' + esc(p.id) + '" title="Report this post" aria-label="Report post">⚑</button>' +
-        '</div></div>';
-    }).join('');
-    wireReacts(feed);
+    var wow = wowId ? posts.filter(function (p) { return p.id === wowId; })[0] : null;
+    if (!items.length && !wow) { feed.innerHTML = empty('Nothing here yet — be the first to say hello. 👋'); return; }
+    feed.innerHTML = (wow ? wowHTML(wow) : '') + items.map(postHTML).join('');
+    wireReacts(feed); wireComments(feed);
     feed.querySelectorAll('[data-more]').forEach(function (b) {
       b.addEventListener('click', function () {
         var t = b.previousElementSibling; if (!t) return;
@@ -78,6 +117,37 @@
           .catch(function () { b.disabled = false; });
       });
     });
+  }
+  function wireComments(container) {
+    container.querySelectorAll('[data-ctoggle]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var id = b.getAttribute('data-ctoggle');
+        var box = container.querySelector('[data-cm="' + id + '"]');
+        if (box) { box.hidden = !box.hidden; if (!box.hidden) { var inp = box.querySelector('[data-cm-input]'); if (inp) inp.focus(); } }
+      });
+    });
+    container.querySelectorAll('[data-cm-send]').forEach(function (b) {
+      b.addEventListener('click', function () { submitComment(container, b.getAttribute('data-cm-send'), b); });
+    });
+    container.querySelectorAll('[data-cm-input]').forEach(function (inp) {
+      inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); submitComment(container, inp.getAttribute('data-cm-input'), null); } });
+    });
+  }
+  function submitComment(container, id, btn) {
+    var box = container.querySelector('[data-cm="' + id + '"]'); if (!box) return;
+    var inp = box.querySelector('[data-cm-input]'); var text = (inp && inp.value || '').trim(); if (!text) return;
+    if (btn) btn.disabled = true;
+    fetch('/apps/p2p/comment', { method: 'POST', headers: { 'content-type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify({ id: id, text: text, name: window.P2P_MEMBER_NAME || '' }) })
+      .then(function (r) { return r.json(); })
+      .then(function (res) {
+        if (btn) btn.disabled = false;
+        if (res && res.ok && res.comment) {
+          if (inp) inp.value = '';
+          var list = box.querySelector('.osx-cm-list'); if (list) list.insertAdjacentHTML('beforeend', cmItem(res.comment));
+          var pp = posts.filter(function (p) { return p.id === id; })[0];
+          if (pp) { pp.comments = pp.comments || []; pp.comments.push(res.comment); var cnt = container.querySelector('[data-ctoggle="' + id + '"] span'); if (cnt) cnt.textContent = pp.comments.length; }
+        }
+      }).catch(function () { if (btn) btn.disabled = false; });
   }
 
   function renderWinsSide() {
@@ -145,7 +215,7 @@
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (j) {
         if (j && j.guest) { stopTimer(); if (feed) feed.innerHTML = empty('Log in to see and share with the community.'); return; }
-        posts = (j && j.posts) || []; render();
+        posts = (j && j.posts) || []; wowId = (j && j.winOfWeek) || null; render();
       })
       .catch(function () { if (feed) feed.innerHTML = empty('Couldn\'t load the wall just now — try again in a moment.'); });
   }
@@ -234,7 +304,7 @@
   if (postBtn) postBtn.addEventListener('click', function () {
     var text = (ta && ta.value || '').trim(); if (!text) return;
     postBtn.disabled = true; postBtn.textContent = 'Posting…';
-    fetch(PROXY, { method: 'POST', headers: { 'content-type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify({ text: text, kind: 'post', name: window.P2P_MEMBER_NAME || '' }) })
+    fetch(PROXY, { method: 'POST', headers: { 'content-type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify({ text: text, kind: 'post', name: window.P2P_MEMBER_NAME || '', streak: myStreak() }) })
       .then(function (r) { return r.json(); })
       .then(function (res) { postBtn.disabled = false; postBtn.textContent = 'Post'; if (res && res.ok) { ta.value = ''; try { localStorage.setItem('p2p_wc_hello', '1'); } catch (e) {} load(); } })
       .catch(function () { postBtn.disabled = false; postBtn.textContent = 'Post'; });
@@ -246,9 +316,9 @@
   if (winShare) winShare.addEventListener('click', function () {
     var t = (winText && winText.value || '').trim(); if (!t) return;
     winShare.disabled = true; winShare.textContent = 'Sharing…';
-    fetch(PROXY, { method: 'POST', headers: { 'content-type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify({ text: t, kind: 'win', name: window.P2P_MEMBER_NAME || '' }) })
+    fetch(PROXY, { method: 'POST', headers: { 'content-type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify({ text: t, kind: 'win', name: window.P2P_MEMBER_NAME || '', streak: myStreak() }) })
       .then(function (r) { return r.json(); })
-      .then(function (res) { winShare.disabled = false; winShare.textContent = 'Share win'; if (res && res.ok) { winText.value = ''; if (winBox) winBox.hidden = true; try { localStorage.setItem('p2p_wc_win', '1'); } catch (e) {} load(); } })
+      .then(function (res) { winShare.disabled = false; winShare.textContent = 'Share win'; if (res && res.ok) { winText.value = ''; if (winBox) winBox.hidden = true; try { localStorage.setItem('p2p_wc_win', '1'); } catch (e) {} confetti(); load(); } })
       .catch(function () { winShare.disabled = false; winShare.textContent = 'Share win'; });
   });
 
@@ -321,4 +391,45 @@
   if (pv) pv.addEventListener('click', function () { curM--; if (curM < 0) { curM = 11; curY--; } render(); });
   if (nx) nx.addEventListener('click', function () { curM++; if (curM > 11) { curM = 0; curY++; } render(); });
   render();
+})();
+
+/* ---- Bell notifications + profile bubble (sidebar, on every OS page) ---- */
+(function () {
+  var root = document.getElementById('p2pos'); if (!root) return;
+  var bar = root.querySelector('[data-userbar]'); if (!bar) return;
+  var bell = bar.querySelector('[data-bell]'), menu = bar.querySelector('[data-bell-menu]'),
+      countEl = bar.querySelector('[data-bell-count]'), roleEl = bar.querySelector('[data-userrole]');
+  var NOTIFS = '/apps/p2p/notifs', notifs = [];
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function ago(ts) { var s = Math.floor((Date.now() - ts) / 1000); if (s < 60) return 'just now'; var m = Math.floor(s / 60); if (m < 60) return m + 'm'; var h = Math.floor(m / 60); if (h < 24) return h + 'h'; return Math.floor(h / 24) + 'd'; }
+  function line(n) {
+    var verb = n.type === 'comment' ? 'commented on your post' : (n.rtype === 'party' ? 'celebrated your post 🎉' : n.rtype === 'thumb' ? 'gave your post a 👍' : 'loved your post ❤');
+    return '<div class="osx-bell-item' + (n.read ? '' : ' unread') + '"><div class="osx-bell-line"><b>' + esc(n.name || 'Someone') + '</b> ' + verb + '</div>' +
+      (n.snippet ? '<div class="osx-bell-snip">“' + esc(n.snippet) + '”</div>' : '') +
+      '<span class="osx-bell-time">' + ago(n.ts) + ' ago</span></div>';
+  }
+  function renderMenu() {
+    if (!menu) return;
+    menu.innerHTML = '<div class="osx-bell-h">Notifications</div>' + (notifs.length ? notifs.map(line).join('') : '<div class="osx-bell-empty">Nothing yet — reactions & replies to your posts show up here. 🔔</div>');
+  }
+  function setCount(u) { if (!countEl) return; if (u > 0) { countEl.textContent = u > 9 ? '9+' : u; countEl.hidden = false; } else countEl.hidden = true; }
+  function fetchNotifs() {
+    fetch(NOTIFS, { credentials: 'same-origin' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+      if (!j || j.guest) return;
+      notifs = j.notifs || []; setCount(j.unread || 0); if (menu && !menu.hidden) renderMenu();
+    }).catch(function () {});
+  }
+  if (roleEl && window.P2P && window.P2P.tier) { try { var t = window.P2P.tier(); if (t && t.name) roleEl.textContent = t.name; } catch (e) {} }
+  if (bell) bell.addEventListener('click', function (e) {
+    e.stopPropagation(); if (!menu) return;
+    var opening = menu.hidden; menu.hidden = !menu.hidden;
+    if (opening) {
+      renderMenu();
+      fetch(NOTIFS, { method: 'POST', headers: { 'content-type': 'application/json' }, credentials: 'same-origin', body: '{}' })
+        .then(function () { setCount(0); notifs.forEach(function (n) { n.read = true; }); }).catch(function () {});
+    }
+  });
+  document.addEventListener('click', function (e) { if (menu && !menu.hidden && !menu.contains(e.target) && e.target !== bell && !bell.contains(e.target)) menu.hidden = true; });
+  fetchNotifs();
+  setInterval(fetchNotifs, 60000);
 })();
