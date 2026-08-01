@@ -96,7 +96,7 @@
           {%- assign os_brand_tagline = section.settings.hero_brand_tagline | default: 'Where Your originality is rooted and ready to grow.' -%}
           <div class="osx-hero-lockup">
             {%- if section.settings.hero_brand_mark != blank -%}<img class="osx-hero-mark" src="{{ section.settings.hero_brand_mark | image_url: width: 360 }}" alt="Purpose 2 Profit" loading="lazy">
-            {%- else -%}<img class="osx-hero-mark" src="{{ 'p2p-brand-mark.png' | asset_url }}" alt="Purpose 2 Profit" loading="lazy">{%- endif -%}
+            {%- else -%}<img class="osx-hero-mark osx-tg-mark" src="{{ 'p2p-trusted-guide.png' | asset_url }}" alt="Purpose 2 Profit" loading="lazy">{%- endif -%}
             <div class="osx-hero-head">
               {%- if section.settings.hero_eyebrow != blank -%}<div class="osx-eyebrow">{{ section.settings.hero_eyebrow }}</div>{%- endif -%}
               <h1>{%- if customer.first_name != blank -%}<span class="osx-name">{{ customer.first_name }}</span>,<br>{{ hero_phrase | slice: 0 | downcase }}{{ hero_phrase | slice: 1, 400 }}{%- else -%}{{ hero_phrase }}{%- endif -%}</h1>
@@ -1297,6 +1297,11 @@
   #p2pos .osx-cm-erow{display:flex;gap:8px;justify-content:flex-end;margin-top:7px;}
   #p2pos .osx-cm-erow button{border:1px solid var(--stroke);background:rgba(255,255,255,.04);color:var(--muted);cursor:pointer;border-radius:999px;padding:6px 13px;font:700 12px/1 system-ui;}
   #p2pos .osx-cm-erow .osx-cm-esave{border-color:var(--gstroke);background:rgba(216,180,90,.12);color:var(--gold-bright);}
+  /* Trusted Guide logo — grayscale art + recolor-following glow (uses --gold-bright) */
+  #p2pos .osx-tlogo{display:inline-block;height:1.55em;margin-right:.4em;vertical-align:-0.34em;position:relative;}
+  #p2pos .osx-tlogo::before{content:"";position:absolute;left:50%;top:48%;transform:translate(-50%,-50%);width:210%;height:130%;border-radius:50%;background:radial-gradient(ellipse,var(--gold-bright),transparent 62%);opacity:.3;z-index:0;pointer-events:none;}
+  #p2pos .osx-tlogo img{position:relative;z-index:1;height:100%;width:auto;display:block;filter:drop-shadow(0 0 5px var(--gold-bright)) drop-shadow(0 0 2px var(--gold-bright));}
+  #p2pos .osx-tg-mark{filter:drop-shadow(0 0 26px var(--gold-bright)) drop-shadow(0 0 10px var(--gold-bright));}
   /* community walkthrough modal */
   .osx-tour-in{width:min(400px,100%);text-align:center;padding:26px 24px 22px;}
   .osx-tour-emoji{font-size:44px;line-height:1;margin-bottom:12px;}
@@ -1719,6 +1724,16 @@ window.P2P_EVENTS = [{%- for b in ev_blocks -%}{"iso":{{ b.settings.iso_date | d
       var offs = [-28, -12, 0, 16, 30];
       var stops = offs.map(function(o, i){ return hsl(h + o, clamp(sat - Math.abs(o) * 0.4, 40, 90), 58 + (i % 2 ? 8 : 0)); });
       root.style.setProperty('--aurora', 'linear-gradient(100deg,' + stops.concat(stops[0]).join(',') + ')');
+    })();
+
+    // Trusted Guide logo next to each view's title (Hauses are external pages, so they're untouched)
+    (function(){
+      var src = "{{ 'p2p-trusted-guide.png' | asset_url }}";
+      var logo = '<span class="osx-tlogo"><img src="' + src + '" alt="" aria-hidden="true"></span>';
+      root.querySelectorAll('.osx-view').forEach(function(v){
+        var h = v.querySelector('.osx-h2');
+        if(h && !h.querySelector('.osx-tlogo')) h.insertAdjacentHTML('afterbegin', logo);
+      });
     })();
 
     // Personalized Brand DNA panel — reads p2p_archetype (set when the Founders Assessment completes)
