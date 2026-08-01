@@ -584,20 +584,19 @@
             <div class="osx-mb-map osx-members-map" data-members-map></div>
             <p class="osx-mb-mapnote">Pins are approximate (city‑level) — never your exact address.</p>
           </div>
+          <div class="osx-suggest" data-suggest>
+            <div class="osx-suggest-h">💡 Help us be better</div>
+            <p class="osx-suggest-sub">A question, an idea, or a bit of praise? Send it straight to the team — it comes to us privately, not to the community.</p>
+            <select class="osx-suggest-kind" data-suggest-kind>
+              <option value="Suggestion">Suggestion</option>
+              <option value="Question">Question</option>
+              <option value="Kudos">Kudos / Praise</option>
+              <option value="Report">Report a concern</option>
+            </select>
+            <textarea class="osx-cw-text" data-suggest-text maxlength="2000" rows="3" placeholder="Share your thoughts…"></textarea>
+            <div class="osx-suggest-row"><span class="osx-suggest-status" data-suggest-status></span><button class="osx-cw-postbtn" type="button" data-suggest-send>Send</button></div>
+          </div>
         </aside>
-      </div>
-
-      <div class="osx-suggest" data-suggest>
-        <div class="osx-suggest-h">💡 Help us be better</div>
-        <p class="osx-suggest-sub">A question, an idea, or a bit of praise? Send it straight to the team — it comes to us privately, not to the community.</p>
-        <select class="osx-suggest-kind" data-suggest-kind>
-          <option value="Suggestion">Suggestion</option>
-          <option value="Question">Question</option>
-          <option value="Kudos">Kudos / Praise</option>
-          <option value="Report">Report a concern</option>
-        </select>
-        <textarea class="osx-cw-text" data-suggest-text maxlength="2000" rows="3" placeholder="Share your thoughts…"></textarea>
-        <div class="osx-suggest-row"><span class="osx-suggest-status" data-suggest-status></span><button class="osx-cw-postbtn" type="button" data-suggest-send>Send</button></div>
       </div>
     </section>
 
@@ -1360,6 +1359,7 @@
   #p2pos .osx-members-side{display:flex;flex-direction:column;gap:18px;}
   #p2pos .osx-members-side .osx-lower-card{border:1px solid var(--stroke);border-radius:16px;background:rgba(255,255,255,.03);padding:16px 18px;}
   #p2pos .osx-members-map{height:min(460px,52vh);}
+  #p2pos .osx-members-side .osx-suggest{max-width:none;margin-top:0;}
   @media (max-width:900px){#p2pos .osx-members-grid{grid-template-columns:1fr;}}
   /* community walkthrough modal */
   .osx-tour-in{width:min(400px,100%);text-align:center;padding:26px 24px 22px;}
