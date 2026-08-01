@@ -33,6 +33,31 @@
 
 ---
 
+## v2 — Community wall + Member profiles + Map (2026-08)
+
+The Worker (`worker.js`) now also powers member profiles, the members directory/map,
+and an **unmoderated** community wall (posts go live instantly). New routes off the
+same App Proxy: `/apps/p2p/{profile,members,community,moderate}`. It needs a shared
+**KV store**. One-time Cloudflare setup:
+
+1. **Create the KV store:** Cloudflare dashboard → **Storage & Databases → KV →
+   Create a namespace**, name it `p2p`.
+2. **Bind it to the Worker:** Workers & Pages → **p2p-progress** → Settings →
+   **Bindings → Add → KV namespace**. Variable name **`P2P_KV`**, namespace = `p2p`.
+3. **Paste the updated `worker.js`** (Quick edit → replace all → Save/Deploy).
+4. **Optional variables** (Settings → Variables):
+   - `admin_ids` — your Shopify customer id(s), comma-separated. Lets you delete a
+     post (spam safety valve). Leave unset = board is fully unmoderated.
+   - `resend_key` + `alert_email` — a free [resend.com](https://resend.com) API key +
+     your email, to get an email ping when someone posts. Optional.
+
+Location on the map is **city-level**, derived automatically from Cloudflare's edge
+geo (`request.cf`) — no browser "allow location?" prompt, never an exact address.
+Members are shown by default (opt-out toggle in their profile); disclose this in the
+Access Pass terms.
+
+---
+
 **Goal:** make a member's progress (courses done, points, badges, streak, journal,
 certificates) follow them across devices and browsers, instead of living only in
 one browser.
