@@ -37,7 +37,9 @@
         '<div class="osx-cw-post-top"><b>' + esc(p.name || 'Member') + '</b><span class="osx-cw-time">' + ago(p.ts) + '</span></div>' +
         '<div class="osx-cw-post-text' + (lng ? ' clamp' : '') + '">' + esc(p.text) + '</div>' +
         (lng ? '<button class="osx-cw-more" type="button" data-more>Read more ▾</button>' : '') +
-        '<div class="osx-cw-post-acts">' + loveBtn(p) + '</div></div>';
+        '<div class="osx-cw-post-acts">' + loveBtn(p) +
+          '<button class="osx-cw-report" type="button" data-report="' + esc(p.id) + '" title="Report this post" aria-label="Report post">⚑</button>' +
+        '</div></div>';
     }).join('');
     wireLoves(feed);
     feed.querySelectorAll('[data-more]').forEach(function (b) {
@@ -45,6 +47,19 @@
         var t = b.previousElementSibling; if (!t) return;
         t.classList.toggle('clamp');
         b.textContent = t.classList.contains('clamp') ? 'Read more ▾' : 'Show less ▴';
+      });
+    });
+    feed.querySelectorAll('[data-report]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        if (b.disabled) return;
+        if (!window.confirm('Report this post to the team for review?')) return;
+        var id = b.getAttribute('data-report');
+        var post = posts.filter(function (p) { return p.id === id; })[0];
+        var txt = post ? ('Reported wall post by ' + (post.name || 'Member') + ':\n\n"' + post.text + '"') : ('Reported post ' + id);
+        b.disabled = true;
+        fetch('/apps/p2p/suggest', { method: 'POST', headers: { 'content-type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify({ text: txt, kind: 'Report' }) })
+          .then(function (r) { return r.json(); }).then(function () { b.textContent = 'reported ✓'; })
+          .catch(function () { b.disabled = false; });
       });
     });
   }
