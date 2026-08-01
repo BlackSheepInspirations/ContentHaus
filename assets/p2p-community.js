@@ -173,6 +173,18 @@
       .catch(function () { postBtn.disabled = false; postBtn.textContent = 'Post'; });
   });
 
+  var winAdd = root.querySelector('[data-win-add]'), winBox = root.querySelector('[data-win-addbox]'),
+      winText = root.querySelector('[data-win-addtext]'), winShare = root.querySelector('[data-win-share]');
+  if (winAdd && winBox) winAdd.addEventListener('click', function () { winBox.hidden = !winBox.hidden; if (!winBox.hidden && winText) winText.focus(); });
+  if (winShare) winShare.addEventListener('click', function () {
+    var t = (winText && winText.value || '').trim(); if (!t) return;
+    winShare.disabled = true; winShare.textContent = 'Sharing…';
+    fetch(PROXY, { method: 'POST', headers: { 'content-type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify({ text: t, kind: 'win', name: window.P2P_MEMBER_NAME || '' }) })
+      .then(function (r) { return r.json(); })
+      .then(function (res) { winShare.disabled = false; winShare.textContent = 'Share win'; if (res && res.ok) { winText.value = ''; if (winBox) winBox.hidden = true; load(); } })
+      .catch(function () { winShare.disabled = false; winShare.textContent = 'Share win'; });
+  });
+
   load(); loadMembersData();
 })();
 

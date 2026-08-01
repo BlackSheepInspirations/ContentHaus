@@ -460,7 +460,11 @@
               </div>
             </div>
             <div class="osx-side-card">
-              <div class="osx-side-h">🏆 Recent wins</div>
+              <div class="osx-side-h">🏆 Recent wins <button class="osx-win-add" type="button" data-win-add>＋ Add</button></div>
+              <div class="osx-win-addbox" data-win-addbox hidden>
+                <textarea class="osx-cw-text" data-win-addtext maxlength="500" rows="2" placeholder="What did you accomplish? 🏆"></textarea>
+                <button class="osx-cw-postbtn" type="button" data-win-share style="width:100%;margin-top:8px;">Share win</button>
+              </div>
               <div class="osx-wins-side-body" data-wins-feed><div class="osx-cw-empty">—</div></div>
             </div>
             <div class="osx-side-card">
@@ -1080,7 +1084,10 @@
   #p2pos .osx-wc-item.done .osx-wc-dot{border-color:#39c5c0;background:rgba(57,197,192,.25);}
   #p2pos .osx-wc-item.done{color:var(--text);}
   #p2pos .osx-side-card{border:1px solid var(--stroke);border-radius:16px;background:rgba(255,255,255,.03);padding:14px 15px;}
-  #p2pos .osx-side-h{font:800 12px/1 system-ui;letter-spacing:.04em;text-transform:uppercase;color:var(--gold-bright);margin-bottom:11px;}
+  #p2pos .osx-side-h{display:flex;align-items:center;justify-content:space-between;gap:8px;font:800 12px/1 system-ui;letter-spacing:.04em;text-transform:uppercase;color:var(--gold-bright);margin-bottom:11px;}
+  #p2pos .osx-win-add{border:1px solid var(--gstroke);background:rgba(216,180,90,.08);color:var(--gold-bright);cursor:pointer;border-radius:999px;padding:4px 10px;font:800 10px/1 system-ui;text-transform:none;flex:none;}
+  #p2pos .osx-win-add:hover{background:rgba(216,180,90,.18);}
+  #p2pos .osx-win-addbox{margin-bottom:12px;}
   #p2pos .osx-ev-scroll{max-height:168px;overflow-y:auto;display:flex;flex-direction:column;gap:9px;}
   #p2pos .osx-ev-item{display:flex;gap:11px;align-items:center;text-decoration:none;}
   #p2pos .osx-ev-when{flex:none;min-width:40px;text-align:center;border:1px solid var(--gstroke);border-radius:9px;padding:6px 6px;}
