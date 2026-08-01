@@ -30,6 +30,7 @@
 
   var data; try { data = JSON.parse(localStorage.getItem(KEY)) || null; } catch (e) { data = null; }
   if (!data) data = {}; if (!data.done) data.done = []; if (!data.goals) data.goals = []; if (!data.lives) data.lives = []; if (!data.posts) data.posts = []; if (!data.snaps) data.snaps = []; if (!data.ideas) data.ideas = [];
+  if (!data.products) data.products = []; if (!data.ctype) data.ctype = 'both';
   var milestoneBaseline = (data.milestones === undefined); if (!data.milestones) data.milestones = {};
   TFS.forEach(function (t) {
     var tf = t[0]; if (!data[tf]) data[tf] = { period: periodKey(tf), top: [], todo: [] };
@@ -57,17 +58,16 @@
   function gauge(pct, id) { var f = Math.round((pct || 0) / 25), s = ''; for (var i = 0; i < 4; i++) s += '<span class="osx-pl-seg' + (i < f ? ' on' : '') + '" data-seg="' + i + '"></span>'; return '<span class="osx-pl-gauge" data-gid="' + esc(id) + '" title="' + (pct || 0) + '%">' + s + '</span>'; }
 
   /* ---------- views ---------- */
+  var TABS = [['dash', '📊 Dashboard', 'all'], ['goals', '🎯 Goals', 'all'], ['products', '📦 Products', 'product'], ['lives', '📡 Lives', 'content'], ['posts', '📝 Posts', 'content'], ['ideas', '💡 Ideas', 'content'], ['growth', '📈 Growth', 'all'], ['lists', '✅ Lists', 'all']];
+  function tabShown(cat) { var ct = data.ctype || 'both'; if (cat === 'all') return true; if (cat === 'product') return ct !== 'content'; return ct !== 'product'; }
   function navHTML() {
-    return '<div class="osx-pl-nav">' +
-      '<button class="osx-pl-navb' + (view === 'dash' ? ' on' : '') + '" data-view="dash">📊 Dashboard</button>' +
-      '<button class="osx-pl-navb' + (view === 'goals' ? ' on' : '') + '" data-view="goals">🎯 Goals</button>' +
-      '<button class="osx-pl-navb' + (view === 'lives' ? ' on' : '') + '" data-view="lives">📡 Lives</button>' +
-      '<button class="osx-pl-navb' + (view === 'posts' ? ' on' : '') + '" data-view="posts">📝 Posts</button>' +
-      '<button class="osx-pl-navb' + (view === 'ideas' ? ' on' : '') + '" data-view="ideas">💡 Ideas</button>' +
-      '<button class="osx-pl-navb' + (view === 'growth' ? ' on' : '') + '" data-view="growth">📈 Growth</button>' +
-      '<button class="osx-pl-navb' + (view === 'lists' ? ' on' : '') + '" data-view="lists">✅ Lists</button></div>';
+    var vis = TABS.filter(function (t) { return tabShown(t[2]); });
+    if (!vis.some(function (t) { return t[0] === view; })) view = 'dash';
+    return '<div class="osx-pl-nav">' + vis.map(function (t) { return '<button class="osx-pl-navb' + (view === t[0] ? ' on' : '') + '" data-view="' + t[0] + '">' + t[1] + '</button>'; }).join('') + '</div>';
   }
   function dashHTML() {
+    var ct = data.ctype || 'both';
+    var sel = '<div class="osx-ct-sel"><span class="osx-ct-l">I create:</span>' + [['content', '📱 Content'], ['product', '📦 Products'], ['both', '✨ Both']].map(function (c) { return '<button class="osx-ct-b' + (ct === c[0] ? ' on' : '') + '" data-ctype="' + c[0] + '">' + c[1] + '</button>'; }).join('') + '</div>';
     var upcoming = data.goals.filter(function (g) { return g.w && daysTo(g.w) !== null && daysTo(g.w) >= 0; }).sort(function (a, b) { return daysTo(a.w) - daysTo(b.w); })[0];
     var cd = upcoming ? '<button class="osx-dash-cd" data-open="' + esc(upcoming.id) + '"><div class="osx-dash-cd-n">' + Math.max(0, daysTo(upcoming.w)) + '</div><div class="osx-dash-cd-t"><b>days to launch</b><span>' + esc(upcoming.title || 'your goal') + '</span></div></button>' : '';
     var snaps = data.snaps.slice().sort(function (a, b) { return (a.week || '').localeCompare(b.week || ''); });
@@ -84,7 +84,7 @@
         '<span class="osx-pl-gsum-b"><b>' + esc(g.title || 'Untitled goal') + '</b>' +
         '<span class="osx-pl-gsum-m"><span class="osx-pl-stage-b">' + st[1] + ' ' + st[2] + '</span> · ' + esc(countdownText(g.w)) + '</span></span></button>';
     }).join('') : '<div class="osx-pl-empty">No goals yet — head to 🎯 Goals to build one with the GROWS formula.</div>';
-    return cd + stats + '<div class="osx-pl-sech">📊 Progress by horizon</div><div class="osx-pl-strip">' + rings + '</div>' +
+    return sel + cd + stats + '<div class="osx-pl-sech">📊 Progress by horizon</div><div class="osx-pl-strip">' + rings + '</div>' +
       '<div class="osx-pl-sech" style="margin-top:10px;">🎯 Your goals</div>' + goals + milestonesStrip();
   }
   function growsRow(g) {
@@ -279,6 +279,34 @@
     return '<div class="osx-pl-add"><input class="osx-pl-in" data-newidea placeholder="Capture a content idea…" maxlength="160"><button class="osx-pl-addbtn" data-newideab>Add</button></div>' + list;
   }
 
+  /* ---------- products (asset tracker for product creators) ---------- */
+  var PROD_STATUS = [['idea', '💭 Idea'], ['building', '🔨 Building'], ['live', '🟢 Live'], ['retired', '· Retired']];
+  var ROOTED_STEPS_P = ['R · Reach — warm up the right people', 'O · Open — build anticipation', 'O · Offer — open the doors', 'T · Trigger — proof + urgency', 'E · Escalate — the close', 'D · Deepen — after-launch care'];
+  function prodObj(id) { return data.products.filter(function (p) { return p.id === id; })[0]; }
+  function prodTrend() { var live = 0, rev = 0, sold = 0, best = '—', bs = -1; data.products.forEach(function (p) { if (p.status === 'live') live++; rev += num(p.revenue); sold += num(p.sold); if (num(p.revenue) > bs) { bs = num(p.revenue); best = p.name || '—'; } }); return { total: data.products.length, live: live, rev: rev, sold: sold, best: best }; }
+  function productCard(p) {
+    var open = !!expanded['PR' + p.id], st = PROD_STATUS.filter(function (s) { return s[0] === (p.status || 'idea'); })[0];
+    var head = '<div class="osx-lv-h" data-prtoggle="' + esc(p.id) + '"><span class="osx-pr-status s-' + (p.status || 'idea') + '">' + st[1] + '</span><span class="osx-lv-hb"><b>' + esc(p.name || 'Untitled product') + '</b><span class="osx-lv-hm">' + (p.price ? '$' + esc(p.price) + ' · ' : '') + num(p.sold) + ' sold · $' + num(p.revenue) + '</span></span></div>';
+    if (!open) return '<div class="osx-lv-card">' + head + '</div>';
+    var body = '<div class="osx-lv-grid">' +
+      '<label class="osx-lv-f"><span>Product name</span><input class="osx-pl-in" data-prf="' + esc(p.id) + '|name" value="' + esc(p.name || '') + '" maxlength="80"></label>' +
+      '<label class="osx-lv-f"><span>Type</span><input class="osx-pl-in" data-prf="' + esc(p.id) + '|type" value="' + esc(p.type || '') + '" placeholder="e.g. Digital planner, Course" maxlength="60"></label>' +
+      '<label class="osx-lv-f"><span>Price ($)</span><input class="osx-pl-in" data-prf="' + esc(p.id) + '|price" value="' + esc(p.price || '') + '" inputmode="numeric" maxlength="10"></label>' +
+      '<label class="osx-lv-f"><span>Status</span><select class="osx-pl-date" data-prf="' + esc(p.id) + '|status">' + PROD_STATUS.map(function (s) { return '<option value="' + s[0] + '"' + (s[0] === (p.status || 'idea') ? ' selected' : '') + '>' + s[1] + '</option>'; }).join('') + '</select></label>' +
+      '<label class="osx-lv-f"><span>Launch date</span><input type="date" class="osx-pl-date" data-prf="' + esc(p.id) + '|launch" value="' + esc(p.launch || '') + '"></label>' +
+      '<label class="osx-lv-f"><span>Units sold</span><input class="osx-pl-in" data-prf="' + esc(p.id) + '|sold" value="' + esc(p.sold || '') + '" inputmode="numeric" maxlength="10"></label>' +
+      '<label class="osx-lv-f"><span>Revenue ($)</span><input class="osx-pl-in" data-prf="' + esc(p.id) + '|revenue" value="' + esc(p.revenue || '') + '" inputmode="numeric" maxlength="12"></label></div>' +
+      '<button class="osx-lv-mkt" data-prlaunch="' + esc(p.id) + '" style="background:none;cursor:pointer;">🚀 Plan this launch with ROOTED →</button>' +
+      '<div class="osx-lv-del"><button data-prdel="' + esc(p.id) + '">Delete product</button></div>';
+    return '<div class="osx-lv-card open">' + head + '<div class="osx-lv-body">' + body + '</div></div>';
+  }
+  function productsHTML() {
+    var t = prodTrend();
+    var trend = t.total ? '<div class="osx-lv-trend"><div class="osx-lv-stat"><b>' + t.total + '</b><span>products</span></div><div class="osx-lv-stat"><b>' + t.live + '</b><span>live</span></div><div class="osx-lv-stat"><b>$' + t.rev + '</b><span>revenue</span></div><div class="osx-lv-stat"><b>' + t.sold + '</b><span>units sold</span></div></div>' : '';
+    var list = data.products.length ? data.products.map(productCard).join('') : '<div class="osx-pl-empty">Add your products/offers — track them 💭 idea → 🔨 building → 🟢 live, log sales, and plan each launch with ROOTED.</div>';
+    return trend + '<button class="osx-pl-newgoal" data-newprod>＋ Add a product</button>' + list;
+  }
+
   /* ---------- gamification: milestones + celebrations ---------- */
   var MILESTONES = [
     ['first_goal', 'First goal set', '🎯', function () { return data.goals.length >= 1; }],
@@ -291,6 +319,8 @@
     ['first_post', 'First post logged', '📝', function () { return data.posts.some(function (p) { return p.done; }); }],
     ['fifty_posts', '50 posts — consistency!', '✍️', function () { return data.posts.filter(function (p) { return p.done; }).length >= 50; }],
     ['first_idea', 'First idea captured', '💡', function () { return data.ideas.length >= 1; }],
+    ['first_product', 'First product added', '📦', function () { return data.products.length >= 1; }],
+    ['product_live', 'A product went LIVE! 🟢', '🛍️', function () { return data.products.some(function (p) { return p.status === 'live'; }); }],
     ['first_sale', 'First sale 💰', '💰', function () { return data.snaps.some(function (s) { return num(s.revenue) > 0 || num(s.sold) > 0; }) || data.lives.concat(data.posts).some(function (x) { return num((x.s || {}).sales) > 0; }); }],
     ['hundred', '100 followers', '⭐', function () { return data.snaps.some(function (s) { return num(s.followers) >= 100; }); }],
     ['k_followers', '1,000 followers 🌟', '🌟', function () { return data.snaps.some(function (s) { return num(s.followers) >= 1000; }); }],
@@ -327,7 +357,7 @@
   }
 
   function render() {
-    var body = view === 'dash' ? dashHTML() : view === 'goals' ? goalsHTML() : view === 'lives' ? livesHTML() : view === 'posts' ? postsHTML() : view === 'ideas' ? ideasHTML() : view === 'growth' ? growthHTML() : listsHTML();
+    var body = view === 'dash' ? dashHTML() : view === 'goals' ? goalsHTML() : view === 'products' ? productsHTML() : view === 'lives' ? livesHTML() : view === 'posts' ? postsHTML() : view === 'ideas' ? ideasHTML() : view === 'growth' ? growthHTML() : listsHTML();
     host.innerHTML = '<div class="osx-pl">' + navHTML() + '<div class="osx-pl-view">' + body + '</div></div>';
     wire();
     checkMilestones();
@@ -399,6 +429,14 @@
     var ni = host.querySelector('[data-newidea]'); if (ni) ni.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); addIdea(); } });
     host.querySelectorAll('[data-idea]').forEach(function (b) { b.addEventListener('click', function () { var i = data.ideas.filter(function (x) { return x.id === b.getAttribute('data-idea'); })[0]; if (i) { i.used = true; data.posts.unshift({ id: uid(), topic: i.text, platform: 'TikTok', type: 'Video', date: '', time: '', hook: '', cta: '', length: '', music: '', done: false, s: {} }); save(); view = 'posts'; render(); } }); });
     host.querySelectorAll('[data-iddel]').forEach(function (b) { b.addEventListener('click', function () { data.ideas = data.ideas.filter(function (x) { return x.id !== b.getAttribute('data-iddel'); }); save(); render(); }); });
+    // creator mode
+    host.querySelectorAll('[data-ctype]').forEach(function (b) { b.addEventListener('click', function () { data.ctype = b.getAttribute('data-ctype'); save(); render(); }); });
+    // products
+    var npr = host.querySelector('[data-newprod]'); if (npr) npr.addEventListener('click', function () { var p = { id: uid(), name: 'New product', type: '', price: '', status: 'idea', launch: '', sold: '', revenue: '' }; data.products.unshift(p); expanded['PR' + p.id] = true; save(); render(); });
+    host.querySelectorAll('[data-prtoggle]').forEach(function (b) { b.addEventListener('click', function (e) { if (e.target.closest('input,select,textarea,button,a')) return; var id = b.getAttribute('data-prtoggle'); expanded['PR' + id] = !expanded['PR' + id]; render(); }); });
+    host.querySelectorAll('[data-prf]').forEach(function (el) { el.addEventListener('change', function () { var p = el.getAttribute('data-prf').split('|'), o = prodObj(p[0]); if (o) { o[p[1]] = el.value; save(); if (p[1] === 'status' || p[1] === 'name' || p[1] === 'price') render(); } }); });
+    host.querySelectorAll('[data-prdel]').forEach(function (b) { b.addEventListener('click', function () { if (!window.confirm('Delete this product?')) return; data.products = data.products.filter(function (x) { return x.id !== b.getAttribute('data-prdel'); }); save(); render(); }); });
+    host.querySelectorAll('[data-prlaunch]').forEach(function (b) { b.addEventListener('click', function () { var o = prodObj(b.getAttribute('data-prlaunch')); if (!o) return; var g = { id: uid(), title: 'Launch: ' + (o.name || 'product'), stage: 'grows', g: '', r: '', o: '', s: '', w: o.launch || '', roadmap: ROOTED_STEPS_P.map(function (t) { return { id: uid(), text: t, pct: 0 }; }) }; data.goals.unshift(g); expanded[g.id] = true; view = 'goals'; save(); render(); }); });
   }
   function addRoad(gid) { var inp = host.querySelector('[data-radd="' + gid + '"]'); var v = (inp && inp.value || '').trim(); if (!v) return; var g = goal(gid); if (g) { g.roadmap = g.roadmap || []; g.roadmap.push({ id: uid(), text: v.slice(0, 120), pct: 0 }); save(); render(); } }
   function addList(bucket) { var inp = host.querySelector('[data-ladd="' + bucket + '"]'); var v = (inp && inp.value || '').trim(); if (!v) return; if (bucket === 'top' && data[active].top.length >= 3) return; data[active][bucket].push({ id: uid(), text: v.slice(0, 120), pct: 0 }); save(); render(); }

@@ -1526,6 +1526,16 @@
   .osx-cele-l{font:800 22px/1.2 Georgia,serif;color:#f0f5f2;margin-bottom:20px;}
   .osx-cele-x{background:linear-gradient(100deg,#f4e2a6,#c9a24a);border:0;color:#0a1410;border-radius:999px;padding:12px 26px;font:800 14px/1 system-ui;cursor:pointer;}
   @keyframes osx-cele-pop{0%{transform:scale(0) rotate(-20deg);}100%{transform:scale(1) rotate(0);}}
+  /* creator mode + product status */
+  #p2pos .osx-ct-sel{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
+  #p2pos .osx-ct-l{font:700 12px/1 system-ui;color:var(--muted);}
+  #p2pos .osx-ct-b{border:1px solid var(--stroke);background:rgba(255,255,255,.03);color:var(--muted);cursor:pointer;border-radius:999px;padding:8px 14px;font:700 12.5px/1 system-ui;transition:.14s;}
+  #p2pos .osx-ct-b.on{color:#0a1410;background:linear-gradient(100deg,#f4e2a6,#c9a24a);border-color:transparent;}
+  #p2pos .osx-pr-status{flex:none;font:800 10px/1 system-ui;letter-spacing:.02em;border-radius:6px;padding:5px 8px;white-space:nowrap;}
+  #p2pos .osx-pr-status.s-idea{color:var(--muted);background:rgba(255,255,255,.06);}
+  #p2pos .osx-pr-status.s-building{color:#f4c534;background:rgba(216,180,90,.14);}
+  #p2pos .osx-pr-status.s-live{color:#0a1410;background:#27ae6e;}
+  #p2pos .osx-pr-status.s-retired{color:var(--muted);background:rgba(255,255,255,.04);}
   @media (max-width:900px){#p2pos .osx-members-grid{grid-template-columns:1fr;}}
   /* community walkthrough modal */
   .osx-tour-in{width:min(400px,100%);text-align:center;padding:26px 24px 22px;}
