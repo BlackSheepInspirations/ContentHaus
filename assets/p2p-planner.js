@@ -67,7 +67,37 @@
   function artifactCount() { var road = 0; data.goals.forEach(function (g) { (g.roadmap || []).forEach(function (x) { if (x.pct >= 100) road++; }); }); return data.lives.filter(function (l) { return l.done; }).length + data.posts.filter(function (p) { return p.done; }).length + data.products.filter(function (p) { return p.status === 'live'; }).length + road + data.raft.cycles.filter(function (c) { return c.fastWin; }).length; }
   function weekList(n) { var arr = [], d = new Date(); for (var i = 0; i < n; i++) { arr.unshift(periodKey('week', d)); d.setDate(d.getDate() - 7); } return arr; }
   function artifactsInWeek(wk) { var c = 0; data.lives.forEach(function (l) { if (l.done && l.date && periodKey('week', dfromiso(l.date)) === wk) c++; }); data.posts.forEach(function (p) { if (p.done && p.date && periodKey('week', dfromiso(p.date)) === wk) c++; }); if (data.raft.cycles.filter(function (x) { return x.week === wk && x.fastWin; })[0]) c++; return c; }
-  function barChart() { var wks = weekList(8), vals = wks.map(artifactsInWeek), max = Math.max.apply(null, vals.concat([1])); return '<div class="osx-barchart">' + vals.map(function (v, i) { return '<div class="osx-bar-col"><div class="osx-bar" style="height:' + Math.max(5, Math.round((v / max) * 100)) + '%" title="' + v + ' shipped"></div><span>' + esc(wks[i].slice(-3)) + '</span></div>'; }).join('') + '</div>'; }
+  function weekArtifacts(wk) {
+    var out = [];
+    data.lives.forEach(function (l) { if (l.done && l.date && periodKey('week', dfromiso(l.date)) === wk) out.push({ kind: 'live', id: l.id, ic: '📡', t: l.title || l.topic || 'Live' }); });
+    data.posts.forEach(function (p) { if (p.done && p.date && periodKey('week', dfromiso(p.date)) === wk) out.push({ kind: 'post', id: p.id, ic: '📝', t: p.topic || 'Post' }); });
+    var fw = data.raft.cycles.filter(function (x) { return x.week === wk && x.fastWin; })[0]; if (fw) out.push({ kind: 'fastwin', id: '', ic: '⚡', t: fw.fastWin });
+    return out;
+  }
+  function barChart() {
+    var wks = weekList(8), vals = wks.map(artifactsInWeek), max = Math.max.apply(null, vals.concat([1]));
+    return '<div class="osx-barchart">' + vals.map(function (v, i) { return '<button type="button" class="osx-bar-col' + (v ? '' : ' empty') + '" data-shipweek="' + esc(wks[i]) + '" title="' + v + ' shipped — click to see"><div class="osx-bar" style="height:' + Math.max(5, Math.round((v / max) * 100)) + '%"></div><span>' + esc(wks[i].slice(-3)) + '</span></button>'; }).join('') + '</div>';
+  }
+  function openItemDetail(kind, id) {
+    if (kind === 'live') { view = 'lives'; livesTab = 'lives'; expanded['L' + id] = true; }
+    else if (kind === 'post') { view = 'posts'; expanded['P' + id] = true; }
+    else if (kind === 'product') { view = 'products'; expanded['PR' + id] = true; }
+    else if (kind === 'goal') { view = 'goals'; expanded[id] = true; }
+    else { view = 'dash'; }
+    render();
+    setTimeout(function () { var el = host.querySelector('[data-ltoggle="' + id + '"],[data-ptoggle="' + id + '"],[data-prtoggle="' + id + '"],[data-toggle="' + id + '"]'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 40);
+  }
+  function openShipWeek(wk) {
+    var arts = weekArtifacts(wk);
+    var pop = document.createElement('div'); pop.className = 'osx-cal-pop'; root.appendChild(pop);
+    var rows = arts.length ? arts.map(function (a) { return '<div class="osx-dcp-i">' + a.ic + ' <b>' + esc(a.t) + '</b>' + (a.kind !== 'fastwin' ? '<button class="osx-ship-open" type="button" data-shipopen="' + a.kind + '|' + esc(a.id) + '">open & update details →</button>' : '') + '</div>'; }).join('') : '<div class="osx-pl-empty">Nothing logged this week.</div>';
+    pop.innerHTML = '<div class="osx-cal-pop-in osx-ns"><button class="osx-cal-pop-x" type="button" aria-label="Close">✕</button><div class="osx-ns-h">Shipped · week of ' + esc(wk) + '</div>' + rows + '<button class="osx-cele-x" type="button" style="margin-top:12px;">Close</button></div>';
+    function close() { pop.remove(); }
+    pop.addEventListener('click', function (e) { if (e.target === pop) close(); });
+    pop.querySelector('.osx-cal-pop-x').addEventListener('click', close);
+    pop.querySelector('.osx-cele-x').addEventListener('click', close);
+    pop.querySelectorAll('[data-shipopen]').forEach(function (b) { b.addEventListener('click', function () { var p = b.getAttribute('data-shipopen').split('|'); close(); openItemDetail(p[0], p[1]); }); });
+  }
   function raftHTML() {
     var c = raftCycle(), last = lastCycleWithWin(), ct = data.ctype || 'both';
     var actL = ['Not chosen', '① Chosen', '② Started', '③ Done'], trac = ct === 'product' ? 'products w/ repeat' : 'weeks unbroken';
@@ -111,12 +141,12 @@
   }
   function radarHTML() {
     var items = [];
-    data.lives.forEach(function (l) { if (!l.deleted && !l.done && l.date) { var dd = daysTo(l.date); if (dd !== null && dd >= 0 && dd <= 14) items.push({ d: dd, ic: '📡', t: l.title || l.topic || 'Live' }); } });
-    data.goals.forEach(function (g) { if (g.w) { var dd = daysTo(g.w); if (dd !== null && dd >= 0 && dd <= 14) items.push({ d: dd, ic: '🎯', t: g.title || 'Goal launch' }); } });
-    data.products.forEach(function (p) { if (p.launch) { var dd = daysTo(p.launch); if (dd !== null && dd >= 0 && dd <= 14) items.push({ d: dd, ic: '📦', t: p.name || 'Product launch' }); } });
+    data.lives.forEach(function (l) { if (!l.deleted && !l.done && l.date) { var dd = daysTo(l.date); if (dd !== null && dd >= 0 && dd <= 14) items.push({ d: dd, kind: 'live', id: l.id, ic: '📡', t: l.title || l.topic || 'Live' }); } });
+    data.goals.forEach(function (g) { if (g.w) { var dd = daysTo(g.w); if (dd !== null && dd >= 0 && dd <= 14) items.push({ d: dd, kind: 'goal', id: g.id, ic: '🎯', t: g.title || 'Goal launch' }); } });
+    data.products.forEach(function (p) { if (p.launch) { var dd = daysTo(p.launch); if (dd !== null && dd >= 0 && dd <= 14) items.push({ d: dd, kind: 'product', id: p.id, ic: '📦', t: p.name || 'Product launch' }); } });
     items.sort(function (a, b) { return a.d - b.d; });
-    var body = items.length ? items.map(function (it) { return '<div class="osx-radar-i"><span class="osx-radar-ic">' + it.ic + '</span><span class="osx-radar-t">' + esc(it.t) + '</span><span class="osx-radar-d">' + (it.d === 0 ? 'Today' : it.d === 1 ? '1 day' : it.d + ' days') + '</span></div>'; }).join('') : '<div class="osx-pl-empty" style="padding:6px 0;">Nothing in the next 2 weeks — plan a live or set a launch date.</div>';
-    return '<div class="osx-pl-sech" style="margin-top:16px;">🔔 Coming up · next 14 days</div>' + body;
+    var body = items.length ? '<div class="osx-radar-scroll' + (items.length > 5 ? ' more' : '') + '">' + items.map(function (it) { return '<button type="button" class="osx-radar-i" data-openitem="' + it.kind + '|' + esc(it.id) + '"><span class="osx-radar-ic">' + it.ic + '</span><span class="osx-radar-t">' + esc(it.t) + '</span><span class="osx-radar-d' + (it.d <= 1 ? ' soon' : '') + '">' + (it.d === 0 ? 'Today' : it.d === 1 ? '1 day' : it.d + ' days') + '</span></button>'; }).join('') + '</div>' : '<div class="osx-pl-empty" style="padding:6px 0;">Nothing in the next 2 weeks — plan a live or set a launch date.</div>';
+    return '<div class="osx-pl-sech" style="margin-top:0;">🔔 Coming up · next 14 days' + (items.length > 5 ? ' <span style="text-transform:none;letter-spacing:0;color:var(--muted);font-weight:600;">· scroll for ' + (items.length - 5) + ' more</span>' : '') + '</div>' + body;
   }
   function openDcDay(iso) {
     var pop = document.createElement('div'); pop.className = 'osx-cal-pop'; root.appendChild(pop);
@@ -154,7 +184,7 @@
       '<div class="osx-pl-sech">📊 What you shipped — last 8 weeks</div>' + barChart() +
       '<div class="osx-pl-sech">🎚️ Progress by horizon</div><div class="osx-pl-strip">' + rings + '</div>' +
       '<div class="osx-pl-sech" style="margin-top:10px;">🎯 Your goals</div>' + goals + milestonesStrip() + '</div>' +
-      '<div class="osx-dash-right">' + dashCalHTML() + radarHTML() + '</div></div>' + laggingHTML();
+      '<div class="osx-dash-right">' + radarHTML() + dashCalHTML() + '</div></div>' + laggingHTML();
   }
   function growsRow(g) {
     return '<div class="osx-pl-grows">' + GROWS.map(function (r) {
@@ -704,6 +734,8 @@
     var dcp = host.querySelector('[data-dcprev]'); if (dcp) dcp.addEventListener('click', function () { calMY.m--; if (calMY.m < 0) { calMY.m = 11; calMY.y--; } render(); });
     var dcn = host.querySelector('[data-dcnext]'); if (dcn) dcn.addEventListener('click', function () { calMY.m++; if (calMY.m > 11) { calMY.m = 0; calMY.y++; } render(); });
     host.querySelectorAll('[data-dcday]').forEach(function (b) { b.addEventListener('click', function () { openDcDay(b.getAttribute('data-dcday')); }); });
+    host.querySelectorAll('[data-shipweek]').forEach(function (b) { b.addEventListener('click', function () { openShipWeek(b.getAttribute('data-shipweek')); }); });
+    host.querySelectorAll('[data-openitem]').forEach(function (b) { b.addEventListener('click', function () { var p = b.getAttribute('data-openitem').split('|'); openItemDetail(p[0], p[1]); }); });
     // RAFT weekly loop
     host.querySelectorAll('[data-raft]').forEach(function (el) { var k = el.getAttribute('data-raft'); var ev = (el.type === 'checkbox') ? 'change' : 'change'; el.addEventListener(ev, function () { var c = raftCycle(); if (el.type === 'checkbox') c[k] = el.checked; else c[k] = el.value; save(); if (k === 'fastWin' || k === 'corrected') render(); }); });
     host.querySelectorAll('[data-act]').forEach(function (b) { b.addEventListener('click', function () { var c = raftCycle(), n = +b.getAttribute('data-act'); c.act = (c.act === n) ? n - 1 : n; save(); render(); }); });
