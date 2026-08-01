@@ -226,3 +226,14 @@ the LAST — push files SEPARATELY.** 3. Copy each file to the mirror
   - Reactions: ❤ 👍 🎉 per wall post. Worker `react` now takes `{type}`; stores `p.reactions={love,thumb,party}` (migrates legacy likedBy→love). community GET returns `reactions` + `mine`. Frontend: reactBar/wireReacts. Wins-side keeps a single ❤ (loveChip).
   - Badges: members.js publishes `recentBadges` (last 3 earned, emoji-mapped via badgeEmoji). Worker stores `sanitizeBadges`. Growth Board rows show up to 3 badge chips → click = badgePopup. `.osx-gb-who` flex + `.osx-gb-badge` CSS added.
 - **Still Phase B (not started):** comments, 🔔 bell + profile bubble, Frank/Ruth house posts, 30 welcome msgs + auto-welcome, Win of the Week pin, Weekly/Monthly Growth toggle, streak flames, celebration map pin, confetti.
+
+## 2026-08-01 (later) — Phase B part 2 (comments, bell, WoW, streaks, house voices)
+Worker re-paste required + a NEW Cron Trigger for Frank/Ruth.
+- **Comments:** `/apps/p2p/comment` POST {id,text,name} appends to post.comments; community GET returns `comments[]`. Frontend: 💬 toggle + inline thread + reply composer (wireComments/submitComment).
+- **Bell + profile bubble:** sidebar `.osx-userbar` (bubble = customer initial, name, tier via P2P.tier). `/apps/p2p/notifs` GET {notifs,unread} / POST marks read. Reactions + comments on your post push a notif to the author (house- authors excluded). Polls every 60s. On ALL OS pages.
+- **Win of the Week:** community GET computes `winOfWeek` = best-loved win in last 7d (tie→newest); frontend pins `.osx-wow` gold card atop the wall.
+- **Streak flames:** members.js publishes `streak` (P2P.streak().count); posts carry denormalized `streak`. Shows 🔥N on Growth Board rows + wall/WoW names (≥2 days).
+- **Auto-welcome:** profile POST with no `prev` drops a one-time house-welcome post (30-line WELCOME_LINES bank). Fires once per member.
+- **Frank & Ruth:** worker `scheduled()` — Mon→Frank "Did you know" (FRANK_POSTS), Thu→Ruth insight (RUTH_POSTS), advancing a KV cursor, 1/author/day. Author ids house-frank/house-ruth, name Frank/Ruth, `house:true` → gold "✦ Haus" tag. **REQUIRES a Cron Trigger** (e.g. `0 15 * * *`). No cron = they never post.
+- **Confetti:** canvas burst on a shared win (no dependency).
+- Still open: the "Something else" Andrea flagged (undefined). Cross-device already live. Email alerts still need resend_key/alert_email (optional).
