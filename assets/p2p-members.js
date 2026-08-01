@@ -66,9 +66,11 @@
   function ensureLeaflet(cb) {
     if (window.L) { cb(); return; }
     if (!document.querySelector('link[data-leaflet]')) {
-      var css = document.createElement('link'); css.rel = 'stylesheet'; css.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'; css.setAttribute('data-leaflet', '1'); document.head.appendChild(css);
+      var css = document.createElement('link'); css.rel = 'stylesheet'; css.href = window.P2P_LEAFLET_CSS || 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'; css.setAttribute('data-leaflet', '1'); document.head.appendChild(css);
     }
-    var js = document.createElement('script'); js.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'; js.onload = cb; js.onerror = function () { if (mapEl) mapEl.innerHTML = '<div class="osx-cw-empty">Map couldn\'t load right now.</div>'; }; document.head.appendChild(js);
+    var js = document.createElement('script'); js.src = window.P2P_LEAFLET_JS || 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+    js.onload = cb; js.onerror = function () { if (mapEl) mapEl.innerHTML = '<div class="osx-cw-empty">Map couldn\'t load right now.</div>'; };
+    document.head.appendChild(js);
   }
   function buildMap() {
     if (!window.L || !mapEl) return;
@@ -78,7 +80,8 @@
     }
     var pts = members.filter(function (p) { return typeof p.lat === 'number' && typeof p.lng === 'number'; });
     pts.forEach(function (p) {
-      L.marker([p.lat, p.lng]).addTo(leafMap).bindPopup('<div class="osx-mb-pop">' + cardHTML(p, true) + '</div>');
+      L.circleMarker([p.lat, p.lng], { radius: 7, color: '#0b1620', weight: 2, fillColor: '#f4c534', fillOpacity: 1 })
+        .addTo(leafMap).bindPopup('<div class="osx-mb-pop">' + cardHTML(p, true) + '</div>');
     });
     setTimeout(function () { if (leafMap) leafMap.invalidateSize(); }, 60);
     setTimeout(function () { if (leafMap) leafMap.invalidateSize(); }, 350);
@@ -125,7 +128,7 @@
     fetch(MEMBERS, { credentials: 'same-origin' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
       if (j && j.guest) { if (grid) grid.innerHTML = '<div class="osx-cw-empty">Log in to see members.</div>'; return; }
       members = (j && j.members) || []; renderDirectory();
-      if (mapReady && leafMap) { leafMap.eachLayer(function (ly) { if (ly instanceof L.Marker) leafMap.removeLayer(ly); }); buildMap(); }
+      if (mapReady && leafMap) { leafMap.eachLayer(function (ly) { if (ly instanceof L.CircleMarker || ly instanceof L.Marker) leafMap.removeLayer(ly); }); buildMap(); }
     }).catch(function () { if (grid) grid.innerHTML = '<div class="osx-cw-empty">Couldn\'t load members.</div>'; });
   }
   function initProfile() {
