@@ -29,7 +29,7 @@
   function weekKey() { return periodKey('week'); }
 
   var data; try { data = JSON.parse(localStorage.getItem(KEY)) || null; } catch (e) { data = null; }
-  if (!data) data = {}; if (!data.done) data.done = []; if (!data.goals) data.goals = [];
+  if (!data) data = {}; if (!data.done) data.done = []; if (!data.goals) data.goals = []; if (!data.lives) data.lives = [];
   TFS.forEach(function (t) {
     var tf = t[0]; if (!data[tf]) data[tf] = { period: periodKey(tf), top: [], todo: [] };
     if (!data[tf].top) data[tf].top = []; if (!data[tf].todo) data[tf].todo = [];
@@ -60,6 +60,7 @@
     return '<div class="osx-pl-nav">' +
       '<button class="osx-pl-navb' + (view === 'dash' ? ' on' : '') + '" data-view="dash">📊 Dashboard</button>' +
       '<button class="osx-pl-navb' + (view === 'goals' ? ' on' : '') + '" data-view="goals">🎯 Goals</button>' +
+      '<button class="osx-pl-navb' + (view === 'lives' ? ' on' : '') + '" data-view="lives">📡 Lives</button>' +
       '<button class="osx-pl-navb' + (view === 'lists' ? ' on' : '') + '" data-view="lists">✅ Lists</button></div>';
   }
   function dashHTML() {
@@ -120,8 +121,66 @@
       '<button class="osx-pl-archbtn" data-arch>✓ Completed archive (' + data.done.length + ')</button>';
   }
 
+  /* ---------- lives (going-live planner + post-live check-in + trends) ---------- */
+  var LIVE_STATS = [['followers', 'New followers'], ['gifts', 'Gifts / diamonds'], ['hearts', 'Likes / hearts'], ['comments', 'Comments'], ['peak', 'Peak viewers'], ['duration', 'Duration (min)'], ['sales', 'Sales ($)']];
+  var PLATFORMS = ['TikTok', 'Instagram', 'YouTube', 'Facebook', 'Other'];
+  function num(v) { var n = parseFloat(String(v == null ? '' : v).replace(/[^0-9.\-]/g, '')); return isNaN(n) ? 0 : n; }
+  function liveObj(id) { return data.lives.filter(function (l) { return l.id === id; })[0]; }
+  function liveDateLabel(l) { if (!l.date) return 'Unscheduled'; var p = l.date.split('-'); var d = new Date(+p[0], +p[1] - 1, +p[2]); return d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' }); }
+  function livesTrend() {
+    var done = data.lives.filter(function (l) { return l.done; });
+    var totalF = 0, withF = 0; done.forEach(function (l) { var f = num((l.s || {}).followers); totalF += f; if (f > 0) withF++; });
+    var byTime = {}; done.forEach(function (l) { if (!l.time) return; (byTime[l.time] = byTime[l.time] || []).push(num((l.s || {}).followers)); });
+    var best = '—', ba = -1; Object.keys(byTime).forEach(function (t) { var a = byTime[t], m = a.reduce(function (x, y) { return x + y; }, 0) / a.length; if (m > ba) { ba = m; best = t; } });
+    return { count: done.length, totalF: totalF, avgF: withF ? Math.round(totalF / withF) : 0, best: best };
+  }
+  function sparkline() {
+    var done = data.lives.filter(function (l) { return l.done; }).slice().sort(function (a, b) { return (a.date || '').localeCompare(b.date || ''); });
+    var vals = done.map(function (l) { return num((l.s || {}).followers); }); if (vals.length < 2) return '';
+    var max = Math.max.apply(null, vals) || 1, w = 200, h = 40, step = w / (vals.length - 1);
+    var pts = vals.map(function (v, i) { return (i * step).toFixed(1) + ',' + (h - (v / max) * (h - 4) - 2).toFixed(1); }).join(' ');
+    return '<svg class="osx-lv-spark" viewBox="0 0 ' + w + ' ' + h + '" preserveAspectRatio="none"><polyline points="' + pts + '" fill="none" stroke="var(--gold-bright)" stroke-width="2" stroke-linejoin="round"/></svg>';
+  }
+  function liveCard(l) {
+    var open = !!expanded['L' + l.id], ls = l.s || {};
+    var kv = l.done ? ('+' + num(ls.followers) + ' followers') : (liveDateLabel(l) + (l.time ? ' · ' + esc(l.time) : ''));
+    var head = '<div class="osx-lv-h" data-ltoggle="' + esc(l.id) + '"><span class="osx-lv-plat">' + esc(l.platform || 'Live') + '</span>' +
+      '<span class="osx-lv-hb"><b>' + esc(l.topic || 'Untitled live') + '</b><span class="osx-lv-hm">' + (l.done ? '✓ Done · ' : '📡 ') + esc(kv) + '</span></span>' +
+      '<span class="osx-lv-when">' + esc(liveDateLabel(l)) + '</span></div>';
+    if (!open) return '<div class="osx-lv-card">' + head + '</div>';
+    var plan = '<div class="osx-lv-grid">' +
+      '<label class="osx-lv-f"><span>Date</span><input type="date" class="osx-pl-date" data-lf="' + esc(l.id) + '|date" value="' + esc(l.date || '') + '"></label>' +
+      '<label class="osx-lv-f"><span>Time</span><input class="osx-pl-in" data-lf="' + esc(l.id) + '|time" value="' + esc(l.time || '') + '" placeholder="e.g. 7:00 PM" maxlength="24"></label>' +
+      '<label class="osx-lv-f"><span>Platform</span><select class="osx-pl-date" data-lf="' + esc(l.id) + '|platform">' + PLATFORMS.map(function (p) { return '<option' + (p === l.platform ? ' selected' : '') + '>' + p + '</option>'; }).join('') + '</select></label></div>' +
+      '<div class="osx-pl-flabel">What I\'m pitching</div><input class="osx-pl-in" data-lf="' + esc(l.id) + '|topic" value="' + esc(l.topic || '') + '" placeholder="The product / topic of this live" maxlength="120">' +
+      '<div class="osx-pl-flabel">My hook / opening script</div><textarea class="osx-pl-ta" rows="2" data-lf="' + esc(l.id) + '|hook" placeholder="The first 10 seconds that stop the scroll…" maxlength="400">' + esc(l.hook || '') + '</textarea>' +
+      '<div class="osx-pl-flabel">My goal for this live</div><input class="osx-pl-in" data-lf="' + esc(l.id) + '|goal" value="' + esc(l.goal || '') + '" placeholder="e.g. +100 followers, 5 sales" maxlength="120">' +
+      '<a class="osx-lv-mkt" href="/pages/marketing-haus" target="_blank" rel="noopener">🎨 Build my hook &amp; promo in Marketing Haus →</a>';
+    var stats = '<div class="osx-lv-check"><div class="osx-pl-flabel" style="margin-top:0;">Post-live check-in — how did it go?</div><div class="osx-lv-grid">' +
+      LIVE_STATS.map(function (s) { return '<label class="osx-lv-f"><span>' + esc(s[1]) + '</span><input class="osx-pl-in" data-ls="' + esc(l.id) + '|' + s[0] + '" value="' + esc(ls[s[0]] || '') + '" inputmode="numeric" maxlength="12"></label>'; }).join('') + '</div>' +
+      '<div class="osx-pl-flabel">What worked / what I\'d change</div><textarea class="osx-pl-ta" rows="2" data-lf="' + esc(l.id) + '|notes" maxlength="400">' + esc(l.notes || '') + '</textarea>' +
+      '<button class="osx-lv-donebtn' + (l.done ? ' on' : '') + '" data-ldone="' + esc(l.id) + '">' + (l.done ? '✓ Logged — tap to reopen' : 'Save results') + '</button></div>';
+    return '<div class="osx-lv-card open">' + head + '<div class="osx-lv-body">' + plan + stats + '<div class="osx-lv-del"><button data-lvdel="' + esc(l.id) + '">Delete live</button></div></div></div>';
+  }
+  function livesHTML() {
+    var t = livesTrend(), sp = sparkline();
+    var trend = t.count ? '<div class="osx-lv-trend">' +
+      '<div class="osx-lv-stat"><b>' + t.count + '</b><span>lives logged</span></div>' +
+      '<div class="osx-lv-stat"><b>+' + t.totalF + '</b><span>new followers</span></div>' +
+      '<div class="osx-lv-stat"><b>+' + t.avgF + '</b><span>avg / live</span></div>' +
+      '<div class="osx-lv-stat"><b>' + esc(t.best) + '</b><span>best time</span></div>' +
+      (sp ? '<div class="osx-lv-sparkwrap"><span>followers trend</span>' + sp + '</div>' : '') + '</div>' : '';
+    var up = data.lives.filter(function (l) { return !l.done; }), past = data.lives.filter(function (l) { return l.done; });
+    up.sort(function (a, b) { return (a.date || '~').localeCompare(b.date || '~'); });
+    past.sort(function (a, b) { return (b.date || '').localeCompare(a.date || ''); });
+    var list = (up.length ? '<div class="osx-pl-sech">📡 Upcoming</div>' + up.map(liveCard).join('') : '') +
+               (past.length ? '<div class="osx-pl-sech" style="margin-top:16px;">✓ Past lives</div>' + past.map(liveCard).join('') : '');
+    if (!data.lives.length) list = '<div class="osx-pl-empty">Plan your first live — script the hook, set a goal, then log how it went. The trends build themselves.</div>';
+    return trend + '<button class="osx-pl-newgoal" data-newlive>＋ Plan a live</button>' + list;
+  }
+
   function render() {
-    var body = view === 'dash' ? dashHTML() : view === 'goals' ? goalsHTML() : listsHTML();
+    var body = view === 'dash' ? dashHTML() : view === 'goals' ? goalsHTML() : view === 'lives' ? livesHTML() : listsHTML();
     host.innerHTML = '<div class="osx-pl">' + navHTML() + '<div class="osx-pl-view">' + body + '</div></div>';
     wire();
   }
@@ -168,6 +227,13 @@
     host.querySelectorAll('[data-ldel]').forEach(function (b) { b.addEventListener('click', function () { var p = b.getAttribute('data-ldel').split('|'); data[active][p[0]] = data[active][p[0]].filter(function (i) { return i.id !== p[1]; }); save(); render(); }); });
     var lt = host.querySelector('[data-ltmpl]'); if (lt) lt.addEventListener('click', function () { if (!window.confirm('Add the ROOTED launch roadmap (6 steps) to your To-dos for this ' + active + '?')) return; ROOTED_STEPS.forEach(function (t) { data[active].todo.push({ id: uid(), text: t, pct: 0 }); }); save(); render(); });
     var arch = host.querySelector('[data-arch]'); if (arch) arch.addEventListener('click', renderArchive);
+    // lives
+    var nl = host.querySelector('[data-newlive]'); if (nl) nl.addEventListener('click', function () { var l = { id: uid(), topic: 'New live', platform: 'TikTok', date: '', time: '', hook: '', goal: '', notes: '', done: false, s: {} }; data.lives.unshift(l); expanded['L' + l.id] = true; save(); render(); });
+    host.querySelectorAll('[data-ltoggle]').forEach(function (b) { b.addEventListener('click', function (e) { if (e.target.closest('input,select,textarea,button,a')) return; var id = b.getAttribute('data-ltoggle'); expanded['L' + id] = !expanded['L' + id]; render(); }); });
+    host.querySelectorAll('[data-lf]').forEach(function (el) { el.addEventListener('change', function () { var p = el.getAttribute('data-lf').split('|'), l = liveObj(p[0]); if (l) { l[p[1]] = el.value; save(); if (p[1] === 'date' || p[1] === 'platform') render(); } }); });
+    host.querySelectorAll('[data-ls]').forEach(function (el) { el.addEventListener('change', function () { var p = el.getAttribute('data-ls').split('|'), l = liveObj(p[0]); if (l) { l.s = l.s || {}; l.s[p[1]] = el.value; save(); } }); });
+    host.querySelectorAll('[data-ldone]').forEach(function (b) { b.addEventListener('click', function () { var l = liveObj(b.getAttribute('data-ldone')); if (l) { l.done = !l.done; save(); render(); } }); });
+    host.querySelectorAll('[data-lvdel]').forEach(function (b) { b.addEventListener('click', function () { if (!window.confirm('Delete this live?')) return; data.lives = data.lives.filter(function (x) { return x.id !== b.getAttribute('data-lvdel'); }); save(); render(); }); });
   }
   function addRoad(gid) { var inp = host.querySelector('[data-radd="' + gid + '"]'); var v = (inp && inp.value || '').trim(); if (!v) return; var g = goal(gid); if (g) { g.roadmap = g.roadmap || []; g.roadmap.push({ id: uid(), text: v.slice(0, 120), pct: 0 }); save(); render(); } }
   function addList(bucket) { var inp = host.querySelector('[data-ladd="' + bucket + '"]'); var v = (inp && inp.value || '').trim(); if (!v) return; if (bucket === 'top' && data[active].top.length >= 3) return; data[active][bucket].push({ id: uid(), text: v.slice(0, 120), pct: 0 }); save(); render(); }
