@@ -1354,12 +1354,12 @@
   #p2pos .osx-expand-map .osx-mb-map{height:62vh;min-height:320px;}
   #p2pos .osx-expand-cal .osx-cal{max-width:none;}
   /* ===== member board: directory + stacked calendar/map ===== */
-  #p2pos .osx-members-grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:22px;align-items:start;}
+  #p2pos .osx-members-grid{display:grid;grid-template-columns:minmax(0,2fr) minmax(340px,1fr);gap:24px;align-items:start;}
   #p2pos .osx-members-main{min-width:0;}
   #p2pos .osx-members-main .osx-mb{max-width:none;}
   #p2pos .osx-members-side{display:flex;flex-direction:column;gap:18px;}
-  #p2pos .osx-members-side .osx-lower-card{border:1px solid var(--stroke);border-radius:16px;background:rgba(255,255,255,.03);padding:15px 16px;}
-  #p2pos .osx-members-map{height:340px;}
+  #p2pos .osx-members-side .osx-lower-card{border:1px solid var(--stroke);border-radius:16px;background:rgba(255,255,255,.03);padding:16px 18px;}
+  #p2pos .osx-members-map{height:min(460px,52vh);}
   @media (max-width:900px){#p2pos .osx-members-grid{grid-template-columns:1fr;}}
   /* community walkthrough modal */
   .osx-tour-in{width:min(400px,100%);text-align:center;padding:26px 24px 22px;}
