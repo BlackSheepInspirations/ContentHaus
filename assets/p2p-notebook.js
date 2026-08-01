@@ -93,6 +93,22 @@
         } else {
           btn("je-arch", e.archived ? "Unarchive" : "Archive").addEventListener("click", function () { var na = !e.archived; setField(e.id, "archived", na); if (!na) switchView("active"); });
           btn("je-del", "Delete").addEventListener("click", function () { confirmDialog("Move to Trash?", "It’ll stay in Trash for 60 days — you can restore it any time before then.", "Move to Trash", function () { setField(e.id, "deletedAt", Date.now()); }); });
+          if (kind === "win") {
+            if (e.shared) {
+              var sp = document.createElement("span"); sp.className = "je-shared"; sp.textContent = "Shared to community ✓"; host.appendChild(sp);
+            } else {
+              (function (entry, button) {
+                button.addEventListener("click", function () {
+                  button.disabled = true; button.textContent = "Sharing…";
+                  var msg = (entry.title ? entry.title + " — " : "") + entry.text;
+                  fetch("/apps/p2p/community", { method: "POST", headers: { "content-type": "application/json" }, credentials: "same-origin", body: JSON.stringify({ text: msg, kind: "win", name: window.P2P_MEMBER_NAME || "" }) })
+                    .then(function (r) { return r.json(); })
+                    .then(function (res) { if (res && res.ok) { setField(entry.id, "shared", true); } else { button.disabled = false; button.textContent = "Share your win on the Community board"; } })
+                    .catch(function () { button.disabled = false; button.textContent = "Share your win on the Community board"; });
+                });
+              })(e, btn("je-share", "Share your win on the Community board"));
+            }
+          }
         }
       });
     }

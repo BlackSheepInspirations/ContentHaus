@@ -215,6 +215,9 @@
 #p2pj .je-btn:hover{color:var(--text); border-color:var(--gstroke);}
 #p2pj .je-btn.je-restore:hover{color:var(--emerald); border-color:rgba(39,174,110,.5);}
 #p2pj .je-btn.je-del:hover{color:#ff9e9e; border-color:rgba(214,51,51,.45);}
+#p2pj .je-btn.je-share{color:var(--gold-bright); border-color:var(--gstroke); background:rgba(216,180,90,.08);}
+#p2pj .je-btn.je-share:hover{background:rgba(216,180,90,.16); border-color:var(--gold-bright);}
+#p2pj .je-shared{font:700 11px/1 system-ui; color:var(--gold-bright); padding:6px 4px;}
 #p2pj-confirm{position:fixed; inset:0; z-index:210; display:none; align-items:center; justify-content:center; padding:20px; background:rgba(3,7,12,.72); backdrop-filter:blur(3px);}
 #p2pj-confirm.show{display:flex;}
 #p2pj-confirm .cf-card{max-width:360px; width:100%; background:linear-gradient(180deg,#0f1c24,#0a141a); border:1px solid var(--gstroke); border-radius:18px; padding:26px 24px 20px; box-shadow:0 24px 60px rgba(0,0,0,.6);}
