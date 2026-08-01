@@ -15,7 +15,7 @@
     hidden: mb.querySelector('[data-mb-hidden]'), save: mb.querySelector('[data-mb-save]'), status: mb.querySelector('[data-mb-status]')
   };
   var socialEls = {}; mb.querySelectorAll('[data-mb-social]').forEach(function (el) { socialEls[el.getAttribute('data-mb-social')] = el; });
-  var members = [], myProfile = null, mapReady = false, leafMap = null;
+  var members = [], myProfile = null;
 
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function initial(n) { n = String(n || '').trim(); return n ? n.charAt(0).toUpperCase() : '🐑'; }
@@ -90,31 +90,30 @@
     js.onload = cb; js.onerror = function () { if (mapEl) mapEl.innerHTML = '<div class="osx-cw-empty">Map couldn\'t load right now.</div>'; };
     document.head.appendChild(js);
   }
-  function buildMap() {
-    if (!window.L || !mapEl) return;
-    if (!leafMap) {
-      leafMap = L.map(mapEl, { scrollWheelZoom: false, attributionControl: true }).setView([39, -98], 3);
-      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: '© OpenStreetMap' }).addTo(leafMap);
+  var mapReg = []; // one Leaflet instance per element: [{el, map}]
+  function buildMapIn(el) {
+    if (!window.L || !el) return null;
+    var reg = null; for (var i = 0; i < mapReg.length; i++) { if (mapReg[i].el === el) { reg = mapReg[i]; break; } }
+    if (!reg) {
+      el.innerHTML = '';
+      var lm = L.map(el, { scrollWheelZoom: false, attributionControl: true }).setView([39, -98], 3);
+      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: '© OpenStreetMap' }).addTo(lm);
+      reg = { el: el, map: lm }; mapReg.push(reg);
     }
-    var pts = members.filter(function (p) { return typeof p.lat === 'number' && typeof p.lng === 'number'; });
-    pts.forEach(function (p) {
+    var map = reg.map;
+    map.eachLayer(function (ly) { if ((L.CircleMarker && ly instanceof L.CircleMarker) || ly instanceof L.Marker) map.removeLayer(ly); });
+    members.filter(function (p) { return typeof p.lat === 'number' && typeof p.lng === 'number'; }).forEach(function (p) {
       L.circleMarker([p.lat, p.lng], { radius: 7, color: '#0b1620', weight: 2, fillColor: '#f4c534', fillOpacity: 1 })
-        .addTo(leafMap).bindPopup('<div class="osx-mb-pop">' + cardHTML(p, true) + '</div>');
+        .addTo(map).bindPopup('<div class="osx-mb-pop">' + cardHTML(p, true) + '</div>');
     });
-    setTimeout(function () { if (leafMap) leafMap.invalidateSize(); }, 60);
-    setTimeout(function () { if (leafMap) leafMap.invalidateSize(); }, 350);
+    setTimeout(function () { map.invalidateSize(); }, 60);
+    setTimeout(function () { map.invalidateSize(); }, 320);
+    return map;
   }
-  function openMap() {
-    if (mapReady) { if (leafMap) setTimeout(function () { leafMap.invalidateSize(); }, 60); return; }
-    mapReady = true;
-    if (mapEl) mapEl.innerHTML = '<div class="osx-cw-empty">Loading the map…</div>';
-    ensureLeaflet(function () { if (mapEl) mapEl.innerHTML = ''; buildMap(); });
-  }
-  // Called by the community mini-map card when it moves the map into its expand modal.
-  window.P2P_MAP_REFRESH = function () {
-    openMap();
-    if (leafMap) { setTimeout(function () { leafMap.invalidateSize(); }, 60); setTimeout(function () { leafMap.invalidateSize(); }, 320); }
-  };
+  function refreshAllMaps() { mapReg.forEach(function (r) { buildMapIn(r.el); }); }
+  function showMap(el) { if (!el) return; ensureLeaflet(function () { buildMapIn(el); }); }
+  // Community mini-map card: build/refresh the map it just moved into its expand modal.
+  window.P2P_MAP_REFRESH = function () { showMap(mapEl); };
 
   /* ---- my profile ---- */
   function fillForm(p) {
@@ -152,7 +151,7 @@
     fetch(MEMBERS, { credentials: 'same-origin' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
       if (j && j.guest) { if (grid) grid.innerHTML = '<div class="osx-cw-empty">Log in to see members.</div>'; return; }
       members = (j && j.members) || []; renderDirectory();
-      if (mapReady && leafMap) { leafMap.eachLayer(function (ly) { if (ly instanceof L.CircleMarker || ly instanceof L.Marker) leafMap.removeLayer(ly); }); buildMap(); }
+      if (window.L) refreshAllMaps();   // re-pin any live maps (community modal + member board)
     }).catch(function () { if (grid) grid.innerHTML = '<div class="osx-cw-empty">Couldn\'t load members.</div>'; });
   }
   function initProfile() {
@@ -174,8 +173,16 @@
     });
   });
 
-  // The map lives hidden in a holder and is built only when the community mini-map card
+  // The community map lives hidden in a holder and is built only when the mini-map card
   // moves it into its expand modal (window.P2P_MAP_REFRESH) — never while it's display:none.
+  // The member-board map is inline; build it when the Members view becomes visible.
+  var membersMapEl = root.querySelector('[data-members-map]');
+  if (membersMapEl) {
+    var mView = membersMapEl.closest('.osx-view');
+    function tryMembersMap() { if (mView && mView.classList.contains('on')) showMap(membersMapEl); }
+    if (mView) { new MutationObserver(tryMembersMap).observe(mView, { attributes: true, attributeFilter: ['class'] }); }
+    tryMembersMap();
+  }
 
   initProfile();
 })();

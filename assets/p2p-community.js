@@ -696,29 +696,14 @@
   });
 })();
 
-/* ---- Month calendar (from window.P2P_EVENTS) — click an event day for a pop-up ---- */
+/* ---- Month calendar (from window.P2P_EVENTS) — one instance per [data-cal] ---- */
 (function () {
   var root = document.getElementById('p2pos'); if (!root) return;
-  var cal = root.querySelector('[data-cal]'); if (!cal) return;
-  var grid = cal.querySelector('[data-cal-grid]'), title = cal.querySelector('[data-cal-title]');
+  var MO = ['January','February','March','April','May','June','July','August','September','October','November','December'];
   var events = (window.P2P_EVENTS || []).filter(function (e) { return e.iso; });
   var byDay = {}; events.forEach(function (e) { (byDay[e.iso] = byDay[e.iso] || []).push(e); });
-  var now = new Date(), curY = now.getFullYear(), curM = now.getMonth();
-  var MO = ['January','February','March','April','May','June','July','August','September','October','November','December'];
   function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
   function pad(n){ return (n<10?'0':'')+n; }
-  function render() {
-    title.textContent = MO[curM] + ' ' + curY;
-    var first = new Date(curY, curM, 1).getDay(), days = new Date(curY, curM + 1, 0).getDate();
-    var t = new Date(), tISO = t.getFullYear()+'-'+pad(t.getMonth()+1)+'-'+pad(t.getDate()), html = '';
-    for (var i = 0; i < first; i++) html += '<span class="osx-cal-d empty"></span>';
-    for (var d = 1; d <= days; d++) {
-      var iso = curY + '-' + pad(curM+1) + '-' + pad(d), evs = byDay[iso];
-      html += '<button type="button" class="osx-cal-d' + (evs?' ev':'') + (iso===tISO?' today':'') + '"' + (evs?' data-cal-day="'+iso+'"':' disabled') + '>' + d + '</button>';
-    }
-    grid.innerHTML = html;
-    grid.querySelectorAll('[data-cal-day]').forEach(function (b) { b.addEventListener('click', function () { openEvent(byDay[b.getAttribute('data-cal-day')]); }); });
-  }
   function openEvent(evs) {
     if (!evs || !evs.length) return;
     var e = evs[0];
@@ -735,10 +720,29 @@
     pop.addEventListener('click', function (ev) { if (ev.target === pop) close(); });
     pop.querySelector('.osx-cal-pop-x').addEventListener('click', close);
   }
-  var pv = cal.querySelector('[data-cal-prev]'), nx = cal.querySelector('[data-cal-next]');
-  if (pv) pv.addEventListener('click', function () { curM--; if (curM < 0) { curM = 11; curY--; } render(); });
-  if (nx) nx.addEventListener('click', function () { curM++; if (curM > 11) { curM = 0; curY++; } render(); });
-  render();
+  function initCal(cal) {
+    if (cal.dataset.calInit) return; cal.dataset.calInit = '1';
+    var grid = cal.querySelector('[data-cal-grid]'), title = cal.querySelector('[data-cal-title]');
+    if (!grid || !title) return;
+    var now = new Date(), curY = now.getFullYear(), curM = now.getMonth();
+    function render() {
+      title.textContent = MO[curM] + ' ' + curY;
+      var first = new Date(curY, curM, 1).getDay(), days = new Date(curY, curM + 1, 0).getDate();
+      var t = new Date(), tISO = t.getFullYear()+'-'+pad(t.getMonth()+1)+'-'+pad(t.getDate()), html = '';
+      for (var i = 0; i < first; i++) html += '<span class="osx-cal-d empty"></span>';
+      for (var d = 1; d <= days; d++) {
+        var iso = curY + '-' + pad(curM+1) + '-' + pad(d), evs = byDay[iso];
+        html += '<button type="button" class="osx-cal-d' + (evs?' ev':'') + (iso===tISO?' today':'') + '"' + (evs?' data-cal-day="'+iso+'"':' disabled') + '>' + d + '</button>';
+      }
+      grid.innerHTML = html;
+      grid.querySelectorAll('[data-cal-day]').forEach(function (b) { b.addEventListener('click', function () { openEvent(byDay[b.getAttribute('data-cal-day')]); }); });
+    }
+    var pv = cal.querySelector('[data-cal-prev]'), nx = cal.querySelector('[data-cal-next]');
+    if (pv) pv.addEventListener('click', function () { curM--; if (curM < 0) { curM = 11; curY--; } render(); });
+    if (nx) nx.addEventListener('click', function () { curM++; if (curM > 11) { curM = 0; curY++; } render(); });
+    render();
+  }
+  root.querySelectorAll('[data-cal]').forEach(initCal);
 })();
 
 /* ---- Bell notifications + profile bubble (sidebar, on every OS page) ---- */
