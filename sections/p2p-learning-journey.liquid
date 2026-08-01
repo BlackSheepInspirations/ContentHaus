@@ -361,6 +361,11 @@
   </div>
   {%- endif -%}
 
+  {%- comment -%} ---- Back-to-top button (bottom-left; behaviour in p2p-journey.js; the tour points at it) ---- {%- endcomment -%}
+  <button class="p2pj-totop" data-totop type="button" aria-label="Back to top" hidden>
+    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M12 19V6M6 12l6-6 6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </button>
+
   {%- comment -%} ---- GUIDED TOUR (spotlight walkthrough of the live page) ---- {%- endcomment -%}
   <div id="p2pj-tour" hidden>
     <div class="tour-spot" data-tour-spot></div>

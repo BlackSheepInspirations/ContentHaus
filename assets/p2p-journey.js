@@ -628,20 +628,27 @@
     var elCount = tour.querySelector('[data-tour-count]'), elTitle = tour.querySelector('[data-tour-title]'), elBody = tour.querySelector('[data-tour-body]');
     var btnBack = tour.querySelector('[data-tour-back]'), btnNext = tour.querySelector('[data-tour-next]'), btnSkip = tour.querySelector('[data-tour-skip]');
     var STEPS = [
-      { center:true, title:'Welcome aboard!', body:"Here's a quick tour of your Learning Journey — about a minute. Tap Next to begin." },
-      { sel:'.board', scroll:'center', title:'Your map', body:'This is your trail. Each glowing marker is a course. Finish one and the path lights up to the next.' },
-      { sel:'.nav', scroll:'top', title:'Getting around', body:'These tabs move you between your map, courses, progress, bonuses and journal.' },
+      { center:true, title:'Welcome aboard!', body:"Here's a quick tour of your Learning Journey — about a minute. Tap Next, or Skip anytime." },
+      { sel:'.stats', scroll:'top', title:'Your live stats', body:'Points, badges, streak and your Merit rank — always in view, updating as you go.' },
+      { sel:'.board', scroll:'center', title:'Your map', body:'This is your trail. Every glowing marker is a course, and finishing one lights the path to the next.' },
+      { sel:'.hs[data-type="course"]', scroll:'center', title:'Starting a course', body:'Tap a glowing marker to open that course. Inside, check off each lesson as you finish it — that is what lights up the trail to the next one.' },
+      { sel:'.hs.is-locked', scroll:'center', title:'Locked courses', body:'A lock means it is not open yet. Tap it and it tells you exactly which course to finish first to unlock it — so you always know your next step.' },
+      { sel:'.hs--plain', scroll:'center', title:'Hidden gems', body:'Watch for wooden signs like this along the trail — they reveal your frameworks (RAFT, GROWS, ROOTED). Little gems that tie the whole journey together.' },
+      { sel:'.mindset-moment', scroll:'center', title:'Daily Boosters', body:'A fresh Heart, Purpose or Mindset booster every day to start you off right.' },
+      { sel:'.nav', scroll:'top', title:'Getting around', body:'These tabs move you between your map, all courses, progress, status checks and journal.' },
       { sel:'.nav a[data-panel="directory"]', scroll:'top', title:'All Courses', body:'Jump straight to any course across every realm — no hunting on the map.' },
-      { sel:'.nav a[data-panel="progress"]', scroll:'top', title:'Your Progress', body:'Points, badges, streak and your Merit rank. Tap any tile there for the full breakdown.' },
-      { sel:'.nav a[data-panel="bonuses"]', scroll:'top', title:'Status Checks', body:'Quick Mindset, Purpose & Heart status checks to keep you steady between courses.' },
+      { sel:'.nav a[data-panel="progress"]', scroll:'top', title:'Your Progress', body:'Points, badges, streak and Merit rank. Tap any tile there for the full breakdown.' },
+      { sel:'.nav a[data-panel="bonuses"]', scroll:'top', title:'Status Checks', body:'Quick Mindset, Purpose & Heart check-ins to keep you steady between courses.' },
       { sel:'.nav a[href*="badges"]', scroll:'top', title:'Milestones', body:'Every badge you earn lives here — realms cleared, streaks, reflections and more.' },
       { sel:'.nav a[data-panel="journal"]', scroll:'top', title:'Journal', body:'Jot notes and reflections as you go. Your first entry each day earns points too.' },
-      { sel:'.stats', scroll:'top', title:'Your live stats', body:'Points, badges, streak and Merit — always in view, updating as you go.' },
-      { sel:'.bar-realms', scroll:'top', title:'The five realms', body:'Hop between realms here as you unlock them — from Open Water all the way to Evergreen.' },
-      { sel:'.mindset-moment', scroll:'center', title:'Daily Boosters', body:'A fresh Heart, Purpose or Mindset booster every day to start you off right.' },
+      { sel:'.p2pj-nextrealm', scroll:'center', title:'On to the next realm', body:'Clear a realm and this doorway opens — tap it to sail on to the next realm and keep your momentum going.' },
+      { sel:'#p2phelp .p2ph-launch', doc:true, scroll:'center', title:'Need a hand?', body:'Stuck at any point? Tap the Need help? button and the Haus Helper answers the most common questions in a click.' },
+      { sel:'.p2pj-totop', doc:true, scroll:'center', title:'Back to the top', body:'And this arrow whisks you straight back to the top of your map — handy on a long scroll.' },
       { center:true, title:"You're all set!", body:'Tap any glowing marker to begin. Replay this tour anytime from the ⓘ Help menu. Enjoy the journey!' }
     ];
     var i = 0, active = STEPS, curTarget = null;
+    // some steps point at fixed widgets outside #p2pj (the Help launcher, back-to-top)
+    function q(s){ return s.doc ? document.querySelector(s.sel) : root.querySelector(s.sel); }
     function vis(el){ if(!el || el.hidden) return false; var r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0; }
     function chrome(){
       var s = active[i];
@@ -665,14 +672,16 @@
     function place(){
       chrome();
       var s = active[i];
-      curTarget = s.center ? null : root.querySelector(s.sel);
+      curTarget = s.center ? null : q(s);
       if(!curTarget){ reposition(); return; }
       try{ curTarget.scrollIntoView({ behavior:'auto', block: s.scroll === 'top' ? 'start' : 'center', inline:'center' }); }catch(e){ curTarget.scrollIntoView(); }
       setTimeout(reposition, 300);
     }
     function start(){
       ['p2pj-welcome','p2pj-info'].forEach(function(id){ var m = document.getElementById(id); if(m) m.classList.remove('show'); });
-      active = STEPS.filter(function(s){ return s.center || vis(root.querySelector(s.sel)); });
+      // force the back-to-top button visible so its step isn't filtered out when at the top
+      var tt = root.querySelector('[data-totop]'); if(tt){ tt.hidden = false; tt.classList.add('show'); }
+      active = STEPS.filter(function(s){ return s.center || vis(q(s)); });
       i = 0; tour.hidden = false; requestAnimationFrame(place);
     }
     function stop(){ tour.hidden = true; tour.classList.remove('center'); }
@@ -695,6 +704,15 @@
       var _h = (location.hash || '').toLowerCase(), _q = (location.search || '').toLowerCase();
       if(_h === '#tour' || _q.indexOf('tour=1') > -1){ requestAnimationFrame(start); }
     }catch(e){}
+  })();
+
+  /* ---- back-to-top button (shows after scrolling; the tour points at it) ---- */
+  (function(){
+    var btn = root.querySelector('[data-totop]'); if(!btn) return;
+    function upd(){ if(window.pageYOffset > 380){ btn.hidden = false; btn.classList.add('show'); } else { btn.classList.remove('show'); } }
+    window.addEventListener('scroll', upd, { passive:true });
+    btn.addEventListener('click', function(){ try{ window.scrollTo({ top:0, behavior:'smooth' }); }catch(e){ window.scrollTo(0,0); } });
+    upd();
   })();
 
   /* ---- JS sticky bar (sits below the theme's own sticky header; ignores lock state) ---- */
