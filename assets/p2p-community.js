@@ -8,7 +8,7 @@
   var PROXY = '/apps/p2p/community', REACT = '/apps/p2p/react', MEMBERS = '/apps/p2p/members';
   var feed = root.querySelector('[data-cw-feed]');
   var winsFeed = root.querySelector('[data-wins-feed]');
-  var posts = [], winPosts = [], winIdx = 0, winTimer = null, welcomeProfileDone = false, wowPost = null, isAdmin = false, catList = null, memberMap = {};
+  var posts = [], winPosts = [], winIdx = 0, winTimer = null, welcomeProfileDone = false, wowPost = null, isAdmin = false, catList = null, memberMap = {}, didDeepLink = false;
   var filter = { category: 'all', range: 'all', sort: 'new', q: '', offset: 0, limit: 20, hasMore: false };
   var CATS = { general: { label: 'General Discussion', emoji: '💬' }, intro: { label: 'Introductions', emoji: '👋' }, wins: { label: 'Wins • Habits • Growth', emoji: '🏆' }, help: { label: 'Questions & Help', emoji: '🙏' }, testimonial: { label: 'Testimonials', emoji: '🙌' }, announce: { label: 'P2P Announcements', emoji: '📣' } };
   function catMeta(k) { return (catList && catList.filter(function (x) { return x.key === k; })[0]) || CATS[k] || null; }
@@ -85,9 +85,9 @@
     }
     return '<div class="osx-cm-item" data-cm-item="' + esc(c.id) + '"><div class="osx-cm-itop"><b>' + esc(c.name || 'Member') + '</b><span class="osx-cm-time">' + ago(c.ts) + (c.edited ? ' · edited' : '') + '</span>' + menu + '</div><div class="osx-cm-text">' + esc(c.text) + '</div></div>';
   }
-  function commentsHTML(p) {
+  function commentsHTML(p, open) {
     var cs = p.comments || [];
-    return '<div class="osx-cm" data-cm="' + esc(p.id) + '" hidden>' +
+    return '<div class="osx-cm" data-cm="' + esc(p.id) + '"' + (open ? '' : ' hidden') + '>' +
       '<div class="osx-cm-list">' + cs.map(function (c) { return cmItem(c, p.id); }).join('') + '</div>' +
       '<div class="osx-cm-add"><input class="osx-cm-input" data-cm-input="' + esc(p.id) + '" maxlength="600" placeholder="Write a reply…"><button class="osx-cm-send" type="button" data-cm-send="' + esc(p.id) + '">Reply</button></div>' +
     '</div>';
@@ -215,7 +215,7 @@
       headHTML(p) + titleHTML(p) +
       '<div class="osx-cw-post-text' + (lng ? ' clamp' : '') + '">' + esc(p.text) + '</div>' +
       (lng ? '<button class="osx-cw-more" type="button" data-more>Read more ▾</button>' : '') +
-      attHTML(p.attachments) + actsHTML(p) + commentsHTML(p) +
+      attHTML(p.attachments) + actsHTML(p) + commentsHTML(p, false) +
     '</div>';
   }
   function wowHTML(p) {
@@ -223,8 +223,36 @@
       '<div class="osx-wow-ribbon">🏆 Win of the Week</div>' +
       headHTML(p) + titleHTML(p) +
       '<div class="osx-cw-post-text">' + esc(p.text) + '</div>' +
-      attHTML(p.attachments) + actsHTML(p) + commentsHTML(p) +
+      attHTML(p.attachments) + actsHTML(p) + commentsHTML(p, false) +
     '</div>';
+  }
+  function openPostModal(id) {
+    var p = findPost(id) || posts.filter(function (x) { return x.id === id; })[0];
+    if (!p) return;
+    var pop = document.createElement('div'); pop.className = 'osx-cal-pop';
+    pop.innerHTML = '<div class="osx-cal-pop-in osx-pm"><button class="osx-cal-pop-x" type="button" aria-label="Close">✕</button>' +
+      headHTML(p) + titleHTML(p) +
+      '<div class="osx-cw-post-text">' + esc(p.text) + '</div>' + attHTML(p.attachments) +
+      '<div class="osx-cw-post-acts">' + reactBar(p) +
+        '<span class="osx-cw-cbtn" style="cursor:default">💬 ' + ((p.comments || []).length) + '</span>' +
+        '<button class="osx-cw-cbtn osx-pm-copy" type="button">🔗 Copy link</button>' +
+      '</div>' + commentsHTML(p, true) + '</div>';
+    root.appendChild(pop);
+    var box = pop.querySelector('.osx-cal-pop-in');
+    function close() { pop.remove(); try { if (new URLSearchParams(location.search).get('post')) history.replaceState(null, '', location.pathname); } catch (e) {} }
+    wireReacts(box); wireComments(box); wireMenus(box);
+    box.querySelectorAll('[data-lightbox]').forEach(function (im) { im.addEventListener('click', function () { openLightbox(im.getAttribute('data-lightbox')); }); });
+    box.querySelectorAll('[data-pedit]').forEach(function (b) { b.addEventListener('click', function () { close(); openEditPost(b.getAttribute('data-pedit')); }); });
+    box.querySelectorAll('[data-pdel]').forEach(function (b) { b.addEventListener('click', function () { close(); deletePost(b.getAttribute('data-pdel')); }); });
+    box.querySelectorAll('[data-preport]').forEach(function (b) { b.addEventListener('click', function () { reportPost(b.getAttribute('data-preport'), b); }); });
+    var copyB = box.querySelector('.osx-pm-copy');
+    if (copyB) copyB.addEventListener('click', function () {
+      var url = location.origin + location.pathname + '?post=' + encodeURIComponent(id);
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(function () { copyB.textContent = 'Copied ✓'; }).catch(function () { window.prompt('Copy this link:', url); });
+      else window.prompt('Copy this link:', url);
+    });
+    pop.addEventListener('click', function (e) { if (e.target === pop) close(); });
+    pop.querySelector('.osx-cal-pop-x').addEventListener('click', close);
   }
   function emptyMsg() {
     if (filter.q) return 'No posts match “' + esc(filter.q) + '.”';
@@ -260,6 +288,13 @@
     feed.querySelectorAll('[data-pedit]').forEach(function (b) { b.addEventListener('click', function () { openEditPost(b.getAttribute('data-pedit')); }); });
     feed.querySelectorAll('[data-pdel]').forEach(function (b) { b.addEventListener('click', function () { deletePost(b.getAttribute('data-pdel')); }); });
     feed.querySelectorAll('[data-preport]').forEach(function (b) { b.addEventListener('click', function () { reportPost(b.getAttribute('data-preport'), b); }); });
+    feed.querySelectorAll('[data-post]').forEach(function (card) {
+      card.style.cursor = 'pointer';
+      card.addEventListener('click', function (e) {
+        if (e.target.closest('button, a, input, textarea, select, .osx-menu, .osx-menu-pop, .osx-att-img, .osx-att-yt, .osx-cm')) return;
+        openPostModal(card.getAttribute('data-post'));
+      });
+    });
   }
   function wireComments(container) {
     container.querySelectorAll('[data-cedit]').forEach(function (b) { b.addEventListener('click', function () { var pr = b.getAttribute('data-cedit').split('|'); openEditComment(pr[0], pr[1]); }); });
@@ -388,6 +423,7 @@
         filter.hasMore = !!j.hasMore;
         render();
         updateSeen();
+        if (!append && !didDeepLink) { didDeepLink = true; try { var dp = new URLSearchParams(location.search).get('post'); if (dp && findPost(dp)) openPostModal(dp); } catch (e) {} }
         var mb = root.querySelector('[data-loadmore]'); if (mb) mb.hidden = !filter.hasMore;
       })
       .catch(function () { var mb = root.querySelector('[data-loadmore]'); if (mb) mb.disabled = false; if (feed && !append) feed.innerHTML = empty('Couldn\'t load the wall just now — try again in a moment.'); });
