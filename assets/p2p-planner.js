@@ -373,7 +373,7 @@
 
   /* ---------- gamification: milestones + celebrations ---------- */
   var MILESTONES = [
-    ['first_goal', 'First goal set', '🎯', function () { return data.goals.some(function (g) { return (g.roadmap && g.roadmap.length) || g.w || (g.title && g.title !== 'New goal'); }); }],
+    ['first_goal', 'First goal set', '🎯', function () { return data.goals.some(function (g) { return (g.roadmap && g.roadmap.length) || g.w; }); }],
     ['first_road', 'First step complete', '🧭', function () { return data.goals.some(function (g) { return (g.roadmap || []).some(function (x) { return x.pct >= 100; }); }); }],
     ['goal_done', 'A goal fully reached!', '🏆', function () { return data.goals.some(function (g) { var r = g.roadmap || []; return r.length && r.every(function (x) { return x.pct >= 100; }); }); }],
     ['launched', 'Launched — you hit 🚀 Rooted', '🚀', function () { return data.goals.some(function (g) { return g.stage === 'rooted' || g.stage === 'evergreen'; }); }],
@@ -400,7 +400,8 @@
   function celebrateNext() {
     if (!celebrateQueue.length) return; var m = celebrateQueue.shift();
     var pop = document.createElement('div'); pop.className = 'osx-cal-pop';
-    pop.innerHTML = '<div class="osx-cal-pop-in osx-cele"><div class="osx-cele-emoji">' + m[2] + '</div><div class="osx-cele-k">' + esc(m[3] || 'Milestone unlocked!') + '</div><div class="osx-cele-l">' + esc(m[1]) + '</div><button class="osx-cele-x" type="button">Keep going 🔥</button></div>';
+    var kicker = (typeof m[3] === 'string') ? m[3] : 'Milestone unlocked!';
+    pop.innerHTML = '<div class="osx-cal-pop-in osx-cele"><div class="osx-cele-emoji">' + m[2] + '</div><div class="osx-cele-k">' + esc(kicker) + '</div><div class="osx-cele-l">' + esc(m[1]) + '</div><button class="osx-cele-x" type="button">Keep going 🔥</button></div>';
     root.appendChild(pop); confetti();
     function close() { pop.remove(); setTimeout(celebrateNext, 200); }
     pop.addEventListener('click', function (e) { if (e.target === pop) close(); });
