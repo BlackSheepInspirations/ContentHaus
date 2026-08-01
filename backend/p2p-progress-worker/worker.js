@@ -5,7 +5,11 @@
      profile   GET/POST   -> this member's own PUBLIC card (KV), incl. opt-out + geo
      members   GET        -> all non-hidden public cards (directory + map)
      community GET/POST    -> GET the wall; POST publishes a post IMMEDIATELY (unmoderated)
+     suggest   POST         -> private question/suggestion -> emails hello@ (+ KV log)
      moderate  POST        -> ADMIN (optional): {id, action:'delete'} — spam safety valve
+
+   Emails (community posts, messages, suggestions, questions) go to env.alert_email
+   (set it to hello@blacksheepcreations.com) via Resend (env.resend_key).
 
    Every request is App-Proxy-signed (env.client_secret) so logged_in_customer_id
    is trustworthy. Admin = customerId listed in env.admin_ids (comma-separated).
@@ -117,6 +121,19 @@ export default {
         return json({ error: 'method' }, 405);
       }
 
+      /* ---------- suggestions / questions (private → email you) ---------- */
+      if (seg === 'suggest') {
+        const body = await request.json().catch(() => null);
+        const text = String((body && body.text) || '').trim();
+        if (!text) return json({ error: 'empty' }, 400);
+        const kind = String((body && body.kind) || 'Suggestion').slice(0, 40);
+        const info = await customerInfo(env, customerId);
+        const rec = { id: Date.now() + '-' + customerId, from: customerId, name: info.firstName || 'Member', kind: kind, text: text.slice(0, 2000), ts: Date.now() };
+        if (kv) await kv.put('suggest:' + rec.id, JSON.stringify(rec)).catch(() => {});   // keep a log
+        await sendEmail(env, kind + ' from ' + rec.name, rec.name + ' sent a ' + kind.toLowerCase() + ':\n\n' + rec.text).catch(() => {});
+        return json({ ok: true });
+      }
+
       /* ---------- admin (optional): delete a post — spam safety valve ---------- */
       if (seg === 'moderate') {
         if (!isAdmin(env, customerId)) return json({ error: 'forbidden' }, 403);
@@ -155,18 +172,21 @@ function sanitizeSocial(s) {
   });
   return out;
 }
-async function alertAdmin(env, post) {
+async function sendEmail(env, subject, text) {
   if (!env.resend_key || !env.alert_email) return;
   await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: { 'Authorization': 'Bearer ' + env.resend_key, 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      from: 'P2P Community <onboarding@resend.dev>',
+      from: env.alert_from || 'P2P Community <onboarding@resend.dev>',
       to: [env.alert_email],
-      subject: 'New post on your community wall',
-      text: post.name + ' just posted:\n\n' + post.text + '\n\nSee it in your OS → Community.'
+      subject: subject,
+      text: text
     })
   });
+}
+async function alertAdmin(env, post) {
+  await sendEmail(env, 'New post on your community wall', post.name + ' just posted:\n\n' + post.text + '\n\nSee it in your OS → Community.');
 }
 
 async function verifyProxySignature(url, secret) {

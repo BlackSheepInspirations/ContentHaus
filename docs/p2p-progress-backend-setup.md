@@ -49,7 +49,10 @@ same App Proxy: `/apps/p2p/{profile,members,community,moderate}`. It needs a sha
    - `admin_ids` — your Shopify customer id(s), comma-separated. Lets you delete a
      post (spam safety valve). Leave unset = board is fully unmoderated.
    - `resend_key` + `alert_email` — a free [resend.com](https://resend.com) API key +
-     your email, to get an email ping when someone posts. Optional.
+     **`alert_email = hello@blacksheepcreations.com`**. Emails you on every community
+     post AND every question/suggestion. (To send *from* your own address instead of
+     Resend's test sender, verify `blacksheepcreations.com` in Resend, then set
+     `alert_from = "Black Sheep <hello@blacksheepcreations.com>"`.)
 
 Location on the map is **city-level**, derived automatically from Cloudflare's edge
 geo (`request.cf`) — no browser "allow location?" prompt, never an exact address.
