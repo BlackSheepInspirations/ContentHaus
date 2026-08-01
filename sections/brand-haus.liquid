@@ -41,6 +41,7 @@
 </div>
 
 {% if bh_has_access %}
+  {% render 'p2p-os-rail', current: 'brand', push: '#brand-haus-app' %}
   <div id="brand-haus-app" data-section-id="{{ section.id }}"></div>
 
   {% comment %}
