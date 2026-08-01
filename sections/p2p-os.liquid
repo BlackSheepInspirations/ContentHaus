@@ -56,7 +56,7 @@
     <nav class="osx-nav">
       {%- comment -%} Sidebar nav is baked into the section (target^label^icon^mode^access_tag^get_url) so a
          theme-editor template revert can never empty it. Edit here in code, not the customizer. {%- endcomment -%}
-      {%- capture os_nav -%}start^Your Journey Starts Here^spark^view^^|checkpoint^Checkpoint^check^view^^|/pages/brand-haus?bh_focus=1^Founders Assessment^fingerprint^link^brand-haus-access^/pages/brand-haus-preview|/pages/brand-haus^Brand Haus^crown^link^brand-haus-access^/pages/brand-haus-preview|/pages/content-haus^Content Haus^prompt^link^prompt-haus-access^/pages/content-haus-preview|/pages/graphics-haus^Graphics Haus^palette^link^graphics-haus-access^/pages/graphics-haus-preview|/pages/project-haus^Project Haus^box^link^product-haus-access^/pages/project-haus-preview|/pages/marketing-haus^Marketing Haus^megaphone^link^marketing-haus-access^/pages/marketing-haus-preview|/pages/growth-haus^Growth Haus^rocket^link^P2P-haus-access^/pages/growth-haus-preview|rooted^ROOTED — Light the Path^path^view^^|mates^Haus Mates^mates^view^^|community^Community^chat^view^^|members^Members^mates^view^^|tools^Tools & Resources^tools^view^^|notebook^Notebook^notebook^view^^|bonus^Bonus Resources^gift^view^^{%- endcapture -%}
+      {%- capture os_nav -%}start^Your Journey Starts Here^spark^view^^|checkpoint^Checkpoint^check^view^^|success^My Success^rocket^view^^|/pages/brand-haus?bh_focus=1^Founders Assessment^fingerprint^link^brand-haus-access^/pages/brand-haus-preview|/pages/brand-haus^Brand Haus^crown^link^brand-haus-access^/pages/brand-haus-preview|/pages/content-haus^Content Haus^prompt^link^prompt-haus-access^/pages/content-haus-preview|/pages/graphics-haus^Graphics Haus^palette^link^graphics-haus-access^/pages/graphics-haus-preview|/pages/project-haus^Project Haus^box^link^product-haus-access^/pages/project-haus-preview|/pages/marketing-haus^Marketing Haus^megaphone^link^marketing-haus-access^/pages/marketing-haus-preview|/pages/growth-haus^Growth Haus^rocket^link^P2P-haus-access^/pages/growth-haus-preview|rooted^ROOTED — Light the Path^path^view^^|mates^Haus Mates^mates^view^^|community^Community^chat^view^^|members^Members^mates^view^^|tools^Tools & Resources^tools^view^^|notebook^Notebook^notebook^view^^|bonus^Bonus Resources^gift^view^^{%- endcapture -%}
       {%- assign os_nav_items = os_nav | split: '|' -%}
       {%- for it in os_nav_items -%}
         {%- assign f = it | split: '^' -%}
@@ -534,6 +534,14 @@
       {%- endif -%}
     </section>
 
+    {%- comment -%} ===== VIEW: My Success — the personal command center ===== {%- endcomment -%}
+    <section class="osx-view" data-view="success">
+      <div class="osx-kick">Your command center</div>
+      <h2 class="osx-h2">My Success <span class="osx-formula">(G + R) × O × W = S</span></h2>
+      <p class="osx-lede">Plan it, track it, launch it — goals, lives, posts and growth, all in one place. Success isn't added; it's rooted and multiplied.</p>
+      <div data-planner><div class="osx-cw-empty">Loading your command center…</div></div>
+    </section>
+
     {%- comment -%} ===== VIEW: Members (directory · map · my profile) ===== {%- endcomment -%}
     <section class="osx-view" data-view="members">
       <div class="osx-kick">Community</div>
@@ -544,14 +552,10 @@
       <div class="osx-mb" data-mb>
         <div class="osx-mb-tabs">
           <button class="osx-mb-tab on" type="button" data-mb-tab="directory">Members</button>
-          <button class="osx-mb-tab" type="button" data-mb-tab="planner">🎯 Planner</button>
           <button class="osx-mb-tab" type="button" data-mb-tab="profile">My Profile</button>
         </div>
         <div class="osx-mb-panel on" data-mb-panel="directory">
           <div class="osx-mb-grid" data-mb-grid><div class="osx-cw-empty">Loading members…</div></div>
-        </div>
-        <div class="osx-mb-panel" data-mb-panel="planner">
-          <div data-planner><div class="osx-cw-empty">Loading your planner…</div></div>
         </div>
         <div class="osx-mb-panel" data-mb-panel="profile">
           <div class="osx-mb-form">
@@ -1497,6 +1501,10 @@
   #p2pos .osx-lv-donebtn.on{color:#0a1410;background:linear-gradient(100deg,#f4e2a6,#c9a24a);border-color:transparent;}
   #p2pos .osx-lv-del{margin-top:12px;}
   #p2pos .osx-lv-del button{border:0;background:none;color:var(--muted);cursor:pointer;font:600 12px/1 system-ui;text-decoration:underline;}
+  #p2pos .osx-formula{display:inline-block;font:700 15px/1.2 Georgia,serif;color:var(--gold-bright);margin-left:8px;vertical-align:middle;letter-spacing:.02em;}
+  #p2pos .osx-gr-row{display:flex;align-items:center;gap:10px;border:1px solid var(--stroke);border-radius:11px;background:rgba(255,255,255,.03);padding:10px 13px;margin-bottom:7px;}
+  #p2pos .osx-gr-row b{font:800 12px/1 system-ui;color:var(--gold-bright);flex:none;}
+  #p2pos .osx-gr-row span{flex:1;min-width:0;font:600 12.5px/1.4 system-ui;color:var(--muted);}
   @media (max-width:900px){#p2pos .osx-members-grid{grid-template-columns:1fr;}}
   /* community walkthrough modal */
   .osx-tour-in{width:min(400px,100%);text-align:center;padding:26px 24px 22px;}

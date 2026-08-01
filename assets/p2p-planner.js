@@ -29,7 +29,7 @@
   function weekKey() { return periodKey('week'); }
 
   var data; try { data = JSON.parse(localStorage.getItem(KEY)) || null; } catch (e) { data = null; }
-  if (!data) data = {}; if (!data.done) data.done = []; if (!data.goals) data.goals = []; if (!data.lives) data.lives = [];
+  if (!data) data = {}; if (!data.done) data.done = []; if (!data.goals) data.goals = []; if (!data.lives) data.lives = []; if (!data.posts) data.posts = []; if (!data.snaps) data.snaps = [];
   TFS.forEach(function (t) {
     var tf = t[0]; if (!data[tf]) data[tf] = { period: periodKey(tf), top: [], todo: [] };
     if (!data[tf].top) data[tf].top = []; if (!data[tf].todo) data[tf].todo = [];
@@ -61,6 +61,8 @@
       '<button class="osx-pl-navb' + (view === 'dash' ? ' on' : '') + '" data-view="dash">📊 Dashboard</button>' +
       '<button class="osx-pl-navb' + (view === 'goals' ? ' on' : '') + '" data-view="goals">🎯 Goals</button>' +
       '<button class="osx-pl-navb' + (view === 'lives' ? ' on' : '') + '" data-view="lives">📡 Lives</button>' +
+      '<button class="osx-pl-navb' + (view === 'posts' ? ' on' : '') + '" data-view="posts">📝 Posts</button>' +
+      '<button class="osx-pl-navb' + (view === 'growth' ? ' on' : '') + '" data-view="growth">📈 Growth</button>' +
       '<button class="osx-pl-navb' + (view === 'lists' ? ' on' : '') + '" data-view="lists">✅ Lists</button></div>';
   }
   function dashHTML() {
@@ -179,8 +181,85 @@
     return trend + '<button class="osx-pl-newgoal" data-newlive>＋ Plan a live</button>' + list;
   }
 
+  /* ---------- posts (daily social post log + weekly review) ---------- */
+  var POST_TYPES = ['Video', 'Reel', 'Carousel', 'Photo', 'Story', 'Text'];
+  var POST_STATS = [['views', 'Views'], ['likes', 'Likes'], ['comments', 'Comments'], ['shares', 'Shares'], ['saves', 'Saves'], ['followers', 'New followers']];
+  function postObj(id) { return data.posts.filter(function (p) { return p.id === id; })[0]; }
+  function postsTrend() {
+    var done = data.posts.filter(function (p) { return p.done; }); var tv = 0, tl = 0;
+    done.forEach(function (p) { tv += num((p.s || {}).views); tl += num((p.s || {}).likes); });
+    var byType = {}; done.forEach(function (p) { if (!p.type) return; (byType[p.type] = byType[p.type] || []).push(num((p.s || {}).likes)); });
+    var best = '—', ba = -1; Object.keys(byType).forEach(function (t) { var a = byType[t], m = a.reduce(function (x, y) { return x + y; }, 0) / a.length; if (m > ba) { ba = m; best = t; } });
+    return { count: done.length, tv: tv, tl: tl, best: best };
+  }
+  function postCard(p) {
+    var open = !!expanded['P' + p.id], ps = p.s || {};
+    var kv = p.done ? (num(ps.likes) + ' likes · ' + num(ps.views) + ' views') : (liveDateLabel(p) + (p.time ? ' · ' + esc(p.time) : ''));
+    var head = '<div class="osx-lv-h" data-ptoggle="' + esc(p.id) + '"><span class="osx-lv-plat">' + esc(p.type || 'Post') + '</span>' +
+      '<span class="osx-lv-hb"><b>' + esc(p.topic || 'Untitled post') + '</b><span class="osx-lv-hm">' + (p.done ? '✓ ' : '📝 ') + esc(kv) + '</span></span>' +
+      '<span class="osx-lv-when">' + esc(liveDateLabel(p)) + '</span></div>';
+    if (!open) return '<div class="osx-lv-card">' + head + '</div>';
+    var plan = '<div class="osx-lv-grid">' +
+      '<label class="osx-lv-f"><span>Date</span><input type="date" class="osx-pl-date" data-pf="' + esc(p.id) + '|date" value="' + esc(p.date || '') + '"></label>' +
+      '<label class="osx-lv-f"><span>Time posted</span><input class="osx-pl-in" data-pf="' + esc(p.id) + '|time" value="' + esc(p.time || '') + '" placeholder="e.g. 6:30 PM" maxlength="24"></label>' +
+      '<label class="osx-lv-f"><span>Platform</span><select class="osx-pl-date" data-pf="' + esc(p.id) + '|platform">' + PLATFORMS.map(function (x) { return '<option' + (x === p.platform ? ' selected' : '') + '>' + x + '</option>'; }).join('') + '</select></label>' +
+      '<label class="osx-lv-f"><span>Type</span><select class="osx-pl-date" data-pf="' + esc(p.id) + '|type">' + POST_TYPES.map(function (x) { return '<option' + (x === p.type ? ' selected' : '') + '>' + x + '</option>'; }).join('') + '</select></label>' +
+      '<label class="osx-lv-f"><span>Video length</span><input class="osx-pl-in" data-pf="' + esc(p.id) + '|length" value="' + esc(p.length || '') + '" placeholder="e.g. 0:45" maxlength="12"></label>' +
+      '<label class="osx-lv-f"><span>Music?</span><select class="osx-pl-date" data-pf="' + esc(p.id) + '|music"><option' + (!p.music ? ' selected' : '') + ' value="">—</option><option' + (p.music === 'Yes' ? ' selected' : '') + '>Yes</option><option' + (p.music === 'No' ? ' selected' : '') + '>No</option></select></label></div>' +
+      '<div class="osx-pl-flabel">What it\'s about</div><input class="osx-pl-in" data-pf="' + esc(p.id) + '|topic" value="' + esc(p.topic || '') + '" placeholder="Topic / theme" maxlength="120">' +
+      '<div class="osx-pl-flabel">On-screen text / hook</div><textarea class="osx-pl-ta" rows="2" data-pf="' + esc(p.id) + '|hook" maxlength="300">' + esc(p.hook || '') + '</textarea>' +
+      '<div class="osx-pl-flabel">Call to action (CTA)</div><input class="osx-pl-in" data-pf="' + esc(p.id) + '|cta" value="' + esc(p.cta || '') + '" placeholder="e.g. Comment WIN, Link in bio" maxlength="120">' +
+      '<a class="osx-lv-mkt" href="/pages/marketing-haus" target="_blank" rel="noopener">🎨 Build this post in Marketing Haus →</a>';
+    var stats = '<div class="osx-lv-check"><div class="osx-pl-flabel" style="margin-top:0;">How did it do?</div><div class="osx-lv-grid">' +
+      POST_STATS.map(function (s) { return '<label class="osx-lv-f"><span>' + esc(s[1]) + '</span><input class="osx-pl-in" data-pps="' + esc(p.id) + '|' + s[0] + '" value="' + esc(ps[s[0]] || '') + '" inputmode="numeric" maxlength="12"></label>'; }).join('') + '</div>' +
+      '<button class="osx-lv-donebtn' + (p.done ? ' on' : '') + '" data-pdone="' + esc(p.id) + '">' + (p.done ? '✓ Logged — tap to reopen' : 'Save results') + '</button></div>';
+    return '<div class="osx-lv-card open">' + head + '<div class="osx-lv-body">' + plan + stats + '<div class="osx-lv-del"><button data-ppdel="' + esc(p.id) + '">Delete post</button></div></div></div>';
+  }
+  function postsHTML() {
+    var t = postsTrend();
+    var trend = t.count ? '<div class="osx-lv-trend"><div class="osx-lv-stat"><b>' + t.count + '</b><span>posts logged</span></div>' +
+      '<div class="osx-lv-stat"><b>' + t.tv + '</b><span>total views</span></div>' +
+      '<div class="osx-lv-stat"><b>' + t.tl + '</b><span>total likes</span></div>' +
+      '<div class="osx-lv-stat"><b>' + esc(t.best) + '</b><span>best type</span></div></div>' : '';
+    var up = data.posts.filter(function (p) { return !p.done; }), past = data.posts.filter(function (p) { return p.done; });
+    up.sort(function (a, b) { return (a.date || '~').localeCompare(b.date || '~'); });
+    past.sort(function (a, b) { return (b.date || '').localeCompare(a.date || ''); });
+    var list = (up.length ? '<div class="osx-pl-sech">📝 Planned / to log</div>' + up.map(postCard).join('') : '') +
+               (past.length ? '<div class="osx-pl-sech" style="margin-top:16px;">✓ Logged posts</div>' + past.map(postCard).join('') : '');
+    if (!data.posts.length) list = '<div class="osx-pl-empty">Log every post — platform, type, hook, CTA, music — then how it did. You\'ll see which posts actually move the needle.</div>';
+    return trend + '<button class="osx-pl-newgoal" data-newpost>＋ Log a post</button>' + list;
+  }
+
+  /* ---------- growth (weekly snapshot of account totals + trend) ---------- */
+  var SNAP_STATS = [['followers', 'Total followers'], ['likes', 'Total likes'], ['diamonds', 'Diamonds'], ['revenue', 'Revenue ($)']];
+  function snapObj(id) { return data.snaps.filter(function (s) { return s.id === id; })[0]; }
+  function livesInWeek(wk) { return data.lives.filter(function (l) { return l.date && periodKey('week', new Date(l.date.split('-')[0], l.date.split('-')[1] - 1, l.date.split('-')[2])) === wk; }).length; }
+  function postsInWeek(wk) { return data.posts.filter(function (p) { return p.date && periodKey('week', new Date(p.date.split('-')[0], p.date.split('-')[1] - 1, p.date.split('-')[2])) === wk; }).length; }
+  function growthHTML() {
+    var snaps = data.snaps.slice().sort(function (a, b) { return (a.week || '').localeCompare(b.week || ''); });
+    var last = snaps[snaps.length - 1], prev = snaps[snaps.length - 2];
+    var delta = (last && prev) ? (num(last.followers) - num(prev.followers)) : 0;
+    var head = '<div class="osx-lv-trend"><div class="osx-lv-stat"><b>' + (last ? num(last.followers) : 0) + '</b><span>followers now</span></div>' +
+      '<div class="osx-lv-stat"><b>' + (delta >= 0 ? '+' : '') + delta + '</b><span>vs last week</span></div>' +
+      '<div class="osx-lv-stat"><b>' + livesInWeek(weekKey()) + '</b><span>lives this week</span></div>' +
+      '<div class="osx-lv-stat"><b>' + postsInWeek(weekKey()) + '</b><span>posts this week</span></div>';
+    var vals = snaps.map(function (s) { return num(s.followers); });
+    if (vals.length > 1) { var max = Math.max.apply(null, vals) || 1, w = 200, h = 40, step = w / (vals.length - 1); var pts = vals.map(function (v, i) { return (i * step).toFixed(1) + ',' + (h - (v / max) * (h - 4) - 2).toFixed(1); }).join(' '); head += '<div class="osx-lv-sparkwrap"><span>follower growth</span><svg class="osx-lv-spark" viewBox="0 0 ' + w + ' ' + h + '" preserveAspectRatio="none"><polyline points="' + pts + '" fill="none" stroke="var(--gold-bright)" stroke-width="2" stroke-linejoin="round"/></svg></div>'; }
+    head += '</div>';
+    var cur = data.snaps.filter(function (s) { return s.week === weekKey(); })[0];
+    var form;
+    if (cur) {
+      form = '<div class="osx-pl-sech">This week — ' + weekKey() + '</div><div class="osx-lv-card open"><div class="osx-lv-body"><div class="osx-lv-grid" style="margin-top:14px;">' +
+        SNAP_STATS.map(function (s) { return '<label class="osx-lv-f"><span>' + esc(s[1]) + '</span><input class="osx-pl-in" data-snf="' + esc(cur.id) + '|' + s[0] + '" value="' + esc(cur[s[0]] || '') + '" inputmode="numeric" maxlength="14"></label>'; }).join('') + '</div></div></div>';
+    } else {
+      form = '<button class="osx-pl-newgoal" data-newsnap>＋ Log this week\'s numbers</button>';
+    }
+    var history = snaps.length ? '<div class="osx-pl-sech" style="margin-top:16px;">History</div>' + snaps.slice().reverse().map(function (s) { return '<div class="osx-gr-row"><b>' + esc(s.week) + '</b><span>' + num(s.followers) + ' followers · ' + num(s.likes) + ' likes · ' + num(s.diamonds) + ' 💎</span><button class="osx-pl-del" data-sndel="' + esc(s.id) + '" aria-label="Remove">✕</button></div>'; }).join('') : '';
+    return head + form + history;
+  }
+
   function render() {
-    var body = view === 'dash' ? dashHTML() : view === 'goals' ? goalsHTML() : view === 'lives' ? livesHTML() : listsHTML();
+    var body = view === 'dash' ? dashHTML() : view === 'goals' ? goalsHTML() : view === 'lives' ? livesHTML() : view === 'posts' ? postsHTML() : view === 'growth' ? growthHTML() : listsHTML();
     host.innerHTML = '<div class="osx-pl">' + navHTML() + '<div class="osx-pl-view">' + body + '</div></div>';
     wire();
   }
@@ -234,6 +313,17 @@
     host.querySelectorAll('[data-ls]').forEach(function (el) { el.addEventListener('change', function () { var p = el.getAttribute('data-ls').split('|'), l = liveObj(p[0]); if (l) { l.s = l.s || {}; l.s[p[1]] = el.value; save(); } }); });
     host.querySelectorAll('[data-ldone]').forEach(function (b) { b.addEventListener('click', function () { var l = liveObj(b.getAttribute('data-ldone')); if (l) { l.done = !l.done; save(); render(); } }); });
     host.querySelectorAll('[data-lvdel]').forEach(function (b) { b.addEventListener('click', function () { if (!window.confirm('Delete this live?')) return; data.lives = data.lives.filter(function (x) { return x.id !== b.getAttribute('data-lvdel'); }); save(); render(); }); });
+    // posts
+    var np = host.querySelector('[data-newpost]'); if (np) np.addEventListener('click', function () { var p = { id: uid(), topic: 'New post', platform: 'TikTok', type: 'Video', date: '', time: '', hook: '', cta: '', length: '', music: '', done: false, s: {} }; data.posts.unshift(p); expanded['P' + p.id] = true; save(); render(); });
+    host.querySelectorAll('[data-ptoggle]').forEach(function (b) { b.addEventListener('click', function (e) { if (e.target.closest('input,select,textarea,button,a')) return; var id = b.getAttribute('data-ptoggle'); expanded['P' + id] = !expanded['P' + id]; render(); }); });
+    host.querySelectorAll('[data-pf]').forEach(function (el) { el.addEventListener('change', function () { var p = el.getAttribute('data-pf').split('|'), o = postObj(p[0]); if (o) { o[p[1]] = el.value; save(); if (p[1] === 'date' || p[1] === 'platform' || p[1] === 'type') render(); } }); });
+    host.querySelectorAll('[data-pps]').forEach(function (el) { el.addEventListener('change', function () { var p = el.getAttribute('data-pps').split('|'), o = postObj(p[0]); if (o) { o.s = o.s || {}; o.s[p[1]] = el.value; save(); } }); });
+    host.querySelectorAll('[data-pdone]').forEach(function (b) { b.addEventListener('click', function () { var o = postObj(b.getAttribute('data-pdone')); if (o) { o.done = !o.done; save(); render(); } }); });
+    host.querySelectorAll('[data-ppdel]').forEach(function (b) { b.addEventListener('click', function () { if (!window.confirm('Delete this post?')) return; data.posts = data.posts.filter(function (x) { return x.id !== b.getAttribute('data-ppdel'); }); save(); render(); }); });
+    // growth (weekly snapshots)
+    var ns = host.querySelector('[data-newsnap]'); if (ns) ns.addEventListener('click', function () { data.snaps.push({ id: uid(), week: weekKey(), followers: '', likes: '', diamonds: '', revenue: '' }); save(); render(); });
+    host.querySelectorAll('[data-snf]').forEach(function (el) { el.addEventListener('change', function () { var p = el.getAttribute('data-snf').split('|'), o = snapObj(p[0]); if (o) { o[p[1]] = el.value; save(); } }); });
+    host.querySelectorAll('[data-sndel]').forEach(function (b) { b.addEventListener('click', function () { data.snaps = data.snaps.filter(function (x) { return x.id !== b.getAttribute('data-sndel'); }); save(); render(); }); });
   }
   function addRoad(gid) { var inp = host.querySelector('[data-radd="' + gid + '"]'); var v = (inp && inp.value || '').trim(); if (!v) return; var g = goal(gid); if (g) { g.roadmap = g.roadmap || []; g.roadmap.push({ id: uid(), text: v.slice(0, 120), pct: 0 }); save(); render(); } }
   function addList(bucket) { var inp = host.querySelector('[data-ladd="' + bucket + '"]'); var v = (inp && inp.value || '').trim(); if (!v) return; if (bucket === 'top' && data[active].top.length >= 3) return; data[active][bucket].push({ id: uid(), text: v.slice(0, 120), pct: 0 }); save(); render(); }
