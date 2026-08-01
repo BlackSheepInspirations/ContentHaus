@@ -16,7 +16,17 @@
 {%- assign has_journey = owns_all -%}
 {%- if customer and section.settings.journey_access_tag != blank and customer.tags contains section.settings.journey_access_tag -%}{%- assign has_journey = true -%}{%- endif -%}
 
-<div id="p2pos" class="osx">
+{%- comment -%} Whole-page gate: members (own any Haus / journey / all-access) get the
+   shell; everyone else gets a preview splash that sends them to /pages/p2p-os-preview. {%- endcomment -%}
+{%- assign has_any_access = owns_all -%}
+{%- if has_journey -%}{%- assign has_any_access = true -%}{%- endif -%}
+{%- if customer -%}
+  {%- assign os_haus_tags = 'brand-haus-access,prompt-haus-access,graphics-haus-access,product-haus-access,marketing-haus-access,P2P-haus-access' | split: ',' -%}
+  {%- for t in os_haus_tags -%}{%- if customer.tags contains t -%}{%- assign has_any_access = true -%}{%- endif -%}{%- endfor -%}
+{%- endif -%}
+
+<div id="p2pos" class="osx"{% unless has_any_access %} data-osx-gated{% endunless %}>
+{%- if has_any_access -%}
   <button class="osx-burger" type="button" aria-label="Menu" data-osx-burger><span></span><span></span><span></span></button>
 
   <aside class="osx-side" data-osx-side>
@@ -73,7 +83,8 @@
       <header class="osx-hero"{% if section.settings.hero_image != blank %} style="--hero:url('{{ section.settings.hero_image | image_url: width: 2000 }}')"{% endif %}>
         <div class="osx-hero-glow"></div>
         <div class="osx-hero-in">
-          {%- if section.settings.hero_brand_mark != blank -%}<div class="osx-hero-mark"><img src="{{ section.settings.hero_brand_mark | image_url: width: 360 }}" alt="Purpose 2 Profit" loading="lazy"></div>{%- endif -%}
+          {%- if section.settings.hero_brand_mark != blank -%}<div class="osx-hero-mark"><img src="{{ section.settings.hero_brand_mark | image_url: width: 360 }}" alt="Purpose 2 Profit" loading="lazy"></div>
+          {%- else -%}<div class="osx-hero-mark"><img src="{{ 'p2p-brand-mark.png' | asset_url }}" alt="Purpose 2 Profit" loading="lazy"></div>{%- endif -%}
           {%- if section.settings.hero_eyebrow != blank -%}<div class="osx-eyebrow">{{ section.settings.hero_eyebrow }}</div>{%- endif -%}
           {%- assign hero_phrase = section.settings.hero_title | default: 'Make this Haus Your Home' -%}
           <h1>{%- if customer.first_name != blank -%}<span class="osx-name">{{ customer.first_name }}</span>,<br>{{ hero_phrase | slice: 0 | downcase }}{{ hero_phrase | slice: 1, 400 }}{%- else -%}{{ hero_phrase }}{%- endif -%}</h1>
@@ -514,6 +525,23 @@
     </section>
     <iframe class="osx-frame" data-osx-frame title="Tool" hidden></iframe>
   </main>
+{%- else -%}
+  {%- comment -%} Non-members: preview splash instead of the members' shell {%- endcomment -%}
+  <div class="osx-gate">
+    <div class="osx-gate-in">
+      <img class="osx-gate-mark" src="{{ 'p2p-brand-mark.png' | asset_url }}" alt="Purpose 2 Profit" loading="eager">
+      <span class="osx-gate-eyebrow">Purpose 2 Profit · Your Operating System</span>
+      <h1 class="osx-gate-h1">Your Haus is waiting</h1>
+      <p class="osx-gate-tag">{{ section.settings.hero_brand_tagline | default: 'Where Your originality is rooted and ready to grow.' }}</p>
+      <p class="osx-gate-body">This is your members' home base — your Brand DNA, all six Hausen, your two AI partners, the Learning Journey and the launch method, all in one place. Take a look inside, then make it yours.</p>
+      <div class="osx-gate-btns">
+        <a class="osx-gate-btn primary" href="{{ section.settings.gate_preview_url | default: '/pages/p2p-os-preview' }}">See what's inside →</a>
+        <a class="osx-gate-btn ghost" href="{{ section.settings.gate_access_url | default: '/products/p2p-os-access' }}">Get the Access Pass</a>
+      </div>
+      <a class="osx-gate-login" href="/account/login">Already a member? Log in →</a>
+    </div>
+  </div>
+{%- endif -%}
 </div>
 
 {%- comment -%} Rule-based guided help widget (floating). Add to haus-links.liquid to put it site-wide. {%- endcomment -%}
@@ -558,6 +586,24 @@
   #p2pos .osx-hero-glow{position:absolute;inset:-40% -10% auto -10%;height:60%;background:radial-gradient(50% 100% at 30% 0%,rgba(143,111,214,.5),transparent 70%),radial-gradient(50% 100% at 75% 10%,rgba(57,197,192,.4),transparent 70%);filter:blur(20px);opacity:.6;pointer-events:none;}
   #p2pos .osx-hero-in{position:relative;flex:1;min-width:280px;}
   #p2pos .osx-hero-mark img{height:clamp(84px,10vw,120px);width:auto;display:block;margin:0 0 12px;filter:drop-shadow(0 8px 22px rgba(120,80,220,.4));}
+  /* non-member preview gate */
+  #p2pos .osx-gate{min-height:70vh;display:flex;align-items:center;justify-content:center;padding:52px 20px;
+    background:radial-gradient(46% 40% at 12% 4%,rgba(39,174,110,.14),transparent 60%),radial-gradient(42% 36% at 88% 8%,rgba(37,99,235,.12),transparent 60%),radial-gradient(50% 40% at 60% 100%,rgba(214,51,108,.10),transparent 60%),linear-gradient(180deg,#080d0b,#0a1310 50%,#080d0b);}
+  #p2pos .osx-gate-in{max-width:560px;text-align:center;}
+  #p2pos .osx-gate-mark{height:clamp(120px,26vw,196px);width:auto;display:block;margin:0 auto 18px;filter:drop-shadow(0 14px 34px rgba(120,80,220,.42));}
+  #p2pos .osx-gate-eyebrow{display:inline-block;font:700 12px/1 system-ui;letter-spacing:.16em;text-transform:uppercase;color:#7fe3b8;margin-bottom:14px;}
+  #p2pos .osx-gate-h1{font:800 clamp(30px,6vw,46px)/1.05 Georgia,serif;margin:0 0 12px;color:var(--text);}
+  #p2pos .osx-gate-tag{font:italic 600 clamp(15px,2.4vw,19px)/1.4 Georgia,serif;margin:0 0 18px;
+    background:var(--aurora);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:p2pos-shift 26s linear infinite;}
+  #p2pos .osx-gate-body{font:400 15.5px/1.65 system-ui;color:var(--muted);margin:0 0 26px;}
+  #p2pos .osx-gate-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:16px;}
+  #p2pos .osx-gate-btn{display:inline-flex;align-items:center;padding:14px 26px;border-radius:999px;font:700 15px/1 system-ui;text-decoration:none;transition:transform .14s,filter .14s;}
+  #p2pos .osx-gate-btn.primary{color:#0a1410;background:linear-gradient(100deg,#f4e2a6,#c9a24a);box-shadow:0 12px 30px -12px rgba(216,180,90,.6);}
+  #p2pos .osx-gate-btn.ghost{color:var(--text);border:1px solid var(--gstroke);}
+  #p2pos .osx-gate-btn:hover{transform:translateY(-2px);filter:brightness(1.04);}
+  #p2pos .osx-gate-login{display:inline-block;font:600 13px/1 system-ui;color:var(--muted);text-decoration:none;}
+  #p2pos .osx-gate-login:hover{color:var(--text);}
+  @media (prefers-reduced-motion:reduce){#p2pos .osx-gate-tag{animation:none;}}
   #p2pos .osx-hero-tagline{margin:10px 0 0;font:italic 600 clamp(14px,2vw,17px)/1.4 Georgia,serif;
     background:var(--aurora);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:p2pos-shift 26s linear infinite;}
   @media (prefers-reduced-motion:reduce){#p2pos .osx-hero-tagline{animation:none;}}
@@ -960,6 +1006,7 @@
 <script>
   document.addEventListener('DOMContentLoaded', function(){
     var root = document.getElementById('p2pos'); if(!root) return;
+    if(root.hasAttribute('data-osx-gated')) return; // non-member preview splash — no shell to wire
     var main = root.querySelector('[data-osx-main]');
     var frame = root.querySelector('[data-osx-frame]');
     var items = root.querySelectorAll('.osx-item');
@@ -1392,6 +1439,9 @@
     { "type": "text", "id": "hero_eyebrow", "label": "Hero eyebrow", "default": "Purpose 2 Profit" },
     { "type": "text", "id": "hero_title", "label": "Hero title", "default": "Make this Haus Your Home", "info": "A logged-in member's first name is prepended: 'Andrea, make this Haus Your Home.' Shown as-is when there's no name: 'Make this Haus Your Home.'" },
     { "type": "text", "id": "hero_brand_tagline", "label": "Brand tagline", "default": "Where Your originality is rooted and ready to grow.", "info": "The Purpose 2 Profit tagline, shown under the greeting. Leave blank to hide." },
+    { "type": "header", "content": "Non-member gate" },
+    { "type": "text", "id": "gate_preview_url", "label": "Preview page URL", "default": "/pages/p2p-os-preview", "info": "Where non-members are sent from the 'See what's inside' button." },
+    { "type": "text", "id": "gate_access_url", "label": "Get Access product/page URL", "default": "/products/p2p-os-access" },
     { "type": "textarea", "id": "hero_body", "label": "Hero body", "default": "This is your home — built around you. Your fingerprint, your spark, your story. Everything you need to go from idea to income lives right here. Let's make it yours." },
     { "type": "text", "id": "hero_cta_label", "label": "Hero button label", "default": "Show me around →" },
     { "type": "text", "id": "hero_cta_url", "label": "Hero button link", "info": "Where 'Show me around' goes — the walkthrough. Defaults to /pages/p2p-tutorial.", "default": "/pages/p2p-tutorial" },

@@ -10,7 +10,8 @@
 
 <div id="p2posprev" class="pmv">
   <header class="pmv-hero">
-    {%- if section.settings.brand_mark != blank -%}<div class="pmv-mark"><img src="{{ section.settings.brand_mark | image_url: width: 500 }}" alt="Purpose 2 Profit" loading="eager"></div>{%- endif -%}
+    {%- if section.settings.brand_mark != blank -%}<div class="pmv-mark"><img src="{{ section.settings.brand_mark | image_url: width: 500 }}" alt="Purpose 2 Profit" loading="eager"></div>
+    {%- else -%}<div class="pmv-mark"><img src="{{ 'p2p-brand-mark.png' | asset_url }}" alt="Purpose 2 Profit" loading="eager"></div>{%- endif -%}
     <span class="pmv-eyebrow">{{ section.settings.eyebrow | default: 'Black Sheep Creations &amp; Inspirations' }}</span>
     <h1 class="pmv-h1">Purpose <span class="pmv-2">2</span> Profit</h1>
     <p class="pmv-tagline">{{ section.settings.tagline | default: 'Where Your originality is rooted and ready to grow.' }}</p>
