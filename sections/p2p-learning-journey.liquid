@@ -32,8 +32,6 @@
   {%- endif -%}
 {%- endfor -%}
 
-{%- if has_access -%}{% render 'p2p-os-rail', current: 'journey', push: '#p2pj' %}{%- endif -%}
-
 <div id="p2pj"
      data-board-courses="{{ board_courses_count }}"
      data-intro-required="{{ section.settings.intro_required }}"
