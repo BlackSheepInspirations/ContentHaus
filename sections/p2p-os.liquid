@@ -407,7 +407,7 @@
     {%- assign community_embed = section.settings.community_embed_url -%}
     {%- assign community_link = section.settings.community_link_url -%}
     <section class="osx-view" data-view="community">
-      <h2 class="osx-h2">P2P Community</h2>
+      <h2 class="osx-h2">P<span class="osx-2">2</span>P Community</h2>
       <p class="osx-comm-tag">Where Your originality is rooted and ready to grow. From thought to thrive.</p>
       <p class="osx-lede">Share wins, ask questions, and build alongside other creators.</p>
 
@@ -435,19 +435,21 @@
             </div>
           </div>
           <aside class="osx-comm-side">
-            {%- if event_blocks.size > 0 -%}
-              <div class="osx-side-card">
-                <div class="osx-side-h">📅 Upcoming events</div>
-                <div class="osx-ev-scroll">
+            <div class="osx-side-card">
+              <div class="osx-side-h">📅 Upcoming events</div>
+              <div class="osx-ev-scroll">
+                {%- if event_blocks.size > 0 -%}
                   {%- for b in event_blocks -%}
                     <a class="osx-ev-item"{% if b.settings.join_url %} href="{{ b.settings.join_url }}" target="_blank" rel="noopener"{% endif %} {{ b.shopify_attributes }}>
                       <span class="osx-ev-when"><b>{{ b.settings.date | default: '•' }}</b></span>
                       <span class="osx-ev-txt"><span class="osx-ev-t">{{ b.settings.title | default: 'Live class' }}{% if b.settings.live_now %} <em class="osx-event-live">● LIVE</em>{% endif %}</span><span class="osx-ev-sub">{{ b.settings.time }}</span></span>
                     </a>
                   {%- endfor -%}
-                </div>
+                {%- else -%}
+                  <div class="osx-ev-empty">No upcoming events yet — check back soon. 📅</div>
+                {%- endif -%}
               </div>
-            {%- endif -%}
+            </div>
             <div class="osx-side-card osx-p2pcard">
               <img class="osx-p2p-logo" src="{{ 'p2p-community-logo.png' | asset_url }}" alt="Purpose 2 Profit">
               <div class="osx-comm-counts">
@@ -1020,7 +1022,7 @@
   /* community wall + wins board */
   #p2pos .osx-cw{max-width:640px;}
   #p2pos .osx-cw-compose{border:1px solid var(--stroke);border-radius:16px;padding:14px;background:rgba(255,255,255,.03);margin-bottom:18px;}
-  #p2pos .osx-cw-text{width:100%;box-sizing:border-box;resize:vertical;min-height:52px;background:rgba(9,17,24,.5);border:1px solid var(--stroke);border-radius:11px;padding:11px 13px;color:var(--text);font:400 14px/1.5 system-ui;}
+  #p2pos .osx-cw-text{width:100%;box-sizing:border-box;resize:vertical;min-height:40px;background:rgba(9,17,24,.5);border:1px solid var(--stroke);border-radius:11px;padding:10px 13px;color:var(--text);font:400 14px/1.5 system-ui;}
   #p2pos .osx-cw-text:focus{outline:none;border-color:var(--gstroke);}
   #p2pos .osx-cw-compose-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:10px;}
   #p2pos .osx-cw-wintoggle{display:inline-flex;align-items:center;gap:7px;font:600 13px/1 system-ui;color:var(--muted);cursor:pointer;}
@@ -1030,7 +1032,7 @@
   #p2pos .osx-cw-tabs{display:flex;gap:8px;margin-bottom:14px;}
   #p2pos .osx-cw-tab{border:1px solid var(--stroke);background:transparent;color:var(--muted);cursor:pointer;padding:8px 16px;border-radius:999px;font:700 13px/1 system-ui;transition:background .14s,color .14s,border-color .14s;}
   #p2pos .osx-cw-tab.on{color:#0a1410;background:linear-gradient(100deg,#f4e2a6,#c9a24a);border-color:transparent;}
-  #p2pos .osx-cw-feed{display:flex;flex-direction:column;gap:12px;}
+  #p2pos .osx-cw-feed{display:flex;flex-direction:column;gap:12px;min-height:340px;}
   #p2pos .osx-cw-post{border:1px solid var(--stroke);border-radius:14px;padding:14px 16px;background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(9,17,24,.4));}
   #p2pos .osx-cw-post.is-win{border-color:rgba(216,180,90,.5);background:linear-gradient(180deg,rgba(216,180,90,.08),rgba(9,17,24,.4));}
   #p2pos .osx-cw-post-top{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
@@ -1121,7 +1123,8 @@
   #p2pos .osx-win-add{border:1px solid var(--gstroke);background:rgba(216,180,90,.08);color:var(--gold-bright);cursor:pointer;border-radius:999px;padding:4px 10px;font:800 10px/1 system-ui;text-transform:none;flex:none;}
   #p2pos .osx-win-add:hover{background:rgba(216,180,90,.18);}
   #p2pos .osx-win-addbox{margin-bottom:12px;}
-  #p2pos .osx-ev-scroll{max-height:168px;overflow-y:auto;display:flex;flex-direction:column;gap:9px;}
+  #p2pos .osx-ev-scroll{min-height:132px;max-height:168px;overflow-y:auto;display:flex;flex-direction:column;gap:9px;}
+  #p2pos .osx-ev-empty{font:500 12.5px/1.5 system-ui;color:var(--muted);padding:8px 2px;}
   #p2pos .osx-ev-item{display:flex;gap:11px;align-items:center;text-decoration:none;}
   #p2pos .osx-ev-when{flex:none;min-width:40px;text-align:center;border:1px solid var(--gstroke);border-radius:9px;padding:6px 6px;}
   #p2pos .osx-ev-when b{font:800 13px/1.1 Georgia,serif;color:var(--gold-bright);}
@@ -1140,8 +1143,9 @@
   #p2pos .osx-gb-rank.top{color:var(--gold-bright);}
   #p2pos .osx-gb-av{width:26px;height:26px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;font:800 11px/1 Georgia,serif;color:var(--gold-bright);background:radial-gradient(circle at 50% 30%,#2a3b52,#12202b);border:1px solid var(--gstroke);overflow:hidden;}
   #p2pos .osx-gb-av img{width:100%;height:100%;object-fit:cover;}
-  #p2pos .osx-gb-name{font:700 12px/1.15 system-ui;color:var(--text);}
-  #p2pos .osx-gb-tier{font:600 10px/1 system-ui;color:var(--muted);margin-top:1px;}
+  #p2pos .osx-gb{min-height:352px;}
+  #p2pos .osx-gb-name{display:block;font:700 12px/1.15 system-ui;color:var(--text);}
+  #p2pos .osx-gb-tier{display:block;font:600 10px/1.2 system-ui;color:var(--muted);margin-top:2px;}
   #p2pos .osx-gb-pts{margin-left:auto;font:800 12.5px/1 system-ui;color:var(--gold-bright);}
   #p2pos .osx-spot-body{display:flex;align-items:center;gap:12px;}
   #p2pos .osx-cw-post-text.clamp{display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden;}
@@ -1322,6 +1326,7 @@ window.P2P_LEAFLET_CSS = {{ 'leaflet.css' | asset_url | json }};
 {%- assign ev_blocks = section.blocks | where: 'type', 'event' -%}
 window.P2P_EVENTS = [{%- for b in ev_blocks -%}{"iso":{{ b.settings.iso_date | default: '' | json }},"date":{{ b.settings.date | default: '' | json }},"time":{{ b.settings.time | default: '' | json }},"title":{{ b.settings.title | default: 'Live class' | json }},"desc":{{ b.settings.desc | default: '' | json }},"join":{{ b.settings.join_url | default: '' | json }},"live":{{ b.settings.live_now | default: false | json }}}{%- unless forloop.last -%},{%- endunless -%}{%- endfor -%}];
 </script>
+{{ 'leaflet.css' | asset_url | stylesheet_tag }}
 <script src="{{ 'p2p-community.js' | asset_url }}" defer="defer"></script>
 <script src="{{ 'p2p-members.js' | asset_url }}" defer="defer"></script>
 {%- comment -%} daily Mindset · Purpose · Heart content for the hero carousel {%- endcomment -%}

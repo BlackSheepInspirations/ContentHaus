@@ -76,7 +76,7 @@
     if (!window.L || !mapEl) return;
     if (!leafMap) {
       leafMap = L.map(mapEl, { scrollWheelZoom: false, attributionControl: true }).setView([39, -98], 3);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: '© OpenStreetMap' }).addTo(leafMap);
+      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: '© OpenStreetMap' }).addTo(leafMap);
     }
     var pts = members.filter(function (p) { return typeof p.lat === 'number' && typeof p.lng === 'number'; });
     pts.forEach(function (p) {
