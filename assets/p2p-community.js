@@ -10,7 +10,18 @@
   var winsFeed = root.querySelector('[data-wins-feed]');
   var ta = wrap ? wrap.querySelector('[data-cw-text]') : null;
   var postBtn = wrap ? wrap.querySelector('[data-cw-post]') : null;
-  var posts = [], winIdx = 0, winTimer = null;
+  var posts = [], winIdx = 0, winTimer = null, welcomeProfileDone = false;
+
+  function myName() { return (window.P2P_MEMBER_NAME || '').trim().toLowerCase(); }
+  function setWc(k, on) { var el = root.querySelector('[data-wc="' + k + '"]'); if (el) el.classList.toggle('done', !!on); }
+  function updateWelcome() {
+    if (!root.querySelector('[data-welcome]')) return;
+    var nm = myName();
+    var mineIs = function (kindWin) { return nm && posts.some(function (p) { return (kindWin ? p.kind === 'win' : p.kind !== 'win') && String(p.name || '').trim().toLowerCase() === nm; }); };
+    setWc('profile', localStorage.getItem('p2p_wc_profile') === '1' || welcomeProfileDone);
+    setWc('hello', localStorage.getItem('p2p_wc_hello') === '1' || mineIs(false));
+    setWc('win', localStorage.getItem('p2p_wc_win') === '1' || mineIs(true));
+  }
 
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function empty(m) { return '<div class="osx-cw-empty">' + m + '</div>'; }
@@ -87,24 +98,47 @@
     if (w.length > 1) winTimer = setInterval(function () { winIdx = (winIdx + 1) % wins().length; renderWinsSide(); }, 8000);
   }
 
+  function setReactBtn(btn, on, count) {
+    btn.classList.toggle('on', !!on);
+    var c = btn.querySelector('span'); if (c) c.textContent = count;
+  }
   function wireReacts(container) {
     container.querySelectorAll('[data-react]').forEach(function (btn) {
       btn.addEventListener('click', function () {
+        if (btn.dataset.busy) return;
         var id = btn.getAttribute('data-react'), type = btn.getAttribute('data-rtype');
+        var span = btn.querySelector('span');
+        var wasOn = btn.classList.contains('on');
+        var cur = parseInt(span ? span.textContent : '0', 10) || 0;
+        // optimistic: flip immediately so it always feels responsive
+        setReactBtn(btn, !wasOn, Math.max(0, cur + (wasOn ? -1 : 1)));
+        btn.dataset.busy = '1';
         fetch(REACT, { method: 'POST', headers: { 'content-type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify({ id: id, type: type }) })
           .then(function (r) { return r.json(); })
           .then(function (res) {
-            if (res && res.ok) {
-              posts.forEach(function (p) { if (p.id === id) { p.reactions = res.reactions; p.mine = res.mine; p.likes = res.likes; p.liked = res.liked; } });
-              btn.classList.toggle('on', res.mine && res.mine[type]);
-              var c = btn.querySelector('span'); if (c) c.textContent = res.reactions ? res.reactions[type] : 0;
-            }
-          }).catch(function () {});
+            delete btn.dataset.busy;
+            if (!res || !res.ok) { setReactBtn(btn, wasOn, cur); return; } // revert on failure
+            // reconcile with server truth when it provides it; else keep the optimistic value
+            var on = (res.mine && typeof res.mine[type] !== 'undefined') ? !!res.mine[type]
+                   : (type === 'love' && typeof res.liked !== 'undefined') ? !!res.liked
+                   : !wasOn;
+            var cnt = (res.reactions && typeof res.reactions[type] !== 'undefined') ? res.reactions[type]
+                    : (type === 'love' && typeof res.likes !== 'undefined') ? res.likes
+                    : Math.max(0, cur + (wasOn ? -1 : 1));
+            setReactBtn(btn, on, cnt);
+            posts.forEach(function (p) {
+              if (p.id !== id) return;
+              if (res.reactions) p.reactions = res.reactions; else { p.reactions = p.reactions || {}; p.reactions[type] = cnt; }
+              if (res.mine) p.mine = res.mine; else { p.mine = p.mine || {}; p.mine[type] = on; }
+              if (typeof res.likes !== 'undefined') p.likes = res.likes;
+              if (typeof res.liked !== 'undefined') p.liked = res.liked;
+            });
+          }).catch(function () { delete btn.dataset.busy; setReactBtn(btn, wasOn, cur); });
       });
     });
   }
 
-  function render() { renderWall(); renderWinsSide(); }
+  function render() { renderWall(); renderWinsSide(); updateWelcome(); }
 
   function load() {
     fetch(PROXY, { credentials: 'same-origin' })
@@ -175,7 +209,9 @@
       var mEl = root.querySelector('[data-count-members]'), aEl = root.querySelector('[data-count-active]');
       if (mEl) mEl.textContent = m.length;
       if (aEl) aEl.textContent = m.filter(function (x) { return x.ts && (now - x.ts) < 5 * 60 * 1000; }).length;
-      renderGrowth(m); renderSpotlight(m);
+      var nm = myName();
+      if (nm && m.some(function (x) { return String(x.name || '').trim().toLowerCase() === nm && (x.photo || x.quote || x.about); })) welcomeProfileDone = true;
+      renderGrowth(m); renderSpotlight(m); updateWelcome();
     }).catch(function () {});
   }
 
@@ -200,7 +236,7 @@
     postBtn.disabled = true; postBtn.textContent = 'Posting…';
     fetch(PROXY, { method: 'POST', headers: { 'content-type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify({ text: text, kind: 'post', name: window.P2P_MEMBER_NAME || '' }) })
       .then(function (r) { return r.json(); })
-      .then(function (res) { postBtn.disabled = false; postBtn.textContent = 'Post'; if (res && res.ok) { ta.value = ''; load(); } })
+      .then(function (res) { postBtn.disabled = false; postBtn.textContent = 'Post'; if (res && res.ok) { ta.value = ''; try { localStorage.setItem('p2p_wc_hello', '1'); } catch (e) {} load(); } })
       .catch(function () { postBtn.disabled = false; postBtn.textContent = 'Post'; });
   });
 
@@ -212,7 +248,7 @@
     winShare.disabled = true; winShare.textContent = 'Sharing…';
     fetch(PROXY, { method: 'POST', headers: { 'content-type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify({ text: t, kind: 'win', name: window.P2P_MEMBER_NAME || '' }) })
       .then(function (r) { return r.json(); })
-      .then(function (res) { winShare.disabled = false; winShare.textContent = 'Share win'; if (res && res.ok) { winText.value = ''; if (winBox) winBox.hidden = true; load(); } })
+      .then(function (res) { winShare.disabled = false; winShare.textContent = 'Share win'; if (res && res.ok) { winText.value = ''; if (winBox) winBox.hidden = true; try { localStorage.setItem('p2p_wc_win', '1'); } catch (e) {} load(); } })
       .catch(function () { winShare.disabled = false; winShare.textContent = 'Share win'; });
   });
 

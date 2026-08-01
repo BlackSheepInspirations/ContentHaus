@@ -133,6 +133,7 @@
     f.save.disabled = true; if (f.status) f.status.textContent = 'Saving…';
     publish(collect(f.hidden ? f.hidden.checked : false)).then(function (res) {
       f.save.disabled = false;
+      if (res && res.ok) { try { localStorage.setItem('p2p_wc_profile', '1'); } catch (e) {} }
       if (f.status) { f.status.textContent = (res && res.ok) ? 'Saved ✓' : 'Try again'; setTimeout(function () { f.status.textContent = ''; }, 3000); }
       loadMembers();
     }).catch(function () { f.save.disabled = false; if (f.status) f.status.textContent = 'Try again'; });
