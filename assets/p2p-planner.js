@@ -18,7 +18,7 @@
                ['s', 'S', 'Success Vision', 'What "done" looks like — specific enough to know when you\'ve arrived.']];
   var ROOTED_STEPS = ['R · Reach — warm up the right people', 'O · Open — build anticipation', 'O · Offer — make the offer', 'T · Trigger — proof + urgency', 'E · Escalate — the close', 'D · Deepen — keep it going after'];
 
-  var view = 'dash', active = 'week', expanded = {}, selected = {}, livesTab = 'lives';
+  var view = 'dash', active = 'week', expanded = {}, selected = {}, livesTab = 'lives', calMY = null;
 
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function p2(n) { return (n < 10 ? '0' : '') + n; }
@@ -90,6 +90,48 @@
     if (!vis.some(function (t) { return t[0] === view; })) view = 'dash';
     return '<div class="osx-pl-nav">' + vis.map(function (t) { return '<button class="osx-pl-navb' + (view === t[0] ? ' on' : '') + '" data-view="' + t[0] + '">' + t[1] + '</button>'; }).join('') + '</div>';
   }
+  var CAL_MO = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  function calP2(n) { return (n < 10 ? '0' : '') + n; }
+  function calMarks() { var mk = {}; function add(iso, k) { if (!iso) return; (mk[iso] = mk[iso] || {})[k] = true; } data.lives.forEach(function (l) { if (!l.deleted && l.date) add(l.date, 'live'); }); data.goals.forEach(function (g) { if (g.w) add(g.w, 'goal'); }); data.products.forEach(function (p) { if (p.launch) add(p.launch, 'prod'); }); (window.P2P_EVENTS || []).forEach(function (e) { if (e.iso) add(e.iso, 'event'); }); try { (JSON.parse(localStorage.getItem('p2p_my_events') || '[]') || []).forEach(function (e) { if (e.iso) add(e.iso, 'plan'); }); } catch (e) {} return mk; }
+  function calVisits() { try { return JSON.parse(localStorage.getItem('p2p_visit_days') || '{}') || {}; } catch (e) { return {}; } }
+  function dashCalHTML() {
+    if (!calMY) { var n = new Date(); calMY = { y: n.getFullYear(), m: n.getMonth() }; }
+    var mk = calMarks(), visits = calVisits();
+    var first = new Date(calMY.y, calMY.m, 1).getDay(), days = new Date(calMY.y, calMY.m + 1, 0).getDate();
+    var td = new Date(), tISO = td.getFullYear() + '-' + calP2(td.getMonth() + 1) + '-' + calP2(td.getDate()), cells = '';
+    for (var i = 0; i < first; i++) cells += '<span class="osx-dc-d empty"></span>';
+    for (var d = 1; d <= days; d++) {
+      var iso = calMY.y + '-' + calP2(calMY.m + 1) + '-' + calP2(d), m = mk[iso] || {};
+      var marks = (visits[iso] ? '<i class="osx-dc-star">★</i>' : '') + (m.live ? '<i class="osx-dc-dot live"></i>' : '') + (m.goal ? '<i class="osx-dc-dot goal"></i>' : '') + (m.prod ? '<i class="osx-dc-dot prod"></i>' : '') + (m.event ? '<i class="osx-dc-dot event"></i>' : '') + (m.plan ? '<i class="osx-dc-dot plan"></i>' : '');
+      cells += '<button type="button" class="osx-dc-d' + (iso === tISO ? ' today' : '') + '" data-dcday="' + iso + '">' + d + (marks ? '<span class="osx-dc-marks">' + marks + '</span>' : '') + '</button>';
+    }
+    return '<div class="osx-dc"><div class="osx-dc-head"><button type="button" data-dcprev aria-label="Previous month">‹</button><b>' + CAL_MO[calMY.m] + ' ' + calMY.y + '</b><button type="button" data-dcnext aria-label="Next month">›</button></div>' +
+      '<div class="osx-dc-dows"><span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span></div><div class="osx-dc-grid">' + cells + '</div>' +
+      '<div class="osx-dc-legend"><span class="l-live">live</span><span class="l-goal">goal</span><span class="l-prod">launch</span><span class="l-event">event</span><span class="l-plan">plan</span><span class="l-star">★ showed up</span></div></div>';
+  }
+  function radarHTML() {
+    var items = [];
+    data.lives.forEach(function (l) { if (!l.deleted && !l.done && l.date) { var dd = daysTo(l.date); if (dd !== null && dd >= 0 && dd <= 14) items.push({ d: dd, ic: '📡', t: l.title || l.topic || 'Live' }); } });
+    data.goals.forEach(function (g) { if (g.w) { var dd = daysTo(g.w); if (dd !== null && dd >= 0 && dd <= 14) items.push({ d: dd, ic: '🎯', t: g.title || 'Goal launch' }); } });
+    data.products.forEach(function (p) { if (p.launch) { var dd = daysTo(p.launch); if (dd !== null && dd >= 0 && dd <= 14) items.push({ d: dd, ic: '📦', t: p.name || 'Product launch' }); } });
+    items.sort(function (a, b) { return a.d - b.d; });
+    var body = items.length ? items.map(function (it) { return '<div class="osx-radar-i"><span class="osx-radar-ic">' + it.ic + '</span><span class="osx-radar-t">' + esc(it.t) + '</span><span class="osx-radar-d">' + (it.d === 0 ? 'Today' : it.d === 1 ? '1 day' : it.d + ' days') + '</span></div>'; }).join('') : '<div class="osx-pl-empty" style="padding:6px 0;">Nothing in the next 2 weeks — plan a live or set a launch date.</div>';
+    return '<div class="osx-pl-sech" style="margin-top:16px;">🔔 Coming up · next 14 days</div>' + body;
+  }
+  function openDcDay(iso) {
+    var pop = document.createElement('div'); pop.className = 'osx-cal-pop'; root.appendChild(pop);
+    var p = iso.split('-'), dt = new Date(+p[0], +p[1] - 1, +p[2]);
+    var rows = data.lives.filter(function (l) { return !l.deleted && l.date === iso; }).map(function (l) { return '<div class="osx-dcp-i">📡 <b>' + esc(l.title || l.topic || 'Live') + '</b>' + (liveTimeStr(l) ? ' · ' + esc(liveTimeStr(l)) : '') + '</div>'; })
+      .concat(data.goals.filter(function (g) { return g.w === iso; }).map(function (g) { return '<div class="osx-dcp-i">🎯 <b>' + esc(g.title || 'Goal window') + '</b> — launch target</div>'; }))
+      .concat(data.products.filter(function (x) { return x.launch === iso; }).map(function (x) { return '<div class="osx-dcp-i">📦 <b>' + esc(x.name || 'Product') + '</b> — launch</div>'; }))
+      .concat((window.P2P_EVENTS || []).filter(function (e) { return e.iso === iso; }).map(function (e) { return '<div class="osx-dcp-i">📅 <b>' + esc(e.title || 'Event') + '</b>' + (e.time ? ' · ' + esc(e.time) : '') + '</div>'; }));
+    try { rows = rows.concat((JSON.parse(localStorage.getItem('p2p_my_events') || '[]') || []).filter(function (e) { return e.iso === iso; }).map(function (e) { return '<div class="osx-dcp-i">✎ <b>' + esc(e.title || 'Plan') + '</b>' + (e.time ? ' · ' + esc(e.time) : '') + '</div>'; })); } catch (e) {}
+    pop.innerHTML = '<div class="osx-cal-pop-in osx-ns"><button class="osx-cal-pop-x" type="button" aria-label="Close">✕</button><div class="osx-ns-h">' + esc(dt.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })) + '</div>' + (rows.join('') || '<div class="osx-pl-empty">Nothing scheduled this day.</div>') + '<button class="osx-cele-x" type="button" style="margin-top:12px;">Close</button></div>';
+    function close() { pop.remove(); }
+    pop.addEventListener('click', function (e) { if (e.target === pop) close(); });
+    pop.querySelector('.osx-cal-pop-x').addEventListener('click', close);
+    pop.querySelector('.osx-cele-x').addEventListener('click', close);
+  }
   function dashHTML() {
     var ct = data.ctype || 'both';
     var sel = '<div class="osx-ct-sel"><span class="osx-ct-l">I create:</span>' + [['content', '📱 Content'], ['product', '📦 Products'], ['both', '✨ Both']].map(function (c) { return '<button class="osx-ct-b' + (ct === c[0] ? ' on' : '') + '" data-ctype="' + c[0] + '">' + c[1] + '</button>'; }).join('') + '</div>';
@@ -108,10 +150,11 @@
         '<span class="osx-pl-gsum-b"><b>' + esc(g.title || 'Untitled goal') + '</b>' +
         '<span class="osx-pl-gsum-m"><span class="osx-pl-stage-b">' + st[1] + ' ' + st[2] + '</span> · ' + esc(countdownText(g.w)) + '</span></span></button>';
     }).join('') : '<div class="osx-pl-empty">No goals yet — head to 🎯 Goals to build one with the GROWS formula.</div>';
-    return sel + cd + raftHTML() + stats +
+    return sel + '<div class="osx-dash-grid"><div class="osx-dash-left">' + cd + raftHTML() + stats +
       '<div class="osx-pl-sech">📊 What you shipped — last 8 weeks</div>' + barChart() +
       '<div class="osx-pl-sech">🎚️ Progress by horizon</div><div class="osx-pl-strip">' + rings + '</div>' +
-      '<div class="osx-pl-sech" style="margin-top:10px;">🎯 Your goals</div>' + goals + milestonesStrip() + laggingHTML();
+      '<div class="osx-pl-sech" style="margin-top:10px;">🎯 Your goals</div>' + goals + milestonesStrip() + '</div>' +
+      '<div class="osx-dash-right">' + dashCalHTML() + radarHTML() + '</div></div>' + laggingHTML();
   }
   function growsRow(g) {
     return '<div class="osx-pl-grows">' + GROWS.map(function (r) {
@@ -657,6 +700,10 @@
     // creator mode + info
     host.querySelectorAll('[data-ctype]').forEach(function (b) { b.addEventListener('click', function () { data.ctype = b.getAttribute('data-ctype'); save(); render(); }); });
     var msi = host.querySelector('[data-msinfo]'); if (msi) msi.addEventListener('click', openInfo);
+    // dashboard calendar
+    var dcp = host.querySelector('[data-dcprev]'); if (dcp) dcp.addEventListener('click', function () { calMY.m--; if (calMY.m < 0) { calMY.m = 11; calMY.y--; } render(); });
+    var dcn = host.querySelector('[data-dcnext]'); if (dcn) dcn.addEventListener('click', function () { calMY.m++; if (calMY.m > 11) { calMY.m = 0; calMY.y++; } render(); });
+    host.querySelectorAll('[data-dcday]').forEach(function (b) { b.addEventListener('click', function () { openDcDay(b.getAttribute('data-dcday')); }); });
     // RAFT weekly loop
     host.querySelectorAll('[data-raft]').forEach(function (el) { var k = el.getAttribute('data-raft'); var ev = (el.type === 'checkbox') ? 'change' : 'change'; el.addEventListener(ev, function () { var c = raftCycle(); if (el.type === 'checkbox') c[k] = el.checked; else c[k] = el.value; save(); if (k === 'fastWin' || k === 'corrected') render(); }); });
     host.querySelectorAll('[data-act]').forEach(function (b) { b.addEventListener('click', function () { var c = raftCycle(), n = +b.getAttribute('data-act'); c.act = (c.act === n) ? n - 1 : n; save(); render(); }); });
