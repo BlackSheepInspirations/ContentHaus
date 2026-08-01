@@ -86,9 +86,23 @@
   var rail = document.getElementById('p2posrail');
   var burger = document.querySelector('[data-p2posr-burger]');
   var scrim = document.querySelector('[data-p2posr-scrim]');
-  if(!rail || !burger) return;
-  function close(){ rail.classList.remove('open'); document.body.classList.remove('p2posr-open'); }
-  burger.addEventListener('click', function(){ var open = rail.classList.toggle('open'); document.body.classList.toggle('p2posr-open', open); });
-  if(scrim) scrim.addEventListener('click', close);
+  if(!rail) return;
+  // Sit the rail below the theme header (same offset the OS uses) instead of under it.
+  var hdr = document.querySelector('.shopify-section-group-header-group');
+  function place(){
+    if(window.matchMedia('(max-width:999px)').matches){ rail.style.top=''; rail.style.height=''; return; }
+    var top = hdr ? Math.max(0, hdr.getBoundingClientRect().bottom) : 0;
+    rail.style.top = top + 'px';
+    rail.style.height = 'calc(100vh - ' + top + 'px)';
+  }
+  place();
+  window.addEventListener('resize', place);
+  window.addEventListener('scroll', place, { passive: true });
+  // mobile drawer
+  if(burger){
+    function close(){ rail.classList.remove('open'); document.body.classList.remove('p2posr-open'); }
+    burger.addEventListener('click', function(){ var open = rail.classList.toggle('open'); document.body.classList.toggle('p2posr-open', open); });
+    if(scrim) scrim.addEventListener('click', close);
+  }
 })();
 </script>
