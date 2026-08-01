@@ -782,10 +782,9 @@
   root.querySelectorAll('[data-cal]').forEach(initCal);
 })();
 
-/* ---- Bell notifications + profile bubble (sidebar, on every OS page) ---- */
+/* ---- Bell notifications + profile bubble (OS sidebar AND the shared rail on other pages) ---- */
 (function () {
-  var root = document.getElementById('p2pos'); if (!root) return;
-  var bar = root.querySelector('[data-userbar]'); if (!bar) return;
+  var bar = document.querySelector('[data-userbar]'); if (!bar) return;
   var bell = bar.querySelector('[data-bell]'), menu = bar.querySelector('[data-bell-menu]'),
       countEl = bar.querySelector('[data-bell-count]'), roleEl = bar.querySelector('[data-userrole]');
   var NOTIFS = '/apps/p2p/notifs', notifs = [];

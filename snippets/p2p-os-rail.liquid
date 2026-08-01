@@ -1,0 +1,94 @@
+{%- comment -%}
+  Shared Purpose 2 Profit member rail — the OS sidebar on every member page.
+  Usage:  {% render 'p2p-os-rail', current: 'journey', push: '#p2pj' %}
+    current : nav target to highlight (start/checkpoint/success/community/
+              brand/content/graphics/project/marketing/growth/journey/rooted/
+              tools/notebook/bonus)
+    push    : CSS selector of the page's root content to shift right on desktop.
+  View-mode items deep-link to /pages/p2p-os?v=<target> (the OS honors ?v=).
+  Gating mirrors the OS: customer owns the item's access_tag, or the all-access tag.
+{%- endcomment -%}
+
+{{ 'p2p-os-shell.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'p2p-community.js' | asset_url }}" defer="defer"></script>
+
+{%- assign owns_all = false -%}
+{%- if customer and customer.tags contains 'all-access' -%}{%- assign owns_all = true -%}{%- endif -%}
+{%- if request.design_mode -%}{%- assign owns_all = true -%}{%- endif -%}
+
+<button class="p2posr-burger" type="button" aria-label="Menu" data-p2posr-burger><span></span><span></span><span></span></button>
+<div class="p2posr-scrim" data-p2posr-scrim></div>
+
+<aside id="p2posrail">
+  <a class="p2posr-brand" href="/pages/p2p-os" aria-label="Black Sheep Creations & Inspirations — home">
+    <img class="p2posr-fav" src="{{ 'bsc-sheep-mark.png' | asset_url }}" alt="" aria-hidden="true">
+    <span class="p2posr-brandsub">Black Sheep Creations &amp; Inspirations</span>
+  </a>
+  <a class="p2posr-emblem" href="/pages/p2p-os" aria-label="Purpose 2 Profit — home">
+    <img src="{{ 'p2p-community-logo.png' | asset_url }}" alt="Purpose 2 Profit">
+  </a>
+
+  <div class="osx-userbar" data-userbar>
+    <span class="osx-userbubble">{% if customer.first_name != blank %}{{ customer.first_name | slice: 0 | upcase }}{% else %}🐑{% endif %}</span>
+    <div class="osx-userinfo">
+      <span class="osx-username">{{ customer.first_name | default: 'Member' }}</span>
+      <span class="osx-usermeta" data-userrole>Member</span>
+    </div>
+    <button class="osx-bell" type="button" data-bell aria-label="Notifications">🔔<span class="osx-bell-dot" data-bell-count hidden>0</span></button>
+    <div class="osx-bell-menu" data-bell-menu hidden></div>
+  </div>
+
+  <nav class="p2posr-nav">
+    {%- capture rail_nav -%}start^Home^spark^/pages/p2p-os^^|checkpoint^Checkpoint^check^/pages/p2p-os?v=checkpoint^^|success^My Success^rocket^/pages/p2p-os?v=success^^|community^Community^chat^/pages/p2p-os?v=community^^|#SEC:Your Hausen|brand^Brand Haus^crown^/pages/brand-haus^brand-haus-access^/pages/brand-haus-preview|content^Content Haus^prompt^/pages/content-haus^prompt-haus-access^/pages/content-haus-preview|graphics^Graphics Haus^palette^/pages/graphics-haus^graphics-haus-access^/pages/graphics-haus-preview|project^Project Haus^box^/pages/project-haus^product-haus-access^/pages/project-haus-preview|marketing^Marketing Haus^megaphone^/pages/marketing-haus^marketing-haus-access^/pages/marketing-haus-preview|growth^Growth Haus^rocket^/pages/growth-haus^P2P-haus-access^/pages/growth-haus-preview|journey^Learning Journey^path^/pages/p2p-learning^^|#SEC:More|rooted^ROOTED^path^/pages/p2p-os?v=rooted^^|tools^Tools &amp; Resources^tools^/pages/p2p-os?v=tools^^|notebook^Notebook^notebook^/pages/p2p-os?v=notebook^^|bonus^Bonus Resources^gift^/pages/p2p-os?v=bonus^^{%- endcapture -%}
+    {%- assign rail_items = rail_nav | split: '|' -%}
+    {%- for it in rail_items -%}
+      {%- if it contains '#SEC:' -%}
+        <div class="p2posr-sec">{{ it | remove: '#SEC:' }}</div>
+      {%- else -%}
+        {%- assign f = it | split: '^' -%}
+        {%- assign it_tag = f[4] -%}
+        {%- assign owns = owns_all -%}
+        {%- if it_tag == blank -%}{%- assign owns = true -%}{%- endif -%}
+        {%- if customer and it_tag != blank and customer.tags contains it_tag -%}{%- assign owns = true -%}{%- endif -%}
+        {%- if owns -%}{%- assign href = f[3] -%}{%- else -%}{%- assign href = f[5] | default: '#' -%}{%- endif -%}
+        <a class="p2posr-item{% if f[0] == current %} on{% endif %}{% unless owns %} locked{% endunless %}" href="{{ href }}">
+          <span class="p2posr-ico">
+            {%- case f[2] -%}
+              {%- when 'spark' -%}<svg viewBox="0 0 24 24"><path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.9 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/></svg>
+              {%- when 'check' -%}<svg viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg>
+              {%- when 'rocket' -%}<svg viewBox="0 0 24 24"><path d="M12 3c4 2 6 6 6 10l-3 3H9l-3-3c0-4 2-8 6-10z"/><circle cx="12" cy="10" r="1.6"/><path d="M9 19l-2 2M15 19l2 2"/></svg>
+              {%- when 'chat' -%}<svg viewBox="0 0 24 24"><path d="M4 6a2 2 0 012-2h12a2 2 0 012 2v8a2 2 0 01-2 2H9l-4 3V6z"/><circle cx="9" cy="10" r="1"/><circle cx="12.5" cy="10" r="1"/><circle cx="16" cy="10" r="1"/></svg>
+              {%- when 'crown' -%}<svg viewBox="0 0 24 24"><path d="M4 8l4 4 4-6 4 6 4-4v9H4z"/></svg>
+              {%- when 'prompt' -%}<svg viewBox="0 0 24 24"><path d="M4 5h16v11H8l-4 3z"/><path d="M8 9h8M8 12h5"/></svg>
+              {%- when 'palette' -%}<svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 100 18c1.5 0 2-1 2-2 0-1.3-1-1.5-1-2.5S14 15 15 15h2a4 4 0 004-4c0-4.4-4-8-9-8z"/></svg>
+              {%- when 'box' -%}<svg viewBox="0 0 24 24"><path d="M12 3l8 4v10l-8 4-8-4V7z"/><path d="M4 7l8 4 8-4M12 11v10"/></svg>
+              {%- when 'megaphone' -%}<svg viewBox="0 0 24 24"><path d="M3 10v4h3l7 4V6l-7 4z"/><path d="M17 8a5 5 0 010 8"/></svg>
+              {%- when 'path' -%}<svg viewBox="0 0 24 24"><path d="M6 20c0-6 12-4 12-10a4 4 0 00-8 0"/><circle cx="6" cy="20" r="1.4"/><circle cx="14" cy="6" r="1.4"/></svg>
+              {%- when 'tools' -%}<svg viewBox="0 0 24 24"><path d="M14 7a3 3 0 00-4 4l-6 6 2 2 6-6a3 3 0 004-4l-2 2-2-2z"/></svg>
+              {%- when 'notebook' -%}<svg viewBox="0 0 24 24"><path d="M6 4h12v16H6z"/><path d="M6 9h12M9 4v16"/></svg>
+              {%- when 'gift' -%}<svg viewBox="0 0 24 24"><path d="M4 11h16v9H4z"/><path d="M4 8h16v3H4zM12 8v12"/></svg>
+              {%- else -%}<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></svg>
+            {%- endcase -%}
+          </span>
+          <span class="p2posr-lbl">{{ f[1] }}</span>
+        </a>
+      {%- endif -%}
+    {%- endfor -%}
+  </nav>
+</aside>
+
+{%- if push != blank -%}
+<style>@media(min-width:1000px){ {{ push }}{ margin-left:264px; } }</style>
+{%- endif -%}
+
+<script>
+(function(){
+  var rail = document.getElementById('p2posrail');
+  var burger = document.querySelector('[data-p2posr-burger]');
+  var scrim = document.querySelector('[data-p2posr-scrim]');
+  if(!rail || !burger) return;
+  function close(){ rail.classList.remove('open'); document.body.classList.remove('p2posr-open'); }
+  burger.addEventListener('click', function(){ var open = rail.classList.toggle('open'); document.body.classList.toggle('p2posr-open', open); });
+  if(scrim) scrim.addEventListener('click', close);
+})();
+</script>

@@ -1,0 +1,68 @@
+/* Purpose 2 Profit — shared member rail (OS sidebar on every page).
+   Rendered by snippets/p2p-os-rail.liquid. Scoped to #p2posrail so it never
+   collides with a host page's own styles. The bell markup reuses the OS's
+   .osx-bell* class names because assets/p2p-community.js builds those. */
+#p2posrail{
+  --text:#e7efeb;--muted:#8aa0a6;--gold:#c9a24a;--gold-bright:#f4c534;
+  --stroke:rgba(255,255,255,.09);--gstroke:rgba(216,180,90,.38);--side:#081119;
+  position:fixed;top:0;left:0;width:264px;height:100vh;z-index:40;
+  box-sizing:border-box;padding:20px 14px;display:flex;flex-direction:column;gap:8px;
+  background:linear-gradient(180deg,var(--side),#060d14);border-right:1px solid var(--stroke);
+  overflow-y:auto;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+#p2posrail *{box-sizing:border-box;}
+#p2posrail a{text-decoration:none;}
+
+/* brand + favicon */
+#p2posrail .p2posr-brand{display:flex;align-items:center;gap:9px;width:100%;background:none;border:0;border-bottom:1px solid var(--stroke);padding:2px 8px 14px;margin-bottom:4px;cursor:pointer;border-radius:8px 8px 0 0;transition:background .15s;}
+#p2posrail .p2posr-brand:hover{background:rgba(255,255,255,.03);}
+#p2posrail .p2posr-fav{width:26px;height:26px;object-fit:contain;flex:none;}
+#p2posrail .p2posr-brandsub{font:800 10.5px/1.35 system-ui;letter-spacing:.05em;text-transform:uppercase;color:var(--text);text-align:left;}
+
+/* P2P emblem card -> OS home */
+#p2posrail .p2posr-emblem{display:block;border:1px solid var(--gstroke);border-radius:14px;background:rgba(255,255,255,.03);padding:11px;margin:4px 0 6px;box-shadow:0 0 18px rgba(216,180,90,.1);transition:transform .15s;}
+#p2posrail .p2posr-emblem:hover{transform:translateY(-1px);}
+#p2posrail .p2posr-emblem img{width:100%;display:block;border-radius:8px;}
+
+/* userbar + bell */
+#p2posrail .osx-userbar{position:relative;display:flex;align-items:center;gap:10px;padding:4px 6px 12px;margin-bottom:4px;border-bottom:1px solid var(--stroke);}
+#p2posrail .osx-userbubble{flex:none;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:800 14px/1 system-ui;color:#1a1206;background:linear-gradient(135deg,var(--gold-bright),var(--gold));}
+#p2posrail .osx-userinfo{display:flex;flex-direction:column;min-width:0;flex:1;}
+#p2posrail .osx-username{font:700 13px/1.2 system-ui;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+#p2posrail .osx-usermeta{font:600 10px/1.2 system-ui;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;}
+#p2posrail .osx-bell{position:relative;flex:none;background:none;border:0;cursor:pointer;font-size:18px;line-height:1;padding:4px;filter:grayscale(.2);transition:transform .12s;}
+#p2posrail .osx-bell:hover{transform:scale(1.1);}
+#p2posrail .osx-bell-dot{position:absolute;top:-2px;right:-2px;min-width:16px;height:16px;padding:0 4px;border-radius:9px;background:#e0457b;color:#fff;font:800 9px/16px system-ui;text-align:center;}
+#p2posrail .osx-bell-menu{position:absolute;top:calc(100% - 4px);left:0;width:252px;max-height:340px;overflow-y:auto;z-index:60;background:#0e1c28;border:1px solid var(--gstroke);border-radius:14px;box-shadow:0 12px 34px rgba(0,0,0,.5);padding:6px;}
+#p2posrail .osx-bell-h{font:800 12px/1 system-ui;color:var(--text);padding:8px 8px 6px;text-transform:uppercase;letter-spacing:.04em;}
+#p2posrail .osx-bell-item{padding:9px 9px;border-radius:10px;border-left:3px solid transparent;}
+#p2posrail .osx-bell-item.unread{background:rgba(216,180,90,.08);}
+#p2posrail .osx-bell-rem{border-left-color:var(--gold-bright);}
+#p2posrail .osx-bell-line{font:600 12px/1.35 system-ui;color:var(--text);}
+#p2posrail .osx-bell-snip{font:500 11px/1.35 system-ui;color:var(--muted);margin-top:2px;}
+#p2posrail .osx-bell-time{font:600 9.5px/1 system-ui;color:var(--muted);display:block;margin-top:4px;}
+#p2posrail .osx-bell-empty{font:500 12px/1.5 system-ui;color:var(--muted);padding:10px 8px 14px;}
+
+/* nav */
+#p2posrail .p2posr-nav{display:flex;flex-direction:column;gap:3px;}
+#p2posrail .p2posr-item{display:flex;align-items:center;gap:11px;width:100%;padding:10px 12px;border:1px solid transparent;border-radius:11px;background:none;color:#cdd9dd;font:600 13px/1.2 system-ui;text-align:left;cursor:pointer;transition:background .15s,border-color .15s,color .15s;}
+#p2posrail .p2posr-item:hover{background:rgba(255,255,255,.04);color:var(--text);}
+#p2posrail .p2posr-item.on{background:linear-gradient(100deg,rgba(216,180,90,.16),rgba(143,111,214,.12));border-color:var(--gstroke);color:#fff;}
+#p2posrail .p2posr-item.locked{opacity:.5;}
+#p2posrail .p2posr-item.locked::after{content:"🔒";margin-left:auto;font-size:11px;}
+#p2posrail .p2posr-ico{flex:none;width:20px;height:20px;display:flex;align-items:center;justify-content:center;}
+#p2posrail .p2posr-ico svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;}
+#p2posrail .p2posr-sec{font:700 9px/1 system-ui;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:12px 12px 4px;}
+
+/* burger (mobile) */
+.p2posr-burger{display:none;position:fixed;top:12px;left:12px;z-index:41;width:42px;height:42px;flex-direction:column;justify-content:center;align-items:center;gap:4px;border:1px solid rgba(255,255,255,.14);border-radius:10px;background:#081119;cursor:pointer;}
+.p2posr-burger span{display:block;width:20px;height:2px;background:#e7efeb;border-radius:2px;}
+.p2posr-scrim{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:39;}
+
+@media(max-width:999px){
+  #p2posrail{transform:translateX(-100%);transition:transform .25s ease;box-shadow:0 0 40px rgba(0,0,0,.6);}
+  #p2posrail.open{transform:translateX(0);}
+  .p2posr-burger{display:flex;}
+  body.p2posr-open .p2posr-scrim{display:block;}
+}
