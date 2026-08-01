@@ -258,3 +258,10 @@ Categories locked: general·intro·wins·help·testimonial·announce (announce=a
 - **members.js:** publishes tierNum (P2P.tier().index).
 - **DEFERRED (next chunks):** full post-detail modal (click post opens big view w/ comment composer), follow-a-user + hover profile card, engagement points+caps+cooldown, Cloudflare R2 real uploads + PDF scroll, live Giphy search UI (needs free key), 600-post house vaults (150×4).
 - Perf note: GET still loads all posts then filters in-worker; fine for hundreds. Add per-channel index before thousands.
+
+## 2026-08-01 (later 4) — edit/delete, garble fix, gold polish, Trusted Guide logo
+NEEDS worker re-paste (620 lines) for edit/delete + charset.
+- **Edit/Delete:** worker `postmod` (author edit / author+admin delete) + `commentmod` (author edit / author+admin+postOwner delete). GET now returns `owner` per post+comment and stops leaking comment author ids. Frontend: ⋯ menu on posts & comments (Edit/Delete/Report), inline comment edit, edit-post modal, "· edited" flag. Report moved into the ⋯ menu.
+- **Garbled category text fix:** category emoji AND label now sourced from the UTF-8 JS file (CATS) not the JSON; worker json() now sends `charset=utf-8` (root fix for the `•` bullets in "Wins • Habits • Growth" on some devices).
+- **Gold polish:** spotlight + Recent-Wins gold outline/glow fixed (specificity was overridden by `.osx-side-card`; now `.osx-side-card.osx-wins-card` + stronger). Invite button now filled gold (Members stays ghost).
+- **Trusted Guide logo:** new transparent grayscale tree/fingerprint art `assets/p2p-trusted-guide.png` (592x1526, sheep is black → invisible on dark bg by design). Hero mark swapped to it (`.osx-tg-mark`, drop-shadow glow). A glowing `.osx-tlogo` is injected before the first `.osx-h2` of every `.osx-view` via inline script — glow uses `--gold-bright` so it follows the recolor. Recolor var confirmed: recolor writes Stand Out hue into `--gold`/`--gold-bright`/`--gstroke`/`--aurora` (p2p-os.liquid ~line 1707+).
