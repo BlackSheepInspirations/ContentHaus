@@ -34,8 +34,11 @@
 </div>
 
 {% if ch_has_access %}
-  {% render 'p2p-os-rail', current: 'project', push: '#product-haus-app' %}
+  <div class="p2posr-shell">
+  {% render 'p2p-os-rail', current: 'project' %}
+  <div class="p2posr-main">
   <div id="product-haus-app" data-section-id="{{ section.id }}"></div>
+  </div></div>
 
   <script src="{{ 'product-haus-util.js' | asset_url }}" defer="defer"></script>
   <script src="{{ 'product-haus-engine.js' | asset_url }}" defer="defer"></script>

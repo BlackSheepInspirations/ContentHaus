@@ -1,11 +1,19 @@
 /* Purpose 2 Profit — shared member rail (OS sidebar on every page).
    Rendered by snippets/p2p-os-rail.liquid. Scoped to #p2posrail so it never
    collides with a host page's own styles. The bell markup reuses the OS's
-   .osx-bell* class names because assets/p2p-community.js builds those. */
+   .osx-bell* class names because assets/p2p-community.js builds those.
+
+   Layout: the host section wraps [rail][content] in .p2posr-shell (flex), so the
+   rail is an in-flow column that sits BELOW the theme header (like the OS
+   sidebar) instead of a fixed overlay. Sticky keeps it visible while the tool
+   scrolls. On mobile it collapses to an off-canvas drawer (burger). */
+.p2posr-shell{display:flex;align-items:flex-start;}
+.p2posr-main{flex:1 1 0%;min-width:0;}
 #p2posrail{
   --text:#e7efeb;--muted:#8aa0a6;--gold:#c9a24a;--gold-bright:#f4c534;
   --stroke:rgba(255,255,255,.09);--gstroke:rgba(216,180,90,.38);--side:#081119;
-  position:fixed;top:0;left:0;width:264px;height:100vh;z-index:40;
+  flex:0 0 264px;width:264px;position:sticky;top:0;align-self:flex-start;
+  height:100vh;max-height:100vh;z-index:10;
   box-sizing:border-box;padding:20px 14px;display:flex;flex-direction:column;gap:8px;
   background:linear-gradient(180deg,var(--side),#060d14);border-right:1px solid var(--stroke);
   overflow-y:auto;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
@@ -61,7 +69,8 @@
 .p2posr-scrim{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:39;}
 
 @media(max-width:999px){
-  #p2posrail{transform:translateX(-100%);transition:transform .25s ease;box-shadow:0 0 40px rgba(0,0,0,.6);}
+  .p2posr-shell{display:block;}
+  #p2posrail{position:fixed;top:0;left:0;height:100%;max-height:none;flex:none;width:264px;z-index:40;transform:translateX(-100%);transition:transform .25s ease;box-shadow:0 0 40px rgba(0,0,0,.6);}
   #p2posrail.open{transform:translateX(0);}
   .p2posr-burger{display:flex;}
   body.p2posr-open .p2posr-scrim{display:block;}
