@@ -9,7 +9,7 @@
   var feed = root.querySelector('[data-cw-feed]');
   var winsFeed = root.querySelector('[data-wins-feed]');
   var posts = [], winPosts = [], winIdx = 0, winTimer = null, welcomeProfileDone = false, wowPost = null, isAdmin = false, catList = null, memberMap = {}, didDeepLink = false;
-  var filter = { category: 'all', range: 'all', sort: 'new', q: '', offset: 0, limit: 20, hasMore: false };
+  var filter = { category: 'all', range: 'all', sort: 'new', q: '', offset: 0, limit: 30, hasMore: false, page: 1, total: 0 };
   var CATS = { general: { label: 'General Discussion', emoji: '💬' }, intro: { label: 'Introductions', emoji: '👋' }, wins: { label: 'Wins • Habits • Growth', emoji: '🏆' }, help: { label: 'Questions & Help', emoji: '🙏' }, testimonial: { label: 'Testimonials', emoji: '🙌' }, announce: { label: 'P2P Announcements', emoji: '📣' } };
   function catMeta(k) { return (catList && catList.filter(function (x) { return x.key === k; })[0]) || CATS[k] || null; }
   function catLabel(k) { return (CATS[k] && CATS[k].label) || (catMeta(k) && catMeta(k).label) || ''; }
@@ -182,7 +182,7 @@
   function deletePost(id) {
     if (!window.confirm('Delete this post? This can\'t be undone.')) return;
     fetch('/apps/p2p/postmod', { method: 'POST', headers: { 'content-type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify({ id: id, action: 'delete' }) })
-      .then(function (r) { return r.json(); }).then(function (res) { if (res && res.ok) { load(false); loadWins(); } }).catch(function () {});
+      .then(function (r) { return r.json(); }).then(function (res) { if (res && res.ok) { load(); loadWins(); } }).catch(function () {});
   }
   function openEditPost(id) {
     var p = findPost(id); if (!p) return;
@@ -203,7 +203,7 @@
       var text = (bI.value || '').trim(); if (!text) return;
       saveB.disabled = true; saveB.textContent = 'Saving…';
       fetch('/apps/p2p/postmod', { method: 'POST', headers: { 'content-type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify({ id: id, action: 'edit', title: (tI.value || '').trim(), text: text }) })
-        .then(function (r) { return r.json(); }).then(function (res) { if (res && res.ok) { close(); load(false); loadWins(); } else { saveB.disabled = false; saveB.textContent = 'Save'; } })
+        .then(function (r) { return r.json(); }).then(function (res) { if (res && res.ok) { close(); load(); loadWins(); } else { saveB.disabled = false; saveB.textContent = 'Save'; } })
         .catch(function () { saveB.disabled = false; saveB.textContent = 'Save'; });
     });
     setTimeout(function () { bI.focus(); }, 40);
@@ -211,18 +211,18 @@
   function deleteComment(pid, cid) {
     if (!window.confirm('Delete this comment?')) return;
     fetch('/apps/p2p/commentmod', { method: 'POST', headers: { 'content-type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify({ id: pid, cid: cid, action: 'delete' }) })
-      .then(function (r) { return r.json(); }).then(function (res) { if (res && res.ok) load(false); }).catch(function () {});
+      .then(function (r) { return r.json(); }).then(function (res) { if (res && res.ok) load(); }).catch(function () {});
   }
   function openEditComment(pid, cid) {
     var el = document.querySelector('[data-cm-item="' + cid + '"] .osx-cm-text'); if (!el) return;
     var old = el.textContent;
     el.innerHTML = '<textarea class="osx-cm-edit" maxlength="600"></textarea><div class="osx-cm-erow"><button type="button" class="osx-cm-ecancel">Cancel</button><button type="button" class="osx-cm-esave">Save</button></div>';
     var ta = el.querySelector('.osx-cm-edit'); ta.value = old; ta.focus();
-    el.querySelector('.osx-cm-ecancel').addEventListener('click', function () { load(false); });
+    el.querySelector('.osx-cm-ecancel').addEventListener('click', function () { load(); });
     el.querySelector('.osx-cm-esave').addEventListener('click', function () {
       var text = (ta.value || '').trim(); if (!text) return;
       fetch('/apps/p2p/commentmod', { method: 'POST', headers: { 'content-type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify({ id: pid, cid: cid, action: 'edit', text: text }) })
-        .then(function (r) { return r.json(); }).then(function (res) { if (res && res.ok) load(false); }).catch(function () {});
+        .then(function (r) { return r.json(); }).then(function (res) { if (res && res.ok) load(); }).catch(function () {});
     });
   }
   function confetti() {
@@ -474,30 +474,55 @@
       localStorage.setItem('p2p_comm_seen', String(newest));
     } catch (e) {}
   }
-  function load(append) {
-    var offset = append ? filter.offset : 0;
-    var moreBtn = root.querySelector('[data-loadmore]');
-    if (moreBtn) moreBtn.disabled = true;
+  function pageCount() { return Math.max(1, Math.ceil((filter.total || 0) / filter.limit)); }
+  function load() {
+    var offset = (filter.page - 1) * filter.limit;
     fetch(buildQuery(offset), { credentials: 'same-origin' })
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (j) {
-        if (moreBtn) moreBtn.disabled = false;
-        if (j && j.guest) { stopTimer(); if (feed) feed.innerHTML = empty('Log in to see and share with the community.'); return; }
-        if (!j) { if (feed && !append) feed.innerHTML = empty('Couldn\'t load the wall just now — try again in a moment.'); return; }
+        if (j && j.guest) { stopTimer(); if (feed) feed.innerHTML = empty('Log in to see and share with the community.'); renderPager(); return; }
+        if (!j) { if (feed) feed.innerHTML = empty('Couldn\'t load the wall just now — try again in a moment.'); return; }
         if (j.categories) { catList = j.categories; renderTabs(); }
         isAdmin = !!j.isAdmin;
         wowPost = j.wowPost || null;
         syncEngage(j.engageTotal);
-        var page = j.posts || [];
-        posts = append ? posts.concat(page) : page;
-        filter.offset = offset + page.length;
+        posts = j.posts || [];
+        filter.total = j.total || 0;
         filter.hasMore = !!j.hasMore;
-        render();
+        if (filter.page > pageCount()) { filter.page = pageCount(); }   // e.g. after a block/delete shrank the list
+        render(); renderPager();
         updateSeen();
-        if (!append && !didDeepLink) { didDeepLink = true; try { var dp = new URLSearchParams(location.search).get('post'); if (dp && findPost(dp)) openPostModal(dp); } catch (e) {} }
-        var mb = root.querySelector('[data-loadmore]'); if (mb) mb.hidden = !filter.hasMore;
+        if (!didDeepLink) { didDeepLink = true; try { var dp = new URLSearchParams(location.search).get('post'); if (dp && findPost(dp)) openPostModal(dp); } catch (e) {} }
       })
-      .catch(function () { var mb = root.querySelector('[data-loadmore]'); if (mb) mb.disabled = false; if (feed && !append) feed.innerHTML = empty('Couldn\'t load the wall just now — try again in a moment.'); });
+      .catch(function () { if (feed) feed.innerHTML = empty('Couldn\'t load the wall just now — try again in a moment.'); });
+  }
+  function goPage(n) {
+    var pc = pageCount(); n = Math.max(1, Math.min(n, pc)); if (n === filter.page) return;
+    filter.page = n; load();
+    if (feed && feed.scrollIntoView) feed.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  function renderPager() {
+    var pager = root.querySelector('[data-cw-pager]'); if (!pager) return;
+    var pc = pageCount(), cur = filter.page;
+    if (pc <= 1) { pager.innerHTML = ''; pager.hidden = true; return; }
+    pager.hidden = false;
+    function btn(n, label, cls, dis) { return '<button type="button" class="osx-pg-b' + (cls ? ' ' + cls : '') + (n === cur ? ' on' : '') + '"' + (dis ? ' disabled' : '') + ' data-pg="' + n + '">' + (label || n) + '</button>'; }
+    var nums = [], set = {};
+    [1, pc, cur, cur - 1, cur + 1].forEach(function (n) { if (n >= 1 && n <= pc) set[n] = 1; });
+    Object.keys(set).map(Number).sort(function (a, b) { return a - b; }).forEach(function (n, i, arr) {
+      if (i > 0 && n - arr[i - 1] > 1) nums.push('<span class="osx-pg-gap">…</span>');
+      nums.push(btn(n));
+    });
+    pager.innerHTML =
+      btn(cur - 1, '‹', 'nav', cur <= 1) +
+      nums.join('') +
+      btn(cur + 1, '›', 'nav', cur >= pc) +
+      '<span class="osx-pg-jump">Go to <input type="number" min="1" max="' + pc + '" data-pg-input value="' + cur + '" aria-label="Jump to page"><button type="button" class="osx-pg-go" data-pg-go>Go</button></span>';
+    pager.querySelectorAll('[data-pg]').forEach(function (b) { b.addEventListener('click', function () { goPage(parseInt(b.getAttribute('data-pg'), 10) || 1); }); });
+    var inp = pager.querySelector('[data-pg-input]'), go = pager.querySelector('[data-pg-go]');
+    function jump() { goPage(parseInt(inp.value, 10) || 1); }
+    if (go) go.addEventListener('click', jump);
+    if (inp) inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); jump(); } });
   }
   function loadWins() {
     fetch(PROXY + '?category=wins&limit=8', { credentials: 'same-origin' })
@@ -609,16 +634,15 @@
     tabsEl.innerHTML = '<button class="osx-cat-tab' + (filter.category === 'all' ? ' on' : '') + '" data-cat="all">All</button>' +
       cats.map(function (c) { return '<button class="osx-cat-tab' + (filter.category === c.key ? ' on' : '') + '" data-cat="' + c.key + '">' + esc(catEmoji(c.key)) + ' ' + esc(catLabel(c.key)) + '</button>'; }).join('');
     tabsEl.querySelectorAll('[data-cat]').forEach(function (b) {
-      b.addEventListener('click', function () { filter.category = b.getAttribute('data-cat'); filter.offset = 0; renderTabs(); load(false); });
+      b.addEventListener('click', function () { filter.category = b.getAttribute('data-cat'); filter.page = 1; renderTabs(); load(); });
     });
   }
 
   /* ---- search + sort ---- */
   var searchEl = root.querySelector('[data-search]'), sortEl = root.querySelector('[data-sort]'), searchT = null;
-  if (searchEl) searchEl.addEventListener('input', function () { clearTimeout(searchT); searchT = setTimeout(function () { filter.q = searchEl.value.trim(); filter.offset = 0; load(false); }, 350); });
-  if (sortEl) sortEl.addEventListener('change', function () { var v = sortEl.value.split('|'); filter.sort = v[0]; filter.range = v[1] || 'all'; filter.offset = 0; load(false); });
-  var moreBtnEl = root.querySelector('[data-loadmore]');
-  if (moreBtnEl) moreBtnEl.addEventListener('click', function () { load(true); });
+  if (searchEl) searchEl.addEventListener('input', function () { clearTimeout(searchT); searchT = setTimeout(function () { filter.q = searchEl.value.trim(); filter.page = 1; load(); }, 350); });
+  if (sortEl) sortEl.addEventListener('change', function () { var v = sortEl.value.split('|'); filter.sort = v[0]; filter.range = v[1] || 'all'; filter.page = 1; load(); });
+  /* pagination replaces the old load-more button; controls render into [data-cw-pager] */
 
   /* ---- pop-up rich composer ---- */
   var composeAv = root.querySelector('[data-compose-av]');
@@ -720,7 +744,7 @@
       fetch(PROXY, { method: 'POST', headers: { 'content-type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify({ text: text || ' ', title: ttl, category: catSel.value, attachments: atts, kind: 'post', name: window.P2P_MEMBER_NAME || '', streak: myStreak() }) })
         .then(function (r) { return r.json(); })
         .then(function (res) {
-          if (res && res.ok) { try { localStorage.setItem('p2p_wc_hello', '1'); } catch (e) {} if (res.engage) handleEngage(res.engage); close(); if (filter.category !== 'all' && filter.category !== catSel.value) filter.category = catSel.value; filter.offset = 0; renderTabs(); load(false); loadWins(); }
+          if (res && res.ok) { try { localStorage.setItem('p2p_wc_hello', '1'); } catch (e) {} if (res.engage) handleEngage(res.engage); close(); if (filter.category !== 'all' && filter.category !== catSel.value) filter.category = catSel.value; filter.page = 1; renderTabs(); load(); loadWins(); }
           else { postB.disabled = false; postB.textContent = 'Post'; }
         })
         .catch(function () { postB.disabled = false; postB.textContent = 'Post'; });
@@ -736,7 +760,7 @@
     winShare.disabled = true; winShare.textContent = 'Sharing…';
     fetch(PROXY, { method: 'POST', headers: { 'content-type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify({ text: t, kind: 'win', name: window.P2P_MEMBER_NAME || '', streak: myStreak() }) })
       .then(function (r) { return r.json(); })
-      .then(function (res) { winShare.disabled = false; winShare.textContent = 'Share win'; if (res && res.ok) { winText.value = ''; if (winBox) winBox.hidden = true; try { localStorage.setItem('p2p_wc_win', '1'); } catch (e) {} if (res.engage) handleEngage(res.engage); confetti(); load(false); loadWins(); } })
+      .then(function (res) { winShare.disabled = false; winShare.textContent = 'Share win'; if (res && res.ok) { winText.value = ''; if (winBox) winBox.hidden = true; try { localStorage.setItem('p2p_wc_win', '1'); } catch (e) {} if (res.engage) handleEngage(res.engage); confetti(); load(); loadWins(); } })
       .catch(function () { winShare.disabled = false; winShare.textContent = 'Share win'; });
   });
 
@@ -787,7 +811,7 @@
     profEl.addEventListener('mouseleave', function () { if (!profPinned) profHideT = setTimeout(function () { hideProf(false); }, 200); });
     profEl.querySelectorAll('[data-extlink]').forEach(function (a) { a.addEventListener('click', function (ev) { ev.preventDefault(); ev.stopPropagation(); if (window.P2P_EXT_CONFIRM) window.P2P_EXT_CONFIRM(a.getAttribute('data-extlink')); }); });
     var vb = profEl.querySelector('[data-profview]');
-    if (vb) vb.addEventListener('click', function () { var q = vb.getAttribute('data-profview'); filter.q = q; filter.offset = 0; if (searchEl) searchEl.value = q; renderTabs(); load(false); hideProf(true); if (feed && feed.scrollIntoView) feed.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+    if (vb) vb.addEventListener('click', function () { var q = vb.getAttribute('data-profview'); filter.q = q; filter.page = 1; if (searchEl) searchEl.value = q; renderTabs(); load(); hideProf(true); if (feed && feed.scrollIntoView) feed.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
     placeProf(anchor);
   }
   root.addEventListener('mouseover', function (e) {
@@ -811,10 +835,10 @@
   window.addEventListener('scroll', function () { if (profEl && !profPinned) hideProf(true); }, true);
   window.P2P_OPEN_POST = function (id) { return openPostModal(id); };
   window.P2P_COMMUNITY_RERENDER = function () { try { render(); } catch (e) {} };
-  window.P2P_COMMUNITY_SEARCH = function (q) { filter.q = String(q || ''); filter.category = 'all'; filter.offset = 0; if (searchEl) searchEl.value = filter.q; renderTabs(); load(false); if (feed && feed.scrollIntoView) feed.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+  window.P2P_COMMUNITY_SEARCH = function (q) { filter.q = String(q || ''); filter.category = 'all'; filter.page = 1; if (searchEl) searchEl.value = filter.q; renderTabs(); load(); if (feed && feed.scrollIntoView) feed.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
 
   document.addEventListener('click', closeMenus);
-  renderTabs(); load(false); loadWins(); loadMembersData();
+  renderTabs(); load(); loadWins(); loadMembersData();
 })();
 
 /* ---- Help us be better — private suggestions/questions/kudos (emails the team) ---- */

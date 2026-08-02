@@ -482,7 +482,7 @@
                 </div>
               </div>
               <div class="osx-cw-feed" data-cw-feed><div class="osx-cw-empty">Loading the wall…</div></div>
-              <button class="osx-loadmore" type="button" data-loadmore hidden>Load more ▾</button>
+              <div class="osx-cw-pager" data-cw-pager hidden></div>
             </div>
           </div>
           <aside class="osx-comm-side">
@@ -1448,8 +1448,17 @@
   #p2pos .osx-search-ic{opacity:.6;font-size:12px;}
   #p2pos .osx-search{flex:1;min-width:0;background:none;border:0;outline:none;color:var(--text);font:400 13px/1.2 system-ui;}
   #p2pos .osx-sort{border:1px solid var(--stroke);border-radius:999px;background:rgba(9,17,24,.5);color:var(--text);font:600 12.5px/1 system-ui;padding:8px 12px;cursor:pointer;}
-  #p2pos .osx-loadmore{display:block;margin:16px auto 0;border:1px solid var(--gstroke);background:rgba(216,180,90,.1);color:var(--gold-bright);cursor:pointer;border-radius:999px;padding:10px 22px;font:700 13px/1 system-ui;}
-  #p2pos .osx-loadmore:hover{background:rgba(216,180,90,.18);}
+  #p2pos .osx-cw-pager{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px;margin:20px 0 4px;}
+  #p2pos .osx-pg-b{min-width:34px;height:34px;padding:0 9px;border:1px solid var(--stroke);background:rgba(255,255,255,.03);color:var(--text);border-radius:9px;font:700 13px/1 system-ui;cursor:pointer;transition:.14s;}
+  #p2pos .osx-pg-b:hover:not([disabled]){border-color:var(--gstroke);}
+  #p2pos .osx-pg-b.on{background:linear-gradient(100deg,rgba(216,180,90,.2),rgba(143,111,214,.14));border-color:var(--gstroke);color:#fff;}
+  #p2pos .osx-pg-b[disabled]{opacity:.4;cursor:default;}
+  #p2pos .osx-pg-b.nav{font-size:16px;}
+  #p2pos .osx-pg-gap{color:var(--muted);padding:0 2px;}
+  #p2pos .osx-pg-jump{display:inline-flex;align-items:center;gap:6px;margin-left:8px;font:600 12px/1 system-ui;color:var(--muted);}
+  #p2pos .osx-pg-jump input{width:52px;height:34px;text-align:center;background:rgba(9,17,24,.5);border:1px solid var(--stroke);border-radius:9px;color:var(--text);font:600 13px/1 system-ui;}
+  #p2pos .osx-pg-go{height:34px;padding:0 12px;border:1px solid var(--gstroke);background:rgba(216,180,90,.1);color:var(--gold-bright);border-radius:9px;font:700 12px/1 system-ui;cursor:pointer;}
+  @media (max-width:560px){#p2pos .osx-pg-jump{width:100%;justify-content:center;margin:6px 0 0;}}
   /* post header w/ avatar + tier + category */
   #p2pos .osx-cw-head{display:flex;align-items:flex-start;gap:11px;margin-bottom:9px;}
   #p2pos .osx-pa{position:relative;flex:none;width:40px;height:40px;border-radius:50%;overflow:visible;display:flex;align-items:center;justify-content:center;font:800 16px/1 Georgia,serif;color:var(--gold-bright);background:radial-gradient(circle at 50% 30%,#2a3b52,#12202b);border:1px solid var(--gstroke);}
