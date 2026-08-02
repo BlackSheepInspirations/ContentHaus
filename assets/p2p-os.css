@@ -486,12 +486,18 @@
   #p2pos .osx-comm-main .osx-cw{max-width:none;border:1px solid var(--stroke);border-radius:18px;background:rgba(255,255,255,.03);padding:16px;flex:1;display:flex;flex-direction:column;}
   #p2pos .osx-cw-top{display:flex;gap:16px;align-items:stretch;margin-bottom:16px;}
   #p2pos .osx-comm-main .osx-cw-compose{flex:1.7;min-width:0;border:0;background:none;padding:0;margin-bottom:0;}
-  #p2pos .osx-cw-top .osx-spot{flex:1;min-width:0;border:1px solid var(--stroke);border-radius:14px;background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(9,17,24,.35));padding:14px;}
+  /* Win of the Week + Member Spotlight — one row under Welcome, above the composer.
+     Flex so a single visible card fills the width; two split it evenly. */
+  #p2pos .osx-comm-topcards{display:flex;flex-wrap:wrap;gap:16px;align-items:stretch;margin:0 0 16px;}
+  #p2pos .osx-comm-topcards > *{flex:1 1 240px;min-width:0;}
+  #p2pos .osx-comm-topcards .osx-spot{border:1px solid var(--stroke);border-radius:14px;background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(9,17,24,.35));padding:14px;}
+  #p2pos .osx-comm-topcards .osx-spot .osx-spot-body{flex-direction:column;align-items:flex-start;gap:10px;margin-top:10px;}
+  #p2pos .osx-wotw-slot{display:flex;}
+  #p2pos .osx-wotw-slot .osx-wow{flex:1;margin:0;}
   /* gold framing + soft glow on the spotlight & recent-wins cards */
-  #p2pos .osx-cw-top .osx-spot,
+  #p2pos .osx-comm-topcards .osx-spot,
   #p2pos .osx-side-card.osx-wins-card{border:1.5px solid var(--gstroke);box-shadow:0 0 0 1px rgba(216,180,90,.22),0 0 26px rgba(216,180,90,.22);}
-  #p2pos .osx-cw-top .osx-spot .osx-spot-body{flex-direction:column;align-items:flex-start;gap:10px;margin-top:10px;}
-  @media (max-width:640px){#p2pos .osx-cw-top{flex-direction:column;}}
+  @media (max-width:640px){#p2pos .osx-cw-top{flex-direction:column;}#p2pos .osx-comm-topcards > *{flex:1 1 100%;}}
   #p2pos .osx-comm-side{flex:0 0 258px;display:flex;flex-direction:column;gap:16px;}
   #p2pos .osx-comm-counts{display:flex;gap:12px;}
   #p2pos .osx-comm-count{flex:1;border:1px solid var(--stroke);border-radius:14px;background:rgba(255,255,255,.03);padding:14px 10px;text-align:center;cursor:pointer;transition:.15s;}

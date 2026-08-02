@@ -7,6 +7,7 @@
   var wrap = root.querySelector('[data-cw]');
   var PROXY = '/apps/p2p/community', REACT = '/apps/p2p/react', MEMBERS = '/apps/p2p/members';
   var feed = root.querySelector('[data-cw-feed]');
+  var wotwSlot = root.querySelector('[data-wotw-slot]');
   var winsFeed = root.querySelector('[data-wins-feed]');
   var posts = [], winPosts = [], winIdx = 0, winTimer = null, welcomeProfileDone = false, wowPost = null, isAdmin = false, catList = null, memberMap = {}, didDeepLink = false, gbRange = 'all', lastMembers = [];
   var filter = { category: 'all', range: 'all', sort: 'new', q: '', offset: 0, limit: 30, hasMore: false, page: 1, total: 0 };
@@ -337,15 +338,10 @@
     if (filter.category !== 'all') return 'Nothing in this channel yet — start the conversation. 👋';
     return 'Nothing here yet — be the first to say hello. 👋';
   }
-  function renderWall() {
-    if (!feed) return;
-    var list = (wowPost ? posts.filter(function (p) { return p.id !== wowPost.id; }) : posts).filter(function (p) { return !isBlockedName(p.name); });
-    var wp = (wowPost && !isBlockedName(wowPost.name)) ? wowPost : null;
-    if (!list.length && !wp) { feed.innerHTML = empty(emptyMsg()); return; }
-    feed.innerHTML = (wp ? wowHTML(wp) : '') + list.map(postHTML).join('');
-    wireReacts(feed); wireComments(feed);
-    feed.querySelectorAll('[data-lightbox]').forEach(function (im) { im.addEventListener('click', function () { openLightbox(im.getAttribute('data-lightbox')); }); });
-    feed.querySelectorAll('[data-pin]').forEach(function (b) {
+  function wirePosts(container) {
+    wireReacts(container); wireComments(container);
+    container.querySelectorAll('[data-lightbox]').forEach(function (im) { im.addEventListener('click', function () { openLightbox(im.getAttribute('data-lightbox')); }); });
+    container.querySelectorAll('[data-pin]').forEach(function (b) {
       b.addEventListener('click', function () {
         var id = b.getAttribute('data-pin');
         var post = posts.filter(function (p) { return p.id === id; })[0];
@@ -355,24 +351,40 @@
           .catch(function () { b.disabled = false; });
       });
     });
-    feed.querySelectorAll('[data-more]').forEach(function (b) {
+    container.querySelectorAll('[data-more]').forEach(function (b) {
       b.addEventListener('click', function () {
         var t = b.previousElementSibling; if (!t) return;
         t.classList.toggle('clamp');
         b.textContent = t.classList.contains('clamp') ? 'Read more ▾' : 'Show less ▴';
       });
     });
-    wireMenus(feed);
-    feed.querySelectorAll('[data-pedit]').forEach(function (b) { b.addEventListener('click', function () { openEditPost(b.getAttribute('data-pedit')); }); });
-    feed.querySelectorAll('[data-pdel]').forEach(function (b) { b.addEventListener('click', function () { deletePost(b.getAttribute('data-pdel')); }); });
-    feed.querySelectorAll('[data-preport]').forEach(function (b) { b.addEventListener('click', function () { reportPost(b.getAttribute('data-preport'), b); }); });
-    feed.querySelectorAll('[data-post]').forEach(function (card) {
+    wireMenus(container);
+    container.querySelectorAll('[data-pedit]').forEach(function (b) { b.addEventListener('click', function () { openEditPost(b.getAttribute('data-pedit')); }); });
+    container.querySelectorAll('[data-pdel]').forEach(function (b) { b.addEventListener('click', function () { deletePost(b.getAttribute('data-pdel')); }); });
+    container.querySelectorAll('[data-preport]').forEach(function (b) { b.addEventListener('click', function () { reportPost(b.getAttribute('data-preport'), b); }); });
+    container.querySelectorAll('[data-post]').forEach(function (card) {
       card.style.cursor = 'pointer';
       card.addEventListener('click', function (e) {
         if (e.target.closest('button, a, input, textarea, select, .osx-menu, .osx-menu-pop, .osx-att-img, .osx-att-yt, .osx-cm')) return;
         openPostModal(card.getAttribute('data-post'));
       });
     });
+  }
+  function renderWall() {
+    if (!feed) return;
+    var list = (wowPost ? posts.filter(function (p) { return p.id !== wowPost.id; }) : posts).filter(function (p) { return !isBlockedName(p.name); });
+    var wp = (wowPost && !isBlockedName(wowPost.name)) ? wowPost : null;
+    // Win of the Week → its own card up top (beside Member Spotlight) when the slot exists,
+    // otherwise it stays pinned to the top of the feed (other embeds without the slot).
+    var inlineWp = wp;
+    if (wotwSlot) {
+      inlineWp = null;
+      if (wp) { wotwSlot.innerHTML = wowHTML(wp); wotwSlot.hidden = false; wirePosts(wotwSlot); }
+      else { wotwSlot.innerHTML = ''; wotwSlot.hidden = true; }
+    }
+    if (!list.length && !inlineWp) { feed.innerHTML = empty(emptyMsg()); return; }
+    feed.innerHTML = (inlineWp ? wowHTML(inlineWp) : '') + list.map(postHTML).join('');
+    wirePosts(feed);
   }
   function wireComments(container) {
     container.querySelectorAll('[data-cedit]').forEach(function (b) { b.addEventListener('click', function () { var pr = b.getAttribute('data-cedit').split('|'); openEditComment(pr[0], pr[1]); }); });
