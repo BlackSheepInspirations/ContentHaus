@@ -592,23 +592,23 @@
               <div class="osx-mb-avatars" data-mb-avatars></div>
             </div>
             <div class="osx-mb-field"><span>…or upload your photo <em>(a photo overrides the avatar above)</em></span>
-              <div class="osx-mb-upload">
+              <div class="osx-mb-upload" data-mb-upzone>
                 <img class="osx-mb-uppreview" data-mb-uppreview alt="" hidden>
                 <button type="button" class="osx-mb-upbtn" data-mb-upbtn>📷 Choose a photo</button>
                 <input type="file" accept="image/*" data-mb-upfile hidden>
-                <span class="osx-mb-upstatus" data-mb-upstatus></span>
+                <span class="osx-mb-upstatus" data-mb-upstatus>or drag &amp; drop a photo here</span>
               </div>
               <input type="url" data-mb-photo class="osx-mb-photourl" placeholder="or paste an image URL (advanced)">
             </div>
             <label class="osx-mb-field"><span>A short quote</span><input type="text" data-mb-quote maxlength="140" placeholder="Your words to live by (optional)"></label>
             <label class="osx-mb-field"><span>About me</span><textarea data-mb-about maxlength="320" rows="3" placeholder="A little about you (optional)"></textarea></label>
             <div class="osx-mb-socialgrid">
-              <label class="osx-mb-field"><span>Website</span><input type="url" data-mb-social="website" placeholder="https://…"></label>
-              <label class="osx-mb-field"><span>Instagram</span><input type="url" data-mb-social="instagram"></label>
-              <label class="osx-mb-field"><span>Facebook</span><input type="url" data-mb-social="facebook"></label>
-              <label class="osx-mb-field"><span>YouTube</span><input type="url" data-mb-social="youtube"></label>
-              <label class="osx-mb-field"><span>TikTok</span><input type="url" data-mb-social="tiktok"></label>
-              <label class="osx-mb-field"><span>LinkedIn</span><input type="url" data-mb-social="linkedin"></label>
+              <label class="osx-mb-field"><span>Website</span><input type="text" data-mb-social="website" placeholder="yoursite.com"></label>
+              <label class="osx-mb-field"><span>Instagram</span><input type="text" data-mb-social="instagram" placeholder="@handle or link"></label>
+              <label class="osx-mb-field"><span>Facebook</span><input type="text" data-mb-social="facebook" placeholder="@handle or link"></label>
+              <label class="osx-mb-field"><span>YouTube</span><input type="text" data-mb-social="youtube" placeholder="@handle or link"></label>
+              <label class="osx-mb-field"><span>TikTok</span><input type="text" data-mb-social="tiktok" placeholder="@handle or link"></label>
+              <label class="osx-mb-field"><span>LinkedIn</span><input type="text" data-mb-social="linkedin" placeholder="in/handle or link"></label>
             </div>
             <label class="osx-mb-field"><span>Email <em>(optional — a way for the flock to reach you)</em></span><input type="email" data-mb-email placeholder="you@example.com" autocomplete="off"></label>
             <label class="osx-mb-optout"><input type="checkbox" data-mb-showemail> Show an “✉️ Email me” button on my card <span class="osx-mb-hint">— stays hidden until someone taps it, and never appears in the directory list</span></label>
@@ -2032,7 +2032,8 @@
   #p2pos .osx-mb-saverow{display:flex;align-items:center;justify-content:flex-end;gap:12px;}
   #p2pos .osx-mb-status{font:600 12.5px/1.3 system-ui;color:var(--gold-bright);}
   #p2pos .osx-mb-status.err{color:#ff9e9e;}
-  #p2pos .osx-mb-upload{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+  #p2pos .osx-mb-upload{display:flex;align-items:center;gap:12px;flex-wrap:wrap;border:1px dashed var(--stroke);border-radius:12px;padding:12px;transition:border-color .14s,background .14s;}
+  #p2pos .osx-mb-upload.drag{border-color:var(--gold-bright);background:rgba(216,180,90,.12);}
   #p2pos .osx-mb-uppreview{width:56px;height:56px;border-radius:50%;object-fit:cover;border:2px solid var(--gstroke);flex:none;}
   #p2pos .osx-mb-upbtn{border:1px solid var(--gstroke);background:rgba(216,180,90,.1);color:var(--gold-bright);border-radius:10px;padding:10px 14px;font:700 13px/1 system-ui;cursor:pointer;}
   #p2pos .osx-mb-upbtn:hover{background:rgba(216,180,90,.2);}

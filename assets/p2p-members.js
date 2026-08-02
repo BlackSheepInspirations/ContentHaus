@@ -18,7 +18,7 @@
   var toolbar = { search: mb.querySelector('[data-mb-search]'), sort: mb.querySelector('[data-mb-sort]'), count: mb.querySelector('[data-mb-count]') };
   var nameEl = mb.querySelector('[data-mb-name]'), avGrid = mb.querySelector('[data-mb-avatars]'), avVal = { v: '' };
   var emailEl = mb.querySelector('[data-mb-email]'), showEmailEl = mb.querySelector('[data-mb-showemail]');
-  var upBtn = mb.querySelector('[data-mb-upbtn]'), upFile = mb.querySelector('[data-mb-upfile]'), upPreview = mb.querySelector('[data-mb-uppreview]'), upStatusEl = mb.querySelector('[data-mb-upstatus]');
+  var upBtn = mb.querySelector('[data-mb-upbtn]'), upFile = mb.querySelector('[data-mb-upfile]'), upPreview = mb.querySelector('[data-mb-uppreview]'), upStatusEl = mb.querySelector('[data-mb-upstatus]'), upZone = mb.querySelector('[data-mb-upzone]');
   var members = [], myProfile = null, searchVal = '', sortVal = 'points';
 
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
@@ -268,6 +268,11 @@
     upBtn.addEventListener('click', function () { upFile.click(); });
     upFile.addEventListener('change', function () { if (upFile.files && upFile.files[0]) handleUpload(upFile.files[0]); });
   }
+  if (upZone) {
+    ['dragenter', 'dragover'].forEach(function (ev) { upZone.addEventListener(ev, function (e) { e.preventDefault(); e.stopPropagation(); upZone.classList.add('drag'); }); });
+    ['dragleave', 'dragend'].forEach(function (ev) { upZone.addEventListener(ev, function (e) { e.preventDefault(); e.stopPropagation(); upZone.classList.remove('drag'); }); });
+    upZone.addEventListener('drop', function (e) { e.preventDefault(); e.stopPropagation(); upZone.classList.remove('drag'); var dt = e.dataTransfer; if (dt && dt.files && dt.files[0]) handleUpload(dt.files[0]); });
+  }
 
   /* ---- my profile ---- */
   function fillForm(p) {
@@ -283,9 +288,18 @@
     showPhotoPreview(p && !isPreset(p.photo) ? (p.photo || '') : '');
   }
   function myKey() { return String(stats().name || '').trim().toLowerCase(); }
+  // Accept a handle (@drea), a bare domain (yoursite.com), or a full link — always store a full https URL so it survives the server's URL check and links out cleanly.
+  function socialUrl(key, raw) {
+    raw = String(raw || '').trim(); if (!raw) return '';
+    if (/^https?:\/\//i.test(raw)) return raw.slice(0, 300);
+    raw = raw.replace(/^@+/, '').replace(/^\/+/, '');
+    if (raw.indexOf('.') > -1) return ('https://' + raw).slice(0, 300);   // looks like a domain
+    var base = { website: 'https://', instagram: 'https://instagram.com/', facebook: 'https://facebook.com/', youtube: 'https://youtube.com/@', tiktok: 'https://tiktok.com/@', linkedin: 'https://linkedin.com/' };
+    return ((base[key] || 'https://') + raw).slice(0, 300);
+  }
   function collect(hidden) {
     var s = stats(), social = {};
-    Object.keys(socialEls).forEach(function (k) { var v = (socialEls[k].value || '').trim(); if (v) social[k] = v; });
+    Object.keys(socialEls).forEach(function (k) { var v = socialUrl(k, socialEls[k].value); if (v) social[k] = v; });
     var url = (f.photo ? f.photo.value.trim() : '');
     var photo = url ? url : (avVal.v ? ('preset:' + avVal.v) : '');
     var nm = (nameEl && nameEl.value.trim()) || s.name;
