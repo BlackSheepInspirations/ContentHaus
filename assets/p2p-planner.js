@@ -38,7 +38,9 @@
   var LAUNCH_BADGES = [[1, 'First Launch'], [3, '3 Launches'], [5, '5 Launches'], [10, '10 Launches']];
   var GOAL_BADGES = [[1, 'First Goal Reached'], [3, '3 Goals Reached'], [5, '5 Goals Reached'], [10, '10 Goals Reached']];
   function milestoneCounts() {
-    var lives = data.lives.filter(function (l) { return l.done && !l.deleted; }).length;
+    // A live only counts once it has actually happened — a future-dated live (even if its card
+    // is filled in / marked done) must not award a "went live" badge yet. Canceled lives never count.
+    var lives = data.lives.filter(function (l) { return l.done && !l.deleted && !l.canceled && !(l.date && daysTo(l.date) > 0); }).length;
     var launches = data.products.filter(function (p) { return p.status === 'live'; }).length;
     var goals = data.goals.filter(function (g) { var r = g.roadmap || []; return r.length && r.every(function (x) { return (x.pct || 0) >= 100; }); }).length;
     return { lives: lives, launches: launches, goals: goals };
@@ -144,7 +146,7 @@
     var line = ''; if (vals.length > 1) { var max = Math.max.apply(null, vals) || 1, w = 160, h = 30, step = w / (vals.length - 1); line = '<svg class="osx-lag-line" viewBox="0 0 ' + w + ' ' + h + '" preserveAspectRatio="none"><polyline points="' + vals.map(function (v, i) { return (i * step).toFixed(1) + ',' + (h - (v / max) * (h - 2) - 1).toFixed(1); }).join(' ') + '" fill="none" stroke="#6b7d84" stroke-width="1.5"/></svg>'; }
     return '<div class="osx-lag"><div class="osx-lag-h">Lagging indicators <span>— not fully in your hands; the work above is what moves them</span></div><div class="osx-lag-row"><div class="osx-lag-s"><b>' + num(last.followers) + '</b><span>followers</span></div><div class="osx-lag-s"><b>' + num(last.likes) + '</b><span>likes</span></div><div class="osx-lag-s"><b>$' + num(last.revenue) + '</b><span>revenue</span></div>' + (line ? '<div class="osx-lag-linewrap">' + line + '</div>' : '') + '</div></div>';
   }
-  var TABS = [['dash', '📊 Dashboard', 'all'], ['goals', '🎯 Goals', 'all'], ['products', '📦 Products', 'product'], ['lives', '📡 Lives', 'content'], ['posts', '📝 Posts', 'content'], ['growth', '📈 Growth', 'all'], ['journal', '📓 Journal', 'all'], ['lists', '✅ Lists', 'all']];
+  var TABS = [['dash', '📊 Dashboard', 'all'], ['goals', '🎯 Goals', 'all'], ['products', '📦 Product Launch', 'product'], ['lives', '📡 Lives', 'content'], ['posts', '📝 Posts', 'content'], ['growth', '📈 Growth', 'all'], ['journal', '📓 Journal', 'all'], ['lists', '✅ Lists', 'all']];
   function tabShown(cat) { var ct = data.ctype || 'both'; if (cat === 'all') return true; if (cat === 'product') return ct !== 'content'; return ct !== 'product'; }
   function navHTML() {
     var vis = TABS.filter(function (t) { return tabShown(t[2]); });
