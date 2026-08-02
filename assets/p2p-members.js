@@ -15,12 +15,63 @@
     hidden: mb.querySelector('[data-mb-hidden]'), save: mb.querySelector('[data-mb-save]'), status: mb.querySelector('[data-mb-status]')
   };
   var socialEls = {}; mb.querySelectorAll('[data-mb-social]').forEach(function (el) { socialEls[el.getAttribute('data-mb-social')] = el; });
-  var members = [], myProfile = null;
+  var toolbar = { search: mb.querySelector('[data-mb-search]'), sort: mb.querySelector('[data-mb-sort]'), count: mb.querySelector('[data-mb-count]') };
+  var nameEl = mb.querySelector('[data-mb-name]'), avGrid = mb.querySelector('[data-mb-avatars]'), avVal = { v: '' };
+  var members = [], myProfile = null, searchVal = '', sortVal = 'points';
 
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function initial(n) { n = String(n || '').trim(); return n ? n.charAt(0).toUpperCase() : '🐑'; }
   function since(iso) { if (!iso) return ''; try { return 'Member since ' + new Date(iso).toLocaleDateString(undefined, { month: 'short', year: 'numeric' }); } catch (e) { return ''; } }
   function loc(p) { return [p.city, p.region || p.country].filter(Boolean).join(', '); }
+  /* ---- avatars: real photo, a chosen preset icon, or the name initial ---- */
+  var PRESETS = ['🐑','🦊','🦉','🐺','🐻','🐼','🐨','🦁','🐯','🦄','🐸','🐵','🦋','🐝','🦚','🦜','🐬','🦖','🐙','🦩','🌟','⚡','🔥','🌈','🎨','🚀','🌸','🍀','🎯','💎'];
+  window.P2P_PRESETS = PRESETS;
+  function isPreset(v) { return /^preset:/.test(String(v || '')); }
+  function avatarInner(p) {
+    var ph = (p && p.photo) || '';
+    if (isPreset(ph)) return '<span class="osx-mb-emoji">' + esc(ph.slice(7)) + '</span>';
+    if (ph) return '<img src="' + esc(ph) + '" alt="" loading="lazy" onerror="this.style.display=\'none\'">';
+    return '<span>' + esc(initial(p && p.name)) + '</span>';
+  }
+  /* ---- follow / favorite (local; server sync best-effort for cross-device + alerts) ---- */
+  function follows() { try { return JSON.parse(localStorage.getItem('p2p_follows') || '[]') || []; } catch (e) { return []; } }
+  function isFollowing(nm) { return follows().indexOf(String(nm || '').trim().toLowerCase()) > -1; }
+  function toggleFollow(nm) {
+    var k = String(nm || '').trim().toLowerCase(), s = follows(), i = s.indexOf(k), on = i === -1;
+    if (on) s.push(k); else s.splice(i, 1);
+    try { localStorage.setItem('p2p_follows', JSON.stringify(s)); } catch (e) {}
+    fetch('/apps/p2p/follow', { method: 'POST', headers: { 'content-type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify({ name: k, on: on }) }).catch(function () {});
+    return on;
+  }
+  /* ---- name safety (client pre-check; the worker is authoritative) ---- */
+  var NAME_BLOCK = /(f+u+c+k|sh[i1\*]t|b[i1]tch|c[u\*]nt|n[i1]gg|f[a4]gg|whore|\bslut\b|\brape\b|nazi|retard|\bcum\b|pussy|a[s\$]{2}hole|jizz|\bp2p ?team\b|\badmin\b|moderator)/i;
+  function nameProblem(nm, others) {
+    nm = String(nm || '').trim();
+    if (!nm) return 'Please enter a display name.';
+    if (nm.length < 2) return 'That name is too short.';
+    if (nm.length > 32) return 'Please keep it under 32 characters.';
+    if (!/[a-z0-9]/i.test(nm)) return 'Please use some letters or numbers.';
+    if (NAME_BLOCK.test(nm)) return 'That name isn’t allowed — please choose another.';
+    var low = nm.toLowerCase();
+    if ((others || []).some(function (o) { return String(o.name || '').trim().toLowerCase() === low; })) return 'That name is already taken — try another.';
+    return '';
+  }
+  /* ---- external-link confirm popup ---- */
+  function openExtConfirm(url) {
+    var host = ''; try { host = new URL(url).hostname.replace(/^www\./, ''); } catch (e) { host = url; }
+    var pop = document.createElement('div'); pop.className = 'osx-cal-pop';
+    pop.innerHTML = '<div class="osx-cal-pop-in osx-extc"><button class="osx-cal-pop-x" type="button" aria-label="Close">✕</button>' +
+      '<div class="osx-extc-h">Leaving Purpose 2 Profit</div>' +
+      '<p class="osx-extc-b">This opens an external site:<br><b>' + esc(host) + '</b></p>' +
+      '<div class="osx-extc-row"><button type="button" class="osx-extc-cancel">Stay here</button>' +
+      '<a class="osx-extc-go" href="' + esc(url) + '" target="_blank" rel="noopener nofollow">Open ' + esc(host) + ' ↗</a></div></div>';
+    root.appendChild(pop);
+    function close() { pop.remove(); }
+    pop.addEventListener('click', function (e) { if (e.target === pop) close(); });
+    pop.querySelector('.osx-cal-pop-x').addEventListener('click', close);
+    pop.querySelector('.osx-extc-cancel').addEventListener('click', close);
+    pop.querySelector('.osx-extc-go').addEventListener('click', function () { setTimeout(close, 60); });
+  }
   function badgeEmoji(name) {
     var n = String(name || '').toLowerCase();
     if (/streak|comeback/.test(n)) return '🔥';
@@ -51,33 +102,84 @@
   var SICON = { website: '🌐', instagram: '📷', facebook: '📘', youtube: '▶️', x: '✖', linkedin: 'in', tiktok: '🎵' };
   function socialHTML(social) {
     if (!social) return '';
-    var out = Object.keys(social).map(function (k) { return '<a href="' + esc(social[k]) + '" target="_blank" rel="noopener" title="' + k + '">' + (SICON[k] || '🔗') + '</a>'; }).join('');
+    var out = Object.keys(social).map(function (k) { return '<a href="' + esc(social[k]) + '" class="osx-mb-sociallink" data-extlink="' + esc(social[k]) + '" rel="noopener nofollow" title="' + esc(k) + '">' + (SICON[k] || '🔗') + '</a>'; }).join('');
     return out ? '<div class="osx-mb-social">' + out + '</div>' : '';
   }
   function cardHTML(p, compact) {
-    var av = p.photo
-      ? '<img src="' + esc(p.photo) + '" alt="" loading="lazy" onerror="this.style.display=\'none\'">'
-      : '<span>' + esc(initial(p.name)) + '</span>';
-    var l = loc(p);
-    return '<div class="osx-mb-card' + (compact ? ' compact' : '') + '">' +
-      '<div class="osx-mb-av">' + av + '</div>' +
-      '<div class="osx-mb-name">' + esc(p.name || 'Member') + '</div>' +
+    var l = loc(p), nm = p.name || 'Member', following = isFollowing(nm);
+    var bell = compact ? '' : '<button type="button" class="osx-mb-follow' + (following ? ' on' : '') + '" data-mb-follow="' + esc(nm) + '" title="' + (following ? 'Following — you’ll be alerted to their posts' : 'Follow to be alerted to their posts') + '">' + (following ? '🔔' : '🔕') + '</button>';
+    return '<div class="osx-mb-card' + (compact ? ' compact' : '') + '"' + (compact ? '' : ' data-mb-open="' + esc(nm) + '"') + '>' + bell +
+      '<div class="osx-mb-av">' + avatarInner(p) + '</div>' +
+      '<div class="osx-mb-name">' + esc(nm) + '</div>' +
       (p.tier ? '<div class="osx-mb-tier">' + esc(p.tier) + '</div>' : '') +
       '<div class="osx-mb-stat">' + (p.points || 0) + ' pts · ' + (p.badges || 0) + ' badges</div>' +
       (l ? '<div class="osx-mb-loc">📍 ' + esc(l) + '</div>' : '') +
       (p.since ? '<div class="osx-mb-since">' + esc(since(p.since)) + '</div>' : '') +
       (p.quote ? '<p class="osx-mb-quote">“' + esc(p.quote) + '”</p>' : '') +
       (!compact && p.about ? '<p class="osx-mb-about">' + esc(p.about) + '</p>' : '') +
-      socialHTML(p.social) +
+      (compact ? '' : socialHTML(p.social)) +
       '</div>';
   }
 
   /* ---- directory ---- */
+  function sortedFiltered() {
+    var q = searchVal.trim().toLowerCase(), out = members.slice();
+    if (q) out = out.filter(function (p) { return (String(p.name || '') + ' ' + loc(p)).toLowerCase().indexOf(q) > -1; });
+    out.sort(function (a, b) {
+      if (sortVal === 'newest') return (Date.parse(b.since || 0) || 0) - (Date.parse(a.since || 0) || 0);
+      if (sortVal === 'oldest') return (Date.parse(a.since || 0) || 0) - (Date.parse(b.since || 0) || 0);
+      if (sortVal === 'az') return String(a.name || '').localeCompare(String(b.name || ''));
+      if (sortVal === 'following') { var fa = isFollowing(a.name) ? 1 : 0, fb = isFollowing(b.name) ? 1 : 0; return (fb - fa) || ((b.points || 0) - (a.points || 0)); }
+      if (sortVal === 'engaged') return (b.engaged || b.points || 0) - (a.engaged || a.points || 0);
+      return (b.points || 0) - (a.points || 0);
+    });
+    return out;
+  }
+  function memberByName(nm) { var k = String(nm || '').trim().toLowerCase(); return members.filter(function (p) { return String(p.name || '').trim().toLowerCase() === k; })[0]; }
   function renderDirectory() {
     if (!grid) return;
-    if (!members.length) { grid.innerHTML = '<div class="osx-cw-empty">No members on the board yet — you might be the first! 🐑</div>'; return; }
-    var sorted = members.slice().sort(function (a, b) { return (b.points || 0) - (a.points || 0); });
-    grid.innerHTML = sorted.map(function (p) { return cardHTML(p, false); }).join('');
+    if (!members.length) { grid.innerHTML = '<div class="osx-cw-empty">No members on the board yet — you might be the first! 🐑</div>'; if (toolbar.count) toolbar.count.textContent = ''; return; }
+    var list = sortedFiltered();
+    if (toolbar.count) toolbar.count.textContent = members.length + (members.length === 1 ? ' member' : ' members');
+    grid.innerHTML = list.length ? list.map(function (p) { return cardHTML(p, false); }).join('') : '<div class="osx-cw-empty">No one matches “' + esc(searchVal) + '.”</div>';
+    wireCards();
+  }
+  function wireCards() {
+    grid.querySelectorAll('[data-mb-follow]').forEach(function (b) { b.addEventListener('click', function (e) { e.stopPropagation(); var on = toggleFollow(b.getAttribute('data-mb-follow')); b.classList.toggle('on', on); b.textContent = on ? '🔔' : '🔕'; b.title = on ? 'Following — you’ll be alerted to their posts' : 'Follow to be alerted to their posts'; if (sortVal === 'following') renderDirectory(); }); });
+    grid.querySelectorAll('[data-extlink]').forEach(function (a) { a.addEventListener('click', function (e) { e.preventDefault(); e.stopPropagation(); openExtConfirm(a.getAttribute('data-extlink')); }); });
+    grid.querySelectorAll('[data-mb-open]').forEach(function (c) { c.addEventListener('click', function (e) { if (e.target.closest('[data-mb-follow],[data-extlink]')) return; openMemberModal(memberByName(c.getAttribute('data-mb-open'))); }); });
+  }
+  function openMemberModal(p) {
+    if (!p) return;
+    var nm = p.name || 'Member', l = loc(p), following = isFollowing(nm);
+    var pop = document.createElement('div'); pop.className = 'osx-cal-pop';
+    pop.innerHTML = '<div class="osx-cal-pop-in osx-mbm"><button class="osx-cal-pop-x" type="button" aria-label="Close">✕</button>' +
+      '<div class="osx-mbm-top"><div class="osx-mb-av osx-mbm-av">' + avatarInner(p) + '</div>' +
+        '<div class="osx-mbm-id"><div class="osx-mbm-name">' + esc(nm) + '</div>' + (p.tier ? '<div class="osx-mb-tier">' + esc(p.tier) + '</div>' : '') +
+        (l ? '<div class="osx-mb-loc">📍 ' + esc(l) + '</div>' : '') + (p.since ? '<div class="osx-mb-since">' + esc(since(p.since)) + '</div>' : '') + '</div>' +
+        '<button type="button" class="osx-mb-follow big' + (following ? ' on' : '') + '" data-mbm-follow>' + (following ? '🔔 Following' : '🔕 Follow') + '</button></div>' +
+      '<div class="osx-mbm-stats"><div><b>' + (p.points || 0) + '</b><span>points</span></div><div><b>' + (p.badges || 0) + '</b><span>badges</span></div>' + (p.streak ? '<div><b>' + p.streak + '🔥</b><span>day streak</span></div>' : '') + '</div>' +
+      (p.quote ? '<p class="osx-mb-quote">“' + esc(p.quote) + '”</p>' : '') +
+      (p.about ? '<p class="osx-mb-about">' + esc(p.about) + '</p>' : '') +
+      socialHTML(p.social) +
+      '<div class="osx-mbm-actions"><button type="button" class="osx-mbm-posts" data-mbm-posts>See their posts →</button></div></div>';
+    root.appendChild(pop);
+    function close() { pop.remove(); }
+    pop.addEventListener('click', function (e) { if (e.target === pop) close(); });
+    pop.querySelector('.osx-cal-pop-x').addEventListener('click', close);
+    pop.querySelectorAll('[data-extlink]').forEach(function (a) { a.addEventListener('click', function (e) { e.preventDefault(); openExtConfirm(a.getAttribute('data-extlink')); }); });
+    var fb = pop.querySelector('[data-mbm-follow]'); if (fb) fb.addEventListener('click', function () { var on = toggleFollow(nm); fb.classList.toggle('on', on); fb.textContent = on ? '🔔 Following' : '🔕 Follow'; });
+    var pv = pop.querySelector('[data-mbm-posts]'); if (pv) pv.addEventListener('click', function () { close(); if (window.P2P_OSX_GO) window.P2P_OSX_GO('community'); if (window.P2P_COMMUNITY_SEARCH) setTimeout(function () { window.P2P_COMMUNITY_SEARCH(nm); }, 60); });
+  }
+  function renderAvatars(sel) {
+    avVal.v = sel || '';
+    if (!avGrid) return;
+    avGrid.innerHTML = PRESETS.map(function (e) { return '<button type="button" class="osx-mb-avopt' + (e === avVal.v ? ' on' : '') + '" data-avopt="' + esc(e) + '">' + e + '</button>'; }).join('');
+    avGrid.querySelectorAll('[data-avopt]').forEach(function (b) { b.addEventListener('click', function () {
+      avVal.v = (avVal.v === b.getAttribute('data-avopt')) ? '' : b.getAttribute('data-avopt');
+      avGrid.querySelectorAll('[data-avopt]').forEach(function (x) { x.classList.toggle('on', !!avVal.v && x.getAttribute('data-avopt') === avVal.v); });
+      if (avVal.v && f.photo) f.photo.value = '';
+    }); });
   }
 
   /* ---- map (Leaflet, lazy) ---- */
@@ -117,34 +219,50 @@
 
   /* ---- my profile ---- */
   function fillForm(p) {
-    if (!p) return;
-    if (f.photo) f.photo.value = p.photo || '';
-    if (f.quote) f.quote.value = p.quote || '';
-    if (f.about) f.about.value = p.about || '';
-    if (f.hidden) f.hidden.checked = !!p.hidden;
-    Object.keys(socialEls).forEach(function (k) { socialEls[k].value = (p.social && p.social[k]) || ''; });
+    if (nameEl) nameEl.value = (p && p.name) || stats().name || '';
+    if (f.photo) f.photo.value = (p && !isPreset(p.photo)) ? (p.photo || '') : '';
+    if (f.quote) f.quote.value = (p && p.quote) || '';
+    if (f.about) f.about.value = (p && p.about) || '';
+    if (f.hidden) f.hidden.checked = !!(p && p.hidden);
+    Object.keys(socialEls).forEach(function (k) { socialEls[k].value = (p && p.social && p.social[k]) || ''; });
+    renderAvatars(p && isPreset(p.photo) ? p.photo.slice(7) : '');
   }
+  function myKey() { return String(stats().name || '').trim().toLowerCase(); }
   function collect(hidden) {
     var s = stats(), social = {};
     Object.keys(socialEls).forEach(function (k) { var v = (socialEls[k].value || '').trim(); if (v) social[k] = v; });
+    var url = (f.photo ? f.photo.value.trim() : '');
+    var photo = url ? url : (avVal.v ? ('preset:' + avVal.v) : '');
+    var nm = (nameEl && nameEl.value.trim()) || s.name;
     return {
-      name: s.name, tier: s.tier, tierNum: s.tierNum, points: s.points, badges: s.badges, recentBadges: s.recentBadges, streak: s.streak,
-      photo: (f.photo ? f.photo.value.trim() : ''), quote: (f.quote ? f.quote.value.trim() : ''), about: (f.about ? f.about.value.trim() : ''),
+      name: nm, tier: s.tier, tierNum: s.tierNum, points: s.points, badges: s.badges, recentBadges: s.recentBadges, streak: s.streak,
+      photo: photo, quote: (f.quote ? f.quote.value.trim() : ''), about: (f.about ? f.about.value.trim() : ''),
       social: social, hidden: hidden
     };
   }
   function publish(body) {
     return fetch(PROFILE, { method: 'POST', headers: { 'content-type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify(body) }).then(function (r) { return r.json(); });
   }
+  function showStatus(msg, err) { if (!f.status) return; f.status.textContent = msg; f.status.classList.toggle('err', !!err); if (msg) setTimeout(function () { if (f.status.textContent === msg) { f.status.textContent = ''; f.status.classList.remove('err'); } }, 4500); }
+  if (f.photo) f.photo.addEventListener('input', function () { if (f.photo.value.trim() && avVal.v) renderAvatars(''); });
   if (f.save) f.save.addEventListener('click', function () {
-    f.save.disabled = true; if (f.status) f.status.textContent = 'Saving…';
+    if (nameEl) {
+      var others = members.filter(function (m) { return String(m.name || '').trim().toLowerCase() !== myKey(); });
+      var prob = nameProblem(nameEl.value, others);
+      if (prob) { showStatus(prob, true); nameEl.focus(); return; }
+    }
+    f.save.disabled = true; showStatus('Saving…', false);
     publish(collect(f.hidden ? f.hidden.checked : false)).then(function (res) {
       f.save.disabled = false;
-      if (res && res.ok) { try { localStorage.setItem('p2p_wc_profile', '1'); } catch (e) {} }
-      if (f.status) { f.status.textContent = (res && res.ok) ? 'Saved ✓' : 'Try again'; setTimeout(function () { f.status.textContent = ''; }, 3000); }
+      if (res && res.error === 'name_taken') { showStatus('That name is already taken — try another.', true); return; }
+      if (res && res.error === 'name_blocked') { showStatus('That name isn’t allowed — please choose another.', true); return; }
+      if (res && res.ok) { try { localStorage.setItem('p2p_wc_profile', '1'); } catch (e) {} if (res.name) { try { window.P2P_MEMBER_NAME = res.name; } catch (e) {} } }
+      showStatus((res && res.ok) ? 'Saved ✓' : 'Try again', !(res && res.ok));
       loadMembers();
-    }).catch(function () { f.save.disabled = false; if (f.status) f.status.textContent = 'Try again'; });
+    }).catch(function () { f.save.disabled = false; showStatus('Try again', true); });
   });
+  if (toolbar.search) toolbar.search.addEventListener('input', function () { searchVal = toolbar.search.value; renderDirectory(); });
+  if (toolbar.sort) toolbar.sort.addEventListener('change', function () { sortVal = toolbar.sort.value; renderDirectory(); });
 
   /* ---- data ---- */
   function loadMembers() {

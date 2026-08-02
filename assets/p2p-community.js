@@ -118,7 +118,7 @@
     for (var i = cs.length - 1; i >= 0 && uniq.length < 5; i--) { var k = String(cs[i].name || '').trim().toLowerCase(); if (!k || seen[k]) continue; seen[k] = 1; uniq.push(cs[i].name); }
     return '<span class="osx-cw-cavs">' + uniq.map(function (nm) {
       var mm = memberMap[String(nm || '').trim().toLowerCase()];
-      var inner = (mm && mm.photo) ? '<img src="' + esc(mm.photo) + '" alt="" loading="lazy" onerror="this.style.display=\'none\'">' : esc((nm || '?').trim().charAt(0).toUpperCase() || '?');
+      var inner = avInner(mm && mm.photo, nm);
       return '<button type="button" class="osx-cav" title="' + esc(nm || 'Member') + '" data-profile="' + esc(nm || '') + '">' + inner + '</button>';
     }).join('') + '</span>';
   }
@@ -220,9 +220,14 @@
     if (isAdmin) return '<button class="osx-pin-btn' + (p.pinned ? ' on' : '') + '" type="button" data-pin="' + esc(p.id) + '" title="' + (p.pinned ? 'Unpin' : 'Pin to top') + '">📌</button>';
     return p.pinned ? '<span class="osx-pin-badge" title="Pinned">📌</span>' : '';
   }
+  function avInner(photo, name) {
+    if (/^preset:/.test(String(photo || ''))) return '<span class="osx-pa-emoji">' + esc(String(photo).slice(7)) + '</span>';
+    if (photo) return '<img src="' + esc(photo) + '" alt="" loading="lazy" onerror="this.style.display=\'none\'">';
+    return esc((name || '?').trim().charAt(0).toUpperCase() || '🐑');
+  }
   function postAvatar(p) {
     var mm = memberMap[String(p.name || '').trim().toLowerCase()];
-    var inner = (mm && mm.photo) ? '<img src="' + esc(mm.photo) + '" alt="" loading="lazy" onerror="this.style.display=\'none\'">' : esc((p.name || '?').trim().charAt(0).toUpperCase() || '🐑');
+    var inner = avInner(mm && mm.photo, p.name);
     var tier = (mm && mm.tierNum) ? '<span class="osx-pa-tier">' + mm.tierNum + '</span>' : '';
     return '<button type="button" class="osx-pa osx-pa-btn" data-profile="' + esc(p.name || '') + '">' + inner + tier + '</button>';
   }
@@ -716,7 +721,7 @@
   }
   function buildProfCard(nm) {
     var pr = memberProfile(nm);
-    var av = pr.photo ? '<img src="' + esc(pr.photo) + '" alt="" onerror="this.style.display=\'none\'">' : esc((pr.name || '?').trim().charAt(0).toUpperCase() || '?');
+    var av = avInner(pr.photo, pr.name);
     var el = document.createElement('div'); el.className = 'osx-profcard';
     el.innerHTML =
       '<div class="osx-profcard-top"><span class="osx-profcard-av">' + av + (pr.tierNum ? '<span class="osx-pa-tier">' + pr.tierNum + '</span>' : '') + '</span>' +
@@ -765,6 +770,7 @@
   document.addEventListener('click', function (e) { if (profEl && profPinned && !profEl.contains(e.target) && !(e.target.closest && e.target.closest('[data-profile]'))) hideProf(true); });
   window.addEventListener('scroll', function () { if (profEl && !profPinned) hideProf(true); }, true);
   window.P2P_OPEN_POST = function (id) { return openPostModal(id); };
+  window.P2P_COMMUNITY_SEARCH = function (q) { filter.q = String(q || ''); filter.category = 'all'; filter.offset = 0; if (searchEl) searchEl.value = filter.q; renderTabs(); load(false); if (feed && feed.scrollIntoView) feed.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
 
   document.addEventListener('click', closeMenus);
   renderTabs(); load(false); loadWins(); loadMembersData();
