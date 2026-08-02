@@ -21,13 +21,14 @@
 {%- comment -%} course-block count (drives the Progress ring) + first Main course (drives the "Up next" card + onboarding's final link) — replaces the old fixed course_1..5_* settings now that courses are section blocks. {%- endcomment -%}
 {%- assign board_courses_count = 0 -%}
 {%- assign first_course_title = '' -%}
-{%- assign first_course_url = '/pages/p2p-course' -%}
+{%- assign first_course_url = '/pages/courses-welcome-aboard' -%}
 {%- for block in section.blocks -%}
   {%- if block.type == 'course' -%}
     {%- assign board_courses_count = board_courses_count | plus: 1 -%}
     {%- if first_course_title == '' -%}
       {%- assign first_course_title = block.settings.title -%}
-      {%- assign first_course_url = block.settings.url | default: first_course_url -%}
+      {%- if block.settings.url != blank -%}{%- assign first_course_url = block.settings.url -%}
+      {%- elsif block.settings.handle != blank -%}{%- assign first_course_url = '/pages/courses-' | append: block.settings.handle -%}{%- endif -%}
     {%- endif -%}
   {%- endif -%}
 {%- endfor -%}
