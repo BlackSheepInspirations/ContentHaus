@@ -497,6 +497,83 @@
             "color": "c-pu",
             "earned": false
           }
+        },
+        "days-1": {
+          "type": "badge",
+          "settings": {
+            "group": "Days Shown Up",
+            "name": "Day One",
+            "req": "Show up 1 day total",
+            "icon": "star",
+            "color": "c-te",
+            "earned": false
+          }
+        },
+        "days-5": {
+          "type": "badge",
+          "settings": {
+            "group": "Days Shown Up",
+            "name": "5 Days Strong",
+            "req": "Show up 5 days total",
+            "icon": "star",
+            "color": "c-em",
+            "earned": false
+          }
+        },
+        "days-10": {
+          "type": "badge",
+          "settings": {
+            "group": "Days Shown Up",
+            "name": "10 Days Strong",
+            "req": "Show up 10 days total",
+            "icon": "star",
+            "color": "c-gold",
+            "earned": false
+          }
+        },
+        "days-25": {
+          "type": "badge",
+          "settings": {
+            "group": "Days Shown Up",
+            "name": "25 Days Strong",
+            "req": "Show up 25 days total",
+            "icon": "star",
+            "color": "c-pu",
+            "earned": false
+          }
+        },
+        "days-50": {
+          "type": "badge",
+          "settings": {
+            "group": "Days Shown Up",
+            "name": "50 Days Strong",
+            "req": "Show up 50 days total",
+            "icon": "star",
+            "color": "c-pk",
+            "earned": false
+          }
+        },
+        "days-75": {
+          "type": "badge",
+          "settings": {
+            "group": "Days Shown Up",
+            "name": "75 Days Strong",
+            "req": "Show up 75 days total",
+            "icon": "star",
+            "color": "c-te",
+            "earned": false
+          }
+        },
+        "days-100": {
+          "type": "badge",
+          "settings": {
+            "group": "Days Shown Up",
+            "name": "100 Days Strong",
+            "req": "Show up 100 days total",
+            "icon": "star",
+            "color": "c-gold",
+            "earned": false
+          }
         }
       },
       "block_order": [
@@ -544,7 +621,14 @@
         "streak-150",
         "every-path",
         "founder",
-        "masterclass"
+        "masterclass",
+        "days-1",
+        "days-5",
+        "days-10",
+        "days-25",
+        "days-50",
+        "days-75",
+        "days-100"
       ],
       "settings": {
         "access_tag": "p2p-learning",
