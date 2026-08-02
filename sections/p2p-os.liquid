@@ -64,7 +64,7 @@
     <nav class="osx-nav">
       {%- comment -%} Sidebar nav is baked into the section (target^label^icon^mode^access_tag^get_url) so a
          theme-editor template revert can never empty it. Edit here in code, not the customizer. {%- endcomment -%}
-      {%- capture os_nav -%}start^Your Journey Starts Here^spark^view^^|checkpoint^Checkpoint^check^view^^|success^My Success^rocket^view^^|community^Community^chat^view^^|/pages/brand-haus?bh_focus=1^Founders Assessment^fingerprint^link^brand-haus-access^/pages/brand-haus-preview|/pages/brand-haus^Brand Haus^crown^link^brand-haus-access^/pages/brand-haus-preview|/pages/content-haus^Content Haus^prompt^link^prompt-haus-access^/pages/content-haus-preview|/pages/graphics-haus^Graphics Haus^palette^link^graphics-haus-access^/pages/graphics-haus-preview|/pages/project-haus^Project Haus^box^link^product-haus-access^/pages/project-haus-preview|/pages/marketing-haus^Marketing Haus^megaphone^link^marketing-haus-access^/pages/marketing-haus-preview|/pages/growth-haus^Growth Haus^rocket^link^P2P-haus-access^/pages/growth-haus-preview|rooted^ROOTED — Light the Path^path^view^^|mates^Haus Mates^mates^view^^|members^Members^mates^view^^|levelup^How You Level Up^trophy^view^^|tools^Tools & Resources^tools^view^^|notebook^Notebook^notebook^view^^|bonus^Bonus Resources^gift^view^^^soon{%- endcapture -%}
+      {%- capture os_nav -%}start^Your Journey Starts Here^spark^view^^|checkpoint^Checkpoint & Tools^check^view^^|success^My Success^rocket^view^^|community^Community^chat^view^^|/pages/brand-haus?bh_focus=1^Founders Assessment^fingerprint^link^brand-haus-access^/pages/brand-haus-preview|/pages/brand-haus^Brand Haus^crown^link^brand-haus-access^/pages/brand-haus-preview|/pages/content-haus^Content Haus^prompt^link^prompt-haus-access^/pages/content-haus-preview|/pages/graphics-haus^Graphics Haus^palette^link^graphics-haus-access^/pages/graphics-haus-preview|/pages/project-haus^Project Haus^box^link^product-haus-access^/pages/project-haus-preview|/pages/marketing-haus^Marketing Haus^megaphone^link^marketing-haus-access^/pages/marketing-haus-preview|/pages/growth-haus^Growth Haus^rocket^link^P2P-haus-access^/pages/growth-haus-preview|rooted^ROOTED — Light the Path^path^view^^|mates^Haus Mates^mates^view^^|members^Members^mates^view^^|levelup^How You Level Up^trophy^view^^|notebook^Notebook^notebook^view^^|bonus^Bonus Resources^gift^view^^^soon{%- endcapture -%}
       {%- assign os_nav_items = os_nav | split: '|' -%}
       {%- for it in os_nav_items -%}
         {%- assign f = it | split: '^' -%}
@@ -233,6 +233,10 @@
 
     {%- comment -%} ===== VIEW: Checkpoint ===== {%- endcomment -%}
     <section class="osx-view" data-view="checkpoint">
+      {%- assign tools_journey_url = section.settings.journey_url | default: '/pages/p2p-learning' -%}
+      {%- assign tools_tutorial_url = section.settings.tools_tutorial_url | default: '/pages/p2p-tutorial' -%}
+      {%- assign tools_badges_url = section.settings.tools_badges_url | default: '/pages/p2p-learning-badges' -%}
+      {%- assign os_support_email = section.settings.support_email | default: 'Hello@blacksheepcreations.com' -%}
       <div class="osx-kick">Before you leave today</div>
       <h2 class="osx-h2">{{ section.settings.checkpoint_title | default: "Set yourself up before you go" }}</h2>
       {%- if section.settings.checkpoint_intro != blank -%}<p class="osx-lede">{{ section.settings.checkpoint_intro }}</p>{%- endif -%}
@@ -274,6 +278,50 @@
             </div>
           </div>
         {%- endfor -%}
+      </div>
+
+      {%- comment -%} ---- Tools & Resources (merged in from the old Tools tab) ---- {%- endcomment -%}
+      <div class="osx-kick" style="margin-top:30px">Tools &amp; Resources</div>
+      <div class="osx-resgroup">
+        <div class="osx-reslabel">Find your way around</div>
+        <div class="osx-resgrid">
+          <a class="osx-rescard" href="{{ tools_tutorial_url }}"><span class="osx-resic">🧭</span><b>Guided walkthrough</b><span>See how the whole OS works, step by step.</span><i>→</i></a>
+          <a class="osx-rescard" href="{{ tools_journey_url }}"><span class="osx-resic">🗺️</span><b>Your Learning Journey</b><span>The gamified course map — realms, courses, badges.</span><i>→</i></a>
+          <a class="osx-rescard" href="{{ tools_badges_url }}"><span class="osx-resic">🏅</span><b>Badges &amp; milestones</b><span>Everything you've earned, and what's next.</span><i>→</i></a>
+        </div>
+      </div>
+      <div class="osx-resgroup">
+        <div class="osx-reslabel">Work faster</div>
+        <div class="osx-resgrid">
+          <button class="osx-rescard" type="button" data-osx-goto="mates"><span class="osx-resic">🤝</span><b>Your Haus Mates</b><span>Frank &amp; Ruth — brainstorm and build on demand.</span><i>→</i></button>
+          <button class="osx-rescard" type="button" data-osx-goto="notebook"><span class="osx-resic">📓</span><b>Your Notebook</b><span>Ideas, notes, wins &amp; journal — all in one place.</span><i>→</i></button>
+          <button class="osx-rescard" type="button" data-osx-goto="success"><span class="osx-resic">🚀</span><b>My Success</b><span>Your command center — goals, lives, posts &amp; more.</span><i>→</i></button>
+        </div>
+      </div>
+      <div class="osx-resgroup">
+        <div class="osx-reslabel">Get better results</div>
+        <div class="osx-restips">
+          <details><summary>How do I get better output from any generator?</summary><div class="osx-fa"><p>Be specific, name who it's for, and show an example of what &ldquo;good&rdquo; looks like. Three small concrete details beat a long vague paragraph every time.</p></div></details>
+          <details><summary>What order should I work in?</summary><div class="osx-fa"><p>Top to bottom down the sidebar: find your direction, lock your Brand DNA, then Content, Graphics, Project, Marketing — and launch with ROOTED. Each step feeds the next.</p></div></details>
+          <details><summary>Where does my work get saved?</summary><div class="osx-fa"><p>Your brand kit and progress live in your account and this browser. Sign in on any device to pick up where you left off, and use each Haus's Export button to keep your own copy.</p></div></details>
+        </div>
+        <div class="osx-ressupport">
+          <span class="osx-ressupport-ic">✉️</span>
+          <div>Stuck on something? <a href="mailto:{{ os_support_email }}">Email {{ os_support_email }} →</a><br><small>Tell us your account email and what you were doing, and we'll get you sorted.</small></div>
+        </div>
+      </div>
+
+      <div class="osx-suggest" data-suggest>
+        <div class="osx-suggest-h">💡 Help us be better</div>
+        <p class="osx-suggest-sub">A question, an idea, or a bit of praise? Send it straight to the team — it comes to us privately, not to the community.</p>
+        <select class="osx-suggest-kind" data-suggest-kind>
+          <option value="Suggestion">Suggestion</option>
+          <option value="Question">Question</option>
+          <option value="Kudos">Kudos / Praise</option>
+          <option value="Report">Report a concern</option>
+        </select>
+        <textarea class="osx-cw-text" data-suggest-text maxlength="2000" rows="3" placeholder="Share your thoughts…"></textarea>
+        <div class="osx-suggest-row"><span class="osx-suggest-status" data-suggest-status></span><button class="osx-cw-postbtn" type="button" data-suggest-send>Send</button></div>
       </div>
     </section>
 
@@ -766,47 +814,6 @@
       </div>
     </section>
 
-    {%- comment -%} ===== VIEW: Tools & Resources (a hub of real destinations) ===== {%- endcomment -%}
-    {%- assign tools_journey_url = section.settings.journey_url | default: '/pages/p2p-learning' -%}
-    {%- assign tools_tutorial_url = section.settings.tools_tutorial_url | default: '/pages/p2p-tutorial' -%}
-    {%- assign tools_badges_url = section.settings.tools_badges_url | default: '/pages/p2p-learning-badges' -%}
-    {%- assign os_support_email = section.settings.support_email | default: 'Hello@blacksheepcreations.com' -%}
-    <section class="osx-view" data-view="tools">
-      <div class="osx-kick">Tools &amp; Resources</div>
-      <h2 class="osx-h2">{{ section.settings.tools_title | default: 'Everything, one click away' }}</h2>
-      <p class="osx-lede">{{ section.settings.tools_intro | default: "The handy bits that keep you moving — how the OS works, where your journey lives, and quick jumps to the tools you'll reach for most." }}</p>
-
-      <div class="osx-resgroup">
-        <div class="osx-reslabel">Find your way around</div>
-        <div class="osx-resgrid">
-          <a class="osx-rescard" href="{{ tools_tutorial_url }}"><span class="osx-resic">🧭</span><b>Guided walkthrough</b><span>See how the whole OS works, step by step.</span><i>→</i></a>
-          <a class="osx-rescard" href="{{ tools_journey_url }}"><span class="osx-resic">🗺️</span><b>Your Learning Journey</b><span>The gamified course map — realms, courses, badges.</span><i>→</i></a>
-          <a class="osx-rescard" href="{{ tools_badges_url }}"><span class="osx-resic">🏅</span><b>Badges &amp; milestones</b><span>Everything you've earned, and what's next.</span><i>→</i></a>
-        </div>
-      </div>
-
-      <div class="osx-resgroup">
-        <div class="osx-reslabel">Work faster</div>
-        <div class="osx-resgrid">
-          <button class="osx-rescard" type="button" data-osx-goto="mates"><span class="osx-resic">🤝</span><b>Your Haus Mates</b><span>Frank &amp; Ruth — brainstorm and build on demand.</span><i>→</i></button>
-          <button class="osx-rescard" type="button" data-osx-goto="notebook"><span class="osx-resic">📓</span><b>Your Notebook</b><span>Ideas, notes, wins &amp; journal — all in one place.</span><i>→</i></button>
-          <button class="osx-rescard" type="button" data-osx-goto="checkpoint"><span class="osx-resic">✅</span><b>Daily Checkpoint</b><span>A quick set-up so every visit moves you forward.</span><i>→</i></button>
-        </div>
-      </div>
-
-      <div class="osx-resgroup">
-        <div class="osx-reslabel">Get better results</div>
-        <div class="osx-restips">
-          <details><summary>How do I get better output from any generator?</summary><div class="osx-fa"><p>Be specific, name who it's for, and show an example of what &ldquo;good&rdquo; looks like. Three small concrete details beat a long vague paragraph every time.</p></div></details>
-          <details><summary>What order should I work in?</summary><div class="osx-fa"><p>Top to bottom down the sidebar: find your direction, lock your Brand DNA, then Content, Graphics, Project, Marketing — and launch with ROOTED. Each step feeds the next.</p></div></details>
-          <details><summary>Where does my work get saved?</summary><div class="osx-fa"><p>Your brand kit and progress live in your account and this browser. Sign in on any device to pick up where you left off, and use each Haus's Export button to keep your own copy.</p></div></details>
-        </div>
-        <div class="osx-ressupport">
-          <span class="osx-ressupport-ic">✉️</span>
-          <div>Stuck on something? <a href="mailto:{{ os_support_email }}">Email {{ os_support_email }} →</a><br><small>Tell us your account email and what you were doing, and we'll get you sorted.</small></div>
-        </div>
-      </div>
-    </section>
 
     {%- comment -%} ===== VIEW: Bonus Resources (downloadable freebies — PDFs) ===== {%- endcomment -%}
     <section class="osx-view" data-view="bonus">
