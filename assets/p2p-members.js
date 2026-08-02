@@ -17,6 +17,7 @@
   var socialEls = {}; mb.querySelectorAll('[data-mb-social]').forEach(function (el) { socialEls[el.getAttribute('data-mb-social')] = el; });
   var toolbar = { search: mb.querySelector('[data-mb-search]'), sort: mb.querySelector('[data-mb-sort]'), count: mb.querySelector('[data-mb-count]') };
   var nameEl = mb.querySelector('[data-mb-name]'), avGrid = mb.querySelector('[data-mb-avatars]'), avVal = { v: '' };
+  var emailEl = mb.querySelector('[data-mb-email]'), showEmailEl = mb.querySelector('[data-mb-showemail]');
   var members = [], myProfile = null, searchVal = '', sortVal = 'points';
 
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
@@ -161,6 +162,7 @@
       (p.quote ? '<p class="osx-mb-quote">“' + esc(p.quote) + '”</p>' : '') +
       (p.about ? '<p class="osx-mb-about">' + esc(p.about) + '</p>' : '') +
       socialHTML(p.social) +
+      (p.hasEmail ? '<button type="button" class="osx-mbm-email" data-mbm-email="' + esc(p.id || '') + '">✉️ Email me</button>' : '') +
       '<div class="osx-mbm-actions"><button type="button" class="osx-mb-follow big' + (following ? ' on' : '') + '" data-mbm-follow>' + (following ? '🔔 Following' : '🔕 Follow') + '</button>' +
       '<button type="button" class="osx-mbm-posts" data-mbm-posts>See their posts →</button></div></div>';
     root.appendChild(pop);
@@ -169,6 +171,14 @@
     pop.querySelector('.osx-cal-pop-x').addEventListener('click', close);
     pop.querySelectorAll('[data-extlink]').forEach(function (a) { a.addEventListener('click', function (e) { e.preventDefault(); openExtConfirm(a.getAttribute('data-extlink')); }); });
     var fb = pop.querySelector('[data-mbm-follow]'); if (fb) fb.addEventListener('click', function () { var on = toggleFollow(nm); fb.classList.toggle('on', on); fb.textContent = on ? '🔔 Following' : '🔕 Follow'; });
+    var eb = pop.querySelector('[data-mbm-email]');
+    if (eb) eb.addEventListener('click', function () {
+      var id = eb.getAttribute('data-mbm-email'); if (!id) return;
+      eb.disabled = true; eb.textContent = 'Revealing…';
+      fetch('/apps/p2p/member-email?id=' + encodeURIComponent(id), { credentials: 'same-origin' }).then(function (r) { return r.json(); })
+        .then(function (j) { if (j && j.email) { var mail = esc(j.email); eb.outerHTML = '<a class="osx-mbm-email revealed" href="mailto:' + mail + '">✉️ ' + mail + '</a>'; } else { eb.textContent = 'No email shared'; } })
+        .catch(function () { eb.disabled = false; eb.textContent = '✉️ Email me'; });
+    });
     var pv = pop.querySelector('[data-mbm-posts]'); if (pv) pv.addEventListener('click', function () { close(); if (window.P2P_OSX_GO) window.P2P_OSX_GO('community'); if (window.P2P_COMMUNITY_SEARCH) setTimeout(function () { window.P2P_COMMUNITY_SEARCH(nm); }, 60); });
   }
   function renderAvatars(sel) {
@@ -224,6 +234,8 @@
     if (f.quote) f.quote.value = (p && p.quote) || '';
     if (f.about) f.about.value = (p && p.about) || '';
     if (f.hidden) f.hidden.checked = !!(p && p.hidden);
+    if (emailEl) emailEl.value = (p && p.email) || '';
+    if (showEmailEl) showEmailEl.checked = !!(p && p.showEmail);
     Object.keys(socialEls).forEach(function (k) { socialEls[k].value = (p && p.social && p.social[k]) || ''; });
     renderAvatars(p && isPreset(p.photo) ? p.photo.slice(7) : '');
   }
@@ -237,7 +249,8 @@
     return {
       name: nm, tier: s.tier, tierNum: s.tierNum, points: s.points, badges: s.badges, recentBadges: s.recentBadges, streak: s.streak,
       photo: photo, quote: (f.quote ? f.quote.value.trim() : ''), about: (f.about ? f.about.value.trim() : ''),
-      social: social, hidden: hidden
+      social: social, hidden: hidden,
+      email: (emailEl ? emailEl.value.trim() : ''), show_email: (showEmailEl ? !!showEmailEl.checked : false)
     };
   }
   function publish(body) {

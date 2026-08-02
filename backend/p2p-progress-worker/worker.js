@@ -214,6 +214,8 @@ export default {
             quote: String(body.quote || '').slice(0, 140),
             about: String(body.about || '').slice(0, 320),
             social: sanitizeSocial(body.social),
+            email: (/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(String(body.email || '').trim()) ? String(body.email).trim().slice(0, 120) : ''),
+            showEmail: !!body.show_email,                  // opted in to a click-to-reveal "Email me" button (never in the bulk list)
             hidden: !!body.hidden,                         // member opted out of map/directory
             adminHidden: !!(prev && prev.adminHidden),     // admin-hidden (light moderation), preserved
             city: geo.city, region: geo.region, country: geo.country, lat: geo.lat, lng: geo.lng,
@@ -254,10 +256,24 @@ export default {
         const members = [];
         for (const k of list.keys) {
           const r = await kv.get(k.name, 'json');
-          if (r && !r.hidden && !r.adminHidden) members.push(r);
+          if (r && !r.hidden && !r.adminHidden) {
+            const hasEmail = !!(r.showEmail && r.email);
+            delete r.email;            // never expose the raw address in the bulk list — revealed only on-demand, one at a time
+            r.hasEmail = hasEmail;
+            members.push(r);
+          }
         }
         const following = (await kv.get('following:' + customerId, 'json')) || [];
         return json({ ok: true, members, following });
+      }
+
+      /* ---------- reveal one member's shared email (click-to-reveal; logged-in only) ---------- */
+      if (seg === 'member-email') {
+        if (!kv || !customerId) return json({ ok: true, email: '' });
+        const id = url.searchParams.get('id') || '';
+        if (!id) return json({ error: 'no_id' }, 400);
+        const r = await kv.get('member:' + id, 'json');
+        return json({ ok: true, email: (r && r.showEmail && r.email) ? r.email : '' });
       }
 
       /* ---------- follow / favorite a member (powers alerts on their new posts) ---------- */
