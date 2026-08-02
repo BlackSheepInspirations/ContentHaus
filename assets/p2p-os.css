@@ -256,6 +256,20 @@
 
   /* Bonus Resources — downloadable freebies */
   #p2pos .osx-bonusgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px;}
+  /* Bonus Resources — nested accordion tree (category → sub-category → cards) */
+  #p2pos .osx-bonustree{display:flex;flex-direction:column;gap:10px;margin-top:18px;}
+  #p2pos .osx-bacc{border:1px solid var(--stroke);border-radius:14px;background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(9,17,24,.35));overflow:hidden;}
+  #p2pos .osx-bacc-head{width:100%;display:flex;align-items:center;gap:11px;padding:15px 16px;background:none;border:0;cursor:pointer;color:var(--text);font:800 15px/1.2 system-ui;text-align:left;transition:background .14s;}
+  #p2pos .osx-bacc-head:hover{background:rgba(216,180,90,.06);}
+  #p2pos .osx-bacc-chev{flex:none;font-style:normal;color:var(--gold-bright);font-size:12px;transition:transform .18s;}
+  #p2pos .osx-bacc-head[aria-expanded="true"] .osx-bacc-chev{transform:rotate(90deg);}
+  #p2pos .osx-bacc-title{flex:1;min-width:0;}
+  #p2pos .osx-bacc-count{flex:none;font:700 11px/1 system-ui;color:var(--muted);background:rgba(255,255,255,.06);border:1px solid var(--stroke);border-radius:999px;padding:4px 9px;}
+  #p2pos .osx-bacc-body{padding:4px 16px 16px;}
+  #p2pos .osx-bacc-body[hidden]{display:none;}
+  #p2pos .osx-bacc--sub{border-color:var(--stroke2, rgba(255,255,255,.05));background:rgba(9,17,24,.3);margin-top:10px;}
+  #p2pos .osx-bacc--sub .osx-bacc-head{font:700 13.5px/1.2 system-ui;padding:12px 14px;}
+  #p2pos .osx-bacc--sub .osx-bacc-title{color:#d7e3de;}
   #p2pos .osx-bonuscard{position:relative;display:flex;flex-direction:column;padding:14px 14px 16px;border:1px solid var(--stroke);border-radius:16px;
     background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(9,17,24,.4));color:var(--text);text-decoration:none;transition:transform .15s ease,border-color .15s ease;}
   #p2pos .osx-bonuscard:hover{transform:translateY(-3px);border-color:var(--gstroke);}

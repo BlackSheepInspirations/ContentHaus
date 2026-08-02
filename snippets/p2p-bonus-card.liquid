@@ -1,0 +1,15 @@
+{%- comment -%}
+  Renders one Bonus Resources download card. Pass a bonus block as `b`.
+  Used by sections/p2p-os.liquid (Bonus Resources accordion tree).
+{%- endcomment -%}
+<a class="osx-bonuscard" href="{{ b.settings.file_url | default: '#' }}" download target="_blank" rel="noopener" {{ b.shopify_attributes }}>
+  {%- if b.settings.thumb != blank -%}
+    <span class="osx-bonus-thumb"><img src="{{ b.settings.thumb | image_url: width: 600 }}" alt="{{ b.settings.title | escape }}" loading="lazy"></span>
+  {%- else -%}
+    <span class="osx-bonus-thumb osx-bonus-thumb--ic">📄</span>
+  {%- endif -%}
+  <span class="osx-bonus-type">{{ b.settings.badge | default: 'PDF' }}</span>
+  <b>{{ b.settings.title | default: 'Free download' }}</b>
+  {%- if b.settings.desc != blank -%}<span class="osx-bonus-desc">{{ b.settings.desc }}</span>{%- endif -%}
+  <span class="osx-bonus-dl">Download <i>↓</i></span>
+</a>

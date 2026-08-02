@@ -988,8 +988,9 @@
       {%- assign bonus_blocks = section.blocks | where: 'type', 'bonus' -%}
 
       {%- if os_bonus_clean != blank or bonus_blocks.size > 0 -%}
-        <div class="osx-bonusgrid">
-          {%- if os_bonus_clean != blank -%}
+        {%- comment -%} Featured (baked) freebies — always visible above the tree {%- endcomment -%}
+        {%- if os_bonus_clean != blank -%}
+          <div class="osx-bonusgrid">
             {%- assign os_bonus_items = os_bonus_clean | split: '|' -%}
             {%- for bo in os_bonus_items -%}
               {%- assign bf = bo | split: '^' -%}
@@ -1005,22 +1006,62 @@
                 <span class="osx-bonus-dl">Download <i>↓</i></span>
               </a>
             {%- endfor -%}
-          {%- endif -%}
+          </div>
+        {%- endif -%}
 
-          {%- for b in bonus_blocks -%}
-            <a class="osx-bonuscard" href="{{ b.settings.file_url | default: '#' }}" download target="_blank" rel="noopener" {{ b.shopify_attributes }}>
-              {%- if b.settings.thumb != blank -%}
-                <span class="osx-bonus-thumb"><img src="{{ b.settings.thumb | image_url: width: 600 }}" alt="{{ b.settings.title | escape }}" loading="lazy"></span>
-              {%- else -%}
-                <span class="osx-bonus-thumb osx-bonus-thumb--ic">📄</span>
+        {%- comment -%} Category tree: category → (optional) sub-category → cards. Fixed category order; sub-categories are free-form. {%- endcomment -%}
+        {%- if bonus_blocks.size > 0 -%}
+          {%- assign cat_order = 'POD,Digital Products,Digital Content Inspirations,Music,Printed Products,Misc.' | split: ',' -%}
+          <div class="osx-bonustree" data-bonustree>
+            {%- for cat in cat_order -%}
+              {%- assign cat_count = 0 -%}
+              {%- assign sub_list = '' -%}
+              {%- for b in bonus_blocks -%}
+                {%- assign bcat = b.settings.category | default: 'Misc.' -%}
+                {%- if bcat == cat -%}
+                  {%- assign cat_count = cat_count | plus: 1 -%}
+                  {%- assign sc = b.settings.subcategory | default: '' | strip -%}
+                  {%- unless sc == blank -%}
+                    {%- assign probe = '~~' | append: sc | append: '~~' -%}
+                    {%- unless sub_list contains probe -%}{%- assign sub_list = sub_list | append: probe -%}{%- endunless -%}
+                  {%- endunless -%}
+                {%- endif -%}
+              {%- endfor -%}
+              {%- if cat_count > 0 -%}
+                <div class="osx-bacc">
+                  <button type="button" class="osx-bacc-head" data-bacc aria-expanded="false"><i class="osx-bacc-chev" aria-hidden="true">▸</i><span class="osx-bacc-title">{{ cat }}</span><span class="osx-bacc-count">{{ cat_count }}</span></button>
+                  <div class="osx-bacc-body" hidden>
+                    {%- comment -%} direct items (no sub-category) {%- endcomment -%}
+                    {%- assign direct_count = 0 -%}
+                    {%- for b in bonus_blocks -%}{%- assign bcat = b.settings.category | default: 'Misc.' -%}{%- if bcat == cat -%}{%- assign sc = b.settings.subcategory | default: '' | strip -%}{%- if sc == blank -%}{%- assign direct_count = direct_count | plus: 1 -%}{%- endif -%}{%- endif -%}{%- endfor -%}
+                    {%- if direct_count > 0 -%}
+                      <div class="osx-bonusgrid">
+                        {%- for b in bonus_blocks -%}{%- assign bcat = b.settings.category | default: 'Misc.' -%}{%- if bcat == cat -%}{%- assign sc = b.settings.subcategory | default: '' | strip -%}{%- if sc == blank -%}{%- render 'p2p-bonus-card', b: b -%}{%- endif -%}{%- endif -%}{%- endfor -%}
+                      </div>
+                    {%- endif -%}
+                    {%- comment -%} sub-category accordions {%- endcomment -%}
+                    {%- assign subs = sub_list | split: '~~' -%}
+                    {%- for sub in subs -%}
+                      {%- assign subt = sub | strip -%}
+                      {%- unless subt == blank -%}
+                        {%- assign sub_count = 0 -%}
+                        {%- for b in bonus_blocks -%}{%- assign bcat = b.settings.category | default: 'Misc.' -%}{%- if bcat == cat -%}{%- assign sc = b.settings.subcategory | default: '' | strip -%}{%- if sc == subt -%}{%- assign sub_count = sub_count | plus: 1 -%}{%- endif -%}{%- endif -%}{%- endfor -%}
+                        <div class="osx-bacc osx-bacc--sub">
+                          <button type="button" class="osx-bacc-head" data-bacc aria-expanded="false"><i class="osx-bacc-chev" aria-hidden="true">▸</i><span class="osx-bacc-title">{{ subt }}</span><span class="osx-bacc-count">{{ sub_count }}</span></button>
+                          <div class="osx-bacc-body" hidden>
+                            <div class="osx-bonusgrid">
+                              {%- for b in bonus_blocks -%}{%- assign bcat = b.settings.category | default: 'Misc.' -%}{%- if bcat == cat -%}{%- assign sc = b.settings.subcategory | default: '' | strip -%}{%- if sc == subt -%}{%- render 'p2p-bonus-card', b: b -%}{%- endif -%}{%- endif -%}{%- endfor -%}
+                            </div>
+                          </div>
+                        </div>
+                      {%- endunless -%}
+                    {%- endfor -%}
+                  </div>
+                </div>
               {%- endif -%}
-              <span class="osx-bonus-type">{{ b.settings.badge | default: 'PDF' }}</span>
-              <b>{{ b.settings.title | default: 'Free download' }}</b>
-              {%- if b.settings.desc != blank -%}<span class="osx-bonus-desc">{{ b.settings.desc }}</span>{%- endif -%}
-              <span class="osx-bonus-dl">Download <i>↓</i></span>
-            </a>
-          {%- endfor -%}
-        </div>
+            {%- endfor -%}
+          </div>
+        {%- endif -%}
       {%- else -%}
         <div class="osx-bonus-empty">
           <div class="osx-bonus-empty-ic">🎁</div>
@@ -1671,6 +1712,17 @@ window.P2P_EVENTS = [{%- for b in ev_blocks -%}{"iso":{{ b.settings.iso_date | d
       });
     }catch(e){ if(window.console) console.warn('P2P meet-flip skipped:', e); } })();
 
+    // Bonus Resources — nested accordion (category → sub-category). Each header toggles its own body.
+    (function(){ try{
+      root.querySelectorAll('[data-bacc]').forEach(function(btn){
+        btn.addEventListener('click', function(){
+          var open = btn.getAttribute('aria-expanded') === 'true';
+          btn.setAttribute('aria-expanded', open ? 'false' : 'true');
+          var body = btn.nextElementSibling; if(body) body.hidden = open;
+        });
+      });
+    }catch(e){ if(window.console) console.warn('P2P bonus-accordion skipped:', e); } })();
+
     // "Your road ahead" — light up each step from real cross-Haus signals (same localStorage the Vault reads)
     (function(){ try{
       function J(k){ try{ return JSON.parse(localStorage.getItem(k)); }catch(e){ return null; } }
@@ -1822,6 +1874,15 @@ window.P2P_EVENTS = [{%- for b in ev_blocks -%}{"iso":{{ b.settings.iso_date | d
         { "type": "text", "id": "title", "label": "Title", "default": "Free download" },
         { "type": "text", "id": "desc", "label": "Description" },
         { "type": "text", "id": "badge", "label": "Type label", "default": "PDF", "info": "Small pill on the card — e.g. PDF, Checklist, Template." },
+        { "type": "select", "id": "category", "label": "Category (top-level folder)", "default": "Misc.", "options": [
+          { "value": "POD", "label": "POD" },
+          { "value": "Digital Products", "label": "Digital Products" },
+          { "value": "Digital Content Inspirations", "label": "Digital Content Inspirations" },
+          { "value": "Music", "label": "Music" },
+          { "value": "Printed Products", "label": "Printed Products" },
+          { "value": "Misc.", "label": "Misc." }
+        ] },
+        { "type": "text", "id": "subcategory", "label": "Sub-category (optional)", "info": "e.g. T-Shirts, Hats, Totes (POD) or Journals, Planners (Digital Products). Leave blank to list the item directly under its category." },
         { "type": "url", "id": "file_url", "label": "File / download URL", "info": "Upload the PDF in Shopify admin → Content → Files, then paste its URL here." },
         { "type": "image_picker", "id": "thumb", "label": "Cover thumbnail (optional)" }
       ]
