@@ -32,7 +32,24 @@
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function p2(n) { return (n < 10 ? '0' : '') + n; }
   function uid() { return String(Date.now()) + Math.random().toString(36).slice(2, 6); }
-  function save() { try { localStorage.setItem(KEY, JSON.stringify(data)); } catch (e) {} try { rebuildReminders(); } catch (e) {} }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(data)); } catch (e) {} try { rebuildReminders(); } catch (e) {} try { awardMilestones(); } catch (e) {} }
+  /* Milestone badges for the doing side — going live, launching products, reaching goals. */
+  var LIVE_BADGES = [[1, 'First Live'], [5, '5 Lives Live'], [10, '10 Lives Live'], [25, '25 Lives Live'], [50, '50 Lives Live']];
+  var LAUNCH_BADGES = [[1, 'First Launch'], [3, '3 Launches'], [5, '5 Launches'], [10, '10 Launches']];
+  var GOAL_BADGES = [[1, 'First Goal Reached'], [3, '3 Goals Reached'], [5, '5 Goals Reached'], [10, '10 Goals Reached']];
+  function milestoneCounts() {
+    var lives = data.lives.filter(function (l) { return l.done && !l.deleted; }).length;
+    var launches = data.products.filter(function (p) { return p.status === 'live'; }).length;
+    var goals = data.goals.filter(function (g) { var r = g.roadmap || []; return r.length && r.every(function (x) { return (x.pct || 0) >= 100; }); }).length;
+    return { lives: lives, launches: launches, goals: goals };
+  }
+  function awardMilestones() {
+    if (!window.P2P || !window.P2P.earnBadge) return;
+    var c = milestoneCounts();
+    LIVE_BADGES.forEach(function (t) { if (c.lives >= t[0]) window.P2P.earnBadge(t[1]); });
+    LAUNCH_BADGES.forEach(function (t) { if (c.launches >= t[0]) window.P2P.earnBadge(t[1]); });
+    GOAL_BADGES.forEach(function (t) { if (c.goals >= t[0]) window.P2P.earnBadge(t[1]); });
+  }
   function isoWeek(d) { var dt = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())); var day = dt.getUTCDay() || 7; dt.setUTCDate(dt.getUTCDate() + 4 - day); var ys = new Date(Date.UTC(dt.getUTCFullYear(), 0, 1)); return { y: dt.getUTCFullYear(), w: Math.ceil((((dt - ys) / 86400000) + 1) / 7) }; }
   function periodKey(tf, d) { d = d || new Date(); var y = d.getFullYear(); if (tf === 'day') return y + '-' + p2(d.getMonth() + 1) + '-' + p2(d.getDate()); if (tf === 'week') { var wk = isoWeek(d); return wk.y + '-W' + p2(wk.w); } if (tf === 'month') return y + '-' + p2(d.getMonth() + 1); if (tf === 'quarter') return y + '-Q' + (Math.floor(d.getMonth() / 3) + 1); return '' + y; }
   function weekKey() { return periodKey('week'); }

@@ -574,6 +574,149 @@
             "color": "c-gold",
             "earned": false
           }
+        },
+        "live-1": {
+          "type": "badge",
+          "settings": {
+            "group": "Going Live",
+            "name": "First Live",
+            "req": "go live for the first time",
+            "icon": "flame",
+            "color": "c-te",
+            "earned": false
+          }
+        },
+        "live-5": {
+          "type": "badge",
+          "settings": {
+            "group": "Going Live",
+            "name": "5 Lives Live",
+            "req": "5 lives logged",
+            "icon": "flame",
+            "color": "c-em",
+            "earned": false
+          }
+        },
+        "live-10": {
+          "type": "badge",
+          "settings": {
+            "group": "Going Live",
+            "name": "10 Lives Live",
+            "req": "10 lives logged",
+            "icon": "flame",
+            "color": "c-gold",
+            "earned": false
+          }
+        },
+        "live-25": {
+          "type": "badge",
+          "settings": {
+            "group": "Going Live",
+            "name": "25 Lives Live",
+            "req": "25 lives logged",
+            "icon": "flame",
+            "color": "c-pu",
+            "earned": false
+          }
+        },
+        "live-50": {
+          "type": "badge",
+          "settings": {
+            "group": "Going Live",
+            "name": "50 Lives Live",
+            "req": "50 lives logged",
+            "icon": "flame",
+            "color": "c-pk",
+            "earned": false
+          }
+        },
+        "launch-1": {
+          "type": "badge",
+          "settings": {
+            "group": "Launching",
+            "name": "First Launch",
+            "req": "launch your first product",
+            "icon": "shootingstar",
+            "color": "c-te",
+            "earned": false
+          }
+        },
+        "launch-3": {
+          "type": "badge",
+          "settings": {
+            "group": "Launching",
+            "name": "3 Launches",
+            "req": "3 products launched",
+            "icon": "shootingstar",
+            "color": "c-em",
+            "earned": false
+          }
+        },
+        "launch-5": {
+          "type": "badge",
+          "settings": {
+            "group": "Launching",
+            "name": "5 Launches",
+            "req": "5 products launched",
+            "icon": "shootingstar",
+            "color": "c-gold",
+            "earned": false
+          }
+        },
+        "launch-10": {
+          "type": "badge",
+          "settings": {
+            "group": "Launching",
+            "name": "10 Launches",
+            "req": "10 products launched",
+            "icon": "shootingstar",
+            "color": "c-pu",
+            "earned": false
+          }
+        },
+        "goal-1": {
+          "type": "badge",
+          "settings": {
+            "group": "Reaching Goals",
+            "name": "First Goal Reached",
+            "req": "complete your first goal",
+            "icon": "trophy",
+            "color": "c-te",
+            "earned": false
+          }
+        },
+        "goal-3": {
+          "type": "badge",
+          "settings": {
+            "group": "Reaching Goals",
+            "name": "3 Goals Reached",
+            "req": "3 goals completed",
+            "icon": "trophy",
+            "color": "c-em",
+            "earned": false
+          }
+        },
+        "goal-5": {
+          "type": "badge",
+          "settings": {
+            "group": "Reaching Goals",
+            "name": "5 Goals Reached",
+            "req": "5 goals completed",
+            "icon": "trophy",
+            "color": "c-gold",
+            "earned": false
+          }
+        },
+        "goal-10": {
+          "type": "badge",
+          "settings": {
+            "group": "Reaching Goals",
+            "name": "10 Goals Reached",
+            "req": "10 goals completed",
+            "icon": "trophy",
+            "color": "c-pu",
+            "earned": false
+          }
         }
       },
       "block_order": [
@@ -628,7 +771,20 @@
         "days-25",
         "days-50",
         "days-75",
-        "days-100"
+        "days-100",
+        "live-1",
+        "live-5",
+        "live-10",
+        "live-25",
+        "live-50",
+        "launch-1",
+        "launch-3",
+        "launch-5",
+        "launch-10",
+        "goal-1",
+        "goal-3",
+        "goal-5",
+        "goal-10"
       ],
       "settings": {
         "access_tag": "p2p-learning",
