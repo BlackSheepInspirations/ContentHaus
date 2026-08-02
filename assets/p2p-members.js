@@ -18,6 +18,7 @@
   var toolbar = { search: mb.querySelector('[data-mb-search]'), sort: mb.querySelector('[data-mb-sort]'), count: mb.querySelector('[data-mb-count]') };
   var nameEl = mb.querySelector('[data-mb-name]'), avGrid = mb.querySelector('[data-mb-avatars]'), avVal = { v: '' };
   var emailEl = mb.querySelector('[data-mb-email]'), showEmailEl = mb.querySelector('[data-mb-showemail]');
+  var upBtn = mb.querySelector('[data-mb-upbtn]'), upFile = mb.querySelector('[data-mb-upfile]'), upPreview = mb.querySelector('[data-mb-uppreview]'), upStatusEl = mb.querySelector('[data-mb-upstatus]');
   var members = [], myProfile = null, searchVal = '', sortVal = 'points';
 
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
@@ -227,6 +228,47 @@
   // Community mini-map card: build/refresh the map it just moved into its expand modal.
   window.P2P_MAP_REFRESH = function () { showMap(mapEl); };
 
+  /* ---- photo upload (client-side resize → R2 via the worker) ---- */
+  function upStatus(msg) { if (upStatusEl) upStatusEl.textContent = msg || ''; }
+  function showPhotoPreview(url) {
+    if (!upPreview) return;
+    if (url && !isPreset(url)) { upPreview.src = url; upPreview.hidden = false; } else { upPreview.hidden = true; upPreview.removeAttribute('src'); }
+  }
+  function handleUpload(file) {
+    if (!file) return;
+    if (!/^image\//.test(file.type)) { upStatus('Please choose an image file.'); return; }
+    if (file.size > 12 * 1024 * 1024) { upStatus('That image is too big (max 12MB).'); return; }
+    upStatus('Preparing…');
+    var fr = new FileReader();
+    fr.onload = function () {
+      var img = new Image();
+      img.onload = function () {
+        var max = 512, scale = Math.min(1, max / Math.max(img.width, img.height));
+        var cw = Math.max(1, Math.round(img.width * scale)), ch = Math.max(1, Math.round(img.height * scale));
+        var cv = document.createElement('canvas'); cv.width = cw; cv.height = ch;
+        cv.getContext('2d').drawImage(img, 0, 0, cw, ch);
+        var dataUrl; try { dataUrl = cv.toDataURL('image/jpeg', 0.85); } catch (e) { upStatus('Couldn’t read that image — try another.'); return; }
+        upStatus('Uploading…');
+        fetch('/apps/p2p/upload', { method: 'POST', headers: { 'content-type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify({ kind: 'avatar', data: dataUrl }) })
+          .then(function (r) { return r.json(); })
+          .then(function (j) {
+            if (j && j.url) { if (f.photo) f.photo.value = j.url; renderAvatars(''); showPhotoPreview(j.url); upStatus('Photo ready — hit Save to keep it.'); }
+            else if (j && j.error === 'no_store') { upStatus('Photo uploads aren’t switched on yet — pick an avatar or paste a URL for now.'); }
+            else if (j && j.error === 'too_large') { upStatus('That image is too large — try a smaller one.'); }
+            else { upStatus('Upload didn’t work — try again.'); }
+          }).catch(function () { upStatus('Upload didn’t work — try again.'); });
+      };
+      img.onerror = function () { upStatus('Couldn’t read that image — try another.'); };
+      img.src = fr.result;
+    };
+    fr.onerror = function () { upStatus('Couldn’t read that file.'); };
+    fr.readAsDataURL(file);
+  }
+  if (upBtn && upFile) {
+    upBtn.addEventListener('click', function () { upFile.click(); });
+    upFile.addEventListener('change', function () { if (upFile.files && upFile.files[0]) handleUpload(upFile.files[0]); });
+  }
+
   /* ---- my profile ---- */
   function fillForm(p) {
     if (nameEl) nameEl.value = (p && p.name) || stats().name || '';
@@ -238,6 +280,7 @@
     if (showEmailEl) showEmailEl.checked = !!(p && p.showEmail);
     Object.keys(socialEls).forEach(function (k) { socialEls[k].value = (p && p.social && p.social[k]) || ''; });
     renderAvatars(p && isPreset(p.photo) ? p.photo.slice(7) : '');
+    showPhotoPreview(p && !isPreset(p.photo) ? (p.photo || '') : '');
   }
   function myKey() { return String(stats().name || '').trim().toLowerCase(); }
   function collect(hidden) {
@@ -257,7 +300,7 @@
     return fetch(PROFILE, { method: 'POST', headers: { 'content-type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify(body) }).then(function (r) { return r.json(); });
   }
   function showStatus(msg, err) { if (!f.status) return; f.status.textContent = msg; f.status.classList.toggle('err', !!err); if (msg) setTimeout(function () { if (f.status.textContent === msg) { f.status.textContent = ''; f.status.classList.remove('err'); } }, 4500); }
-  if (f.photo) f.photo.addEventListener('input', function () { if (f.photo.value.trim() && avVal.v) renderAvatars(''); });
+  if (f.photo) f.photo.addEventListener('input', function () { if (f.photo.value.trim() && avVal.v) renderAvatars(''); showPhotoPreview(f.photo.value.trim()); });
   if (f.save) f.save.addEventListener('click', function () {
     if (nameEl) {
       var others = members.filter(function (m) { return String(m.name || '').trim().toLowerCase() !== myKey(); });

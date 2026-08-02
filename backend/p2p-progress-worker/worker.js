@@ -210,7 +210,7 @@ export default {
             recentBadges: sanitizeBadges(body.recentBadges),
             streak: Number(body.streak) || 0,
             since: info.createdAt || (prev && prev.since) || null,
-            photo: (String(body.photo || '').slice(0, 7) === 'preset:' ? String(body.photo).slice(0, 64) : sanitizeUrl(body.photo)),
+            photo: (function () { const ph = String(body.photo || ''); if (ph.slice(0, 7) === 'preset:') return ph.slice(0, 64); if (ph.slice(0, 17) === '/apps/p2p/imgget?') return ph.slice(0, 200); return sanitizeUrl(ph); })(),
             quote: String(body.quote || '').slice(0, 140),
             about: String(body.about || '').slice(0, 320),
             social: sanitizeSocial(body.social),
@@ -265,6 +265,35 @@ export default {
         }
         const following = (await kv.get('following:' + customerId, 'json')) || [];
         return json({ ok: true, members, following });
+      }
+
+      /* ---------- image upload → R2 (avatars now; post media later) ---------- */
+      if (seg === 'upload') {
+        if (request.method !== 'POST') return json({ error: 'method' }, 405);
+        if (!customerId) return json({ error: 'guest' }, 401);
+        if (!env.MEDIA) return json({ error: 'no_store' }, 501);   // R2 bucket not bound yet
+        const body = await request.json().catch(() => null);
+        const m = /^data:(image\/(png|jpe?g|webp|gif));base64,(.+)$/i.exec(String((body && body.data) || ''));
+        if (!m) return json({ error: 'bad_image' }, 400);
+        const ct = m[1].toLowerCase();
+        const ext = ct.indexOf('png') > -1 ? 'png' : ct.indexOf('webp') > -1 ? 'webp' : ct.indexOf('gif') > -1 ? 'gif' : 'jpg';
+        let bytes;
+        try { bytes = Uint8Array.from(atob(m[3]), c => c.charCodeAt(0)); } catch (e) { return json({ error: 'bad_image' }, 400); }
+        if (bytes.length > 3 * 1024 * 1024) return json({ error: 'too_large' }, 413);   // 3MB after client-side resize
+        const kind = (body.kind === 'avatar' || body.kind === 'post') ? body.kind : 'misc';
+        const key = kind + '_' + customerId + '_' + Date.now() + '.' + ext;
+        await env.MEDIA.put(key, bytes, { httpMetadata: { contentType: ct } });
+        const base = (env.r2_public_base || '').replace(/\/+$/, '');
+        return json({ ok: true, url: base ? (base + '/' + key) : ('/apps/p2p/imgget?key=' + encodeURIComponent(key)) });
+      }
+      /* ---------- serve an R2 image (fallback when no public bucket URL is set) ---------- */
+      if (seg === 'imgget') {
+        if (!env.MEDIA) return new Response('not found', { status: 404 });
+        const key = url.searchParams.get('key') || '';
+        const obj = key ? await env.MEDIA.get(key) : null;
+        if (!obj) return new Response('not found', { status: 404 });
+        const h = new Headers(); obj.writeHttpMetadata(h); h.set('Cache-Control', 'public, max-age=31536000, immutable');
+        return new Response(obj.body, { headers: h });
       }
 
       /* ---------- reveal one member's shared email (click-to-reveal; logged-in only) ---------- */
