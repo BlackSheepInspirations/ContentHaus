@@ -123,6 +123,7 @@ window.P2P = (function(){
     p += (get(K.ptsStreak, 0) || 0) + (get(K.ptsJournal, 0) || 0); // streak + journal ledgers
     p += (get(K.ptsWeekBonus, 0) || 0);                            // weekly-goal bonuses
     p += (get('p2p_engage_points', 0) || 0);                       // community engagement (server-awarded)
+    p += (get('p2p_pts_doing', 0) || 0);                           // going live / launching / reaching goals (planner-awarded)
     return p;
   }
   function pointsBreakdown(){
@@ -136,7 +137,8 @@ window.P2P = (function(){
       streak:  get(K.ptsStreak, 0) || 0,
       journal: get(K.ptsJournal, 0) || 0,
       weekly:  get(K.ptsWeekBonus, 0) || 0,
-      engage:  get('p2p_engage_points', 0) || 0
+      engage:  get('p2p_engage_points', 0) || 0,
+      doing:   get('p2p_pts_doing', 0) || 0
     };
   }
 
@@ -210,7 +212,13 @@ window.P2P = (function(){
     if(!w || w.k !== k) w = { k:k, done:0, paid:false };
     w.done += 1;
     var justHit = false;
-    if(w.done >= WEEK_GOAL && !w.paid){ w.paid = true; justHit = true; set(K.ptsWeekBonus, (get(K.ptsWeekBonus, 0) || 0) + R.weekbonus); }
+    if(w.done >= WEEK_GOAL && !w.paid){
+      w.paid = true; justHit = true;
+      set(K.ptsWeekBonus, (get(K.ptsWeekBonus, 0) || 0) + R.weekbonus);
+      var wh = (get('p2p_weeks_hit', 0) || 0) + 1; set('p2p_weeks_hit', wh);   // cumulative weeks the goal was hit
+      if(wh >= 4)  earnBadge('Consistent Closer');
+      if(wh >= 12) earnBadge('Steady Hand');
+    }
     set(K.weekGoal, w);
     return justHit;
   }

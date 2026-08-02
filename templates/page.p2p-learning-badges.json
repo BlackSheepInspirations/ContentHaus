@@ -490,9 +490,9 @@
         "masterclass": {
           "type": "badge",
           "settings": {
-            "group": "Special",
-            "name": "Masterclass",
-            "req": "Join a live masterclass",
+            "group": "Masterclasses",
+            "name": "Masterclass Grad",
+            "req": "complete a masterclass",
             "icon": "grad",
             "color": "c-pu",
             "earned": false
@@ -717,6 +717,61 @@
             "color": "c-pu",
             "earned": false
           }
+        },
+        "conv-start": {
+          "type": "badge",
+          "settings": {
+            "group": "Community",
+            "name": "Conversation Starter",
+            "req": "start meaningful chats on the board",
+            "icon": "star",
+            "color": "c-te",
+            "earned": false
+          }
+        },
+        "encourager": {
+          "type": "badge",
+          "settings": {
+            "group": "Community",
+            "name": "Encourager",
+            "req": "reply to 25 members",
+            "icon": "heart",
+            "color": "c-pk",
+            "earned": false
+          }
+        },
+        "cheerleader": {
+          "type": "badge",
+          "settings": {
+            "group": "Community",
+            "name": "Cheerleader",
+            "req": "give 100 reactions",
+            "icon": "shootingstar",
+            "color": "c-gold",
+            "earned": false
+          }
+        },
+        "closer": {
+          "type": "badge",
+          "settings": {
+            "group": "Consistency",
+            "name": "Consistent Closer",
+            "req": "hit your weekly goal 4 weeks",
+            "icon": "flag",
+            "color": "c-em",
+            "earned": false
+          }
+        },
+        "steady": {
+          "type": "badge",
+          "settings": {
+            "group": "Consistency",
+            "name": "Steady Hand",
+            "req": "hit your weekly goal 12 weeks",
+            "icon": "compass",
+            "color": "c-gold",
+            "earned": false
+          }
         }
       },
       "block_order": [
@@ -784,7 +839,12 @@
         "goal-1",
         "goal-3",
         "goal-5",
-        "goal-10"
+        "goal-10",
+        "conv-start",
+        "encourager",
+        "cheerleader",
+        "closer",
+        "steady"
       ],
       "settings": {
         "access_tag": "p2p-learning",

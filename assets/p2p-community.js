@@ -84,7 +84,19 @@
     setTimeout(function () { t.classList.remove('show'); setTimeout(function () { t.remove(); }, 300); }, kind === 'warn' ? 2800 : 1500);
   }
   function syncEngage(total) { if (typeof total !== 'undefined' && total !== null) { try { localStorage.setItem('p2p_engage_points', total); } catch (e) {} } }
-  function handleEngage(e) {
+  function bumpMy(key) { var n = 0; try { n = (parseInt(localStorage.getItem(key) || '0', 10) || 0) + 1; localStorage.setItem(key, String(n)); } catch (e) {} return n; }
+  function myCount(key) { try { return parseInt(localStorage.getItem(key) || '0', 10) || 0; } catch (e) { return 0; } }
+  function awardCommunityBadges() {
+    if (!window.P2P || !window.P2P.earnBadge) return;
+    if (myCount('p2p_my_posts') >= 3) window.P2P.earnBadge('Conversation Starter');
+    if (myCount('p2p_my_comments') >= 25) window.P2P.earnBadge('Encourager');
+    if (myCount('p2p_my_reacts') >= 100) window.P2P.earnBadge('Cheerleader');
+  }
+  function handleEngage(e, kind) {
+    if (kind === 'post') bumpMy('p2p_my_posts');
+    else if (kind === 'comment') bumpMy('p2p_my_comments');
+    else if (kind === 'like') bumpMy('p2p_my_reacts');
+    awardCommunityBadges();
     if (!e) return;
     syncEngage(e.total);
     if (e.cooldown) toast('Whoa — liking too fast! Points paused for a few minutes ⏳', 'warn');
@@ -394,7 +406,7 @@
           var list = box.querySelector('.osx-cm-list'); if (list) { list.insertAdjacentHTML('beforeend', cmItem(res.comment, id)); wireMenus(list); list.querySelectorAll('[data-cdel]').forEach(function (bd) { bd.addEventListener('click', function () { var pr = bd.getAttribute('data-cdel').split('|'); deleteComment(pr[0], pr[1]); }); }); list.querySelectorAll('[data-cedit]').forEach(function (bd) { bd.addEventListener('click', function () { var pr = bd.getAttribute('data-cedit').split('|'); openEditComment(pr[0], pr[1]); }); }); }
           var pp = posts.filter(function (p) { return p.id === id; })[0];
           if (pp) { pp.comments = pp.comments || []; pp.comments.push(res.comment); var cnt = container.querySelector('[data-ctoggle="' + id + '"] span'); if (cnt) cnt.textContent = pp.comments.length; }
-          if (res.engage) handleEngage(res.engage);
+          if (res.engage) handleEngage(res.engage, 'comment');
         }
       }).catch(function () { if (btn) btn.disabled = false; });
   }
@@ -452,7 +464,7 @@
               if (typeof res.likes !== 'undefined') p.likes = res.likes;
               if (typeof res.liked !== 'undefined') p.liked = res.liked;
             });
-            if (res.engage) handleEngage(res.engage);
+            if (res.engage) handleEngage(res.engage, 'like');
           }).catch(function () { delete btn.dataset.busy; setReactBtn(btn, wasOn, cur); });
       });
     });
@@ -754,7 +766,7 @@
       fetch(PROXY, { method: 'POST', headers: { 'content-type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify({ text: text || ' ', title: ttl, category: catSel.value, attachments: atts, kind: 'post', name: window.P2P_MEMBER_NAME || '', streak: myStreak() }) })
         .then(function (r) { return r.json(); })
         .then(function (res) {
-          if (res && res.ok) { try { localStorage.setItem('p2p_wc_hello', '1'); } catch (e) {} if (res.engage) handleEngage(res.engage); close(); if (filter.category !== 'all' && filter.category !== catSel.value) filter.category = catSel.value; filter.page = 1; renderTabs(); load(); loadWins(); }
+          if (res && res.ok) { try { localStorage.setItem('p2p_wc_hello', '1'); } catch (e) {} if (res.engage) handleEngage(res.engage, 'post'); close(); if (filter.category !== 'all' && filter.category !== catSel.value) filter.category = catSel.value; filter.page = 1; renderTabs(); load(); loadWins(); }
           else { postB.disabled = false; postB.textContent = 'Post'; }
         })
         .catch(function () { postB.disabled = false; postB.textContent = 'Post'; });
@@ -770,7 +782,7 @@
     winShare.disabled = true; winShare.textContent = 'Sharing…';
     fetch(PROXY, { method: 'POST', headers: { 'content-type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify({ text: t, kind: 'win', name: window.P2P_MEMBER_NAME || '', streak: myStreak() }) })
       .then(function (r) { return r.json(); })
-      .then(function (res) { winShare.disabled = false; winShare.textContent = 'Share win'; if (res && res.ok) { winText.value = ''; if (winBox) winBox.hidden = true; try { localStorage.setItem('p2p_wc_win', '1'); } catch (e) {} if (res.engage) handleEngage(res.engage); confetti(); load(); loadWins(); } })
+      .then(function (res) { winShare.disabled = false; winShare.textContent = 'Share win'; if (res && res.ok) { winText.value = ''; if (winBox) winBox.hidden = true; try { localStorage.setItem('p2p_wc_win', '1'); } catch (e) {} if (res.engage) handleEngage(res.engage, 'post'); confetti(); load(); loadWins(); } })
       .catch(function () { winShare.disabled = false; winShare.textContent = 'Share win'; });
   });
 

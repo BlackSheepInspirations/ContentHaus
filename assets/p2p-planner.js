@@ -44,11 +44,16 @@
     return { lives: lives, launches: launches, goals: goals };
   }
   function awardMilestones() {
-    if (!window.P2P || !window.P2P.earnBadge) return;
+    if (!window.P2P) return;
     var c = milestoneCounts();
-    LIVE_BADGES.forEach(function (t) { if (c.lives >= t[0]) window.P2P.earnBadge(t[1]); });
-    LAUNCH_BADGES.forEach(function (t) { if (c.launches >= t[0]) window.P2P.earnBadge(t[1]); });
-    GOAL_BADGES.forEach(function (t) { if (c.goals >= t[0]) window.P2P.earnBadge(t[1]); });
+    if (window.P2P.earnBadge) {
+      LIVE_BADGES.forEach(function (t) { if (c.lives >= t[0]) window.P2P.earnBadge(t[1]); });
+      LAUNCH_BADGES.forEach(function (t) { if (c.launches >= t[0]) window.P2P.earnBadge(t[1]); });
+      GOAL_BADGES.forEach(function (t) { if (c.goals >= t[0]) window.P2P.earnBadge(t[1]); });
+    }
+    // Doing points (idempotent — recomputed from current counts): Live +15, Launch +50, Goal +50.
+    try { localStorage.setItem('p2p_pts_doing', String(c.lives * 15 + c.launches * 50 + c.goals * 50)); } catch (e) {}
+    if (window.P2P.push) { try { window.P2P.push(); } catch (e) {} }
   }
   function isoWeek(d) { var dt = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())); var day = dt.getUTCDay() || 7; dt.setUTCDate(dt.getUTCDate() + 4 - day); var ys = new Date(Date.UTC(dt.getUTCFullYear(), 0, 1)); return { y: dt.getUTCFullYear(), w: Math.ceil((((dt - ys) / 86400000) + 1) / 7) }; }
   function periodKey(tf, d) { d = d || new Date(); var y = d.getFullYear(); if (tf === 'day') return y + '-' + p2(d.getMonth() + 1) + '-' + p2(d.getDate()); if (tf === 'week') { var wk = isoWeek(d); return wk.y + '-W' + p2(wk.w); } if (tf === 'month') return y + '-' + p2(d.getMonth() + 1); if (tf === 'quarter') return y + '-Q' + (Math.floor(d.getMonth() / 3) + 1); return '' + y; }
