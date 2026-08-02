@@ -513,10 +513,6 @@
               </div>
               <div class="osx-wins-side-body" data-wins-feed><div class="osx-cw-empty">—</div></div>
             </div>
-            <div class="osx-side-card">
-              <div class="osx-side-h">🌱 Growth Board</div>
-              <div class="osx-gb" data-gb><div class="osx-cw-empty">—</div></div>
-            </div>
             <button class="osx-side-card osx-mini osx-mini-map" type="button" data-map-open>
               <div class="osx-side-h">📍 Where's the <span class="osx-flock-grad">flock?</span></div>
               <div class="osx-mini-body"><b data-mini-map-count>📍</b><span class="osx-mini-hint">Tap to explore the map →</span></div>
@@ -621,6 +617,17 @@
       </div>
         </div>
         <aside class="osx-members-side">
+          <div class="osx-lower-card osx-gb-card">
+            <div class="osx-gb-head">
+              <div class="osx-side-h">🌱 Growth Board</div>
+              <div class="osx-gb-range" data-gb-range>
+                <button type="button" class="osx-gb-rb on" data-gbr="all">All-Time</button>
+                <button type="button" class="osx-gb-rb" data-gbr="d30">30 days</button>
+                <button type="button" class="osx-gb-rb" data-gbr="d7">7 days</button>
+              </div>
+            </div>
+            <div class="osx-gb" data-gb><div class="osx-cw-empty">—</div></div>
+          </div>
           <div class="osx-lower-card">
             <div class="osx-cal" data-cal>
               <div class="osx-cal-head"><button type="button" class="osx-cal-nav" data-cal-prev aria-label="Previous month">‹</button><b data-cal-title>—</b><button type="button" class="osx-cal-nav" data-cal-next aria-label="Next month">›</button></div>
@@ -1993,7 +2000,13 @@
   #p2pos .osx-p2p-btns .osx-comm-invite{flex:1;}
   #p2pos .osx-comm-invite.ghost{background:transparent;color:var(--gold-bright);border:1px solid var(--gstroke);}
   #p2pos .osx-p2pcard .osx-comm-counts{margin-top:2px;}
-  #p2pos .osx-gb-row{display:flex;align-items:center;gap:9px;padding:7px 0;border-top:1px solid var(--stroke);}
+  #p2pos .osx-gb-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:6px;}
+  #p2pos .osx-gb-range{display:inline-flex;gap:3px;background:rgba(9,17,24,.5);border:1px solid var(--stroke);border-radius:999px;padding:3px;}
+  #p2pos .osx-gb-rb{border:0;background:none;color:var(--muted);border-radius:999px;padding:5px 10px;font:700 11px/1 system-ui;cursor:pointer;transition:.14s;}
+  #p2pos .osx-gb-rb.on{background:linear-gradient(100deg,rgba(216,180,90,.22),rgba(143,111,214,.16));color:#fff;}
+  #p2pos .osx-gb-fire{font-size:11px;color:var(--gold-bright);font-weight:800;}
+  #p2pos .osx-gb-row{display:flex;align-items:center;gap:9px;padding:7px 0;border-top:1px solid var(--stroke);cursor:pointer;border-radius:8px;transition:background .14s;}
+  #p2pos .osx-gb-row:hover{background:rgba(255,255,255,.03);}
   #p2pos .osx-gb-row:first-child{border-top:0;}
   #p2pos .osx-gb-rank{width:16px;text-align:center;font:800 12px/1 Georgia,serif;color:var(--muted);}
   #p2pos .osx-gb-rank.top{color:var(--gold-bright);}

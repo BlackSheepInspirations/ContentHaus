@@ -233,6 +233,15 @@ export default {
           // maintain the name -> owner index that enforces uniqueness
           if (prevLow && prevLow !== low) await kv.delete('name:' + prevLow).catch(() => {});
           if (low) await kv.put('name:' + low, customerId).catch(() => {});
+          // daily points snapshot → powers the Growth Board's 7d/30d windows (fills in going forward)
+          try {
+            const todayNum = Math.floor(Date.now() / 86400000);
+            let snaps = (await kv.get('snap:' + customerId, 'json')) || [];
+            if (snaps.length && snaps[snaps.length - 1].d === todayNum) snaps[snaps.length - 1].p = rec.points;
+            else snaps.push({ d: todayNum, p: rec.points });
+            if (snaps.length > 40) snaps = snaps.slice(-40);
+            await kv.put('snap:' + customerId, JSON.stringify(snaps));
+          } catch (e) {}
           // Name changed → refresh it on this member's existing posts + comments so old content shows the new identity (avatars are looked up by name, so this fixes those too).
           if (prevLow && prevLow !== low) {
             try {
@@ -262,12 +271,23 @@ export default {
         if (!kv) return json({ ok: true, members: [] });
         const list = await kv.list({ prefix: 'member:' });
         const members = [];
+        const todayNum = Math.floor(Date.now() / 86400000);
+        function windowGain(snaps, cur, w) {
+          if (!snaps || !snaps.length) return 0;
+          const cutoff = todayNum - w; let base = null;
+          for (const s of snaps) { if (s.d <= cutoff) base = s; }   // most recent snapshot at/older than the window edge
+          if (!base) base = snaps[0];                                 // newer than the window → count gains since first seen
+          return Math.max(0, (cur || 0) - (base.p || 0));
+        }
         for (const k of list.keys) {
           const r = await kv.get(k.name, 'json');
           if (r && !r.hidden && !r.adminHidden) {
             const hasEmail = !!(r.showEmail && r.email);
             delete r.email;            // never expose the raw address in the bulk list — revealed only on-demand, one at a time
             r.hasEmail = hasEmail;
+            const snaps = await kv.get('snap:' + r.id, 'json');
+            r.d7 = windowGain(snaps, r.points, 7);
+            r.d30 = windowGain(snaps, r.points, 30);
             members.push(r);
           }
         }

@@ -8,7 +8,7 @@
   var PROXY = '/apps/p2p/community', REACT = '/apps/p2p/react', MEMBERS = '/apps/p2p/members';
   var feed = root.querySelector('[data-cw-feed]');
   var winsFeed = root.querySelector('[data-wins-feed]');
-  var posts = [], winPosts = [], winIdx = 0, winTimer = null, welcomeProfileDone = false, wowPost = null, isAdmin = false, catList = null, memberMap = {}, didDeepLink = false;
+  var posts = [], winPosts = [], winIdx = 0, winTimer = null, welcomeProfileDone = false, wowPost = null, isAdmin = false, catList = null, memberMap = {}, didDeepLink = false, gbRange = 'all', lastMembers = [];
   var filter = { category: 'all', range: 'all', sort: 'new', q: '', offset: 0, limit: 30, hasMore: false, page: 1, total: 0 };
   var CATS = { general: { label: 'General Discussion', emoji: '💬' }, intro: { label: 'Introductions', emoji: '👋' }, wins: { label: 'Wins • Habits • Growth', emoji: '🏆' }, help: { label: 'Questions & Help', emoji: '🙏' }, testimonial: { label: 'Testimonials', emoji: '🙌' }, announce: { label: 'P2P Announcements', emoji: '📣' } };
   function catMeta(k) { return (catList && catList.filter(function (x) { return x.key === k; })[0]) || CATS[k] || null; }
@@ -565,16 +565,20 @@
   function renderGrowth(m) {
     var el = root.querySelector('[data-gb]'); if (!el) return;
     if (!m.length) { el.innerHTML = empty('No members yet.'); return; }
-    var top = m.slice().sort(function (a, b) { return (b.points || 0) - (a.points || 0); }).slice(0, 10);
+    var key = gbRange === 'd7' ? 'd7' : gbRange === 'd30' ? 'd30' : 'points';
+    var top = m.slice().sort(function (a, b) { return ((b[key] || 0) - (a[key] || 0)) || ((b.points || 0) - (a.points || 0)); }).slice(0, 10);
+    var allZero = key !== 'points' && top.every(function (p) { return !(p[key] || 0); });
+    if (allZero) { el.innerHTML = '<div class="osx-cw-empty" style="padding:10px 0;">This window is still filling in — points earned over the last ' + (key === 'd7' ? '7' : '30') + ' days will show here as everyone keeps showing up. 🌱</div>'; return; }
     el.innerHTML = top.map(function (p, i) {
-      return '<div class="osx-gb-row"><span class="osx-gb-rank' + (i < 3 ? ' top' : '') + '">' + (i + 1) + '</span>' +
+      var val = (p[key] || 0);
+      return '<div class="osx-gb-row" data-profile="' + esc(p.name || '') + '"><span class="osx-gb-rank' + (i < 3 ? ' top' : '') + '">' + (i + 1) + '</span>' +
         '<span class="osx-gb-av">' + avatar(p) + '</span>' +
-        '<span class="osx-gb-who"><span class="osx-gb-name">' + esc(p.name || 'Member') + '</span>' + (p.tier ? '<span class="osx-gb-tier">' + esc(p.tier) + '</span>' : '') + '</span>' +
+        '<span class="osx-gb-who"><span class="osx-gb-name">' + esc(p.name || 'Member') + (p.streak ? ' <span class="osx-gb-fire">' + p.streak + '🔥</span>' : '') + '</span>' + (p.tier ? '<span class="osx-gb-tier">' + esc(p.tier) + '</span>' : '') + '</span>' +
         badgeChips(p) +
-        '<span class="osx-gb-pts">' + (p.points || 0).toLocaleString() + '</span></div>';
+        '<span class="osx-gb-pts">' + (key === 'points' ? val.toLocaleString() : '+' + val.toLocaleString()) + '</span></div>';
     }).join('');
     el.querySelectorAll('[data-badge]').forEach(function (b) {
-      b.addEventListener('click', function () { badgePopup(b.getAttribute('data-badge'), b.getAttribute('data-bemoji')); });
+      b.addEventListener('click', function (e) { e.stopPropagation(); badgePopup(b.getAttribute('data-badge'), b.getAttribute('data-bemoji')); });
     });
   }
 
@@ -602,7 +606,7 @@
       if (nm && m.some(function (x) { return String(x.name || '').trim().toLowerCase() === nm && (x.photo || x.quote || x.about); })) welcomeProfileDone = true;
       memberMap = {};
       m.forEach(function (x) { if (x.name) memberMap[String(x.name).trim().toLowerCase()] = { photo: x.photo || '', tier: x.tier || '', tierNum: x.tierNum || 0 }; });
-      renderGrowth(m); renderSpotlight(m); updateWelcome();
+      lastMembers = m; renderGrowth(m); renderSpotlight(m); updateWelcome();
       if (posts.length || wowPost) renderWall();   // now that we have photos/tiers, repaint the feed
     }).catch(function () {});
   }
@@ -838,6 +842,9 @@
   window.P2P_COMMUNITY_SEARCH = function (q) { filter.q = String(q || ''); filter.category = 'all'; filter.page = 1; if (searchEl) searchEl.value = filter.q; renderTabs(); load(); if (feed && feed.scrollIntoView) feed.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
 
   document.addEventListener('click', closeMenus);
+  root.querySelectorAll('[data-gbr]').forEach(function (b) {
+    b.addEventListener('click', function () { gbRange = b.getAttribute('data-gbr'); root.querySelectorAll('[data-gbr]').forEach(function (x) { x.classList.toggle('on', x === b); }); renderGrowth(lastMembers); });
+  });
   renderTabs(); load(); loadWins(); loadMembersData();
 })();
 
