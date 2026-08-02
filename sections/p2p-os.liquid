@@ -171,6 +171,7 @@
           <button class="osx-chip" type="button" data-prog="points" aria-label="See where your points came from"><span class="osx-cico">⭐</span><span><b class="p2pos-points">0</b><small>Points</small></span></button>
           <button class="osx-chip" type="button" data-prog="badges" aria-label="See your badges"><span class="osx-cico">🏅</span><span><b class="p2pos-badges">0</b><small>Badges</small></span></button>
           <button class="osx-chip" type="button" data-prog="streak" aria-label="See your streak"><span class="osx-cico">🔥</span><span><b class="p2pos-streak">0</b><small>Day streak</small></span></button>
+          <button class="osx-chip" type="button" data-prog="streak" aria-label="See days shown up"><span class="osx-cico">🗓️</span><span><b class="p2pos-days">0</b><small>Days shown up</small></span></button>
           <button class="osx-chip" type="button" data-prog="merit" aria-label="See Merit and Tiers"><span class="osx-cico">✦</span><span><b class="p2pos-tier">Dreamer</b><small>Merit tier</small></span></button>
         </div>
       </div>
@@ -1402,6 +1403,7 @@ window.P2P_EVENTS = [{%- for b in ev_blocks -%}{"iso":{{ b.settings.iso_date | d
       put('.p2pos-points', window.P2P.points());
       var bs = window.P2P.badgesStat(); put('.p2pos-badges', bs ? bs.earned : window.P2P.earnedSet().length);
       put('.p2pos-streak', window.P2P.streak().count);
+      if(window.P2P.daysActive) put('.p2pos-days', window.P2P.daysActive());
       if(window.P2P.tier) put('.p2pos-tier', window.P2P.tier().name);
       var ring = root.querySelector('[data-osx-ring]');
       if(ring && window.P2P_MAP){

@@ -87,7 +87,9 @@
     }
     var nav = '<div class="pb-calnav"><button type="button" class="pb-calb" data-streak-prev aria-label="Previous month">‹</button><b>' + MONTHS[m] + " " + y + '</b><button type="button" class="pb-calb" data-streak-next aria-label="Next month"' + (streakMO >= 0 ? " disabled" : "") + ">›</button></div>";
     var sub = longest > count ? ("Longest run: " + longest + " days · showed up on the lit days.") : "Keep it lit — every day you show up glows.";
-    return { title: "Your streak", body: '<div class="pb-streaktop"><span class="pb-flame">🔥</span><span class="pb-streaknum">' + count + "<small>day" + (count === 1 ? "" : "s") + ' in a row</small></span></div>' + nav + '<div class="pb-cal">' + dows + cells + '</div><p class="pb-sub" style="margin-top:14px">' + sub + "</p>" };
+    var totalDays = (window.P2P && window.P2P.daysActive) ? window.P2P.daysActive() : 0;
+    var daysLine = totalDays ? '<p class="pb-sub" style="margin-top:4px">🗓️ <b>' + totalDays + ' day' + (totalDays === 1 ? '' : 's') + ' shown up</b> in total — cumulative, so a missed day never sets it back.</p>' : '';
+    return { title: "Your streak", body: '<div class="pb-streaktop"><span class="pb-flame">🔥</span><span class="pb-streaknum">' + count + "<small>day" + (count === 1 ? "" : "s") + ' in a row</small></span></div>' + daysLine + nav + '<div class="pb-cal">' + dows + cells + '</div><p class="pb-sub" style="margin-top:14px">' + sub + "</p>" };
   }
 
   function viewMerit() {
