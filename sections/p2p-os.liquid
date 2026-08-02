@@ -2179,7 +2179,7 @@ window.P2P_EVENTS = [{%- for b in ev_blocks -%}{"iso":{{ b.settings.iso_date | d
 
     // Trusted Guide logo — large on the LEFT, with each view's eyebrow/title/subtext stacked to its right.
     // Also Title-Cases hero titles (keeping ACRONYMS like ROOTED/P2P) and aura-colors chosen words.
-    (function(){
+    (function(){ try{
       var src = "{{ 'p2p-trusted-guide.png' | asset_url }}";
       var AURA = { checkpoint:['before'], rooted:['rooted'], mates:['partners'], members:['flock'], tools:['one','click'], notebook:['notebook'], bonus:['free','downloads'] };
       function tcWord(w){ return /[A-Z]/.test(w) ? w : (w.charAt(0).toUpperCase() + w.slice(1)); }
@@ -2205,17 +2205,18 @@ window.P2P_EVENTS = [{%- for b in ev_blocks -%}{"iso":{{ b.settings.iso_date | d
         while(n && (n.classList.contains('osx-comm-tag') || n.classList.contains('osx-lede'))){ var nx = n.nextElementSibling; follow.push(n); n = nx; }
         var row = document.createElement('div'); row.className = 'osx-hero-lockrow';
         var col = document.createElement('div'); col.className = 'osx-hero-textcol';
-        v.insertBefore(row, kick || h);
+        var anchor = kick || h; if(!anchor || anchor.parentNode !== v){ return; } // title not a direct child — skip, don't throw
+        v.insertBefore(row, anchor);
         row.innerHTML = '<span class="osx-hero-biglogo"><img src="' + src + '" alt="" aria-hidden="true"></span>';
         row.appendChild(col);
         if(kick) col.appendChild(kick);
         col.appendChild(h);
         follow.forEach(function(f){ col.appendChild(f); });
       });
-    })();
+    }catch(e){ if(window.console) console.warn('P2P hero-title block skipped:', e); } })();
 
     // Personalized Brand DNA panel — reads p2p_archetype (set when the Founders Assessment completes)
-    (function(){
+    (function(){ try{
       var dna = root.querySelector('[data-osx-dna]'); if(!dna) return;
       var A = window.P2P_ARCHETYPE || {}, imgs = A.img || {}, assessUrl = A.assessUrl || '/pages/brand-haus?bh_focus=1';
       var rec = null; try{ rec = JSON.parse(localStorage.getItem('p2p_archetype') || 'null'); }catch(e){}
@@ -2237,10 +2238,10 @@ window.P2P_EVENTS = [{%- for b in ev_blocks -%}{"iso":{{ b.settings.iso_date | d
         dna.innerHTML = '<a class="dna-nudge" href="' + esc(assessUrl) + '"><span class="dna-nudge-ic">✦</span><b>Discover your Brand DNA</b><span class="dna-nudge-sub">Take your Founders Assessment to reveal your archetype →</span></a>';
         dna.hidden = false;
       }
-    })();
+    }catch(e){ if(window.console) console.warn('P2P DNA panel skipped:', e); } })();
 
     // Daily Mindset · Purpose · Heart carousel — one item per pillar per day; auto-rotate + Next
-    (function(){
+    (function(){ try{
       var wrap = root.querySelector('[data-osx-moments]'); if(!wrap) return;
       var day = Math.floor(Date.now() / 864e5);
       var pillars = [
@@ -2269,7 +2270,7 @@ window.P2P_EVENTS = [{%- for b in ev_blocks -%}{"iso":{{ b.settings.iso_date | d
       dots.forEach(function(d, di){ d.addEventListener('click', function(){ go(di); start(); }); });
       wrap.addEventListener('mouseenter', stop); wrap.addEventListener('mouseleave', start);
       render(); wrap.hidden = false; start();
-    })();
+    }catch(e){ if(window.console) console.warn('P2P boosters skipped:', e); } })();
 
     // live stats + ring (reuse the engine)
     if(root.querySelector('[data-osx-stats]') && window.P2P){
@@ -2290,7 +2291,7 @@ window.P2P_EVENTS = [{%- for b in ev_blocks -%}{"iso":{{ b.settings.iso_date | d
     if(window.P2PProgressPopups){ window.P2PProgressPopups.mount(root); }
 
     // "Born an Original" — rotate the middle line every 11s (up-slide). Mark, title & gold note stay fixed.
-    (function(){
+    (function(){ try{
       var box = root.querySelector('[data-osx-reassure]'); if(!box) return;
       var line = box.querySelector('.osx-reassure-line'); if(!line) return;
       var LINES = [
@@ -2408,19 +2409,19 @@ window.P2P_EVENTS = [{%- for b in ev_blocks -%}{"iso":{{ b.settings.iso_date | d
         }, 500);
       }
       setInterval(tick, 11000);
-    })();
+    }catch(e){ if(window.console) console.warn('P2P born-original skipped:', e); } })();
 
     // Checkpoint "Meet your Hausen" — flip a card to reveal more + a link (link click still navigates).
-    (function(){
+    (function(){ try{
       root.querySelectorAll('.osx-meetcard').forEach(function(card){
         function flip(){ card.classList.toggle('flipped'); }
         card.addEventListener('click', function(e){ if(e.target.closest('.osx-meetlink')){ return; } flip(); });
         card.addEventListener('keydown', function(e){ if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); flip(); } });
       });
-    })();
+    }catch(e){ if(window.console) console.warn('P2P meet-flip skipped:', e); } })();
 
     // "Your road ahead" — light up each step from real cross-Haus signals (same localStorage the Vault reads)
-    (function(){
+    (function(){ try{
       function J(k){ try{ return JSON.parse(localStorage.getItem(k)); }catch(e){ return null; } }
       function log(k){ var v = J(k); return Array.isArray(v) && v.length > 0; }
       var vault = J('blackSheepBrandKitVault'), gp = J('promptToProfit.currentProject'), P = window.P2P;
@@ -2440,7 +2441,7 @@ window.P2P_EVENTS = [{%- for b in ev_blocks -%}{"iso":{{ b.settings.iso_date | d
         node.addEventListener('click', function(){ node.classList.toggle('flipped'); });
         node.addEventListener('keydown', function(e){ if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); node.classList.toggle('flipped'); } });
       });
-    })();
+    }catch(e){ if(window.console) console.warn('P2P road-ahead skipped:', e); } })();
   });
 </script>
 
