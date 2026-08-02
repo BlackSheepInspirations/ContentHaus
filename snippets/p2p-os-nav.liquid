@@ -71,7 +71,7 @@
     <div class="osx-bell-menu" data-bell-menu hidden></div>
   </div>
   <nav class="p2posnav-nav">
-    {%- capture os_nav -%}start^Your Journey Starts Here^spark^view^^|checkpoint^Checkpoint^check^view^^|success^My Success^rocket^view^^|community^Community^chat^view^^|/pages/brand-haus?bh_focus=1^Founders Assessment^fingerprint^link^brand-haus-access^/pages/brand-haus-preview|/pages/brand-haus^Brand Haus^crown^link^brand-haus-access^/pages/brand-haus-preview|/pages/content-haus^Content Haus^prompt^link^prompt-haus-access^/pages/content-haus-preview|/pages/graphics-haus^Graphics Haus^palette^link^graphics-haus-access^/pages/graphics-haus-preview|/pages/project-haus^Project Haus^box^link^product-haus-access^/pages/project-haus-preview|/pages/marketing-haus^Marketing Haus^megaphone^link^marketing-haus-access^/pages/marketing-haus-preview|/pages/growth-haus^Growth Haus^rocket^link^P2P-haus-access^/pages/growth-haus-preview|rooted^ROOTED — Light the Path^path^view^^|mates^Haus Mates^mates^view^^|members^Members^mates^view^^|levelup^How You Level Up^trophy^view^^|tools^Tools & Resources^tools^view^^|notebook^Notebook^notebook^view^^|bonus^Bonus Resources^gift^view^^{%- endcapture -%}
+    {%- capture os_nav -%}start^Your Journey Starts Here^spark^view^^|checkpoint^Checkpoint^check^view^^|success^My Success^rocket^view^^|community^Community^chat^view^^|/pages/brand-haus?bh_focus=1^Founders Assessment^fingerprint^link^brand-haus-access^/pages/brand-haus-preview|/pages/brand-haus^Brand Haus^crown^link^brand-haus-access^/pages/brand-haus-preview|/pages/content-haus^Content Haus^prompt^link^prompt-haus-access^/pages/content-haus-preview|/pages/graphics-haus^Graphics Haus^palette^link^graphics-haus-access^/pages/graphics-haus-preview|/pages/project-haus^Project Haus^box^link^product-haus-access^/pages/project-haus-preview|/pages/marketing-haus^Marketing Haus^megaphone^link^marketing-haus-access^/pages/marketing-haus-preview|/pages/growth-haus^Growth Haus^rocket^link^P2P-haus-access^/pages/growth-haus-preview|rooted^ROOTED — Light the Path^path^view^^|mates^Haus Mates^mates^view^^|members^Members^mates^view^^|levelup^How You Level Up^trophy^view^^|tools^Tools & Resources^tools^view^^|notebook^Notebook^notebook^view^^|bonus^Bonus Resources^gift^view^^^soon{%- endcapture -%}
     {%- assign os_nav_items = os_nav | split: '|' -%}
     {%- for it in os_nav_items -%}
       {%- assign f = it | split: '^' -%}
@@ -81,6 +81,7 @@
       {%- assign mode = f[3] -%}
       {%- assign it_tag = f[4] -%}
       {%- assign get_url = f[5] -%}
+      {%- assign it_soon = f[6] -%}
 
       {%- comment -%} resolve gating + destination {%- endcomment -%}
       {%- assign owns = owns_all -%}
@@ -101,7 +102,7 @@
       {%- assign is_active = false -%}
       {%- if cur_target != blank and target == cur_target -%}{%- assign is_active = true -%}{%- endif -%}
 
-      <a class="p2posnav-item{% if is_active %} on{% endif %}{% if locked %} locked{% endif %}" href="{{ href }}"{% if locked %} title="Preview — add this Haus to unlock"{% endif %}>
+      <a class="p2posnav-item{% if is_active %} on{% endif %}{% if locked %} locked{% endif %}{% if it_soon == 'soon' %} soon{% endif %}" href="{{ href }}"{% if it_soon == 'soon' %} title="Coming soon"{% elsif locked %} title="Preview — add this Haus to unlock"{% endif %}>
         <span class="p2posnav-ico">
           {%- case icon -%}
             {%- when 'spark' -%}<svg viewBox="0 0 24 24"><path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.9 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/></svg>
@@ -124,6 +125,7 @@
           {%- endcase -%}
         </span>
         <span class="p2posnav-lbl">{{ label }}</span>
+        {%- if it_soon == 'soon' -%}<span class="p2posnav-soon">Soon</span>{%- endif -%}
         {%- if locked -%}<span class="p2posnav-lock">🔒</span>{%- endif -%}
       </a>
     {%- endfor -%}
@@ -159,6 +161,9 @@
   #p2posnav .p2posnav-item.locked{opacity:.62;}
   #p2posnav .p2posnav-item.locked .p2posnav-ico svg{stroke:var(--muted);}
   #p2posnav .p2posnav-lbl{flex:1;min-width:0;}
+  #p2posnav .p2posnav-item.soon{opacity:.55;}
+  #p2posnav .p2posnav-item.soon .p2posnav-lbl{color:var(--muted);}
+  #p2posnav .p2posnav-soon{font:800 8.5px/1 system-ui;letter-spacing:.06em;text-transform:uppercase;color:#0a1410;background:linear-gradient(100deg,#f4e2a6,#c9a24a);border-radius:999px;padding:3px 7px;}
   #p2posnav .p2posnav-lock{font-size:11px;opacity:.7;}
 
   /* ── OS sidebar chrome (brand favicon, P2P emblem card, profile + bell) — matches /pages/p2p-os ── */

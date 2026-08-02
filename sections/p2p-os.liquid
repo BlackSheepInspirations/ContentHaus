@@ -64,7 +64,7 @@
     <nav class="osx-nav">
       {%- comment -%} Sidebar nav is baked into the section (target^label^icon^mode^access_tag^get_url) so a
          theme-editor template revert can never empty it. Edit here in code, not the customizer. {%- endcomment -%}
-      {%- capture os_nav -%}start^Your Journey Starts Here^spark^view^^|checkpoint^Checkpoint^check^view^^|success^My Success^rocket^view^^|community^Community^chat^view^^|/pages/brand-haus?bh_focus=1^Founders Assessment^fingerprint^link^brand-haus-access^/pages/brand-haus-preview|/pages/brand-haus^Brand Haus^crown^link^brand-haus-access^/pages/brand-haus-preview|/pages/content-haus^Content Haus^prompt^link^prompt-haus-access^/pages/content-haus-preview|/pages/graphics-haus^Graphics Haus^palette^link^graphics-haus-access^/pages/graphics-haus-preview|/pages/project-haus^Project Haus^box^link^product-haus-access^/pages/project-haus-preview|/pages/marketing-haus^Marketing Haus^megaphone^link^marketing-haus-access^/pages/marketing-haus-preview|/pages/growth-haus^Growth Haus^rocket^link^P2P-haus-access^/pages/growth-haus-preview|rooted^ROOTED — Light the Path^path^view^^|mates^Haus Mates^mates^view^^|members^Members^mates^view^^|levelup^How You Level Up^trophy^view^^|tools^Tools & Resources^tools^view^^|notebook^Notebook^notebook^view^^|bonus^Bonus Resources^gift^view^^{%- endcapture -%}
+      {%- capture os_nav -%}start^Your Journey Starts Here^spark^view^^|checkpoint^Checkpoint^check^view^^|success^My Success^rocket^view^^|community^Community^chat^view^^|/pages/brand-haus?bh_focus=1^Founders Assessment^fingerprint^link^brand-haus-access^/pages/brand-haus-preview|/pages/brand-haus^Brand Haus^crown^link^brand-haus-access^/pages/brand-haus-preview|/pages/content-haus^Content Haus^prompt^link^prompt-haus-access^/pages/content-haus-preview|/pages/graphics-haus^Graphics Haus^palette^link^graphics-haus-access^/pages/graphics-haus-preview|/pages/project-haus^Project Haus^box^link^product-haus-access^/pages/project-haus-preview|/pages/marketing-haus^Marketing Haus^megaphone^link^marketing-haus-access^/pages/marketing-haus-preview|/pages/growth-haus^Growth Haus^rocket^link^P2P-haus-access^/pages/growth-haus-preview|rooted^ROOTED — Light the Path^path^view^^|mates^Haus Mates^mates^view^^|members^Members^mates^view^^|levelup^How You Level Up^trophy^view^^|tools^Tools & Resources^tools^view^^|notebook^Notebook^notebook^view^^|bonus^Bonus Resources^gift^view^^^soon{%- endcapture -%}
       {%- assign os_nav_items = os_nav | split: '|' -%}
       {%- for it in os_nav_items -%}
         {%- assign f = it | split: '^' -%}
@@ -73,9 +73,11 @@
         {%- if it_tag == blank -%}{%- assign owns = true -%}{%- endif -%}
         {%- if customer and it_tag != blank and customer.tags contains it_tag -%}{%- assign owns = true -%}{%- endif -%}
         {%- if request.design_mode -%}{%- assign owns = true -%}{%- endif -%}
-          <button class="osx-item{% if forloop.first %} on{% endif %}{% unless owns %} locked{% endunless %}" type="button"
+          {%- assign it_soon = f[6] -%}
+          <button class="osx-item{% if forloop.first %} on{% endif %}{% unless owns %} locked{% endunless %}{% if it_soon == 'soon' %} soon{% endif %}" type="button"
             data-mode="{{ f[3] }}"
             data-target="{{ f[0] }}"
+            {% if it_soon == 'soon' %}data-soon="1"{% endif %}
             {% unless owns %}data-get="{{ f[5] }}"{% endunless %}>
             <span class="osx-ico">
               {%- case f[2] -%}
@@ -99,6 +101,7 @@
               {%- endcase -%}
             </span>
             <span class="osx-lbl">{{ f[1] }}</span>
+            {%- if it_soon == 'soon' -%}<span class="osx-soon">Soon</span>{%- endif -%}
             {%- unless owns -%}<span class="osx-lock">🔒</span>{%- endunless -%}
           </button>
       {%- endfor -%}
@@ -881,6 +884,9 @@
   #p2pos .osx-item.locked .osx-ico svg{stroke:var(--muted);}
   #p2pos .osx-lbl{flex:1;min-width:0;}
   #p2pos .osx-lock{font-size:11px;opacity:.7;}
+  #p2pos .osx-item.soon{opacity:.55;}
+  #p2pos .osx-item.soon .osx-lbl{color:var(--muted);}
+  #p2pos .osx-soon{margin-left:auto;font:800 8.5px/1 system-ui;letter-spacing:.06em;text-transform:uppercase;color:#0a1410;background:linear-gradient(100deg,#f4e2a6,#c9a24a);border-radius:999px;padding:3px 7px;}
 
   /* main pane */
   #p2pos .osx-main{position:relative;overflow-y:auto;max-height:88vh;}
@@ -2311,6 +2317,11 @@ window.P2P_EVENTS = [{%- for b in ev_blocks -%}{"iso":{{ b.settings.iso_date | d
     }
     function activate(btn){
       items.forEach(function(b){ b.classList.toggle('on', b === btn); });
+      if(btn.getAttribute('data-soon')){
+        showView('__placeholder');
+        var pst = root.querySelector('[data-osx-ph-title]'); if(pst) pst.textContent = ((btn.querySelector('.osx-lbl')||{}).textContent || 'This') + ' — coming soon';
+        return;
+      }
       var mode = btn.getAttribute('data-mode'), target = btn.getAttribute('data-target') || '';
       if(btn.classList.contains('locked')){
         showView('__locked');
