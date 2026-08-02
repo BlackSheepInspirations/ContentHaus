@@ -89,6 +89,21 @@
               </div>
             </div>
 
+            <script>
+              /* Reveal the "coming soon" placeholder when the how-to clip isn't uploaded yet,
+                 instead of showing a broken/empty player. */
+              (function () {
+                var v = document.getElementById('howToVideo'),
+                    ph = document.getElementById('howToPlaceholder');
+                if (!v || !ph) return;
+                var src = v.querySelector('source');
+                function showPlaceholder() { if (ph.hidden) { ph.hidden = false; v.style.display = 'none'; } }
+                if (src) src.addEventListener('error', showPlaceholder);
+                v.addEventListener('error', showPlaceholder);
+                setTimeout(function () { if (!v.readyState) showPlaceholder(); }, 2500);
+              })();
+            </script>
+
             <p class="video-frame__caption">
               Watch: how to turn your product into a prompt pack — in about 60 seconds.
             </p>
