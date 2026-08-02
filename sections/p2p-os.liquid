@@ -269,10 +269,9 @@
     {%- comment -%} ===== VIEW: Notebook (shared engine — Journal shares data with the Learning Journey) ===== {%- endcomment -%}
     <section class="osx-view" data-view="notebook" data-osx-nb>
       <div class="jr-head">
-        <div><div class="osx-kick">Notebook</div><h2 class="osx-h2">{{ section.settings.notebook_title | default: 'Your Notebook' }}</h2></div>
+        <div><div class="osx-kick">Notebook</div><h2 class="osx-h2">{{ section.settings.notebook_title | default: 'Your Notebook' }}</h2>{%- if section.settings.notebook_intro != blank -%}<p class="osx-lede">{{ section.settings.notebook_intro }}</p>{%- endif -%}</div>
         <button class="jr-export-all" type="button" data-jr-export>Export everything</button>
       </div>
-      {%- if section.settings.notebook_intro != blank -%}<p class="osx-lede">{{ section.settings.notebook_intro }}</p>{%- endif -%}
       <div class="jr-tabs">
         <button class="jr-tab on" type="button" data-jrmode="journal">Journal</button>
         <button class="jr-tab" type="button" data-jrmode="notes">Notes</button>
