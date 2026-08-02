@@ -44,7 +44,7 @@
     return on;
   }
   /* ---- name safety (client pre-check; the worker is authoritative) ---- */
-  var NAME_BLOCK = /(f+u+c+k|sh[i1\*]t|b[i1]tch|c[u\*]nt|n[i1]gg|f[a4]gg|whore|\bslut\b|\brape\b|nazi|retard|\bcum\b|pussy|a[s\$]{2}hole|jizz|\bp2p ?team\b|\badmin\b|moderator)/i;
+  var NAME_BLOCK = /(f+u+c+k|sh[i1\*]t|b[i1]tch|c[u\*]nt|n[i1]gg|f[a4]gg|whore|\bslut\b|\brape\b|nazi|retard|\bcum\b|pussy|a[s\$]{2}hole|jizz|dumbass|bastard|\bhoe\b|loser|idiot|stupid|\bdumb\b|\bugly\b|moron|imbecile|worthless|\bhate\b|\bkill\b|\bdie\b|\bscum\b|\btrash\b|\bfat\b|\bp2p ?team\b|\badmin\b|moderator|official)/i;
   function nameProblem(nm, others) {
     nm = String(nm || '').trim();
     if (!nm) return 'Please enter a display name.';
@@ -257,7 +257,7 @@
       f.save.disabled = false;
       if (res && res.error === 'name_taken') { showStatus('That name is already taken — try another.', true); return; }
       if (res && res.error === 'name_blocked') { showStatus('That name isn’t allowed — please choose another.', true); return; }
-      if (res && res.ok) { try { localStorage.setItem('p2p_wc_profile', '1'); } catch (e) {} if (res.name) { try { window.P2P_MEMBER_NAME = res.name; } catch (e) {} } }
+      if (res && res.ok) { try { localStorage.setItem('p2p_wc_profile', '1'); } catch (e) {} applyIdentity(res.name || payload.name, payload.photo); }
       showStatus((res && res.ok) ? 'Saved ✓' : 'Try again', !(res && res.ok));
       loadMembers();
     }).catch(function () { f.save.disabled = false; showStatus('Try again', true); });
@@ -275,10 +275,23 @@
       if (window.L) refreshAllMaps();   // re-pin any live maps (community modal + member board)
     }).catch(function () { if (grid) grid.innerHTML = '<div class="osx-cw-empty">Couldn\'t load members.</div>'; });
   }
+  // Make the member's chosen name + avatar show everywhere (sidebar bubble, community "mine" checks, their own profile card), not just the directory.
+  function applyIdentity(nm, photo) {
+    nm = String(nm || '').trim(); if (!nm) return;
+    try { window.P2P_MEMBER_NAME = nm; } catch (e) {}
+    document.querySelectorAll('[data-userbar] .osx-username').forEach(function (el) { el.textContent = nm; el.setAttribute('data-profile', nm); });
+    document.querySelectorAll('[data-userbar] .osx-userbubble').forEach(function (el) {
+      el.setAttribute('data-profile', nm);
+      if (isPreset(photo)) el.innerHTML = '<span class="osx-pa-emoji">' + esc(String(photo).slice(7)) + '</span>';
+      else if (!photo) el.textContent = initial(nm);
+    });
+    if (window.P2P_COMMUNITY_RERENDER) { try { window.P2P_COMMUNITY_RERENDER(); } catch (e) {} }
+  }
   function initProfile() {
     fetch(PROFILE, { credentials: 'same-origin' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
       if (j && j.guest) return;
       myProfile = (j && j.profile) || null;
+      if (myProfile && myProfile.name) applyIdentity(myProfile.name, myProfile.photo);
       fillForm(myProfile);
       // auto-publish a refreshed card (opt-out default = shown), preserving personalization + hidden
       publish(collect(myProfile ? !!myProfile.hidden : false)).then(loadMembers).catch(loadMembers);

@@ -62,7 +62,7 @@ const WELCOME_LINES = [
   '{name}, you made it. Take a breath, look around, and say hello. 🐑🖤'
 ];
 // Display-name safety: reserved words + a compact profanity/slur blocklist (client pre-checks; this is authoritative).
-const NAME_BLOCK = /(f+u+c+k|sh[i1\*]t|b[i1]tch|c[u\*]nt|n[i1]gg|f[a4]gg|whore|\bslut\b|\brape\b|nazi|retard|\bcum\b|pussy|a[s\$]{2}hole|jizz|\bp2p ?team\b|\badmin\b|moderator|official)/i;
+const NAME_BLOCK = /(f+u+c+k|sh[i1\*]t|b[i1]tch|c[u\*]nt|n[i1]gg|f[a4]gg|whore|\bslut\b|\brape\b|nazi|retard|\bcum\b|pussy|a[s\$]{2}hole|jizz|dumbass|bastard|\bhoe\b|loser|idiot|stupid|\bdumb\b|\bugly\b|moron|imbecile|worthless|\bhate\b|\bkill\b|\bdie\b|\bscum\b|\btrash\b|\bfat\b|\bp2p ?team\b|\badmin\b|moderator|official)/i;
 const FRANK_POSTS = [
   'Did you know? Your first offer only needs ONE buyer to prove it works. Aim for one, not a hundred.',
   'Did you know? Most people quit right before the compounding kicks in. Post 30 times before you judge the results.',
@@ -210,7 +210,7 @@ export default {
             recentBadges: sanitizeBadges(body.recentBadges),
             streak: Number(body.streak) || 0,
             since: info.createdAt || (prev && prev.since) || null,
-            photo: sanitizeUrl(body.photo),
+            photo: (String(body.photo || '').slice(0, 7) === 'preset:' ? String(body.photo).slice(0, 64) : sanitizeUrl(body.photo)),
             quote: String(body.quote || '').slice(0, 140),
             about: String(body.about || '').slice(0, 320),
             social: sanitizeSocial(body.social),
