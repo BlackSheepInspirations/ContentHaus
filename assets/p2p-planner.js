@@ -38,7 +38,7 @@
   function weekKey() { return periodKey('week'); }
 
   var data; try { data = JSON.parse(localStorage.getItem(KEY)) || null; } catch (e) { data = null; }
-  if (!data) data = {}; if (!data.done) data.done = []; if (!data.goals) data.goals = []; if (!data.lives) data.lives = []; if (!data.posts) data.posts = []; if (!data.snaps) data.snaps = []; if (!data.ideas) data.ideas = [];
+  if (!data) data = {}; if (!data.done) data.done = []; if (!data.goals) data.goals = []; if (!data.lives) data.lives = []; if (!data.posts) data.posts = []; if (!data.snaps) data.snaps = []; if (!data.ideas) data.ideas = []; if (!data.schedIdeas) data.schedIdeas = [];
   if (!data.products) data.products = []; if (!data.ctype) data.ctype = 'both'; if (!data.raft) data.raft = { cycles: [] }; if (!data.northstar) data.northstar = {}; if (!data.templates) data.templates = [];
   data.lives.forEach(function (l) { if (!l.archived && !l.deleted && l.date && daysTo(l.date) < 0) l.archived = true; });   // past-dated lives auto-archive
   var milestoneBaseline = (data.milestones === undefined); if (!data.milestones) data.milestones = {};
@@ -133,8 +133,16 @@
   function calP2(n) { return (n < 10 ? '0' : '') + n; }
   function calMarks() { var mk = {}; function add(iso, k) { if (!iso) return; (mk[iso] = mk[iso] || {})[k] = true; } data.lives.forEach(function (l) { if (!l.deleted && l.date) add(l.date, 'live'); }); data.posts.forEach(function (p) { if (!p.deleted && p.date) add(p.date, 'post'); }); data.goals.forEach(function (g) { if (g.w) add(g.w, 'goal'); }); data.products.forEach(function (p) { if (p.launch) add(p.launch, 'prod'); }); (window.P2P_EVENTS || []).forEach(function (e) { if (e.iso) add(e.iso, 'event'); }); try { (JSON.parse(localStorage.getItem('p2p_my_events') || '[]') || []).forEach(function (e) { if (e.iso) add(e.iso, 'plan'); }); } catch (e) {} return mk; }
   function calVisits() { try { return JSON.parse(localStorage.getItem('p2p_visit_days') || '{}') || {}; } catch (e) { return {}; } }
+  // The "Ideas to schedule" tray pulls straight from your Journal → Ideas (localStorage p2p_ideas),
+  // minus any you've already scheduled (data.schedIdeas).
+  function journalIdeas() {
+    var a; try { a = JSON.parse(localStorage.getItem('p2p_ideas') || '[]') || []; } catch (e) { a = []; }
+    var sched = data.schedIdeas || [];
+    return a.filter(function (i) { return i && !i.archived && !i.deletedAt && sched.indexOf(i.id) < 0; })
+      .map(function (i) { return { id: i.id, text: (i.title || i.text || '').trim() || 'Idea' }; });
+  }
   function ideaTrayHTML() {
-    var un = data.ideas.filter(function (i) { return !i.used; });
+    var un = journalIdeas();
     if (pendIdea && !un.some(function (i) { return i.id === pendIdea; })) pendIdea = null;
     var chips = un.length
       ? un.slice(0, 12).map(function (i) { return '<button type="button" class="osx-idchip' + (pendIdea === i.id ? ' picking' : '') + '" draggable="true" data-ideachip="' + esc(i.id) + '" title="Drag onto a calendar day — or tap, then tap a day">💡 ' + esc(i.text) + '</button>'; }).join('')
@@ -184,9 +192,10 @@
     if (lb) lb.addEventListener('click', function () { data.posts.unshift({ id: uid(), topic: 'Posted', platform: 'TikTok', type: 'Video', date: iso, time: '', hook: '', cta: '', length: '', music: '', done: true, s: {} }); save(); close(); render(); });
   }
   function scheduleIdea(ideaId, iso) {
-    var i = data.ideas.filter(function (x) { return x.id === ideaId; })[0];
+    var i = journalIdeas().filter(function (x) { return x.id === ideaId; })[0];
     if (!i || !iso) return;
-    i.used = true;
+    if (!data.schedIdeas) data.schedIdeas = [];
+    if (data.schedIdeas.indexOf(ideaId) < 0) data.schedIdeas.push(ideaId);
     data.posts.unshift({ id: uid(), topic: i.text, platform: 'TikTok', type: 'Video', date: iso, time: '', hook: '', cta: '', length: '', music: '', done: false, s: {} });
     save(); render();
   }
