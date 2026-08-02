@@ -27,7 +27,7 @@
       '<span class="osx-menu-pop osx-tmpl-pop" hidden>' + ROADMAP_TEMPLATES.map(function (t) { return '<button type="button" data-tmpl-add="' + esc(scope) + '|' + t[0] + '">' + t[1] + ' <i>· ' + t[2].length + '</i></button>'; }).join('') + '</span></span>';
   }
 
-  var view = 'dash', active = 'week', expanded = {}, selected = {}, livesTab = 'lives', calMY = null;
+  var view = 'dash', active = 'week', expanded = {}, selected = {}, livesTab = 'lives', calMY = null, pendIdea = null;
 
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function p2(n) { return (n < 10 ? '0' : '') + n; }
@@ -133,6 +133,15 @@
   function calP2(n) { return (n < 10 ? '0' : '') + n; }
   function calMarks() { var mk = {}; function add(iso, k) { if (!iso) return; (mk[iso] = mk[iso] || {})[k] = true; } data.lives.forEach(function (l) { if (!l.deleted && l.date) add(l.date, 'live'); }); data.posts.forEach(function (p) { if (!p.deleted && p.date) add(p.date, 'post'); }); data.goals.forEach(function (g) { if (g.w) add(g.w, 'goal'); }); data.products.forEach(function (p) { if (p.launch) add(p.launch, 'prod'); }); (window.P2P_EVENTS || []).forEach(function (e) { if (e.iso) add(e.iso, 'event'); }); try { (JSON.parse(localStorage.getItem('p2p_my_events') || '[]') || []).forEach(function (e) { if (e.iso) add(e.iso, 'plan'); }); } catch (e) {} return mk; }
   function calVisits() { try { return JSON.parse(localStorage.getItem('p2p_visit_days') || '{}') || {}; } catch (e) { return {}; } }
+  function ideaTrayHTML() {
+    var un = data.ideas.filter(function (i) { return !i.used; });
+    if (pendIdea && !un.some(function (i) { return i.id === pendIdea; })) pendIdea = null;
+    var chips = un.length
+      ? un.slice(0, 12).map(function (i) { return '<button type="button" class="osx-idchip' + (pendIdea === i.id ? ' picking' : '') + '" draggable="true" data-ideachip="' + esc(i.id) + '" title="Drag onto a calendar day — or tap, then tap a day">💡 ' + esc(i.text) + '</button>'; }).join('')
+      : '<div class="osx-pl-empty" style="padding:6px 0;">No loose ideas yet — capture some in Journal → Ideas and they\'ll show here to drag onto a day.</div>';
+    var pend = pendIdea ? (function () { var it = un.filter(function (i) { return i.id === pendIdea; })[0]; return it ? '<div class="osx-idtray-pick">Tap a day to schedule <b>💡 ' + esc(it.text) + '</b> <button type="button" data-idcancel>Cancel</button></div>' : ''; })() : '';
+    return '<div class="osx-idtray"><div class="osx-pl-sech" style="margin-top:14px;">✨ Ideas to schedule <span style="text-transform:none;letter-spacing:0;color:var(--muted);font-weight:600;">· drag one onto a day</span></div>' + pend + '<div class="osx-idtray-row">' + chips + '</div></div>';
+  }
   function dashCalHTML() {
     if (!calMY) { var n = new Date(); calMY = { y: n.getFullYear(), m: n.getMonth() }; }
     var mk = calMarks(), visits = calVisits();
@@ -142,7 +151,7 @@
     for (var d = 1; d <= days; d++) {
       var iso = calMY.y + '-' + calP2(calMY.m + 1) + '-' + calP2(d), m = mk[iso] || {};
       var marks = (visits[iso] ? '<i class="osx-dc-star">★</i>' : '') + (m.live ? '<i class="osx-dc-dot live"></i>' : '') + (m.post ? '<i class="osx-dc-dot post"></i>' : '') + (m.goal ? '<i class="osx-dc-dot goal"></i>' : '') + (m.prod ? '<i class="osx-dc-dot prod"></i>' : '') + (m.event ? '<i class="osx-dc-dot event"></i>' : '') + (m.plan ? '<i class="osx-dc-dot plan"></i>' : '');
-      cells += '<button type="button" class="osx-dc-d' + (iso === tISO ? ' today' : '') + '" data-dcday="' + iso + '">' + d + (marks ? '<span class="osx-dc-marks">' + marks + '</span>' : '') + '</button>';
+      cells += '<button type="button" class="osx-dc-d' + (iso === tISO ? ' today' : '') + (pendIdea ? ' picking' : '') + '" data-dcday="' + iso + '">' + d + (marks ? '<span class="osx-dc-marks">' + marks + '</span>' : '') + '</button>';
     }
     return '<div class="osx-dc"><div class="osx-dc-head"><button type="button" data-dcprev aria-label="Previous month">‹</button><b>' + CAL_MO[calMY.m] + ' ' + calMY.y + '</b><button type="button" data-dcnext aria-label="Next month">›</button></div>' +
       '<div class="osx-dc-dows"><span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span></div><div class="osx-dc-grid">' + cells + '</div>' +
@@ -173,6 +182,13 @@
     pop.querySelector('.osx-cele-x').addEventListener('click', close);
     var lb = pop.querySelector('[data-dclog]');
     if (lb) lb.addEventListener('click', function () { data.posts.unshift({ id: uid(), topic: 'Posted', platform: 'TikTok', type: 'Video', date: iso, time: '', hook: '', cta: '', length: '', music: '', done: true, s: {} }); save(); close(); render(); });
+  }
+  function scheduleIdea(ideaId, iso) {
+    var i = data.ideas.filter(function (x) { return x.id === ideaId; })[0];
+    if (!i || !iso) return;
+    i.used = true;
+    data.posts.unshift({ id: uid(), topic: i.text, platform: 'TikTok', type: 'Video', date: iso, time: '', hook: '', cta: '', length: '', music: '', done: false, s: {} });
+    save(); render();
   }
   /* ---------- social snapshot widgets (creator side) ---------- */
   function liveStat(l, key) { var r = l.results || {}, s = 0; Object.keys(r).forEach(function (p) { s += num((r[p] || {})[key]); }); return s; }
@@ -234,7 +250,7 @@
       '<div class="osx-pl-sech">📊 What you shipped — last 8 weeks</div>' + barChart() +
       '<div class="osx-pl-sech">🎚️ Progress by horizon</div><div class="osx-pl-strip">' + rings + '</div>' +
       '<div class="osx-pl-sech" style="margin-top:10px;">🎯 Your goals</div>' + goals + milestonesStrip() + '</div>' +
-      '<div class="osx-dash-right">' + radarHTML() + dashCalHTML() + '</div></div>' + laggingHTML();
+      '<div class="osx-dash-right">' + radarHTML() + dashCalHTML() + ideaTrayHTML() + '</div></div>' + laggingHTML();
   }
   function growsRow(g) {
     return '<div class="osx-pl-grows">' + GROWS.map(function (r) {
@@ -845,7 +861,19 @@
     // dashboard calendar
     var dcp = host.querySelector('[data-dcprev]'); if (dcp) dcp.addEventListener('click', function () { calMY.m--; if (calMY.m < 0) { calMY.m = 11; calMY.y--; } render(); });
     var dcn = host.querySelector('[data-dcnext]'); if (dcn) dcn.addEventListener('click', function () { calMY.m++; if (calMY.m > 11) { calMY.m = 0; calMY.y++; } render(); });
-    host.querySelectorAll('[data-dcday]').forEach(function (b) { b.addEventListener('click', function () { openDcDay(b.getAttribute('data-dcday')); }); });
+    host.querySelectorAll('[data-dcday]').forEach(function (b) { b.addEventListener('click', function () { var iso = b.getAttribute('data-dcday'); if (pendIdea) { var id = pendIdea; pendIdea = null; scheduleIdea(id, iso); } else { openDcDay(iso); } }); });
+    var dragId = null;
+    host.querySelectorAll('[data-ideachip]').forEach(function (c) {
+      c.addEventListener('click', function () { var id = c.getAttribute('data-ideachip'); pendIdea = pendIdea === id ? null : id; render(); });
+      c.addEventListener('dragstart', function (e) { dragId = c.getAttribute('data-ideachip'); pendIdea = null; c.classList.add('dragging'); if (e.dataTransfer) { e.dataTransfer.effectAllowed = 'move'; try { e.dataTransfer.setData('text/plain', dragId); } catch (er) {} } });
+      c.addEventListener('dragend', function () { dragId = null; c.classList.remove('dragging'); host.querySelectorAll('.osx-dc-d.drop-hot').forEach(function (x) { x.classList.remove('drop-hot'); }); });
+    });
+    var idc = host.querySelector('[data-idcancel]'); if (idc) idc.addEventListener('click', function () { pendIdea = null; render(); });
+    host.querySelectorAll('[data-dcday]').forEach(function (b) {
+      b.addEventListener('dragover', function (e) { e.preventDefault(); if (e.dataTransfer) e.dataTransfer.dropEffect = 'move'; b.classList.add('drop-hot'); });
+      b.addEventListener('dragleave', function () { b.classList.remove('drop-hot'); });
+      b.addEventListener('drop', function (e) { e.preventDefault(); b.classList.remove('drop-hot'); var id = dragId || (e.dataTransfer && e.dataTransfer.getData('text/plain')); if (id) scheduleIdea(id, b.getAttribute('data-dcday')); });
+    });
     host.querySelectorAll('[data-shipweek]').forEach(function (b) { b.addEventListener('click', function () { openShipWeek(b.getAttribute('data-shipweek')); }); });
     host.querySelectorAll('[data-openitem]').forEach(function (b) { b.addEventListener('click', function () { var p = b.getAttribute('data-openitem').split('|'); openItemDetail(p[0], p[1]); }); });
     host.querySelectorAll('[data-remind]').forEach(function (b) { b.addEventListener('click', function () { var p = b.getAttribute('data-remind').split('|'), it = remItem(p[0], p[1]); if (!it) return; it.reminders = it.reminders || []; var i = it.reminders.indexOf(p[2]); if (i > -1) it.reminders.splice(i, 1); else it.reminders.push(p[2]); b.classList.toggle('on'); save(); }); });

@@ -1626,6 +1626,15 @@
   #p2pos .osx-dc-legend span::before{content:"●";margin-right:3px;}
   #p2pos .osx-dc-legend .l-live::before{color:#e0457b;} #p2pos .osx-dc-legend .l-post::before{color:#5ac8fa;} #p2pos .osx-dc-legend .l-goal::before{color:var(--gold-bright);} #p2pos .osx-dc-legend .l-prod::before{color:#27ae6e;} #p2pos .osx-dc-legend .l-event::before{color:#39c5c0;} #p2pos .osx-dc-legend .l-plan::before{color:#8f6fd6;}
   #p2pos .osx-dc-legend .l-star::before{content:"";margin:0;}
+  #p2pos .osx-idtray-row{display:flex;flex-wrap:wrap;gap:6px;max-height:140px;overflow-y:auto;}
+  #p2pos .osx-idchip{cursor:grab;border:1px solid var(--stroke);background:rgba(255,255,255,.03);color:var(--text);border-radius:999px;padding:6px 11px;font:600 11.5px/1.25 system-ui;max-width:100%;text-align:left;white-space:normal;}
+  #p2pos .osx-idchip:hover{border-color:var(--gstroke);}
+  #p2pos .osx-idchip.dragging{opacity:.5;cursor:grabbing;}
+  #p2pos .osx-idchip.picking{border-color:#5ac8fa;background:rgba(90,200,250,.16);color:#fff;}
+  #p2pos .osx-dc-d.drop-hot{outline:2px dashed #5ac8fa;outline-offset:-2px;background:rgba(90,200,250,.14);border-radius:8px;}
+  #p2pos .osx-dc-d.picking{cursor:copy;}
+  #p2pos .osx-idtray-pick{margin:8px 0 4px;padding:8px 10px;border:1px solid rgba(90,200,250,.4);background:rgba(90,200,250,.1);border-radius:9px;font:600 11.5px/1.4 system-ui;color:var(--text);}
+  #p2pos .osx-idtray-pick button{margin-left:8px;border:0;background:none;color:#5ac8fa;font:700 11.5px/1 system-ui;cursor:pointer;text-decoration:underline;}
   #p2pos .osx-radar-scroll{display:flex;flex-direction:column;gap:7px;}
   #p2pos .osx-radar-scroll.more{max-height:266px;overflow-y:auto;padding-right:4px;margin-bottom:14px;}
   #p2pos .osx-radar-scroll.more::-webkit-scrollbar{width:6px;}
