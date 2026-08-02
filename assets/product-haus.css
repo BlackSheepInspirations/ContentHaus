@@ -2040,3 +2040,11 @@
   border-left: 3px solid var(--pdh-espresso);
   border-radius: 4px;
 }
+
+/* Hero: full-bleed flush to the rail on the OS layout (squared + top-aligned), matching Growth Haus.
+   Cancels the .pdh-brand-header padding + max-width cap so it reaches the rail at any monitor width. */
+.pdh-marketing__hero { border-radius: 0; }
+@media (min-width: 1025px) {
+  .pdh-brand-header { max-width: none; }
+  .pdh-brand-header .pdh-marketing__hero { margin-left: -16px; margin-right: -16px; margin-top: -40px; }
+}

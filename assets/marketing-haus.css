@@ -2031,3 +2031,11 @@
   border-left: 3px solid var(--mh-espresso);
   border-radius: 4px;
 }
+
+/* Hero: full-bleed flush to the rail on the OS layout (squared + top-aligned), matching Growth Haus.
+   Cancels the .mh-brand-header padding + max-width cap so it reaches the rail at any monitor width. */
+.mh-marketing__hero { border-radius: 0; }
+@media (min-width: 1025px) {
+  .mh-brand-header { max-width: none; }
+  .mh-brand-header .mh-marketing__hero { margin-left: -16px; margin-right: -16px; margin-top: -40px; }
+}
