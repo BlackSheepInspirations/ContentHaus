@@ -405,7 +405,7 @@
   }
   function liveCard(l) {
     var open = !!expanded['L' + l.id], plats = livePlats(l);
-    var head = '<div class="osx-lv-h" data-ltoggle="' + esc(l.id) + '"><input type="checkbox" class="osx-lv-check" data-lvsel="' + esc(l.id) + '"' + (selected[l.id] ? ' checked' : '') + ' aria-label="Select"><span class="osx-lv-plats">' + plats.map(function (p) { return platPill(p, l.otherPlat); }).join('') + '</span>' +
+    var head = '<div class="osx-lv-h" data-ltoggle="' + esc(l.id) + '"><input type="checkbox" class="osx-lv-selbox" data-lvsel="' + esc(l.id) + '"' + (selected[l.id] ? ' checked' : '') + ' aria-label="Select"><span class="osx-lv-plats">' + plats.map(function (p) { return platPill(p, l.otherPlat); }).join('') + '</span>' +
       '<span class="osx-lv-hb"><b class="osx-lv-title">' + esc(l.title || l.topic || 'Untitled live') + '</b>' + (l.done ? '<span class="osx-lv-hm">✓ Logged · +' + liveFollowers(l) + ' followers</span>' : '') + '</span>' +
       liveCountdown(l) + '</div>';
     if (!open) return '<div class="osx-lv-card' + (l._dupe ? ' osx-dupe' : '') + '">' + head + (l._dupe ? '<div class="osx-lv-dupebadge">⚠ Duplicate — update date, time &amp; platform to save</div>' : '') + '</div>';
