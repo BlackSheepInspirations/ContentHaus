@@ -616,6 +616,7 @@
             <label class="osx-mb-optout"><input type="checkbox" data-mb-hidden> Hide me from the member map &amp; directory</label>
             <div class="osx-mb-saverow"><span class="osx-mb-status" data-mb-status></span><button class="osx-cw-postbtn" type="button" data-mb-save>Save my profile</button></div>
           </div>
+          <div class="osx-mb-circle" data-mb-circle></div>
         </div>
       </div>
         </div>
@@ -2090,6 +2091,23 @@
   #p2pos .osx-mbm-email{display:block;width:100%;margin-top:14px;border:1px solid var(--stroke);background:rgba(255,255,255,.04);color:var(--text);border-radius:11px;padding:11px;font:700 13px/1.3 system-ui;cursor:pointer;text-align:center;text-decoration:none;word-break:break-word;}
   #p2pos .osx-mbm-email:hover{border-color:var(--gstroke);}
   #p2pos .osx-mbm-email.revealed{color:var(--gold-bright);}
+  #p2pos .osx-mbm-block{display:block;margin:14px auto 0;border:0;background:none;color:var(--muted);font:600 12px/1 system-ui;cursor:pointer;text-decoration:underline;}
+  #p2pos .osx-mbm-block:hover{color:#ff9e9e;}
+  #p2pos .osx-mb-circle{margin-top:24px;display:flex;flex-direction:column;gap:18px;}
+  #p2pos .osx-circle-h{font:800 12px/1 system-ui;letter-spacing:.05em;text-transform:uppercase;color:var(--gold);margin-bottom:9px;}
+  #p2pos .osx-circle-h b{color:var(--text);margin-left:4px;}
+  #p2pos .osx-circle-list{display:flex;flex-wrap:wrap;gap:8px;}
+  #p2pos .osx-circle-chip{display:inline-flex;align-items:center;gap:2px;border:1px solid var(--stroke);border-radius:999px;padding:3px 5px 3px 3px;background:rgba(255,255,255,.03);}
+  #p2pos .osx-circle-open{display:inline-flex;align-items:center;gap:7px;border:0;background:none;cursor:pointer;color:var(--text);font:700 12.5px/1 system-ui;padding:2px 4px 2px 2px;}
+  #p2pos .osx-circle-open:hover{color:var(--gold-bright);}
+  #p2pos .osx-circle-av{width:26px;height:26px;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 30%,#2a3b52,#12202b);color:var(--gold-bright);font:800 12px/1 Georgia,serif;flex:none;}
+  #p2pos .osx-circle-av img{width:100%;height:100%;object-fit:cover;}
+  #p2pos .osx-circle-av .osx-pa-emoji{font-size:14px;}
+  #p2pos .osx-circle-nm{white-space:nowrap;}
+  #p2pos .osx-circle-x{border:0;background:none;color:var(--muted);cursor:pointer;font:700 12px/1 system-ui;padding:4px 7px;border-radius:50%;}
+  #p2pos .osx-circle-x:hover{color:#ff9e9e;background:rgba(255,255,255,.06);}
+  #p2pos .osx-circle-unblock{border:1px solid var(--gstroke);background:rgba(216,180,90,.1);color:var(--gold-bright);cursor:pointer;font:700 11px/1 system-ui;padding:5px 9px;border-radius:999px;margin-right:3px;}
+  #p2pos .osx-circle-empty{font:500 12.5px/1.4 system-ui;color:var(--muted);}
   #p2pos .osx-mb-hint{font:500 11px/1.4 system-ui;color:var(--muted);}
   #p2pos .osx-extc{width:min(380px,92vw);max-width:none;text-align:center;padding:26px 24px;}
   #p2pos .osx-extc-h{font:800 16px/1.2 system-ui;color:var(--text);margin-bottom:8px;}

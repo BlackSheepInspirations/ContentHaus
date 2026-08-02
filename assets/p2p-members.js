@@ -19,7 +19,7 @@
   var nameEl = mb.querySelector('[data-mb-name]'), avGrid = mb.querySelector('[data-mb-avatars]'), avVal = { v: '' };
   var emailEl = mb.querySelector('[data-mb-email]'), showEmailEl = mb.querySelector('[data-mb-showemail]');
   var upBtn = mb.querySelector('[data-mb-upbtn]'), upFile = mb.querySelector('[data-mb-upfile]'), upPreview = mb.querySelector('[data-mb-uppreview]'), upStatusEl = mb.querySelector('[data-mb-upstatus]'), upZone = mb.querySelector('[data-mb-upzone]');
-  var members = [], myProfile = null, searchVal = '', sortVal = 'points';
+  var members = [], myProfile = null, searchVal = '', sortVal = 'points', myFollowing = [], myFollowers = [], myBlocked = [];
 
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function initial(n) { n = String(n || '').trim(); return n ? n.charAt(0).toUpperCase() : '🐑'; }
@@ -43,6 +43,16 @@
     if (on) s.push(k); else s.splice(i, 1);
     try { localStorage.setItem('p2p_follows', JSON.stringify(s)); } catch (e) {}
     fetch('/apps/p2p/follow', { method: 'POST', headers: { 'content-type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify({ name: k, on: on }) }).catch(function () {});
+    return on;
+  }
+  /* ---- block (one-way: their posts/comments vanish from my feed) ---- */
+  function blockedList() { try { return JSON.parse(localStorage.getItem('p2p_blocked') || '[]') || []; } catch (e) { return []; } }
+  function isBlocked(nm) { return blockedList().indexOf(String(nm || '').trim().toLowerCase()) > -1; }
+  function toggleBlock(id, nm) {
+    var k = String(nm || '').trim().toLowerCase(), s = blockedList(), i = s.indexOf(k), on = i === -1;
+    if (on) s.push(k); else s.splice(i, 1);
+    try { localStorage.setItem('p2p_blocked', JSON.stringify(s)); } catch (e) {}
+    fetch('/apps/p2p/block', { method: 'POST', headers: { 'content-type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify({ id: id, on: on }) }).catch(function () {});
     return on;
   }
   /* ---- name safety (client pre-check; the worker is authoritative) ---- */
@@ -159,6 +169,24 @@
     grid.querySelectorAll('[data-extlink]').forEach(function (a) { a.addEventListener('click', function (e) { e.preventDefault(); e.stopPropagation(); openExtConfirm(a.getAttribute('data-extlink')); }); });
     grid.querySelectorAll('[data-mb-open]').forEach(function (c) { c.addEventListener('click', function (e) { if (e.target.closest('[data-mb-follow],[data-extlink]')) return; openMemberModal(memberByName(c.getAttribute('data-mb-open'))); }); });
   }
+  function circleChip(m, kind) {
+    var nm = m.name || 'Member', av = avatarInner({ photo: m.photo, name: nm });
+    var act = kind === 'following' ? '<button type="button" class="osx-circle-x" data-circle-unfollow="' + esc(nm) + '" title="Unfollow">✕</button>'
+      : kind === 'blocked' ? '<button type="button" class="osx-circle-unblock" data-circle-unblock="' + esc(m.id || '') + '|' + esc(nm) + '">Unblock</button>' : '';
+    return '<div class="osx-circle-chip"><button type="button" class="osx-circle-open" data-circle-open="' + esc(nm) + '"><span class="osx-circle-av">' + av + '</span><span class="osx-circle-nm">' + esc(nm) + '</span></button>' + act + '</div>';
+  }
+  function renderCircle() {
+    var box = mb.querySelector('[data-mb-circle]'); if (!box) return;
+    var flw = (myFollowing || []).map(function (low) { return memberByName(low) || { name: low, photo: '' }; });
+    var fw = myFollowers || [], bl = myBlocked || [];
+    box.innerHTML =
+      '<div class="osx-circle-sec"><div class="osx-circle-h">Following <b>' + flw.length + '</b></div><div class="osx-circle-list">' + (flw.length ? flw.map(function (m) { return circleChip(m, 'following'); }).join('') : '<div class="osx-circle-empty">You’re not following anyone yet — tap the 🔕 on a member to follow.</div>') + '</div></div>' +
+      '<div class="osx-circle-sec"><div class="osx-circle-h">Followers <b>' + fw.length + '</b></div><div class="osx-circle-list">' + (fw.length ? fw.map(function (m) { return circleChip(m, 'follower'); }).join('') : '<div class="osx-circle-empty">No followers yet — share a win and they’ll come. 🏆</div>') + '</div></div>' +
+      (bl.length ? '<div class="osx-circle-sec"><div class="osx-circle-h">Blocked <b>' + bl.length + '</b></div><div class="osx-circle-list">' + bl.map(function (m) { return circleChip(m, 'blocked'); }).join('') + '</div></div>' : '');
+    box.querySelectorAll('[data-circle-open]').forEach(function (b) { b.addEventListener('click', function () { var p = memberByName(b.getAttribute('data-circle-open')); if (p) openMemberModal(p); }); });
+    box.querySelectorAll('[data-circle-unfollow]').forEach(function (b) { b.addEventListener('click', function () { var nm = b.getAttribute('data-circle-unfollow'); toggleFollow(nm); myFollowing = (myFollowing || []).filter(function (x) { return x !== String(nm).trim().toLowerCase(); }); renderCircle(); }); });
+    box.querySelectorAll('[data-circle-unblock]').forEach(function (b) { b.addEventListener('click', function () { var pr = b.getAttribute('data-circle-unblock').split('|'), bid = pr[0], bnm = pr.slice(1).join('|'); toggleBlock(bid, bnm); myBlocked = (myBlocked || []).filter(function (x) { return String(x.name).toLowerCase() !== String(bnm).toLowerCase(); }); renderCircle(); loadMembers(); if (window.P2P_COMMUNITY_RERENDER) window.P2P_COMMUNITY_RERENDER(); }); });
+  }
   function openMemberModal(p) {
     if (!p) return;
     var nm = p.name || 'Member', l = loc(p), following = isFollowing(nm);
@@ -173,7 +201,9 @@
       socialHTML(p.social) +
       (p.hasEmail ? '<button type="button" class="osx-mbm-email" data-mbm-email="' + esc(p.id || '') + '">✉️ Email me</button>' : '') +
       '<div class="osx-mbm-actions"><button type="button" class="osx-mb-follow big' + (following ? ' on' : '') + '" data-mbm-follow>' + (following ? '🔔 Following' : '🔕 Follow') + '</button>' +
-      '<button type="button" class="osx-mbm-posts" data-mbm-posts>See their posts →</button></div></div>';
+      '<button type="button" class="osx-mbm-posts" data-mbm-posts>See their posts →</button></div>' +
+      (String(nm).trim().toLowerCase() !== myKey() ? '<button type="button" class="osx-mbm-block" data-mbm-block="' + esc(p.id || '') + '">' + (isBlocked(nm) ? 'Unblock' : 'Block') + '</button>' : '') +
+      '</div>';
     root.appendChild(pop);
     function close() { pop.remove(); }
     pop.addEventListener('click', function (e) { if (e.target === pop) close(); });
@@ -189,6 +219,16 @@
         .catch(function () { eb.disabled = false; eb.textContent = '✉️ Email me'; });
     });
     var pv = pop.querySelector('[data-mbm-posts]'); if (pv) pv.addEventListener('click', function () { close(); if (window.P2P_OSX_GO) window.P2P_OSX_GO('community'); if (window.P2P_COMMUNITY_SEARCH) setTimeout(function () { window.P2P_COMMUNITY_SEARCH(nm); }, 60); });
+    var blk = pop.querySelector('[data-mbm-block]');
+    if (blk) blk.addEventListener('click', function () {
+      var already = isBlocked(nm);
+      if (!already && !window.confirm('Block ' + nm + '? Their posts and comments disappear from your feed, and any follow between you is removed. You can undo this from My Profile.')) return;
+      var on = toggleBlock(blk.getAttribute('data-mbm-block'), nm);
+      myBlocked = on ? myBlocked.concat([{ id: p.id, name: nm, photo: p.photo || '' }]) : myBlocked.filter(function (x) { return String(x.name).toLowerCase() !== String(nm).toLowerCase(); });
+      renderCircle();
+      if (on) { close(); loadMembers(); if (window.P2P_COMMUNITY_RERENDER) window.P2P_COMMUNITY_RERENDER(); }
+      else { blk.textContent = 'Block'; }
+    });
   }
   function renderAvatars(sel) {
     avVal.v = sel || '';
@@ -349,7 +389,8 @@
       if (j && j.guest) { if (grid) grid.innerHTML = '<div class="osx-cw-empty">Log in to see members.</div>'; return; }
       // merge the server's follow list so favorites persist across devices
       if (j && j.following && j.following.length) { try { var loc2 = follows(), merged = loc2.slice(); j.following.forEach(function (n) { if (merged.indexOf(n) < 0) merged.push(n); }); localStorage.setItem('p2p_follows', JSON.stringify(merged)); } catch (e) {} }
-      members = (j && j.members) || []; renderDirectory();
+      if (j && j.following) myFollowing = j.following;
+      members = (j && j.members) || []; renderDirectory(); renderCircle();
       if (window.L) refreshAllMaps();   // re-pin any live maps (community modal + member board)
     }).catch(function () { if (grid) grid.innerHTML = '<div class="osx-cw-empty">Couldn\'t load members.</div>'; });
   }
@@ -370,8 +411,11 @@
     fetch(PROFILE, { credentials: 'same-origin' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
       if (j && j.guest) return;
       myProfile = (j && j.profile) || null;
+      myFollowers = (j && j.followers) || [];
+      myBlocked = (j && j.blocked) || [];
+      try { localStorage.setItem('p2p_blocked', JSON.stringify(myBlocked.map(function (m) { return String(m.name || '').trim().toLowerCase(); }))); } catch (e) {}
       if (myProfile && myProfile.name) applyIdentity(myProfile.name, myProfile.photo);
-      fillForm(myProfile);
+      fillForm(myProfile); renderCircle();
       // auto-publish a refreshed card (opt-out default = shown), preserving personalization + hidden
       publish(collect(myProfile ? !!myProfile.hidden : false)).then(loadMembers).catch(loadMembers);
     }).catch(function () { loadMembers(); });

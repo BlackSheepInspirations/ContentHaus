@@ -169,7 +169,15 @@ export default {
       /* ---------- member public profile card ---------- */
       if (seg === 'profile') {
         if (!kv) return json({ error: 'no_store' }, 501);
-        if (request.method === 'GET') return json({ ok: true, profile: await kv.get('member:' + customerId, 'json') });
+        if (request.method === 'GET') {
+          const rec = await kv.get('member:' + customerId, 'json');
+          const myLow = rec && rec.name ? String(rec.name).trim().toLowerCase() : '';
+          async function chips(cids) { const out = []; for (const cid of (cids || []).slice(0, 200)) { const r = await kv.get('member:' + cid, 'json'); out.push({ id: cid, name: (r && r.name) || 'Member', photo: (r && r.photo) || '' }); } return out; }
+          const followerCids = myLow ? ((await kv.get('followers:' + myLow, 'json')) || []) : [];
+          const followers = await chips(followerCids);
+          const blocked = await chips((await kv.get('blocked:' + customerId, 'json')) || []);
+          return json({ ok: true, profile: rec, followers: followers, blocked: blocked });
+        }
         if (request.method === 'POST') {
           const body = await request.json().catch(() => null);
           if (!body || typeof body !== 'object') return json({ error: 'bad body' }, 400);
@@ -326,17 +334,49 @@ export default {
         return json({ ok: true });
       }
 
+      /* ---------- block a member (one-way: their posts/comments vanish from my feed) ---------- */
+      if (seg === 'block') {
+        if (!kv || !customerId) return json({ ok: true });
+        if (request.method !== 'POST') return json({ error: 'method' }, 405);
+        const body = await request.json().catch(() => null);
+        const targetId = String((body && body.id) || '').trim();
+        if (!targetId || targetId === customerId) return json({ error: 'bad' }, 400);
+        const on = !!(body && body.on);
+        const bkey = 'blocked:' + customerId;
+        let arr = (await kv.get(bkey, 'json')) || [];
+        const i = arr.indexOf(targetId);
+        if (on && i === -1) arr.push(targetId); else if (!on && i > -1) arr.splice(i, 1);
+        await kv.put(bkey, JSON.stringify(arr.slice(0, 2000)));
+        if (on) {
+          // sever any follow between us, both directions
+          const meRec = await kv.get('member:' + customerId, 'json');
+          const themRec = await kv.get('member:' + targetId, 'json');
+          const myLow = meRec && meRec.name ? String(meRec.name).trim().toLowerCase() : '';
+          const themLow = themRec && themRec.name ? String(themRec.name).trim().toLowerCase() : '';
+          async function unfollow(followerCid, followeeLow) {
+            if (!followeeLow) return;
+            let fa = (await kv.get('followers:' + followeeLow, 'json')) || []; const a = fa.indexOf(followerCid); if (a > -1) { fa.splice(a, 1); await kv.put('followers:' + followeeLow, JSON.stringify(fa)); }
+            let ga = (await kv.get('following:' + followerCid, 'json')) || []; const b = ga.indexOf(followeeLow); if (b > -1) { ga.splice(b, 1); await kv.put('following:' + followerCid, JSON.stringify(ga)); }
+          }
+          await unfollow(customerId, themLow);   // me → them
+          await unfollow(targetId, myLow);        // them → me
+        }
+        return json({ ok: true });
+      }
+
       /* ---------- community wall ---------- */
       if (seg === 'community') {
         if (!kv) return json({ ok: true, posts: [] });
         if (request.method === 'GET') {
           const list = await kv.list({ prefix: 'post:' });
+          const bset = new Set((await kv.get('blocked:' + customerId, 'json')) || []);   // hide blocked members' content from me
           const all = [];
           for (const k of list.keys) {
             const p = await kv.get(k.name, 'json');
             if (!p) continue;
+            if (bset.size && bset.has(p.author)) continue;   // skip blocked authors' posts
             const rs = reactState(p, customerId);
-            all.push({ id: p.id, name: p.name, title: p.title || '', text: p.text, kind: p.kind, category: p.category || (p.kind === 'win' ? 'wins' : 'general'), attachments: p.attachments || [], ts: p.ts, streak: p.streak || 0, house: !!p.house, pinned: !!p.pinned, edited: !!p.edited, owner: p.author === customerId, comments: (p.comments || []).map(c => ({ id: c.id, name: c.name, text: c.text, ts: c.ts, edited: !!c.edited, owner: c.author === customerId })), reactions: rs.counts, mine: rs.mine, likes: rs.counts.love, liked: rs.mine.love });
+            all.push({ id: p.id, name: p.name, title: p.title || '', text: p.text, kind: p.kind, category: p.category || (p.kind === 'win' ? 'wins' : 'general'), attachments: p.attachments || [], ts: p.ts, streak: p.streak || 0, house: !!p.house, pinned: !!p.pinned, edited: !!p.edited, owner: p.author === customerId, comments: (p.comments || []).filter(c => !(bset.size && bset.has(c.author))).map(c => ({ id: c.id, name: c.name, text: c.text, ts: c.ts, edited: !!c.edited, owner: c.author === customerId })), reactions: rs.counts, mine: rs.mine, likes: rs.counts.love, liked: rs.mine.love });
           }
           all.sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0) || b.ts - a.ts);
           const cat = url.searchParams.get('category') || 'all';

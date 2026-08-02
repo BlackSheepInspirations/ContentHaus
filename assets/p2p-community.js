@@ -25,6 +25,8 @@
   function newCommentCount(p) { var base = cmBaseline(p), me = myName(), n = 0; (p.comments || []).forEach(function (c) { if (c.ts > base && String(c.name || '').trim().toLowerCase() !== me) n++; }); return n; }
 
   function myName() { return (window.P2P_MEMBER_NAME || '').trim().toLowerCase(); }
+  function blockedNames() { try { return JSON.parse(localStorage.getItem('p2p_blocked') || '[]') || []; } catch (e) { return []; } }
+  function isBlockedName(nm) { return blockedNames().indexOf(String(nm || '').trim().toLowerCase()) > -1; }
   function setWc(k, on) { var el = root.querySelector('[data-wc="' + k + '"]'); if (el) el.classList.toggle('done', !!on); }
   function updateWelcome() {
     if (!root.querySelector('[data-welcome]')) return;
@@ -130,7 +132,7 @@
     return '<div class="osx-cm-item" data-cm-item="' + esc(c.id) + '"><div class="osx-cm-itop"><button type="button" class="osx-name-btn" data-profile="' + esc(c.name || '') + '">' + esc(c.name || 'Member') + '</button><span class="osx-cm-time">' + ago(c.ts) + (c.edited ? ' · edited' : '') + '</span>' + menu + '</div><div class="osx-cm-text">' + linkify(c.text) + '</div></div>';
   }
   function commentsHTML(p, open) {
-    var cs = p.comments || [];
+    var cs = (p.comments || []).filter(function (c) { return !isBlockedName(c.name); });
     return '<div class="osx-cm" data-cm="' + esc(p.id) + '"' + (open ? '' : ' hidden') + '>' +
       '<div class="osx-cm-list">' + cs.map(function (c) { return cmItem(c, p.id); }).join('') + '</div>' +
       '<div class="osx-cm-add"><button type="button" class="osx-cm-tool" data-cm-emoji="' + esc(p.id) + '" title="Add an emoji" aria-label="Add an emoji">😊</button><button type="button" class="osx-cm-tool" data-cm-link="' + esc(p.id) + '" title="Add a link" aria-label="Add a link">🔗</button><input class="osx-cm-input" data-cm-input="' + esc(p.id) + '" maxlength="600" placeholder="Write a reply…"><button class="osx-cm-send" type="button" data-cm-send="' + esc(p.id) + '">Reply</button></div>' +
@@ -325,9 +327,10 @@
   }
   function renderWall() {
     if (!feed) return;
-    var list = wowPost ? posts.filter(function (p) { return p.id !== wowPost.id; }) : posts;
-    if (!list.length && !wowPost) { feed.innerHTML = empty(emptyMsg()); return; }
-    feed.innerHTML = (wowPost ? wowHTML(wowPost) : '') + list.map(postHTML).join('');
+    var list = (wowPost ? posts.filter(function (p) { return p.id !== wowPost.id; }) : posts).filter(function (p) { return !isBlockedName(p.name); });
+    var wp = (wowPost && !isBlockedName(wowPost.name)) ? wowPost : null;
+    if (!list.length && !wp) { feed.innerHTML = empty(emptyMsg()); return; }
+    feed.innerHTML = (wp ? wowHTML(wp) : '') + list.map(postHTML).join('');
     wireReacts(feed); wireComments(feed);
     feed.querySelectorAll('[data-lightbox]').forEach(function (im) { im.addEventListener('click', function () { openLightbox(im.getAttribute('data-lightbox')); }); });
     feed.querySelectorAll('[data-pin]').forEach(function (b) {
