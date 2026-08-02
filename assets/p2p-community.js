@@ -1129,8 +1129,27 @@
     pop.querySelector('.osx-cal-pop-x').addEventListener('click', close);
     if (onShow) onShow();
   }
+  // Upcoming-events sidebar list — unified from window.P2P_EVENTS (baked + theme-editor blocks),
+  // upcoming only, soonest first. A click opens the same detail card as the calendar.
+  (function renderUpcoming() {
+    var box = root.querySelector('[data-ev-upcoming]'); if (!box) return;
+    var p2 = function (n) { return (n < 10 ? '0' : '') + n; };
+    var esc2 = function (s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+    var now = new Date(), tISO = now.getFullYear() + '-' + p2(now.getMonth() + 1) + '-' + p2(now.getDate());
+    var up = (window.P2P_EVENTS || []).filter(function (e) { return e.iso && e.iso >= tISO; }).sort(function (a, b) { return a.iso < b.iso ? -1 : a.iso > b.iso ? 1 : 0; });
+    if (!up.length) return; // no upcoming Haus events — keep the Liquid fallback / empty note
+    box.innerHTML = up.map(function (e) {
+      return '<button type="button" class="osx-ev-item" data-ev-open="' + esc2(e.iso) + '">' +
+        '<span class="osx-ev-when"><b>' + esc2(e.date || e.iso) + '</b></span>' +
+        '<span class="osx-ev-txt"><span class="osx-ev-t">' + esc2(e.title || 'Live session') + (e.live ? ' <em class="osx-event-live">● LIVE</em>' : '') + '</span><span class="osx-ev-sub">' + esc2(e.time || 'Tap for details') + '</span></span>' +
+        '</button>';
+    }).join('');
+    box.querySelectorAll('[data-ev-open]').forEach(function (b) { b.addEventListener('click', function () { openDay(b.getAttribute('data-ev-open')); }); });
+  })();
   var calBtn = root.querySelector('[data-cal-open]');
   if (calBtn) calBtn.addEventListener('click', function () { openHolderModal('[data-cal-holder]', 'osx-expand-cal'); });
   var mapBtn = root.querySelector('[data-map-open]');
   if (mapBtn) mapBtn.addEventListener('click', function () { openHolderModal('[data-map-holder]', 'osx-expand-map', function () { if (window.P2P_MAP_REFRESH) window.P2P_MAP_REFRESH(); }); });
 })();
+
+/* deploy-bump 1785710768 */

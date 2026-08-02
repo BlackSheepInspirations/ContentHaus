@@ -30,6 +30,8 @@
   var view = 'dash', active = 'week', expanded = {}, selected = {}, livesTab = 'lives', calMY = null, pendIdea = null, selDay = null;
 
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  // Brand mark for P2P (Haus) events — the store favicon, falling back to the sheep emoji.
+  function p2pFavIc() { return window.P2P_FAVICON ? '<img class="osx-p2p-favic" src="' + window.P2P_FAVICON + '" alt="P2P" width="16" height="16">' : '🐑'; }
   function p2(n) { return (n < 10 ? '0' : '') + n; }
   function uid() { return String(Date.now()) + Math.random().toString(36).slice(2, 6); }
   function save() { try { localStorage.setItem(KEY, JSON.stringify(data)); } catch (e) {} try { rebuildReminders(); } catch (e) {} try { awardMilestones(); } catch (e) {} }
@@ -120,6 +122,7 @@
     else if (kind === 'product') { view = 'products'; expanded['PR' + id] = true; }
     else if (kind === 'goal') { view = 'goals'; expanded[id] = true; }
     else if (kind === 'event') { var ev = (data.events || []).filter(function (e) { return e.id === id; })[0]; view = 'dash'; render(); if (ev) setTimeout(function () { selectDay(ev.iso); var pnl = host.querySelector('[data-dc-daypanel]'); if (pnl) pnl.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 60); return; }
+    else if (kind === 'hausev') { view = 'dash'; render(); setTimeout(function () { selectDay(id); var pnl = host.querySelector('[data-dc-daypanel]'); if (pnl) pnl.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 60); return; }
     else { view = 'dash'; }
     render();
     setTimeout(function () { var el = host.querySelector('[data-ltoggle="' + id + '"],[data-ptoggle="' + id + '"],[data-prtoggle="' + id + '"],[data-toggle="' + id + '"]'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 40);
@@ -159,7 +162,7 @@
   }
   var CAL_MO = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
   function calP2(n) { return (n < 10 ? '0' : '') + n; }
-  function calMarks() { var mk = {}; function add(iso, k) { if (!iso) return; (mk[iso] = mk[iso] || {})[k] = true; } data.lives.forEach(function (l) { if (!l.deleted && l.date) add(l.date, 'live'); }); data.posts.forEach(function (p) { if (!p.deleted && p.date) add(p.date, 'post'); }); data.goals.forEach(function (g) { if (g.w) add(g.w, 'goal'); }); data.products.forEach(function (p) { if (p.launch) add(p.launch, 'prod'); }); (window.P2P_EVENTS || []).forEach(function (e) { if (e.iso) add(e.iso, 'event'); }); (data.events || []).forEach(function (e) { if (e.iso) add(e.iso, e.kind === 'reminder' ? 'plan' : 'event'); }); return mk; }
+  function calMarks() { var mk = {}; function add(iso, k) { if (!iso) return; (mk[iso] = mk[iso] || {})[k] = true; } data.lives.forEach(function (l) { if (!l.deleted && l.date) add(l.date, 'live'); }); data.posts.forEach(function (p) { if (!p.deleted && p.date) add(p.date, 'post'); }); data.goals.forEach(function (g) { if (g.w) add(g.w, 'goal'); }); data.products.forEach(function (p) { if (p.launch) add(p.launch, 'prod'); }); (window.P2P_EVENTS || []).forEach(function (e) { if (e.iso) add(e.iso, 'hausev'); }); (data.events || []).forEach(function (e) { if (e.iso) add(e.iso, e.kind === 'reminder' ? 'plan' : 'event'); }); return mk; }
   function calVisits() { try { return JSON.parse(localStorage.getItem('p2p_visit_days') || '{}') || {}; } catch (e) { return {}; } }
   // The "Ideas to schedule" tray pulls straight from your Journal → Ideas (localStorage p2p_ideas),
   // minus any you've already scheduled (data.schedIdeas).
@@ -187,11 +190,11 @@
     for (var d = 1; d <= days; d++) {
       var iso = calMY.y + '-' + calP2(calMY.m + 1) + '-' + calP2(d), m = mk[iso] || {};
       var marks = (visits[iso] ? '<i class="osx-dc-star">★</i>' : '') + (m.live ? '<i class="osx-dc-dot live"></i>' : '') + (m.post ? '<i class="osx-dc-dot post"></i>' : '') + (m.goal ? '<i class="osx-dc-dot goal"></i>' : '') + (m.prod ? '<i class="osx-dc-dot prod"></i>' : '') + (m.event ? '<i class="osx-dc-dot event"></i>' : '') + (m.plan ? '<i class="osx-dc-dot plan"></i>' : '');
-      cells += '<button type="button" class="osx-dc-d' + (iso === tISO ? ' today' : '') + (iso === selDay ? ' sel' : '') + (pendIdea ? ' picking' : '') + '" data-dcday="' + iso + '">' + d + (marks ? '<span class="osx-dc-marks">' + marks + '</span>' : '') + '</button>';
+      cells += '<button type="button" class="osx-dc-d' + (iso === tISO ? ' today' : '') + (iso === selDay ? ' sel' : '') + (m.hausev ? ' hausev' : '') + (pendIdea ? ' picking' : '') + '" data-dcday="' + iso + '">' + d + (marks ? '<span class="osx-dc-marks">' + marks + '</span>' : '') + (m.hausev ? '<span class="osx-dc-p2p">P2P</span>' : '') + '</button>';
     }
     return '<div class="osx-dc"><div class="osx-dc-head"><button type="button" data-dcprev aria-label="Previous month">‹</button><b>' + CAL_MO[calMY.m] + ' ' + calMY.y + '</b><button type="button" data-dcnext aria-label="Next month">›</button></div>' +
       '<div class="osx-dc-dows"><span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span></div><div class="osx-dc-grid">' + cells + '</div>' +
-      '<div class="osx-dc-legend"><span class="l-live">live</span><span class="l-post">posted</span><span class="l-goal">goal</span><span class="l-prod">launch</span><span class="l-event">event</span><span class="l-plan">reminder</span><span class="l-star">★ showed up</span></div>' +
+      '<div class="osx-dc-legend"><span class="l-p2p">P2P event</span><span class="l-live">live</span><span class="l-post">posted</span><span class="l-goal">goal</span><span class="l-prod">launch</span><span class="l-event">event</span><span class="l-plan">reminder</span><span class="l-star">★ showed up</span></div>' +
       '<div class="osx-dcp-panel" data-dc-daypanel>' + dayPanelHTML(selDay) + '</div></div>';
   }
   function radarHTML() {
@@ -201,8 +204,9 @@
     data.products.forEach(function (p) { if (p.launch) { var dd = daysTo(p.launch); if (dd !== null && dd >= 0 && dd <= 14) items.push({ d: dd, kind: 'product', id: p.id, ic: '📦', t: p.name || 'Product launch' }); } });
     data.posts.forEach(function (p) { if (!p.deleted && !p.done && p.date) { var dd = daysTo(p.date); if (dd !== null && dd >= 0 && dd <= 14) items.push({ d: dd, kind: 'post', id: p.id, ic: '📝', t: p.topic || p.platform || 'Post' }); } });
     (data.events || []).forEach(function (e) { if (e.iso) { var dd = daysTo(e.iso); if (dd !== null && dd >= 0 && dd <= 14) items.push({ d: dd, kind: 'event', id: e.id, ic: e.kind === 'reminder' ? '⏰' : '📅', t: e.title || (e.kind === 'reminder' ? 'Reminder' : 'Event') }); } });
+    (window.P2P_EVENTS || []).forEach(function (e) { if (e.iso) { var dd = daysTo(e.iso); if (dd !== null && dd >= 0 && dd <= 14) items.push({ d: dd, kind: 'hausev', id: e.iso, ic: p2pFavIc(), t: e.title || 'P2P event', haus: true }); } });
     items.sort(function (a, b) { return a.d - b.d; });
-    var body = items.length ? '<div class="osx-radar-scroll' + (items.length > 5 ? ' more' : '') + '">' + items.map(function (it) { return '<button type="button" class="osx-radar-i" data-openitem="' + it.kind + '|' + esc(it.id) + '"><span class="osx-radar-ic">' + it.ic + '</span><span class="osx-radar-t">' + esc(it.t) + '</span><span class="osx-radar-d' + (it.d <= 1 ? ' soon' : '') + '">' + (it.d === 0 ? 'Today' : it.d === 1 ? '1 day' : it.d + ' days') + '</span></button>'; }).join('') + '</div>' : '<div class="osx-pl-empty" style="padding:6px 0;">Nothing in the next 2 weeks — plan a live or set a launch date.</div>';
+    var body = items.length ? '<div class="osx-radar-scroll' + (items.length > 5 ? ' more' : '') + '">' + items.map(function (it) { return '<button type="button" class="osx-radar-i' + (it.haus ? ' haus' : '') + '" data-openitem="' + it.kind + '|' + esc(it.id) + '"><span class="osx-radar-ic">' + it.ic + '</span><span class="osx-radar-t">' + esc(it.t) + (it.haus ? ' <em class="osx-radar-p2p">P2P</em>' : '') + '</span><span class="osx-radar-d' + (it.d <= 1 ? ' soon' : '') + '">' + (it.d === 0 ? 'Today' : it.d === 1 ? '1 day' : it.d + ' days') + '</span></button>'; }).join('') + '</div>' : '<div class="osx-pl-empty" style="padding:6px 0;">Nothing in the next 2 weeks — plan a live or set a launch date.</div>';
     return '<div class="osx-pl-sech" style="margin-top:0;">🔔 Coming up · next 14 days' + (items.length > 5 ? ' <span style="text-transform:none;letter-spacing:0;color:var(--muted);font-weight:600;">· scroll for ' + (items.length - 5) + ' more</span>' : '') + '</div>' + body;
   }
   function openDcDay(iso) {
@@ -212,7 +216,7 @@
       .concat(data.posts.filter(function (pp) { return !pp.deleted && pp.date === iso; }).map(function (pp) { return '<div class="osx-dcp-i">📝 <b>' + esc(pp.topic || pp.platform || 'Post') + '</b>' + (pp.done ? ' · ✓ posted' : '') + '</div>'; }))
       .concat(data.goals.filter(function (g) { return g.w === iso; }).map(function (g) { return '<div class="osx-dcp-i">🎯 <b>' + esc(g.title || 'Goal window') + '</b> — launch target</div>'; }))
       .concat(data.products.filter(function (x) { return x.launch === iso; }).map(function (x) { return '<div class="osx-dcp-i">📦 <b>' + esc(x.name || 'Product') + '</b> — launch</div>'; }))
-      .concat((window.P2P_EVENTS || []).filter(function (e) { return e.iso === iso; }).map(function (e) { return '<div class="osx-dcp-i">📅 <b>' + esc(e.title || 'Event') + '</b>' + (e.time ? ' · ' + esc(e.time) : '') + '</div>'; }));
+      .concat((window.P2P_EVENTS || []).filter(function (e) { return e.iso === iso; }).map(function (e) { return '<div class="osx-dcp-i">' + p2pFavIc() + ' <b>' + esc(e.title || 'Event') + '</b>' + (e.time ? ' · ' + esc(e.time) : '') + '</div>'; }));
     try { rows = rows.concat((JSON.parse(localStorage.getItem('p2p_my_events') || '[]') || []).filter(function (e) { return e.iso === iso; }).map(function (e) { return '<div class="osx-dcp-i">✎ <b>' + esc(e.title || 'Plan') + '</b>' + (e.time ? ' · ' + esc(e.time) : '') + '</div>'; })); } catch (e) {}
     pop.innerHTML = '<div class="osx-cal-pop-in osx-ns"><button class="osx-cal-pop-x" type="button" aria-label="Close">✕</button><div class="osx-ns-h">' + esc(dt.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })) + '</div>' + (rows.join('') || '<div class="osx-pl-empty">Nothing scheduled this day.</div>') + '<button class="osx-dclog" type="button" data-dclog>＋ Log a post I made this day</button><button class="osx-cele-x" type="button" style="margin-top:8px;">Close</button></div>';
     function close() { pop.remove(); }
@@ -237,7 +241,7 @@
     data.posts.filter(function (pp) { return !pp.deleted && pp.date === iso; }).forEach(function (pp) { rows.push(dcItemRow('post', pp.id, '📝', pp.topic || pp.platform || 'Post', pp.time || '', pp.done ? 'posted' : '')); });
     data.goals.filter(function (g) { return g.w === iso; }).forEach(function (g) { rows.push(dcItemRow('goal', g.id, '🎯', g.title || 'Goal', 'launch target', '')); });
     data.products.filter(function (x) { return x.launch === iso; }).forEach(function (x) { rows.push(dcItemRow('product', x.id, '📦', x.name || 'Product', 'launch', x.status === 'live' ? 'live' : '')); });
-    (window.P2P_EVENTS || []).filter(function (e) { return e.iso === iso; }).forEach(function (e) { rows.push(dcItemRow('hausevent', '', '⭐', e.title || 'Haus event', e.time || '', 'P2P')); });
+    (window.P2P_EVENTS || []).filter(function (e) { return e.iso === iso; }).forEach(function (e) { rows.push(dcItemRow('hausevent', '', p2pFavIc(), e.title || 'Haus event', e.time || '', 'P2P')); });
     (data.events || []).filter(function (e) { return e.iso === iso; }).forEach(function (e) { rows.push(dcItemRow('event', e.id, e.kind === 'reminder' ? '⏰' : '📅', e.title || (e.kind === 'reminder' ? 'Reminder' : 'Event'), evTimeStr(e), '', true)); });
     var head = '<div class="osx-dcp-head"><b>' + esc(prettyDate(iso)) + '</b><button type="button" class="osx-dcp-add" data-dcp-add="' + iso + '">＋ Add event</button></div>';
     var body = rows.length ? '<div class="osx-dcp-list">' + rows.join('') + '</div>' : '<div class="osx-dcp-empty">Nothing scheduled this day yet.</div>';
