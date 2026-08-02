@@ -225,18 +225,18 @@
   function postHTML(p) {
     var lng = (p.text || '').length > 280;
     return '<div class="osx-cw-post' + (p.house ? ' house' : '') + (p.pinned ? ' pinned' : '') + '" data-post="' + esc(p.id) + '">' +
-      headHTML(p) + titleHTML(p) +
+      headHTML(p) + titleHTML(p) + attHTML(p.attachments) +
       '<div class="osx-cw-post-text' + (lng ? ' clamp' : '') + '">' + esc(p.text) + '</div>' +
       (lng ? '<button class="osx-cw-more" type="button" data-more>Read more ▾</button>' : '') +
-      attHTML(p.attachments) + actsHTML(p) + commentsHTML(p, false) +
+      actsHTML(p) + commentsHTML(p, false) +
     '</div>';
   }
   function wowHTML(p) {
     return '<div class="osx-wow" data-post="' + esc(p.id) + '">' +
       '<div class="osx-wow-ribbon">🏆 Win of the Week</div>' +
-      headHTML(p) + titleHTML(p) +
+      headHTML(p) + titleHTML(p) + attHTML(p.attachments) +
       '<div class="osx-cw-post-text">' + esc(p.text) + '</div>' +
-      attHTML(p.attachments) + actsHTML(p) + commentsHTML(p, false) +
+      actsHTML(p) + commentsHTML(p, false) +
     '</div>';
   }
   function openPostModal(id) {
