@@ -223,6 +223,19 @@ export default {
           // maintain the name -> owner index that enforces uniqueness
           if (prevLow && prevLow !== low) await kv.delete('name:' + prevLow).catch(() => {});
           if (low) await kv.put('name:' + low, customerId).catch(() => {});
+          // Name changed → refresh it on this member's existing posts + comments so old content shows the new identity (avatars are looked up by name, so this fixes those too).
+          if (prevLow && prevLow !== low) {
+            try {
+              const pl = await kv.list({ prefix: 'post:' });
+              for (const pk of pl.keys) {
+                const pp = await kv.get(pk.name, 'json'); if (!pp) continue;
+                let changed = false;
+                if (pp.author === customerId && pp.name !== name) { pp.name = name; changed = true; }
+                if (Array.isArray(pp.comments)) { for (const c of pp.comments) { if (c.author === customerId && c.name !== name) { c.name = name; changed = true; } } }
+                if (changed) await kv.put(pk.name, JSON.stringify(pp));
+              }
+            } catch (e) {}
+          }
           // brand-new member (no prior card) → drop a one-time welcome post on the wall
           if (!prev && rec.name && rec.name !== 'Member') {
             const line = WELCOME_LINES[Math.floor(Math.random() * WELCOME_LINES.length)].replace('{name}', rec.name);

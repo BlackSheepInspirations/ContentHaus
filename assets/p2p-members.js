@@ -156,13 +156,13 @@
     pop.innerHTML = '<div class="osx-cal-pop-in osx-mbm"><button class="osx-cal-pop-x" type="button" aria-label="Close">✕</button>' +
       '<div class="osx-mbm-top"><div class="osx-mb-av osx-mbm-av">' + avatarInner(p) + '</div>' +
         '<div class="osx-mbm-id"><div class="osx-mbm-name">' + esc(nm) + '</div>' + (p.tier ? '<div class="osx-mb-tier">' + esc(p.tier) + '</div>' : '') +
-        (l ? '<div class="osx-mb-loc">📍 ' + esc(l) + '</div>' : '') + (p.since ? '<div class="osx-mb-since">' + esc(since(p.since)) + '</div>' : '') + '</div>' +
-        '<button type="button" class="osx-mb-follow big' + (following ? ' on' : '') + '" data-mbm-follow>' + (following ? '🔔 Following' : '🔕 Follow') + '</button></div>' +
+        (l ? '<div class="osx-mb-loc">📍 ' + esc(l) + '</div>' : '') + (p.since ? '<div class="osx-mb-since">' + esc(since(p.since)) + '</div>' : '') + '</div></div>' +
       '<div class="osx-mbm-stats"><div><b>' + (p.points || 0) + '</b><span>points</span></div><div><b>' + (p.badges || 0) + '</b><span>badges</span></div>' + (p.streak ? '<div><b>' + p.streak + '🔥</b><span>day streak</span></div>' : '') + '</div>' +
       (p.quote ? '<p class="osx-mb-quote">“' + esc(p.quote) + '”</p>' : '') +
       (p.about ? '<p class="osx-mb-about">' + esc(p.about) + '</p>' : '') +
       socialHTML(p.social) +
-      '<div class="osx-mbm-actions"><button type="button" class="osx-mbm-posts" data-mbm-posts>See their posts →</button></div></div>';
+      '<div class="osx-mbm-actions"><button type="button" class="osx-mb-follow big' + (following ? ' on' : '') + '" data-mbm-follow>' + (following ? '🔔 Following' : '🔕 Follow') + '</button>' +
+      '<button type="button" class="osx-mbm-posts" data-mbm-posts>See their posts →</button></div></div>';
     root.appendChild(pop);
     function close() { pop.remove(); }
     pop.addEventListener('click', function (e) { if (e.target === pop) close(); });
