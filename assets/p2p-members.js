@@ -353,7 +353,8 @@
     document.querySelectorAll('[data-userbar] .osx-userbubble').forEach(function (el) {
       el.setAttribute('data-profile', nm);
       if (isPreset(photo)) el.innerHTML = '<span class="osx-pa-emoji">' + esc(String(photo).slice(7)) + '</span>';
-      else if (!photo) el.textContent = initial(nm);
+      else if (photo) el.innerHTML = '<img src="' + esc(photo) + '" alt="" loading="lazy" onerror="this.style.display=\'none\'">';
+      else el.textContent = initial(nm);
     });
     if (window.P2P_COMMUNITY_RERENDER) { try { window.P2P_COMMUNITY_RERENDER(); } catch (e) {} }
   }

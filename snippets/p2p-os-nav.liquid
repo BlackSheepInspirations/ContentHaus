@@ -186,7 +186,9 @@
   #p2posnav .osx-comm-invite:hover{filter:brightness(1.06);}
   #p2posnav .osx-comm-invite.ghost{background:transparent;color:var(--gold-bright);border:1px solid var(--gstroke);}
   #p2posnav .osx-userbar{position:relative;display:flex;align-items:center;gap:10px;padding:4px 10px 12px;margin-bottom:8px;border-bottom:1px solid var(--stroke);}
-  #p2posnav .osx-userbubble{flex:none;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:800 15px/1 Georgia,serif;color:var(--gold-bright);background:radial-gradient(circle at 50% 30%,#2a3b52,#12202b);border:1.5px solid var(--gstroke);}
+  #p2posnav .osx-userbubble{flex:none;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:800 15px/1 Georgia,serif;color:var(--gold-bright);background:radial-gradient(circle at 50% 30%,#2a3b52,#12202b);border:1.5px solid var(--gstroke);overflow:hidden;}
+  #p2posnav .osx-userbubble img{width:100%;height:100%;object-fit:cover;}
+  #p2posnav .osx-userbubble .osx-pa-emoji{font-size:18px;line-height:1;}
   #p2posnav .osx-userinfo{flex:1;min-width:0;line-height:1.2;}
   #p2posnav .osx-username{display:block;font:700 13px/1.2 system-ui;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   #p2posnav .osx-usermeta{display:block;font:600 10px/1.2 system-ui;letter-spacing:.03em;text-transform:uppercase;color:var(--gold-bright);}
@@ -267,6 +269,17 @@
       var mEl = rail.querySelector('[data-count-members]'), aEl = rail.querySelector('[data-count-active]');
       if(mEl) mEl.textContent = m.length;
       if(aEl) aEl.textContent = m.filter(function(x){ return x.ts && (now - x.ts) < 300000; }).length;
+    }).catch(function(){});
+    // My own photo + display name on the rail bubble (the OS members script doesn't run here).
+    fetch('/apps/p2p/profile', { credentials: 'same-origin' }).then(function(r){ return r.ok ? r.json() : null; }).then(function(j){
+      var p = j && j.profile; if(!p) return;
+      var bub = rail.querySelector('[data-userbar] .osx-userbubble'), unm = rail.querySelector('[data-userbar] .osx-username');
+      if(unm && p.name) unm.textContent = p.name;
+      if(bub){
+        var ph = String(p.photo || '');
+        if(/^preset:/.test(ph)) bub.innerHTML = '<span class="osx-pa-emoji">' + ph.slice(7).replace(/[&<>"]/g,'') + '</span>';
+        else if(ph) bub.innerHTML = '<img src="' + ph.replace(/"/g,'&quot;') + '" alt="" loading="lazy" onerror="this.style.display=\'none\'">';
+      }
     }).catch(function(){});
     // Invite — copy the preview link (same behavior as the OS emblem card).
     var inv = rail.querySelector('[data-comm-invite]');
