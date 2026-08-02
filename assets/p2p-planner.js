@@ -17,6 +17,15 @@
                ['w', 'W', 'Window of Time', 'A real deadline on the calendar. Skip it and the plan drifts forever.'],
                ['s', 'S', 'Success Vision', 'What "done" looks like — specific enough to know when you\'ve arrived.']];
   var ROOTED_STEPS = ['R · Reach — warm up the right people', 'O · Open — build anticipation', 'O · Offer — make the offer', 'T · Trigger — proof + urgency', 'E · Escalate — the close', 'D · Deepen — keep it going after'];
+  var ROADMAP_TEMPLATES = [
+    ['rooted', '🚀 ROOTED launch', ROOTED_STEPS],
+    ['raft', '🔁 RAFT sprint', ['R · Relieve — clear your biggest blocker', 'A · Act — one committed action this week', 'F · Fast Win — ship one thing that didn\'t exist before', 'T · Traction — measure it, then run it back']],
+    ['content', '📱 Content week', ['Plan the week\'s hooks & topics', 'Batch-create the content', 'Schedule / queue the posts', 'Show up daily (post or go live)', 'Engage — reply to every comment', 'Review what worked, then double down']]
+  ];
+  function tmplDropdown(scope) {
+    return '<span class="osx-tmpl-wrap"><button class="osx-pl-tmpl" type="button" data-tmpl-open="' + esc(scope) + '">＋ Template ▾</button>' +
+      '<span class="osx-menu-pop osx-tmpl-pop" hidden>' + ROADMAP_TEMPLATES.map(function (t) { return '<button type="button" data-tmpl-add="' + esc(scope) + '|' + t[0] + '">' + t[1] + ' <i>· ' + t[2].length + '</i></button>'; }).join('') + '</span></span>';
+  }
 
   var view = 'dash', active = 'week', expanded = {}, selected = {}, livesTab = 'lives', calMY = null;
 
@@ -245,7 +254,7 @@
       '<div class="osx-pl-stages"><span class="osx-pl-stagelbl">Stage:</span>' + stageBtns + '<button class="osx-pl-gdel" data-gdel="' + esc(g.id) + '">Delete goal</button></div>' + warn +
       field(g, 'g') +
       '<div class="osx-pl-flabel">R · Roadmap <span>the ordered steps — each tracks its own progress</span></div>' + road +
-      '<div class="osx-pl-add"><input class="osx-pl-in" data-radd="' + esc(g.id) + '" placeholder="Add a roadmap step…" maxlength="120"><button class="osx-pl-addbtn" data-raddb="' + esc(g.id) + '">Add</button> <button class="osx-pl-tmpl" data-rtmpl="' + esc(g.id) + '">＋ ROOTED launch</button></div>' +
+      '<div class="osx-pl-add"><input class="osx-pl-in" data-radd="' + esc(g.id) + '" placeholder="Add a roadmap step…" maxlength="120"><button class="osx-pl-addbtn" data-raddb="' + esc(g.id) + '">Add</button> ' + tmplDropdown('goal:' + g.id) + '</div>' +
       '<div class="osx-pl-own"><div class="osx-pl-flabel">O · Ownership <span>your committed action this week</span></div>' +
         '<div class="osx-pl-ownrow"><input class="osx-pl-in" data-of="' + esc(g.id) + '" value="' + esc(g.o || '') + '" placeholder="e.g. Publish one product listing this week" maxlength="160">' +
         '<button class="osx-pl-owntog' + (ownedThisWeek(g) ? ' on' : '') + '" data-otog="' + esc(g.id) + '">' + (ownedThisWeek(g) ? '✓ Done this week' : 'Mark done') + '</button></div></div>' +
@@ -270,7 +279,7 @@
     function item(it, bucket) { return '<div class="osx-pl-item' + (it.pct >= 100 ? ' done' : '') + '">' + gauge(it.pct, 'L|' + it.id) + '<span class="osx-pl-text">' + esc(it.text) + '</span><span class="osx-pl-pct">' + (it.pct || 0) + '%</span><button class="osx-pl-del" data-ldel="' + esc(bucket + '|' + it.id) + '" aria-label="Remove">✕</button></div>'; }
     return '<div class="osx-pl-head"><div class="osx-pl-tfs">' + tfBtns + '</div><div class="osx-pl-rollup"><b>' + periodPct(active) + '%</b><span>this ' + active + '</span></div></div>' +
       '<div class="osx-pl-sec"><div class="osx-pl-sech">⭐ Top 3 — your must-wins</div>' + (seg.top.map(function (it) { return item(it, 'top'); }).join('') || '<div class="osx-pl-empty">Name your 3 must-wins for this ' + active + '.</div>') + (seg.top.length >= 3 ? '' : '<div class="osx-pl-add"><input class="osx-pl-in" data-ladd="top" placeholder="Add a top priority…" maxlength="120"><button class="osx-pl-addbtn" data-laddb="top">Add</button></div>') + '</div>' +
-      '<div class="osx-pl-sec"><div class="osx-pl-sech">✎ To-dos <button class="osx-pl-tmpl" data-ltmpl>＋ ROOTED launch</button></div>' + (seg.todo.map(function (it) { return item(it, 'todo'); }).join('') || '<div class="osx-pl-empty">Everything else you want to move on.</div>') + '<div class="osx-pl-add"><input class="osx-pl-in" data-ladd="todo" placeholder="Add a to-do…" maxlength="120"><button class="osx-pl-addbtn" data-laddb="todo">Add</button></div></div>' +
+      '<div class="osx-pl-sec"><div class="osx-pl-sech">✎ To-dos ' + tmplDropdown('list') + '</div>' + (seg.todo.map(function (it) { return item(it, 'todo'); }).join('') || '<div class="osx-pl-empty">Everything else you want to move on.</div>') + '<div class="osx-pl-add"><input class="osx-pl-in" data-ladd="todo" placeholder="Add a to-do…" maxlength="120"><button class="osx-pl-addbtn" data-laddb="todo">Add</button></div></div>' +
       '<button class="osx-pl-archbtn" data-arch>✓ Completed archive (' + data.done.length + ')</button>';
   }
 
@@ -770,13 +779,19 @@
     host.querySelectorAll('[data-raddb]').forEach(function (b) { b.addEventListener('click', function () { addRoad(b.getAttribute('data-raddb')); }); });
     host.querySelectorAll('[data-radd]').forEach(function (inp) { inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); addRoad(inp.getAttribute('data-radd')); } }); });
     host.querySelectorAll('[data-rdel]').forEach(function (b) { b.addEventListener('click', function () { var p = b.getAttribute('data-rdel').split('|'), g = goal(p[0]); if (g) { g.roadmap = (g.roadmap || []).filter(function (x) { return x.id !== p[1]; }); save(); render(); } }); });
-    host.querySelectorAll('[data-rtmpl]').forEach(function (b) { b.addEventListener('click', function () { var g = goal(b.getAttribute('data-rtmpl')); if (g) { g.roadmap = g.roadmap || []; ROOTED_STEPS.forEach(function (t) { g.roadmap.push({ id: uid(), text: t, pct: 0 }); }); save(); render(); } }); });
+    host.querySelectorAll('[data-tmpl-open]').forEach(function (b) { b.addEventListener('click', function (e) { e.stopPropagation(); var pop = b.nextElementSibling; if (pop) pop.hidden = !pop.hidden; }); });
+    host.querySelectorAll('[data-tmpl-add]').forEach(function (b) { b.addEventListener('click', function () {
+      var p = b.getAttribute('data-tmpl-add').split('|'), scope = p[0], tid = p[1];
+      var tpl = ROADMAP_TEMPLATES.filter(function (x) { return x[0] === tid; })[0]; if (!tpl) return;
+      if (scope === 'list') { tpl[2].forEach(function (t) { data[active].todo.push({ id: uid(), text: t, pct: 0 }); }); }
+      else { var g = goal(scope.slice(5)); if (g) { g.roadmap = g.roadmap || []; tpl[2].forEach(function (t) { g.roadmap.push({ id: uid(), text: t, pct: 0 }); }); } }
+      save(); render();
+    }); });
     // lists
     host.querySelectorAll('[data-tf]').forEach(function (b) { b.addEventListener('click', function () { active = b.getAttribute('data-tf'); render(); }); });
     host.querySelectorAll('[data-laddb]').forEach(function (b) { b.addEventListener('click', function () { addList(b.getAttribute('data-laddb')); }); });
     host.querySelectorAll('[data-ladd]').forEach(function (inp) { inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); addList(inp.getAttribute('data-ladd')); } }); });
     host.querySelectorAll('[data-ldel]').forEach(function (b) { b.addEventListener('click', function () { var p = b.getAttribute('data-ldel').split('|'); data[active][p[0]] = data[active][p[0]].filter(function (i) { return i.id !== p[1]; }); save(); render(); }); });
-    var lt = host.querySelector('[data-ltmpl]'); if (lt) lt.addEventListener('click', function () { if (!window.confirm('Add the ROOTED launch roadmap (6 steps) to your To-dos for this ' + active + '?')) return; ROOTED_STEPS.forEach(function (t) { data[active].todo.push({ id: uid(), text: t, pct: 0 }); }); save(); render(); });
     var arch = host.querySelector('[data-arch]'); if (arch) arch.addEventListener('click', renderArchive);
     // lives
     var nsb = host.querySelector('[data-northstar]'); if (nsb) nsb.addEventListener('click', openNorthStar);
@@ -843,6 +858,9 @@
   }
   function addRoad(gid) { var inp = host.querySelector('[data-radd="' + gid + '"]'); var v = (inp && inp.value || '').trim(); if (!v) return; var g = goal(gid); if (g) { g.roadmap = g.roadmap || []; g.roadmap.push({ id: uid(), text: v.slice(0, 120), pct: 0 }); save(); render(); } }
   function addList(bucket) { var inp = host.querySelector('[data-ladd="' + bucket + '"]'); var v = (inp && inp.value || '').trim(); if (!v) return; if (bucket === 'top' && data[active].top.length >= 3) return; data[active][bucket].push({ id: uid(), text: v.slice(0, 120), pct: 0 }); save(); render(); }
+
+  // close any open template dropdown on an outside click (registered once)
+  document.addEventListener('click', function (e) { if (!e.target.closest('.osx-tmpl-wrap')) { host.querySelectorAll('.osx-tmpl-pop').forEach(function (p) { p.hidden = true; }); } });
 
   render();
   try { rebuildReminders(); } catch (e) {}
