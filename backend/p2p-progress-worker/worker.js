@@ -75,7 +75,20 @@ const FRANK_POSTS = [
   'Did you know? Your email list is the only audience you actually own. Start it today, even at zero.',
   'Did you know? People buy outcomes, not features. Sell the after, not the tool.',
   'Did you know? The best marketing is a product people can\'t stop talking about. Make the first version remarkable.',
-  'Did you know? Consistency is a business strategy. The algorithm rewards the person who shows up on the boring days.'
+  'Did you know? Consistency is a business strategy. The algorithm rewards the person who shows up on the boring days.',
+  'Did you know? A niche isn\'t a cage — it\'s a magnet. The narrower your "who," the louder your "yes."',
+  'Did you know? Your first draft\'s only job is to exist. You can\'t edit a blank page, but you can always sharpen a rough one.',
+  'Did you know? A guarantee doesn\'t cost you sales — it removes the reason to say no. Take the risk off their plate.',
+  'Did you know? One good piece of content is five. Chop the video into clips, the clips into captions, the captions into an email. Create once, publish everywhere.',
+  'Did you know? Objections are a map. Every "but what about…" is telling you exactly what to put on your sales page.',
+  'Did you know? Give people three prices and most pick the middle. You\'re not selling one thing — you\'re framing a choice.',
+  'Did you know? A deadline is a feature. "Whenever you\'re ready" is the slowest-selling offer on earth.',
+  'Did you know? Facts tell, stories sell. Wrap your proof in a before-and-after and watch it land.',
+  'Did you know? If you\'re tracking ten numbers, you\'re tracking none. Pick the one that pays the bills and guard it.',
+  'Did you know? Every shiny new tactic is a tax on the one that\'s already working. Finish before you chase.',
+  'Did you know? Sell it before you build it. A pre-sale is the only market research that pays you.',
+  'Did you know? The middle is where most quit — not the start, not the finish. Boring consistency IS the strategy.',
+  'Did you know? A referral is a warm lead someone else already closed for you. Make asking part of every delivery.'
 ];
 const RUTH_POSTS = [
   'A gentle reminder: comparison is a thief. The only fair race is against who you were yesterday. 🌱',
@@ -89,7 +102,20 @@ const RUTH_POSTS = [
   'A soft word: be as kind to yourself as you\'d be to a friend starting exactly where you are.',
   'Remember why you started. On the hard days, purpose is the thing that carries the plan. ✨',
   'A thought: the flock grows stronger when we celebrate each other loudly. Whose win can you cheer today?',
-  'Gentle truth: you were made original on purpose, for a purpose. Don\'t shrink to fit someone else\'s box.'
+  'Gentle truth: you were made original on purpose, for a purpose. Don\'t shrink to fit someone else\'s box.',
+  'A gentle reminder: you\'re not late. Flowers don\'t bloom in the same month, and neither do callings.',
+  'Something to hold onto: faithfulness in the small, unseen things is still faithfulness. Heaven keeps different books than the algorithm.',
+  'A soft truth: you can\'t pour from an empty cup, and you were never meant to. Fill up first, then overflow.',
+  'Today\'s word: the good things being grown in you can\'t be rushed. Trust the timing you can\'t see yet.',
+  'A gentle nudge: tend your work like a garden, not a machine. Some days you plant, some you water, some you just wait.',
+  'Remember: it\'s okay to be a beginner. Every master you admire once fumbled through the exact page you\'re on today.',
+  'Something to sit with: the harvest comes for the one who keeps planting, not the one who keeps measuring the soil.',
+  'A soft reminder: your quiet, behind-the-scenes obedience is building something loud. Keep showing up when no one\'s clapping.',
+  'A thought for today: gratitude turns what you have into enough. Name one good thing before you chase the next.',
+  'Gentle truth: your pace is not a problem to fix. Slow and rooted outlasts fast and shallow every time.',
+  'Remember: rest is an act of trust — a way of saying the world keeps turning even when you set the work down.',
+  'A kind word: don\'t let a hard season convince you the whole story is hard. Chapters change. Keep turning the page.',
+  'Something true: you were planted, not buried. What feels like the dark is just the soil doing its quiet work. 🌱'
 ];
 const ERIC_POSTS = [
   'Why did the entrepreneur bring a ladder to the sales meeting? He heard the projections were through the roof. 😂',
@@ -117,7 +143,24 @@ const DREA_POSTS = [
   'Wednesday reminder: comparison will rob you blind if you let it. Someone else\'s chapter twenty is not a rebuke of your chapter two. Run YOUR race, at your pace, with your heart wide open. That\'s where the magic — and the peace — actually lives. 🏃‍♀️🤍',
   'A soft word for the tired ones: rest is not quitting. Sometimes the most productive, faithful thing you can do is close the laptop, hug someone you love, and remember why you started. The work will be there tomorrow. Refill your cup first. ☕🤍',
   'Here\'s what I know for sure this week: you were made original, on purpose, for a purpose. The world doesn\'t need a watered-down copy of someone else. It needs the real, brave, imperfect you. Show up as her. She\'s the whole point. 🖤🐑',
-  'Checking in on your heart, not just your hustle. How ARE you — really? If today all you did was keep going, that counts. If today you rested, that counts too. Grace over grind, always. I\'m so proud of you. 💛'
+  'Checking in on your heart, not just your hustle. How ARE you — really? If today all you did was keep going, that counts. If today you rested, that counts too. Grace over grind, always. I\'m so proud of you. 💛',
+  'Hey friend. If today felt like carrying something heavy and smiling anyway — I see you. You don\'t have to have it all together to belong here. Come as you are. 🤍',
+  'Mid-week heart check: the thing you keep almost-quitting, the one that scares you? That\'s usually the exact thing you were made for. Fear and calling live really close together. Stay one more day. 💛',
+  'Can I tell you something? The message you almost didn\'t send — someone out there needed it. Your courage is somebody else\'s answered prayer. Send it. Post it. Show up. ✨',
+  'I know some of you are tired in a way sleep doesn\'t fix. You\'re allowed to slow down without stopping. Faithful and weary can be the same person. Be gentle with her today. 🌱',
+  'Little reminder: celebrate the small wins out loud. The first sale, the first yes, the first brave post. Joy you skip past is joy you lose. Let yourself be proud. 🎉',
+  'That dream that keeps tapping you on the shoulder isn\'t going away, because it\'s not supposed to. Stop asking if you\'re qualified and start asking who you can help first. 🖤',
+  'Your story — the messy middle, not just the highlight reel — is the thing that connects with people. Don\'t polish away the parts that make you relatable. 🤍',
+  'It\'s okay to want more. Wanting to grow, to earn, to be seen for your work isn\'t greed — it\'s stewardship of the gift you were given. Chase it without apologizing. 💛',
+  'To the one in the lonely middle — past the excitement, not yet at the finish — this is where it counts. The view changes for the ones who don\'t turn around. 🏔️',
+  'Gentle truth for the compare-and-scroll days: social media is everyone\'s trailer, not their movie. Stop measuring your behind-the-scenes against their highlight reel. 🏃‍♀️',
+  'Hear this: the quiet work you do when no one\'s watching is not invisible. God sees it, the flock feels it, and it\'s compounding into something you can\'t see yet. 🌱',
+  'You are not "too much." Not too loud, too big, too ambitious, too tender. The people meant for you are looking for exactly the amount of you that you are. 💛',
+  'When you want to quit — and you will, we all do — don\'t decide on your worst day. Rest, breathe, come back tomorrow. Quitting is a call for a rested mind, not a tired one. 🤍',
+  'Your people are coming — the ones who\'ll say "this changed everything for me." Keep showing up for the empty room now, so it\'s full and ready when they arrive. 🪑',
+  'Imperfect action beats perfect intentions every time. The half-finished thing you shipped is worth more than the masterpiece still hiding in your head. 💪',
+  'Talk to yourself like you\'d talk to a friend just starting out. You\'d never call her behind, or dumb, or too late. Extend that same grace to the woman in the mirror. 🖤',
+  'Never underestimate the ripple. One thing you make, one person you help — it reaches people you\'ll never meet. You\'re planting shade trees for strangers. Keep planting. 🌳'
 ];
 // Community channels. `post` = who may post: 'all' or 'admin' (admin/house only).
 const CATEGORIES = {
