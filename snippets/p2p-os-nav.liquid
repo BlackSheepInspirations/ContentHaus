@@ -119,8 +119,10 @@
     color:var(--text);font-family:system-ui,-apple-system,sans-serif;}
   @keyframes p2posnav-shift{0%{background-position:0% 50%;}100%{background-position:300% 50%;}}
 
-  /* shift the whole page right so nothing hides behind the rail (header is sticky, so it shifts too) */
-  html.p2p-hasnav body{padding-left:var(--p2posnav-w);}
+  /* shift only the main content right (NOT the store header/footer) so nothing hides
+     behind the rail — the header stays full-width and the Black Sheep logo stays put,
+     matching the OS page. */
+  html.p2p-hasnav #MainContent{padding-left:var(--p2posnav-w);}
 
   #p2posnav .p2posnav-brand{display:block;text-decoration:none;border-bottom:1px solid var(--stroke);padding:6px 10px 16px;margin-bottom:8px;border-radius:8px;transition:background .15s;}
   #p2posnav .p2posnav-brand:hover{background:rgba(255,255,255,.03);}
@@ -145,8 +147,8 @@
   @media (prefers-reduced-motion: reduce){#p2posnav .p2posnav-2{animation:none;}}
 
   @media (max-width:1024px){
-    /* off-canvas drawer on reduced/mobile widths; page is not shifted */
-    html.p2p-hasnav body{padding-left:0;}
+    /* off-canvas drawer on reduced/mobile widths; content is not shifted */
+    html.p2p-hasnav #MainContent{padding-left:0;}
     #p2posnav{transform:translateX(-100%);transition:transform .25s ease;box-shadow:0 0 46px rgba(0,0,0,.6);width:min(84vw,300px);z-index:1002;}
     html.p2posnav-open #p2posnav{transform:translateX(0);}
     html.p2posnav-open .p2posnav-scrim{display:block;}
