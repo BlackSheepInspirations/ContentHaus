@@ -205,6 +205,17 @@
       }
       h._marker = cs; // lets the hover wiring below light up the right marker
       board.appendChild(cs);
+      // NEW (21-day window from data-new-since) / SOON stickers — a separate overlay so it never fights the state marker
+      var soon = /^(true|1)$/i.test(h.getAttribute('data-coming-soon') || '');
+      var ns = h.getAttribute('data-new-since'), isNew = false;
+      if(ns){ var t0 = Date.parse(ns); if(!isNaN(t0)){ var days = (Date.now() - t0) / 86400000; isNew = days >= -1 && days <= 21; } }
+      if(soon || isNew){
+        var tag = document.createElement('div');
+        tag.className = 'cs cs-tag';
+        tag.style.left = cs.style.left; tag.style.top = cs.style.top;
+        tag.innerHTML = '<span class="cs-sticker ' + (soon ? 'cs-soon' : 'cs-new') + '">' + (soon ? 'Soon' : 'New') + '</span>';
+        board.appendChild(tag);
+      }
     });
   }
 

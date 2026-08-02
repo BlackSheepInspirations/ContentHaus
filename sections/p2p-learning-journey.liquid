@@ -150,11 +150,11 @@
         {%- if node_url == blank and b.handle != blank -%}{%- assign node_url = '/pages/courses-' | append: b.handle -%}{%- endif -%}
         {%- case block.type -%}
           {%- when 'course' -%}
-            <button class="hs" style="{{ pos }}" data-type="course" data-handle="{{ b.handle }}" data-title="{{ b.title }}" data-body="{{ b.body }}" data-cta="Open course" data-url="{{ node_url }}"{{ block.shopify_attributes }}></button>
+            <button class="hs" style="{{ pos }}" data-type="course" data-handle="{{ b.handle }}" data-title="{{ b.title }}" data-body="{{ b.body }}" data-cta="Open course" data-url="{{ node_url }}" data-new-since="{{ b.new_since }}" data-coming-soon="{{ b.coming_soon }}"{{ block.shopify_attributes }}></button>
           {%- when 'offshoot' -%}
             {%- assign unlock_handle = b.unlock_after_handle -%}
             {%- if unlock_handle == blank -%}{%- assign unlock_handle = section.settings.offshoot_hub_handle -%}{%- endif -%}
-            <button class="hs hs--offshoot" style="{{ pos }}" data-type="offshoot" data-handle="{{ b.handle }}" data-unlock-after="{{ unlock_handle }}" data-title="{{ b.title }}" data-body="{{ b.body }}" data-cta="Open course" data-url="{{ node_url }}"{{ block.shopify_attributes }}></button>
+            <button class="hs hs--offshoot" style="{{ pos }}" data-type="offshoot" data-handle="{{ b.handle }}" data-unlock-after="{{ unlock_handle }}" data-title="{{ b.title }}" data-body="{{ b.body }}" data-cta="Open course" data-url="{{ node_url }}" data-new-since="{{ b.new_since }}" data-coming-soon="{{ b.coming_soon }}"{{ block.shopify_attributes }}></button>
           {%- when 'check' -%}
             {%- assign ctl = b.title | downcase -%}
             {%- if ctl contains 'mindset' -%}{%- assign ccat = 'mindset' -%}{%- elsif ctl contains 'purpose' -%}{%- assign ccat = 'purpose' -%}{%- elsif ctl contains 'heart' -%}{%- assign ccat = 'heart' -%}{%- else -%}{%- assign ccat = 'check' -%}{%- endif -%}
@@ -740,6 +740,8 @@
         { "type": "text", "id": "handle", "label": "Handle", "info": "Must match this course's own page — its \"Course handle\" setting on the Course Player section. This is how the map checks completion." },
         { "type": "url", "id": "url", "label": "Course page" },
         { "type": "textarea", "id": "body", "label": "Info-popup blurb" },
+        { "type": "text", "id": "new_since", "label": "Mark NEW since (date)", "info": "Set to the date you added/updated this course (YYYY-MM-DD). A gold NEW sticker shows for 21 days, then clears itself." },
+        { "type": "checkbox", "id": "coming_soon", "label": "Coming soon (SOON sticker)", "info": "Flags the course with a SOON sticker. It stays clickable — point its Course page at a teaser/waitlist." },
         { "type": "checkbox", "id": "is_realm_anchor", "label": "This is this Realm's anchor course", "info": "Informational only — the actual gate is the \"Realm unlock\" setting above, set on whichever Realm(s) this one gates." },
         { "type": "number", "id": "pos_left", "label": "Position — left (%)", "default": 40 },
         { "type": "number", "id": "pos_top", "label": "Position — top (%)", "default": 20 },
@@ -755,6 +757,8 @@
         { "type": "text", "id": "handle", "label": "Handle" },
         { "type": "url", "id": "url", "label": "Course page" },
         { "type": "textarea", "id": "body", "label": "Info-popup blurb" },
+        { "type": "text", "id": "new_since", "label": "Mark NEW since (date)", "info": "Set to the date you added/updated this course (YYYY-MM-DD). A gold NEW sticker shows for 21 days, then clears itself." },
+        { "type": "checkbox", "id": "coming_soon", "label": "Coming soon (SOON sticker)", "info": "Flags the course with a SOON sticker. It stays clickable — point its Course page at a teaser/waitlist." },
         { "type": "text", "id": "unlock_after_handle", "label": "Unlocks after (course handle)", "info": "Leave blank to use this board's default Offshoot hub handle." },
         { "type": "number", "id": "pos_left", "label": "Position — left (%)", "default": 15 },
         { "type": "number", "id": "pos_top", "label": "Position — top (%)", "default": 50 },

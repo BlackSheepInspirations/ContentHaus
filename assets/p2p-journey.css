@@ -292,6 +292,11 @@
 #p2pj .cs .lock{background:radial-gradient(circle at 40% 34%,rgba(32,44,54,.94),rgba(8,14,18,.95));
   border:2px solid rgba(216,180,90,.55); box-shadow:0 0 18px rgba(0,0,0,.6), inset 0 0 14px rgba(0,0,0,.5);}
 #p2pj .cs .lock svg{width:2.5cqw; height:2.5cqw; min-width:13px; min-height:13px; fill:#e0bd63;}
+/* NEW / SOON stickers — a separate overlay offset above-right of the node marker */
+#p2pj .cs-tag{z-index:7;}
+#p2pj .cs-sticker{position:relative; transform:translate(14px,-20px); font:800 8.5px/1 system-ui; letter-spacing:.05em; text-transform:uppercase; padding:3px 6px; border-radius:999px; white-space:nowrap; box-shadow:0 2px 8px rgba(0,0,0,.45);}
+#p2pj .cs-new{background:linear-gradient(100deg,#f4e2a6,#c9a24a); color:#0a1410;}
+#p2pj .cs-soon{background:#22303f; color:#d8e6f2; border:1px solid rgba(255,255,255,.28);}
 /* available — one color per node type, matching the board's own star/sign treatment */
 #p2pj .cs .avail{border:2px solid rgba(255,255,255,.4); box-shadow:0 4px 14px rgba(0,0,0,.45);}
 #p2pj .cs .avail svg{width:2.3cqw; height:2.3cqw; min-width:12px; min-height:12px; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round;}
