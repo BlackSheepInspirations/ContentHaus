@@ -552,7 +552,8 @@
     popup('<div class="osx-cal-pop-ban" style="font-size:40px;">' + esc(emoji || '🏅') + '</div>' +
       '<div class="osx-cal-pop-b"><div class="osx-cal-pop-t">' + esc(label) + '</div>' +
       '<div class="osx-cal-pop-meta">🏅 Badge earned</div>' +
-      '<div class="osx-cal-pop-desc">Earn your own by showing up daily, finishing courses, and keeping your streak alive. See them all under Checkpoint → Badges.</div></div>');
+      '<div class="osx-cal-pop-desc">Earn your own by showing up daily, finishing courses, and keeping your streak alive.</div>' +
+      '<a class="osx-cal-pop-link" href="/pages/p2p-learning-badges">See all badges &amp; how to earn them →</a></div>');
   }
   function badgeChips(p) {
     var b = (p.recentBadges || []).slice(0, 3);
@@ -563,23 +564,28 @@
   }
 
   function renderGrowth(m) {
-    var el = root.querySelector('[data-gb]'); if (!el) return;
-    if (!m.length) { el.innerHTML = empty('No members yet.'); return; }
+    var els = root.querySelectorAll('[data-gb]'); if (!els.length) return;
     var key = gbRange === 'd7' ? 'd7' : gbRange === 'd30' ? 'd30' : 'points';
-    var top = m.slice().sort(function (a, b) { return ((b[key] || 0) - (a[key] || 0)) || ((b.points || 0) - (a.points || 0)); }).slice(0, 10);
-    var allZero = key !== 'points' && top.every(function (p) { return !(p[key] || 0); });
-    if (allZero) { el.innerHTML = '<div class="osx-cw-empty" style="padding:10px 0;">This window is still filling in — points earned over the last ' + (key === 'd7' ? '7' : '30') + ' days will show here as everyone keeps showing up. 🌱</div>'; return; }
-    el.innerHTML = top.map(function (p, i) {
-      var val = (p[key] || 0);
-      return '<div class="osx-gb-row" data-profile="' + esc(p.name || '') + '"><span class="osx-gb-rank' + (i < 3 ? ' top' : '') + '">' + (i + 1) + '</span>' +
-        '<span class="osx-gb-av">' + avatar(p) + '</span>' +
-        '<span class="osx-gb-who"><span class="osx-gb-name">' + esc(p.name || 'Member') + (p.streak ? ' <span class="osx-gb-fire">' + p.streak + '🔥</span>' : '') + '</span>' + (p.tier ? '<span class="osx-gb-tier">' + esc(p.tier) + '</span>' : '') + '</span>' +
-        badgeChips(p) +
-        '<span class="osx-gb-pts">' + (key === 'points' ? val.toLocaleString() : '+' + val.toLocaleString()) + '</span></div>';
-    }).join('');
-    el.querySelectorAll('[data-badge]').forEach(function (b) {
-      b.addEventListener('click', function (e) { e.stopPropagation(); badgePopup(b.getAttribute('data-badge'), b.getAttribute('data-bemoji')); });
+    var html;
+    if (!m.length) { html = empty('No members yet.'); }
+    else {
+      var top = m.slice().sort(function (a, b) { return ((b[key] || 0) - (a[key] || 0)) || ((b.points || 0) - (a.points || 0)); }).slice(0, 10);
+      var allZero = key !== 'points' && top.every(function (p) { return !(p[key] || 0); });
+      if (allZero) { html = '<div class="osx-cw-empty" style="padding:10px 0;">This window is still filling in — points earned over the last ' + (key === 'd7' ? '7' : '30') + ' days will show here as everyone keeps showing up. 🌱</div>'; }
+      else html = top.map(function (p, i) {
+        var val = (p[key] || 0);
+        return '<div class="osx-gb-row" data-profile="' + esc(p.name || '') + '"><span class="osx-gb-rank' + (i < 3 ? ' top' : '') + '">' + (i + 1) + '</span>' +
+          '<span class="osx-gb-av">' + avatar(p) + '</span>' +
+          '<span class="osx-gb-who"><span class="osx-gb-name">' + esc(p.name || 'Member') + (p.streak ? ' <span class="osx-gb-fire">' + p.streak + '🔥</span>' : '') + '</span>' + (p.tier ? '<span class="osx-gb-tier">' + esc(p.tier) + '</span>' : '') + '</span>' +
+          badgeChips(p) +
+          '<span class="osx-gb-pts">' + (key === 'points' ? val.toLocaleString() : '+' + val.toLocaleString()) + '</span></div>';
+      }).join('');
+    }
+    els.forEach(function (el) {
+      el.innerHTML = html;
+      el.querySelectorAll('[data-badge]').forEach(function (b) { b.addEventListener('click', function (e) { e.stopPropagation(); badgePopup(b.getAttribute('data-badge'), b.getAttribute('data-bemoji')); }); });
     });
+    root.querySelectorAll('[data-gbr]').forEach(function (x) { x.classList.toggle('on', x.getAttribute('data-gbr') === gbRange); });
   }
 
   function renderSpotlight(m) {
@@ -843,7 +849,7 @@
 
   document.addEventListener('click', closeMenus);
   root.querySelectorAll('[data-gbr]').forEach(function (b) {
-    b.addEventListener('click', function () { gbRange = b.getAttribute('data-gbr'); root.querySelectorAll('[data-gbr]').forEach(function (x) { x.classList.toggle('on', x === b); }); renderGrowth(lastMembers); });
+    b.addEventListener('click', function () { gbRange = b.getAttribute('data-gbr'); renderGrowth(lastMembers); });
   });
   renderTabs(); load(); loadWins(); loadMembersData();
 })();

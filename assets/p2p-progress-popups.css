@@ -48,6 +48,11 @@
 .p2ppop .pb-cal .cell.on{background:linear-gradient(160deg,#f4c534,#d6336c); color:#1a0d05;}
 .p2ppop .pb-cal .cell.today{outline:2px solid var(--gold-bright,#f4c534); outline-offset:1px;}
 .p2ppop .pb-cal .dow{aspect-ratio:auto; background:none; color:var(--muted,#8aa0a6); font:700 9px/1 system-ui; text-transform:uppercase;}
+.p2ppop .pb-calnav{display:flex; align-items:center; justify-content:center; gap:14px; margin:0 0 12px; font:700 13px/1 system-ui; color:#e7efeb;}
+.p2ppop .pb-calb{width:30px; height:30px; border:1px solid var(--gstroke,rgba(216,180,90,.38)); background:rgba(255,255,255,.04); color:var(--gold-bright,#f4c534); border-radius:50%; cursor:pointer; font-size:15px; line-height:1;}
+.p2ppop .pb-calb[disabled]{opacity:.35; cursor:default;}
+.p2ppop .pb-badgelink{display:inline-block; margin-top:16px; color:var(--gold-bright,#f4c534); font:700 13px/1.3 system-ui; text-decoration:none;}
+.p2ppop .pb-badgelink:hover{text-decoration:underline;}
 
 .p2ppop .pb-merittop{text-align:center; margin-bottom:18px;}
 @keyframes p2ppop-shift{0%{background-position:0% 50%;}100%{background-position:250% 50%;}}

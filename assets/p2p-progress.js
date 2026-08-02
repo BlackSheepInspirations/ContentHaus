@@ -22,6 +22,9 @@ window.P2P = (function(){
   var STREAK_BADGES = { 5:'5-Day Streak', 10:'10-Day Streak', 15:'15-Day Streak',
     20:'20-Day Streak', 25:'25-Day Streak', 50:'50-Day Streak', 75:'75-Day Streak',
     100:'100-Day Streak', 125:'125-Day Streak', 150:'150-Day Streak' };
+  // Cumulative days shown up (total access days) — never lost to a missed day.
+  var DAYS_BADGES = { 1:'Day One', 5:'5 Days Strong', 10:'10 Days Strong', 25:'25 Days Strong',
+    50:'50 Days Strong', 75:'75 Days Strong', 100:'100 Days Strong' };
   var K = { streak:'p2p_streak', signs:'p2p_signs', earned:'p2p_badges_earned',
     journal:'p2p_journal', courses:'p2p_courses_done',
     rates:'p2p_rates', ptsStreak:'p2p_pts_streak', ptsJournal:'p2p_pts_journal', journalDay:'p2p_journal_day',
@@ -59,6 +62,9 @@ window.P2P = (function(){
   function awardStreakBadges(count){
     Object.keys(STREAK_BADGES).forEach(function(n){ if(count >= +n) earnBadge(STREAK_BADGES[n]); });
   }
+  function awardDaysBadges(days){
+    Object.keys(DAYS_BADGES).forEach(function(n){ if(days >= +n) earnBadge(DAYS_BADGES[n]); });
+  }
 
   /* One "grace day" forgives a single missed day so a long run doesn't die from one
      slip. It regenerates a clean week (7 days) after it was last spent. New/reset
@@ -87,9 +93,10 @@ window.P2P = (function(){
       if(da == null) da = Math.max(0, (s.longest || 0) - 1); // seed existing members from their record
       set(K.daysActive, da + 1);                              // one more distinct active day
     }
-    // Badges unlock on CUMULATIVE days shown up (never lost to a missed day) — the live
-    // streak count is just a soft motivator. Busy creators still earn every milestone.
-    awardStreakBadges(get(K.daysActive, s.count) || s.count);
+    // Two tracks: consecutive "streak" badges (the on-a-roll flame) + cumulative
+    // "days shown up" badges (total access days, never lost — busy creators still earn them).
+    awardStreakBadges(s.count);
+    awardDaysBadges(get(K.daysActive, 0) || 0);
     // log every day the member shows up — powers the personal calendar's "showed up" stars
     var vd = get('p2p_visit_days', {}); if (!vd[t]) { vd[t] = 1; set('p2p_visit_days', vd); }
     s.graced = graced; // transient flag for this load (not persisted meaningfully)
@@ -271,7 +278,8 @@ window.P2P = (function(){
     daysActive: function(){ return get(K.daysActive, 0) || 0; },
     badgesStat: function(){ return get('p2p_badges_stat', null); }, // {earned,total} published by the badges page
     rates: R,
-    STREAK_BADGES: STREAK_BADGES
+    STREAK_BADGES: STREAK_BADGES,
+    DAYS_BADGES: DAYS_BADGES
   };
 })();
 

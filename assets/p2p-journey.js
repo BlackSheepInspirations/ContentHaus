@@ -510,28 +510,35 @@
   function viewBadges(){
     var names = (window.P2P && window.P2P.earnedSet) ? window.P2P.earnedSet() : [];
     var n = badgeCount();
-    if(!names.length) return { title:'Badges', sub: n + ' earned', body:'<p class="pb-empty">No badges yet — they unlock as you finish courses, keep a streak, and reflect. Your first is closer than you think.</p>' };
+    var days = (window.P2P && window.P2P.daysActive) ? window.P2P.daysActive() : 0;
+    var daysLine = days ? '<p class="pb-sub" style="margin-top:2px">🗓️ ' + days + ' day' + (days === 1 ? '' : 's') + ' shown up in the Haus.</p>' : '';
+    var link = '<a class="pb-badgelink" href="/pages/p2p-learning-badges">See the full Badges &amp; Milestones page →</a>';
+    if(!names.length) return { title:'Badges', sub: n + ' earned', body: daysLine + '<p class="pb-empty">No badges yet — they unlock as you finish courses, keep a streak, and reflect. Your first is closer than you think.</p>' + link };
     var grid = names.map(function(nm){ return '<div class="pb-badge"><span class="pb-bmedal">' + MEDAL + '</span><span class="pb-bname">' + esc(nm) + '</span></div>'; }).join('');
-    return { title:'Badges earned', sub: n + ' unlocked so far.', body:'<div class="pb-badges">' + grid + '</div>' };
+    return { title:'Badges earned', sub: n + ' unlocked so far.', body: daysLine + '<div class="pb-badges">' + grid + '</div>' + link };
   }
 
+  var streakMO = 0;
+  function visitDays(){ try { return JSON.parse(localStorage.getItem('p2p_visit_days') || '{}') || {}; } catch(e){ return {}; } }
+  var MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
   function viewStreak(){
     var s = (window.P2P && window.P2P.streak) ? window.P2P.streak() : { count:0, last:'', longest:0 };
     var count = s.count || 0, longest = s.longest || count;
-    var now = new Date(), y = now.getFullYear(), m = now.getMonth();
-    var monthName = ['January','February','March','April','May','June','July','August','September','October','November','December'][m];
-    var firstDow = new Date(y, m, 1).getDay(), dim = new Date(y, m + 1, 0).getDate(), todayDom = now.getDate();
-    var endNum = s.last ? dNum(s.last) : Math.floor(Date.now()/864e5), startNum = endNum - (count - 1);
+    var base = new Date(); base.setDate(1); base.setMonth(base.getMonth() + streakMO);
+    var y = base.getFullYear(), m = base.getMonth();
+    var now = new Date(), isThisMonth = (y === now.getFullYear() && m === now.getMonth()), todayDom = now.getDate();
+    var firstDow = new Date(y, m, 1).getDay(), dim = new Date(y, m + 1, 0).getDate();
+    var vd = visitDays();
+    function iso(d){ return y + '-' + (m + 1 < 10 ? '0' : '') + (m + 1) + '-' + (d < 10 ? '0' : '') + d; }
     var dows = ['S','M','T','W','T','F','S'].map(function(d){ return '<span class="cell dow">' + d + '</span>'; }).join('');
     var cells = '';
     for(var i = 0; i < firstDow; i++) cells += '<span class="cell" style="background:none"></span>';
     for(var dom = 1; dom <= dim; dom++){
-      var cn = Math.floor(Date.UTC(y, m, dom) / 86400000);
-      var on = count > 0 && cn >= startNum && cn <= endNum;
-      cells += '<span class="cell' + (on ? ' on' : '') + (dom === todayDom ? ' today' : '') + '">' + dom + '</span>';
+      cells += '<span class="cell' + (vd[iso(dom)] ? ' on' : '') + (isThisMonth && dom === todayDom ? ' today' : '') + '">' + dom + '</span>';
     }
-    var sub = longest > count ? ('Longest run: ' + longest + ' days.') : 'Keep it lit — every day counts.';
-    return { title:'Your streak', body:'<div class="pb-streaktop"><span class="pb-flame">🔥</span><span class="pb-streaknum">' + count + '<small>day' + (count === 1 ? '' : 's') + ' in a row · ' + monthName + '</small></span></div><div class="pb-cal">' + dows + cells + '</div><p class="pb-sub" style="margin-top:14px">' + sub + '</p>' };
+    var nav = '<div class="pb-calnav"><button type="button" class="pb-calb" data-streak-prev aria-label="Previous month">‹</button><b>' + MONTHS[m] + ' ' + y + '</b><button type="button" class="pb-calb" data-streak-next aria-label="Next month"' + (streakMO >= 0 ? ' disabled' : '') + '>›</button></div>';
+    var sub = longest > count ? ('Longest run: ' + longest + ' days · showed up on the lit days.') : 'Keep it lit — every day you show up glows.';
+    return { title:'Your streak', body:'<div class="pb-streaktop"><span class="pb-flame">🔥</span><span class="pb-streaknum">' + count + '<small>day' + (count === 1 ? '' : 's') + ' in a row</small></span></div>' + nav + '<div class="pb-cal">' + dows + cells + '</div><p class="pb-sub" style="margin-top:14px">' + sub + '</p>' };
   }
 
   function viewMerit(){
@@ -549,13 +556,17 @@
 
   var VIEWS = { courses: viewCourses, points: viewPoints, badges: viewBadges, streak: viewStreak, merit: viewMerit };
   var progModal = document.getElementById('p2pj-prog');
-  function openProg(name){
+  function openProg(name, keepMonth){
     if(!progModal || !VIEWS[name]) return;
+    if(name === 'streak' && !keepMonth) streakMO = 0;
     var v = VIEWS[name]();
     progModal.querySelector('[data-prog-title]').innerHTML = v.title;
     var body = progModal.querySelector('[data-prog-body]');
     body.innerHTML = (v.sub ? '<p class="pb-sub">' + v.sub + '</p>' : '') + v.body;
     progModal.classList.add('show');
+    var sp = body.querySelector('[data-streak-prev]'), sn = body.querySelector('[data-streak-next]');
+    if(sp) sp.addEventListener('click', function(){ streakMO--; openProg('streak', true); });
+    if(sn) sn.addEventListener('click', function(){ if(streakMO < 0){ streakMO++; openProg('streak', true); } });
   }
   function closeProg(){ if(progModal) progModal.classList.remove('show'); }
   root.querySelectorAll('[data-prog]').forEach(function(t){ t.addEventListener('click', function(){ openProg(t.getAttribute('data-prog')); }); });
