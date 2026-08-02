@@ -16,6 +16,13 @@
   // Always source the emoji from this UTF-8 file (never the JSON response) so it renders consistently on every device.
   function catEmoji(k) { return (CATS[k] && CATS[k].emoji) || (catMeta(k) && catMeta(k).emoji) || ''; }
   function seenTs() { var v = 0; try { v = parseInt(localStorage.getItem('p2p_comm_seen') || '0', 10) || 0; } catch (e) {} return v; }
+  function cmSeen() { try { return JSON.parse(localStorage.getItem('p2p_cm_seen') || '{}') || {}; } catch (e) { return {}; } }
+  function cmSeenSave(o) { try { localStorage.setItem('p2p_cm_seen', JSON.stringify(o)); } catch (e) {} }
+  // Baseline = the moment this member first saw the post in the feed; comments after it count as "new" until opened.
+  function cmBaseline(p) { var s = cmSeen(); if (!(p.id in s)) { s[p.id] = Date.now(); cmSeenSave(s); } return s[p.id]; }
+  function cmLatestTs(p) { var t = 0; (p.comments || []).forEach(function (c) { if (c.ts > t) t = c.ts; }); return t; }
+  function markCmSeen(p) { var s = cmSeen(); s[p.id] = Math.max(cmLatestTs(p), Date.now()); cmSeenSave(s); }
+  function newCommentCount(p) { var base = cmBaseline(p), me = myName(), n = 0; (p.comments || []).forEach(function (c) { if (c.ts > base && String(c.name || '').trim().toLowerCase() !== me) n++; }); return n; }
 
   function myName() { return (window.P2P_MEMBER_NAME || '').trim().toLowerCase(); }
   function setWc(k, on) { var el = root.querySelector('[data-wc="' + k + '"]'); if (el) el.classList.toggle('done', !!on); }
@@ -96,7 +103,7 @@
       var mi = (c.owner ? '<button type="button" data-cedit="' + esc(pid) + '|' + esc(c.id) + '">✏️ Edit</button>' : '') + '<button type="button" data-cdel="' + esc(pid) + '|' + esc(c.id) + '">🗑️ Delete</button>';
       menu = '<span class="osx-menu"><button type="button" class="osx-menu-dots" data-menu aria-label="More">⋯</button><span class="osx-menu-pop" hidden>' + mi + '</span></span>';
     }
-    return '<div class="osx-cm-item" data-cm-item="' + esc(c.id) + '"><div class="osx-cm-itop"><b>' + esc(c.name || 'Member') + '</b><span class="osx-cm-time">' + ago(c.ts) + (c.edited ? ' · edited' : '') + '</span>' + menu + '</div><div class="osx-cm-text">' + esc(c.text) + '</div></div>';
+    return '<div class="osx-cm-item" data-cm-item="' + esc(c.id) + '"><div class="osx-cm-itop"><button type="button" class="osx-name-btn" data-profile="' + esc(c.name || '') + '">' + esc(c.name || 'Member') + '</button><span class="osx-cm-time">' + ago(c.ts) + (c.edited ? ' · edited' : '') + '</span>' + menu + '</div><div class="osx-cm-text">' + esc(c.text) + '</div></div>';
   }
   function commentsHTML(p, open) {
     var cs = p.comments || [];
@@ -105,9 +112,21 @@
       '<div class="osx-cm-add"><input class="osx-cm-input" data-cm-input="' + esc(p.id) + '" maxlength="600" placeholder="Write a reply…"><button class="osx-cm-send" type="button" data-cm-send="' + esc(p.id) + '">Reply</button></div>' +
     '</div>';
   }
+  function commenterAvatars(p) {
+    var cs = p.comments || []; if (!cs.length) return '';
+    var seen = {}, uniq = [];
+    for (var i = cs.length - 1; i >= 0 && uniq.length < 5; i--) { var k = String(cs[i].name || '').trim().toLowerCase(); if (!k || seen[k]) continue; seen[k] = 1; uniq.push(cs[i].name); }
+    return '<span class="osx-cw-cavs">' + uniq.map(function (nm) {
+      var mm = memberMap[String(nm || '').trim().toLowerCase()];
+      var inner = (mm && mm.photo) ? '<img src="' + esc(mm.photo) + '" alt="" loading="lazy" onerror="this.style.display=\'none\'">' : esc((nm || '?').trim().charAt(0).toUpperCase() || '?');
+      return '<button type="button" class="osx-cav" title="' + esc(nm || 'Member') + '" data-profile="' + esc(nm || '') + '">' + inner + '</button>';
+    }).join('') + '</span>';
+  }
   function actsHTML(p) {
+    var nc = newCommentCount(p);
     return '<div class="osx-cw-post-acts">' + reactBar(p) +
-      '<button class="osx-cw-cbtn" type="button" data-ctoggle="' + esc(p.id) + '">💬 <span>' + ((p.comments || []).length) + '</span></button>' +
+      '<button class="osx-cw-cbtn' + (nc ? ' hasnew' : '') + '" type="button" data-ctoggle="' + esc(p.id) + '">💬 <span>' + ((p.comments || []).length) + '</span>' + (nc ? '<span class="osx-cw-newc">' + nc + ' new</span>' : '') + '</button>' +
+      commenterAvatars(p) +
     '</div>';
   }
   function postMenu(p) {
@@ -205,7 +224,7 @@
     var mm = memberMap[String(p.name || '').trim().toLowerCase()];
     var inner = (mm && mm.photo) ? '<img src="' + esc(mm.photo) + '" alt="" loading="lazy" onerror="this.style.display=\'none\'">' : esc((p.name || '?').trim().charAt(0).toUpperCase() || '🐑');
     var tier = (mm && mm.tierNum) ? '<span class="osx-pa-tier">' + mm.tierNum + '</span>' : '';
-    return '<span class="osx-pa">' + inner + tier + '</span>';
+    return '<button type="button" class="osx-pa osx-pa-btn" data-profile="' + esc(p.name || '') + '">' + inner + tier + '</button>';
   }
   function attHTML(atts) {
     if (!atts || !atts.length) return '';
@@ -219,7 +238,7 @@
   function unreadDot(p) { return (p.ts > seenTs() && String(p.name || '').trim().toLowerCase() !== myName()) ? '<span class="osx-unread" title="New"></span>' : ''; }
   function headHTML(p) {
     return '<div class="osx-cw-head">' + postAvatar(p) +
-      '<div class="osx-cw-hmeta"><div class="osx-cw-nameline">' + unreadDot(p) + '<b>' + esc(p.name || 'Member') + '</b>' + flame(p.streak) + houseTag(p) + '</div>' +
+      '<div class="osx-cw-hmeta"><div class="osx-cw-nameline">' + unreadDot(p) + '<button type="button" class="osx-name-btn" data-profile="' + esc(p.name || '') + '">' + esc(p.name || 'Member') + '</button>' + flame(p.streak) + houseTag(p) + '</div>' +
       '<div class="osx-cw-sub">' + ago(p.ts) + ' · ' + catChip(p) + (p.edited ? ' · edited' : '') + '</div></div>' + pinBtn(p) + postMenu(p) + '</div>';
   }
   function postHTML(p) {
@@ -241,16 +260,17 @@
   }
   function openPostModal(id) {
     var p = findPost(id) || posts.filter(function (x) { return x.id === id; })[0];
-    if (!p) return;
+    if (!p) return false;
     var pop = document.createElement('div'); pop.className = 'osx-cal-pop';
     pop.innerHTML = '<div class="osx-cal-pop-in osx-pm"><button class="osx-cal-pop-x" type="button" aria-label="Close">✕</button>' +
       headHTML(p) + titleHTML(p) +
       '<div class="osx-cw-post-text">' + esc(p.text) + '</div>' + attHTML(p.attachments) +
       '<div class="osx-cw-post-acts">' + reactBar(p) +
-        '<span class="osx-cw-cbtn" style="cursor:default">💬 ' + ((p.comments || []).length) + '</span>' +
+        '<span class="osx-cw-cbtn" style="cursor:default">💬 ' + ((p.comments || []).length) + '</span>' + commenterAvatars(p) +
         '<button class="osx-cw-cbtn osx-pm-copy" type="button">🔗 Copy link</button>' +
       '</div>' + commentsHTML(p, true) + '</div>';
     root.appendChild(pop);
+    markCmSeen(p);
     var box = pop.querySelector('.osx-cal-pop-in');
     function close() { pop.remove(); try { if (new URLSearchParams(location.search).get('post')) history.replaceState(null, '', location.pathname); } catch (e) {} }
     wireReacts(box); wireComments(box); wireMenus(box);
@@ -266,6 +286,7 @@
     });
     pop.addEventListener('click', function (e) { if (e.target === pop) close(); });
     pop.querySelector('.osx-cal-pop-x').addEventListener('click', close);
+    return true;
   }
   function emptyMsg() {
     if (filter.q) return 'No posts match “' + esc(filter.q) + '.”';
@@ -316,7 +337,7 @@
       b.addEventListener('click', function () {
         var id = b.getAttribute('data-ctoggle');
         var box = container.querySelector('[data-cm="' + id + '"]');
-        if (box) { box.hidden = !box.hidden; if (!box.hidden) { var inp = box.querySelector('[data-cm-input]'); if (inp) inp.focus(); } }
+        if (box) { box.hidden = !box.hidden; if (!box.hidden) { var inp = box.querySelector('[data-cm-input]'); if (inp) inp.focus(); var pp = findPost(id); if (pp) { markCmSeen(pp); b.classList.remove('hasnew'); var nb = b.querySelector('.osx-cw-newc'); if (nb) nb.remove(); } } }
       });
     });
     container.querySelectorAll('[data-cm-send]').forEach(function (b) {
@@ -353,7 +374,7 @@
     winsFeed.innerHTML =
       '<div class="osx-wside">' +
         '<p class="osx-wside-text">' + esc(p.text) + '</p>' +
-        '<div class="osx-wside-foot"><span class="osx-wside-by">' + esc(p.name || 'Member') + '</span>' + loveChip(p) + '</div>' +
+        '<div class="osx-wside-foot"><button type="button" class="osx-wside-by osx-name-btn" data-profile="' + esc(p.name || '') + '">' + esc(p.name || 'Member') + '</button>' + loveChip(p) + '</div>' +
       '</div>' +
       (w.length > 1 ? '<div class="osx-win-dots">' + w.map(function (_, i) { return '<span class="' + (i === winIdx ? 'on' : '') + '" data-win-dot="' + i + '"></span>'; }).join('') + '</div>' : '');
     wireReacts(winsFeed);
@@ -685,6 +706,66 @@
       .catch(function () { winShare.disabled = false; winShare.textContent = 'Share win'; });
   });
 
+  /* ---- profile hover + click card (post / comment / win authors, commenter avatars) ---- */
+  var profEl = null, profShowT = null, profHideT = null, profPinned = false, profKey = '';
+  function memberProfile(nm) {
+    var key = String(nm || '').trim().toLowerCase(), mm = memberMap[key] || {};
+    var mine = posts.filter(function (p) { return String(p.name || '').trim().toLowerCase() === key; });
+    var recent = mine.slice().sort(function (a, b) { return (b.ts || 0) - (a.ts || 0); })[0];
+    return { name: nm, photo: mm.photo || '', tier: mm.tier || '', tierNum: mm.tierNum || 0, posts: mine.length, wins: mine.filter(function (p) { return p.kind === 'win'; }).length, streak: recent ? (recent.streak || 0) : 0 };
+  }
+  function buildProfCard(nm) {
+    var pr = memberProfile(nm);
+    var av = pr.photo ? '<img src="' + esc(pr.photo) + '" alt="" onerror="this.style.display=\'none\'">' : esc((pr.name || '?').trim().charAt(0).toUpperCase() || '?');
+    var el = document.createElement('div'); el.className = 'osx-profcard';
+    el.innerHTML =
+      '<div class="osx-profcard-top"><span class="osx-profcard-av">' + av + (pr.tierNum ? '<span class="osx-pa-tier">' + pr.tierNum + '</span>' : '') + '</span>' +
+      '<div class="osx-profcard-id"><div class="osx-profcard-name">' + esc(pr.name || 'Member') + (pr.streak ? ' <span class="osx-profcard-fire">' + pr.streak + '🔥</span>' : '') + '</div>' +
+      '<div class="osx-profcard-rank">' + esc(pr.tier || 'Member') + '</div></div></div>' +
+      '<div class="osx-profcard-stats"><div><b>' + pr.posts + '</b><span>posts</span></div><div><b>' + pr.wins + '</b><span>wins</span></div></div>' +
+      (pr.posts ? '<button type="button" class="osx-profcard-view" data-profview="' + esc(pr.name || '') + '">See their posts</button>' : '');
+    return el;
+  }
+  function placeProf(anchor) {
+    if (!profEl || !anchor) return;
+    var r = anchor.getBoundingClientRect(), w = profEl.offsetWidth || 240, h = profEl.offsetHeight || 130;
+    var left = Math.min(Math.max(8, r.left), window.innerWidth - w - 8);
+    var top = r.bottom + 8; if (top + h > window.innerHeight - 8) top = Math.max(8, r.top - h - 8);
+    profEl.style.left = left + 'px'; profEl.style.top = top + 'px';
+  }
+  function hideProf(force) {
+    clearTimeout(profShowT); clearTimeout(profHideT);
+    if (profEl && (force || !profPinned)) { profEl.remove(); profEl = null; profKey = ''; profPinned = false; }
+  }
+  function showProf(nm, anchor, pinned) {
+    var key = String(nm || '').trim().toLowerCase(); if (!key) return;
+    if (profEl && profKey === key) { if (pinned) { profPinned = true; placeProf(anchor); } return; }
+    hideProf(true);
+    profKey = key; profPinned = !!pinned;
+    profEl = buildProfCard(nm); root.appendChild(profEl);
+    profEl.addEventListener('mouseenter', function () { clearTimeout(profHideT); });
+    profEl.addEventListener('mouseleave', function () { if (!profPinned) profHideT = setTimeout(function () { hideProf(false); }, 200); });
+    var vb = profEl.querySelector('[data-profview]');
+    if (vb) vb.addEventListener('click', function () { var q = vb.getAttribute('data-profview'); filter.q = q; filter.offset = 0; if (searchEl) searchEl.value = q; renderTabs(); load(false); hideProf(true); if (feed && feed.scrollIntoView) feed.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+    placeProf(anchor);
+  }
+  root.addEventListener('mouseover', function (e) {
+    var t = e.target.closest ? e.target.closest('[data-profile]') : null; if (!t || !root.contains(t)) return;
+    clearTimeout(profHideT); var nm = t.getAttribute('data-profile'); if (!nm) return;
+    profShowT = setTimeout(function () { showProf(nm, t, false); }, 280);
+  });
+  root.addEventListener('mouseout', function (e) {
+    var t = e.target.closest ? e.target.closest('[data-profile]') : null; if (!t) return;
+    clearTimeout(profShowT); if (!profPinned) profHideT = setTimeout(function () { hideProf(false); }, 220);
+  });
+  root.addEventListener('click', function (e) {
+    var t = e.target.closest ? e.target.closest('[data-profile]') : null; if (!t || !root.contains(t)) return;
+    e.preventDefault(); e.stopPropagation(); showProf(t.getAttribute('data-profile'), t, true);
+  });
+  document.addEventListener('click', function (e) { if (profEl && profPinned && !profEl.contains(e.target) && !(e.target.closest && e.target.closest('[data-profile]'))) hideProf(true); });
+  window.addEventListener('scroll', function () { if (profEl && !profPinned) hideProf(true); }, true);
+  window.P2P_OPEN_POST = function (id) { return openPostModal(id); };
+
   document.addEventListener('click', closeMenus);
   renderTabs(); load(false); loadWins(); loadMembersData();
 })();
@@ -806,7 +887,7 @@
       return '<div class="osx-bell-item unread osx-bell-rem"><div class="osx-bell-line">' + ic + ' <b>' + esc(n.title) + '</b></div><div class="osx-bell-snip">' + esc(n.label) + ' · starts ' + when + '</div></div>';
     }
     var verb = n.type === 'comment' ? 'commented on your post' : (n.rtype === 'party' ? 'celebrated your post 🎉' : n.rtype === 'thumb' ? 'gave your post a 👍' : 'loved your post ❤');
-    return '<div class="osx-bell-item' + (n.read ? '' : ' unread') + '"><div class="osx-bell-line"><b>' + esc(n.name || 'Someone') + '</b> ' + verb + '</div>' +
+    return '<div class="osx-bell-item' + (n.read ? '' : ' unread') + (n.postId ? ' osx-bell-click' : '') + '"' + (n.postId ? ' data-openpost="' + esc(n.postId) + '"' : '') + '><div class="osx-bell-line"><b>' + esc(n.name || 'Someone') + '</b> ' + verb + '</div>' +
       (n.snippet ? '<div class="osx-bell-snip">“' + esc(n.snippet) + '”</div>' : '') +
       '<span class="osx-bell-time">' + ago(n.ts) + ' ago</span></div>';
   }
@@ -820,6 +901,13 @@
     var rem = due.map(function (r) { return { reminder: true, kind: r.kind, title: r.title, label: r.label, startAt: r.startAt }; });
     var all = rem.concat(serverNotifs(localNids));
     menu.innerHTML = '<div class="osx-bell-h">Notifications</div>' + (all.length ? all.map(line).join('') : '<div class="osx-bell-empty">Nothing yet — reminders you set and reactions to your posts show up here. 🔔</div>');
+    menu.querySelectorAll('[data-openpost]').forEach(function (it) {
+      it.addEventListener('click', function () {
+        var pid = it.getAttribute('data-openpost'); menu.hidden = true;
+        if (window.P2P_OPEN_POST && window.P2P_OPEN_POST(pid)) return;
+        window.location.href = '/pages/p2p-os?post=' + encodeURIComponent(pid);
+      });
+    });
   }
   function setCount(u) { if (!countEl) return; if (u > 0) { countEl.textContent = u > 9 ? '9+' : u; countEl.hidden = false; } else countEl.hidden = true; }
   function refreshCount() { var due = dueReminders(), localNids = {}; due.forEach(function (r) { localNids[r.nid] = 1; }); setCount(serverNotifs(localNids).filter(function (n) { return !n.read; }).length + due.length); }
