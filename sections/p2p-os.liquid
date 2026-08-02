@@ -25,6 +25,13 @@
   {%- for t in os_haus_tags -%}{%- if customer.tags contains t -%}{%- assign has_any_access = true -%}{%- endif -%}{%- endfor -%}
 {%- endif -%}
 
+{%- unless has_any_access -%}
+  {%- comment -%} No access → send them straight to the preview page (no squished splash flash).
+     design_mode forces has_any_access true above, so the theme editor is unaffected. {%- endcomment -%}
+  <script>window.location.replace({{ '/pages/p2p-os-preview' | json }});</script>
+  <style>#p2pos{display:none !important;}</style>
+  <noscript><meta http-equiv="refresh" content="0;url=/pages/p2p-os-preview"><div style="padding:48px 20px;text-align:center;font-family:system-ui;"><a href="/pages/p2p-os-preview">Continue to the Purpose 2 Profit preview →</a></div></noscript>
+{%- endunless -%}
 <div id="p2pos" class="osx"{% unless has_any_access %} data-osx-gated{% endunless %}>
 {%- if has_any_access -%}
   <button class="osx-burger" type="button" aria-label="Menu" data-osx-burger><span></span><span></span><span></span></button>
