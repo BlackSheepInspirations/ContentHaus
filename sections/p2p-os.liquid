@@ -25,6 +25,8 @@
   {%- for t in os_haus_tags -%}{%- if customer.tags contains t -%}{%- assign has_any_access = true -%}{%- endif -%}{%- endfor -%}
 {%- endif -%}
 
+{%- comment -%} Load the OS stylesheet first so the member shell paints already-styled — avoids a flash of default (gold) accents before the brand recolor runs. {%- endcomment -%}
+{{ 'p2p-os.css' | asset_url | stylesheet_tag }}
 {%- unless has_any_access -%}
   {%- comment -%} No access → send them straight to the preview page (no squished splash flash).
      design_mode forces has_any_access true above, so the theme editor is unaffected. {%- endcomment -%}
@@ -1176,8 +1178,6 @@
 
 {%- comment -%} Rule-based guided help widget (floating). Add to haus-links.liquid to put it site-wide. {%- endcomment -%}
 {% render 'p2p-helper' %}
-
-{{ 'p2p-os.css' | asset_url | stylesheet_tag }}
 
 <script>
   /* Keep the mobile menu button just below the (sticky) store header, measured, so it never

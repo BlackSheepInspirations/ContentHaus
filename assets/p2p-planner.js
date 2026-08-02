@@ -872,6 +872,19 @@
     checkMilestones();
     checkLiveCele();
   }
+  // Re-render on the next tick but keep keyboard focus where the user tabbed to, so a field
+  // change (which rebuilds the DOM) doesn't drop focus to the top of the page.
+  function renderKeepFocus() {
+    setTimeout(function () {
+      var a = document.activeElement, key = null, ss = null, se = null;
+      if (a && host.contains(a) && a.getAttribute) {
+        var ats = ['data-lf', 'data-pf', 'data-prf', 'data-gf', 'data-wf', 'data-of', 'data-lg', 'data-lr', 'data-lprompt', 'data-pps', 'data-snf'];
+        for (var i = 0; i < ats.length; i++) { var v = a.getAttribute(ats[i]); if (v != null) { key = { at: ats[i], v: v }; try { ss = a.selectionStart; se = a.selectionEnd; } catch (e) {} break; } }
+      }
+      render();
+      if (key) { var el = null; try { el = host.querySelector('[' + key.at + '="' + (window.CSS && CSS.escape ? CSS.escape(key.v) : key.v) + '"]'); } catch (e) {} if (el) { el.focus(); try { if (ss != null && el.setSelectionRange) el.setSelectionRange(ss, se); } catch (e2) {} } }
+    }, 0);
+  }
   function renderArchive() {
     var by = {}; data.done.slice().reverse().forEach(function (d) { var k = d.tf + ' · ' + d.period; (by[k] = by[k] || []).push(d); });
     var keys = Object.keys(by), h = '<div class="osx-pl">' + navHTML() + '<div class="osx-pl-view"><button class="osx-pl-archbtn" data-back>← Back</button><div class="osx-pl-sech" style="margin-top:16px;">✓ Completed</div>';
@@ -898,9 +911,9 @@
     // goals
     var ng = host.querySelector('[data-newgoal]'); if (ng) ng.addEventListener('click', function () { var g = { id: uid(), title: 'New goal', stage: 'grows', g: '', r: '', o: '', s: '', w: '', roadmap: [], oDone: false, oWeek: '' }; data.goals.unshift(g); expanded[g.id] = true; save(); render(); });
     host.querySelectorAll('[data-toggle]').forEach(function (b) { b.addEventListener('click', function (e) { if (e.target.closest('.osx-pl-gauge,button,input,textarea,a')) return; var id = b.getAttribute('data-toggle'); expanded[id] = !expanded[id]; render(); }); });
-    host.querySelectorAll('[data-gf]').forEach(function (ta) { ta.addEventListener('change', function () { var p = ta.getAttribute('data-gf').split('|'), g = goal(p[0]); if (g) { if (p[1] === 'title') g.title = ta.value; else g[p[1]] = ta.value; save(); render(); } }); });
-    host.querySelectorAll('[data-wf]').forEach(function (inp) { inp.addEventListener('change', function () { var g = goal(inp.getAttribute('data-wf')); if (g) { g.w = inp.value; save(); render(); } }); });
-    host.querySelectorAll('[data-of]').forEach(function (inp) { inp.addEventListener('change', function () { var g = goal(inp.getAttribute('data-of')); if (g) { g.o = inp.value; save(); render(); } }); });
+    host.querySelectorAll('[data-gf]').forEach(function (ta) { ta.addEventListener('change', function () { var p = ta.getAttribute('data-gf').split('|'), g = goal(p[0]); if (g) { if (p[1] === 'title') g.title = ta.value; else g[p[1]] = ta.value; save(); renderKeepFocus(); } }); });
+    host.querySelectorAll('[data-wf]').forEach(function (inp) { inp.addEventListener('change', function () { var g = goal(inp.getAttribute('data-wf')); if (g) { g.w = inp.value; save(); renderKeepFocus(); } }); });
+    host.querySelectorAll('[data-of]').forEach(function (inp) { inp.addEventListener('change', function () { var g = goal(inp.getAttribute('data-of')); if (g) { g.o = inp.value; save(); renderKeepFocus(); } }); });
     host.querySelectorAll('[data-otog]').forEach(function (b) { b.addEventListener('click', function () { var g = goal(b.getAttribute('data-otog')); if (g) { var on = ownedThisWeek(g); g.oDone = !on; g.oWeek = weekKey(); save(); render(); } }); });
     host.querySelectorAll('[data-stage]').forEach(function (b) { b.addEventListener('click', function () { var p = b.getAttribute('data-stage').split('|'), g = goal(p[0]); if (g) { g.stage = p[1]; save(); render(); } }); });
     host.querySelectorAll('[data-gdel]').forEach(function (b) { b.addEventListener('click', function () { if (!window.confirm('Delete this goal?')) return; data.goals = data.goals.filter(function (x) { return x.id !== b.getAttribute('data-gdel'); }); save(); render(); }); });
@@ -928,7 +941,7 @@
     host.querySelectorAll('[data-scripttips]').forEach(function (b) { b.addEventListener('click', function (e) { e.stopPropagation(); openScriptTips(); }); });
     var nl = host.querySelector('[data-newlive]'); if (nl) nl.addEventListener('click', function () { var l = { id: uid(), title: '', platforms: ['TikTok'], otherPlat: '', date: '', hour: '', min: '00', ampm: 'PM', tz: 'ET', pitch: '', pitchOther: '', roomPromise: '', hook: '', script: '', prompts: ['', '', '', '', ''], goals: {}, results: {}, reflect: {}, win: '', blocker: '', action: '', mood: '', moodNote: '', done: false }; data.lives.unshift(l); expanded['L' + l.id] = true; save(); render(); });
     host.querySelectorAll('[data-ltoggle]').forEach(function (b) { b.addEventListener('click', function (e) { if (e.target.closest('input,select,textarea,button,a')) return; var id = b.getAttribute('data-ltoggle'); expanded['L' + id] = !expanded['L' + id]; render(); }); });
-    host.querySelectorAll('[data-lf]').forEach(function (el) { el.addEventListener('change', function () { var p = el.getAttribute('data-lf').split('|'), l = liveObj(p[0]); if (!l) return; if (p[1].indexOf('reflect_') === 0) { l.reflect = l.reflect || {}; l.reflect[p[1].slice(8)] = el.value; } else l[p[1]] = el.value; if (l._dupe && dupeReady(l)) l._dupe = false; save(); if (/^(date|hour|pitch)$/.test(p[1])) render(); }); });
+    host.querySelectorAll('[data-lf]').forEach(function (el) { el.addEventListener('change', function () { var p = el.getAttribute('data-lf').split('|'), l = liveObj(p[0]); if (!l) return; if (p[1].indexOf('reflect_') === 0) { l.reflect = l.reflect || {}; l.reflect[p[1].slice(8)] = el.value; } else l[p[1]] = el.value; if (l._dupe && dupeReady(l)) l._dupe = false; save(); if (/^(date|hour|pitch)$/.test(p[1])) renderKeepFocus(); }); });
     host.querySelectorAll('[data-lg]').forEach(function (el) { el.addEventListener('change', function () { var p = el.getAttribute('data-lg').split('|'), l = liveObj(p[0]); if (l) { l.goals = l.goals || {}; l.goals[p[1]] = l.goals[p[1]] || {}; l.goals[p[1]][p[2]] = el.value; save(); applyStatColor(l, p[1], p[2]); } }); });
     host.querySelectorAll('[data-lr]').forEach(function (el) { el.addEventListener('change', function () { var p = el.getAttribute('data-lr').split('|'), l = liveObj(p[0]); if (l) { l.results = l.results || {}; l.results[p[1]] = l.results[p[1]] || {}; l.results[p[1]][p[2]] = el.value; save(); applyStatColor(l, p[1], p[2]); } }); });
     host.querySelectorAll('[data-lplat]').forEach(function (b) { b.addEventListener('click', function () { var p = b.getAttribute('data-lplat').split('|'), l = liveObj(p[0]); if (!l) return; l.platforms = l.platforms || []; var i = l.platforms.indexOf(p[1]); if (i > -1) l.platforms.splice(i, 1); else l.platforms.push(p[1]); if (l._dupe && dupeReady(l)) l._dupe = false; save(); render(); }); });
@@ -950,7 +963,7 @@
     // posts
     var np = host.querySelector('[data-newpost]'); if (np) np.addEventListener('click', function () { var p = { id: uid(), topic: 'New post', platform: 'TikTok', type: 'Video', date: '', time: '', hook: '', cta: '', length: '', music: '', done: false, s: {} }; data.posts.unshift(p); expanded['P' + p.id] = true; save(); render(); });
     host.querySelectorAll('[data-ptoggle]').forEach(function (b) { b.addEventListener('click', function (e) { if (e.target.closest('input,select,textarea,button,a')) return; var id = b.getAttribute('data-ptoggle'); expanded['P' + id] = !expanded['P' + id]; render(); }); });
-    host.querySelectorAll('[data-pf]').forEach(function (el) { el.addEventListener('change', function () { var p = el.getAttribute('data-pf').split('|'), o = postObj(p[0]); if (o) { o[p[1]] = el.value; save(); if (p[1] === 'date' || p[1] === 'platform' || p[1] === 'type') render(); } }); });
+    host.querySelectorAll('[data-pf]').forEach(function (el) { el.addEventListener('change', function () { var p = el.getAttribute('data-pf').split('|'), o = postObj(p[0]); if (o) { o[p[1]] = el.value; save(); if (p[1] === 'date' || p[1] === 'platform' || p[1] === 'type') renderKeepFocus(); } }); });
     host.querySelectorAll('[data-pps]').forEach(function (el) { el.addEventListener('change', function () { var p = el.getAttribute('data-pps').split('|'), o = postObj(p[0]); if (o) { o.s = o.s || {}; o.s[p[1]] = el.value; save(); } }); });
     host.querySelectorAll('[data-pdone]').forEach(function (b) { b.addEventListener('click', function () { var o = postObj(b.getAttribute('data-pdone')); if (o) { o.done = !o.done; save(); render(); } }); });
     host.querySelectorAll('[data-ppdel]').forEach(function (b) { b.addEventListener('click', function () { if (!window.confirm('Delete this post?')) return; data.posts = data.posts.filter(function (x) { return x.id !== b.getAttribute('data-ppdel'); }); save(); render(); }); });
@@ -993,7 +1006,7 @@
     // products
     var npr = host.querySelector('[data-newprod]'); if (npr) npr.addEventListener('click', function () { var p = { id: uid(), name: 'New product', type: '', price: '', status: 'idea', launch: '', sold: '', revenue: '' }; data.products.unshift(p); expanded['PR' + p.id] = true; save(); render(); });
     host.querySelectorAll('[data-prtoggle]').forEach(function (b) { b.addEventListener('click', function (e) { if (e.target.closest('input,select,textarea,button,a')) return; var id = b.getAttribute('data-prtoggle'); expanded['PR' + id] = !expanded['PR' + id]; render(); }); });
-    host.querySelectorAll('[data-prf]').forEach(function (el) { el.addEventListener('change', function () { var p = el.getAttribute('data-prf').split('|'), o = prodObj(p[0]); if (o) { o[p[1]] = el.value; save(); if (p[1] === 'status' || p[1] === 'name' || p[1] === 'price') render(); } }); });
+    host.querySelectorAll('[data-prf]').forEach(function (el) { el.addEventListener('change', function () { var p = el.getAttribute('data-prf').split('|'), o = prodObj(p[0]); if (o) { o[p[1]] = el.value; save(); if (p[1] === 'status' || p[1] === 'name' || p[1] === 'price') renderKeepFocus(); } }); });
     host.querySelectorAll('[data-prdel]').forEach(function (b) { b.addEventListener('click', function () { if (!window.confirm('Delete this product?')) return; data.products = data.products.filter(function (x) { return x.id !== b.getAttribute('data-prdel'); }); save(); render(); }); });
     host.querySelectorAll('[data-prlaunch]').forEach(function (b) { b.addEventListener('click', function () { var o = prodObj(b.getAttribute('data-prlaunch')); if (!o) return; var g = { id: uid(), title: 'Launch: ' + (o.name || 'product'), stage: 'grows', g: '', r: '', o: '', s: '', w: o.launch || '', roadmap: ROOTED_STEPS_P.map(function (t) { return { id: uid(), text: t, pct: 0 }; }) }; data.goals.unshift(g); expanded[g.id] = true; view = 'goals'; save(); render(); }); });
   }
