@@ -113,7 +113,7 @@
     var line = ''; if (vals.length > 1) { var max = Math.max.apply(null, vals) || 1, w = 160, h = 30, step = w / (vals.length - 1); line = '<svg class="osx-lag-line" viewBox="0 0 ' + w + ' ' + h + '" preserveAspectRatio="none"><polyline points="' + vals.map(function (v, i) { return (i * step).toFixed(1) + ',' + (h - (v / max) * (h - 2) - 1).toFixed(1); }).join(' ') + '" fill="none" stroke="#6b7d84" stroke-width="1.5"/></svg>'; }
     return '<div class="osx-lag"><div class="osx-lag-h">Lagging indicators <span>— not fully in your hands; the work above is what moves them</span></div><div class="osx-lag-row"><div class="osx-lag-s"><b>' + num(last.followers) + '</b><span>followers</span></div><div class="osx-lag-s"><b>' + num(last.likes) + '</b><span>likes</span></div><div class="osx-lag-s"><b>$' + num(last.revenue) + '</b><span>revenue</span></div>' + (line ? '<div class="osx-lag-linewrap">' + line + '</div>' : '') + '</div></div>';
   }
-  var TABS = [['dash', '📊 Dashboard', 'all'], ['goals', '🎯 Goals', 'all'], ['products', '📦 Products', 'product'], ['lives', '📡 Lives', 'content'], ['posts', '📝 Posts', 'content'], ['ideas', '💡 Ideas', 'content'], ['growth', '📈 Growth', 'all'], ['lists', '✅ Lists', 'all']];
+  var TABS = [['dash', '📊 Dashboard', 'all'], ['goals', '🎯 Goals', 'all'], ['products', '📦 Products', 'product'], ['lives', '📡 Lives', 'content'], ['posts', '📝 Posts', 'content'], ['ideas', '💡 Ideas', 'content'], ['growth', '📈 Growth', 'all'], ['journal', '📓 Journal', 'all'], ['lists', '✅ Lists', 'all']];
   function tabShown(cat) { var ct = data.ctype || 'both'; if (cat === 'all') return true; if (cat === 'product') return ct !== 'content'; return ct !== 'product'; }
   function navHTML() {
     var vis = TABS.filter(function (t) { return tabShown(t[2]); });
@@ -701,10 +701,37 @@
     return '<div class="osx-pl-sech" style="margin-top:14px;">🏅 Milestones <span style="text-transform:none;letter-spacing:0;color:var(--muted);font-weight:600;">' + earned.length + ' / ' + MILESTONES.length + '</span> <button class="osx-ms-info" data-msinfo>ⓘ How this works</button></div><div class="osx-ms-row">' + badges + '</div>';
   }
 
+  /* ---------- Journal (the shared 4-tab notebook, mounted here too) ---------- */
+  function jrPane(mode, store, kind, on, saveLabel, ph, titlePh) {
+    return '<div class="jr-pane"' + (on ? '' : ' hidden') + ' data-jrpane="' + mode + '" data-store="' + store + '" data-kind="' + kind + '">' +
+      '<div class="jr-compose"><input class="jr-title" type="text" maxlength="80" placeholder="' + esc(titlePh) + '" data-jr-title>' +
+      '<textarea data-jr-text rows="4" placeholder="' + esc(ph) + '"></textarea>' +
+      '<div class="jr-actions"><button class="jr-save" type="button" data-jr-save>' + saveLabel + '</button></div></div>' +
+      '<div class="jr-toolbar"><input class="jr-search" type="search" placeholder="Search titles &amp; text…" data-jr-search>' +
+      '<div class="jr-views"><button class="jr-view on" type="button" data-jr-view="active">Active</button><button class="jr-view" type="button" data-jr-view="archived">Archived</button><button class="jr-view" type="button" data-jr-view="trash">Trash</button></div></div>' +
+      '<div class="jr-list" data-jr-list></div></div>';
+  }
+  function journalHTML() {
+    return '<div data-planner-journal>' +
+      '<div class="osx-pl-sech">📓 Journal <span style="text-transform:none;letter-spacing:0;color:var(--muted);font-weight:600;">— reflections, notes, ideas &amp; wins, shared with your Learning Journey</span></div>' +
+      '<div class="jr-head" style="justify-content:flex-end;margin-bottom:6px;"><button class="jr-export-all" type="button" data-jr-export>Export everything</button></div>' +
+      '<div class="jr-tabs"><button class="jr-tab on" type="button" data-jrmode="journal">Journal</button><button class="jr-tab" type="button" data-jrmode="notes">Notes</button><button class="jr-tab" type="button" data-jrmode="ideas">Ideas</button><button class="jr-tab" type="button" data-jrmode="wins">Wins</button></div>' +
+      jrPane('journal', 'p2p_journal', 'reflection', true, 'Save entry', 'Reflect on what you\'re learning and building…', 'Title (optional)') +
+      jrPane('notes', 'p2p_notes', 'note', false, 'Save note', 'Jot a note…', 'Title — e.g. "Spring launch campaign"') +
+      jrPane('ideas', 'p2p_ideas', 'idea', false, 'Save idea', 'Capture the idea…', 'Title — e.g. "Devotional journal for new moms"') +
+      jrPane('wins', 'p2p_wins', 'win', false, 'Save win', 'Big or small — a first sale, a finished course, showing up when it was hard…', 'Title (optional)') +
+      '</div>';
+  }
+  function mountJournal() {
+    if (view !== 'journal' || !window.P2PNotebook) return;
+    var jr = host.querySelector('[data-planner-journal]'); if (!jr) return;
+    window.P2PNotebook.mount(jr, { onSave: function (kind) { if (kind === 'reflection' && window.P2P) { if (window.P2P.checkJournal) window.P2P.checkJournal(); if (window.P2P.addJournalPoint) window.P2P.addJournalPoint(); } } });
+  }
   function render() {
-    var body = view === 'dash' ? dashHTML() : view === 'goals' ? goalsHTML() : view === 'products' ? productsHTML() : view === 'lives' ? livesHTML() : view === 'posts' ? postsHTML() : view === 'ideas' ? ideasHTML() : view === 'growth' ? growthHTML() : listsHTML();
+    var body = view === 'dash' ? dashHTML() : view === 'goals' ? goalsHTML() : view === 'products' ? productsHTML() : view === 'lives' ? livesHTML() : view === 'posts' ? postsHTML() : view === 'ideas' ? ideasHTML() : view === 'growth' ? growthHTML() : view === 'journal' ? journalHTML() : listsHTML();
     host.innerHTML = '<div class="osx-pl">' + navHTML() + '<div class="osx-pl-view">' + body + '</div></div>';
     wire();
+    mountJournal();
     checkMilestones();
     checkLiveCele();
   }
