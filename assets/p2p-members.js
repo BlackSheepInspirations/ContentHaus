@@ -20,6 +20,8 @@
   var emailEl = mb.querySelector('[data-mb-email]'), showEmailEl = mb.querySelector('[data-mb-showemail]');
   var upBtn = mb.querySelector('[data-mb-upbtn]'), upFile = mb.querySelector('[data-mb-upfile]'), upPreview = mb.querySelector('[data-mb-uppreview]'), upStatusEl = mb.querySelector('[data-mb-upstatus]'), upZone = mb.querySelector('[data-mb-upzone]');
   var bigAv = mb.querySelector('[data-mb-bigav]');
+  var locEl = mb.querySelector('[data-mb-loc]'), locMenu = mb.querySelector('[data-mb-locmenu]'), locNote = mb.querySelector('[data-mb-locnote]');
+  var myLoc = null;   // { label, lat, lng } custom city pin, or null = use the auto edge-geo
   var members = [], myProfile = null, searchVal = '', sortVal = 'points', myFollowing = [], myFollowers = [], myBlocked = [];
 
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
@@ -386,6 +388,49 @@
     Object.keys(socialEls).forEach(function (k) { socialEls[k].value = (p && p.social && p.social[k]) || ''; });
     renderAvatars(p && isPreset(p.photo) ? p.photo.slice(7) : '');
     showPhotoPreview(p && !isPreset(p.photo) ? (p.photo || '') : '');
+    myLoc = (p && p.customLoc && p.city) ? { label: p.city, lat: p.lat, lng: p.lng } : null;
+    if (locEl) locEl.value = '';
+    showLoc(myLoc);
+  }
+  /* ---- location typeahead (OpenStreetMap Nominatim, city-level; overrides the auto edge-geo) ---- */
+  function showLoc(l) {
+    if (!locNote) return;
+    if (l && l.label) {
+      locNote.innerHTML = '<span class="osx-mb-locpin">📍 ' + esc(l.label) + '</span><button type="button" class="osx-mb-locclear" data-mb-locclear>Use approximate location instead</button>';
+      locNote.hidden = false;
+      var c = locNote.querySelector('[data-mb-locclear]'); if (c) c.addEventListener('click', function () { myLoc = null; if (locEl) locEl.value = ''; showLoc(null); });
+    } else { locNote.hidden = true; locNote.innerHTML = ''; }
+  }
+  function closeLocMenu() { if (locMenu) { locMenu.hidden = true; locMenu.innerHTML = ''; } }
+  if (locEl) {
+    var locT = null;
+    locEl.addEventListener('input', function () {
+      var q = locEl.value.trim(); clearTimeout(locT);
+      if (q.length < 3) { closeLocMenu(); return; }
+      locT = setTimeout(function () {
+        fetch('https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=5&q=' + encodeURIComponent(q), { headers: { 'Accept': 'application/json' } })
+          .then(function (r) { return r.ok ? r.json() : []; })
+          .then(function (list) {
+            if (!locMenu || !list || !list.length) { closeLocMenu(); return; }
+            locMenu.innerHTML = list.map(function (p) {
+              var a = p.address || {};
+              var city = a.city || a.town || a.village || a.hamlet || a.municipality || a.county || '';
+              var region = a.state || a.region || '';
+              var country = a.country_code ? a.country_code.toUpperCase() : (a.country || '');
+              var label = [city, region, country].filter(Boolean).join(', ') || String(p.display_name || '').split(',').slice(0, 2).join(', ').trim();
+              return '<button type="button" class="osx-mb-locopt" data-loc-lat="' + esc(p.lat) + '" data-loc-lng="' + esc(p.lon) + '" data-loc-label="' + esc(label) + '">' + esc(label) + '</button>';
+            }).join('');
+            locMenu.hidden = false;
+            locMenu.querySelectorAll('[data-loc-label]').forEach(function (b) {
+              b.addEventListener('click', function () {
+                myLoc = { label: b.getAttribute('data-loc-label'), lat: parseFloat(b.getAttribute('data-loc-lat')), lng: parseFloat(b.getAttribute('data-loc-lng')) };
+                locEl.value = ''; closeLocMenu(); showLoc(myLoc);
+              });
+            });
+          }).catch(function () { closeLocMenu(); });
+      }, 450);
+    });
+    locEl.addEventListener('blur', function () { setTimeout(closeLocMenu, 180); });
   }
   function myKey() { return String(stats().name || '').trim().toLowerCase(); }
   // Accept a handle (@drea), a bare domain (yoursite.com), or a full link — always store a full https URL so it survives the server's URL check and links out cleanly.
@@ -406,7 +451,7 @@
     return {
       name: nm, tier: s.tier, tierNum: s.tierNum, points: s.points, badges: s.badges, recentBadges: s.recentBadges, streak: s.streak,
       photo: photo, quote: (f.quote ? f.quote.value.trim() : ''), about: (f.about ? f.about.value.trim() : ''),
-      social: social, hidden: hidden,
+      social: social, hidden: hidden, location: myLoc,
       email: (emailEl ? emailEl.value.trim() : ''), show_email: (showEmailEl ? !!showEmailEl.checked : false)
     };
   }

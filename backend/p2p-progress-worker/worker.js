@@ -208,6 +208,13 @@ export default {
               }
             }
           }
+          // Location: a member-set city (typeahead) wins over the auto edge-geo. body.location is
+          //   { label, lat, lng } to set a custom pin, null to revert to auto, or absent to keep as-is.
+          let loc;
+          if (body.location === null) loc = null;
+          else if (body.location) loc = sanitizeLoc(body.location);
+          else if (prev && prev.customLoc) loc = { label: prev.city, lat: prev.lat, lng: prev.lng };
+          else loc = null;
           const rec = {
             id: customerId,
             name: name,
@@ -226,7 +233,8 @@ export default {
             showEmail: !!body.show_email,                  // opted in to a click-to-reveal "Email me" button (never in the bulk list)
             hidden: !!body.hidden,                         // member opted out of map/directory
             adminHidden: !!(prev && prev.adminHidden),     // admin-hidden (light moderation), preserved
-            city: geo.city, region: geo.region, country: geo.country, lat: geo.lat, lng: geo.lng,
+            city: loc ? loc.label : geo.city, region: loc ? '' : geo.region, country: loc ? '' : geo.country,
+            lat: loc ? loc.lat : geo.lat, lng: loc ? loc.lng : geo.lng, customLoc: !!loc,
             ts: Date.now()
           };
           await kv.put('member:' + customerId, JSON.stringify(rec));
@@ -730,6 +738,15 @@ export default {
 };
 
 /* ---------- helpers ---------- */
+// A member-chosen city pin: label + lat/lng, rounded to ~city precision (2 decimals ≈ 1.1 km).
+function sanitizeLoc(v) {
+  if (!v || typeof v !== 'object') return null;
+  const lat = Number(v.lat), lng = Number(v.lng);
+  if (!isFinite(lat) || !isFinite(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) return null;
+  const label = String(v.label || '').trim().slice(0, 80);
+  if (!label) return null;
+  return { label: label, lat: Math.round(lat * 100) / 100, lng: Math.round(lng * 100) / 100 };
+}
 function geoFrom(request) {
   const c = request.cf || {};
   return {
