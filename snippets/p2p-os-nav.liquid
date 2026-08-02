@@ -144,13 +144,14 @@
 
   @media (prefers-reduced-motion: reduce){#p2posnav .p2posnav-2{animation:none;}}
 
-  @media (max-width:900px){
-    /* off-canvas drawer on small screens; page is not shifted */
+  @media (max-width:1024px){
+    /* off-canvas drawer on reduced/mobile widths; page is not shifted */
     html.p2p-hasnav body{padding-left:0;}
     #p2posnav{transform:translateX(-100%);transition:transform .25s ease;box-shadow:0 0 46px rgba(0,0,0,.6);width:min(84vw,300px);z-index:1002;}
     html.p2posnav-open #p2posnav{transform:translateX(0);}
     html.p2posnav-open .p2posnav-scrim{display:block;}
-    .p2posnav-burger{display:flex;flex-direction:column;justify-content:center;gap:4px;position:fixed;left:12px;bottom:84px;z-index:1000;width:52px;height:52px;border:1px solid var(--gstroke,rgba(216,180,90,.38));border-radius:50%;background:linear-gradient(180deg,#0b1620,#060d14);box-shadow:0 8px 22px rgba(0,0,0,.45);cursor:pointer;}
+    /* prominent top-left menu button, just below the sticky header (matches the OS page) */
+    .p2posnav-burger{display:flex;flex-direction:column;justify-content:center;gap:4px;position:fixed;left:12px;top:calc(var(--p2posnav-top,0px) + 10px);z-index:1003;width:48px;height:48px;border:1px solid var(--gstroke,rgba(216,180,90,.38));border-radius:12px;background:linear-gradient(180deg,#0b1620,#060d14);box-shadow:0 8px 22px rgba(0,0,0,.45);cursor:pointer;}
     .p2posnav-burger span{display:block;height:2px;width:20px;margin:0 auto;background:#f4c534;border-radius:2px;}
   }
 </style>
