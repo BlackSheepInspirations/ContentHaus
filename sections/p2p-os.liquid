@@ -285,11 +285,56 @@
       <div class="osx-kick" style="margin-top:30px">Tools &amp; Resources</div>
       <div class="osx-resgroup">
         <div class="osx-reslabel">Find your way around</div>
-        <div class="osx-resgrid">
-          <a class="osx-rescard" href="{{ tools_tutorial_url }}"><span class="osx-resic">🧭</span><b>Guided walkthrough</b><span>See how the whole OS works, step by step.</span><i>→</i></a>
-          <a class="osx-rescard" href="{{ tools_journey_url }}"><span class="osx-resic">🗺️</span><b>Your Learning Journey</b><span>The gamified course map — realms, courses, badges.</span><i>→</i></a>
-          <a class="osx-rescard" href="{{ tools_badges_url }}"><span class="osx-resic">🏅</span><b>Badges &amp; milestones</b><span>Everything you've earned, and what's next.</span><i>→</i></a>
-          <button class="osx-rescard" type="button" data-osx-map-open><span class="osx-resic">🗺️</span><b>The Rewards Map</b><span>Every point, tier &amp; badge — the whole system on one page.</span><i>→</i></button>
+        <p class="osx-res-hint">Tap a card to peek inside — you only leave this page if you choose to.</p>
+        <div class="osx-meet osx-meet--tools">
+          <div class="osx-meetcard" role="button" tabindex="0" aria-label="Guided walkthrough — tap to learn more">
+            <div class="osx-meetcard-inner">
+              <div class="osx-meetface osx-meetfront">
+                <span class="osx-flip-ic" aria-hidden="true">↻</span>
+                <span class="osx-meic">🧭</span><b>Guided walkthrough</b>
+                <p>See how the whole OS works, step by step.</p>
+              </div>
+              <div class="osx-meetface osx-meetback">
+                <p class="osx-meetmore">A guided tour of every part of your OS — the dashboard, the Hausen, your Journey, and how it all fits together.</p>
+                <a class="osx-meetlink" href="{{ tools_tutorial_url }}">Open the walkthrough →</a>
+              </div>
+            </div>
+          </div>
+          <div class="osx-meetcard" role="button" tabindex="0" aria-label="Your Learning Journey — tap to learn more">
+            <div class="osx-meetcard-inner">
+              <div class="osx-meetface osx-meetfront">
+                <span class="osx-flip-ic" aria-hidden="true">↻</span>
+                <span class="osx-meic">🗺️</span><b>Your Learning Journey</b>
+                <p>The gamified course map — realms, courses, badges.</p>
+              </div>
+              <div class="osx-meetface osx-meetback">
+                <p class="osx-meetmore">Your full course map: five realms of courses, daily check-ins, and the badges you unlock as you go.</p>
+                <a class="osx-meetlink" href="{{ tools_journey_url }}">Open the Journey →</a>
+              </div>
+            </div>
+          </div>
+          <div class="osx-meetcard" role="button" tabindex="0" aria-label="Badges and milestones — tap to learn more">
+            <div class="osx-meetcard-inner">
+              <div class="osx-meetface osx-meetfront">
+                <span class="osx-flip-ic" aria-hidden="true">↻</span>
+                <span class="osx-meic">🏅</span><b>Badges &amp; milestones</b>
+                <p>Everything you've earned, and what's next.</p>
+              </div>
+              <div class="osx-meetface osx-meetback">
+                <p class="osx-meetmore">See every badge you've earned and the ones still ahead — streaks, courses, community and more.</p>
+                <a class="osx-meetlink" href="{{ tools_badges_url }}">Open my Badges →</a>
+              </div>
+            </div>
+          </div>
+          <div class="osx-meetcard" data-noflip role="button" tabindex="0" data-osx-map-open aria-label="Open the Rewards Map">
+            <div class="osx-meetcard-inner">
+              <div class="osx-meetface osx-meetfront">
+                <span class="osx-meic">🗺️</span><b>The Rewards Map</b>
+                <p>Every point, tier &amp; badge — the whole system on one page.</p>
+                <span class="osx-meetlink" aria-hidden="true">Open the map →</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
       <div class="osx-resgroup">
@@ -518,6 +563,7 @@
                   <button class="osx-compose-line" type="button" data-compose-open>
                     <span class="osx-compose-av" data-compose-av>🐑</span>
                     <span class="osx-compose-ph">Share a win, a question, or an encouragement…</span>
+                    <span class="osx-compose-cue">✏️ Start a post</span>
                   </button>
                   <div class="osx-cw-filters">
                     <div class="osx-cat-tabs" data-cat-tabs></div>
@@ -748,11 +794,25 @@
         <div class="osx-gam-you-load">Loading your standing…</div>
       </div>
 
-      <div class="osx-gam-card">
-        <div class="osx-gam-h">🪜 The 20 Tiers</div>
-        <p class="osx-gam-sub">You start as a <b>Dreamer</b> and climb every 500 points. Your current tier is highlighted.</p>
-        <ol class="osx-gam-ladder" data-gam-ladder><li class="osx-gam-load">Loading the ladder…</li></ol>
-        <p class="osx-gam-note">Reach the top and you keep going — <b>Unbound II, III…</b> every 500 points beyond.</p>
+      <div class="osx-gam-toprow">
+        <div class="osx-gam-card osx-gb-card">
+          <div class="osx-gb-head">
+            <div class="osx-gam-h" style="margin-bottom:0;">🌱 Growth Board</div>
+            <div class="osx-gb-range" data-gb-range>
+              <button type="button" class="osx-gb-rb on" data-gbr="all">All-Time</button>
+              <button type="button" class="osx-gb-rb" data-gbr="d30">30d</button>
+              <button type="button" class="osx-gb-rb" data-gbr="d7">7d</button>
+            </div>
+          </div>
+          <p class="osx-gam-sub">See who's climbing — points earned across the Haus. The 🔥 is their current streak.</p>
+          <div class="osx-gb" data-gb><div class="osx-cw-empty">Loading the board…</div></div>
+        </div>
+        <div class="osx-gam-card">
+          <div class="osx-gam-h">🪜 The 20 Tiers</div>
+          <p class="osx-gam-sub">You start as a <b>Dreamer</b> and climb every 500 points. Your current tier is highlighted.</p>
+          <ol class="osx-gam-ladder" data-gam-ladder><li class="osx-gam-load">Loading the ladder…</li></ol>
+          <p class="osx-gam-note">Reach the top and you keep going — <b>Unbound II, III…</b> every 500 points beyond.</p>
+        </div>
       </div>
 
       <div class="osx-gam-split">
@@ -778,6 +838,18 @@
             <li><span>React to a post (❤ 👍 🎉)</span><b>+1</b></li>
           </ul>
           <p class="osx-gam-note">Points never expire — they only add up. Every <b>250</b> is a <b>Merit</b>; every <b>500</b> a <b>Tier</b>. Community points have a gentle daily cap (and light anti-spam) so showing up genuinely is what counts — not farming likes.</p>
+          <div class="osx-suggest osx-suggest-side" data-suggest style="margin-top:16px;">
+            <div class="osx-suggest-h">💡 Help us be better</div>
+            <p class="osx-suggest-sub">A question about points, tiers or badges — or an idea to make rewards better? Send it privately to the team.</p>
+            <select class="osx-suggest-kind" data-suggest-kind>
+              <option value="Suggestion">Suggestion</option>
+              <option value="Question">Question</option>
+              <option value="Kudos">Kudos / Praise</option>
+              <option value="Report">Report a concern</option>
+            </select>
+            <textarea class="osx-cw-text" data-suggest-text maxlength="2000" rows="3" placeholder="Share your thoughts…"></textarea>
+            <div class="osx-suggest-row"><span class="osx-suggest-status" data-suggest-status></span><button class="osx-cw-postbtn" type="button" data-suggest-send>Send</button></div>
+          </div>
         </div>
 
       <div class="osx-gam-card osx-gam-badges">
@@ -1545,6 +1617,7 @@ window.P2P_EVENTS = [{%- for b in ev_blocks -%}{"iso":{{ b.settings.iso_date | d
     // Checkpoint "Meet your Hausen" — flip a card to reveal more + a link (link click still navigates).
     (function(){ try{
       root.querySelectorAll('.osx-meetcard').forEach(function(card){
+        if(card.hasAttribute('data-noflip')){ return; }  // e.g. Rewards Map card — its own click opens the pop-up, no flip
         function flip(){ card.classList.toggle('flipped'); }
         card.addEventListener('click', function(e){ if(e.target.closest('.osx-meetlink')){ return; } flip(); });
         card.addEventListener('keydown', function(e){ if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); flip(); } });
