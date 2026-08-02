@@ -64,7 +64,7 @@
     <nav class="osx-nav">
       {%- comment -%} Sidebar nav is baked into the section (target^label^icon^mode^access_tag^get_url) so a
          theme-editor template revert can never empty it. Edit here in code, not the customizer. {%- endcomment -%}
-      {%- capture os_nav -%}start^Your Journey Starts Here^spark^view^^|checkpoint^Checkpoint^check^view^^|success^My Success^rocket^view^^|community^Community^chat^view^^|/pages/brand-haus?bh_focus=1^Founders Assessment^fingerprint^link^brand-haus-access^/pages/brand-haus-preview|/pages/brand-haus^Brand Haus^crown^link^brand-haus-access^/pages/brand-haus-preview|/pages/content-haus^Content Haus^prompt^link^prompt-haus-access^/pages/content-haus-preview|/pages/graphics-haus^Graphics Haus^palette^link^graphics-haus-access^/pages/graphics-haus-preview|/pages/project-haus^Project Haus^box^link^product-haus-access^/pages/project-haus-preview|/pages/marketing-haus^Marketing Haus^megaphone^link^marketing-haus-access^/pages/marketing-haus-preview|/pages/growth-haus^Growth Haus^rocket^link^P2P-haus-access^/pages/growth-haus-preview|rooted^ROOTED — Light the Path^path^view^^|mates^Haus Mates^mates^view^^|members^Members^mates^view^^|tools^Tools & Resources^tools^view^^|notebook^Notebook^notebook^view^^|bonus^Bonus Resources^gift^view^^{%- endcapture -%}
+      {%- capture os_nav -%}start^Your Journey Starts Here^spark^view^^|checkpoint^Checkpoint^check^view^^|success^My Success^rocket^view^^|community^Community^chat^view^^|/pages/brand-haus?bh_focus=1^Founders Assessment^fingerprint^link^brand-haus-access^/pages/brand-haus-preview|/pages/brand-haus^Brand Haus^crown^link^brand-haus-access^/pages/brand-haus-preview|/pages/content-haus^Content Haus^prompt^link^prompt-haus-access^/pages/content-haus-preview|/pages/graphics-haus^Graphics Haus^palette^link^graphics-haus-access^/pages/graphics-haus-preview|/pages/project-haus^Project Haus^box^link^product-haus-access^/pages/project-haus-preview|/pages/marketing-haus^Marketing Haus^megaphone^link^marketing-haus-access^/pages/marketing-haus-preview|/pages/growth-haus^Growth Haus^rocket^link^P2P-haus-access^/pages/growth-haus-preview|rooted^ROOTED — Light the Path^path^view^^|mates^Haus Mates^mates^view^^|members^Members^mates^view^^|levelup^How You Level Up^trophy^view^^|tools^Tools & Resources^tools^view^^|notebook^Notebook^notebook^view^^|bonus^Bonus Resources^gift^view^^{%- endcapture -%}
       {%- assign os_nav_items = os_nav | split: '|' -%}
       {%- for it in os_nav_items -%}
         {%- assign f = it | split: '^' -%}
@@ -94,6 +94,7 @@
                 {%- when 'chat' -%}<svg viewBox="0 0 24 24"><path d="M4 6a2 2 0 012-2h12a2 2 0 012 2v8a2 2 0 01-2 2H9l-4 3V6z"/><circle cx="9" cy="10" r="1"/><circle cx="12.5" cy="10" r="1"/><circle cx="16" cy="10" r="1"/></svg>
                 {%- when 'notebook' -%}<svg viewBox="0 0 24 24"><path d="M6 4h12v16H6z"/><path d="M6 9h12M9 4v16"/></svg>
                 {%- when 'gift' -%}<svg viewBox="0 0 24 24"><path d="M4 11h16v9H4z"/><path d="M4 8h16v3H4zM12 8v12M12 8c-2-4-6-1-3 0 3 1 3 0 3 0zm0 0c2-4 6-1 3 0-3 1-3 0-3 0z"/></svg>
+                {%- when 'trophy' -%}<svg viewBox="0 0 24 24"><path d="M7 4h10v4a5 5 0 01-10 0zM7 6H4v1a3 3 0 003 3M17 6h3v1a3 3 0 01-3 3M9 20h6M12 13v4"/></svg>
                 {%- else -%}<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></svg>
               {%- endcase -%}
             </span>
@@ -633,6 +634,97 @@
             <div class="osx-suggest-row"><span class="osx-suggest-status" data-suggest-status></span><button class="osx-cw-postbtn" type="button" data-suggest-send>Send</button></div>
           </div>
         </aside>
+      </div>
+    </section>
+
+    {%- comment -%} ===== VIEW: How You Level Up (gamification reference) ===== {%- endcomment -%}
+    <section class="osx-view" data-view="levelup">
+      <div class="osx-kick">Rewards</div>
+      <h2 class="osx-h2">How you level up</h2>
+      <p class="osx-lede">Everything you do here earns points. Points build your <b>Merits</b> and raise your <b>Tier</b> — and milestones unlock <b>badges</b> along the way. Here's the whole map.</p>
+
+      <div class="osx-gam-you" data-gam-you>
+        <div class="osx-gam-you-load">Loading your standing…</div>
+      </div>
+
+      <div class="osx-gam-grid">
+        <div class="osx-gam-card">
+          <div class="osx-gam-h">✨ How you earn points</div>
+          <ul class="osx-gam-rates">
+            <li><span>Finish a course</span><b>+100</b></li>
+            <li><span>Complete a masterclass</span><b>+250</b></li>
+            <li><span>Brand DNA / Founders Assessment</span><b>+250</b></li>
+            <li><span>Daily check-in (Mindset · Purpose · Heart)</span><b>+40</b></li>
+            <li><span>Earn a certificate</span><b>+25</b></li>
+            <li><span>Earn a badge</span><b>+25</b></li>
+            <li><span>Hit your weekly goal</span><b>+50</b></li>
+            <li><span>A journal or reflection entry</span><b>+5</b></li>
+            <li><span>Show up (daily streak)</span><b>+5 / day</b></li>
+          </ul>
+          <p class="osx-gam-note">Points never expire — they only add up. Every <b>250</b> points is a new <b>Merit</b>; every <b>500</b> points lifts you a <b>Tier</b>.</p>
+        </div>
+
+        <div class="osx-gam-card">
+          <div class="osx-gam-h">🪜 The 20 Tiers</div>
+          <p class="osx-gam-sub">You start as a <b>Dreamer</b> and climb every 500 points. Your current tier is highlighted.</p>
+          <ol class="osx-gam-ladder" data-gam-ladder><li class="osx-gam-load">Loading the ladder…</li></ol>
+          <p class="osx-gam-note">Reach the top and you keep going — <b>Unbound II, III…</b> every 500 points beyond.</p>
+        </div>
+      </div>
+
+      <div class="osx-gam-card osx-gam-badges">
+        <div class="osx-gam-h">🏅 Every badge & how to earn it</div>
+        <div class="osx-gam-bgroup">
+          <h4>Getting started</h4>
+          <ul>
+            <li><b>First Steps</b> — begin your very first course</li>
+            <li><b>First Reflection</b> — write your first journal entry</li>
+            <li><b>Finding Your Current</b> — finish 3 courses</li>
+          </ul>
+        </div>
+        <div class="osx-gam-bgroup">
+          <h4>Daily checks</h4>
+          <ul>
+            <li><b>Mindset I / II → Clear Mind</b> — do the Mindset check in 1, 2, then all 5 realms</li>
+            <li><b>Purpose I / II → True Purpose</b> — the Purpose check in 1, 2, then all 5 realms</li>
+            <li><b>Heart I / II → Open Heart</b> — the Heart check in 1, 2, then all 5 realms</li>
+          </ul>
+        </div>
+        <div class="osx-gam-bgroup">
+          <h4>Journaling</h4>
+          <ul>
+            <li><b>Journal Keeper</b> — 10 reflections</li>
+            <li><b>Journal Devotee</b> — 15 reflections</li>
+          </ul>
+        </div>
+        <div class="osx-gam-bgroup">
+          <h4>Frameworks</h4>
+          <ul>
+            <li><b>RAFT Master · GROWS Master · ROOTED Master</b> — finish each framework course</li>
+            <li><b>Trail Explorer</b> — try all three frameworks</li>
+          </ul>
+        </div>
+        <div class="osx-gam-bgroup">
+          <h4>Realms</h4>
+          <ul>
+            <li><b>Open Water · Element Forest · Desert Blooms · Golden Harvest · Evergreen — Cleared</b> — clear each realm</li>
+          </ul>
+        </div>
+        <div class="osx-gam-bgroup">
+          <h4>Showing up</h4>
+          <ul>
+            <li><b>5 / 10 / 15-Day Streak</b> — show up 5, 10, then 15 <em>total</em> days. They add up over time — a busy day never wipes them out.</li>
+            <li><b>Comeback</b> — step away, then come back and pick right up</li>
+          </ul>
+          <p class="osx-gam-note" style="margin-top:8px;">The 🔥 by your name counts your current run of days in a row — a fun little motivator, but your badges come from days shown up all together, so you never lose ground.</p>
+        </div>
+        <div class="osx-gam-bgroup">
+          <h4>Capstones</h4>
+          <ul>
+            <li><b>Reached Freedom</b> — clear all five realms 👑</li>
+            <li><b>Every Path Walked</b> — complete every course, including the offshoots</li>
+          </ul>
+        </div>
       </div>
     </section>
 
@@ -1960,6 +2052,46 @@
   #p2pos .osx-extc-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
   #p2pos .osx-extc-cancel{border:1px solid var(--stroke);background:none;color:var(--muted);border-radius:999px;padding:10px 18px;font:700 12.5px/1 system-ui;cursor:pointer;}
   #p2pos .osx-extc-go{border:0;background:linear-gradient(100deg,#f4e2a6,#c9a24a);color:#0a1410;border-radius:999px;padding:10px 18px;font:800 12.5px/1 system-ui;text-decoration:none;display:inline-flex;align-items:center;}
+  /* How You Level Up */
+  #p2pos .osx-gam-you{margin:6px 0 22px;}
+  #p2pos .osx-gam-you-in{display:flex;flex-wrap:wrap;align-items:center;gap:22px;border:1px solid var(--gstroke);border-radius:18px;padding:18px 22px;background:linear-gradient(120deg,rgba(216,180,90,.12),rgba(143,111,214,.08));}
+  #p2pos .osx-gam-you-load{border:1px solid var(--stroke);border-radius:16px;padding:16px;color:var(--muted);font:600 13px/1.4 system-ui;}
+  #p2pos .osx-gam-you-k{display:block;font:700 10px/1 system-ui;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
+  #p2pos .osx-gam-you-tier b{font:800 26px/1 Georgia,serif;color:var(--gold-bright);}
+  #p2pos .osx-gam-you-nums{display:flex;gap:22px;margin-left:auto;flex-wrap:wrap;}
+  #p2pos .osx-gam-you-nums div{display:flex;flex-direction:column;}
+  #p2pos .osx-gam-you-nums b{font:800 20px/1 system-ui;color:var(--text);}
+  #p2pos .osx-gam-you-nums span{font:600 10px/1.3 system-ui;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;margin-top:3px;}
+  #p2pos .osx-gam-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+  #p2pos .osx-gam-card{border:1px solid var(--stroke);border-radius:18px;padding:20px 22px;background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(9,17,24,.4));}
+  #p2pos .osx-gam-h{font:800 16px/1.2 system-ui;color:var(--text);margin-bottom:12px;}
+  #p2pos .osx-gam-sub{font:500 12.5px/1.5 system-ui;color:var(--muted);margin:-6px 0 12px;}
+  #p2pos .osx-gam-rates{list-style:none;margin:0;padding:0;}
+  #p2pos .osx-gam-rates li{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:9px 0;border-bottom:1px solid var(--stroke);font:500 13px/1.4 system-ui;color:var(--text);}
+  #p2pos .osx-gam-rates li:last-child{border-bottom:0;}
+  #p2pos .osx-gam-rates li span{color:#cfe0da;}
+  #p2pos .osx-gam-rates li b{color:var(--gold-bright);font:800 14px/1 system-ui;white-space:nowrap;}
+  #p2pos .osx-gam-note{font:500 12px/1.5 system-ui;color:var(--muted);margin:12px 0 0;}
+  #p2pos .osx-gam-note b{color:var(--text);}
+  #p2pos .osx-gam-ladder{list-style:none;margin:0;padding:0;max-height:420px;overflow-y:auto;}
+  #p2pos .osx-gam-ladder li{display:flex;align-items:center;gap:11px;padding:8px 10px;border-radius:10px;font:600 13px/1.2 system-ui;color:var(--muted);}
+  #p2pos .osx-gam-ladder li.done{color:var(--text);}
+  #p2pos .osx-gam-ladder li.done .osx-gam-rank{background:rgba(39,174,110,.2);color:#7fe3b0;border-color:transparent;}
+  #p2pos .osx-gam-ladder li.now{background:linear-gradient(100deg,rgba(216,180,90,.18),rgba(143,111,214,.12));color:var(--text);border:1px solid var(--gstroke);}
+  #p2pos .osx-gam-ladder li.now .osx-gam-rank{background:var(--gold-bright);color:#0a1410;border-color:transparent;}
+  #p2pos .osx-gam-rank{flex:none;width:24px;height:24px;border-radius:50%;border:1px solid var(--stroke);display:flex;align-items:center;justify-content:center;font:800 11px/1 system-ui;}
+  #p2pos .osx-gam-tname{flex:1;}
+  #p2pos .osx-gam-tpts{font:600 11px/1 system-ui;color:var(--muted);white-space:nowrap;}
+  #p2pos .osx-gam-ladder li.now .osx-gam-tpts{color:var(--gold-bright);}
+  #p2pos .osx-gam-load{color:var(--muted);padding:8px 10px;font:600 13px/1.2 system-ui;}
+  #p2pos .osx-gam-badges{margin-top:18px;}
+  #p2pos .osx-gam-bgroup{margin-top:14px;}
+  #p2pos .osx-gam-bgroup h4{font:800 12px/1 system-ui;letter-spacing:.05em;text-transform:uppercase;color:var(--gold);margin:0 0 7px;}
+  #p2pos .osx-gam-bgroup ul{list-style:none;margin:0;padding:0;}
+  #p2pos .osx-gam-bgroup li{padding:5px 0 5px 16px;position:relative;font:500 13px/1.5 system-ui;color:#cfe0da;}
+  #p2pos .osx-gam-bgroup li::before{content:"🏅";position:absolute;left:0;top:5px;font-size:11px;}
+  #p2pos .osx-gam-bgroup li b{color:var(--text);}
+  @media (max-width:820px){#p2pos .osx-gam-grid{grid-template-columns:1fr;}}
   #p2pos .osx-community-ph{max-width:520px;margin:20px auto;text-align:center;padding:38px 28px;border:1px dashed var(--gstroke);border-radius:20px;background:rgba(57,197,192,.05);}
   #p2pos .osx-community-ph-ic{font-size:40px;margin-bottom:12px;}
   #p2pos .osx-community-ph b{display:block;font:700 20px/1.2 Georgia,serif;color:var(--text);margin-bottom:8px;}
@@ -2125,6 +2257,30 @@ window.P2P_EVENTS = [{%- for b in ev_blocks -%}{"iso":{{ b.settings.iso_date | d
 <script src="{{ 'p2p-moments.js' | asset_url }}" defer="defer"></script>
 <script src="{{ 'p2p-purpose.js' | asset_url }}" defer="defer"></script>
 <script src="{{ 'p2p-heart.js' | asset_url }}" defer="defer"></script>
+<script>
+  /* How You Level Up — fill the "you're here" strip + tier ladder from live progress */
+  (function(){
+    var root = document.getElementById('p2pos'); if(!root) return;
+    var view = root.querySelector('.osx-view[data-view="levelup"]'); if(!view) return;
+    function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+    function build(){
+      var P = window.P2P, you = view.querySelector('[data-gam-you]'), ladder = view.querySelector('[data-gam-ladder]');
+      if(!P || !P.tier){ if(you) you.innerHTML = '<div class="osx-gam-you-load">Your standing appears here once your progress loads.</div>'; return; }
+      var t = P.tier(), pts = (P.points ? P.points() : 0) || 0, names = t.tiers || [], idx = t.index || 1;
+      var step = (t.next - t.start) || 500, toNext = Math.max(0, (t.next || 0) - pts);
+      if(you) you.innerHTML = '<div class="osx-gam-you-in"><div class="osx-gam-you-tier"><span class="osx-gam-you-k">You are a</span><b>'+esc(t.name)+'</b></div>'+
+        '<div class="osx-gam-you-nums"><div><b>'+pts.toLocaleString()+'</b><span>points</span></div><div><b>'+(t.merits||0)+'</b><span>merits</span></div><div><b>'+toNext.toLocaleString()+'</b><span>pts to '+esc(t.nextName||'next')+'</span></div></div></div>';
+      if(ladder){
+        var rows = '';
+        for(var j=0;j<names.length;j++){ var lo = j*step, cls = (j===idx-1)?'now':(j<idx-1?'done':'');
+          rows += '<li class="'+cls+'"><span class="osx-gam-rank">'+(j+1)+'</span><span class="osx-gam-tname">'+esc(names[j])+'</span><span class="osx-gam-tpts">'+lo.toLocaleString()+(j===idx-1?' · you':'')+' pts</span></li>'; }
+        ladder.innerHTML = rows;
+      }
+    }
+    build();
+    new MutationObserver(function(){ if(view.classList.contains('on')) build(); }).observe(view,{ attributes:true, attributeFilter:['class'] });
+  })();
+</script>
 <script>
   document.addEventListener('DOMContentLoaded', function(){
     var root = document.getElementById('p2pos'); if(!root) return;

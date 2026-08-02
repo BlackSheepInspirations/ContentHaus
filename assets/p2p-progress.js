@@ -81,13 +81,15 @@ window.P2P = (function(){
     }
     if(s.count > (s.longest || 0)) s.longest = s.count;
     set(K.streak, s);
-    awardStreakBadges(s.count);
     if(gained){
       set(K.ptsStreak, (get(K.ptsStreak, 0) || 0) + R.streak); // once per new day
       var da = get(K.daysActive, null);
       if(da == null) da = Math.max(0, (s.longest || 0) - 1); // seed existing members from their record
       set(K.daysActive, da + 1);                              // one more distinct active day
     }
+    // Badges unlock on CUMULATIVE days shown up (never lost to a missed day) — the live
+    // streak count is just a soft motivator. Busy creators still earn every milestone.
+    awardStreakBadges(get(K.daysActive, s.count) || s.count);
     // log every day the member shows up — powers the personal calendar's "showed up" stars
     var vd = get('p2p_visit_days', {}); if (!vd[t]) { vd[t] = 1; set('p2p_visit_days', vd); }
     s.graced = graced; // transient flag for this load (not persisted meaningfully)
