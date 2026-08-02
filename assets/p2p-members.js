@@ -255,7 +255,7 @@
             if (j && j.url) { if (f.photo) f.photo.value = j.url; renderAvatars(''); showPhotoPreview(j.url); upStatus('Photo ready — hit Save to keep it.'); }
             else if (j && j.error === 'no_store') { upStatus('Photo uploads aren’t switched on yet — pick an avatar or paste a URL for now.'); }
             else if (j && j.error === 'too_large') { upStatus('That image is too large — try a smaller one.'); }
-            else { upStatus('Upload didn’t work — try again.'); }
+            else { upStatus('Upload failed — ' + ((j && (j.detail || j.error)) || 'unknown error') + '.'); if (window.console) console.log('P2P upload error:', j); }
           }).catch(function () { upStatus('Upload didn’t work — try again.'); });
       };
       img.onerror = function () { upStatus('Couldn’t read that image — try another.'); };
