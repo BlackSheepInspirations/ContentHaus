@@ -280,9 +280,12 @@
     if (isAdmin) return '<button class="osx-pin-btn' + (p.pinned ? ' on' : '') + '" type="button" data-pin="' + esc(p.id) + '" title="' + (p.pinned ? 'Unpin' : 'Pin to top') + '">📌</button>';
     return p.pinned ? '<span class="osx-pin-badge" title="Pinned">📌</span>' : '';
   }
+  // House voices (Frank, Ruth) get a fixed Haus-mate logo as their avatar. Map set in the OS Liquid.
+  function houseAv(name) { var m = window.P2P_HOUSE_AV || {}; return m[String(name || '').trim().toLowerCase()] || ''; }
   function avInner(photo, name) {
     if (/^preset:/.test(String(photo || ''))) return '<span class="osx-pa-emoji">' + esc(String(photo).slice(7)) + '</span>';
     if (photo) return '<img src="' + esc(photo) + '" alt="" loading="lazy" onerror="this.style.display=\'none\'">';
+    var h = houseAv(name); if (h) return '<img src="' + esc(h) + '" alt="" loading="lazy">';
     return esc((name || '?').trim().charAt(0).toUpperCase() || '🐑');
   }
   function postAvatar(p) {
@@ -596,7 +599,7 @@
     pop.addEventListener('click', function (e) { if (e.target === pop || (e.target.className || '').indexOf('osx-lb-x') > -1) close(); });
   }
 
-  function avatar(p) { return p.photo ? '<img src="' + esc(p.photo) + '" alt="" loading="lazy" onerror="this.style.display=\'none\'">' : esc((p.name || '?').trim().charAt(0).toUpperCase() || '🐑'); }
+  function avatar(p) { if (p.photo) return '<img src="' + esc(p.photo) + '" alt="" loading="lazy" onerror="this.style.display=\'none\'">'; var h = houseAv(p.name); if (h) return '<img src="' + esc(h) + '" alt="" loading="lazy">'; return esc((p.name || '?').trim().charAt(0).toUpperCase() || '🐑'); }
 
   function popup(inner) {
     var pop = document.createElement('div'); pop.className = 'osx-cal-pop';

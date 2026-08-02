@@ -1197,7 +1197,7 @@ window.P2P_EVENTS = [{%- for b in ev_blocks -%}{"iso":{{ b.settings.iso_date | d
 {{ 'leaflet.css' | asset_url | stylesheet_tag }}
 <script src="{{ 'p2p-community.js' | asset_url }}" defer="defer"></script>
 <script src="{{ 'p2p-members.js' | asset_url }}" defer="defer"></script>
-<script>window.P2P_BEANCHORED="{{ 'p2p-be-anchored.jpg' | asset_url }}";window.P2P_GHM="{{ 'p2p-ghm-logo.png' | asset_url }}";</script>
+<script>window.P2P_BEANCHORED="{{ 'p2p-be-anchored.jpg' | asset_url }}";window.P2P_GHM="{{ 'p2p-ghm-logo.png' | asset_url }}";window.P2P_HOUSE_AV={"frank":{{ 'haus-mate-idea.png' | asset_url | json }},"ruth":{{ 'haus-mate-build.png' | asset_url | json }}};</script>
 <script src="{{ 'p2p-planner.js' | asset_url }}" defer="defer"></script>
 {%- comment -%} daily Mindset · Purpose · Heart content for the hero carousel {%- endcomment -%}
 <script src="{{ 'p2p-moments.js' | asset_url }}" defer="defer"></script>
