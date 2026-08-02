@@ -278,19 +278,22 @@ window.P2P = (function(){
    `custom.p2p_progress` metafield via /apps/p2p/progress (a signed App Proxy call to our
    Cloudflare Worker). Guests are untouched — they keep using localStorage only. */
 (function(){
-  var PROXY = '/apps/p2p/progress', TS_KEY = 'p2p_sync_ts';
-  function collect(){ var o = {}; for(var i=0;i<localStorage.length;i++){ var k = localStorage.key(i); if(k && k.indexOf('p2p_') === 0 && k !== TS_KEY) o[k] = localStorage.getItem(k); } return o; }
+  var PROXY = '/apps/p2p/progress', TS_KEY = 'p2p_sync_ts', OWNER_KEY = 'p2p_owner';
+  function collect(){ var o = {}; for(var i=0;i<localStorage.length;i++){ var k = localStorage.key(i); if(k && k.indexOf('p2p_') === 0 && k !== TS_KEY && k !== OWNER_KEY) o[k] = localStorage.getItem(k); } return o; }
   function snap(){ return JSON.stringify(collect()); }
   var lastPushed = snap();
 
   function applyBlob(blob){
     var changed = false;
     Object.keys(blob).forEach(function(k){
-      if(k === '_ts') return;
+      if(k === '_ts' || k === OWNER_KEY) return;
       if(typeof blob[k] === 'string' && localStorage.getItem(k) !== blob[k]){ try{ localStorage.setItem(k, blob[k]); changed = true; }catch(e){} }
     });
     return changed;
   }
+  // Wipe this browser's P2P state — used when a DIFFERENT customer logs in, so nobody
+  // inherits the previous account's badges/courses/brand kits/journal, etc.
+  function clearLocal(){ var keys = []; for(var i=0;i<localStorage.length;i++){ var k = localStorage.key(i); if(k && k.indexOf('p2p_') === 0) keys.push(k); } keys.forEach(function(k){ try{ localStorage.removeItem(k); }catch(e){} }); }
   function push(){
     if(snap() === lastPushed) return;
     var blob = collect(); blob._ts = Date.now();
@@ -300,19 +303,35 @@ window.P2P = (function(){
   }
   var t = null;
   function schedulePush(){ if(t) clearTimeout(t); t = setTimeout(push, 1500); }
+  // reload once per account per tab-session so the page re-renders with the right data (no loops)
+  function reloadForAccount(cid){ try{ if(sessionStorage.getItem('p2p_acct_loaded') === cid) return; sessionStorage.setItem('p2p_acct_loaded', cid); }catch(e){} location.reload(); }
 
-  // pull the server's copy on load; newest wins
+  // pull the server's copy on load
   fetch(PROXY, { method:'GET', credentials:'same-origin' })
     .then(function(r){ return r.ok ? r.json() : null; })
     .then(function(j){
       if(!j || j.guest) return;                                   // not logged in -> localStorage only
+      var cid = String(j.customerId || ''); if(!cid) return;
+      var owner = localStorage.getItem(OWNER_KEY) || '';
+      if(owner !== cid){
+        // This browser's data isn't confirmed to belong to the logged-in customer
+        // (different account, or a fresh load). Load THIS customer's own server copy —
+        // never inherit whatever happens to be in localStorage.
+        clearLocal();
+        if(j.progress) applyBlob(j.progress);
+        try{ localStorage.setItem(OWNER_KEY, cid); localStorage.setItem(TS_KEY, String((j.progress && j.progress._ts) || Date.now())); }catch(e){}
+        lastPushed = snap();
+        reloadForAccount(cid);
+        return;
+      }
+      // Same account, confirmed on this browser -> normal cross-device newest-wins sync.
       var serverTs = (j.progress && j.progress._ts) || 0;
       var localTs = parseInt(localStorage.getItem(TS_KEY) || '0', 10) || 0;
       if(j.progress && serverTs > localTs){
         var changed = applyBlob(j.progress);
         try{ localStorage.setItem(TS_KEY, String(serverTs)); }catch(e){}
         lastPushed = snap();
-        if(changed && !sessionStorage.getItem('p2p_synced')){ sessionStorage.setItem('p2p_synced', '1'); location.reload(); }
+        if(changed) reloadForAccount(cid);
       } else {
         push();                                                   // server empty/older -> upload our progress
       }

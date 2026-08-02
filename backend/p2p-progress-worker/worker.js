@@ -154,7 +154,7 @@ export default {
     try {
       /* ---------- progress (unchanged behaviour) ---------- */
       if (seg === 'progress' || seg === 'p2p' || seg === '') {
-        if (request.method === 'GET') return json({ ok: true, progress: await readProgress(env, customerId) });
+        if (request.method === 'GET') return json({ ok: true, customerId: customerId, progress: await readProgress(env, customerId) });
         if (request.method === 'POST') {
           const body = await request.json().catch(() => null);
           if (!body || typeof body !== 'object') return json({ error: 'bad body' }, 400);
