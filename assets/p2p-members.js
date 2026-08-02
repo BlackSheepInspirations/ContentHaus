@@ -19,6 +19,7 @@
   var nameEl = mb.querySelector('[data-mb-name]'), avGrid = mb.querySelector('[data-mb-avatars]'), avVal = { v: '' };
   var emailEl = mb.querySelector('[data-mb-email]'), showEmailEl = mb.querySelector('[data-mb-showemail]');
   var upBtn = mb.querySelector('[data-mb-upbtn]'), upFile = mb.querySelector('[data-mb-upfile]'), upPreview = mb.querySelector('[data-mb-uppreview]'), upStatusEl = mb.querySelector('[data-mb-upstatus]'), upZone = mb.querySelector('[data-mb-upzone]');
+  var bigAv = mb.querySelector('[data-mb-bigav]');
   var members = [], myProfile = null, searchVal = '', sortVal = 'points', myFollowing = [], myFollowers = [], myBlocked = [];
 
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
@@ -237,7 +238,8 @@
     avGrid.querySelectorAll('[data-avopt]').forEach(function (b) { b.addEventListener('click', function () {
       avVal.v = (avVal.v === b.getAttribute('data-avopt')) ? '' : b.getAttribute('data-avopt');
       avGrid.querySelectorAll('[data-avopt]').forEach(function (x) { x.classList.toggle('on', !!avVal.v && x.getAttribute('data-avopt') === avVal.v); });
-      if (avVal.v && f.photo) f.photo.value = '';
+      if (avVal.v && f.photo) { f.photo.value = ''; showPhotoPreview(''); }
+      updateBigAv();
     }); });
   }
 
@@ -276,39 +278,89 @@
   // Community mini-map card: build/refresh the map it just moved into its expand modal.
   window.P2P_MAP_REFRESH = function () { showMap(mapEl); };
 
-  /* ---- photo upload (client-side resize → R2 via the worker) ---- */
+  /* ---- photo upload (crop → client-side resize → R2 via the worker) ---- */
   function upStatus(msg) { if (upStatusEl) upStatusEl.textContent = msg || ''; }
+  // The big circular preview beside the name — shows the pending photo/avatar exactly as it'll appear.
+  function updateBigAv() {
+    if (!bigAv) return;
+    var url = f.photo ? f.photo.value.trim() : '';
+    if (url && !isPreset(url)) { bigAv.innerHTML = '<img src="' + esc(url) + '" alt="" onerror="this.parentNode.textContent=\'🐑\'">'; }
+    else if (avVal.v) { bigAv.innerHTML = '<span class="osx-mb-bigav-emoji">' + esc(avVal.v) + '</span>'; }
+    else { var nm = String(stats().name || '').trim(); bigAv.textContent = nm ? nm.slice(0, 1).toUpperCase() : '🐑'; }
+  }
   function showPhotoPreview(url) {
-    if (!upPreview) return;
-    if (url && !isPreset(url)) { upPreview.src = url; upPreview.hidden = false; } else { upPreview.hidden = true; upPreview.removeAttribute('src'); }
+    if (upPreview) {
+      if (url && !isPreset(url)) { upPreview.src = url; upPreview.hidden = false; } else { upPreview.hidden = true; upPreview.removeAttribute('src'); }
+    }
+    updateBigAv();
+  }
+  function uploadCropped(dataUrl) {
+    upStatus('Uploading…');
+    fetch('/apps/p2p/upload', { method: 'POST', headers: { 'content-type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify({ kind: 'avatar', data: dataUrl }) })
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        if (j && j.url) { if (f.photo) f.photo.value = j.url; renderAvatars(''); showPhotoPreview(j.url); upStatus('Photo ready — hit Save to keep it.'); }
+        else if (j && j.error === 'no_store') { upStatus('Photo uploads aren’t switched on yet — pick an avatar or paste a URL for now.'); }
+        else if (j && j.error === 'too_large') { upStatus('That image is too large — try a smaller one.'); }
+        else { upStatus('Upload failed — ' + ((j && (j.detail || j.error)) || 'unknown error') + '.'); if (window.console) console.log('P2P upload error:', j); }
+      }).catch(function () { upStatus('Upload didn’t work — try again.'); });
+  }
+  // Circular crop: drag to re-center, slider/pinch to zoom, then export a square 512px JPEG (CSS renders it circular everywhere).
+  function openCropModal(srcUrl) {
+    var img = new Image();
+    img.onload = function () {
+      var V = 300, OUT = 512;
+      var cover = V / Math.min(img.width, img.height), zoom = 1, s = cover;
+      var ox = (V - img.width * s) / 2, oy = (V - img.height * s) / 2;
+      var pop = document.createElement('div'); pop.className = 'osx-crop';
+      pop.innerHTML = '<div class="osx-crop-card" role="dialog" aria-modal="true" aria-label="Crop your profile photo">' +
+        '<button type="button" class="osx-crop-x" data-crop-x aria-label="Cancel">✕</button>' +
+        '<h3 class="osx-crop-h">Crop your profile photo</h3>' +
+        '<div class="osx-crop-stage" data-crop-stage><img data-crop-img alt="" draggable="false"><div class="osx-crop-ring" aria-hidden="true"></div></div>' +
+        '<label class="osx-crop-zoom"><span>Zoom</span><input type="range" min="1" max="3" step="0.01" value="1" data-crop-zoom aria-label="Zoom"></label>' +
+        '<div class="osx-crop-hint">Drag the photo to re-center · slider or pinch to zoom.</div>' +
+        '<button type="button" class="osx-cw-postbtn osx-crop-save" data-crop-save>Save photo</button>' +
+        '<button type="button" class="osx-crop-diff" data-crop-diff>Or, upload a different photo</button>' +
+        '</div>';
+      document.body.appendChild(pop);
+      var imgEl = pop.querySelector('[data-crop-img]'), stage = pop.querySelector('[data-crop-stage]');
+      imgEl.src = srcUrl;
+      function clamp() { var w = img.width * s, h = img.height * s; if (ox > 0) ox = 0; if (oy > 0) oy = 0; if (ox < V - w) ox = V - w; if (oy < V - h) oy = V - h; }
+      function render() { clamp(); imgEl.style.width = (img.width * s) + 'px'; imgEl.style.height = (img.height * s) + 'px'; imgEl.style.transform = 'translate(' + ox + 'px,' + oy + 'px)'; }
+      render();
+      var dragging = false, sx0, sy0, ox0, oy0;
+      function pt(e) { var t = (e.touches && e.touches[0]) ? e.touches[0] : e; return { x: t.clientX, y: t.clientY }; }
+      function down(e) { dragging = true; var p = pt(e); sx0 = p.x; sy0 = p.y; ox0 = ox; oy0 = oy; e.preventDefault(); }
+      function move(e) { if (!dragging) return; var p = pt(e); ox = ox0 + (p.x - sx0); oy = oy0 + (p.y - sy0); render(); e.preventDefault(); }
+      function up() { dragging = false; }
+      stage.addEventListener('mousedown', down); window.addEventListener('mousemove', move); window.addEventListener('mouseup', up);
+      stage.addEventListener('touchstart', down, { passive: false }); window.addEventListener('touchmove', move, { passive: false }); window.addEventListener('touchend', up);
+      pop.querySelector('[data-crop-zoom]').addEventListener('input', function () {
+        var cx = V / 2, cy = V / 2, oldS = s; zoom = parseFloat(this.value) || 1; s = cover * zoom;
+        ox = cx - ((cx - ox) / oldS) * s; oy = cy - ((cy - oy) / oldS) * s; render();
+      });
+      function cleanup() { window.removeEventListener('mousemove', move); window.removeEventListener('mouseup', up); window.removeEventListener('touchmove', move); window.removeEventListener('touchend', up); pop.remove(); }
+      pop.querySelector('[data-crop-x]').addEventListener('click', cleanup);
+      pop.addEventListener('click', function (e) { if (e.target === pop) cleanup(); });
+      pop.querySelector('[data-crop-diff]').addEventListener('click', function () { cleanup(); if (upFile) { upFile.value = ''; upFile.click(); } });
+      pop.querySelector('[data-crop-save]').addEventListener('click', function () {
+        var cv = document.createElement('canvas'); cv.width = OUT; cv.height = OUT;
+        var sxs = (0 - ox) / s, sys = (0 - oy) / s, sside = V / s;
+        try { cv.getContext('2d').drawImage(img, sxs, sys, sside, sside, 0, 0, OUT, OUT); } catch (e) { upStatus('Couldn’t process that image — try another.'); cleanup(); return; }
+        var dataUrl; try { dataUrl = cv.toDataURL('image/jpeg', 0.85); } catch (e2) { upStatus('Couldn’t process that image — try another.'); cleanup(); return; }
+        cleanup(); uploadCropped(dataUrl);
+      });
+    };
+    img.onerror = function () { upStatus('Couldn’t read that image — try another.'); };
+    img.src = srcUrl;
   }
   function handleUpload(file) {
     if (!file) return;
     if (!/^image\//.test(file.type)) { upStatus('Please choose an image file.'); return; }
     if (file.size > 12 * 1024 * 1024) { upStatus('That image is too big (max 12MB).'); return; }
-    upStatus('Preparing…');
+    upStatus('Opening cropper…');
     var fr = new FileReader();
-    fr.onload = function () {
-      var img = new Image();
-      img.onload = function () {
-        var max = 512, scale = Math.min(1, max / Math.max(img.width, img.height));
-        var cw = Math.max(1, Math.round(img.width * scale)), ch = Math.max(1, Math.round(img.height * scale));
-        var cv = document.createElement('canvas'); cv.width = cw; cv.height = ch;
-        cv.getContext('2d').drawImage(img, 0, 0, cw, ch);
-        var dataUrl; try { dataUrl = cv.toDataURL('image/jpeg', 0.85); } catch (e) { upStatus('Couldn’t read that image — try another.'); return; }
-        upStatus('Uploading…');
-        fetch('/apps/p2p/upload', { method: 'POST', headers: { 'content-type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify({ kind: 'avatar', data: dataUrl }) })
-          .then(function (r) { return r.json(); })
-          .then(function (j) {
-            if (j && j.url) { if (f.photo) f.photo.value = j.url; renderAvatars(''); showPhotoPreview(j.url); upStatus('Photo ready — hit Save to keep it.'); }
-            else if (j && j.error === 'no_store') { upStatus('Photo uploads aren’t switched on yet — pick an avatar or paste a URL for now.'); }
-            else if (j && j.error === 'too_large') { upStatus('That image is too large — try a smaller one.'); }
-            else { upStatus('Upload failed — ' + ((j && (j.detail || j.error)) || 'unknown error') + '.'); if (window.console) console.log('P2P upload error:', j); }
-          }).catch(function () { upStatus('Upload didn’t work — try again.'); });
-      };
-      img.onerror = function () { upStatus('Couldn’t read that image — try another.'); };
-      img.src = fr.result;
-    };
+    fr.onload = function () { upStatus(''); openCropModal(fr.result); };
     fr.onerror = function () { upStatus('Couldn’t read that file.'); };
     fr.readAsDataURL(file);
   }
