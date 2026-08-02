@@ -1010,6 +1010,26 @@
   #p2pos .osx-dca-save{flex:none;border:1px solid var(--gstroke);background:var(--aurora);background-size:300% 100%;color:#0a1410;border-radius:10px;padding:10px 16px;font:800 12.5px/1 system-ui;cursor:pointer;}
   #p2pos .osx-dca-open{flex:1;min-width:0;border:1px solid var(--stroke);background:rgba(255,255,255,.04);color:var(--text);border-radius:10px;padding:10px 12px;font:700 12px/1 system-ui;cursor:pointer;}
   #p2pos .osx-dca-open:hover{border-color:var(--gstroke);}
+  /* post-event check-in banner */
+  #p2pos .osx-ci{border:1.5px solid var(--gstroke);border-radius:16px;background:linear-gradient(180deg,rgba(216,180,90,.14),rgba(9,17,24,.4));padding:16px 18px;margin:0 0 18px;box-shadow:0 0 26px rgba(216,180,90,.16);}
+  #p2pos .osx-ci-top{display:flex;align-items:flex-start;gap:11px;}
+  #p2pos .osx-ci-ic{font-size:22px;line-height:1;flex:none;}
+  #p2pos .osx-ci-hd{display:flex;flex-direction:column;gap:3px;}
+  #p2pos .osx-ci-hd b{font:800 15px/1.2 system-ui;color:var(--text);}
+  #p2pos .osx-ci-hd span{font:500 12.5px/1.5 system-ui;color:var(--muted);}
+  #p2pos .osx-ci-item{margin:12px 0 12px;padding:9px 12px;border:1px solid var(--stroke);border-radius:10px;background:rgba(255,255,255,.03);font:600 13px/1.4 system-ui;color:#dbe7e2;}
+  #p2pos .osx-ci-btns{display:flex;gap:9px;flex-wrap:wrap;}
+  #p2pos .osx-ci-yes{border:1px solid var(--gstroke);background:var(--aurora);background-size:300% 100%;color:#0a1410;border-radius:10px;padding:11px 16px;font:800 13px/1 system-ui;cursor:pointer;}
+  #p2pos .osx-ci-no{border:1px solid var(--stroke);background:rgba(255,255,255,.04);color:var(--muted);border-radius:10px;padding:11px 16px;font:700 12.5px/1 system-ui;cursor:pointer;}
+  #p2pos .osx-ci-no:hover{color:var(--text);border-color:var(--gstroke);}
+  #p2pos .osx-ci-cancelbox{margin-top:12px;display:flex;flex-direction:column;gap:9px;}
+  #p2pos .osx-ci-cancelbox textarea{width:100%;background:rgba(9,17,24,.5);border:1px solid var(--stroke);border-radius:10px;padding:10px 12px;color:var(--text);font:400 13px/1.5 system-ui;}
+  #p2pos .osx-ci-cancelbox textarea:focus{outline:none;border-color:var(--gstroke);}
+  #p2pos .osx-ci-cancelrow{display:flex;gap:9px;justify-content:flex-end;}
+  #p2pos .osx-ci-back{border:0;background:none;color:var(--muted);font:700 12.5px/1 system-ui;cursor:pointer;padding:8px 12px;}
+  #p2pos .osx-ci-confirm{border:1px solid var(--stroke);background:rgba(224,69,123,.14);color:#ff8fb0;border-radius:10px;padding:10px 15px;font:800 12.5px/1 system-ui;cursor:pointer;}
+  #p2pos .osx-ci-confirm:hover{background:rgba(224,69,123,.22);}
+  #p2pos .osx-ci-more{margin-top:11px;font:600 11.5px/1.4 system-ui;color:var(--muted);}
   #p2pos .osx-idtray-row{display:flex;flex-wrap:wrap;gap:6px;max-height:140px;overflow-y:auto;}
   #p2pos .osx-idchip{cursor:grab;border:1px solid var(--stroke);background:rgba(255,255,255,.03);color:var(--text);border-radius:999px;padding:6px 11px;font:600 11.5px/1.25 system-ui;max-width:100%;text-align:left;white-space:normal;}
   #p2pos .osx-idchip:hover{border-color:var(--gstroke);}

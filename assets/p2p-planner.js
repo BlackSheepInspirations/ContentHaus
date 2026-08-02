@@ -337,6 +337,25 @@
     var tops = '<div class="osx-sw-card"><div class="osx-sw-t">🏆 What\'s working</div><div class="osx-sw-kv"><span>Top platform</span><b>' + (tp ? esc(tp) : '—') + '</b></div><div class="osx-sw-kv"><span>Best time to go live</span><b>' + (bt && bt !== '—' ? esc(bt) : '—') + '</b></div>' + (!tp ? '<div class="osx-sw-empty" style="margin-top:6px;">Log a couple of lives with results to unlock this.</div>' : '') + '</div>';
     return '<div class="osx-pl-sech">📣 Your social snapshot</div><div class="osx-sw-grid">' + recap + grow + heat + tops + '</div>';
   }
+  // ---- Post-event check-in: a live whose date has passed but isn't marked happened/canceled.
+  // Only a COMPLETED live counts toward the "went live" badge (gated in milestoneCounts).
+  function pendingCheckins() {
+    return data.lives.filter(function (l) {
+      if (l.deleted || l.done || l.canceled || !l.date) return false;
+      var dd = daysTo(l.date); return dd !== null && dd < 0 && dd >= -30;
+    }).sort(function (a, b) { return (b.date || '').localeCompare(a.date || ''); });
+  }
+  function checkinHTML() {
+    var pend = pendingCheckins(); if (!pend.length) return '';
+    var l = pend[0];
+    var more = pend.length > 1 ? '<div class="osx-ci-more">＋ ' + (pend.length - 1) + ' more to review after this</div>' : '';
+    return '<div class="osx-ci" data-ci="' + esc(l.id) + '">' +
+      '<div class="osx-ci-top"><span class="osx-ci-ic">📡</span><div class="osx-ci-hd"><b>Did your live happen?</b><span>Log it so your growth actually counts — you won\'t get the badge until it\'s marked done.</span></div></div>' +
+      '<div class="osx-ci-item">&ldquo;' + esc(l.title || l.topic || 'Live') + '&rdquo; · ' + esc(liveDateLabel(l)) + '</div>' +
+      '<div class="osx-ci-btns" data-ci-btns><button type="button" class="osx-ci-yes" data-ci-yes="' + esc(l.id) + '">✓ Yes, it happened</button><button type="button" class="osx-ci-no" data-ci-no>It was canceled</button></div>' +
+      '<div class="osx-ci-cancelbox" data-ci-cancelbox hidden><textarea class="osx-pl-ta" data-ci-reason rows="2" maxlength="220" placeholder="What got in the way? (optional — helps you spot patterns)"></textarea><div class="osx-ci-cancelrow"><button type="button" class="osx-ci-back" data-ci-back>Back</button><button type="button" class="osx-ci-confirm" data-ci-confirm="' + esc(l.id) + '">Mark canceled</button></div></div>' +
+      more + '</div>';
+  }
   function dashHTML() {
     var ct = data.ctype || 'both';
     var sel = '<div class="osx-ct-sel"><span class="osx-ct-l">I create:</span>' + [['content', '📱 Content'], ['product', '📦 Products'], ['both', '✨ Both']].map(function (c) { return '<button class="osx-ct-b' + (ct === c[0] ? ' on' : '') + '" data-ctype="' + c[0] + '">' + c[1] + '</button>'; }).join('') + '</div>';
@@ -355,7 +374,7 @@
         '<span class="osx-pl-gsum-b"><b>' + esc(g.title || 'Untitled goal') + '</b>' +
         '<span class="osx-pl-gsum-m"><span class="osx-pl-stage-b">' + st[1] + ' ' + st[2] + '</span> · ' + esc(countdownText(g.w)) + '</span></span></button>';
     }).join('') : '<div class="osx-pl-empty">No goals yet — head to 🎯 Goals to build one with the GROWS formula.</div>';
-    return sel + '<div class="osx-dash-grid"><div class="osx-dash-left">' + cd + raftHTML() + stats + socialWidgetsHTML() +
+    return sel + checkinHTML() + '<div class="osx-dash-grid"><div class="osx-dash-left">' + cd + raftHTML() + stats + socialWidgetsHTML() +
       '<div class="osx-pl-sech">📊 What you shipped — last 8 weeks</div>' + barChart() +
       '<div class="osx-pl-sech">🎚️ Progress by horizon</div><div class="osx-pl-strip">' + rings + '</div>' +
       '<div class="osx-pl-sech" style="margin-top:10px;">🎯 Your goals</div>' + goals + milestonesStrip() + '</div>' +
@@ -504,6 +523,9 @@
     data.lives.forEach(function (l) { if (!l.deleted && !l.done) push('live', l); });
     data.goals.forEach(function (g) { push('goal', g); });
     data.products.forEach(function (p) { if (p.status !== 'live') push('product', p); });
+    // Post-event nudge → the OS bell: a live whose time passed but isn't logged. Stamped "now" so
+    // it lands in the bell's recent-window; nid per-live so it shows once, and drops once resolved.
+    try { pendingCheckins().forEach(function (l) { var n = Date.now(); out.push({ nid: 'checkin-' + l.id, id: l.id, kind: 'live', title: l.title || l.topic || 'your live', label: '— don’t forget to log how it went to track your growth', fireAt: n, startAt: n }); }); } catch (e) {}
     try { localStorage.setItem('p2p_reminders', JSON.stringify(out)); } catch (e) {}
     clearTimeout(_remSync); _remSync = setTimeout(function () { try { fetch('/apps/p2p/reminders', { method: 'POST', headers: { 'content-type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify({ items: out }) }).catch(function () {}); } catch (e) {} }, 1500);
   }
@@ -979,6 +1001,11 @@
     host.querySelectorAll('[data-iddel]').forEach(function (b) { b.addEventListener('click', function () { data.ideas = data.ideas.filter(function (x) { return x.id !== b.getAttribute('data-iddel'); }); save(); render(); }); });
     // creator mode + info
     host.querySelectorAll('[data-ctype]').forEach(function (b) { b.addEventListener('click', function () { data.ctype = b.getAttribute('data-ctype'); save(); render(); }); });
+    // post-event check-in
+    host.querySelectorAll('[data-ci-yes]').forEach(function (b) { b.addEventListener('click', function () { var l = liveObj(b.getAttribute('data-ci-yes')); if (l) { l.done = true; l.completedAt = Date.now(); save(); render(); } }); });
+    host.querySelectorAll('[data-ci-no]').forEach(function (b) { b.addEventListener('click', function () { var box = host.querySelector('[data-ci-cancelbox]'), btns = host.querySelector('[data-ci-btns]'); if (box) box.hidden = false; if (btns) btns.style.display = 'none'; var r = host.querySelector('[data-ci-reason]'); if (r) r.focus(); }); });
+    host.querySelectorAll('[data-ci-back]').forEach(function (b) { b.addEventListener('click', function () { render(); }); });
+    host.querySelectorAll('[data-ci-confirm]').forEach(function (b) { b.addEventListener('click', function () { var l = liveObj(b.getAttribute('data-ci-confirm')); if (l) { l.canceled = true; var r = host.querySelector('[data-ci-reason]'); l.cancelReason = r ? r.value.trim() : ''; save(); render(); } }); });
     var msi = host.querySelector('[data-msinfo]'); if (msi) msi.addEventListener('click', openInfo);
     // dashboard calendar
     var dcp = host.querySelector('[data-dcprev]'); if (dcp) dcp.addEventListener('click', function () { calMY.m--; if (calMY.m < 0) { calMY.m = 11; calMY.y--; } render(); });
