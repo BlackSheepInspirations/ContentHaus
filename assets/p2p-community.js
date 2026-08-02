@@ -1032,6 +1032,19 @@
   function dueReminders() {
     var out = [], now = Date.now(), fired = firedSet();
     try { (JSON.parse(localStorage.getItem('p2p_reminders') || '[]') || []).forEach(function (r) { if (r.fireAt <= now && r.startAt >= now - 7200000 && fired.indexOf(r.nid) < 0) out.push(r); }); } catch (e) {}
+    // Haus events → a 7 / 3 / 1-day countdown nudge for everyone (no link — just a heads-up).
+    try {
+      (window.P2P_EVENTS || []).forEach(function (e) {
+        if (!e.iso) return;
+        var bt = new Date(e.iso + 'T12:00:00').getTime(); if (!bt) return;
+        [7, 3, 1].forEach(function (d) {
+          var fireAt = bt - d * 86400000, nid = 'hausev-' + e.iso + '-' + d + 'd';
+          if (fireAt <= now && bt >= now - 7200000 && fired.indexOf(nid) < 0) {
+            out.push({ nid: nid, kind: 'event', title: e.title || 'P2P event', label: (d === 1 ? 'Tomorrow' : 'In ' + d + ' days') + ' · ' + (e.date || e.iso) + (e.time ? ' · ' + e.time : ''), startAt: bt, post: true });
+          }
+        });
+      });
+    } catch (e) {}
     out.sort(function (a, b) { return a.startAt - b.startAt; });
     return out;
   }
