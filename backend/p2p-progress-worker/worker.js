@@ -396,7 +396,7 @@ export default {
             if (!p) continue;
             if (bset.size && bset.has(p.author)) continue;   // skip blocked authors' posts
             const rs = reactState(p, customerId);
-            all.push({ id: p.id, name: p.name, title: p.title || '', text: p.text, kind: p.kind, category: p.category || (p.kind === 'win' ? 'wins' : 'general'), attachments: p.attachments || [], ts: p.ts, streak: p.streak || 0, house: !!p.house, pinned: !!p.pinned, edited: !!p.edited, owner: p.author === customerId, comments: (p.comments || []).filter(c => !(bset.size && bset.has(c.author))).map(c => ({ id: c.id, name: c.name, text: c.text, ts: c.ts, edited: !!c.edited, owner: c.author === customerId })), reactions: rs.counts, mine: rs.mine, likes: rs.counts.love, liked: rs.mine.love });
+            all.push({ id: p.id, name: p.name, title: p.title || '', text: p.text, kind: p.kind, category: p.category || (p.kind === 'win' ? 'wins' : 'general'), attachments: p.attachments || [], ts: p.ts, streak: p.streak || 0, house: !!p.house, pinned: !!p.pinned, edited: !!p.edited, owner: p.author === customerId, comments: (p.comments || []).filter(c => !(bset.size && bset.has(c.author))).map(c => ({ id: c.id, name: c.name, text: c.text, attachments: c.attachments || [], ts: c.ts, edited: !!c.edited, owner: c.author === customerId })), reactions: rs.counts, mine: rs.mine, likes: rs.counts.love, liked: rs.mine.love });
           }
           all.sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0) || b.ts - a.ts);
           const cat = url.searchParams.get('category') || 'all';
@@ -484,11 +484,12 @@ export default {
         const body = await request.json().catch(() => null);
         const pid = body && body.id;
         const text = String((body && body.text) || '').trim();
-        if (!pid || !text) return json({ error: 'bad' }, 400);
+        const cAtts = sanitizeAttachments(body && body.attachments, 2);
+        if (!pid || (!text && !cAtts.length)) return json({ error: 'bad' }, 400);
         const p = await kv.get('post:' + pid, 'json');
         if (!p) return json({ error: 'not_found' }, 404);
         const info = await customerInfo(env, customerId);
-        const c = { id: Date.now() + '-' + customerId, author: customerId, name: String((body && body.name) || info.firstName || 'Member').slice(0, 40), text: text.slice(0, 600), ts: Date.now() };
+        const c = { id: Date.now() + '-' + customerId, author: customerId, name: String((body && body.name) || info.firstName || 'Member').slice(0, 40), text: text.slice(0, 600), attachments: cAtts, ts: Date.now() };
         p.comments = Array.isArray(p.comments) ? p.comments : [];
         p.comments.push(c);
         await kv.put('post:' + pid, JSON.stringify(p));
@@ -496,7 +497,7 @@ export default {
           await pushNotif(kv, p.author, { type: 'comment', name: c.name, postId: pid, snippet: c.text.slice(0, 80), ts: Date.now() });
         }
         const engage = await awardEngage(env, customerId, 'comment');
-        return json({ ok: true, comment: { id: c.id, name: c.name, text: c.text, ts: c.ts, edited: false, owner: true }, engage: engage });
+        return json({ ok: true, comment: { id: c.id, name: c.name, text: c.text, attachments: c.attachments, ts: c.ts, edited: false, owner: true }, engage: engage });
       }
 
       /* ---------- notifications (bell) ---------- */
@@ -768,11 +769,13 @@ function sanitizeBadges(a) {
     return { label: String(b.label || '').slice(0, 60), emoji: String(b.emoji || '🏅').slice(0, 8) };
   }).filter(function (b) { return b.label; });
 }
-// Post attachments: [{type:'image'|'gif'|'youtube'|'link', url, ...}], max 6, http(s) only.
-function sanitizeAttachments(a) {
+// Post attachments: [{type:'image'|'gif'|'youtube'|'link', url, ...}], http(s) only.
+// Posts allow up to 6; comments pass a smaller max (keeps replies compact).
+function sanitizeAttachments(a, max) {
   if (!Array.isArray(a)) return [];
+  const lim = max || 6;
   const out = [];
-  for (const raw of a.slice(0, 6)) {
+  for (const raw of a.slice(0, lim)) {
     if (!raw || typeof raw !== 'object') continue;
     const type = ['image', 'gif', 'youtube', 'link'].indexOf(raw.type) > -1 ? raw.type : 'link';
     const url = sanitizeUrl(raw.url);

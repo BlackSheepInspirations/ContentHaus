@@ -9,6 +9,7 @@
   var feed = root.querySelector('[data-cw-feed]');
   var wotwSlot = root.querySelector('[data-wotw-slot]');
   var winsFeed = root.querySelector('[data-wins-feed]');
+  var cmPendingAtts = {};   // post id → [{type,url}] staged for the next reply (max 2)
   var posts = [], winPosts = [], winIdx = 0, winTimer = null, welcomeProfileDone = false, wowPost = null, isAdmin = false, catList = null, memberMap = {}, didDeepLink = false, gbRange = 'all', lastMembers = [];
   var filter = { category: 'all', range: 'all', sort: 'new', q: '', offset: 0, limit: 30, hasMore: false, page: 1, total: 0 };
   var CATS = { general: { label: 'General Discussion', emoji: '💬' }, intro: { label: 'Introductions', emoji: '👋' }, wins: { label: 'Wins • Habits • Growth', emoji: '🏆' }, help: { label: 'Questions & Help', emoji: '🙏' }, testimonial: { label: 'Testimonials', emoji: '🙌' }, announce: { label: 'P2P Announcements', emoji: '📣' } };
@@ -142,14 +143,34 @@
       var mi = (c.owner ? '<button type="button" data-cedit="' + esc(pid) + '|' + esc(c.id) + '">✏️ Edit</button>' : '') + '<button type="button" data-cdel="' + esc(pid) + '|' + esc(c.id) + '">🗑️ Delete</button>';
       menu = '<span class="osx-menu"><button type="button" class="osx-menu-dots" data-menu aria-label="More">⋯</button><span class="osx-menu-pop" hidden>' + mi + '</span></span>';
     }
-    return '<div class="osx-cm-item" data-cm-item="' + esc(c.id) + '"><div class="osx-cm-itop"><button type="button" class="osx-name-btn" data-profile="' + esc(c.name || '') + '">' + esc(c.name || 'Member') + '</button><span class="osx-cm-time">' + ago(c.ts) + (c.edited ? ' · edited' : '') + '</span>' + menu + '</div><div class="osx-cm-text">' + linkify(c.text) + '</div></div>';
+    var body = (c.text ? '<div class="osx-cm-text">' + linkify(c.text) + '</div>' : '') + cmAttHTML(c.attachments);
+    return '<div class="osx-cm-item" data-cm-item="' + esc(c.id) + '"><div class="osx-cm-itop"><button type="button" class="osx-name-btn" data-profile="' + esc(c.name || '') + '">' + esc(c.name || 'Member') + '</button><span class="osx-cm-time">' + ago(c.ts) + (c.edited ? ' · edited' : '') + '</span>' + menu + '</div>' + body + '</div>';
+  }
+  function cmAttHTML(atts) {
+    if (!atts || !atts.length) return '';
+    return '<div class="osx-cm-atts">' + atts.map(function (a) {
+      if (a.type === 'image' || a.type === 'gif') return '<img class="osx-cm-att-img" src="' + esc(a.url) + '" alt="" loading="lazy" data-lightbox="' + esc(a.url) + '">';
+      return '<a class="osx-att-link" href="' + esc(a.url) + '" target="_blank" rel="noopener">🔗 ' + esc(a.title || a.url) + '</a>';
+    }).join('') + '</div>';
   }
   function commentsHTML(p, open) {
     var cs = (p.comments || []).filter(function (c) { return !isBlockedName(c.name); });
     return '<div class="osx-cm" data-cm="' + esc(p.id) + '"' + (open ? '' : ' hidden') + '>' +
       '<div class="osx-cm-list">' + cs.map(function (c) { return cmItem(c, p.id); }).join('') + '</div>' +
-      '<div class="osx-cm-add"><button type="button" class="osx-cm-tool" data-cm-emoji="' + esc(p.id) + '" title="Add an emoji" aria-label="Add an emoji">😊</button><button type="button" class="osx-cm-tool" data-cm-link="' + esc(p.id) + '" title="Add a link" aria-label="Add a link">🔗</button><input class="osx-cm-input" data-cm-input="' + esc(p.id) + '" maxlength="600" placeholder="Write a reply…"><button class="osx-cm-send" type="button" data-cm-send="' + esc(p.id) + '">Reply</button></div>' +
+      '<div class="osx-cm-attspend" data-cm-atts="' + esc(p.id) + '"></div>' +
+      '<div class="osx-cm-add"><button type="button" class="osx-cm-tool" data-cm-emoji="' + esc(p.id) + '" title="Add an emoji" aria-label="Add an emoji">😊</button><button type="button" class="osx-cm-tool" data-cm-img="' + esc(p.id) + '" title="Add a photo" aria-label="Add a photo">🖼️</button><button type="button" class="osx-cm-tool" data-cm-gif="' + esc(p.id) + '" title="Add a GIF" aria-label="Add a GIF">GIF</button><button type="button" class="osx-cm-tool" data-cm-link="' + esc(p.id) + '" title="Add a link" aria-label="Add a link">🔗</button><input class="osx-cm-input" data-cm-input="' + esc(p.id) + '" maxlength="600" placeholder="Write a reply…"><button class="osx-cm-send" type="button" data-cm-send="' + esc(p.id) + '">Reply</button></div>' +
     '</div>';
+  }
+  function addCmAtt(container, id, att) {
+    var arr = cmPendingAtts[id] || (cmPendingAtts[id] = []);
+    if (arr.length >= 2) { alert('Up to 2 images per reply.'); return; }
+    arr.push(att); renderCmAtts(container, id);
+  }
+  function renderCmAtts(container, id) {
+    var wrap = container.querySelector('[data-cm-atts="' + id + '"]'); if (!wrap) return;
+    var arr = cmPendingAtts[id] || [];
+    wrap.innerHTML = arr.map(function (a, i) { return '<span class="osx-cm-attpend"><img src="' + esc(a.url) + '" alt=""><button type="button" data-cm-attrm="' + i + '" aria-label="Remove">✕</button></span>'; }).join('');
+    wrap.querySelectorAll('[data-cm-attrm]').forEach(function (b) { b.addEventListener('click', function () { arr.splice(+b.getAttribute('data-cm-attrm'), 1); renderCmAtts(container, id); }); });
   }
   function commenterAvatars(p) {
     var cs = p.comments || []; if (!cs.length) return '';
@@ -398,6 +419,16 @@
     });
     container.querySelectorAll('[data-cm-emoji]').forEach(function (b) { b.addEventListener('click', function (e) { e.stopPropagation(); var inp = container.querySelector('[data-cm-input="' + b.getAttribute('data-cm-emoji') + '"]'); openEmojiPicker(b, inp); }); });
     container.querySelectorAll('[data-cm-link]').forEach(function (b) { b.addEventListener('click', function () { var inp = container.querySelector('[data-cm-input="' + b.getAttribute('data-cm-link') + '"]'); insertLink(inp); }); });
+    container.querySelectorAll('[data-cm-img]').forEach(function (b) { b.addEventListener('click', function () {
+      var id = b.getAttribute('data-cm-img');
+      var url = window.prompt('Paste an image or GIF URL:', 'https://'); if (!url) return; url = url.trim();
+      if (!/^https?:\/\//i.test(url)) { alert('Please paste a full http(s) link.'); return; }
+      addCmAtt(container, id, { type: 'image', url: url });
+    }); });
+    container.querySelectorAll('[data-cm-gif]').forEach(function (b) { b.addEventListener('click', function () {
+      var id = b.getAttribute('data-cm-gif');
+      openGiphy(b, function (u) { addCmAtt(container, id, { type: 'gif', url: u }); });
+    }); });
     container.querySelectorAll('[data-cm-send]').forEach(function (b) {
       b.addEventListener('click', function () { submitComment(container, b.getAttribute('data-cm-send'), b); });
     });
@@ -407,15 +438,18 @@
   }
   function submitComment(container, id, btn) {
     var box = container.querySelector('[data-cm="' + id + '"]'); if (!box) return;
-    var inp = box.querySelector('[data-cm-input]'); var text = (inp && inp.value || '').trim(); if (!text) return;
+    var inp = box.querySelector('[data-cm-input]'); var text = (inp && inp.value || '').trim();
+    var atts = cmPendingAtts[id] || [];
+    if (!text && !atts.length) return;
     if (btn) btn.disabled = true;
-    fetch('/apps/p2p/comment', { method: 'POST', headers: { 'content-type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify({ id: id, text: text, name: window.P2P_MEMBER_NAME || '' }) })
+    fetch('/apps/p2p/comment', { method: 'POST', headers: { 'content-type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify({ id: id, text: text, attachments: atts, name: window.P2P_MEMBER_NAME || '' }) })
       .then(function (r) { return r.json(); })
       .then(function (res) {
         if (btn) btn.disabled = false;
         if (res && res.ok && res.comment) {
           if (inp) inp.value = '';
-          var list = box.querySelector('.osx-cm-list'); if (list) { list.insertAdjacentHTML('beforeend', cmItem(res.comment, id)); wireMenus(list); list.querySelectorAll('[data-cdel]').forEach(function (bd) { bd.addEventListener('click', function () { var pr = bd.getAttribute('data-cdel').split('|'); deleteComment(pr[0], pr[1]); }); }); list.querySelectorAll('[data-cedit]').forEach(function (bd) { bd.addEventListener('click', function () { var pr = bd.getAttribute('data-cedit').split('|'); openEditComment(pr[0], pr[1]); }); }); }
+          delete cmPendingAtts[id]; renderCmAtts(container, id);
+          var list = box.querySelector('.osx-cm-list'); if (list) { list.insertAdjacentHTML('beforeend', cmItem(res.comment, id)); wireMenus(list); list.querySelectorAll('[data-lightbox]').forEach(function (im) { im.addEventListener('click', function () { openLightbox(im.getAttribute('data-lightbox')); }); }); list.querySelectorAll('[data-cdel]').forEach(function (bd) { bd.addEventListener('click', function () { var pr = bd.getAttribute('data-cdel').split('|'); deleteComment(pr[0], pr[1]); }); }); list.querySelectorAll('[data-cedit]').forEach(function (bd) { bd.addEventListener('click', function () { var pr = bd.getAttribute('data-cedit').split('|'); openEditComment(pr[0], pr[1]); }); }); }
           var pp = posts.filter(function (p) { return p.id === id; })[0];
           if (pp) { pp.comments = pp.comments || []; pp.comments.push(res.comment); var cnt = container.querySelector('[data-ctoggle="' + id + '"] span'); if (cnt) cnt.textContent = pp.comments.length; }
           if (res.engage) handleEngage(res.engage, 'comment');
