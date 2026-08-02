@@ -70,25 +70,25 @@ window.P2P = (function(){
      slip. It regenerates a clean week (7 days) after it was last spent. New/reset
      streaks start with grace available. */
   function tick(){
-    var s = get(K.streak, null), t = today(), tn = dayNum(t), gained = false, graced = false;
+    var s = get(K.streak, null), t = today(), tn = dayNum(t), gained = false, graced = false, continued = false;
     if(!s || typeof s.count !== 'number'){ s = { last:t, count:1, longest:1, grace:true, graceAt:0 }; gained = true; }
     else {
       if(typeof s.grace !== 'boolean') s.grace = true; // migrate older records
       var diff = tn - dayNum(s.last);
       if(diff <= 0){ /* same day or clock moved back — leave the run as-is */ }
       else if(diff === 1){
-        s.count += 1; s.last = t; gained = true;
+        s.count += 1; s.last = t; gained = true; continued = true;
         if(!s.grace && (tn - (s.graceAt || 0)) >= 7) s.grace = true; // earned it back after a clean week
       }
       else if(diff === 2 && s.grace){ // missed exactly one day — forgive it, once
-        s.count += 1; s.last = t; s.grace = false; s.graceAt = tn; gained = true; graced = true;
+        s.count += 1; s.last = t; s.grace = false; s.graceAt = tn; gained = true; graced = true; continued = true;
       }
       else { if(s.count >= COMEBACK_MIN) earnBadge('Comeback'); s.count = 1; s.last = t; s.grace = true; s.graceAt = 0; gained = true; }
     }
     if(s.count > (s.longest || 0)) s.longest = s.count;
     set(K.streak, s);
     if(gained){
-      set(K.ptsStreak, (get(K.ptsStreak, 0) || 0) + R.streak); // once per new day
+      set(K.ptsStreak, (get(K.ptsStreak, 0) || 0) + R.streak + (continued ? R.streak : 0)); // +5 for showing up, +5 more while a streak is alive
       var da = get(K.daysActive, null);
       if(da == null) da = Math.max(0, (s.longest || 0) - 1); // seed existing members from their record
       set(K.daysActive, da + 1);                              // one more distinct active day
