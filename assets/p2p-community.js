@@ -686,11 +686,19 @@
     else { window.prompt('Copy this invite link:', url); }
   });
 
+  function goMembersItem() {
+    return Array.prototype.slice.call(root.querySelectorAll('.osx-item')).filter(function (x) { return /^\s*Members\s*$/i.test((x.textContent || '').trim()); })[0]
+      || Array.prototype.slice.call(root.querySelectorAll('.osx-item')).filter(function (x) { return /Members/i.test(x.textContent || ''); })[0];
+  }
   root.querySelectorAll('[data-go-members]').forEach(function (b) {
+    b.addEventListener('click', function () { var item = goMembersItem(); if (item) item.click(); });
+  });
+  // "My Profile" — open the Members view on its My Profile tab (in-page on the OS, or navigate from the Haus rail).
+  root.querySelectorAll('[data-go-profile]').forEach(function (b) {
     b.addEventListener('click', function () {
-      var item = Array.prototype.slice.call(root.querySelectorAll('.osx-item')).filter(function (x) { return /^\s*Members\s*$/i.test((x.textContent || '').trim()); })[0]
-        || Array.prototype.slice.call(root.querySelectorAll('.osx-item')).filter(function (x) { return /Members/i.test(x.textContent || ''); })[0];
-      if (item) item.click();
+      var tab = document.querySelector('[data-mb-tab="profile"]');
+      if (tab) { var item = goMembersItem(); if (item) item.click(); setTimeout(function () { tab.click(); }, 50); }
+      else { window.location.href = '/pages/p2p-os?v=members&tab=profile'; }
     });
   });
 

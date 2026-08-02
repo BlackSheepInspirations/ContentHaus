@@ -49,7 +49,7 @@
       </div>
       <div class="osx-p2p-btns">
         <button class="osx-comm-invite" type="button" data-comm-invite>＋ Invite</button>
-        <button class="osx-comm-invite ghost" type="button" data-go-members>Members</button>
+        <button class="osx-comm-invite ghost" type="button" data-go-profile>My Profile</button>
       </div>
     </div>
     <div class="osx-userbar" data-userbar>
@@ -339,10 +339,46 @@
       </div>
       <div class="osx-resgroup">
         <div class="osx-reslabel">Work faster</div>
-        <div class="osx-resgrid">
-          <button class="osx-rescard" type="button" data-osx-goto="mates"><span class="osx-resic">🤝</span><b>Your Haus Mates</b><span>Frank &amp; Ruth — brainstorm and build on demand.</span><i>→</i></button>
-          <button class="osx-rescard" type="button" data-osx-goto="notebook"><span class="osx-resic">📓</span><b>Your Notebook</b><span>Ideas, notes, wins &amp; journal — all in one place.</span><i>→</i></button>
-          <button class="osx-rescard" type="button" data-osx-goto="success"><span class="osx-resic">🚀</span><b>My Success</b><span>Your command center — goals, lives, posts &amp; more.</span><i>→</i></button>
+        <div class="osx-meet osx-meet--tools">
+          <div class="osx-meetcard" role="button" tabindex="0" aria-label="Your Haus Mates — tap to learn more">
+            <div class="osx-meetcard-inner">
+              <div class="osx-meetface osx-meetfront">
+                <span class="osx-flip-ic" aria-hidden="true">↻</span>
+                <span class="osx-meic">🤝</span><b>Your Haus Mates</b>
+                <p>Frank &amp; Ruth — brainstorm and build on demand.</p>
+              </div>
+              <div class="osx-meetface osx-meetback">
+                <p class="osx-meetmore">Frank sharpens your ideas like a blunt Creative Director; Ruth makes them production-ready. Ask either one any time you're stuck.</p>
+                <button class="osx-meetlink" type="button" data-osx-goto="mates">Open Haus Mates →</button>
+              </div>
+            </div>
+          </div>
+          <div class="osx-meetcard" role="button" tabindex="0" aria-label="Your Notebook — tap to learn more">
+            <div class="osx-meetcard-inner">
+              <div class="osx-meetface osx-meetfront">
+                <span class="osx-flip-ic" aria-hidden="true">↻</span>
+                <span class="osx-meic">📓</span><b>Your Notebook</b>
+                <p>Ideas, notes, wins &amp; journal — all in one place.</p>
+              </div>
+              <div class="osx-meetface osx-meetback">
+                <p class="osx-meetmore">Capture ideas, keep notes, log wins and reflect in your journal — everything stays saved to your account.</p>
+                <button class="osx-meetlink" type="button" data-osx-goto="notebook">Open my Notebook →</button>
+              </div>
+            </div>
+          </div>
+          <div class="osx-meetcard" role="button" tabindex="0" aria-label="My Success — tap to learn more">
+            <div class="osx-meetcard-inner">
+              <div class="osx-meetface osx-meetfront">
+                <span class="osx-flip-ic" aria-hidden="true">↻</span>
+                <span class="osx-meic">🚀</span><b>My Success</b>
+                <p>Your command center — goals, lives, posts &amp; more.</p>
+              </div>
+              <div class="osx-meetface osx-meetback">
+                <p class="osx-meetmore">Your command center: set goals, plan lives and launches, track posts, and see everything you've shipped.</p>
+                <button class="osx-meetlink" type="button" data-osx-goto="success">Open My Success →</button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
       <div class="osx-resgroup">
@@ -1234,11 +1270,19 @@ window.P2P_EVENTS = [{%- for b in ev_blocks -%}{"iso":{{ b.settings.iso_date | d
     // deep-link: /pages/p2p-os?v=<view> opens that view directly
     // (the shared rail on the Haus pages links here for view-mode items like Checkpoint / Notebook)
     (function(){
-      var m = /[?&]v=([^&]+)/.exec(window.location.search); if(!m) return;
-      var want = decodeURIComponent(m[1]).replace(/[^a-z0-9_-]/gi, '');
-      var nav = Array.prototype.filter.call(items, function(x){ return x.getAttribute('data-target') === want; })[0];
-      if(nav){ activate(nav); }
-      // consume the deep-link param so a refresh (or a duplicated tab) returns to the dashboard, not this view
+      var search = window.location.search;
+      var m = /[?&]v=([^&]+)/.exec(search), tabM = /[?&]tab=([^&]+)/.exec(search);
+      if(!m && !tabM) return;
+      if(m){
+        var want = decodeURIComponent(m[1]).replace(/[^a-z0-9_-]/gi, '');
+        var nav = Array.prototype.filter.call(items, function(x){ return x.getAttribute('data-target') === want; })[0];
+        if(nav){ activate(nav); }
+      }
+      if(tabM){
+        var tab = decodeURIComponent(tabM[1]).replace(/[^a-z0-9_-]/gi, '');
+        setTimeout(function(){ var tb = root.querySelector('[data-mb-tab="'+tab+'"]'); if(tb) tb.click(); }, 80);
+      }
+      // consume the deep-link params so a refresh (or a duplicated tab) returns to the dashboard, not this view
       try{ history.replaceState(null, '', window.location.pathname); }catch(e){}
     })();
     // mobile drawer
