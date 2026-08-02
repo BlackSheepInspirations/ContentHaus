@@ -747,13 +747,19 @@
   }
   function buildProfCard(nm) {
     var pr = memberProfile(nm);
-    var av = avInner(pr.photo, pr.name);
+    var full = (window.P2P_MEMBER_BY_NAME && window.P2P_MEMBER_BY_NAME(nm)) || null;
+    var av = avInner((full && full.photo) || pr.photo, pr.name);
+    var tier = (full && full.tier) || pr.tier || 'Member';
+    var loc = full ? [full.city, full.region || full.country].filter(Boolean).join(', ') : '';
+    var socials = (full && full.social && window.P2P_MEMBER_SOCIAL_HTML) ? window.P2P_MEMBER_SOCIAL_HTML(full.social) : '';
     var el = document.createElement('div'); el.className = 'osx-profcard';
     el.innerHTML =
       '<div class="osx-profcard-top"><span class="osx-profcard-av">' + av + (pr.tierNum ? '<span class="osx-pa-tier">' + pr.tierNum + '</span>' : '') + '</span>' +
       '<div class="osx-profcard-id"><div class="osx-profcard-name">' + esc(pr.name || 'Member') + (pr.streak ? ' <span class="osx-profcard-fire">' + pr.streak + '🔥</span>' : '') + '</div>' +
-      '<div class="osx-profcard-rank">' + esc(pr.tier || 'Member') + '</div></div></div>' +
-      '<div class="osx-profcard-stats"><div><b>' + pr.posts + '</b><span>posts</span></div><div><b>' + pr.wins + '</b><span>wins</span></div></div>' +
+      '<div class="osx-profcard-rank">' + esc(tier) + '</div>' + (loc ? '<div class="osx-profcard-loc">📍 ' + esc(loc) + '</div>' : '') + '</div></div>' +
+      '<div class="osx-profcard-stats"><div><b>' + ((full && full.points) || 0) + '</b><span>points</span></div><div><b>' + ((full && full.badges) || 0) + '</b><span>badges</span></div><div><b>' + pr.posts + '</b><span>posts</span></div></div>' +
+      (full && full.quote ? '<p class="osx-profcard-quote">“' + esc(full.quote) + '”</p>' : '') +
+      socials +
       (pr.posts ? '<button type="button" class="osx-profcard-view" data-profview="' + esc(pr.name || '') + '">See their posts</button>' : '');
     return el;
   }
@@ -776,6 +782,7 @@
     profEl = buildProfCard(nm); root.appendChild(profEl);
     profEl.addEventListener('mouseenter', function () { clearTimeout(profHideT); });
     profEl.addEventListener('mouseleave', function () { if (!profPinned) profHideT = setTimeout(function () { hideProf(false); }, 200); });
+    profEl.querySelectorAll('[data-extlink]').forEach(function (a) { a.addEventListener('click', function (ev) { ev.preventDefault(); ev.stopPropagation(); if (window.P2P_EXT_CONFIRM) window.P2P_EXT_CONFIRM(a.getAttribute('data-extlink')); }); });
     var vb = profEl.querySelector('[data-profview]');
     if (vb) vb.addEventListener('click', function () { var q = vb.getAttribute('data-profview'); filter.q = q; filter.offset = 0; if (searchEl) searchEl.value = q; renderTabs(); load(false); hideProf(true); if (feed && feed.scrollIntoView) feed.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
     placeProf(anchor);
@@ -791,7 +798,11 @@
   });
   root.addEventListener('click', function (e) {
     var t = e.target.closest ? e.target.closest('[data-profile]') : null; if (!t || !root.contains(t)) return;
-    e.preventDefault(); e.stopPropagation(); showProf(t.getAttribute('data-profile'), t, true);
+    e.preventDefault(); e.stopPropagation();
+    var nm = t.getAttribute('data-profile');
+    hideProf(true);
+    if (window.P2P_OPEN_MEMBER && window.P2P_OPEN_MEMBER(nm)) return;   // the full, rich member card
+    showProf(nm, t, true);                                             // fallback if the members module hasn't loaded
   });
   document.addEventListener('click', function (e) { if (profEl && profPinned && !profEl.contains(e.target) && !(e.target.closest && e.target.closest('[data-profile]'))) hideProf(true); });
   window.addEventListener('scroll', function () { if (profEl && !profPinned) hideProf(true); }, true);

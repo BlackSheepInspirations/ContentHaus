@@ -397,5 +397,11 @@
     tryMembersMap();
   }
 
+  // Expose the rich member card so the community (hover/click) shows the SAME card, not a thin one.
+  window.P2P_MEMBER_BY_NAME = function (nm) { return memberByName(nm) || null; };
+  window.P2P_OPEN_MEMBER = function (nm) { var p = memberByName(nm); if (p) { openMemberModal(p); return true; } return false; };
+  window.P2P_MEMBER_SOCIAL_HTML = function (s) { return socialHTML(s); };
+  window.P2P_EXT_CONFIRM = function (u) { openExtConfirm(u); };
+
   initProfile();
 })();
