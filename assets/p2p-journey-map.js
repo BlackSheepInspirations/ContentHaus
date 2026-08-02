@@ -5,7 +5,7 @@
    `after` on an item locks it until that handle is done. Checks are intentionally
    excluded — they live in the Bonuses panel and are never gated. */
 window.P2P_MAP = [
-  { n:1, name:'Open Water', url:'/pages/p2p-learning', gate:'', courses:[
+  { n:1, name:'Open Water', url:'/pages/p2p-learning', gate:'welcome-aboard', courses:[
     { t:'Welcome Aboard', h:'welcome-aboard' },
     { t:'RAFT', h:'raft' },
     { t:'Finding Your Lane', h:'finding-your-lane' },
@@ -18,7 +18,7 @@ window.P2P_MAP = [
     { t:'Psychology Behind a Purchase', h:'psychology-behind-a-purchase' },
     { t:'Show Up Your Way', h:'show-up-your-way' }
   ]},
-  { n:2, name:'Element Forest', url:'/pages/realm-2', gate:'', courses:[
+  { n:2, name:'Element Forest', url:'/pages/realm-2', gate:'grows', courses:[
     { t:'The GROWS Formula', h:'grows' },
     { t:'Digital Product Advantage', h:'digital-product-advantage' },
     { t:'Bringing Your Brand to Life', h:'bringing-your-brand-to-life' },
@@ -35,7 +35,7 @@ window.P2P_MAP = [
     { t:'Media Kits & Social Templates', h:'media-kits-social-templates', o:true },
     { t:'Cards & Invitations', h:'cards-invitations', o:true }
   ]},
-  { n:3, name:'Desert Blooms', url:'/pages/realm-3', gate:'', courses:[
+  { n:3, name:'Desert Blooms', url:'/pages/realm-3', gate:'pod-foundations', courses:[
     { t:'POD Foundations', h:'pod-foundations' },
     { t:'What Every Product Needs', h:'what-pod-products-need' },
     { t:'Trademark Traps in POD', h:'trademark-traps-in-pod' },
@@ -45,7 +45,7 @@ window.P2P_MAP = [
     { t:'OpenART for Designers', h:'openart-for-designers', o:true },
     { t:'Kittl for Designers', h:'kittl-for-designers', o:true }
   ]},
-  { n:4, name:'Golden Harvest', url:'/pages/realm-4', gate:'', courses:[
+  { n:4, name:'Golden Harvest', url:'/pages/realm-4', gate:'turning-digital-to-physical', courses:[
     { t:'Turning Digital to Physical', h:'turning-digital-to-physical' },
     { t:'Publishing & Ebook Production', h:'publishing-ebook-production' },
     { t:'Amazon KDP & Audible', h:'amazon-kdp-audible' },

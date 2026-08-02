@@ -130,20 +130,21 @@
     if(window.P2P){ window.P2P.earnBadge('Set Sail'); if(window.P2P_celebrate) window.P2P_celebrate(); } // earned for completing "Your Journey Starts Here"
   }
   var introRequired = root.getAttribute('data-intro-required') !== 'false';
+  // Realm anchor: the one course that unlocks the rest of this realm (section setting).
+  var REALM_GATE = (root.getAttribute('data-unlock-after') || '').trim();
+  function courseDone(hh){ return !!(window.P2P && hh && window.P2P.isCourseDone(hh)); }
 
   function nodeState(h){
     if(h.hasAttribute('data-begin')) return onboardingDone() ? 'done' : 'available'; // entry point — never locked
-    var type = h.getAttribute('data-type');
-    if(type === 'check') return 'available'; // never locked
     var handle = h.getAttribute('data-handle');
-    if(window.P2P && handle && window.P2P.isCourseDone(handle)) return 'done';
-    if(type === 'offshoot'){
-      var hub = h.getAttribute('data-unlock-after');
-      var hubDone = !hub || (window.P2P && window.P2P.isCourseDone(hub));
-      return hubDone ? 'available' : 'locked';
-    }
-    // Main course
-    return (introRequired && !onboardingDone()) ? 'locked' : 'available';
+    if(courseDone(handle)) return 'done';
+    var after = (h.getAttribute('data-unlock-after') || '').trim();
+    if(after) return courseDone(after) ? 'available' : 'locked';           // explicit hub (e.g. Selling-on → Storefront Essentials)
+    if(REALM_GATE && handle && handle === REALM_GATE)                       // the realm's own anchor course
+      return (introRequired && !onboardingDone()) ? 'locked' : 'available';
+    if(REALM_GATE) return courseDone(REALM_GATE) ? 'available' : 'locked';  // rest of a gated realm — courses AND checks wait for the anchor
+    if(h.getAttribute('data-type') === 'check') return 'available';         // ungated realm: checks never lock
+    return (introRequired && !onboardingDone()) ? 'locked' : 'available';   // ungated realm main course
   }
   function nodeType(h){ return h.hasAttribute('data-begin') ? 'start' : (h.getAttribute('data-type') || 'course'); }
   /* one icon per node type — shown on every "available" marker so the map
@@ -154,11 +155,11 @@
     offshoot: '<svg viewBox="0 0 24 24"><path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.9 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/></svg>',
     check: '<svg viewBox="0 0 24 24"><path d="M12 2l2 7 7 2-7 2-2 7-2-7-7-2 7-2z"/></svg>'
   };
+  function handleTitle(hh){ if(!hh) return ''; var n = root.querySelector('[data-handle="' + hh + '"]'); return (n && n.getAttribute('data-title')) || hh.replace(/-/g, ' ').replace(/\b\w/g, function(c){ return c.toUpperCase(); }); }
   function lockReason(h){
-    if(h.getAttribute('data-type') === 'offshoot'){
-      var hub = h.getAttribute('data-unlock-after');
-      return hub ? ('Complete "' + hub.replace(/-/g, ' ') + '" to unlock this.') : 'Locked for now.';
-    }
+    var after = (h.getAttribute('data-unlock-after') || '').trim();
+    if(after) return 'Complete "' + handleTitle(after) + '" to unlock this.';
+    if(REALM_GATE && h.getAttribute('data-handle') !== REALM_GATE) return 'Complete "' + handleTitle(REALM_GATE) + '" to unlock the rest of this realm.';
     return 'Finish "Your Journey Begins Here" to unlock this.';
   }
 
