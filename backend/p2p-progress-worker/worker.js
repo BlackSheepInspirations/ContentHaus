@@ -729,5 +729,11 @@ async function writeProgress(env, customerId, progress) {
   const errs = data && data.metafieldsSet && data.metafieldsSet.userErrors;
   if (errs && errs.length) throw new Error('set ' + JSON.stringify(errs));
 }
-function json(obj, status = 200) { return new Response(JSON.stringify(obj), { status, headers: { 'content-type': 'application/json; charset=utf-8', ...cors() } }); }
+// Serialize ASCII-only: escape every non-ASCII char (incl. emoji surrogate pairs) to \uXXXX.
+// The App Proxy can re-interpret raw UTF-8 bytes on some devices and garble emojis in user
+// text; pure-ASCII JSON is charset-immune and JSON.parse rebuilds the exact characters.
+function json(obj, status = 200) {
+  const body = JSON.stringify(obj).replace(/[\u0080-\uffff]/g, function (c) { return '\\u' + ('0000' + c.charCodeAt(0).toString(16)).slice(-4); });
+  return new Response(body, { status, headers: { 'content-type': 'application/json; charset=utf-8', ...cors() } });
+}
 function cors() { return { 'access-control-allow-origin': '*', 'access-control-allow-methods': 'GET,POST,OPTIONS', 'access-control-allow-headers': 'content-type' }; }
