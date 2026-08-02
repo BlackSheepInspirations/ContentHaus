@@ -1924,14 +1924,21 @@
   margin-bottom: 40px;
   overflow: hidden;
   isolation: isolate;
-  border-radius: 22px;
+  border-radius: 0;
   padding: 52px 40px 46px;
   background:
-    radial-gradient(60% 120% at 18% 8%, rgba(184, 30, 70, 0.52), transparent 60%),
-    radial-gradient(55% 120% at 82% 12%, rgba(140, 24, 52, 0.40), transparent 62%),
-    radial-gradient(50% 130% at 60% 108%, rgba(120, 18, 44, 0.34), transparent 60%),
-    linear-gradient(135deg, #3a0e1c 0%, #250a13 42%, #14090c 100%);
+    radial-gradient(58% 120% at 18% 8%, rgba(168, 28, 66, 0.40), transparent 60%),
+    radial-gradient(52% 120% at 82% 12%, rgba(120, 22, 48, 0.32), transparent 62%),
+    radial-gradient(48% 120% at 32% 100%, rgba(112, 42, 150, 0.24), transparent 60%),
+    radial-gradient(50% 130% at 66% 108%, rgba(96, 16, 40, 0.30), transparent 60%),
+    linear-gradient(135deg, #2a0a14 0%, #16070d 46%, #080406 100%);
   box-shadow: 0 24px 60px -28px rgba(6, 10, 14, 0.72), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+/* On the OS layout (rail present), let the hero go full-bleed flush to the rail — cancels the
+   .bh-brand-header 16px padding so it reads as one banner with the sidebar, like Growth Haus. */
+@media (min-width: 1025px) {
+  .bh-brand-header { max-width: none; }
+  .bh-brand-header .bh-marketing__hero { margin-left: -16px; margin-right: -16px; margin-top: -40px; }
 }
 /* livelier moving aurora sheen */
 .bh-marketing__hero::before {
