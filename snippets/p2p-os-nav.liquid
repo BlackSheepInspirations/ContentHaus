@@ -46,10 +46,30 @@
 <div class="p2posnav-scrim" data-p2posnav-scrim hidden></div>
 
 <aside id="p2posnav" data-p2posnav aria-label="Purpose 2 Profit navigation">
-  <a class="p2posnav-brand" href="/pages/p2p-os">
-    <span class="p2posnav-mark">Purpose <span class="p2posnav-2">2</span> Profit</span>
-    <span class="p2posnav-sub">powered by Black Sheep Creations &amp; Inspirations</span>
+  <a class="osx-brand osx-brand-row" href="/pages/p2p-os" aria-label="Black Sheep Creations & Inspirations — home">
+    <img class="osx-brand-fav" src="{{ 'bsc-sheep-mark.png' | asset_url }}" alt="" aria-hidden="true">
+    <div class="osx-brandsub osx-brandsub-solo">Black Sheep Creations &amp; Inspirations</div>
   </a>
+  <div class="osx-side-p2p">
+    <a class="osx-side-p2p-logo" href="/pages/p2p-os" aria-label="Purpose 2 Profit — home"><img src="{{ 'p2p-community-logo.png' | asset_url }}" alt="Purpose 2 Profit"></a>
+    <div class="osx-comm-counts">
+      <a class="osx-comm-count" href="/pages/p2p-os?v=members"><b data-count-members>—</b><span>Members</span></a>
+      <a class="osx-comm-count" href="/pages/p2p-os?v=members"><b data-count-active>—</b><span>Active</span></a>
+    </div>
+    <div class="osx-p2p-btns">
+      <button class="osx-comm-invite" type="button" data-comm-invite>＋ Invite</button>
+      <a class="osx-comm-invite ghost" href="/pages/p2p-os?v=members">Members</a>
+    </div>
+  </div>
+  <div class="osx-userbar" data-userbar>
+    <span class="osx-userbubble">{% if customer.first_name != blank %}{{ customer.first_name | slice: 0 | upcase }}{% else %}🐑{% endif %}</span>
+    <div class="osx-userinfo">
+      <span class="osx-username">{{ customer.first_name | default: 'Member' }}</span>
+      <span class="osx-usermeta" data-userrole>Member</span>
+    </div>
+    <button class="osx-bell" type="button" data-bell aria-label="Notifications">🔔<span class="osx-bell-dot" data-bell-count hidden>0</span></button>
+    <div class="osx-bell-menu" data-bell-menu hidden></div>
+  </div>
   <nav class="p2posnav-nav">
     {%- capture os_nav -%}start^Your Journey Starts Here^spark^view^^|checkpoint^Checkpoint^check^view^^|/pages/brand-haus?bh_focus=1^Founders Assessment^fingerprint^link^brand-haus-access^/pages/brand-haus-preview|/pages/brand-haus^Brand Haus^crown^link^brand-haus-access^/pages/brand-haus-preview|/pages/content-haus^Content Haus^prompt^link^prompt-haus-access^/pages/content-haus-preview|/pages/graphics-haus^Graphics Haus^palette^link^graphics-haus-access^/pages/graphics-haus-preview|/pages/project-haus^Project Haus^box^link^product-haus-access^/pages/project-haus-preview|/pages/marketing-haus^Marketing Haus^megaphone^link^marketing-haus-access^/pages/marketing-haus-preview|/pages/growth-haus^Growth Haus^rocket^link^P2P-haus-access^/pages/growth-haus-preview|rooted^ROOTED — Light the Path^path^view^^|mates^Haus Mates^mates^view^^|community^Community^chat^view^^|tools^Tools & Resources^tools^view^^|notebook^Notebook^notebook^view^^|bonus^Bonus Resources^gift^view^^{%- endcapture -%}
     {%- assign os_nav_items = os_nav | split: '|' -%}
@@ -140,6 +160,44 @@
   #p2posnav .p2posnav-lbl{flex:1;min-width:0;}
   #p2posnav .p2posnav-lock{font-size:11px;opacity:.7;}
 
+  /* ── OS sidebar chrome (brand favicon, P2P emblem card, profile + bell) — matches /pages/p2p-os ── */
+  #p2posnav .osx-brand{display:block;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--stroke);padding:6px 10px 16px;margin-bottom:10px;cursor:pointer;border-radius:8px 8px 0 0;transition:background .15s;text-decoration:none;}
+  #p2posnav .osx-brand:hover{background:rgba(255,255,255,.03);}
+  #p2posnav .osx-brand-row{display:flex;align-items:center;gap:9px;}
+  #p2posnav .osx-brand-fav{width:26px;height:26px;object-fit:contain;flex:none;}
+  #p2posnav .osx-brandsub{margin-top:5px;font:600 9.5px/1.3 system-ui;letter-spacing:.03em;text-transform:uppercase;color:var(--muted);}
+  #p2posnav .osx-brandsub-solo{font:800 11px/1.4 system-ui;letter-spacing:.06em;text-transform:uppercase;color:var(--text);margin:0;}
+  #p2posnav .osx-side-p2p{border:1px solid var(--gstroke);border-radius:14px;background:rgba(255,255,255,.03);padding:11px;margin:12px 0 10px;box-shadow:0 0 18px rgba(216,180,90,.1);}
+  #p2posnav .osx-side-p2p-logo{display:block;width:100%;border:0;background:none;padding:0;margin:0 0 10px;cursor:pointer;border-radius:8px;overflow:hidden;}
+  #p2posnav .osx-side-p2p-logo img{width:100%;display:block;border-radius:8px;}
+  #p2posnav .osx-comm-counts{display:flex;gap:12px;}
+  #p2posnav .osx-comm-count{flex:1;border:1px solid var(--stroke);border-radius:14px;background:rgba(255,255,255,.03);padding:14px 10px;text-align:center;cursor:pointer;transition:.15s;text-decoration:none;}
+  #p2posnav .osx-comm-count:hover{border-color:var(--gstroke);background:rgba(216,180,90,.08);}
+  #p2posnav .osx-comm-count b{display:block;font:800 22px/1 Georgia,serif;color:var(--gold-bright);}
+  #p2posnav .osx-comm-count span{display:block;margin-top:4px;font:600 11px/1 system-ui;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);}
+  #p2posnav .osx-p2p-btns{display:flex;gap:7px;margin-top:12px;}
+  #p2posnav .osx-comm-invite{border:0;background:linear-gradient(100deg,#f4e2a6,#c9a24a);color:#0a1410;cursor:pointer;border-radius:999px;padding:11px 16px;font:800 13px/1 system-ui;transition:.15s;text-decoration:none;text-align:center;flex:1;}
+  #p2posnav .osx-comm-invite:hover{filter:brightness(1.06);}
+  #p2posnav .osx-comm-invite.ghost{background:transparent;color:var(--gold-bright);border:1px solid var(--gstroke);}
+  #p2posnav .osx-userbar{position:relative;display:flex;align-items:center;gap:10px;padding:4px 10px 12px;margin-bottom:8px;border-bottom:1px solid var(--stroke);}
+  #p2posnav .osx-userbubble{flex:none;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:800 15px/1 Georgia,serif;color:var(--gold-bright);background:radial-gradient(circle at 50% 30%,#2a3b52,#12202b);border:1.5px solid var(--gstroke);}
+  #p2posnav .osx-userinfo{flex:1;min-width:0;line-height:1.2;}
+  #p2posnav .osx-username{display:block;font:700 13px/1.2 system-ui;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  #p2posnav .osx-usermeta{display:block;font:600 10px/1.2 system-ui;letter-spacing:.03em;text-transform:uppercase;color:var(--gold-bright);}
+  #p2posnav .osx-bell{position:relative;flex:none;background:none;border:0;cursor:pointer;font-size:18px;line-height:1;padding:4px;filter:grayscale(.2);transition:transform .12s;}
+  #p2posnav .osx-bell:hover{transform:scale(1.12);}
+  #p2posnav .osx-bell-dot{position:absolute;top:-2px;right:-3px;min-width:16px;height:16px;padding:0 4px;box-sizing:border-box;border-radius:999px;background:#e0457b;color:#fff;font:800 10px/16px system-ui;text-align:center;}
+  #p2posnav .osx-bell-menu{position:absolute;top:calc(100% - 4px);left:8px;width:250px;max-height:340px;overflow-y:auto;z-index:60;background:#0e1c28;border:1px solid var(--gstroke);border-radius:14px;box-shadow:0 12px 34px rgba(0,0,0,.5);padding:6px;}
+  #p2posnav .osx-bell-h{font:800 11px/1 system-ui;letter-spacing:.05em;text-transform:uppercase;color:var(--gold-bright);padding:9px 10px 8px;}
+  #p2posnav .osx-bell-empty{font:500 12.5px/1.5 system-ui;color:var(--muted);padding:6px 10px 12px;}
+  #p2posnav .osx-bell-item{padding:9px 10px;border-radius:10px;}
+  #p2posnav .osx-bell-item.unread{background:rgba(216,180,90,.09);}
+  #p2posnav .osx-bell-rem{border-left:3px solid var(--gold-bright);}
+  #p2posnav .osx-bell-line{font:500 12.5px/1.4 system-ui;color:#d7e3de;}
+  #p2posnav .osx-bell-line b{color:var(--text);font-weight:700;}
+  #p2posnav .osx-bell-snip{font:italic 400 12px/1.4 Georgia,serif;color:var(--muted);margin-top:2px;}
+  #p2posnav .osx-bell-time{font:600 10px/1 system-ui;color:var(--muted);}
+
   /* burger + scrim — hidden until the mobile drawer is open */
   .p2posnav-burger{display:none;}
   .p2posnav-scrim{display:none;position:fixed;inset:0;background:rgba(3,7,10,.55);z-index:1001;border:0;}
@@ -171,8 +229,8 @@
     if(burger) burger.addEventListener('click', toggle);
     if(scrim)  scrim.addEventListener('click', close);
     document.addEventListener('keydown', function(e){ if(e.key === 'Escape') close(); });
-    // close the drawer when a nav item is tapped (it's navigating away anyway)
-    el.querySelectorAll('.p2posnav-item, .p2posnav-brand').forEach(function(a){ a.addEventListener('click', close); });
+    // close the drawer when a navigating link is tapped (bell + Invite act in place, so exclude them)
+    el.querySelectorAll('.p2posnav-item, .osx-brand, .osx-side-p2p-logo, .osx-comm-count, .osx-comm-invite.ghost').forEach(function(a){ a.addEventListener('click', close); });
     // Keep the fixed rail directly BELOW the sticky theme header (not at top:0, where
     // it rides up behind the banner and clips its own brand mark) so it lines up with
     // the OS page and the layout doesn't jump between them.
@@ -183,5 +241,32 @@
     syncTop();
     window.addEventListener('resize', syncTop);
     window.addEventListener('load', syncTop);
+  })();
+</script>
+
+{%- comment -%} Load the OS's progress + community JS so the rail's bell (and profile tier) work
+   identically here. community.js's wall/map IIFEs bail out off the OS page (they require #p2pos);
+   only its bell IIFE — which finds [data-userbar] anywhere — activates on Haus pages. {%- endcomment -%}
+<script src="{{ 'p2p-progress.js' | asset_url }}" defer="defer"></script>
+<script src="{{ 'p2p-community.js' | asset_url }}" defer="defer"></script>
+<script>
+  (function(){
+    var rail = document.getElementById('p2posnav'); if(!rail) return;
+    // Members / Active counts — the OS's own loader doesn't run here, so do a lightweight fetch.
+    fetch('/apps/p2p/members', { credentials: 'same-origin' }).then(function(r){ return r.ok ? r.json() : null; }).then(function(j){
+      if(!j || j.guest) return;
+      var m = j.members || [], now = Date.now();
+      var mEl = rail.querySelector('[data-count-members]'), aEl = rail.querySelector('[data-count-active]');
+      if(mEl) mEl.textContent = m.length;
+      if(aEl) aEl.textContent = m.filter(function(x){ return x.ts && (now - x.ts) < 300000; }).length;
+    }).catch(function(){});
+    // Invite — copy the preview link (same behavior as the OS emblem card).
+    var inv = rail.querySelector('[data-comm-invite]');
+    if(inv) inv.addEventListener('click', function(){
+      var url = location.origin + '/pages/p2p-os-preview', t = inv.textContent;
+      function done(){ inv.textContent = 'Link copied ✓'; setTimeout(function(){ inv.textContent = t; }, 2000); }
+      if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(url).then(done).catch(function(){ window.prompt('Copy this invite link:', url); }); }
+      else window.prompt('Copy this invite link:', url);
+    });
   })();
 </script>
