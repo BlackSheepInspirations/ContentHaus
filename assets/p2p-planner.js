@@ -131,7 +131,7 @@
   }
   var CAL_MO = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
   function calP2(n) { return (n < 10 ? '0' : '') + n; }
-  function calMarks() { var mk = {}; function add(iso, k) { if (!iso) return; (mk[iso] = mk[iso] || {})[k] = true; } data.lives.forEach(function (l) { if (!l.deleted && l.date) add(l.date, 'live'); }); data.goals.forEach(function (g) { if (g.w) add(g.w, 'goal'); }); data.products.forEach(function (p) { if (p.launch) add(p.launch, 'prod'); }); (window.P2P_EVENTS || []).forEach(function (e) { if (e.iso) add(e.iso, 'event'); }); try { (JSON.parse(localStorage.getItem('p2p_my_events') || '[]') || []).forEach(function (e) { if (e.iso) add(e.iso, 'plan'); }); } catch (e) {} return mk; }
+  function calMarks() { var mk = {}; function add(iso, k) { if (!iso) return; (mk[iso] = mk[iso] || {})[k] = true; } data.lives.forEach(function (l) { if (!l.deleted && l.date) add(l.date, 'live'); }); data.posts.forEach(function (p) { if (!p.deleted && p.date) add(p.date, 'post'); }); data.goals.forEach(function (g) { if (g.w) add(g.w, 'goal'); }); data.products.forEach(function (p) { if (p.launch) add(p.launch, 'prod'); }); (window.P2P_EVENTS || []).forEach(function (e) { if (e.iso) add(e.iso, 'event'); }); try { (JSON.parse(localStorage.getItem('p2p_my_events') || '[]') || []).forEach(function (e) { if (e.iso) add(e.iso, 'plan'); }); } catch (e) {} return mk; }
   function calVisits() { try { return JSON.parse(localStorage.getItem('p2p_visit_days') || '{}') || {}; } catch (e) { return {}; } }
   function dashCalHTML() {
     if (!calMY) { var n = new Date(); calMY = { y: n.getFullYear(), m: n.getMonth() }; }
@@ -141,12 +141,12 @@
     for (var i = 0; i < first; i++) cells += '<span class="osx-dc-d empty"></span>';
     for (var d = 1; d <= days; d++) {
       var iso = calMY.y + '-' + calP2(calMY.m + 1) + '-' + calP2(d), m = mk[iso] || {};
-      var marks = (visits[iso] ? '<i class="osx-dc-star">★</i>' : '') + (m.live ? '<i class="osx-dc-dot live"></i>' : '') + (m.goal ? '<i class="osx-dc-dot goal"></i>' : '') + (m.prod ? '<i class="osx-dc-dot prod"></i>' : '') + (m.event ? '<i class="osx-dc-dot event"></i>' : '') + (m.plan ? '<i class="osx-dc-dot plan"></i>' : '');
+      var marks = (visits[iso] ? '<i class="osx-dc-star">★</i>' : '') + (m.live ? '<i class="osx-dc-dot live"></i>' : '') + (m.post ? '<i class="osx-dc-dot post"></i>' : '') + (m.goal ? '<i class="osx-dc-dot goal"></i>' : '') + (m.prod ? '<i class="osx-dc-dot prod"></i>' : '') + (m.event ? '<i class="osx-dc-dot event"></i>' : '') + (m.plan ? '<i class="osx-dc-dot plan"></i>' : '');
       cells += '<button type="button" class="osx-dc-d' + (iso === tISO ? ' today' : '') + '" data-dcday="' + iso + '">' + d + (marks ? '<span class="osx-dc-marks">' + marks + '</span>' : '') + '</button>';
     }
     return '<div class="osx-dc"><div class="osx-dc-head"><button type="button" data-dcprev aria-label="Previous month">‹</button><b>' + CAL_MO[calMY.m] + ' ' + calMY.y + '</b><button type="button" data-dcnext aria-label="Next month">›</button></div>' +
       '<div class="osx-dc-dows"><span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span></div><div class="osx-dc-grid">' + cells + '</div>' +
-      '<div class="osx-dc-legend"><span class="l-live">live</span><span class="l-goal">goal</span><span class="l-prod">launch</span><span class="l-event">event</span><span class="l-plan">plan</span><span class="l-star">★ showed up</span></div></div>';
+      '<div class="osx-dc-legend"><span class="l-live">live</span><span class="l-post">posted</span><span class="l-goal">goal</span><span class="l-prod">launch</span><span class="l-event">event</span><span class="l-plan">plan</span><span class="l-star">★ showed up</span></div></div>';
   }
   function radarHTML() {
     var items = [];
@@ -161,15 +161,18 @@
     var pop = document.createElement('div'); pop.className = 'osx-cal-pop'; root.appendChild(pop);
     var p = iso.split('-'), dt = new Date(+p[0], +p[1] - 1, +p[2]);
     var rows = data.lives.filter(function (l) { return !l.deleted && l.date === iso; }).map(function (l) { return '<div class="osx-dcp-i">📡 <b>' + esc(l.title || l.topic || 'Live') + '</b>' + (liveTimeStr(l) ? ' · ' + esc(liveTimeStr(l)) : '') + '</div>'; })
+      .concat(data.posts.filter(function (pp) { return !pp.deleted && pp.date === iso; }).map(function (pp) { return '<div class="osx-dcp-i">📝 <b>' + esc(pp.topic || pp.platform || 'Post') + '</b>' + (pp.done ? ' · ✓ posted' : '') + '</div>'; }))
       .concat(data.goals.filter(function (g) { return g.w === iso; }).map(function (g) { return '<div class="osx-dcp-i">🎯 <b>' + esc(g.title || 'Goal window') + '</b> — launch target</div>'; }))
       .concat(data.products.filter(function (x) { return x.launch === iso; }).map(function (x) { return '<div class="osx-dcp-i">📦 <b>' + esc(x.name || 'Product') + '</b> — launch</div>'; }))
       .concat((window.P2P_EVENTS || []).filter(function (e) { return e.iso === iso; }).map(function (e) { return '<div class="osx-dcp-i">📅 <b>' + esc(e.title || 'Event') + '</b>' + (e.time ? ' · ' + esc(e.time) : '') + '</div>'; }));
     try { rows = rows.concat((JSON.parse(localStorage.getItem('p2p_my_events') || '[]') || []).filter(function (e) { return e.iso === iso; }).map(function (e) { return '<div class="osx-dcp-i">✎ <b>' + esc(e.title || 'Plan') + '</b>' + (e.time ? ' · ' + esc(e.time) : '') + '</div>'; })); } catch (e) {}
-    pop.innerHTML = '<div class="osx-cal-pop-in osx-ns"><button class="osx-cal-pop-x" type="button" aria-label="Close">✕</button><div class="osx-ns-h">' + esc(dt.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })) + '</div>' + (rows.join('') || '<div class="osx-pl-empty">Nothing scheduled this day.</div>') + '<button class="osx-cele-x" type="button" style="margin-top:12px;">Close</button></div>';
+    pop.innerHTML = '<div class="osx-cal-pop-in osx-ns"><button class="osx-cal-pop-x" type="button" aria-label="Close">✕</button><div class="osx-ns-h">' + esc(dt.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })) + '</div>' + (rows.join('') || '<div class="osx-pl-empty">Nothing scheduled this day.</div>') + '<button class="osx-dclog" type="button" data-dclog>＋ Log a post I made this day</button><button class="osx-cele-x" type="button" style="margin-top:8px;">Close</button></div>';
     function close() { pop.remove(); }
     pop.addEventListener('click', function (e) { if (e.target === pop) close(); });
     pop.querySelector('.osx-cal-pop-x').addEventListener('click', close);
     pop.querySelector('.osx-cele-x').addEventListener('click', close);
+    var lb = pop.querySelector('[data-dclog]');
+    if (lb) lb.addEventListener('click', function () { data.posts.unshift({ id: uid(), topic: 'Posted', platform: 'TikTok', type: 'Video', date: iso, time: '', hook: '', cta: '', length: '', music: '', done: true, s: {} }); save(); close(); render(); });
   }
   /* ---------- social snapshot widgets (creator side) ---------- */
   function liveStat(l, key) { var r = l.results || {}, s = 0; Object.keys(r).forEach(function (p) { s += num((r[p] || {})[key]); }); return s; }
