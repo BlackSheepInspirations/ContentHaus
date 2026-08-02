@@ -985,87 +985,60 @@
       <p class="osx-lede">{{ section.settings.bonus_intro | default: "Guides, checklists and templates to download and keep. New drops are added regularly — grab whatever helps." }}</p>
 
       {%- comment -%} Baked freebies (revert-proof): one per line (| separated), fields ^ separated:
-         title^description^download-url^type-label^thumbnail-asset-filename.
-         Thumbnail is an assets/ filename (resolved with asset_url); leave blank for a 📄 icon. {%- endcomment -%}
-      {%- capture os_bonus -%}Journal Creator Quickstart Series — Vol. 1^Turn a broad journal thought into one clear concept you're ready to build.^https://canva.link/vol-1-journal-creator-series^eBook^bonus-journal-creator-vol1.jpg{%- endcapture -%}
+         title^description^download-url^type-label^thumbnail-asset-filename^category^sub-category.
+         Thumbnail is an assets/ filename; category/sub-category place it in the accordion tree. {%- endcomment -%}
+      {%- capture os_bonus -%}Journal Creator Quickstart Series — Vol. 1^Turn a broad journal thought into one clear concept you're ready to build.^https://canva.link/vol-1-journal-creator-series^eBook^bonus-journal-creator-vol1.jpg^Digital Products^Journals{%- endcapture -%}
       {%- assign os_bonus_clean = os_bonus | strip -%}
+      {%- assign os_bonus_items = os_bonus_clean | split: '|' -%}
       {%- assign bonus_blocks = section.blocks | where: 'type', 'bonus' -%}
 
       {%- if os_bonus_clean != blank or bonus_blocks.size > 0 -%}
-        {%- comment -%} Featured (baked) freebies — always visible above the tree {%- endcomment -%}
-        {%- if os_bonus_clean != blank -%}
-          <div class="osx-bonusgrid">
-            {%- assign os_bonus_items = os_bonus_clean | split: '|' -%}
-            {%- for bo in os_bonus_items -%}
-              {%- assign bf = bo | split: '^' -%}
-              <a class="osx-bonuscard" href="{{ bf[2] }}" download target="_blank" rel="noopener">
-                {%- if bf[4] != blank -%}
-                  <span class="osx-bonus-thumb"><img src="{{ bf[4] | asset_url }}" alt="{{ bf[0] | escape }}" loading="lazy"></span>
-                {%- else -%}
-                  <span class="osx-bonus-thumb osx-bonus-thumb--ic">📄</span>
-                {%- endif -%}
-                <span class="osx-bonus-type">{{ bf[3] | default: 'PDF' }}</span>
-                <b>{{ bf[0] }}</b>
-                {%- if bf[1] != blank -%}<span class="osx-bonus-desc">{{ bf[1] }}</span>{%- endif -%}
-                <span class="osx-bonus-dl">Download <i>↓</i></span>
-              </a>
-            {%- endfor -%}
-          </div>
-        {%- endif -%}
-
-        {%- comment -%} Category tree: category → (optional) sub-category → cards. Fixed category order; sub-categories are free-form. {%- endcomment -%}
-        {%- if bonus_blocks.size > 0 -%}
-          {%- assign cat_order = 'POD,Digital Products,Digital Content Inspirations,Music,Printed Products,Misc.' | split: ',' -%}
-          <div class="osx-bonustree" data-bonustree>
-            {%- for cat in cat_order -%}
-              {%- assign cat_count = 0 -%}
-              {%- assign sub_list = '' -%}
-              {%- for b in bonus_blocks -%}
-                {%- assign bcat = b.settings.category | default: 'Misc.' -%}
-                {%- if bcat == cat -%}
-                  {%- assign cat_count = cat_count | plus: 1 -%}
-                  {%- assign sc = b.settings.subcategory | default: '' | strip -%}
-                  {%- unless sc == blank -%}
-                    {%- assign probe = '~~' | append: sc | append: '~~' -%}
-                    {%- unless sub_list contains probe -%}{%- assign sub_list = sub_list | append: probe -%}{%- endunless -%}
-                  {%- endunless -%}
-                {%- endif -%}
-              {%- endfor -%}
-              {%- if cat_count > 0 -%}
-                <div class="osx-bacc">
-                  <button type="button" class="osx-bacc-head" data-bacc aria-expanded="false"><i class="osx-bacc-chev" aria-hidden="true">▸</i><span class="osx-bacc-title">{{ cat }}</span><span class="osx-bacc-count">{{ cat_count }}</span></button>
-                  <div class="osx-bacc-body" hidden>
-                    {%- comment -%} direct items (no sub-category) {%- endcomment -%}
-                    {%- assign direct_count = 0 -%}
-                    {%- for b in bonus_blocks -%}{%- assign bcat = b.settings.category | default: 'Misc.' -%}{%- if bcat == cat -%}{%- assign sc = b.settings.subcategory | default: '' | strip -%}{%- if sc == blank -%}{%- assign direct_count = direct_count | plus: 1 -%}{%- endif -%}{%- endif -%}{%- endfor -%}
-                    {%- if direct_count > 0 -%}
-                      <div class="osx-bonusgrid">
-                        {%- for b in bonus_blocks -%}{%- assign bcat = b.settings.category | default: 'Misc.' -%}{%- if bcat == cat -%}{%- assign sc = b.settings.subcategory | default: '' | strip -%}{%- if sc == blank -%}{%- render 'p2p-bonus-card', b: b -%}{%- endif -%}{%- endif -%}{%- endfor -%}
-                      </div>
-                    {%- endif -%}
-                    {%- comment -%} sub-category accordions {%- endcomment -%}
-                    {%- assign subs = sub_list | split: '~~' -%}
-                    {%- for sub in subs -%}
-                      {%- assign subt = sub | strip -%}
-                      {%- unless subt == blank -%}
-                        {%- assign sub_count = 0 -%}
-                        {%- for b in bonus_blocks -%}{%- assign bcat = b.settings.category | default: 'Misc.' -%}{%- if bcat == cat -%}{%- assign sc = b.settings.subcategory | default: '' | strip -%}{%- if sc == subt -%}{%- assign sub_count = sub_count | plus: 1 -%}{%- endif -%}{%- endif -%}{%- endfor -%}
-                        <div class="osx-bacc osx-bacc--sub">
-                          <button type="button" class="osx-bacc-head" data-bacc aria-expanded="false"><i class="osx-bacc-chev" aria-hidden="true">▸</i><span class="osx-bacc-title">{{ subt }}</span><span class="osx-bacc-count">{{ sub_count }}</span></button>
-                          <div class="osx-bacc-body" hidden>
-                            <div class="osx-bonusgrid">
-                              {%- for b in bonus_blocks -%}{%- assign bcat = b.settings.category | default: 'Misc.' -%}{%- if bcat == cat -%}{%- assign sc = b.settings.subcategory | default: '' | strip -%}{%- if sc == subt -%}{%- render 'p2p-bonus-card', b: b -%}{%- endif -%}{%- endif -%}{%- endfor -%}
-                            </div>
+        {%- comment -%} Category tree (baked items + theme-editor blocks together): category → (optional) sub-category → cards. {%- endcomment -%}
+        {%- assign cat_order = 'POD,Digital Products,Digital Content Inspirations,Music,Printed Products,Misc.' | split: ',' -%}
+        <div class="osx-bonustree" data-bonustree>
+          {%- for cat in cat_order -%}
+            {%- assign cat_count = 0 -%}
+            {%- assign sub_list = '' -%}
+            {%- for b in bonus_blocks -%}{%- assign bcat = b.settings.category | default: 'Misc.' -%}{%- if bcat == cat -%}{%- assign cat_count = cat_count | plus: 1 -%}{%- assign sc = b.settings.subcategory | default: '' | strip -%}{%- unless sc == blank -%}{%- assign probe = '~~' | append: sc | append: '~~' -%}{%- unless sub_list contains probe -%}{%- assign sub_list = sub_list | append: probe -%}{%- endunless -%}{%- endunless -%}{%- endif -%}{%- endfor -%}
+            {%- for bo in os_bonus_items -%}{%- assign bf = bo | split: '^' -%}{%- assign bcat = bf[5] | default: 'Misc.' | strip -%}{%- if bcat == cat -%}{%- assign cat_count = cat_count | plus: 1 -%}{%- assign sc = bf[6] | default: '' | strip -%}{%- unless sc == blank -%}{%- assign probe = '~~' | append: sc | append: '~~' -%}{%- unless sub_list contains probe -%}{%- assign sub_list = sub_list | append: probe -%}{%- endunless -%}{%- endunless -%}{%- endif -%}{%- endfor -%}
+            {%- if cat_count > 0 -%}
+              <div class="osx-bacc">
+                <button type="button" class="osx-bacc-head" data-bacc aria-expanded="false"><i class="osx-bacc-chev" aria-hidden="true">▸</i><span class="osx-bacc-title">{{ cat }}</span><span class="osx-bacc-count">{{ cat_count }}</span></button>
+                <div class="osx-bacc-body" hidden>
+                  {%- comment -%} direct items (no sub-category) {%- endcomment -%}
+                  {%- assign direct_count = 0 -%}
+                  {%- for b in bonus_blocks -%}{%- assign bcat = b.settings.category | default: 'Misc.' -%}{%- if bcat == cat -%}{%- assign sc = b.settings.subcategory | default: '' | strip -%}{%- if sc == blank -%}{%- assign direct_count = direct_count | plus: 1 -%}{%- endif -%}{%- endif -%}{%- endfor -%}
+                  {%- for bo in os_bonus_items -%}{%- assign bf = bo | split: '^' -%}{%- assign bcat = bf[5] | default: 'Misc.' | strip -%}{%- if bcat == cat -%}{%- assign sc = bf[6] | default: '' | strip -%}{%- if sc == blank -%}{%- assign direct_count = direct_count | plus: 1 -%}{%- endif -%}{%- endif -%}{%- endfor -%}
+                  {%- if direct_count > 0 -%}
+                    <div class="osx-bonusgrid">
+                      {%- for b in bonus_blocks -%}{%- assign bcat = b.settings.category | default: 'Misc.' -%}{%- if bcat == cat -%}{%- assign sc = b.settings.subcategory | default: '' | strip -%}{%- if sc == blank -%}{%- render 'p2p-bonus-card', b: b -%}{%- endif -%}{%- endif -%}{%- endfor -%}
+                      {%- for bo in os_bonus_items -%}{%- assign bf = bo | split: '^' -%}{%- assign bcat = bf[5] | default: 'Misc.' | strip -%}{%- if bcat == cat -%}{%- assign sc = bf[6] | default: '' | strip -%}{%- if sc == blank -%}{%- assign bthumb = '' -%}{%- if bf[4] != blank -%}{%- assign bthumb = bf[4] | asset_url -%}{%- endif -%}{%- render 'p2p-bonus-card', title: bf[0], desc: bf[1], url: bf[2], type: bf[3], thumb_url: bthumb -%}{%- endif -%}{%- endif -%}{%- endfor -%}
+                    </div>
+                  {%- endif -%}
+                  {%- comment -%} sub-category accordions {%- endcomment -%}
+                  {%- assign subs = sub_list | split: '~~' -%}
+                  {%- for sub in subs -%}
+                    {%- assign subt = sub | strip -%}
+                    {%- unless subt == blank -%}
+                      {%- assign sub_count = 0 -%}
+                      {%- for b in bonus_blocks -%}{%- assign bcat = b.settings.category | default: 'Misc.' -%}{%- if bcat == cat -%}{%- assign sc = b.settings.subcategory | default: '' | strip -%}{%- if sc == subt -%}{%- assign sub_count = sub_count | plus: 1 -%}{%- endif -%}{%- endif -%}{%- endfor -%}
+                      {%- for bo in os_bonus_items -%}{%- assign bf = bo | split: '^' -%}{%- assign bcat = bf[5] | default: 'Misc.' | strip -%}{%- if bcat == cat -%}{%- assign sc = bf[6] | default: '' | strip -%}{%- if sc == subt -%}{%- assign sub_count = sub_count | plus: 1 -%}{%- endif -%}{%- endif -%}{%- endfor -%}
+                      <div class="osx-bacc osx-bacc--sub">
+                        <button type="button" class="osx-bacc-head" data-bacc aria-expanded="false"><i class="osx-bacc-chev" aria-hidden="true">▸</i><span class="osx-bacc-title">{{ subt }}</span><span class="osx-bacc-count">{{ sub_count }}</span></button>
+                        <div class="osx-bacc-body" hidden>
+                          <div class="osx-bonusgrid">
+                            {%- for b in bonus_blocks -%}{%- assign bcat = b.settings.category | default: 'Misc.' -%}{%- if bcat == cat -%}{%- assign sc = b.settings.subcategory | default: '' | strip -%}{%- if sc == subt -%}{%- render 'p2p-bonus-card', b: b -%}{%- endif -%}{%- endif -%}{%- endfor -%}
+                            {%- for bo in os_bonus_items -%}{%- assign bf = bo | split: '^' -%}{%- assign bcat = bf[5] | default: 'Misc.' | strip -%}{%- if bcat == cat -%}{%- assign sc = bf[6] | default: '' | strip -%}{%- if sc == subt -%}{%- assign bthumb = '' -%}{%- if bf[4] != blank -%}{%- assign bthumb = bf[4] | asset_url -%}{%- endif -%}{%- render 'p2p-bonus-card', title: bf[0], desc: bf[1], url: bf[2], type: bf[3], thumb_url: bthumb -%}{%- endif -%}{%- endif -%}{%- endfor -%}
                           </div>
                         </div>
-                      {%- endunless -%}
-                    {%- endfor -%}
-                  </div>
+                      </div>
+                    {%- endunless -%}
+                  {%- endfor -%}
                 </div>
-              {%- endif -%}
-            {%- endfor -%}
-          </div>
-        {%- endif -%}
+              </div>
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
       {%- else -%}
         <div class="osx-bonus-empty">
           <div class="osx-bonus-empty-ic">🎁</div>

@@ -1,15 +1,23 @@
 {%- comment -%}
-  Renders one Bonus Resources download card. Pass a bonus block as `b`.
+  Renders one Bonus Resources download card. Two modes:
+   • Theme-editor block: pass the block as `b`.
+   • Baked item: pass title / desc / url / type / thumb_url (already resolved) directly.
   Used by sections/p2p-os.liquid (Bonus Resources accordion tree).
 {%- endcomment -%}
-<a class="osx-bonuscard" href="{{ b.settings.file_url | default: '#' }}" download target="_blank" rel="noopener" {{ b.shopify_attributes }}>
-  {%- if b.settings.thumb != blank -%}
-    <span class="osx-bonus-thumb"><img src="{{ b.settings.thumb | image_url: width: 600 }}" alt="{{ b.settings.title | escape }}" loading="lazy"></span>
+{%- assign c_url = url | default: b.settings.file_url | default: '#' -%}
+{%- assign c_type = type | default: b.settings.badge | default: 'PDF' -%}
+{%- assign c_title = title | default: b.settings.title | default: 'Free download' -%}
+{%- assign c_desc = desc | default: b.settings.desc -%}
+{%- assign c_thumb = thumb_url -%}
+{%- if c_thumb == blank and b.settings.thumb != blank -%}{%- assign c_thumb = b.settings.thumb | image_url: width: 600 -%}{%- endif -%}
+<a class="osx-bonuscard" href="{{ c_url }}" download target="_blank" rel="noopener" {{ b.shopify_attributes }}>
+  {%- if c_thumb != blank -%}
+    <span class="osx-bonus-thumb"><img src="{{ c_thumb }}" alt="{{ c_title | escape }}" loading="lazy"></span>
   {%- else -%}
     <span class="osx-bonus-thumb osx-bonus-thumb--ic">📄</span>
   {%- endif -%}
-  <span class="osx-bonus-type">{{ b.settings.badge | default: 'PDF' }}</span>
-  <b>{{ b.settings.title | default: 'Free download' }}</b>
-  {%- if b.settings.desc != blank -%}<span class="osx-bonus-desc">{{ b.settings.desc }}</span>{%- endif -%}
+  <span class="osx-bonus-type">{{ c_type }}</span>
+  <b>{{ c_title }}</b>
+  {%- if c_desc != blank -%}<span class="osx-bonus-desc">{{ c_desc }}</span>{%- endif -%}
   <span class="osx-bonus-dl">Download <i>↓</i></span>
 </a>
