@@ -892,7 +892,7 @@
       var when = dt <= 0 ? 'now' : dt < 3600000 ? 'in ' + Math.round(dt / 60000) + ' min' : dt < 86400000 ? 'in ' + Math.round(dt / 3600000) + ' hr' : 'in ' + Math.round(dt / 86400000) + ' days';
       return '<div class="osx-bell-item unread osx-bell-rem"><div class="osx-bell-line">' + ic + ' <b>' + esc(n.title) + '</b></div><div class="osx-bell-snip">' + esc(n.label) + ' · starts ' + when + '</div></div>';
     }
-    var verb = n.type === 'comment' ? 'commented on your post' : (n.rtype === 'party' ? 'celebrated your post 🎉' : n.rtype === 'thumb' ? 'gave your post a 👍' : 'loved your post ❤');
+    var verb = n.type === 'follow' ? 'shared a new post' : n.type === 'comment' ? 'commented on your post' : (n.rtype === 'party' ? 'celebrated your post 🎉' : n.rtype === 'thumb' ? 'gave your post a 👍' : 'loved your post ❤');
     return '<div class="osx-bell-item' + (n.read ? '' : ' unread') + (n.postId ? ' osx-bell-click' : '') + '"' + (n.postId ? ' data-openpost="' + esc(n.postId) + '"' : '') + '><div class="osx-bell-line"><b>' + esc(n.name || 'Someone') + '</b> ' + verb + '</div>' +
       (n.snippet ? '<div class="osx-bell-snip">“' + esc(n.snippet) + '”</div>' : '') +
       '<span class="osx-bell-time">' + ago(n.ts) + ' ago</span></div>';

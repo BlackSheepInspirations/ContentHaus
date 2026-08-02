@@ -252,7 +252,8 @@
       if (prob) { showStatus(prob, true); nameEl.focus(); return; }
     }
     f.save.disabled = true; showStatus('Saving…', false);
-    publish(collect(f.hidden ? f.hidden.checked : false)).then(function (res) {
+    var payload = collect(f.hidden ? f.hidden.checked : false); payload.explicit = true;
+    publish(payload).then(function (res) {
       f.save.disabled = false;
       if (res && res.error === 'name_taken') { showStatus('That name is already taken — try another.', true); return; }
       if (res && res.error === 'name_blocked') { showStatus('That name isn’t allowed — please choose another.', true); return; }
@@ -268,6 +269,8 @@
   function loadMembers() {
     fetch(MEMBERS, { credentials: 'same-origin' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
       if (j && j.guest) { if (grid) grid.innerHTML = '<div class="osx-cw-empty">Log in to see members.</div>'; return; }
+      // merge the server's follow list so favorites persist across devices
+      if (j && j.following && j.following.length) { try { var loc2 = follows(), merged = loc2.slice(); j.following.forEach(function (n) { if (merged.indexOf(n) < 0) merged.push(n); }); localStorage.setItem('p2p_follows', JSON.stringify(merged)); } catch (e) {} }
       members = (j && j.members) || []; renderDirectory();
       if (window.L) refreshAllMaps();   // re-pin any live maps (community modal + member board)
     }).catch(function () { if (grid) grid.innerHTML = '<div class="osx-cw-empty">Couldn\'t load members.</div>'; });

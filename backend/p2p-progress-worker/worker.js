@@ -61,6 +61,8 @@ const WELCOME_LINES = [
   'Welcome, {name}! Post your first win the moment you get one. We\'ll celebrate loud.',
   '{name}, you made it. Take a breath, look around, and say hello. 🐑🖤'
 ];
+// Display-name safety: reserved words + a compact profanity/slur blocklist (client pre-checks; this is authoritative).
+const NAME_BLOCK = /(f+u+c+k|sh[i1\*]t|b[i1]tch|c[u\*]nt|n[i1]gg|f[a4]gg|whore|\bslut\b|\brape\b|nazi|retard|\bcum\b|pussy|a[s\$]{2}hole|jizz|\bp2p ?team\b|\badmin\b|moderator|official)/i;
 const FRANK_POSTS = [
   'Did you know? Your first offer only needs ONE buyer to prove it works. Aim for one, not a hundred.',
   'Did you know? Most people quit right before the compounding kicks in. Post 30 times before you judge the results.',
@@ -174,9 +176,33 @@ export default {
           const info = await customerInfo(env, customerId);
           const geo = geoFrom(request);
           const prev = await kv.get('member:' + customerId, 'json');
+          const explicit = !!body.explicit;                 // true = pressed Save (strict); false = background auto-save
+          const prevLow = prev && prev.name ? String(prev.name).trim().toLowerCase() : '';
+          // resolve a safe, unique display name
+          let name = (String(body.name || info.firstName || 'Member').slice(0, 40).trim()) || 'Member';
+          if (NAME_BLOCK.test(name)) {
+            if (explicit) return json({ error: 'name_blocked' }, 200);
+            name = (String(info.firstName || 'Member').slice(0, 40).trim()) || 'Member';
+            if (NAME_BLOCK.test(name)) name = 'Member';
+          }
+          let low = name.toLowerCase();
+          if (low !== prevLow) {
+            const holder = await kv.get('name:' + low, { type: 'text' });
+            if (holder && holder !== customerId) {
+              if (explicit) return json({ error: 'name_taken' }, 200);
+              // background save: auto-disambiguate so onboarding never stalls
+              let n = 2, base = name;
+              for (;;) {
+                const cand = (base + ' ' + n).slice(0, 40);
+                const h = await kv.get('name:' + cand.toLowerCase(), { type: 'text' });
+                if (!h || h === customerId) { name = cand; low = cand.toLowerCase(); break; }
+                if (++n > 60) { name = (base + ' ' + customerId.slice(-4)).slice(0, 40); low = name.toLowerCase(); break; }
+              }
+            }
+          }
           const rec = {
             id: customerId,
-            name: String(body.name || info.firstName || 'Member').slice(0, 40),
+            name: name,
             tier: String(body.tier || '').slice(0, 40),
             tierNum: Number(body.tierNum) || 0,
             points: Number(body.points) || 0,
@@ -194,13 +220,16 @@ export default {
             ts: Date.now()
           };
           await kv.put('member:' + customerId, JSON.stringify(rec));
+          // maintain the name -> owner index that enforces uniqueness
+          if (prevLow && prevLow !== low) await kv.delete('name:' + prevLow).catch(() => {});
+          if (low) await kv.put('name:' + low, customerId).catch(() => {});
           // brand-new member (no prior card) → drop a one-time welcome post on the wall
           if (!prev && rec.name && rec.name !== 'Member') {
             const line = WELCOME_LINES[Math.floor(Math.random() * WELCOME_LINES.length)].replace('{name}', rec.name);
             const wid = Date.now() + '-welcome-' + customerId;
             await kv.put('post:' + wid, JSON.stringify({ id: wid, author: 'house-welcome', name: 'P2P', text: line, kind: 'post', category: 'intro', house: true, ts: Date.now() })).catch(() => {});
           }
-          return json({ ok: true });
+          return json({ ok: true, name: rec.name });
         }
         return json({ error: 'method' }, 405);
       }
@@ -214,7 +243,29 @@ export default {
           const r = await kv.get(k.name, 'json');
           if (r && !r.hidden && !r.adminHidden) members.push(r);
         }
-        return json({ ok: true, members });
+        const following = (await kv.get('following:' + customerId, 'json')) || [];
+        return json({ ok: true, members, following });
+      }
+
+      /* ---------- follow / favorite a member (powers alerts on their new posts) ---------- */
+      if (seg === 'follow') {
+        if (!kv) return json({ ok: true });
+        if (request.method !== 'POST') return json({ error: 'method' }, 405);
+        const body = await request.json().catch(() => null);
+        const target = String((body && body.name) || '').trim().toLowerCase();
+        if (!target) return json({ error: 'no_name' }, 400);
+        const on = !!(body && body.on);
+        const fkey = 'followers:' + target;                  // who follows this member (for alerts)
+        let arr = (await kv.get(fkey, 'json')) || [];
+        const i = arr.indexOf(customerId);
+        if (on && i === -1) arr.push(customerId); else if (!on && i > -1) arr.splice(i, 1);
+        await kv.put(fkey, JSON.stringify(arr.slice(0, 5000)));
+        const mkey = 'following:' + customerId;               // this member's own following list (cross-device sort)
+        let mine = (await kv.get(mkey, 'json')) || [];
+        const j = mine.indexOf(target);
+        if (on && j === -1) mine.push(target); else if (!on && j > -1) mine.splice(j, 1);
+        await kv.put(mkey, JSON.stringify(mine.slice(0, 2000)));
+        return json({ ok: true });
       }
 
       /* ---------- community wall ---------- */
@@ -264,9 +315,18 @@ export default {
           const id = Date.now() + '-' + customerId;
           const kind = ((body && body.kind) === 'win') ? 'win' : 'post';   // wins get their own board
           const category = catFor((body && body.category) || 'general', kind, isAdmin(env, customerId));
-          const post = { id, author: customerId, name: String((body && body.name) || info.firstName || 'Member').slice(0, 40), title: String((body && body.title) || '').slice(0, 120), text: text.slice(0, 1000), kind: kind, category: category, attachments: sanitizeAttachments(body && body.attachments), streak: Number(body && body.streak) || 0, ts: Date.now() };
+          const meRec = await kv.get('member:' + customerId, 'json');
+          const myName = (meRec && meRec.name) || String((body && body.name) || info.firstName || 'Member').slice(0, 40);
+          const post = { id, author: customerId, name: myName, title: String((body && body.title) || '').slice(0, 120), text: text.slice(0, 1000), kind: kind, category: category, attachments: sanitizeAttachments(body && body.attachments), streak: Number(body && body.streak) || 0, ts: Date.now() };
           await kv.put('post:' + id, JSON.stringify(post));   // live immediately (unmoderated)
           await alertAdmin(env, post).catch(() => {});         // optional email ping to you
+          // alert anyone following this member that they shared something new
+          try {
+            const followers = (await kv.get('followers:' + String(myName).trim().toLowerCase(), 'json')) || [];
+            for (const fid of followers) {
+              if (fid && fid !== customerId) await pushNotif(kv, fid, { type: 'follow', name: myName, postId: id, snippet: text.slice(0, 80), ts: Date.now() });
+            }
+          } catch (e) {}
           const engage = await awardEngage(env, customerId, 'post');
           return json({ ok: true, engage: engage });
         }
