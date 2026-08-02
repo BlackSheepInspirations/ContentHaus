@@ -27,7 +27,7 @@
       '<span class="osx-menu-pop osx-tmpl-pop" hidden>' + ROADMAP_TEMPLATES.map(function (t) { return '<button type="button" data-tmpl-add="' + esc(scope) + '|' + t[0] + '">' + t[1] + ' <i>· ' + t[2].length + '</i></button>'; }).join('') + '</span></span>';
   }
 
-  var view = 'dash', active = 'week', expanded = {}, selected = {}, livesTab = 'lives', calMY = null, pendIdea = null;
+  var view = 'dash', active = 'week', expanded = {}, selected = {}, livesTab = 'lives', calMY = null, pendIdea = null, selDay = null;
 
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function p2(n) { return (n < 10 ? '0' : '') + n; }
@@ -64,6 +64,9 @@
   var data; try { data = JSON.parse(localStorage.getItem(KEY)) || null; } catch (e) { data = null; }
   if (!data) data = {}; if (!data.done) data.done = []; if (!data.goals) data.goals = []; if (!data.lives) data.lives = []; if (!data.posts) data.posts = []; if (!data.snaps) data.snaps = []; if (!data.ideas) data.ideas = []; if (!data.schedIdeas) data.schedIdeas = [];
   if (!data.products) data.products = []; if (!data.ctype) data.ctype = 'both'; if (!data.raft) data.raft = { cycles: [] }; if (!data.northstar) data.northstar = {}; if (!data.templates) data.templates = [];
+  if (!data.events) data.events = [];   // generic reminders + events added from the calendar (typed items live in lives/posts/goals/products)
+  // One-time migration: fold the old disconnected calendar store into data.events so it reaches the radar + day panel.
+  try { var _mig = JSON.parse(localStorage.getItem('p2p_my_events') || '[]') || []; if (_mig.length) { _mig.forEach(function (e) { if (e && e.iso) data.events.push({ id: e.id || uid(), kind: 'event', title: e.title || 'Event', iso: e.iso, hour: e.hour || '', min: e.min || '', ampm: e.ampm || '', tz: e.tz || '', time: e.time || '' }); }); localStorage.removeItem('p2p_my_events'); try { localStorage.setItem(KEY, JSON.stringify(data)); } catch (e2) {} } } catch (e) {}
   data.lives.forEach(function (l) { if (!l.archived && !l.deleted && l.date && daysTo(l.date) < 0) l.archived = true; });   // past-dated lives auto-archive
   var milestoneBaseline = (data.milestones === undefined); if (!data.milestones) data.milestones = {};
   TFS.forEach(function (t) {
@@ -116,6 +119,7 @@
     else if (kind === 'post') { view = 'posts'; expanded['P' + id] = true; }
     else if (kind === 'product') { view = 'products'; expanded['PR' + id] = true; }
     else if (kind === 'goal') { view = 'goals'; expanded[id] = true; }
+    else if (kind === 'event') { var ev = (data.events || []).filter(function (e) { return e.id === id; })[0]; view = 'dash'; render(); if (ev) setTimeout(function () { selectDay(ev.iso); var pnl = host.querySelector('[data-dc-daypanel]'); if (pnl) pnl.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 60); return; }
     else { view = 'dash'; }
     render();
     setTimeout(function () { var el = host.querySelector('[data-ltoggle="' + id + '"],[data-ptoggle="' + id + '"],[data-prtoggle="' + id + '"],[data-toggle="' + id + '"]'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 40);
@@ -155,7 +159,7 @@
   }
   var CAL_MO = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
   function calP2(n) { return (n < 10 ? '0' : '') + n; }
-  function calMarks() { var mk = {}; function add(iso, k) { if (!iso) return; (mk[iso] = mk[iso] || {})[k] = true; } data.lives.forEach(function (l) { if (!l.deleted && l.date) add(l.date, 'live'); }); data.posts.forEach(function (p) { if (!p.deleted && p.date) add(p.date, 'post'); }); data.goals.forEach(function (g) { if (g.w) add(g.w, 'goal'); }); data.products.forEach(function (p) { if (p.launch) add(p.launch, 'prod'); }); (window.P2P_EVENTS || []).forEach(function (e) { if (e.iso) add(e.iso, 'event'); }); try { (JSON.parse(localStorage.getItem('p2p_my_events') || '[]') || []).forEach(function (e) { if (e.iso) add(e.iso, 'plan'); }); } catch (e) {} return mk; }
+  function calMarks() { var mk = {}; function add(iso, k) { if (!iso) return; (mk[iso] = mk[iso] || {})[k] = true; } data.lives.forEach(function (l) { if (!l.deleted && l.date) add(l.date, 'live'); }); data.posts.forEach(function (p) { if (!p.deleted && p.date) add(p.date, 'post'); }); data.goals.forEach(function (g) { if (g.w) add(g.w, 'goal'); }); data.products.forEach(function (p) { if (p.launch) add(p.launch, 'prod'); }); (window.P2P_EVENTS || []).forEach(function (e) { if (e.iso) add(e.iso, 'event'); }); (data.events || []).forEach(function (e) { if (e.iso) add(e.iso, e.kind === 'reminder' ? 'plan' : 'event'); }); return mk; }
   function calVisits() { try { return JSON.parse(localStorage.getItem('p2p_visit_days') || '{}') || {}; } catch (e) { return {}; } }
   // The "Ideas to schedule" tray pulls straight from your Journal → Ideas (localStorage p2p_ideas),
   // minus any you've already scheduled (data.schedIdeas).
@@ -183,17 +187,20 @@
     for (var d = 1; d <= days; d++) {
       var iso = calMY.y + '-' + calP2(calMY.m + 1) + '-' + calP2(d), m = mk[iso] || {};
       var marks = (visits[iso] ? '<i class="osx-dc-star">★</i>' : '') + (m.live ? '<i class="osx-dc-dot live"></i>' : '') + (m.post ? '<i class="osx-dc-dot post"></i>' : '') + (m.goal ? '<i class="osx-dc-dot goal"></i>' : '') + (m.prod ? '<i class="osx-dc-dot prod"></i>' : '') + (m.event ? '<i class="osx-dc-dot event"></i>' : '') + (m.plan ? '<i class="osx-dc-dot plan"></i>' : '');
-      cells += '<button type="button" class="osx-dc-d' + (iso === tISO ? ' today' : '') + (pendIdea ? ' picking' : '') + '" data-dcday="' + iso + '">' + d + (marks ? '<span class="osx-dc-marks">' + marks + '</span>' : '') + '</button>';
+      cells += '<button type="button" class="osx-dc-d' + (iso === tISO ? ' today' : '') + (iso === selDay ? ' sel' : '') + (pendIdea ? ' picking' : '') + '" data-dcday="' + iso + '">' + d + (marks ? '<span class="osx-dc-marks">' + marks + '</span>' : '') + '</button>';
     }
     return '<div class="osx-dc"><div class="osx-dc-head"><button type="button" data-dcprev aria-label="Previous month">‹</button><b>' + CAL_MO[calMY.m] + ' ' + calMY.y + '</b><button type="button" data-dcnext aria-label="Next month">›</button></div>' +
       '<div class="osx-dc-dows"><span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span></div><div class="osx-dc-grid">' + cells + '</div>' +
-      '<div class="osx-dc-legend"><span class="l-live">live</span><span class="l-post">posted</span><span class="l-goal">goal</span><span class="l-prod">launch</span><span class="l-event">event</span><span class="l-plan">plan</span><span class="l-star">★ showed up</span></div></div>';
+      '<div class="osx-dc-legend"><span class="l-live">live</span><span class="l-post">posted</span><span class="l-goal">goal</span><span class="l-prod">launch</span><span class="l-event">event</span><span class="l-plan">reminder</span><span class="l-star">★ showed up</span></div>' +
+      '<div class="osx-dcp-panel" data-dc-daypanel>' + dayPanelHTML(selDay) + '</div></div>';
   }
   function radarHTML() {
     var items = [];
     data.lives.forEach(function (l) { if (!l.deleted && !l.done && l.date) { var dd = daysTo(l.date); if (dd !== null && dd >= 0 && dd <= 14) items.push({ d: dd, kind: 'live', id: l.id, ic: '📡', t: l.title || l.topic || 'Live' }); } });
     data.goals.forEach(function (g) { if (g.w) { var dd = daysTo(g.w); if (dd !== null && dd >= 0 && dd <= 14) items.push({ d: dd, kind: 'goal', id: g.id, ic: '🎯', t: g.title || 'Goal launch' }); } });
     data.products.forEach(function (p) { if (p.launch) { var dd = daysTo(p.launch); if (dd !== null && dd >= 0 && dd <= 14) items.push({ d: dd, kind: 'product', id: p.id, ic: '📦', t: p.name || 'Product launch' }); } });
+    data.posts.forEach(function (p) { if (!p.deleted && !p.done && p.date) { var dd = daysTo(p.date); if (dd !== null && dd >= 0 && dd <= 14) items.push({ d: dd, kind: 'post', id: p.id, ic: '📝', t: p.topic || p.platform || 'Post' }); } });
+    (data.events || []).forEach(function (e) { if (e.iso) { var dd = daysTo(e.iso); if (dd !== null && dd >= 0 && dd <= 14) items.push({ d: dd, kind: 'event', id: e.id, ic: e.kind === 'reminder' ? '⏰' : '📅', t: e.title || (e.kind === 'reminder' ? 'Reminder' : 'Event') }); } });
     items.sort(function (a, b) { return a.d - b.d; });
     var body = items.length ? '<div class="osx-radar-scroll' + (items.length > 5 ? ' more' : '') + '">' + items.map(function (it) { return '<button type="button" class="osx-radar-i" data-openitem="' + it.kind + '|' + esc(it.id) + '"><span class="osx-radar-ic">' + it.ic + '</span><span class="osx-radar-t">' + esc(it.t) + '</span><span class="osx-radar-d' + (it.d <= 1 ? ' soon' : '') + '">' + (it.d === 0 ? 'Today' : it.d === 1 ? '1 day' : it.d + ' days') + '</span></button>'; }).join('') + '</div>' : '<div class="osx-pl-empty" style="padding:6px 0;">Nothing in the next 2 weeks — plan a live or set a launch date.</div>';
     return '<div class="osx-pl-sech" style="margin-top:0;">🔔 Coming up · next 14 days' + (items.length > 5 ? ' <span style="text-transform:none;letter-spacing:0;color:var(--muted);font-weight:600;">· scroll for ' + (items.length - 5) + ' more</span>' : '') + '</div>' + body;
@@ -214,6 +221,75 @@
     pop.querySelector('.osx-cele-x').addEventListener('click', close);
     var lb = pop.querySelector('[data-dclog]');
     if (lb) lb.addEventListener('click', function () { data.posts.unshift({ id: uid(), topic: 'Posted', platform: 'TikTok', type: 'Video', date: iso, time: '', hook: '', cta: '', length: '', music: '', done: true, s: {} }); save(); close(); render(); });
+  }
+  // ---- Under-calendar day panel (replaces the pop-up) ----
+  function prettyDate(iso) { var p = iso.split('-'), dt = new Date(+p[0], +p[1] - 1, +p[2]); return dt.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' }); }
+  function evTimeStr(e) { if (e.time) return e.time; if (e.hour) return e.hour + ':' + (e.min || '00') + ' ' + (e.ampm || '') + (e.tz ? ' ' + e.tz : ''); return ''; }
+  function dcItemRow(kind, id, ic, title, meta, badge, removable) {
+    var det = (kind === 'live' || kind === 'post' || kind === 'goal' || kind === 'product') ? '<button type="button" class="osx-dcp-det" data-dcp-open="' + kind + '|' + esc(id) + '">details →</button>' : '';
+    var rm = removable ? '<button type="button" class="osx-dcp-rm" data-dcp-rm="' + esc(id) + '" aria-label="Remove">✕</button>' : '';
+    return '<div class="osx-dcp-i"><span class="osx-dcp-ic">' + ic + '</span><span class="osx-dcp-t"><b>' + esc(title) + '</b>' + (meta ? '<span class="osx-dcp-m">' + esc(meta) + '</span>' : '') + '</span>' + (badge ? '<span class="osx-dcp-bdg">' + esc(badge) + '</span>' : '') + det + rm + '</div>';
+  }
+  function dayPanelHTML(iso) {
+    if (!iso) return '<div class="osx-dcp-hint">Tap a day to see what’s on it — or add something new.</div>';
+    var rows = [];
+    data.lives.filter(function (l) { return !l.deleted && l.date === iso; }).forEach(function (l) { rows.push(dcItemRow('live', l.id, '📡', l.title || l.topic || 'Live', liveTimeStr(l), l.canceled ? 'canceled' : (l.done ? 'done' : ''))); });
+    data.posts.filter(function (pp) { return !pp.deleted && pp.date === iso; }).forEach(function (pp) { rows.push(dcItemRow('post', pp.id, '📝', pp.topic || pp.platform || 'Post', pp.time || '', pp.done ? 'posted' : '')); });
+    data.goals.filter(function (g) { return g.w === iso; }).forEach(function (g) { rows.push(dcItemRow('goal', g.id, '🎯', g.title || 'Goal', 'launch target', '')); });
+    data.products.filter(function (x) { return x.launch === iso; }).forEach(function (x) { rows.push(dcItemRow('product', x.id, '📦', x.name || 'Product', 'launch', x.status === 'live' ? 'live' : '')); });
+    (window.P2P_EVENTS || []).filter(function (e) { return e.iso === iso; }).forEach(function (e) { rows.push(dcItemRow('hausevent', '', '⭐', e.title || 'Haus event', e.time || '', 'P2P')); });
+    (data.events || []).filter(function (e) { return e.iso === iso; }).forEach(function (e) { rows.push(dcItemRow('event', e.id, e.kind === 'reminder' ? '⏰' : '📅', e.title || (e.kind === 'reminder' ? 'Reminder' : 'Event'), evTimeStr(e), '', true)); });
+    var head = '<div class="osx-dcp-head"><b>' + esc(prettyDate(iso)) + '</b><button type="button" class="osx-dcp-add" data-dcp-add="' + iso + '">＋ Add event</button></div>';
+    var body = rows.length ? '<div class="osx-dcp-list">' + rows.join('') + '</div>' : '<div class="osx-dcp-empty">Nothing scheduled this day yet.</div>';
+    return head + body;
+  }
+  function wireDayPanel(panel) {
+    if (!panel) return;
+    panel.querySelectorAll('[data-dcp-open]').forEach(function (b) { b.addEventListener('click', function () { var pr = b.getAttribute('data-dcp-open').split('|'); openItemDetail(pr[0], pr[1]); }); });
+    panel.querySelectorAll('[data-dcp-rm]').forEach(function (b) { b.addEventListener('click', function () { var id = b.getAttribute('data-dcp-rm'); data.events = (data.events || []).filter(function (e) { return e.id !== id; }); save(); render(); }); });
+    var add = panel.querySelector('[data-dcp-add]'); if (add) add.addEventListener('click', function () { openAddEvent(add.getAttribute('data-dcp-add'), panel); });
+  }
+  function selectDay(iso) {
+    selDay = iso;
+    var panel = host.querySelector('[data-dc-daypanel]');
+    if (panel) { panel.innerHTML = dayPanelHTML(iso); wireDayPanel(panel); }
+    host.querySelectorAll('[data-dcday]').forEach(function (b) { b.classList.toggle('sel', b.getAttribute('data-dcday') === iso); });
+  }
+  var DCA_PLATS = ['Instagram', 'Facebook', 'TikTok', 'YouTube', 'Etsy', 'Shopify', 'Amazon', 'My Shop', 'Email', 'Other'];
+  function openAddEvent(iso, panel) {
+    var hrs = ''; for (var h = 1; h <= 12; h++) hrs += '<option>' + h + '</option>';
+    var mins = ''; for (var mm = 0; mm < 60; mm += 5) { var v = (mm < 10 ? '0' : '') + mm; mins += '<option>' + v + '</option>'; }
+    panel.innerHTML = '<div class="osx-dca">' +
+      '<div class="osx-dcp-head"><b>Add to ' + esc(prettyDate(iso)) + '</b><button type="button" class="osx-dca-cancel" aria-label="Cancel">✕</button></div>' +
+      '<label class="osx-dca-f"><span>What is it?</span><select data-dca-type><option value="live">📡 Live</option><option value="product">📦 Product launch</option><option value="post">📝 Post</option><option value="goal">🎯 Goal</option><option value="reminder">⏰ Reminder</option><option value="event">📅 Event</option></select></label>' +
+      '<label class="osx-dca-f" data-dca-platwrap><span>Platform</span><select data-dca-plat>' + DCA_PLATS.map(function (p) { return '<option>' + p + '</option>'; }).join('') + '</select></label>' +
+      '<label class="osx-dca-f"><span>Title</span><input type="text" data-dca-title maxlength="120" placeholder="Give it a name"></label>' +
+      '<div class="osx-dca-f"><span>Time</span><div class="osx-dca-time"><select data-dca-hr>' + hrs + '</select><span class="osx-dca-colon">:</span><select data-dca-min>' + mins + '</select><select data-dca-ampm><option>AM</option><option selected>PM</option></select><select data-dca-tz><option>ET</option><option>CT</option><option>MT</option><option>PT</option></select></div></div>' +
+      '<div class="osx-dca-row"><button type="button" class="osx-dca-save" data-dca-save>Add</button><button type="button" class="osx-dca-open" data-dca-open>Add &amp; open details →</button></div>' +
+      '</div>';
+    var typeSel = panel.querySelector('[data-dca-type]'), platWrap = panel.querySelector('[data-dca-platwrap]');
+    function syncPlat() { platWrap.style.display = (typeSel.value === 'live' || typeSel.value === 'post') ? '' : 'none'; }
+    typeSel.addEventListener('change', syncPlat); syncPlat();
+    panel.querySelector('.osx-dca-cancel').addEventListener('click', function () { selectDay(iso); });
+    panel.querySelector('[data-dca-save]').addEventListener('click', function () { addTypedItem(iso, panel, false); });
+    panel.querySelector('[data-dca-open]').addEventListener('click', function () { addTypedItem(iso, panel, true); });
+    var ti = panel.querySelector('[data-dca-title]'); if (ti) setTimeout(function () { ti.focus(); }, 30);
+  }
+  function addTypedItem(iso, panel, open) {
+    var type = panel.querySelector('[data-dca-type]').value;
+    var title = (panel.querySelector('[data-dca-title]').value || '').trim();
+    var plat = panel.querySelector('[data-dca-plat]').value;
+    var hr = panel.querySelector('[data-dca-hr]').value, min = panel.querySelector('[data-dca-min]').value, ampm = panel.querySelector('[data-dca-ampm]').value, tz = panel.querySelector('[data-dca-tz]').value;
+    var timeStr = hr + ':' + min + ' ' + ampm + ' ' + tz;
+    var newId = uid(), kind = type;
+    if (type === 'live') { data.lives.unshift({ id: newId, title: title || 'Live', platforms: [plat], otherPlat: '', date: iso, hour: hr, min: min, ampm: ampm, tz: tz, pitch: '', pitchOther: '', roomPromise: '', hook: '', script: '', prompts: ['', '', '', '', ''], goals: {}, results: {}, reflect: {}, win: '', blocker: '', action: '', mood: '', moodNote: '', done: false }); expanded['L' + newId] = true; }
+    else if (type === 'product') { data.products.unshift({ id: newId, name: title || 'Product', type: '', price: '', status: 'idea', launch: iso, sold: '', revenue: '' }); expanded['PR' + newId] = true; }
+    else if (type === 'post') { data.posts.unshift({ id: newId, topic: title || 'Post', platform: plat, type: 'Video', date: iso, time: timeStr, hook: '', cta: '', length: '', music: '', done: false, s: {} }); expanded['P' + newId] = true; }
+    else if (type === 'goal') { data.goals.unshift({ id: newId, title: title || 'Goal', stage: 'grows', g: '', r: '', o: '', s: '', w: iso, roadmap: [], oDone: false, oWeek: '' }); expanded[newId] = true; }
+    else { data.events.push({ id: newId, kind: type, title: title || (type === 'reminder' ? 'Reminder' : 'Event'), iso: iso, hour: hr, min: min, ampm: ampm, tz: tz, time: timeStr }); }
+    save();
+    if (open && (kind === 'live' || kind === 'post' || kind === 'goal' || kind === 'product')) { openItemDetail(kind, newId); }
+    else { render(); }
   }
   function scheduleIdea(ideaId, iso) {
     var i = journalIdeas().filter(function (x) { return x.id === ideaId; })[0];
@@ -894,7 +970,8 @@
     // dashboard calendar
     var dcp = host.querySelector('[data-dcprev]'); if (dcp) dcp.addEventListener('click', function () { calMY.m--; if (calMY.m < 0) { calMY.m = 11; calMY.y--; } render(); });
     var dcn = host.querySelector('[data-dcnext]'); if (dcn) dcn.addEventListener('click', function () { calMY.m++; if (calMY.m > 11) { calMY.m = 0; calMY.y++; } render(); });
-    host.querySelectorAll('[data-dcday]').forEach(function (b) { b.addEventListener('click', function () { var iso = b.getAttribute('data-dcday'); if (pendIdea) { var id = pendIdea; pendIdea = null; scheduleIdea(id, iso); } else { openDcDay(iso); } }); });
+    host.querySelectorAll('[data-dcday]').forEach(function (b) { b.addEventListener('click', function () { var iso = b.getAttribute('data-dcday'); if (pendIdea) { var id = pendIdea; pendIdea = null; scheduleIdea(id, iso); } else { selectDay(iso); } }); });
+    wireDayPanel(host.querySelector('[data-dc-daypanel]'));
     var dragId = null;
     host.querySelectorAll('[data-ideachip]').forEach(function (c) {
       c.addEventListener('click', function () { var id = c.getAttribute('data-ideachip'); pendIdea = pendIdea === id ? null : id; render(); });

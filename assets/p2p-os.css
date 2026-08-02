@@ -975,6 +975,40 @@
   #p2pos .osx-dc-legend span::before{content:"●";margin-right:3px;}
   #p2pos .osx-dc-legend .l-live::before{color:#e0457b;} #p2pos .osx-dc-legend .l-post::before{color:#5ac8fa;} #p2pos .osx-dc-legend .l-goal::before{color:var(--gold-bright);} #p2pos .osx-dc-legend .l-prod::before{color:#27ae6e;} #p2pos .osx-dc-legend .l-event::before{color:#39c5c0;} #p2pos .osx-dc-legend .l-plan::before{color:#8f6fd6;}
   #p2pos .osx-dc-legend .l-star::before{content:"";margin:0;}
+  #p2pos .osx-dc-d.sel{border-color:var(--gold-bright);background:rgba(216,180,90,.16);color:var(--gold-bright);font-weight:800;}
+  /* under-calendar day panel */
+  #p2pos .osx-dcp-panel{margin-top:12px;border-top:1px solid var(--stroke);padding-top:12px;}
+  #p2pos .osx-dcp-hint{font:500 12px/1.5 system-ui;color:var(--muted);padding:2px 2px 4px;}
+  #p2pos .osx-dcp-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:9px;}
+  #p2pos .osx-dcp-head b{font:800 13px/1.2 system-ui;color:var(--text);}
+  #p2pos .osx-dcp-add{flex:none;border:1px solid var(--gstroke);background:rgba(216,180,90,.12);color:var(--gold-bright);border-radius:999px;padding:6px 12px;font:800 11.5px/1 system-ui;cursor:pointer;transition:.14s;}
+  #p2pos .osx-dcp-add:hover{background:rgba(216,180,90,.2);}
+  #p2pos .osx-dcp-list{display:flex;flex-direction:column;gap:7px;}
+  #p2pos .osx-dcp-i{display:flex;align-items:center;gap:9px;border:1px solid var(--stroke);border-radius:10px;background:rgba(255,255,255,.03);padding:9px 11px;font:500 12.5px/1.35 system-ui;color:#dbe7e2;margin-bottom:0;}
+  #p2pos .osx-dcp-ic{flex:none;font-size:15px;}
+  #p2pos .osx-dcp-t{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;}
+  #p2pos .osx-dcp-t b{font:700 12.5px/1.25 system-ui;color:var(--text);}
+  #p2pos .osx-dcp-m{font:500 10.5px/1.3 system-ui;color:var(--muted);}
+  #p2pos .osx-dcp-bdg{flex:none;font:800 8.5px/1 system-ui;letter-spacing:.04em;text-transform:uppercase;color:var(--gold-bright);background:rgba(216,180,90,.14);border-radius:999px;padding:4px 7px;}
+  #p2pos .osx-dcp-det{flex:none;border:0;background:none;color:var(--gold-bright);font:700 11px/1 system-ui;cursor:pointer;padding:0;white-space:nowrap;}
+  #p2pos .osx-dcp-det:hover{text-decoration:underline;}
+  #p2pos .osx-dcp-rm{flex:none;border:0;background:none;color:var(--muted);font:700 13px/1 system-ui;cursor:pointer;padding:0 2px;}
+  #p2pos .osx-dcp-rm:hover{color:#e0457b;}
+  #p2pos .osx-dcp-empty{font:500 12px/1.5 system-ui;color:var(--muted);padding:2px;}
+  /* add-event form (inline in the panel) */
+  #p2pos .osx-dca{display:flex;flex-direction:column;gap:10px;}
+  #p2pos .osx-dca-f{display:flex;flex-direction:column;gap:4px;font:700 10.5px/1 system-ui;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;}
+  #p2pos .osx-dca-f select,#p2pos .osx-dca-f input{background:rgba(9,17,24,.5);border:1px solid var(--stroke);border-radius:9px;padding:9px 11px;color:var(--text);font:400 13px/1.3 system-ui;text-transform:none;letter-spacing:0;}
+  #p2pos .osx-dca-f select:focus,#p2pos .osx-dca-f input:focus{outline:none;border-color:var(--gstroke);}
+  #p2pos .osx-dca-time{display:flex;align-items:center;gap:5px;}
+  #p2pos .osx-dca-time select{flex:1;min-width:0;padding:9px 6px;text-align:center;}
+  #p2pos .osx-dca-colon{color:var(--muted);font-weight:800;}
+  #p2pos .osx-dca-cancel{border:0;background:none;color:var(--muted);font:700 14px/1 system-ui;cursor:pointer;}
+  #p2pos .osx-dca-cancel:hover{color:var(--text);}
+  #p2pos .osx-dca-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:2px;}
+  #p2pos .osx-dca-save{flex:none;border:1px solid var(--gstroke);background:var(--aurora);background-size:300% 100%;color:#0a1410;border-radius:10px;padding:10px 16px;font:800 12.5px/1 system-ui;cursor:pointer;}
+  #p2pos .osx-dca-open{flex:1;min-width:0;border:1px solid var(--stroke);background:rgba(255,255,255,.04);color:var(--text);border-radius:10px;padding:10px 12px;font:700 12px/1 system-ui;cursor:pointer;}
+  #p2pos .osx-dca-open:hover{border-color:var(--gstroke);}
   #p2pos .osx-idtray-row{display:flex;flex-wrap:wrap;gap:6px;max-height:140px;overflow-y:auto;}
   #p2pos .osx-idchip{cursor:grab;border:1px solid var(--stroke);background:rgba(255,255,255,.03);color:var(--text);border-radius:999px;padding:6px 11px;font:600 11.5px/1.25 system-ui;max-width:100%;text-align:left;white-space:normal;}
   #p2pos .osx-idchip:hover{border-color:var(--gstroke);}
