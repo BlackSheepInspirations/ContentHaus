@@ -1390,8 +1390,8 @@
   #p2pos .osx-map-cta i{font-style:normal;}
 
   /* Rewards Map — overlay */
-  #p2pos .osx-map{position:fixed;inset:0;z-index:1120;display:grid;place-items:center;padding:20px;background:rgba(3,7,10,.72);backdrop-filter:blur(4px);}
-  #p2pos .osx-map[hidden]{display:none;}
+  #p2pos .osx-rwm{position:fixed;inset:0;z-index:1120;display:grid;place-items:center;padding:20px;background:rgba(3,7,10,.72);backdrop-filter:blur(4px);}
+  #p2pos .osx-rwm[hidden]{display:none;}
   #p2pos .osx-map-card{position:relative;width:min(920px,100%);max-height:88vh;display:flex;flex-direction:column;border:1px solid var(--gstroke);border-radius:22px;overflow:hidden;
     background:linear-gradient(180deg,#0e1b22,#0a141a);box-shadow:0 30px 90px rgba(0,0,0,.6);}
   #p2pos .osx-map-x{position:absolute;top:14px;right:14px;z-index:2;width:36px;height:36px;border-radius:50%;cursor:pointer;
