@@ -1033,9 +1033,11 @@
   }
   function line(n) {
     if (n.reminder) {
-      var ic = n.kind === 'live' ? '📡' : n.kind === 'goal' ? '🎯' : '📦', dt = n.startAt - Date.now();
+      var ic = n.kind === 'live' ? '📡' : n.kind === 'goal' ? '🎯' : n.kind === 'post' ? '📝' : n.kind === 'event' ? '📅' : '📦', dt = n.startAt - Date.now();
       var when = dt <= 0 ? 'now' : dt < 3600000 ? 'in ' + Math.round(dt / 60000) + ' min' : dt < 86400000 ? 'in ' + Math.round(dt / 3600000) + ' hr' : 'in ' + Math.round(dt / 86400000) + ' days';
-      return '<div class="osx-bell-item unread osx-bell-rem"><div class="osx-bell-line">' + ic + ' <b>' + esc(n.title) + '</b></div><div class="osx-bell-snip">' + esc(n.label) + ' · starts ' + when + '</div></div>';
+      var snip = n.post ? esc(n.label) : (esc(n.label) + ' · starts ' + when);
+      var canOpen = n.kind && n.id;
+      return '<div class="osx-bell-item unread osx-bell-rem' + (canOpen ? ' osx-bell-click' : '') + '"' + (canOpen ? ' data-openitem="' + esc(n.kind) + '|' + esc(n.id) + '"' : '') + '><div class="osx-bell-line">' + ic + ' <b>' + esc(n.title) + '</b></div><div class="osx-bell-snip">' + snip + '</div></div>';
     }
     var verb = n.type === 'follow' ? 'shared a new post' : n.type === 'comment' ? 'commented on your post' : (n.rtype === 'party' ? 'celebrated your post 🎉' : n.rtype === 'thumb' ? 'gave your post a 👍' : 'loved your post ❤');
     return '<div class="osx-bell-item' + (n.read ? '' : ' unread') + (n.postId ? ' osx-bell-click' : '') + '"' + (n.postId ? ' data-openpost="' + esc(n.postId) + '"' : '') + '><div class="osx-bell-line"><b>' + esc(n.name || 'Someone') + '</b> ' + verb + '</div>' +
@@ -1049,7 +1051,7 @@
   function renderMenu() {
     if (!menu) return;
     var due = dueReminders(), localNids = {}; due.forEach(function (r) { localNids[r.nid] = 1; });
-    var rem = due.map(function (r) { return { reminder: true, kind: r.kind, title: r.title, label: r.label, startAt: r.startAt }; });
+    var rem = due.map(function (r) { return { reminder: true, kind: r.kind, id: r.id, title: r.title, label: r.label, startAt: r.startAt, post: r.post }; });
     var all = rem.concat(serverNotifs(localNids));
     menu.innerHTML = '<div class="osx-bell-h">Notifications</div>' + (all.length ? all.map(line).join('') : '<div class="osx-bell-empty">Nothing yet — reminders you set and reactions to your posts show up here. 🔔</div>');
     menu.querySelectorAll('[data-openpost]').forEach(function (it) {
@@ -1057,6 +1059,14 @@
         var pid = it.getAttribute('data-openpost'); menu.hidden = true;
         if (window.P2P_OPEN_POST && window.P2P_OPEN_POST(pid)) return;
         window.location.href = '/pages/p2p-os?post=' + encodeURIComponent(pid);
+      });
+    });
+    // reminder / check-in notifications → jump to that item in My Success to close it out
+    menu.querySelectorAll('[data-openitem]').forEach(function (it) {
+      it.addEventListener('click', function () {
+        var pr = it.getAttribute('data-openitem').split('|'); menu.hidden = true;
+        if (window.P2P_PLANNER_OPEN) { if (window.P2P_OSX_GO) window.P2P_OSX_GO('success'); setTimeout(function () { window.P2P_PLANNER_OPEN(pr[0], pr[1]); }, 90); }
+        else { window.location.href = '/pages/p2p-os?v=success&open=' + encodeURIComponent(pr[0] + '|' + pr[1]); }
       });
     });
   }

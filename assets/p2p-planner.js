@@ -356,6 +356,18 @@
       '<div class="osx-ci-cancelbox" data-ci-cancelbox hidden><textarea class="osx-pl-ta" data-ci-reason rows="2" maxlength="220" placeholder="What got in the way? (optional — helps you spot patterns)"></textarea><div class="osx-ci-cancelrow"><button type="button" class="osx-ci-back" data-ci-back>Back</button><button type="button" class="osx-ci-confirm" data-ci-confirm="' + esc(l.id) + '">Mark canceled</button></div></div>' +
       more + '</div>';
   }
+  function afterCheckinPop(id) {
+    var pop = document.createElement('div'); pop.className = 'osx-cal-pop'; root.appendChild(pop);
+    pop.innerHTML = '<div class="osx-cal-pop-in osx-ns"><button class="osx-cal-pop-x" type="button" aria-label="Close">✕</button>' +
+      '<div class="osx-cele-emoji">🎉</div><div class="osx-ns-h">Logged — nice work!</div>' +
+      '<p class="osx-ci-popsub">Now capture how it went — viewers, wins, what to tweak — so your growth data actually reflects it.</p>' +
+      '<div class="osx-ci-popbtns"><button class="osx-ci-poplater" type="button">Maybe later</button><button class="osx-ci-popgo" type="button" data-cip-go="' + esc(id) + '">Update my live →</button></div></div>';
+    function close() { pop.remove(); }
+    pop.addEventListener('click', function (e) { if (e.target === pop) close(); });
+    pop.querySelector('.osx-cal-pop-x').addEventListener('click', close);
+    pop.querySelector('.osx-ci-poplater').addEventListener('click', close);
+    pop.querySelector('[data-cip-go]').addEventListener('click', function () { close(); openItemDetail('live', id); });
+  }
   function dashHTML() {
     var ct = data.ctype || 'both';
     var sel = '<div class="osx-ct-sel"><span class="osx-ct-l">I create:</span>' + [['content', '📱 Content'], ['product', '📦 Products'], ['both', '✨ Both']].map(function (c) { return '<button class="osx-ct-b' + (ct === c[0] ? ' on' : '') + '" data-ctype="' + c[0] + '">' + c[1] + '</button>'; }).join('') + '</div>';
@@ -525,7 +537,7 @@
     data.products.forEach(function (p) { if (p.status !== 'live') push('product', p); });
     // Post-event nudge → the OS bell: a live whose time passed but isn't logged. Stamped "now" so
     // it lands in the bell's recent-window; nid per-live so it shows once, and drops once resolved.
-    try { pendingCheckins().forEach(function (l) { var n = Date.now(); out.push({ nid: 'checkin-' + l.id, id: l.id, kind: 'live', title: l.title || l.topic || 'your live', label: '— don’t forget to log how it went to track your growth', fireAt: n, startAt: n }); }); } catch (e) {}
+    try { pendingCheckins().forEach(function (l) { var n = Date.now(); out.push({ nid: 'checkin-' + l.id, id: l.id, kind: 'live', title: l.title || l.topic || 'your live', label: '— don’t forget to log how it went to track your growth', fireAt: n, startAt: n, post: true }); }); } catch (e) {}
     try { localStorage.setItem('p2p_reminders', JSON.stringify(out)); } catch (e) {}
     clearTimeout(_remSync); _remSync = setTimeout(function () { try { fetch('/apps/p2p/reminders', { method: 'POST', headers: { 'content-type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify({ items: out }) }).catch(function () {}); } catch (e) {} }, 1500);
   }
@@ -1002,7 +1014,7 @@
     // creator mode + info
     host.querySelectorAll('[data-ctype]').forEach(function (b) { b.addEventListener('click', function () { data.ctype = b.getAttribute('data-ctype'); save(); render(); }); });
     // post-event check-in
-    host.querySelectorAll('[data-ci-yes]').forEach(function (b) { b.addEventListener('click', function () { var l = liveObj(b.getAttribute('data-ci-yes')); if (l) { l.done = true; l.completedAt = Date.now(); save(); render(); } }); });
+    host.querySelectorAll('[data-ci-yes]').forEach(function (b) { b.addEventListener('click', function () { var id = b.getAttribute('data-ci-yes'), l = liveObj(id); if (l) { l.done = true; l.completedAt = Date.now(); save(); render(); afterCheckinPop(id); } }); });
     host.querySelectorAll('[data-ci-no]').forEach(function (b) { b.addEventListener('click', function () { var box = host.querySelector('[data-ci-cancelbox]'), btns = host.querySelector('[data-ci-btns]'); if (box) box.hidden = false; if (btns) btns.style.display = 'none'; var r = host.querySelector('[data-ci-reason]'); if (r) r.focus(); }); });
     host.querySelectorAll('[data-ci-back]').forEach(function (b) { b.addEventListener('click', function () { render(); }); });
     host.querySelectorAll('[data-ci-confirm]').forEach(function (b) { b.addEventListener('click', function () { var l = liveObj(b.getAttribute('data-ci-confirm')); if (l) { l.canceled = true; var r = host.querySelector('[data-ci-reason]'); l.cancelReason = r ? r.value.trim() : ''; save(); render(); } }); });
@@ -1045,4 +1057,8 @@
 
   render();
   try { rebuildReminders(); } catch (e) {}
+  // Let the OS bell open a specific planner item (live/post/goal/product) to close it out.
+  window.P2P_PLANNER_OPEN = function (kind, id) { try { openItemDetail(kind, id); } catch (e) {} };
+  // Deep-link from the bell on a Haus page: /pages/p2p-os?v=success&open=kind|id
+  try { var _om = /[?&]open=([^&]+)/.exec(window.location.search); if (_om) { var _p = decodeURIComponent(_om[1]).split('|'); if (_p[0] && _p[1]) setTimeout(function () { openItemDetail(_p[0], _p[1]); }, 150); } } catch (e) {}
 })();
