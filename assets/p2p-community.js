@@ -944,8 +944,10 @@
   });
 })();
 
-/* ---- Personal calendar: events (window.P2P_EVENTS) + your own plans + "showed up" stars.
-       One instance per [data-cal]; window.P2P_CAL_REFRESH re-renders them all. ---- */
+/* ---- Community / Members calendar: HAUS EVENTS ONLY (window.P2P_EVENTS) — the same for
+       everyone. Event days turn white with a gold "P2P" pill; a click opens a full detail
+       card (image, time, join, add-to-calendar). One instance per [data-cal];
+       window.P2P_CAL_REFRESH re-renders them all. ---- */
 (function () {
   var root = document.getElementById('p2pos'); if (!root) return;
   var MO = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -953,36 +955,37 @@
   var byDay = {}; events.forEach(function (e) { (byDay[e.iso] = byDay[e.iso] || []).push(e); });
   function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
   function pad(n){ return (n<10?'0':'')+n; }
-  function getVisits(){ try { return JSON.parse(localStorage.getItem('p2p_visit_days') || '{}') || {}; } catch(e){ return {}; } }
-  function getMine(){ try { return JSON.parse(localStorage.getItem('p2p_my_events') || '[]') || []; } catch(e){ return []; } }
-  function setMine(a){ try { localStorage.setItem('p2p_my_events', JSON.stringify(a)); } catch(e){} }
-  function mineByDay(){ var m = {}; getMine().forEach(function(e){ if(e.iso) (m[e.iso]=m[e.iso]||[]).push(e); }); return m; }
   function prettyDate(iso){ var p = iso.split('-'); var dt = new Date(+p[0], +p[1]-1, +p[2]); return dt.toLocaleDateString(undefined,{ weekday:'long', month:'long', day:'numeric', year:'numeric' }); }
+  function gcalLink(e){
+    var d = (e.iso||'').replace(/-/g,''); if(d.length!==8) return '';
+    var nx = new Date(+e.iso.slice(0,4), +e.iso.slice(5,7)-1, +e.iso.slice(8,10)+1);
+    var end = nx.getFullYear()+pad(nx.getMonth()+1)+pad(nx.getDate());
+    var details = (e.desc?e.desc+'\n\n':'') + (e.time?'Time: '+e.time+'\n':'') + (e.join?'Join: '+e.join:'');
+    return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text='+encodeURIComponent(e.title||'P2P Event')+'&dates='+d+'/'+end+'&details='+encodeURIComponent(details);
+  }
 
   var renders = [];
   window.P2P_CAL_REFRESH = function(){ renders.forEach(function(fn){ try{ fn(); }catch(e){} }); };
 
   function openDay(iso) {
-    var g = byDay[iso] || [], mine = mineByDay()[iso] || [], visited = !!getVisits()[iso];
+    var g = byDay[iso] || []; if (!g.length) return;
     var pop = document.createElement('div'); pop.className = 'osx-cal-pop';
-    var gHtml = g.map(function(e){ return '<div class="osx-day-ev"><div class="osx-day-evt"><b>'+esc(e.title||'Live session')+'</b>'+(e.time?' · '+esc(e.time):'')+(e.live?' <em class="osx-event-live">● LIVE</em>':'')+'</div>'+(e.desc?'<div class="osx-day-desc">'+esc(e.desc)+'</div>':'')+(e.join?'<a class="osx-day-join" href="'+esc(e.join)+'" target="_blank" rel="noopener">Join the call →</a>':'')+'</div>'; }).join('');
-    var mHtml = mine.map(function(e){ return '<div class="osx-day-ev mine"><div class="osx-day-evt"><b>'+esc(e.title)+'</b>'+(e.time?' · '+esc(e.time):'')+'<button class="osx-day-del" data-del="'+esc(e.id)+'" title="Remove" aria-label="Remove">✕</button></div>'+(e.note?'<div class="osx-day-desc">'+esc(e.note)+'</div>':'')+'</div>'; }).join('');
-    pop.innerHTML = '<div class="osx-cal-pop-in osx-day-pop"><button class="osx-cal-pop-x" type="button" aria-label="Close">✕</button>' +
-      '<div class="osx-day-h">'+esc(prettyDate(iso))+(visited?' <span class="osx-day-visit">★ you showed up</span>':'')+'</div>' +
-      (g.length ? '<div class="osx-day-sec">📅 Events</div>'+gHtml : '') +
-      '<div class="osx-day-sec">✎ Your plans</div>' + (mHtml || '<div class="osx-day-empty">Nothing planned yet — add one below.</div>') +
-      '<div class="osx-day-add"><input class="osx-day-title" placeholder="e.g. Launch day, Go live 7pm, Batch content" maxlength="90"><input class="osx-day-time" placeholder="Time (optional)" maxlength="24"><button class="osx-day-save" type="button">Add plan</button></div>' +
-      '</div>';
+    var cards = g.map(function(e){
+      var img = e.image ? '<div class="osx-evd-img"><img src="'+esc(e.image)+'" alt="" loading="lazy"></div>' : '';
+      var gcal = gcalLink(e);
+      return '<div class="osx-evd">' + img +
+        '<div class="osx-evd-body"><span class="osx-evd-pill">P2P Event'+(e.live?' · <em>● LIVE</em>':'')+'</span>' +
+        '<h3 class="osx-evd-title">'+esc(e.title||'Live session')+'</h3>' +
+        '<div class="osx-evd-when"><span class="osx-evd-cal-ic">📅</span> '+esc(prettyDate(iso))+(e.time?' · '+esc(e.time):'')+'</div>' +
+        (e.desc?'<p class="osx-evd-desc">'+esc(e.desc)+'</p>':'') +
+        '<div class="osx-evd-btns">'+(e.join?'<a class="osx-evd-join" href="'+esc(e.join)+'" target="_blank" rel="noopener">🎥 '+esc(e.joinLabel||'Join the call')+' →</a>':'')+(gcal?'<a class="osx-evd-addcal" href="'+gcal+'" target="_blank" rel="noopener">＋ Add to calendar</a>':'')+'</div>' +
+        '</div></div>';
+    }).join('');
+    pop.innerHTML = '<div class="osx-cal-pop-in osx-evd-pop"><button class="osx-cal-pop-x" type="button" aria-label="Close">✕</button>' + cards + '</div>';
     document.body.appendChild(pop);
     function close() { pop.remove(); }
-    function reopen() { close(); openDay(iso); }
     pop.addEventListener('click', function (ev) { if (ev.target === pop) close(); });
     pop.querySelector('.osx-cal-pop-x').addEventListener('click', close);
-    pop.querySelectorAll('[data-del]').forEach(function (b) { b.addEventListener('click', function () { var id = b.getAttribute('data-del'); setMine(getMine().filter(function (e) { return String(e.id) !== id; })); window.P2P_CAL_REFRESH(); reopen(); }); });
-    var save = pop.querySelector('.osx-day-save'), ti = pop.querySelector('.osx-day-title'), tm = pop.querySelector('.osx-day-time');
-    function add() { var title = (ti.value||'').trim(); if(!title) return; var arr = getMine(); arr.push({ id: String(Date.now())+Math.random().toString(36).slice(2,6), iso: iso, title: title.slice(0,90), time: (tm.value||'').trim().slice(0,24) }); setMine(arr); window.P2P_CAL_REFRESH(); reopen(); }
-    save.addEventListener('click', add);
-    ti.addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); add(); } });
   }
 
   function initCal(cal) {
@@ -992,15 +995,13 @@
     var now = new Date(), curY = now.getFullYear(), curM = now.getMonth();
     function render() {
       title.textContent = MO[curM] + ' ' + curY;
-      var visits = getVisits(), mine = mineByDay();
       var first = new Date(curY, curM, 1).getDay(), days = new Date(curY, curM + 1, 0).getDate();
       var t = new Date(), tISO = t.getFullYear()+'-'+pad(t.getMonth()+1)+'-'+pad(t.getDate()), html = '';
       for (var i = 0; i < first; i++) html += '<span class="osx-cal-d empty"></span>';
       for (var d = 1; d <= days; d++) {
         var iso = curY + '-' + pad(curM+1) + '-' + pad(d);
-        var hasG = byDay[iso], hasM = mine[iso], vis = visits[iso];
-        var marks = (vis?'<i class="osx-cal-star">★</i>':'') + (hasG?'<i class="osx-cal-dot g"></i>':'') + (hasM?'<i class="osx-cal-dot m"></i>':'');
-        html += '<button type="button" class="osx-cal-d' + (hasG||hasM?' ev':'') + (iso===tISO?' today':'') + '" data-cal-day="'+iso+'">' + d + (marks?'<span class="osx-cal-marks">'+marks+'</span>':'') + '</button>';
+        var ev = byDay[iso];
+        html += '<button type="button" class="osx-cal-d' + (ev?' ev-haus':'') + (iso===tISO?' today':'') + '" data-cal-day="'+iso+'">' + d + (ev?'<span class="osx-cal-p2p">P2P</span>':'') + '</button>';
       }
       grid.innerHTML = html;
       grid.querySelectorAll('[data-cal-day]').forEach(function (b) { b.addEventListener('click', function () { openDay(b.getAttribute('data-cal-day')); }); });

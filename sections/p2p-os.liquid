@@ -688,6 +688,7 @@
               <div class="osx-cal-head"><button type="button" class="osx-cal-nav" data-cal-prev aria-label="Previous month">‹</button><b data-cal-title>—</b><button type="button" class="osx-cal-nav" data-cal-next aria-label="Next month">›</button></div>
               <div class="osx-cal-dows"><span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span></div>
               <div class="osx-cal-grid" data-cal-grid></div>
+              <div class="osx-cal-legend"><span class="osx-cal-legend-pill">P2P</span> P2P Event — tap the day for details</div>
             </div>
           </div>
           <div data-map-holder>
@@ -797,6 +798,7 @@
               <div class="osx-cal-head"><button type="button" class="osx-cal-nav" data-cal-prev aria-label="Previous month">‹</button><b data-cal-title>—</b><button type="button" class="osx-cal-nav" data-cal-next aria-label="Next month">›</button></div>
               <div class="osx-cal-dows"><span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span></div>
               <div class="osx-cal-grid" data-cal-grid></div>
+              <div class="osx-cal-legend"><span class="osx-cal-legend-pill">P2P</span> P2P Event — tap the day for details</div>
             </div>
           </div>
           <div class="osx-lower-card">
@@ -1211,7 +1213,7 @@ window.P2P_MEMBER_NAME = {{ customer.first_name | default: '' | json }};
 window.P2P_LEAFLET_JS = {{ 'leaflet.js' | asset_url | json }};
 window.P2P_LEAFLET_CSS = {{ 'leaflet.css' | asset_url | json }};
 {%- assign ev_blocks = section.blocks | where: 'type', 'event' -%}
-window.P2P_EVENTS = [{%- for b in ev_blocks -%}{"iso":{{ b.settings.iso_date | default: '' | json }},"date":{{ b.settings.date | default: '' | json }},"time":{{ b.settings.time | default: '' | json }},"title":{{ b.settings.title | default: 'Live class' | json }},"desc":{{ b.settings.desc | default: '' | json }},"join":{{ b.settings.join_url | default: '' | json }},"live":{{ b.settings.live_now | default: false | json }}}{%- unless forloop.last -%},{%- endunless -%}{%- endfor -%}];
+window.P2P_EVENTS = [{%- for b in ev_blocks -%}{"iso":{{ b.settings.iso_date | default: '' | json }},"date":{{ b.settings.date | default: '' | json }},"time":{{ b.settings.time | default: '' | json }},"title":{{ b.settings.title | default: 'Live class' | json }},"desc":{{ b.settings.desc | default: '' | json }},"join":{{ b.settings.join_url | default: '' | json }},"joinLabel":{{ b.settings.join_label | default: 'Join the call' | json }},"image":{% if b.settings.image %}{{ b.settings.image | image_url: width: 900 | json }}{% else %}""{% endif %},"live":{{ b.settings.live_now | default: false | json }}}{%- unless forloop.last -%},{%- endunless -%}{%- endfor -%}];
 </script>
 {{ 'leaflet.css' | asset_url | stylesheet_tag }}
 <script src="{{ 'p2p-community.js' | asset_url }}" defer="defer"></script>
@@ -1896,6 +1898,7 @@ window.P2P_EVENTS = [{%- for b in ev_blocks -%}{"iso":{{ b.settings.iso_date | d
         { "type": "text", "id": "time", "label": "Time", "info": "e.g. 6:00 PM ET" },
         { "type": "text", "id": "title", "label": "Title", "default": "Live class" },
         { "type": "textarea", "id": "desc", "label": "What it is" },
+        { "type": "image_picker", "id": "image", "label": "Cover image (optional)", "info": "Shows at the top of the event's detail card when a member taps the day." },
         { "type": "url", "id": "join_url", "label": "Join link (Zoom / Google Meet)", "info": "Paste the meeting link members click to join." },
         { "type": "text", "id": "join_label", "label": "Join button label", "default": "Join the call" },
         { "type": "checkbox", "id": "live_now", "label": "Show as LIVE now", "default": false }

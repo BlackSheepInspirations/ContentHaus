@@ -553,6 +553,28 @@
   #p2pos .osx-cal-d.ev{border-color:var(--gstroke);background:rgba(216,180,90,.12);color:var(--text);cursor:pointer;}
   #p2pos .osx-cal-d.ev::before{content:"";position:absolute;left:6px;bottom:6px;width:6px;height:6px;border-radius:50%;background:var(--gold-bright);}
   #p2pos .osx-cal-d.ev:hover{background:rgba(216,180,90,.22);}
+  /* Haus-event day: white square + gold "P2P" pill so it's unmistakable */
+  #p2pos .osx-cal-d[disabled]{cursor:default;opacity:.5;}
+  #p2pos .osx-cal-d.ev-haus{background:#f4f1ea;color:#0a1410;border-color:#f4c534;box-shadow:0 0 0 1px #f4c534,0 0 14px rgba(244,197,52,.35);cursor:pointer;font-weight:800;align-items:flex-start;justify-content:flex-end;padding-bottom:16px;}
+  #p2pos .osx-cal-d.ev-haus:hover{background:#fffdf7;}
+  #p2pos .osx-cal-p2p{position:absolute;left:50%;bottom:3px;transform:translateX(-50%);font:800 7.5px/1 system-ui;letter-spacing:.04em;color:#3a2c05;background:linear-gradient(100deg,#f4e2a6,#c9a24a);border-radius:999px;padding:2px 5px;}
+  #p2pos .osx-cal-legend{margin-top:10px;display:flex;align-items:center;gap:7px;font:600 10.5px/1.4 system-ui;color:var(--muted);}
+  #p2pos .osx-cal-legend-pill{font:800 8px/1 system-ui;letter-spacing:.04em;color:#3a2c05;background:linear-gradient(100deg,#f4e2a6,#c9a24a);border-radius:999px;padding:3px 6px;}
+  /* event detail card (Skool-style) */
+  .osx-cal-pop-in.osx-evd-pop{width:min(420px,100%);max-height:88vh;overflow-y:auto;background:#0e1c28;}
+  .osx-evd + .osx-evd{border-top:1px solid rgba(255,255,255,.08);}
+  .osx-evd-img{width:100%;aspect-ratio:16/9;background:#050b10;overflow:hidden;}
+  .osx-evd-img img{width:100%;height:100%;object-fit:cover;display:block;}
+  .osx-evd-body{padding:18px 20px 20px;}
+  .osx-evd-pill{display:inline-block;font:800 9.5px/1 system-ui;letter-spacing:.06em;text-transform:uppercase;color:#3a2c05;background:linear-gradient(100deg,#f4e2a6,#c9a24a);border-radius:999px;padding:5px 10px;margin-bottom:11px;}
+  .osx-evd-pill em{font-style:normal;color:#7a1020;}
+  .osx-evd-title{font:800 20px/1.2 Georgia,serif;color:#fff;margin:0 0 10px;}
+  .osx-evd-when{font:600 13px/1.4 system-ui;color:#c6d6d0;margin-bottom:10px;}
+  .osx-evd-desc{font:400 13.5px/1.6 system-ui;color:#b6c6c0;margin:0 0 16px;white-space:pre-wrap;}
+  .osx-evd-btns{display:flex;flex-direction:column;gap:9px;}
+  .osx-evd-join{display:block;text-align:center;text-decoration:none;background:linear-gradient(100deg,#4a63ff,#6b5bff);color:#fff;border-radius:11px;padding:13px;font:800 13.5px/1 system-ui;}
+  .osx-evd-addcal{display:block;text-align:center;text-decoration:none;border:1px solid rgba(255,255,255,.16);color:#c6d6d0;border-radius:11px;padding:11px;font:700 12.5px/1 system-ui;}
+  .osx-evd-addcal:hover{border-color:rgba(244,197,52,.5);color:#fff;}
   .osx-cal-pop{position:fixed;inset:0;z-index:2000;background:rgba(3,7,12,.72);display:flex;align-items:center;justify-content:center;padding:20px;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;}
   .osx-cal-pop-in{position:relative;width:min(360px,100%);border:1px solid rgba(216,180,90,.4);border-radius:16px;overflow:hidden;background:#0e1c28;color:#e7efeb;}
   .osx-cal-pop-x{position:absolute;top:10px;right:10px;z-index:2;border:0;background:rgba(0,0,0,.35);color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;font:700 13px/1 system-ui;}
