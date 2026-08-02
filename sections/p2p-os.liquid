@@ -602,6 +602,7 @@
             </div>
             <label class="osx-mb-field"><span>A short quote</span><input type="text" data-mb-quote maxlength="140" placeholder="Your words to live by (optional)"></label>
             <label class="osx-mb-field"><span>About me</span><textarea data-mb-about maxlength="320" rows="3" placeholder="A little about you (optional)"></textarea></label>
+            <div class="osx-mb-social-note">Just your <b>@handle</b> is enough — we’ll build the full link. A website like <b>yoursite.com</b> works too (no <i>www</i> or <i>https</i> needed).</div>
             <div class="osx-mb-socialgrid">
               <label class="osx-mb-field"><span>Website</span><input type="text" data-mb-social="website" placeholder="yoursite.com"></label>
               <label class="osx-mb-field"><span>Instagram</span><input type="text" data-mb-social="instagram" placeholder="@handle or link"></label>
@@ -2028,6 +2029,8 @@
   #p2pos .osx-mb-field{display:flex;flex-direction:column;gap:5px;font:700 12px/1 system-ui;color:var(--muted);}
   #p2pos .osx-mb-field input,#p2pos .osx-mb-field textarea{background:rgba(9,17,24,.5);border:1px solid var(--stroke);border-radius:10px;padding:10px 12px;color:var(--text);font:400 14px/1.5 system-ui;}
   #p2pos .osx-mb-field input:focus,#p2pos .osx-mb-field textarea:focus{outline:none;border-color:var(--gstroke);}
+  #p2pos .osx-mb-social-note{font:500 12px/1.5 system-ui;color:var(--muted);margin:2px 0 -2px;}
+  #p2pos .osx-mb-social-note b{color:var(--text);}
   #p2pos .osx-mb-socialgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
   #p2pos .osx-mb-optout{display:inline-flex;align-items:center;gap:8px;font:600 13px/1.3 system-ui;color:var(--muted);cursor:pointer;}
   #p2pos .osx-mb-saverow{display:flex;align-items:center;justify-content:flex-end;gap:12px;}
@@ -2084,7 +2087,7 @@
   #p2pos .osx-mbm-email:hover{border-color:var(--gstroke);}
   #p2pos .osx-mbm-email.revealed{color:var(--gold-bright);}
   #p2pos .osx-mb-hint{font:500 11px/1.4 system-ui;color:var(--muted);}
-  #p2pos .osx-extc{max-width:360px;width:100%;text-align:center;}
+  #p2pos .osx-extc{width:min(380px,92vw);max-width:none;text-align:center;padding:26px 24px;}
   #p2pos .osx-extc-h{font:800 16px/1.2 system-ui;color:var(--text);margin-bottom:8px;}
   #p2pos .osx-extc-b{font:500 13.5px/1.6 system-ui;color:var(--muted);margin:0 0 16px;}
   #p2pos .osx-extc-b b{color:var(--text);}

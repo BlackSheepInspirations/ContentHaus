@@ -683,10 +683,20 @@ function sanitizeUrl(u) {
   u = String(u || '').trim();
   return /^https?:\/\/[^\s]+$/i.test(u) ? u.slice(0, 400) : '';
 }
+// Accept a handle (@drea), a bare domain (yoursite.com), or a full link — always store a full https URL.
+function socialUrlKey(key, raw) {
+  raw = String(raw || '').trim(); if (!raw) return '';
+  if (/^https?:\/\//i.test(raw)) return raw.slice(0, 300);
+  raw = raw.replace(/^@+/, '').replace(/^\/+/, '');
+  if (!raw || /\s/.test(raw)) return '';
+  if (raw.indexOf('.') > -1) return ('https://' + raw).slice(0, 300);   // looks like a domain
+  const base = { website: 'https://', instagram: 'https://instagram.com/', facebook: 'https://facebook.com/', youtube: 'https://youtube.com/@', tiktok: 'https://tiktok.com/@', linkedin: 'https://linkedin.com/', x: 'https://x.com/' };
+  return ((base[key] || 'https://') + raw).slice(0, 300);
+}
 function sanitizeSocial(s) {
   const out = {}; if (!s || typeof s !== 'object') return out;
   ['website', 'instagram', 'facebook', 'youtube', 'x', 'linkedin', 'tiktok'].forEach(function (k) {
-    const v = sanitizeUrl(s[k]); if (v) out[k] = v;
+    const v = socialUrlKey(k, s[k]); if (v) out[k] = v;
   });
   return out;
 }
