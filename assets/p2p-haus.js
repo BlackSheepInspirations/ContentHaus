@@ -1947,9 +1947,20 @@ function clearAllData() {
   });
 
   Object.keys(appState.generatorSettings).forEach((generatorKey) => {
+    const definition = GENERATOR_DEFINITIONS[generatorKey];
+    // Persisted settings can carry a key for a generator that was later removed
+    // or renamed (the Growth Haus rebuild dropped a few). Without this guard,
+    // dereferencing .fields on the missing definition threw here and aborted
+    // clearAllData BEFORE it removed the saved project — so "New Project" would
+    // silently half-clear. Drop the stale key instead of exploding.
+    if (!definition || !definition.fields) {
+      delete appState.generatorSettings[generatorKey];
+      return;
+    }
+
     appState.generatorSettings[generatorKey] = {};
 
-    GENERATOR_DEFINITIONS[generatorKey].fields.forEach((field) => {
+    definition.fields.forEach((field) => {
       appState.generatorSettings[generatorKey][field.key] =
         field.defaultValue ?? "";
     });
