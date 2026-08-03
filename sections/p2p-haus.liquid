@@ -170,8 +170,13 @@
             </p>
           </div>
 
+          <div class="rooted-readiness" id="rootedReadiness">
+            <div class="rr-top"><span class="rr-label">&#128293; Launch readiness</span><span class="rr-count" data-rr-count>0 of 6 stages ready</span></div>
+            <div class="rr-bar"><i data-rr-fill style="width:0%;"></i></div>
+          </div>
+
           <div class="journey__trail">
-            <button class="jstop" type="button" data-jstop aria-expanded="false" aria-controls="jstopBody1">
+            <button class="jstop" type="button" data-jstop data-stage-station="reach" aria-expanded="false" aria-controls="jstopBody1">
               <span class="jstop__dot">R</span>
               <span class="jstop__title">Reach</span>
               <span class="jstop__time">Days 1&ndash;3</span>
@@ -184,11 +189,12 @@
                 <div class="jstop__acts">
                   <a class="jstop__act jstop__act--make" href="/pages/marketing-haus">&#128295; Make: Marketing Haus &middot; Social &amp; content &rarr;</a>
                   <a class="jstop__act jstop__act--log" href="/pages/p2p-os?v=success&amp;add=post">&#128204; Log a Post to My Success &rarr;</a>
+                  <button type="button" class="jstop__act jstop__act--done" data-rooted-stage="reach"><span class="jd-off">&#9711; Mark Reach done</span><span class="jd-on">&#9989; Reach done</span></button>
                 </div>
               </div>
             </div>
 
-            <button class="jstop" type="button" data-jstop aria-expanded="false" aria-controls="jstopBody2">
+            <button class="jstop" type="button" data-jstop data-stage-station="open" aria-expanded="false" aria-controls="jstopBody2">
               <span class="jstop__dot">O</span>
               <span class="jstop__title">Open</span>
               <span class="jstop__time">Day 4</span>
@@ -201,11 +207,12 @@
                 <div class="jstop__acts">
                   <a class="jstop__act jstop__act--make" href="#generatorLibraryTitle">&#128295; Make: Your Launch Announcement &mdash; below &rarr;</a>
                   <a class="jstop__act jstop__act--log" href="/pages/p2p-os?v=success&amp;add=post">&#128204; Log a Post to My Success &rarr;</a>
+                  <button type="button" class="jstop__act jstop__act--done" data-rooted-stage="open"><span class="jd-off">&#9711; Mark Open done</span><span class="jd-on">&#9989; Open done</span></button>
                 </div>
               </div>
             </div>
 
-            <button class="jstop" type="button" data-jstop aria-expanded="false" aria-controls="jstopBody3">
+            <button class="jstop" type="button" data-jstop data-stage-station="offer" aria-expanded="false" aria-controls="jstopBody3">
               <span class="jstop__dot">O</span>
               <span class="jstop__title">Offer</span>
               <span class="jstop__time">Days 5&ndash;7</span>
@@ -218,11 +225,12 @@
                 <div class="jstop__acts">
                   <a class="jstop__act jstop__act--make" href="/pages/marketing-haus">&#128295; Make: Marketing Haus &middot; Sales copy + video &rarr;</a>
                   <a class="jstop__act jstop__act--log" href="/pages/p2p-os?v=success&amp;add=goal">&#128204; Log a Goal to My Success &rarr;</a>
+                  <button type="button" class="jstop__act jstop__act--done" data-rooted-stage="offer"><span class="jd-off">&#9711; Mark Offer done</span><span class="jd-on">&#9989; Offer done</span></button>
                 </div>
               </div>
             </div>
 
-            <button class="jstop" type="button" data-jstop aria-expanded="false" aria-controls="jstopBody4">
+            <button class="jstop" type="button" data-jstop data-stage-station="trigger" aria-expanded="false" aria-controls="jstopBody4">
               <span class="jstop__dot">T</span>
               <span class="jstop__title">Trigger</span>
               <span class="jstop__time">Day 8 &middot; GO LIVE</span>
@@ -235,11 +243,12 @@
                 <div class="jstop__acts">
                   <a class="jstop__act jstop__act--make" href="/pages/marketing-haus">&#128295; Make: Marketing Haus &middot; Ad + Listing &rarr;</a>
                   <a class="jstop__act jstop__act--log" href="/pages/p2p-os?v=success&amp;add=product">&#128204; Log the Product Launch to My Success &rarr;</a>
+                  <button type="button" class="jstop__act jstop__act--done" data-rooted-stage="trigger"><span class="jd-off">&#9711; Mark Trigger done</span><span class="jd-on">&#9989; Trigger done</span></button>
                 </div>
               </div>
             </div>
 
-            <button class="jstop" type="button" data-jstop aria-expanded="false" aria-controls="jstopBody5">
+            <button class="jstop" type="button" data-jstop data-stage-station="escalate" aria-expanded="false" aria-controls="jstopBody5">
               <span class="jstop__dot">E</span>
               <span class="jstop__title">Escalate</span>
               <span class="jstop__time">Days 9&ndash;10</span>
@@ -252,11 +261,12 @@
                 <div class="jstop__acts">
                   <a class="jstop__act jstop__act--make" href="/pages/marketing-haus">&#128295; Make: Marketing Haus &middot; Email + Testimonials &rarr;</a>
                   <a class="jstop__act jstop__act--log" href="/pages/p2p-os?v=success&amp;add=post">&#128204; Log a Post to My Success &rarr;</a>
+                  <button type="button" class="jstop__act jstop__act--done" data-rooted-stage="escalate"><span class="jd-off">&#9711; Mark Escalate done</span><span class="jd-on">&#9989; Escalate done</span></button>
                 </div>
               </div>
             </div>
 
-            <button class="jstop is-dest" type="button" data-jstop aria-expanded="false" aria-controls="jstopBody6">
+            <button class="jstop is-dest" type="button" data-jstop data-stage-station="deepen" aria-expanded="false" aria-controls="jstopBody6">
               <span class="jstop__dot">D</span>
               <span class="jstop__title">Deepen</span>
               <span class="jstop__time">Day 11+ &amp; beyond</span>
@@ -269,6 +279,7 @@
                 <div class="jstop__acts">
                   <a class="jstop__act jstop__act--make" href="/pages/marketing-haus">&#128295; Make: Marketing Haus &middot; Follow-up + GPT &rarr;</a>
                   <a class="jstop__act jstop__act--log" href="/pages/p2p-os?v=success&amp;add=reminder">&#128204; Log a recurring Reminder to My Success &rarr;</a>
+                  <button type="button" class="jstop__act jstop__act--done" data-rooted-stage="deepen"><span class="jd-off">&#9711; Mark Deepen done</span><span class="jd-on">&#9989; Deepen done</span></button>
                 </div>
               </div>
             </div>

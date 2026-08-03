@@ -346,6 +346,7 @@ function initializeApplication() {
   initStickyRail();
   initPremiumTabs();
   renderRootedStages();
+  renderTrailProgress();
   renderRootedDeepenToggle();
   renderRootedQualityCheck();
   renderRootedCalendar(collectProjectData());
@@ -3525,6 +3526,7 @@ function generatePremiumOutputs(data) {
 
   renderPremiumOutputs(appState.premiumOutputs);
   renderRootedStages();
+  renderTrailProgress();
   renderRootedDeepenToggle();
   renderRootedQualityCheck();
   renderRootedCalendar(data);
@@ -4367,7 +4369,40 @@ function renderRootedStages() {
       };
       saveCurrentProject();
       renderRootedStages();
+      try { renderTrailProgress(); } catch (e) {}
     });
+  });
+}
+
+// The ROOTED trail (the top-of-page overview) is a second view of the SAME
+// appState.rootedStages tracker: its per-station "done" toggles + the Launch
+// Readiness bar read and write the one source of truth, so the OS Growth
+// progress node lights up too. Bindings are attached once (data-bound guard).
+function renderTrailProgress() {
+  const stages = appState.rootedStages || {};
+  const ids = ROOTED_STAGES.map((s) => s.id);
+  const done = ids.filter((id) => stages[id]).length;
+  const fill = document.querySelector("[data-rr-fill]");
+  const count = document.querySelector("[data-rr-count]");
+  if (fill) fill.style.width = Math.round((done / ids.length) * 100) + "%";
+  if (count) count.textContent = done + " of " + ids.length + " stages ready";
+  ids.forEach((id) => {
+    const header = document.querySelector('[data-stage-station="' + id + '"]');
+    if (header) header.classList.toggle("is-stage-done", !!stages[id]);
+    const btn = document.querySelector('.jstop__act--done[data-rooted-stage="' + id + '"]');
+    if (!btn) return;
+    btn.classList.toggle("is-on", !!stages[id]);
+    btn.setAttribute("aria-pressed", String(!!stages[id]));
+    if (!btn.dataset.bound) {
+      btn.dataset.bound = "1";
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        appState.rootedStages = { ...appState.rootedStages, [id]: !appState.rootedStages[id] };
+        saveCurrentProject();
+        renderTrailProgress();
+        try { renderRootedStages(); } catch (e2) {}
+      });
+    }
   });
 }
 

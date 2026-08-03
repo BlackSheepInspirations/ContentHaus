@@ -879,6 +879,32 @@
 #p2p-haus-app .jstop__act:hover { transform: translateY(-1px);
 }
 
+/* ROOTED Launch Readiness bar + per-station done toggle (a 2nd view of appState.rootedStages) */
+#p2p-haus-app .rooted-readiness { max-width: 640px; margin: 0 auto 18px;
+}
+#p2p-haus-app .rr-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 7px;
+}
+#p2p-haus-app .rr-label { font-weight: 800; font-size: 0.8rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--color-gold);
+}
+#p2p-haus-app .rr-count { font-weight: 700; font-size: 0.8rem; color: var(--color-text-muted);
+}
+#p2p-haus-app .rr-bar { height: 10px; border-radius: 999px; background: color-mix(in srgb, var(--color-primary) 12%, transparent); border: 1px solid var(--color-border); overflow: hidden;
+}
+#p2p-haus-app .rr-bar i { display: block; height: 100%; width: 0; border-radius: 999px; background: linear-gradient(90deg, #39c5c0, #8f6fd6, #27ae6e); transition: width 0.5s ease;
+}
+#p2p-haus-app .jstop__act--done { cursor: pointer; color: var(--color-text-muted); background: transparent; border: 1px solid var(--color-border); font-family: inherit;
+}
+#p2p-haus-app .jstop__act--done .jd-on { display: none;
+}
+#p2p-haus-app .jstop__act--done.is-on { color: #27ae6e; border-color: color-mix(in srgb, #27ae6e 45%, var(--color-border)); background: color-mix(in srgb, #27ae6e 12%, transparent);
+}
+#p2p-haus-app .jstop__act--done.is-on .jd-off { display: none;
+}
+#p2p-haus-app .jstop__act--done.is-on .jd-on { display: inline;
+}
+#p2p-haus-app .jstop.is-stage-done .jstop__dot { background: #27ae6e !important; color: #fff;
+}
+
 #p2p-haus-app .journey__kit { border-top: 1px solid var(--color-border); padding-top: 4px;
 }
 
