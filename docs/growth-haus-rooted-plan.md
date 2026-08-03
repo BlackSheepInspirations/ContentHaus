@@ -65,6 +65,23 @@ Full visual blueprint (artifact): *Growth Haus, Rebuilt on ROOTED* — regenerat
 4. **Worked example + polish** — a sample product carried through all six stages so "what good
    looks like" is one click away; general beginner-proofing.
 
+### Epic upgrades — make it a TRUE launch program (ideas, ranked)
+
+1. **⭐ Launch date → a real, dated plan (the centerpiece).** ROOTED_STAGES already carry
+   `dayOffsetStart/End` (Reach D1–3 … Trigger D8 GO LIVE … Deepen D11+). Let the member pick a
+   **launch date**; compute each stage's real dates counting back from it; show a **T-minus
+   countdown**; and add a one-click **"Add my whole launch to My Success"** that drops every
+   stage's tasks + reminders into the planner at once (reuses the `?add`/reminder infra + the
+   pre-filled titles). This is what turns the trail from a guide into a program on a timeline.
+2. **Per-stage asset checklists** — each stage lists its assets (from ROOTED_STAGES `.assets`) as
+   checkable items that feed the readiness %, each with its own "Make →."
+3. **A rewarding finish line** — all 6 done → confetti + a **"Launched" badge** (+points, same
+   wiring as the Masterclass badge, §Phase-50 pattern) + the "turn this evergreen" flow.
+4. **Launch retro → next launch** — after Trigger, a quick "how did it go?" capturing
+   wins/testimonials, feeding Deepen and seeding the next run (repeatable engine).
+5. **"Launching this week" in Community** — announce the launch date to the flock for
+   accountability + hype; ties the program to the community.
+
 ---
 
 ## Architecture / file map (so future sessions move fast)
