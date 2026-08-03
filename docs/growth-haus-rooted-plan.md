@@ -52,14 +52,25 @@ Full visual blueprint (artifact): *Growth Haus, Rebuilt on ROOTED* — regenerat
 
 ## Next up (in priority order)
 
-1. **Launch Profile pre-fill / threading** — the deep "no back-and-forth" magic. Product +
-   audience + offer + brand entered once in Growth Haus, then each **"Make →"** opens the target
-   generator *pre-filled*. Cross-Haus: pass context via a shared localStorage key or URL params;
-   target Hausen (Marketing first) need to read + apply it on load. Start with the cheap wins we
-   fully control (e.g. My Success "Log →" pre-filling the title with the product name).
-2. **Relocate the premium modules** — physically move the old bolt-ons (Full Ad Package, video,
-   voiceover, Suno, animate, marketing-campaign) out of Growth Haus into Marketing/Graphics, so
-   Growth Haus only *links* to them.
+1. **Launch Profile pre-fill / threading** — ✅ **SHIPPED (2026-08-03).** Growth Haus writes a
+   `p2p_launch_prefill` blob + `?prefill=1` on a "Make →" click; new `assets/p2p-launch-prefill.js`
+   (on Marketing/Graphics/Content) injects the shared free-text DNA fields via the styleDNA
+   setters + `ui.renderApp()`, banners, and cleans up. Reliable today: **audience** carries into
+   Marketing/Graphics (the always-present shared field); product/offer/tone/problem/outcome ride
+   in the stash for the deeper per-studio seeding phase. Log → title threading already done
+   (`updateTrailLogTitles`). Growth Haus has no brandName input (comes from the Brand Kit), so
+   business-name prefill would need to source the kit — noted for later.
+2. **Premium modules — Andrea's decision (2026-08-03): generators are 100% keepers; DEMOTE them
+   in Growth Haus AND CLONE all of them into Marketing Haus (they live in both).**
+   - Interim demote DONE: "Premium Output Modules" → "Bonus Launch Assets" copy reframe.
+   - TODO (a) stronger demote — Andrea floated a **sidebar pop-up** format (compact launcher chips
+     that open each output in a modal, rather than a big tabbed section). Feasible; TBD final form.
+   - TODO (b) **clone ALL premium generators into Marketing Haus** — the big one. The 9 are text-
+     prompt builders (buildFullAdPackage/buildSunoPrompt/buildVideoScriptPrompt/buildVoiceoverScript/
+     buildMarketingPrompt/buildCustomGptConfig/buildPhotoAnimationPrompt + buildLaunchPlan/
+     build30DayCalendar in p2p-haus.js). Marketing Haus is a modular namespaced app (studios with
+     styleDNA + per-studio fields) — so each becomes a Marketing "studio" fed by Marketing's own
+     inputs, not a literal copy of the launch-`data` version. Sizable, phased build.
 3. **Evergreen conversion** — ✅ **Live/Evergreen mode toggle SHIPPED (Phase 8)** (bound to
    `appState.deepenMode`: Live = fixed-date plan; Evergreen = relative-day always-on funnel).
    Still could add: per-output evergreen variants + a Buyer GPT builder in Deepen.
@@ -109,6 +120,33 @@ parses, all Liquid schemas are valid, tag pairs balance. Three real bugs found &
   not reproducing.
 
 ---
+
+## 2026-08-03 — Growth Haus review polish batch (Andrea) + launch-type build (designed, deferred)
+
+Shipped this session (all live + committed):
+- **1a Make → pre-fill** and **1b keep+demote** (see Next up #1/#2 above).
+- **Evergreen explainer** — always-visible Live-vs-Evergreen helper under the mode toggle
+  (the detailed note only showed *after* selecting). Evergreen stays a first-class option.
+- **Reference-image guidance** — callout: it shapes Frank/Ruth's prompt, and the member must
+  attach the actual image *in the chat* with the prompt (tool passes direction, not the file).
+- **"Leaving Growth Haus" heads-up** — `wireLeaveGuard()` in p2p-haus.js: outbound in-content
+  action links (Make→ / Log→ / Enter-the-Evergreens) pop a "hop back to keep ROOTING" modal with
+  a "don't show again" opt-out (`localStorage p2p_hide_leave_note`). Bubble-phase so the prefill
+  href-rewrite lands first; honors new-tab intent; does NOT touch the nav rail.
+- **Purpose → Profit framing** — teal "The Purpose" eyebrow over the ROOTED trail + a
+  "The purpose:" line in each of the 6 stations; gold "The Profit" eyebrow over the
+  "see everything you'll walk away with" flip-cards. (script: scratchpad/purpose-notes.js)
+- **Template renames** — "Etsy digital download" → **Digital Download**; "Shopify product" →
+  **Physical Product** (data-preset keys unchanged).
+
+**DEFERRED — the launch-type build (Andrea to react to the field spec):** one selector,
+**What are you launching?** = Digital Download · Physical Product · Business Launch · LIVE on
+Socials, driving templates + conditional fields + the readiness "types" — with the existing
+**Live/Evergreen** as a separate *mode* toggle (two dials, not one list). Per-type fields
+sketched; **LIVE on Socials** is the big departure (drops pricing → prep checklist + self-promo
+templates; bridges to the parked TikTok-Live agency vision in docs/my-success-agency-vision.md).
+Business Launch + LIVE on Socials templates ship WITH this build (not before). This is the last
+open Growth-Haus item; everything else from the review batch is done.
 
 ## Architecture / file map (so future sessions move fast)
 
