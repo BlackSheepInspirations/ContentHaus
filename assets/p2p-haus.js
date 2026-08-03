@@ -4459,6 +4459,7 @@ function renderTrailProgress() {
   }
 
   updateTrailLogTitles();
+  renderRootedMode();
   updateStationDates();
   renderStationAssets();
   const pn = document.getElementById("productName");
@@ -4497,7 +4498,8 @@ function renderTrailProgress() {
 // When a go-live date is set, each station shows its real date range (counting back from
 // launch = Day 8) instead of "Days 1–3", plus a T-minus countdown; toggles the add-to-calendar CTA.
 function updateStationDates() {
-  const raw = ((typeof readValue === "function" ? readValue("launchDateExact") : "") || "").trim();
+  // Evergreen mode has no fixed date — fall back to the relative day labels (the note explains they're per-lead).
+  const raw = appState.deepenMode === "evergreen" ? "" : ((typeof readValue === "function" ? readValue("launchDateExact") : "") || "").trim();
   const defaults = { reach: "Days 1–3", open: "Day 4", offer: "Days 5–7", trigger: "Day 8 · GO LIVE", escalate: "Days 9–10", deepen: "Day 11+" };
   let launch = null;
   if (raw) { const p = raw.split("-").map(Number); const t = new Date(p[0], (p[1] || 1) - 1, p[2] || 1); if (!Number.isNaN(t.getTime())) launch = t; }
@@ -4521,6 +4523,31 @@ function updateStationDates() {
   }
   const addcal = document.querySelector("[data-rr-addcal]");
   if (addcal) addcal.hidden = !launch;
+}
+
+// Live vs Evergreen: a fixed-date launch, or an always-on funnel every new lead flows through.
+// Bound to appState.deepenMode (kept in sync with the Deepen-stage toggle).
+function renderRootedMode() {
+  const mode = appState.deepenMode === "evergreen" ? "evergreen" : "live";
+  document.querySelectorAll(".rmode-btn").forEach((b) => {
+    const on = b.getAttribute("data-mode") === mode;
+    b.classList.toggle("is-on", on);
+    b.setAttribute("aria-pressed", String(on));
+    if (!b.dataset.bound) {
+      b.dataset.bound = "1";
+      b.addEventListener("click", () => {
+        appState.deepenMode = b.getAttribute("data-mode") === "evergreen" ? "evergreen" : "live";
+        saveCurrentProject();
+        renderTrailProgress();
+        try { renderRootedDeepenToggle(); } catch (e) {}
+      });
+    }
+  });
+  const isEvergreen = mode === "evergreen";
+  const dateRow = document.querySelector("[data-launchdate-row]");
+  if (dateRow) dateRow.hidden = isEvergreen;
+  const note = document.querySelector("[data-evergreen-note]");
+  if (note) note.hidden = !isEvergreen;
 }
 
 // Per-stage asset checklist — the concrete deliverables for each ROOTED stage (from
