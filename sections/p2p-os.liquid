@@ -473,38 +473,6 @@
       </div>
     </section>
 
-    {%- comment -%} ===== VIEW: ROOTED — Light the Path (concise overview → deeper dive in the Evergreens) ===== {%- endcomment -%}
-    {%- assign evergreens_url = section.settings.evergreens_url | default: '/pages/realm-5' -%}
-    {%- assign rooted_growth_url = section.settings.rooted_growth_url | default: '/pages/growth-haus' -%}
-    <section class="osx-view" data-view="rooted">
-      <div class="osx-kick">The path to launch</div>
-      <h2 class="osx-h2">{{ section.settings.rooted_title | default: 'ROOTED — light the path' }}</h2>
-      <p class="osx-lede">{{ section.settings.rooted_intro | default: "ROOTED is the six-stage method that carries you from ready to launched. Here's the shape of the whole path — walk it top to bottom, then go deep in the Evergreens when you're ready to run one for real." }}</p>
-
-      {%- comment -%} the 6 stages (letter^name^one-liner) — spell ROOTED down the trail {%- endcomment -%}
-      {%- capture os_rooted -%}R^Reach^Warm up the right people before you sell a thing.|O^Open^Open the loop — build anticipation with pre-launch content.|O^Offer^Make the offer. The doors open, and it's for sale.|T^Trigger^Give them a reason to decide now — proof and gentle urgency.|E^Escalate^The close — last call as the window starts to narrow.|D^Deepen^Keep the relationship going long after launch day.{%- endcapture -%}
-      {%- assign os_rooted_items = os_rooted | split: '|' -%}
-      <ol class="osx-rooted">
-        {%- for rs in os_rooted_items -%}
-          {%- assign rf = rs | split: '^' -%}
-          <li class="osx-rstep">
-            <span class="osx-rletter">{{ rf[0] }}</span>
-            <div class="osx-rbody"><b>{{ rf[1] }}</b><span>{{ rf[2] }}</span></div>
-          </li>
-        {%- endfor -%}
-      </ol>
-
-      <div class="osx-rooted-cta">
-        <div class="osx-rooted-cta-ic">🌲</div>
-        <div class="osx-rooted-cta-in">
-          <b>Go deeper in the Evergreens</b>
-          <p>Realm 5 of your Learning Journey is the full ROOTED course — every stage, worked example by example. Finish it there to earn your <i>ROOTED Master</i> certificate.</p>
-          <a class="osx-cta" href="{{ evergreens_url }}">Enter the Evergreens →</a>
-        </div>
-      </div>
-      <p class="osx-rooted-foot">Ready to run your launch now? <a href="{{ rooted_growth_url }}">Build your ROOTED plan in Growth Haus →</a></p>
-    </section>
-
     {%- comment -%} ===== VIEW: Haus Mates (Frank — Idea Haus · Ruth — Build Haus) ===== {%- endcomment -%}
     {%- assign frank_url = section.settings.frank_url | default: 'https://chatgpt.com/g/g-6a489ad05ac48191a7692939b09fc6f1-the-idea-haus' -%}
     {%- assign ruth_url = section.settings.ruth_url | default: 'https://chatgpt.com/g/g-6a638c2591848191837a671eb3097901-the-build-haus' -%}
@@ -1453,7 +1421,7 @@ window.P2P_EVENTS = [{"iso":"2026-08-15","date":"Sat · Aug 15","time":"","title
     // Also Title-Cases hero titles (keeping ACRONYMS like ROOTED/P2P) and aura-colors chosen words.
     (function(){ try{
       var src = "{{ 'p2p-trusted-guide.png' | asset_url }}";
-      var AURA = { checkpoint:['before'], rooted:['rooted'], mates:['partners'], members:['flock'], tools:['one','click'], notebook:['notebook'], bonus:['free','downloads'] };
+      var AURA = { checkpoint:['before'], mates:['partners'], members:['flock'], tools:['one','click'], notebook:['notebook'], bonus:['free','downloads'] };
       function tcWord(w){ return /[A-Z]/.test(w) ? w : (w.charAt(0).toUpperCase() + w.slice(1)); }
       function processH2(h, aura){
         Array.prototype.slice.call(h.childNodes).forEach(function(node){
