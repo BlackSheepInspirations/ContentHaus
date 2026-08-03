@@ -96,6 +96,9 @@ const appState = {
     reach: false, open: false, offer: false,
     trigger: false, escalate: false, deepen: false
   },
+  // Per-stage asset checklist: { stageId: [bool per deliverable] }. Checking all of a
+  // stage's assets auto-completes that stage (keeps rootedStages in sync).
+  rootedAssets: {},
   // "live" (tied to this specific launch date) or "evergreen" (a rolling
   // sequence for whoever joins, any day) — changes Deepen's wording.
   deepenMode: "live",
@@ -4418,7 +4421,13 @@ function renderTrailProgress() {
       btn.dataset.bound = "1";
       btn.addEventListener("click", (e) => {
         e.stopPropagation();
-        appState.rootedStages = { ...appState.rootedStages, [id]: !appState.rootedStages[id] };
+        const newVal = !(appState.rootedStages && appState.rootedStages[id]);
+        appState.rootedStages = { ...appState.rootedStages, [id]: newVal };
+        // keep the checklist in sync: marking a stage done/undone checks/unchecks all its assets
+        const stg = ROOTED_STAGES.filter((s) => s.id === id)[0];
+        const items = stg ? stageAssetItems(stg) : [];
+        appState.rootedAssets = appState.rootedAssets || {};
+        appState.rootedAssets[id] = items.map(() => newVal);
         saveCurrentProject();
         renderTrailProgress();
         try { renderRootedStages(); } catch (e2) {}
@@ -4451,6 +4460,7 @@ function renderTrailProgress() {
 
   updateTrailLogTitles();
   updateStationDates();
+  renderStationAssets();
   const pn = document.getElementById("productName");
   if (pn && !pn.dataset.trailBound) { pn.dataset.trailBound = "1"; pn.addEventListener("input", updateTrailLogTitles); }
   const ld = document.querySelector("[data-launch-date]");
@@ -4511,6 +4521,43 @@ function updateStationDates() {
   }
   const addcal = document.querySelector("[data-rr-addcal]");
   if (addcal) addcal.hidden = !launch;
+}
+
+// Per-stage asset checklist — the concrete deliverables for each ROOTED stage (from
+// ROOTED_STAGES.assets), checkable + persisted in appState.rootedAssets. Checking all of a
+// stage's assets auto-completes that stage (kept in sync with appState.rootedStages).
+function stageAssetItems(stage) {
+  return String((stage && stage.assets) || "").replace(/\.\s*$/, "").split(",").map((s) => s.trim()).filter(Boolean);
+}
+function renderStationAssets() {
+  const store = appState.rootedAssets || {};
+  ROOTED_STAGES.forEach((stage) => {
+    const host = document.querySelector('[data-assets="' + stage.id + '"]');
+    if (!host) return;
+    const items = stageAssetItems(stage);
+    if (!items.length) { host.innerHTML = ""; return; }
+    const checked = store[stage.id] || [];
+    const doneN = items.filter((_, i) => checked[i]).length;
+    host.innerHTML =
+      '<div class="jassets__head">Make these <span class="jassets__count">' + doneN + "/" + items.length + "</span></div>" +
+      items.map((it, i) => '<label class="jassets__item' + (checked[i] ? " is-done" : "") + '"><input type="checkbox" data-asset="' + stage.id + "|" + i + '"' + (checked[i] ? " checked" : "") + "><span>" + escapeHtml(it) + "</span></label>").join("");
+    host.querySelectorAll("[data-asset]").forEach((box) => {
+      box.addEventListener("change", (e) => {
+        e.stopPropagation();
+        const parts = box.getAttribute("data-asset").split("|");
+        const sid = parts[0], idx = +parts[1];
+        const arr = (appState.rootedAssets = appState.rootedAssets || {});
+        const list = (arr[sid] = arr[sid] || []);
+        list[idx] = box.checked;
+        const total = stageAssetItems(ROOTED_STAGES.filter((s) => s.id === sid)[0]).length;
+        const allDone = total > 0 && list.filter(Boolean).length >= total;
+        appState.rootedStages = { ...appState.rootedStages, [sid]: allDone };
+        saveCurrentProject();
+        renderTrailProgress();
+        try { renderRootedStages(); } catch (e2) {}
+      });
+    });
+  });
 }
 
 // A quick confetti burst for the ROOTED finish line.
@@ -5154,6 +5201,7 @@ function saveCurrentProject() {
       premiumOutputs: appState.premiumOutputs,
       lastGeneratedSignature: appState.lastGeneratedSignature,
       rootedStages: appState.rootedStages,
+      rootedAssets: appState.rootedAssets,
       deepenMode: appState.deepenMode,
       rootedQualityCheck: appState.rootedQualityCheck
     };
@@ -5204,6 +5252,7 @@ function restoreCurrentProject(showFeedback = false) {
       ...appState.rootedStages,
       ...(project.rootedStages || {})
     };
+    appState.rootedAssets = { ...(project.rootedAssets || {}) };
     appState.deepenMode = project.deepenMode === "evergreen" ? "evergreen" : "live";
     appState.rootedQualityCheck = {
       ...appState.rootedQualityCheck,

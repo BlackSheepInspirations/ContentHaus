@@ -935,6 +935,20 @@
 #p2p-haus-app .rr-addcal[hidden] { display: none;
 }
 
+/* Per-stage asset checklist */
+#p2p-haus-app .jstop__assets { margin: 4px 0 2px;
+}
+#p2p-haus-app .jassets__head { font-weight: 800; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-text-muted); margin-bottom: 6px;
+}
+#p2p-haus-app .jassets__count { color: var(--color-primary);
+}
+#p2p-haus-app .jassets__item { display: flex; align-items: center; gap: 8px; font-size: 13.5px; color: var(--color-text); padding: 4px 0; cursor: pointer;
+}
+#p2p-haus-app .jassets__item input { width: 16px; height: 16px; flex: none; accent-color: var(--color-primary); cursor: pointer;
+}
+#p2p-haus-app .jassets__item.is-done span { text-decoration: line-through; color: var(--color-text-muted);
+}
+
 #p2p-haus-app .journey__kit { border-top: 1px solid var(--color-border); padding-top: 4px;
 }
 
