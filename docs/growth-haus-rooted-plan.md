@@ -73,8 +73,9 @@ Full visual blueprint (artifact): *Growth Haus, Rebuilt on ROOTED* — regenerat
    writes `p2p_pending_launch` and imports via `?importlaunch=1` (`P2P_PLANNER_IMPORT_LAUNCH`).
 2. **Per-stage asset checklists** — each stage lists its assets (from ROOTED_STAGES `.assets`) as
    checkable items that feed the readiness %, each with its own "Make →."
-3. **A rewarding finish line** — all 6 done → confetti + a **"Launched" badge** (+points, same
-   wiring as the Masterclass badge, §Phase-50 pattern) + the "turn this evergreen" flow.
+3. **A rewarding finish line** — ✅ **SHIPPED (Phase 6).** All 6 done → confetti + toast + the
+   **"Launched" badge** (+225 pts one-time: R.launch 200 + badge 25) via `window.P2P.awardLaunch()`.
+   (Still could add: the "turn this evergreen" flow off the finish line.)
 4. **Launch retro → next launch** — after Trigger, a quick "how did it go?" capturing
    wins/testimonials, feeding Deepen and seeding the next run (repeatable engine).
 5. **"Launching this week" in Community** — announce the launch date to the flock for
