@@ -2063,3 +2063,50 @@
   .gh-brand-header { max-width: none; }
   .gh-brand-header .gh-marketing__hero { margin-left: -16px; margin-right: -16px; margin-top: -40px; }
 }
+
+/* =====================================================================
+   GRAPHICS HAUS — design-system skin (docs/haus-design-system.md)
+   Mirror of the Content Haus reference, scoped to
+   #graphics-haus-app.haus--graphics. Signature: amethyst (--haus-accent).
+   Sibling port of Content, so the same class hooks apply 1:1.
+   ===================================================================== */
+#graphics-haus-app.haus--graphics { --gh-teal: var(--haus-accent-deep); }
+
+#graphics-haus-app.haus--graphics .gh-field-group__title::after {
+  content: ""; flex: 1 1 auto; min-width: 20px; height: 1px;
+  margin-left: 6px; background: var(--gh-border);
+}
+
+#graphics-haus-app.haus--graphics .gh-body__fields .gh-field-group {
+  position: relative; padding-top: 20px;
+}
+#graphics-haus-app.haus--graphics .gh-body__fields .gh-field-group::before {
+  content: ""; position: absolute; top: 0; left: 0; right: 0; height: 5px;
+  border-radius: 10px 10px 0 0;
+  background: linear-gradient(90deg, var(--haus-accent-deep), var(--haus-accent), var(--haus-accent-light));
+}
+#graphics-haus-app.haus--graphics .gh-styledna__title {
+  flex-basis: 100%; gap: 7px; margin-bottom: 2px;
+  font-size: 11px; font-weight: 800; letter-spacing: 0.15em;
+  text-transform: uppercase; color: var(--hds-gold-c);
+}
+#graphics-haus-app.haus--graphics .hds-encase .gh-field-group,
+#graphics-haus-app.haus--graphics .gh-subpanel .gh-field-group { padding-top: 16px; }
+#graphics-haus-app.haus--graphics .hds-encase .gh-field-group::before,
+#graphics-haus-app.haus--graphics .gh-subpanel .gh-field-group::before { display: none; }
+
+#graphics-haus-app.haus--graphics .gh-body__preview > * {
+  box-shadow: inset 6px 0 0 0 var(--hds-gold-b);
+}
+
+#graphics-haus-app.haus--graphics .gh-preset-row {
+  background: #fff; border: 1px solid var(--gh-border); border-radius: 14px; padding: 14px 16px 16px;
+}
+#graphics-haus-app.haus--graphics .gh-preset-row__label {
+  font-size: 11px; font-weight: 800; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--haus-accent-deep);
+}
+#graphics-haus-app.haus--graphics .gh-subpanel {
+  background: #fff; border: 1px solid var(--gh-border); border-radius: 14px; padding: 14px 16px 16px;
+}
+#graphics-haus-app.haus--graphics .hds-encase__eyebrow { color: var(--haus-accent-deep); }

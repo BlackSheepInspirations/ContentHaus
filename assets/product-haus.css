@@ -2048,3 +2048,50 @@
   .pdh-brand-header { max-width: none; }
   .pdh-brand-header .pdh-marketing__hero { margin-left: -16px; margin-right: -16px; margin-top: -40px; }
 }
+
+/* =====================================================================
+   PROJECT HAUS — design-system skin (docs/haus-design-system.md)
+   Mirror of the Content Haus reference, scoped to
+   #product-haus-app.haus--project. Signature: sapphire (--haus-accent).
+   Sibling port of Content, so the same class hooks apply 1:1.
+   ===================================================================== */
+#product-haus-app.haus--project { --pdh-teal: var(--haus-accent-deep); }
+
+#product-haus-app.haus--project .pdh-field-group__title::after {
+  content: ""; flex: 1 1 auto; min-width: 20px; height: 1px;
+  margin-left: 6px; background: var(--pdh-border);
+}
+
+#product-haus-app.haus--project .pdh-body__fields .pdh-field-group {
+  position: relative; padding-top: 20px;
+}
+#product-haus-app.haus--project .pdh-body__fields .pdh-field-group::before {
+  content: ""; position: absolute; top: 0; left: 0; right: 0; height: 5px;
+  border-radius: 10px 10px 0 0;
+  background: linear-gradient(90deg, var(--haus-accent-deep), var(--haus-accent), var(--haus-accent-light));
+}
+#product-haus-app.haus--project .pdh-styledna__title {
+  flex-basis: 100%; gap: 7px; margin-bottom: 2px;
+  font-size: 11px; font-weight: 800; letter-spacing: 0.15em;
+  text-transform: uppercase; color: var(--hds-gold-c);
+}
+#product-haus-app.haus--project .hds-encase .pdh-field-group,
+#product-haus-app.haus--project .pdh-subpanel .pdh-field-group { padding-top: 16px; }
+#product-haus-app.haus--project .hds-encase .pdh-field-group::before,
+#product-haus-app.haus--project .pdh-subpanel .pdh-field-group::before { display: none; }
+
+#product-haus-app.haus--project .pdh-body__preview > * {
+  box-shadow: inset 6px 0 0 0 var(--hds-gold-b);
+}
+
+#product-haus-app.haus--project .pdh-preset-row {
+  background: #fff; border: 1px solid var(--pdh-border); border-radius: 14px; padding: 14px 16px 16px;
+}
+#product-haus-app.haus--project .pdh-preset-row__label {
+  font-size: 11px; font-weight: 800; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--haus-accent-deep);
+}
+#product-haus-app.haus--project .pdh-subpanel {
+  background: #fff; border: 1px solid var(--pdh-border); border-radius: 14px; padding: 14px 16px 16px;
+}
+#product-haus-app.haus--project .hds-encase__eyebrow { color: var(--haus-accent-deep); }
