@@ -162,6 +162,58 @@ is genuinely thin. Buckets:
 
 ---
 
+## Social Media Realm (TikTok) — PARKED (blueprint only, do NOT build yet)
+
+**Decision (Andrea):** shaped but intentionally **not built**. Focus stays on launching
+the existing product and proving it (proof-of-concept traction) *before* expanding. This
+lives here as a ready-to-go blueprint so nothing's lost.
+
+**Scope: TikTok-only.** Every other platform (IG, YouTube, etc.) becomes its *own
+separate* realm later — we don't know those platforms well enough yet, and mixing them
+would dilute. One platform, taught deeply. (The earlier "FB/FF market" idea was a
+misspeak — dropped.)
+
+**Slots as:** Realm 6 in the Learning Journey — reuses the realm map / course player /
+badges / points / certs / **Masterclass type** already built.
+
+### Creator track (levels)
+- **L1 Foundations** — mindset, platform literacy, profile/setup, how the algorithm
+  rewards you, content pillars.
+- **L2 Content craft** — short-form structure, **the hook / retention / feeling** (the
+  qual thesis, taught explicitly), series thinking, trends without losing your voice.
+- **L3 Going Live** — setup, hosting energy, holding a room, engagement loops, gifting
+  mechanics, PK/battles, beating the lulls, consistency as the #1 lever.
+- **L4 Growth engines** — grow rooms, PKs for reach, collabs, cross-promo (TikTok-native
+  tactics).
+- **L5 Monetize & scale** — diamonds → dollars, subs, brand deals, diversify, run it like
+  a business.
+- **L6 Modeling success** — case studies, shadow-a-pro, build your own playbook (also a
+  recurring lesson device across levels).
+
+### Manager split-level
+Creator core (they must know the craft) **+ a manager branch unlocked by the
+`role:manager` tag** (reuses the access-tier model above). Branch: manager foundations ·
+roster ops (quotas + the manager dashboard) · coaching the *qual* layer + 1:1s ·
+motivation/retention (spot burnout & churn early) · team & compliance (recruiting, TikTok
+policy, safeguarding, group grow-room strategy).
+
+### "Items" — the differentiator (beyond video)
+Applied items that **write to My Success**: action items (log your first Live, set the
+week's hour goal, run a grow room + log it) · templates (content calendar, Live
+run-of-show, **hook bank**, PK scripts) · challenges wired to the **existing badges/points**
+(7-day Live streak, first 1k diamonds) · reflection prompts (qual/journal) · **Masterclass
+capstones** (type already built) · track-completion **certs**. Closes the loop:
+lesson → logged Live → quota ring → manager coaches.
+
+### Open when we return
+- Name the realm (ideas: The Live Room · Center Stage · Spotlight Pasture · Flock & Follow).
+- Format/voice: micro-lessons (3–7 min) vs full courses; her teaching vs guest creators
+  vs curated mix.
+- Whole-map-first vs spike **one** level (L3 · Going Live) as the proof-of-concept.
+- Other-platform realms (IG/YT/…) = future, separate, need a subject-matter expert.
+
+---
+
 ## Open questions / next steps (for a fresh session)
 
 - [ ] Ask the TikTok rep the two feed/consent questions (Q2) — determines whether
