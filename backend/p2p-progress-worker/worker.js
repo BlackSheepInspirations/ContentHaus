@@ -216,7 +216,7 @@ const HOUSE = [
   { day: 1, id: 'house-frank', name: 'Frank', title: 'Let me be Frank with you…', bank: FRANK_POSTS, cursor: 'house-cursor:frank' },
   { day: 2, id: 'house-joke', kind: 'joke', title: 'Tuesday\'s Terrible Joke of the Day', bank: JOKE_POSTS, cursor: 'house-cursor:joke', castCursor: 'house-cursor:jokecast' },
   { day: 3, id: 'house-drea', name: 'Drea', title: 'Drea\'s Mid‑Week Heart Check', bank: DREA_POSTS, cursor: 'house-cursor:drea' },
-  { day: 4, id: 'house-ruth', name: 'Ruth', title: 'A Word from Ruth', bank: RUTH_POSTS, cursor: 'house-cursor:ruth' },
+  { day: 0, id: 'house-ruth', name: 'Ruth', title: 'A Word from Ruth', bank: RUTH_POSTS, cursor: 'house-cursor:ruth' },
   { day: 5, id: 'house-eric', name: 'Uncle Eric', kind: 'meme', title: 'A lil\' Snark Before the Weekend', bank: ERIC_MEMES, cursor: 'house-cursor:eric' }
 ];
 
@@ -734,7 +734,7 @@ export default {
   },
 
   // House voices (Frank/Drea/Ruth/Eric) — needs a Cron Trigger (e.g. daily "0 15 * * *").
-  // Mon→Frank, Wed→Drea, Thu→Ruth, Fri→Eric. Advances through each bank; one post per voice per day max.
+  // Sun→Ruth, Mon→Frank, Tue→rotating joke, Wed→Drea, Fri→Eric meme. Advances through each bank; one post per voice per day max.
   async scheduled(event, env, ctx) {
     const kv = env.P2P_KV; if (!kv) return;
     const now = new Date();
