@@ -71,8 +71,9 @@ Full visual blueprint (artifact): *Growth Haus, Rebuilt on ROOTED* — regenerat
    date picker on the trail; each station shows real dates (launch = Day 8; Reach = launch-7..-5
    … Deepen = launch+3..+9); T-minus countdown; one-click **"Add my whole launch to My Success"**
    writes `p2p_pending_launch` and imports via `?importlaunch=1` (`P2P_PLANNER_IMPORT_LAUNCH`).
-2. **Per-stage asset checklists** — each stage lists its assets (from ROOTED_STAGES `.assets`) as
-   checkable items that feed the readiness %, each with its own "Make →."
+2. **Per-stage asset checklists** — ✅ **SHIPPED (Phase 7).** Each station lists its deliverables
+   (ROOTED_STAGES `.assets`) as checkable items with an X/N count, persisted in
+   `appState.rootedAssets`; checking all auto-completes the stage (synced with the done toggle).
 3. **A rewarding finish line** — ✅ **SHIPPED (Phase 6).** All 6 done → confetti + toast + the
    **"Launched" badge** (+225 pts one-time: R.launch 200 + badge 25) via `window.P2P.awardLaunch()`.
    (Still could add: the "turn this evergreen" flow off the finish line.)
