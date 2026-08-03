@@ -67,12 +67,10 @@ Full visual blueprint (artifact): *Growth Haus, Rebuilt on ROOTED* — regenerat
 
 ### Epic upgrades — make it a TRUE launch program (ideas, ranked)
 
-1. **⭐ Launch date → a real, dated plan (the centerpiece).** ROOTED_STAGES already carry
-   `dayOffsetStart/End` (Reach D1–3 … Trigger D8 GO LIVE … Deepen D11+). Let the member pick a
-   **launch date**; compute each stage's real dates counting back from it; show a **T-minus
-   countdown**; and add a one-click **"Add my whole launch to My Success"** that drops every
-   stage's tasks + reminders into the planner at once (reuses the `?add`/reminder infra + the
-   pre-filled titles). This is what turns the trail from a guide into a program on a timeline.
+1. **⭐ Launch date → a real, dated plan (the centerpiece).** ✅ **SHIPPED (Phase 5).** Go-live
+   date picker on the trail; each station shows real dates (launch = Day 8; Reach = launch-7..-5
+   … Deepen = launch+3..+9); T-minus countdown; one-click **"Add my whole launch to My Success"**
+   writes `p2p_pending_launch` and imports via `?importlaunch=1` (`P2P_PLANNER_IMPORT_LAUNCH`).
 2. **Per-stage asset checklists** — each stage lists its assets (from ROOTED_STAGES `.assets`) as
    checkable items that feed the readiness %, each with its own "Make →."
 3. **A rewarding finish line** — all 6 done → confetti + a **"Launched" badge** (+points, same
