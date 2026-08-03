@@ -1960,6 +1960,21 @@
         </form>
 
           <aside class="build-rail" aria-label="Build summary">
+            <!-- Your selections: sits ABOVE the pinned pack, scrolls normally -->
+            <div class="build-rail__above">
+              <div class="build-rail__card">
+                <div id="railBrandKit" class="rail-brandkit" hidden></div>
+                <details class="rail-panel" open>
+                  <summary class="rail-panel__summary">
+                    <span>Your selections</span>
+                    <span class="rail-panel__chev" aria-hidden="true">+</span>
+                  </summary>
+                  <div id="railSelections" class="rail-panel__body ingredient-review"></div>
+                </details>
+              </div>
+            </div>
+
+            <!-- Your pack: the ONLY sticky piece (pins as you scroll) -->
             <div class="build-rail__pinned">
               <div class="build-rail__card">
                 <p class="build-rail__eyebrow">Your pack</p>
@@ -1980,18 +1995,9 @@
               </div>
             </div>
 
+            <!-- Vault + Recently Generated: below the pack, scroll normally -->
             <div class="build-rail__extras">
               <div class="build-rail__card">
-              <div id="railBrandKit" class="rail-brandkit" hidden></div>
-
-              <details class="rail-panel">
-                <summary class="rail-panel__summary">
-                  <span>Your selections</span>
-                  <span class="rail-panel__chev" aria-hidden="true">+</span>
-                </summary>
-                <div id="railSelections" class="rail-panel__body ingredient-review"></div>
-              </details>
-
               <details class="rail-panel">
                 <summary class="rail-panel__summary">
                   <span>Your Vault <span id="railVaultCount" class="rail-panel__count">(0)</span></span>

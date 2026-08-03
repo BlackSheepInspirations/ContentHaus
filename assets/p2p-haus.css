@@ -1052,16 +1052,28 @@
 /* ---------- Build layout + sticky Generate rail ---------- */
 #p2p-haus-app .build-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 320px;
+  grid-template-columns: minmax(0, 1fr) 300px;
   gap: 28px;
   align-items: start;
 }
 
 #p2p-haus-app .build-rail {
+  /* The rail itself is NOT sticky — only "Your Pack" pins (see .build-rail__pinned),
+     so "Your selections" (above it) and the Vault/Recent (below it) scroll normally
+     instead of the whole tall rail sticking and hiding them. */
+  align-self: start;
+}
+
+#p2p-haus-app .build-rail__above {
+  margin-bottom: 14px;
+}
+
+#p2p-haus-app .build-rail__pinned {
   position: sticky;
   /* On Shopify the theme header is sticky; the embed sets --rail-sticky-top
      to clear it so "Your Pack" is never hidden underneath. Standalone: 20px. */
   top: var(--rail-sticky-top, 20px);
+  z-index: 4;
 }
 
 /* Two widget blocks: a pinned progress card + a scrolling extras card. */
@@ -1578,7 +1590,8 @@
     grid-template-columns: 1fr;
   }
 
-  #p2p-haus-app .build-rail {
+  #p2p-haus-app .build-rail,
+  #p2p-haus-app .build-rail__pinned {
     position: static;
   }
 
