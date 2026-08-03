@@ -4388,6 +4388,19 @@ function renderTrailProgress() {
   if (fill) fill.style.width = Math.round((done / ids.length) * 100) + "%";
   if (count) count.textContent = done + " of " + ids.length + " stages ready";
 
+  // Finish line: all 6 stages done → celebrate once + award the "Launched" badge (+points).
+  if (done === ids.length) {
+    if (!window.__rootedLaunchCelebrated) {
+      window.__rootedLaunchCelebrated = true;
+      let firstTime = false;
+      try { if (window.P2P && window.P2P.awardLaunch) { firstTime = window.P2P.awardLaunch(); if (window.P2P.push) window.P2P.push(); } } catch (e) {}
+      try { showToast(firstTime ? "🎉 Launch complete! You earned the Launched badge (+225 pts)." : "🎉 Launch complete — go get 'em! 🚀", "success"); } catch (e) {}
+      launchConfetti();
+    }
+  } else {
+    window.__rootedLaunchCelebrated = false;
+  }
+
   // Guided Mode: the "current" stage is the first one not yet marked done.
   const current = list.find((s) => !stages[s.id]) || null;
 
@@ -4498,6 +4511,27 @@ function updateStationDates() {
   }
   const addcal = document.querySelector("[data-rr-addcal]");
   if (addcal) addcal.hidden = !launch;
+}
+
+// A quick confetti burst for the ROOTED finish line.
+function launchConfetti() {
+  try {
+    const cv = document.createElement("canvas");
+    cv.style.cssText = "position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:99999;";
+    document.body.appendChild(cv);
+    const ctx = cv.getContext("2d");
+    const W = (cv.width = window.innerWidth), H = (cv.height = window.innerHeight);
+    const colors = ["#f4c534", "#39c5c0", "#8f6fd6", "#27ae6e", "#ff5c7a"];
+    const P = [];
+    for (let i = 0; i < 130; i++) P.push({ x: W / 2, y: H * 0.28, vx: (Math.random() - 0.5) * 15, vy: Math.random() * -13 - 4, s: Math.random() * 7 + 3, c: colors[i % colors.length], r: Math.random() * 6, vr: (Math.random() - 0.5) * 0.4 });
+    const t0 = performance.now();
+    (function frame(t) {
+      const el = t - t0, a = Math.max(0, 1 - el / 2800);
+      ctx.clearRect(0, 0, W, H);
+      P.forEach((p) => { p.vy += 0.32; p.x += p.vx; p.y += p.vy; p.r += p.vr; ctx.save(); ctx.globalAlpha = a; ctx.translate(p.x, p.y); ctx.rotate(p.r); ctx.fillStyle = p.c; ctx.fillRect(-p.s / 2, -p.s / 2, p.s, p.s * 0.6); ctx.restore(); });
+      if (el < 2800) requestAnimationFrame(frame); else cv.remove();
+    })(t0);
+  } catch (e) {}
 }
 
 // Pre-fill: each station's "Log this →" carries the product name + a stage label into the My

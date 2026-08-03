@@ -28,7 +28,7 @@ window.P2P = (function(){
   var K = { streak:'p2p_streak', signs:'p2p_signs', earned:'p2p_badges_earned',
     journal:'p2p_journal', courses:'p2p_courses_done',
     rates:'p2p_rates', ptsStreak:'p2p_pts_streak', ptsJournal:'p2p_pts_journal', journalDay:'p2p_journal_day',
-    certsAwarded:'p2p_certs_awarded', checksDone:'p2p_checks_done',
+    certsAwarded:'p2p_certs_awarded', checksDone:'p2p_checks_done', mcAwarded:'p2p_mc_awarded', ptsLaunch:'p2p_pts_launch',
     weekGoal:'p2p_weekgoal', ptsWeekBonus:'p2p_pts_weekbonus', daysActive:'p2p_days_active' };
 
   function get(k, def){ try{ var v = JSON.parse(localStorage.getItem(k)); return v == null ? def : v; }catch(e){ return def; } }
@@ -37,7 +37,7 @@ window.P2P = (function(){
   /* POINT RATES — the journey section passes its editable values via
      window.P2P_POINTS; we cache them so the player & badges pages (which don't
      carry those settings) award the same amounts. Falls back to these defaults. */
-  var DEFAULT_RATES = { course:100, dna:250, side:40, cert:25, journal:5, streak:5, badge:25, masterclass:250, weekbonus:50, weekgoal:1, level:250 };
+  var DEFAULT_RATES = { course:100, dna:250, side:40, cert:25, journal:5, streak:5, badge:25, masterclass:250, launch:200, weekbonus:50, weekgoal:1, level:250 };
   var POINT_INELIGIBLE = []; // badge names that must NOT award points (future points-milestone badges), to prevent reward loops
   var R = (function(){
     var cfg = window.P2P_POINTS;
@@ -118,6 +118,8 @@ window.P2P = (function(){
     var p = get(K.courses, []).length * R.course;                  // finished courses
     if(e.indexOf('Founder Fingerprint') !== -1) p += R.dna;        // Brand DNA Blueprint (one-time)
     p += get(K.certsAwarded, []).length * R.cert;                  // certificates — once per course
+    p += get(K.mcAwarded, []).length * R.masterclass;             // masterclasses — once per masterclass course
+    p += (get(K.ptsLaunch, 0) || 0);                              // completed a ROOTED launch (one-time)
     p += get(K.checksDone, []).length * R.side;                    // side quests (checks)
     p += eligibleBadgeCount() * R.badge;                           // eligible badges (+25 each)
     p += (get(K.ptsStreak, 0) || 0) + (get(K.ptsJournal, 0) || 0); // streak + journal ledgers
@@ -132,6 +134,8 @@ window.P2P = (function(){
       courses: get(K.courses, []).length * R.course,
       dna:     (e.indexOf('Founder Fingerprint') !== -1) ? R.dna : 0,
       certs:   get(K.certsAwarded, []).length * R.cert,
+      masterclass: get(K.mcAwarded, []).length * R.masterclass,
+      launch:  get(K.ptsLaunch, 0) || 0,
       side:    get(K.checksDone, []).length * R.side,
       badges:  eligibleBadgeCount() * R.badge,
       streak:  get(K.ptsStreak, 0) || 0,
@@ -173,6 +177,12 @@ window.P2P = (function(){
   }
   /* certificate award — +R.cert once per course handle */
   function awardCert(handle){ handle = String(handle || ''); var a = get(K.certsAwarded, []); if(handle && a.indexOf(handle) === -1){ a.push(handle); set(K.certsAwarded, a); } return a.length; }
+  /* masterclass award — +R.masterclass and the "Masterclass" badge, once per masterclass course handle.
+     Fired by the course player only when that course is flagged data-masterclass. */
+  function awardMasterclass(handle){ handle = String(handle || ''); var a = get(K.mcAwarded, []); if(handle && a.indexOf(handle) === -1){ a.push(handle); set(K.mcAwarded, a); earnBadge('Masterclass'); } return a.length; }
+  /* launch award — a one-time +R.launch bonus + the "Launched" badge, fired by Growth Haus when all
+     6 ROOTED stages are marked done. One-time (flag-guarded) so it can't be farmed by re-toggling. */
+  function awardLaunch(){ var first = !get(K.ptsLaunch, 0); if(first) set(K.ptsLaunch, R.launch); earnBadge('Launched'); return first; }
 
   function markSign(key){
     key = String(key || '').toLowerCase();
@@ -276,6 +286,8 @@ window.P2P = (function(){
     isCourseDone: isCourseDone,
     completeCheck: completeCheck,
     awardCert: awardCert,
+    awardMasterclass: awardMasterclass,
+    awardLaunch: awardLaunch,
     weekGoal: weekGoal,
     points: points,
     pointsBreakdown: pointsBreakdown,
