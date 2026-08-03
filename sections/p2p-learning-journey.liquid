@@ -75,7 +75,7 @@
         <a href="#" data-panel="directory" data-tip="Jump straight to any course, across every realm"><svg viewBox="0 0 24 24"><path d="M4 5h16M4 12h16M4 19h16" stroke-linecap="round"/><circle cx="4" cy="5" r="0.4"/></svg><small>All Courses</small></a>
         <a href="#" data-panel="progress" data-tip="Your points, badges &amp; streaks"><svg viewBox="0 0 24 24"><path d="M4 20V12M9.5 20V6M15 20v-9M20.5 20V8"/><path d="M3 20h18"/></svg><small>Progress</small></a>
         <a href="#" data-panel="bonuses" data-tip="Side-quests: Mindset, Purpose &amp; Heart"><svg viewBox="0 0 24 24"><rect x="3.5" y="9" width="17" height="11" rx="1.2"/><path d="M2.5 9h19v3.4h-19z"/><path d="M12 9v11M12 9c-3.4-5.5-7.4-1.2-3 .6M12 9c3.4-5.5 7.4-1.2 3 .6"/></svg><small>Bonuses</small></a>
-        <a href="{{ section.settings.milestones_url | default: '/pages/p2p-badges' }}" data-tip="Badges you've earned"><svg viewBox="0 0 24 24"><path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.9 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/></svg><small>Milestones</small></a>
+        <a href="{{ section.settings.milestones_url | default: '/pages/p2p-learning-badges' }}" data-tip="Badges you've earned"><svg viewBox="0 0 24 24"><path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.9 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/></svg><small>Milestones</small></a>
         <a href="#" data-panel="journal" data-tip="Your notes &amp; reflections"><svg viewBox="0 0 24 24"><path d="M12 6C10 4.4 5.5 4.2 3.5 5.2v13.6c2-1 6.5-.8 8.5.8 2-1.6 6.5-1.8 8.5-.8V5.2C18.5 4.2 14 4.4 12 6z"/><path d="M12 6v13.6"/></svg><small>Journal</small></a>
       </nav>
       <div class="bar-right">
@@ -506,7 +506,7 @@
       <div class="bp-eyebrow">✦ Badge Unlocked ✦</div>
       <div class="bp-name"></div>
       <div class="bp-actions">
-        <a class="bp-view" href="{{ section.settings.milestones_url | default: '/pages/p2p-badges' }}">See it in Milestones →</a>
+        <a class="bp-view" href="{{ section.settings.milestones_url | default: '/pages/p2p-learning-badges' }}">See it in Milestones →</a>
         <button class="bp-close" type="button">Keep going</button>
       </div>
     </div>
