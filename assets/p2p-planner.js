@@ -1066,7 +1066,7 @@
   // Deep-link from the bell on a Haus page: /pages/p2p-os?v=success&open=kind|id
   try { var _om = /[?&]open=([^&]+)/.exec(window.location.search); if (_om) { var _p = decodeURIComponent(_om[1]).split('|'); if (_p[0] && _p[1]) setTimeout(function () { openItemDetail(_p[0], _p[1]); }, 150); } } catch (e) {}
   // "Log this →" from Growth Haus (ROOTED): open the typed add-flow on today with a type preselected.
-  window.P2P_PLANNER_ADD = function (type) {
+  window.P2P_PLANNER_ADD = function (type, title) {
     try {
       view = 'dash'; render();
       var td = new Date(), today = td.getFullYear() + '-' + calP2(td.getMonth() + 1) + '-' + calP2(td.getDate());
@@ -1076,10 +1076,12 @@
         openAddEvent(today, panel);
         var sel = panel.querySelector('[data-dca-type]');
         if (sel && type) { sel.value = type; sel.dispatchEvent(new Event('change')); }
+        var ti = panel.querySelector('[data-dca-title]');
+        if (ti && title) { ti.value = String(title).slice(0, 120); }
         panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }, 90);
     } catch (e) {}
   };
-  // Deep-link: /pages/p2p-os?v=success&add=post|goal|product|reminder|live
-  try { var _am = /[?&]add=([^&#]+)/.exec(window.location.search); if (_am) { var _at = decodeURIComponent(_am[1]); setTimeout(function () { window.P2P_PLANNER_ADD(_at); }, 220); } } catch (e) {}
+  // Deep-link: /pages/p2p-os?v=success&add=<type>&title=<name>  (ROOTED "Log this →" pre-fills the title)
+  try { var _am = /[?&]add=([^&#]+)/.exec(window.location.search); if (_am) { var _at = decodeURIComponent(_am[1]); var _tm = /[?&]title=([^&#]+)/.exec(window.location.search); var _tt = _tm ? decodeURIComponent(_tm[1].replace(/\+/g, ' ')) : ''; setTimeout(function () { window.P2P_PLANNER_ADD(_at, _tt); }, 220); } } catch (e) {}
 })();

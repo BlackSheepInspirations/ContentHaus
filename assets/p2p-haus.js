@@ -4435,6 +4435,27 @@ function renderTrailProgress() {
       });
     }
   }
+
+  updateTrailLogTitles();
+  const pn = document.getElementById("productName");
+  if (pn && !pn.dataset.trailBound) { pn.dataset.trailBound = "1"; pn.addEventListener("input", updateTrailLogTitles); }
+}
+
+// Pre-fill: each station's "Log this →" carries the product name + a stage label into the My
+// Success add-flow title, so the logged item lands pre-named instead of blank.
+function updateTrailLogTitles() {
+  const product = ((typeof readValue === "function" ? readValue("productName") : "") || "").trim();
+  const labels = { reach: "warm-up post", open: "teaser / waitlist", offer: "sales page live", trigger: "launch", escalate: "last call", deepen: "follow-up" };
+  ROOTED_STAGES.forEach((s) => {
+    const header = document.querySelector('[data-stage-station="' + s.id + '"]');
+    if (!header) return;
+    const body = document.getElementById(header.getAttribute("aria-controls"));
+    const log = body ? body.querySelector(".jstop__act--log") : null;
+    if (!log) return;
+    const base = (log.getAttribute("href") || "").split("&title=")[0];
+    const label = product ? product + " — " + (labels[s.id] || "") : "";
+    log.setAttribute("href", label ? base + "&title=" + encodeURIComponent(label) : base);
+  });
 }
 
 // Live-vs-Evergreen toggle for Deepen (docs/ROOTED_Method.md's explicit
