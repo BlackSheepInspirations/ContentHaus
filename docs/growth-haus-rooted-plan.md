@@ -63,14 +63,19 @@ Full visual blueprint (artifact): *Growth Haus, Rebuilt on ROOTED* — regenerat
 2. **Premium modules — Andrea's decision (2026-08-03): generators are 100% keepers; DEMOTE them
    in Growth Haus AND CLONE all of them into Marketing Haus (they live in both).**
    - Interim demote DONE: "Premium Output Modules" → "Bonus Launch Assets" copy reframe.
-   - TODO (a) stronger demote — Andrea floated a **sidebar pop-up** format (compact launcher chips
-     that open each output in a modal, rather than a big tabbed section). Feasible; TBD final form.
-   - TODO (b) **clone ALL premium generators into Marketing Haus** — the big one. The 9 are text-
-     prompt builders (buildFullAdPackage/buildSunoPrompt/buildVideoScriptPrompt/buildVoiceoverScript/
-     buildMarketingPrompt/buildCustomGptConfig/buildPhotoAnimationPrompt + buildLaunchPlan/
-     build30DayCalendar in p2p-haus.js). Marketing Haus is a modular namespaced app (studios with
-     styleDNA + per-studio fields) — so each becomes a Marketing "studio" fed by Marketing's own
-     inputs, not a literal copy of the launch-`data` version. Sizable, phased build.
+   - ✅ (a) demote DONE — bonus assets now open in a **popup**: a compact launcher chip flips the
+     whole section into a fixed-overlay modal (`wireBonusModal` + `.is-modal`), no DOM surgery.
+   - ✅ (b) clone DONE — **gap analysis** first: Marketing Haus already had 24 generators and already
+     covered Video Script (`short-form-video-script`), Photo Animation (`video-motion-prompt`), and
+     most of Full Ad Package (`video-ad-bundle`). So only the genuinely-missing ones were cloned as
+     **Pattern B Quick Generators** (declarative file + one script tag each, no ui.js edits):
+     **Suno Music, Video Ad Kit** (enhanced all-in-one: music bed + caption + checklist, kept
+     alongside the shot-focused Bundle), **Custom GPT Builder, 30-Day Content Calendar, Voiceover
+     Script**. **Campaign Plan + ROOTED Launch Plan stay in ROOTED only** (not cloned). Growth Haus
+     "Full Ad Package" tab renamed → "Video Ad Kit". All five live-verified in Quick Generators.
+     Pattern for future clones: `assets/marketing-haus-generators-<name>.js` +
+     `MarketingHaus.generatorEngine.registerGenerator({...})` + a `<script>` tag in
+     sections/marketing-haus.liquid (before marketing-haus-ui.js).
 3. **Evergreen conversion** — ✅ **Live/Evergreen mode toggle SHIPPED (Phase 8)** (bound to
    `appState.deepenMode`: Live = fixed-date plan; Evergreen = relative-day always-on funnel).
    Still could add: per-output evergreen variants + a Buyer GPT builder in Deepen.
