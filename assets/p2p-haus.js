@@ -4380,15 +4380,23 @@ function renderRootedStages() {
 // progress node lights up too. Bindings are attached once (data-bound guard).
 function renderTrailProgress() {
   const stages = appState.rootedStages || {};
-  const ids = ROOTED_STAGES.map((s) => s.id);
+  const list = ROOTED_STAGES;
+  const ids = list.map((s) => s.id);
   const done = ids.filter((id) => stages[id]).length;
   const fill = document.querySelector("[data-rr-fill]");
   const count = document.querySelector("[data-rr-count]");
   if (fill) fill.style.width = Math.round((done / ids.length) * 100) + "%";
   if (count) count.textContent = done + " of " + ids.length + " stages ready";
+
+  // Guided Mode: the "current" stage is the first one not yet marked done.
+  const current = list.find((s) => !stages[s.id]) || null;
+
   ids.forEach((id) => {
     const header = document.querySelector('[data-stage-station="' + id + '"]');
-    if (header) header.classList.toggle("is-stage-done", !!stages[id]);
+    if (header) {
+      header.classList.toggle("is-stage-done", !!stages[id]);
+      header.classList.toggle("is-current", !!current && current.id === id);
+    }
     const btn = document.querySelector('.jstop__act--done[data-rooted-stage="' + id + '"]');
     if (!btn) return;
     btn.classList.toggle("is-on", !!stages[id]);
@@ -4404,6 +4412,29 @@ function renderTrailProgress() {
       });
     }
   });
+
+  // "Continue your launch" — always points at the current stage (or celebrates when done).
+  const cont = document.querySelector("[data-rr-continue]");
+  if (cont) {
+    if (current) {
+      cont.textContent = (done > 0 ? "Continue with " : "Start with ") + current.name + " →";
+      cont.classList.remove("is-complete");
+      cont.dataset.target = current.id;
+    } else {
+      cont.textContent = "🎉 Launch complete — keep it evergreen →";
+      cont.classList.add("is-complete");
+      cont.dataset.target = "deepen";
+    }
+    if (!cont.dataset.bound) {
+      cont.dataset.bound = "1";
+      cont.addEventListener("click", () => {
+        const hdr = document.querySelector('[data-stage-station="' + cont.dataset.target + '"]');
+        if (!hdr) return;
+        if (hdr.getAttribute("aria-expanded") !== "true") hdr.click();
+        hdr.scrollIntoView({ behavior: "smooth", block: "center" });
+      });
+    }
+  }
 }
 
 // Live-vs-Evergreen toggle for Deepen (docs/ROOTED_Method.md's explicit
