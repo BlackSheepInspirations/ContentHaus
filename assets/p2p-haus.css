@@ -1078,8 +1078,23 @@
   align-self: start;
 }
 
-#p2p-haus-app .build-rail__above {
-  margin-bottom: 14px;
+#p2p-haus-app .build-rail__panel {
+  /* the single sidebar card; scrolls INTERNALLY if it ever gets taller than the viewport,
+     so nothing is cut off and no piece can overlap another. */
+  max-height: calc(100vh - var(--rail-sticky-top, 152px) - 24px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+#p2p-haus-app .build-rail__card > .rail-panel--flush {
+  margin-top: 0;
+  border-top: 0;
+}
+
+#p2p-haus-app .build-rail__pack {
+  margin: 14px 0 6px;
+  padding-top: 14px;
+  border-top: 1px solid var(--color-border);
 }
 
 /* Two widget blocks: a pinned progress card + a scrolling extras card. */
@@ -1538,8 +1553,6 @@
 }
 
 #p2p-haus-app .rail-panel__body { padding: 2px 0 6px;
-  max-height: 210px;
-  overflow-y: auto;
 }
 
 #p2p-haus-app .rail-item-row {

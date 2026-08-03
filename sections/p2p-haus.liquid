@@ -1959,45 +1959,32 @@
           </section>
         </form>
 
+          <!-- ONE clean sticky panel (modeled on Content Haus's .ph-body__preview): a single
+               card so the pieces can't overlap each other; the whole panel scrolls internally
+               if it ever gets taller than the viewport. -->
           <aside class="build-rail" aria-label="Build summary">
-            <!-- Your selections: sits ABOVE the pinned pack, scrolls normally -->
-            <div class="build-rail__above">
-              <div class="build-rail__card">
-                <div id="railBrandKit" class="rail-brandkit" hidden></div>
-                <details class="rail-panel" open>
-                  <summary class="rail-panel__summary">
-                    <span>Your selections</span>
-                    <span class="rail-panel__chev" aria-hidden="true">+</span>
-                  </summary>
-                  <div id="railSelections" class="rail-panel__body ingredient-review"></div>
-                </details>
-              </div>
-            </div>
+            <div class="build-rail__card build-rail__panel">
+              <!-- Your selections (above the pack) -->
+              <div id="railBrandKit" class="rail-brandkit" hidden></div>
+              <details class="rail-panel rail-panel--flush" open>
+                <summary class="rail-panel__summary">
+                  <span>Your selections</span>
+                  <span class="rail-panel__chev" aria-hidden="true">+</span>
+                </summary>
+                <div id="railSelections" class="rail-panel__body ingredient-review"></div>
+              </details>
 
-            <!-- Your pack: the ONLY sticky piece (pins as you scroll) -->
-            <div class="build-rail__pinned">
-              <div class="build-rail__card">
+              <!-- Your pack (readiness + generate) -->
+              <div class="build-rail__pack">
                 <p class="build-rail__eyebrow">Your pack</p>
                 <div id="railReadiness" class="build-rail__readiness"></div>
-                <button
-                  id="railGenerateBtn"
-                  type="button"
-                  class="build-rail__generate"
-                >
+                <button id="railGenerateBtn" type="button" class="build-rail__generate">
                   Generate my pack
                 </button>
-                <p
-                  id="railStatus"
-                  class="build-rail__status"
-                  role="status"
-                  aria-live="polite"
-                ></p>
+                <p id="railStatus" class="build-rail__status" role="status" aria-live="polite"></p>
               </div>
-            </div>
 
-            <!-- Vault + Recently Generated: below the pack, scroll normally -->
-            <div class="build-rail__extras">
-              <div class="build-rail__card">
+              <!-- Your Vault + Recently Generated (below the pack) -->
               <details class="rail-panel">
                 <summary class="rail-panel__summary">
                   <span>Your Vault <span id="railVaultCount" class="rail-panel__count">(0)</span></span>
@@ -2017,7 +2004,6 @@
               <button id="railClearAllBtn" type="button" class="rail-clear-all">
                 Clear all &amp; start over
               </button>
-              </div>
             </div>
           </aside>
         </div>
