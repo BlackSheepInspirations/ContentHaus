@@ -1,0 +1,81 @@
+/* =====================================================================
+   HAUS DESIGN SYSTEM — shared base (see docs/haus-design-system.md)
+   One stylesheet all six Hausen pull from. Each Haus sets its signature
+   by adding a `.haus--<name>` class on its app container; every accent
+   below keys off --haus-accent, so switching the Haus = switching one token.
+   Gold is a fixed universal accent (callout left-bars everywhere).
+   ===================================================================== */
+
+:root {
+  /* universal callout gold (never a Haus signature) */
+  --hds-gold-a: #c7902b;
+  --hds-gold-b: #e4ae3c;
+  --hds-gold-c: #f2d07e;
+
+  /* neutral surfaces (light "Haus" look) */
+  --hds-cream: #efece1;
+  --hds-card:  #ffffff;
+  --hds-ink:   #1e1b14;
+  --hds-muted: #6c6558;
+  --hds-line:  #e4dfd2;
+
+  /* default signature (burnt orange) — overridden by .haus--* below */
+  --haus-accent:       #e06a2b;
+  --haus-accent-deep:  #c2551f;
+  --haus-accent-light: #f4a259;
+}
+
+/* ---- The six Haus signatures (set on the app container) ---- */
+.haus--content   { --haus-accent:#e06a2b; --haus-accent-deep:#c2551f; --haus-accent-light:#f4a259; }
+.haus--growth    { --haus-accent:#14a880; --haus-accent-deep:#0c8f6a; --haus-accent-light:#57e2b4; }
+.haus--marketing { --haus-accent:#c51e98; --haus-accent-deep:#a2197e; --haus-accent-light:#e668bc; }
+.haus--graphics  { --haus-accent:#7c3aed; --haus-accent-deep:#5f27c4; --haus-accent-light:#a879f2; }
+.haus--project   { --haus-accent:#2560e6; --haus-accent-deep:#1b49c4; --haus-accent-light:#5a93f7; }
+.haus--brand     { --haus-accent:#c31d48; --haus-accent-deep:#a21339; --haus-accent-light:#e24e73; }
+
+/* ---- Section header: ✦ marker + hairline, then title / subtitle / description ---- */
+.hds-head { margin: 0 0 16px; }
+.hds-eyebrow { display:flex; align-items:center; gap:9px; margin-bottom:12px; }
+.hds-eyebrow__spark { color:var(--haus-accent); font-size:15px; line-height:1; flex:none; }
+.hds-eyebrow__lbl {
+  font-size:12px; font-weight:800; letter-spacing:.15em; text-transform:uppercase;
+  color:#3f3a30; white-space:nowrap;
+}
+.hds-eyebrow__rule { flex:1; height:1px; background:var(--hds-line); }
+.hds-title { font-size:22px; line-height:1.15; letter-spacing:-.01em; color:var(--hds-ink); margin:0 0 6px; }
+.hds-subtitle { font-size:12.5px; font-weight:700; letter-spacing:.02em; color:var(--haus-accent-deep); margin:0 0 9px; }
+.hds-desc { font-size:13.5px; line-height:1.5; color:var(--hds-muted); margin:0; }
+
+/* ---- Cards + accent bars ---- */
+.hds-card {
+  background:var(--hds-card); border:1px solid var(--hds-line); border-radius:16px;
+  box-shadow:0 6px 20px rgba(40,34,20,.06); overflow:hidden;
+}
+.hds-card__pad { padding:20px 22px 22px; }
+
+/* primary → thick TOP bar in the Haus signature */
+.hds-card--primary {
+  border-top:6px solid transparent;
+  border-image:linear-gradient(90deg, var(--haus-accent-deep), var(--haus-accent), var(--haus-accent-light)) 1;
+}
+/* callout → thick GOLD LEFT bar (same on every Haus) */
+.hds-card--callout {
+  border-left:6px solid transparent;
+  border-image:linear-gradient(180deg, var(--hds-gold-a), var(--hds-gold-b), var(--hds-gold-c)) 1;
+}
+
+/* ---- "White box + eyebrow" encasing (Companion / Make it a Video / Type / Presets) ---- */
+.hds-encase {
+  background:var(--hds-card); border:1px solid var(--hds-line); border-radius:14px; padding:16px 18px;
+}
+.hds-encase__eyebrow {
+  font-size:11px; font-weight:800; letter-spacing:.15em; text-transform:uppercase;
+  color:var(--haus-accent-deep); margin:0 0 10px;
+}
+
+/* ---- Hero: uniform black-opal + emerald/opal aurora on EVERY Haus (shared brand anchor).
+   The hero deliberately does NOT use --haus-accent — same background everywhere; per-Haus
+   identity lives in the accent bars above. (Detailed hero shell layered in at build time.) ---- */
+.hds-hero {
+  --hds-hero-opal-a:#0c8f6a; --hds-hero-opal-b:#14a880; --hds-hero-opal-c:#57e2b4;
+}
