@@ -1059,6 +1059,15 @@
   align-items: start;
 }
 
+/* The results + prompt-assembly sections live BELOW the grid at full width, so they slid
+   under the sticky rail on the right. Cap them to the form column's width (the left 2fr of
+   the 2fr/1fr grid, minus the gap) and left-align, so the sticky rail never sits on top. */
+#p2p-haus-app #resultsSection,
+#p2p-haus-app #promptAssemblySection {
+  max-width: calc((100% - 28px) / 3 * 2);
+  margin-right: auto;
+}
+
 #p2p-haus-app .build-rail {
   /* One compact sticky column (mirrors the other Hausen): the whole rail pins as a single
      unit, and its panels are height-capped + internally scrollable (see .rail-panel__body)
@@ -1591,6 +1600,11 @@
 
   #p2p-haus-app .build-rail {
     position: static;
+  }
+
+  #p2p-haus-app #resultsSection,
+  #p2p-haus-app #promptAssemblySection {
+    max-width: none;
   }
 
   #p2p-haus-app .build-rail__card {
