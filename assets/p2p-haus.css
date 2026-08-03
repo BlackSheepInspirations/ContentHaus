@@ -967,6 +967,22 @@
 #p2p-haus-app .rr-announce[hidden] { display: none;
 }
 
+/* Launch retro → next launch */
+#p2p-haus-app .rooted-retro { margin-top: 12px; padding: 14px; border: 1px solid color-mix(in srgb, var(--color-gold) 40%, var(--color-border)); border-radius: 12px; background: color-mix(in srgb, var(--color-gold) 7%, transparent);
+}
+#p2p-haus-app .rooted-retro[hidden] { display: none;
+}
+#p2p-haus-app .retro-head { font-weight: 800; font-size: 14px; color: var(--color-gold); margin-bottom: 8px;
+}
+#p2p-haus-app .retro-q { display: block; font-size: 13px; color: var(--color-text-muted);
+}
+#p2p-haus-app .retro-q textarea { display: block; width: 100%; margin-top: 6px; font-family: inherit; font-size: 13.5px; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--color-border); background: var(--color-surface, #14101f); color: var(--color-text, #efe9f7); resize: vertical;
+}
+#p2p-haus-app .rr-newlaunch { margin-top: 10px; width: 100%; cursor: pointer; font-family: inherit; font-weight: 800; font-size: 14px; padding: 11px 18px; border-radius: 12px; border: 0; color: #0b0910; background: linear-gradient(100deg, #27ae6e, #39c5c0); transition: transform 0.12s ease, filter 0.12s ease;
+}
+#p2p-haus-app .rr-newlaunch:hover { transform: translateY(-1px); filter: brightness(1.05);
+}
+
 #p2p-haus-app .journey__kit { border-top: 1px solid var(--color-border); padding-top: 4px;
 }
 

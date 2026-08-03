@@ -99,6 +99,8 @@ const appState = {
   // Per-stage asset checklist: { stageId: [bool per deliverable] }. Checking all of a
   // stage's assets auto-completes that stage (keeps rootedStages in sync).
   rootedAssets: {},
+  // Post-launch retro note (shown at the finish line); cleared when a new launch starts.
+  rootedRetro: "",
   // "live" (tied to this specific launch date) or "evergreen" (a rolling
   // sequence for whoever joins, any day) — changes Deepen's wording.
   deepenMode: "live",
@@ -4516,6 +4518,38 @@ function renderTrailProgress() {
         .catch(() => { announce.disabled = false; announce.textContent = label; try { showToast("Couldn't reach the community — check your connection.", "warning"); } catch (e) {} });
     });
   }
+
+  // Launch retro → next launch: at the finish line, capture a lesson + offer a clean reset for a fresh run.
+  const retro = document.querySelector("[data-retro]");
+  if (retro) {
+    retro.hidden = done !== ids.length;
+    const note = retro.querySelector("[data-retro-note]");
+    if (note) {
+      if (!note.dataset.bound) {
+        note.dataset.bound = "1";
+        note.value = appState.rootedRetro || "";
+        note.addEventListener("input", () => { appState.rootedRetro = note.value; try { saveCurrentProject(); } catch (e) {} });
+      } else if (document.activeElement !== note) {
+        note.value = appState.rootedRetro || "";
+      }
+    }
+    const nl = retro.querySelector("[data-rr-newlaunch]");
+    if (nl && !nl.dataset.bound) {
+      nl.dataset.bound = "1";
+      nl.addEventListener("click", () => {
+        if (!window.confirm("Start a fresh launch? This clears your ROOTED progress, checklists, and go-live date for a new run. (Your logged My Success items stay.)")) return;
+        appState.rootedStages = { reach: false, open: false, offer: false, trigger: false, escalate: false, deepen: false };
+        appState.rootedAssets = {};
+        appState.rootedRetro = "";
+        if (typeof writeValue === "function") writeValue("launchDateExact", "");
+        window.__rootedLaunchCelebrated = false;
+        saveCurrentProject();
+        renderTrailProgress();
+        try { renderRootedStages(); } catch (e) {}
+        try { showToast("🌱 Fresh launch started — walk the path again!", "success"); } catch (e) {}
+      });
+    }
+  }
 }
 
 // When a go-live date is set, each station shows its real date range (counting back from
@@ -5254,6 +5288,7 @@ function saveCurrentProject() {
       lastGeneratedSignature: appState.lastGeneratedSignature,
       rootedStages: appState.rootedStages,
       rootedAssets: appState.rootedAssets,
+      rootedRetro: appState.rootedRetro,
       deepenMode: appState.deepenMode,
       rootedQualityCheck: appState.rootedQualityCheck
     };
@@ -5305,6 +5340,7 @@ function restoreCurrentProject(showFeedback = false) {
       ...(project.rootedStages || {})
     };
     appState.rootedAssets = { ...(project.rootedAssets || {}) };
+    appState.rootedRetro = project.rootedRetro || "";
     appState.deepenMode = project.deepenMode === "evergreen" ? "evergreen" : "live";
     appState.rootedQualityCheck = {
       ...appState.rootedQualityCheck,
