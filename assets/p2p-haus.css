@@ -1052,7 +1052,9 @@
 /* ---------- Build layout + sticky Generate rail ---------- */
 #p2p-haus-app .build-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 300px;
+  /* Fractional columns (mirrors the other Hausen's .mh-body 2fr/1fr) so the rail SCALES
+     with the viewport instead of a fixed px width that overflows/overlaps at higher zoom. */
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
   gap: 28px;
   align-items: start;
 }
