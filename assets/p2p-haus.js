@@ -1177,6 +1177,16 @@ function applyPreset(key) {
   updateIngredientReview();
   updateValidationSummary();
   markResultsOutdated();
+
+  // The sample doubles as a ROOTED worked example: seed a go-live date ~2 weeks out so the
+  // trail shows a fully-dated launch (Reach a week before … Trigger on the day … Deepen after).
+  if (key === "sample") {
+    const d = new Date(); d.setDate(d.getDate() + 14);
+    const iso = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+    writeValue("launchDateExact", iso);
+    try { renderTrailProgress(); } catch (e) {}
+  }
+
   saveCurrentProject();
 
   if (preset.generate) {
