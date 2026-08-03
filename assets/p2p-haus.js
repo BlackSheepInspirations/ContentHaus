@@ -358,6 +358,7 @@ function initializeApplication() {
   renderTrailProgress();
   wireMakeHandoff();
   wireLeaveGuard();
+  wireBonusModal();
   renderRootedDeepenToggle();
   renderRootedQualityCheck();
   renderRootedCalendar(collectProjectData());
@@ -4864,6 +4865,40 @@ function showLeaveModal(href, destLabel) {
   if (go) go.focus();
 }
 
+// The bonus assets (formerly the big inline "Premium Output Modules" section) are demoted to
+// a popup: a compact launcher button opens the whole tabbed section as a fixed-overlay modal
+// (toggling the .is-modal class), keeping the ROOTED trail the star. No DOM surgery -- the
+// section and all its tabs/panels/copy buttons stay wired exactly as they are.
+function wireBonusModal() {
+  const section = document.getElementById("premiumSection");
+  if (!section || section.dataset.bonusBound) return;
+  section.dataset.bonusBound = "1";
+  const launcher = document.getElementById("bonusLauncherBtn");
+  const closeBtn = document.getElementById("bonusModalClose");
+
+  function onKey(e) {
+    if (e.key === "Escape") closeBonus();
+  }
+  function openBonus() {
+    section.hidden = false;
+    section.classList.add("is-modal");
+    section.scrollTop = 0;
+    document.addEventListener("keydown", onKey);
+  }
+  function closeBonus() {
+    section.classList.remove("is-modal");
+    section.hidden = true;
+    document.removeEventListener("keydown", onKey);
+  }
+
+  if (launcher) launcher.addEventListener("click", openBonus);
+  if (closeBtn) closeBtn.addEventListener("click", closeBonus);
+  // Click on the scrim (the overlay padding, not the content column) closes.
+  section.addEventListener("click", function (e) {
+    if (e.target === section) closeBonus();
+  });
+}
+
 function updateTrailLogTitles() {
   const product = ((typeof readValue === "function" ? readValue("productName") : "") || "").trim();
   const labels = { reach: "warm-up post", open: "teaser / waitlist", offer: "sales page live", trigger: "launch", escalate: "last call", deepen: "follow-up" };
@@ -5765,8 +5800,15 @@ function updateGeneratedVisibility() {
     promptAssemblySection.hidden = !hasResults;
   }
 
-  if (premiumSection) {
-    premiumSection.hidden = !hasResults;
+  // The bonus assets now live behind a launcher that opens them in a popup (keeps ROOTED
+  // the star). Show the launcher when there are results; the section stays hidden until the
+  // launcher opens it as a modal (see wireBonusModal), so we don't slam it shut mid-view.
+  const bonusLauncher = getElement("bonusLauncherBtn");
+  if (bonusLauncher) {
+    bonusLauncher.hidden = !hasResults;
+  }
+  if (premiumSection && !premiumSection.classList.contains("is-modal")) {
+    premiumSection.hidden = true;
   }
 }
 
