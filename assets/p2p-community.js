@@ -1057,6 +1057,9 @@
     pop.addEventListener('click', function (ev) { if (ev.target === pop) close(); });
     pop.querySelector('.osx-cal-pop-x').addEventListener('click', close);
   }
+  // Expose so the separate "Upcoming events" sidebar IIFE (renderUpcoming) can open the
+  // same detail card — it lives in a different IIFE and can't see openDay directly.
+  window.P2P_OPEN_EVENT_DAY = openDay;
 
   function initCal(cal) {
     if (cal.dataset.calInit) return; cal.dataset.calInit = '1';
@@ -1211,7 +1214,7 @@
         '<span class="osx-ev-txt"><span class="osx-ev-t">' + esc2(e.title || 'Live session') + (e.live ? ' <em class="osx-event-live">● LIVE</em>' : '') + '</span><span class="osx-ev-sub">' + esc2(e.time || 'Tap for details') + '</span></span>' +
         '</button>';
     }).join('');
-    box.querySelectorAll('[data-ev-open]').forEach(function (b) { b.addEventListener('click', function () { openDay(b.getAttribute('data-ev-open')); }); });
+    box.querySelectorAll('[data-ev-open]').forEach(function (b) { b.addEventListener('click', function () { if (window.P2P_OPEN_EVENT_DAY) window.P2P_OPEN_EVENT_DAY(b.getAttribute('data-ev-open')); }); });
   })();
   var calBtn = root.querySelector('[data-cal-open]');
   if (calBtn) calBtn.addEventListener('click', function () { openHolderModal('[data-cal-holder]', 'osx-expand-cal'); });
