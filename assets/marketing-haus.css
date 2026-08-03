@@ -2039,3 +2039,94 @@
   .mh-brand-header { max-width: none; }
   .mh-brand-header .mh-marketing__hero { margin-left: -16px; margin-right: -16px; margin-top: -40px; }
 }
+
+/* =====================================================================
+   MARKETING HAUS — design-system skin (docs/haus-design-system.md)
+   Mirror of the Content Haus reference, scoped to
+   #marketing-haus-app.haus--marketing. Marketing's signature is fuchsia
+   (--haus-accent from haus-design-system.css); callout gold + hds-* come
+   from the shared base. See memory: propagation = accent-remap + bars +
+   eyebrows. Marketing's structure is a sibling port of Content, so the
+   same class hooks (.mh-body__fields / .mh-body__preview / .mh-field-group
+   / .mh-preset-row / .mh-subpanel / .mh-styledna) apply 1:1.
+   ===================================================================== */
+
+/* 1 — Accent retint: legacy teal → Marketing's fuchsia signature. */
+#marketing-haus-app.haus--marketing {
+  --mh-teal: var(--haus-accent-deep);
+}
+
+/* 2 — Section header: section icon marker + trailing hairline. */
+#marketing-haus-app.haus--marketing .mh-field-group__title::after {
+  content: "";
+  flex: 1 1 auto;
+  min-width: 20px;
+  height: 1px;
+  margin-left: 6px;
+  background: var(--mh-border);
+}
+
+/* 3 — PRIMARY cards: fuchsia top bar on every build section (left col). */
+#marketing-haus-app.haus--marketing .mh-body__fields .mh-field-group {
+  position: relative;
+  padding-top: 20px;
+}
+#marketing-haus-app.haus--marketing .mh-body__fields .mh-field-group::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 5px;
+  border-radius: 10px 10px 0 0;
+  background: linear-gradient(90deg, var(--haus-accent-deep), var(--haus-accent), var(--haus-accent-light));
+}
+/* The Studio-Setup dark bar title promoted to a full-width gold eyebrow. */
+#marketing-haus-app.haus--marketing .mh-styledna__title {
+  flex-basis: 100%;
+  gap: 7px;
+  margin-bottom: 2px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--hds-gold-c);
+}
+/* A field-group nested in a white-box encasing doesn't restate the bar. */
+#marketing-haus-app.haus--marketing .hds-encase .mh-field-group,
+#marketing-haus-app.haus--marketing .mh-subpanel .mh-field-group {
+  padding-top: 16px;
+}
+#marketing-haus-app.haus--marketing .hds-encase .mh-field-group::before,
+#marketing-haus-app.haus--marketing .mh-subpanel .mh-field-group::before {
+  display: none;
+}
+
+/* 4 — SECONDARY cards: gold callout left-bar on every right-column widget. */
+#marketing-haus-app.haus--marketing .mh-body__preview > * {
+  box-shadow: inset 6px 0 0 0 var(--hds-gold-b);
+}
+
+/* 5 — White-box "eyebrow" encasings (Presets / any sub-panels). */
+#marketing-haus-app.haus--marketing .mh-preset-row {
+  background: #fff;
+  border: 1px solid var(--mh-border);
+  border-radius: 14px;
+  padding: 14px 16px 16px;
+}
+#marketing-haus-app.haus--marketing .mh-preset-row__label {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--haus-accent-deep);
+}
+#marketing-haus-app.haus--marketing .mh-subpanel {
+  background: #fff;
+  border: 1px solid var(--mh-border);
+  border-radius: 14px;
+  padding: 14px 16px 16px;
+}
+#marketing-haus-app.haus--marketing .hds-encase__eyebrow {
+  color: var(--haus-accent-deep);
+}

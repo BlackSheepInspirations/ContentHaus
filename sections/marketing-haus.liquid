@@ -20,21 +20,43 @@
 {% endif %}
 
 {{ 'marketing-haus.css' | asset_url | stylesheet_tag }}
+{{ 'haus-design-system.css' | asset_url | stylesheet_tag }}
 
 {% comment %}
   Rendered as a sibling of #marketing-haus-app, never inside it — the JS
-  does root.innerHTML = "" on every re-render.
+  does root.innerHTML = "" on every re-render. Shared design-system hero
+  (docs/haus-design-system.md) — same black-opal aurora as every Haus.
 {% endcomment %}
-<div class="mh-brand-header">
-  <div class="mh-marketing__hero">
-    <p class="mh-marketing__eyebrow">{{ section.settings.brand_eyebrow }}</p>
-    <h1 class="mh-marketing__heading">{{ section.settings.brand_heading | replace: 'Marketing', '<span class="mh-heading-accent">Marketing</span>' }}</h1>
-    <div class="mh-marketing__subheading">{{ section.settings.brand_subheading }}</div>
+<div class="mh-brand-header haus--marketing hds-hero">
+  <div class="hds-hero__inner">
+    <p class="hds-hero__eyebrow">{{ section.settings.brand_eyebrow }}</p>
+    <div class="hds-hero__grid">
+      <div class="hds-hero__intro">
+        <h1 class="hds-hero__title">{{ section.settings.brand_heading | replace: 'Marketing', '<span class="accent">Marketing</span>' }}</h1>
+        <div class="hds-hero__desc">{{ section.settings.brand_subheading }}</div>
+      </div>
+      <div class="hds-hero__media">
+        <div class="hds-hero__frame">
+          <video id="mhHowToVideo" class="hds-hero__video" controls preload="metadata" poster="{{ 'how-to-marketing-poster.jpg' | asset_url }}">
+            <source src="{{ 'how-to-marketing.mp4' | asset_url }}" type="video/mp4">
+          </video>
+          <div class="hds-hero__ph" id="mhHowToPlaceholder" hidden>
+            <span class="hds-hero__play" aria-hidden="true">&#9654;</span>
+            <p class="hds-hero__ph-title">Tutorial coming soon</p>
+            <p class="hds-hero__ph-note">A quick how-to for this studio</p>
+          </div>
+        </div>
+        <p class="hds-hero__caption">Watch: spin up a marketing asset in about 60 seconds.</p>
+      </div>
+    </div>
   </div>
+  <script>
+    (function(){var v=document.getElementById('mhHowToVideo'),ph=document.getElementById('mhHowToPlaceholder');if(!v||!ph)return;var s=v.querySelector('source');function show(){if(ph.hidden){ph.hidden=false;v.style.display='none';}}if(s)s.addEventListener('error',show);v.addEventListener('error',show);setTimeout(function(){if(!v.readyState)show();},2500);})();
+  </script>
 </div>
 
 {% if mh_has_access %}
-  <div id="marketing-haus-app" data-section-id="{{ section.id }}"></div>
+  <div id="marketing-haus-app" class="haus--marketing" data-section-id="{{ section.id }}"></div>
 
   <script src="{{ 'marketing-haus-util.js' | asset_url }}" defer="defer"></script>
   <script src="{{ 'marketing-haus-engine.js' | asset_url }}" defer="defer"></script>
