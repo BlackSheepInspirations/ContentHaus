@@ -34,8 +34,8 @@
       built into a launch.
     </p>
     <div class="p2p-preview__actions">
-      {% if p2p_owns and section.settings.tool_url != blank %}
-        <a class="p2p-preview__btn p2p-preview__btn--get" href="{{ section.settings.tool_url }}">Open the Haus</a>
+      {% if p2p_owns %}
+        <a class="p2p-preview__btn p2p-preview__btn--get" href="{{ section.settings.tool_url | default: '/pages/growth-haus' }}">Open the Haus</a>
       {% elsif section.settings.access_product %}
         <a class="p2p-preview__btn p2p-preview__btn--get" href="{{ section.settings.access_product.url }}">
           Get the Access Pass{% if section.settings.access_product.price %} — {{ section.settings.access_product.price | money }}{% endif %}
