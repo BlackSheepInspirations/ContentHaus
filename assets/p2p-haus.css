@@ -867,6 +867,18 @@
 #p2p-haus-app .jachieve b { color: var(--color-gold);
 }
 
+/* ROOTED station actions — Make (link to the right Haus) + Log (to My Success) */
+#p2p-haus-app .jstop__acts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+}
+#p2p-haus-app .jstop__act { display: inline-flex; align-items: center; gap: 4px; text-decoration: none; font-weight: 700; font-size: 0.8rem; line-height: 1; padding: 9px 13px; border-radius: 999px; border: 1px solid var(--color-border); transition: transform 0.12s ease, border-color 0.12s ease, background 0.12s ease;
+}
+#p2p-haus-app .jstop__act--make { color: var(--color-primary); background: color-mix(in srgb, var(--color-primary) 10%, transparent); border-color: color-mix(in srgb, var(--color-primary) 38%, var(--color-border));
+}
+#p2p-haus-app .jstop__act--log { color: var(--color-gold); background: color-mix(in srgb, var(--color-gold) 10%, transparent); border-color: color-mix(in srgb, var(--color-gold) 38%, var(--color-border));
+}
+#p2p-haus-app .jstop__act:hover { transform: translateY(-1px);
+}
+
 #p2p-haus-app .journey__kit { border-top: 1px solid var(--color-border); padding-top: 4px;
 }
 
