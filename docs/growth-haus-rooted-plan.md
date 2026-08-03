@@ -90,6 +90,23 @@ remain — they reach into other Haus apps (`marketing-haus.js` etc.), so map th
 - ✅ Brand DNA paste box retired (lean on "Load your Brand Kit").
 - ✅ Orphaned OS "ROOTED — Light the Path" view markup swept.
 - ✅ Worker ("Jessica") deployed with all 130 memes — no open worker deploy.
+- ✅ Masterclass player wiring (`p2p-player.js` + `p2p-learning-player.liquid`) — was
+  deployed live but never committed (missed in the Phase-50 `git add`); now committed.
+
+### Code scrub (full-surface QA pass) — done
+A cold adversarial review + live console sweep of the whole session surface. All JS
+parses, all Liquid schemas are valid, tag pairs balance. Three real bugs found & fixed:
+- **Finish-line celebration replayed on every reload** of a completed launch — the
+  once-guard was a transient `window.__rootedLaunchCelebrated` global that resets each
+  load. Now a persisted `appState.rootedCelebrated` flag (fires on the transition only).
+- **Two "mark done" controls disagreed** — the "Your ROOTED Progress" checklist set
+  `rootedStages` but not `rootedAssets`, so checking one asset would silently un-complete
+  a stage. The checklist handler now syncs assets like the trail button.
+- **`clearAllData` threw on a stale generator key** (removed/renamed generator left in
+  saved `generatorSettings`) → "New Project" half-cleared. Now guards + drops the key.
+- Verified: fresh live load throws **zero** console errors; the two older console
+  exceptions (`pad is not defined`, `clearAllData …fields`) were stale/pre-fix history,
+  not reproducing.
 
 ---
 
