@@ -107,7 +107,11 @@ const appState = {
   // The doc's 3-question check, run against a pasted draft before it ships.
   // Self-assessed, not auto-graded — "who's the hero"/"one problem"/"one
   // action" aren't mechanically checkable from text alone.
-  rootedQualityCheck: { draft: "", hero: false, problem: false, action: false }
+  rootedQualityCheck: { draft: "", hero: false, problem: false, action: false },
+  // True once the finish-line celebration (confetti + toast) has fired for this
+  // launch, so it doesn't replay on every reload of a completed launch. Re-arms
+  // when a stage is un-completed / a new launch starts (see renderTrailProgress).
+  rootedCelebrated: false
 };
 
 
@@ -4378,13 +4382,23 @@ function renderRootedStages() {
 
   container.querySelectorAll("[data-rooted-stage]").forEach((box) => {
     box.addEventListener("change", () => {
+      const id = box.dataset.rootedStage;
       appState.rootedStages = {
         ...appState.rootedStages,
-        [box.dataset.rootedStage]: box.checked
+        [id]: box.checked
       };
+      // Keep the station checklist in sync with the trail toggle: marking a stage
+      // done/undone here checks/unchecks all of its assets too, so the station's
+      // "X/N assets" count matches (otherwise checking one asset would re-derive
+      // allDone=false and silently un-complete the stage the user just marked).
+      const stg = ROOTED_STAGES.filter((s) => s.id === id)[0];
+      const items = stg ? stageAssetItems(stg) : [];
+      appState.rootedAssets = appState.rootedAssets || {};
+      appState.rootedAssets[id] = items.map(() => box.checked);
       saveCurrentProject();
       renderRootedStages();
       try { renderTrailProgress(); } catch (e) {}
+      try { renderStationAssets(); } catch (e) {}
     });
   });
 }
@@ -4404,16 +4418,21 @@ function renderTrailProgress() {
   if (count) count.textContent = done + " of " + ids.length + " stages ready";
 
   // Finish line: all 6 stages done → celebrate once + award the "Launched" badge (+points).
+  // The "celebrated" flag is PERSISTED in appState (not a transient window global), so the
+  // confetti + toast fire only on the transition to done — not on every reload of a
+  // completed launch. It re-arms when a stage is un-completed or a new launch is started.
   if (done === ids.length) {
-    if (!window.__rootedLaunchCelebrated) {
-      window.__rootedLaunchCelebrated = true;
+    if (!appState.rootedCelebrated) {
+      appState.rootedCelebrated = true;
+      saveCurrentProject();
       let firstTime = false;
       try { if (window.P2P && window.P2P.awardLaunch) { firstTime = window.P2P.awardLaunch(); if (window.P2P.push) window.P2P.push(); } } catch (e) {}
       try { showToast(firstTime ? "🎉 Launch complete! You earned the Launched badge (+225 pts)." : "🎉 Launch complete — go get 'em! 🚀", "success"); } catch (e) {}
       launchConfetti();
     }
-  } else {
-    window.__rootedLaunchCelebrated = false;
+  } else if (appState.rootedCelebrated) {
+    appState.rootedCelebrated = false;
+    saveCurrentProject();
   }
 
   // Guided Mode: the "current" stage is the first one not yet marked done.
@@ -5300,7 +5319,8 @@ function saveCurrentProject() {
       rootedAssets: appState.rootedAssets,
       rootedRetro: appState.rootedRetro,
       deepenMode: appState.deepenMode,
-      rootedQualityCheck: appState.rootedQualityCheck
+      rootedQualityCheck: appState.rootedQualityCheck,
+      rootedCelebrated: appState.rootedCelebrated
     };
 
     localStorage.setItem(
@@ -5356,6 +5376,7 @@ function restoreCurrentProject(showFeedback = false) {
       ...appState.rootedQualityCheck,
       ...(project.rootedQualityCheck || {})
     };
+    appState.rootedCelebrated = !!project.rootedCelebrated;
 
     initializeGeneratorSettings();
     synchronizeSelectedGenerators();
