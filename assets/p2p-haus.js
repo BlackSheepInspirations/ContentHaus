@@ -357,6 +357,7 @@ function initializeApplication() {
   renderRootedStages();
   renderTrailProgress();
   wireMakeHandoff();
+  wireLeaveGuard();
   renderRootedDeepenToggle();
   renderRootedQualityCheck();
   renderRootedCalendar(collectProjectData());
@@ -4755,6 +4756,112 @@ function wireMakeHandoff() {
     },
     true
   );
+}
+
+// "You're leaving Growth Haus" heads-up. Any in-content action link that navigates the
+// member off the page (Make -> another Haus, Log -> My Success, Enter the Evergreens) first
+// shows a friendly reminder that they can hop back to keep ROOTING, with a "don't show again"
+// opt-out (localStorage p2p_hide_leave_note). Does NOT touch the persistent nav rail. Runs in
+// the bubble phase so wireMakeHandoff's capture-phase href rewrite (prefill) lands first.
+var LEAVE_LABELS = {
+  "/pages/marketing-haus": "Marketing Haus",
+  "/pages/graphics-haus": "Graphics Haus",
+  "/pages/content-haus": "Content Haus",
+  "/pages/brand-haus": "Brand Haus",
+  "/pages/project-haus": "Project Haus",
+  "/pages/p2p-os": "My Success"
+};
+
+function leaveDestLabel(link, href) {
+  if (link.closest && link.closest(".rooted-evergreen-link")) return "the Evergreens";
+  const path = href.split("?")[0].split("#")[0].replace(/\/$/, "");
+  return LEAVE_LABELS[path] || "another page";
+}
+
+function wireLeaveGuard() {
+  if (document.__p2pLeaveGuard) return;
+  document.__p2pLeaveGuard = true;
+  document.addEventListener(
+    "click",
+    function (e) {
+      try {
+        if (localStorage.getItem("p2p_hide_leave_note") === "1") return; // opted out
+      } catch (err) {}
+      const link =
+        e.target && e.target.closest
+          ? e.target.closest(
+              ".jstop__act--make, .jstop__act--log, .rooted-evergreen-link a"
+            )
+          : null;
+      if (!link) return;
+      const href = link.getAttribute("href") || "";
+      if (!href || href.charAt(0) === "#") return; // in-page anchor -- not leaving
+      // honor new-tab intent (modifier / target=_blank): let the browser handle it
+      if (e.metaKey || e.ctrlKey || e.shiftKey || link.target === "_blank") return;
+      e.preventDefault();
+      showLeaveModal(href, leaveDestLabel(link, href));
+    },
+    false
+  );
+}
+
+function showLeaveModal(href, destLabel) {
+  const existing = document.getElementById("p2pLeaveModal");
+  if (existing) existing.remove();
+  const ov = document.createElement("div");
+  ov.id = "p2pLeaveModal";
+  ov.setAttribute("role", "dialog");
+  ov.setAttribute("aria-modal", "true");
+  ov.style.cssText =
+    "position:fixed;inset:0;z-index:100000;display:flex;align-items:center;justify-content:center;" +
+    "padding:20px;background:rgba(6,8,12,.72);";
+  ov.innerHTML =
+    '<div style="max-width:440px;width:100%;background:#12151c;color:#eaf2f0;' +
+    "border:1px solid rgba(120,220,210,.4);border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.5);" +
+    "padding:24px 24px 20px;font:400 15px/1.5 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;\">" +
+    '<div style="font-size:19px;font-weight:800;margin-bottom:8px;">🌱 You’re headed to ' +
+    destLabel +
+    "</div>" +
+    '<p style="margin:0 0 16px;opacity:.9;">Go make what you need &mdash; then hop right back to Growth Haus to <b>keep ROOTING</b>. Your launch stays right where you left it.</p>' +
+    '<label style="display:flex;align-items:center;gap:8px;font-size:13px;opacity:.8;margin-bottom:18px;cursor:pointer;">' +
+    '<input type="checkbox" id="p2pLeaveHide" style="width:16px;height:16px;flex:none;"> Don’t show me this again</label>' +
+    '<div style="display:flex;gap:10px;justify-content:flex-end;">' +
+    '<button type="button" id="p2pLeaveStay" style="padding:10px 16px;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:transparent;color:#eaf2f0;font-weight:600;cursor:pointer;">Stay here</button>' +
+    '<button type="button" id="p2pLeaveGo" style="padding:10px 18px;border-radius:10px;border:0;background:#39c5c0;color:#06222b;font-weight:800;cursor:pointer;">Continue &rarr;</button>' +
+    "</div></div>";
+  document.body.appendChild(ov);
+
+  function persistHide() {
+    const cb = document.getElementById("p2pLeaveHide");
+    if (cb && cb.checked) {
+      try {
+        localStorage.setItem("p2p_hide_leave_note", "1");
+      } catch (e) {}
+    }
+  }
+  function close() {
+    ov.remove();
+    document.removeEventListener("keydown", onKey);
+  }
+  function onKey(ev) {
+    if (ev.key === "Escape") close();
+  }
+  document.addEventListener("keydown", onKey);
+  ov.addEventListener("click", function (ev) {
+    if (ev.target === ov) close();
+  });
+  document
+    .getElementById("p2pLeaveStay")
+    .addEventListener("click", function () {
+      persistHide();
+      close();
+    });
+  document.getElementById("p2pLeaveGo").addEventListener("click", function () {
+    persistHide();
+    window.location.href = href;
+  });
+  const go = document.getElementById("p2pLeaveGo");
+  if (go) go.focus();
 }
 
 function updateTrailLogTitles() {
