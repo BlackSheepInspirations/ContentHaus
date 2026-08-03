@@ -20,13 +20,14 @@
 {% endif %}
 
 {{ 'prompt-builder.css' | asset_url | stylesheet_tag }}
+{{ 'haus-design-system.css' | asset_url | stylesheet_tag }}
 
 {% comment %}
   Rendered as a sibling of #prompt-haus-app, never inside it — the JS does
   root.innerHTML = "" on every re-render, which would wipe out any
   Liquid-rendered content placed inside that div.
 {% endcomment %}
-<div class="ph-brand-header">
+<div class="ph-brand-header haus--content">
   <div class="ph-marketing__hero">
     <p class="ph-marketing__eyebrow">{{ section.settings.brand_eyebrow }}</p>
     <h1 class="ph-marketing__heading">{{ section.settings.brand_heading | replace: 'Content', '<span class="ph-heading-accent">Content</span>' }}</h1>
@@ -35,7 +36,7 @@
 </div>
 
 {% if ph_has_access %}
-  <div id="prompt-haus-app" data-section-id="{{ section.id }}"></div>
+  <div id="prompt-haus-app" class="haus--content" data-section-id="{{ section.id }}"></div>
 
   <script src="{{ 'prompt-builder-styledna.js' | asset_url }}" defer="defer"></script>
   <script src="{{ 'prompt-builder-engine.js' | asset_url }}" defer="defer"></script>
