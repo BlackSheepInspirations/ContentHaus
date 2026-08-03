@@ -63,8 +63,8 @@ Full visual blueprint (artifact): *Growth Haus, Rebuilt on ROOTED* — regenerat
 3. **Evergreen conversion** — ✅ **Live/Evergreen mode toggle SHIPPED (Phase 8)** (bound to
    `appState.deepenMode`: Live = fixed-date plan; Evergreen = relative-day always-on funnel).
    Still could add: per-output evergreen variants + a Buyer GPT builder in Deepen.
-4. **Worked example + polish** — a sample product carried through all six stages so "what good
-   looks like" is one click away; general beginner-proofing.
+4. **Worked example** — ✅ **SHIPPED (Phase 11).** "See a sample launch" loads the Focus Planner
+   sample AND seeds a go-live date so the whole dated trail is demonstrated.
 
 ### Epic upgrades — make it a TRUE launch program (ideas, ranked)
 
@@ -78,10 +78,18 @@ Full visual blueprint (artifact): *Growth Haus, Rebuilt on ROOTED* — regenerat
 3. **A rewarding finish line** — ✅ **SHIPPED (Phase 6).** All 6 done → confetti + toast + the
    **"Launched" badge** (+225 pts one-time: R.launch 200 + badge 25) via `window.P2P.awardLaunch()`.
    (Still could add: the "turn this evergreen" flow off the finish line.)
-4. **Launch retro → next launch** — after Trigger, a quick "how did it go?" capturing
-   wins/testimonials, feeding Deepen and seeding the next run (repeatable engine).
-5. **"Launching this week" in Community** — announce the launch date to the flock for
-   accountability + hype; ties the program to the community.
+4. **Launch retro → next launch** — ✅ **SHIPPED (Phase 10).** Finish-line retro card (persisted
+   reflection) + a "Start my next launch" reset → ROOTED is now a repeatable engine.
+5. **"Launching this week" in Community** — ✅ **SHIPPED (Phase 9).** "Announce your launch to the
+   flock" posts the go-live date to the community for hype + accountability.
+
+**Everything above except #1 (Make→ pre-fill) and #2 (relocation) is now SHIPPED.** Those two
+remain — they reach into other Haus apps (`marketing-haus.js` etc.), so map those first.
+
+### Loose ends — cleared
+- ✅ Brand DNA paste box retired (lean on "Load your Brand Kit").
+- ✅ Orphaned OS "ROOTED — Light the Path" view markup swept.
+- ✅ Worker ("Jessica") deployed with all 130 memes — no open worker deploy.
 
 ---
 
