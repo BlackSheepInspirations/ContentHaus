@@ -1060,22 +1060,17 @@
 }
 
 #p2p-haus-app .build-rail {
-  /* The rail itself is NOT sticky — only "Your Pack" pins (see .build-rail__pinned),
-     so "Your selections" (above it) and the Vault/Recent (below it) scroll normally
-     instead of the whole tall rail sticking and hiding them. */
+  /* One compact sticky column (mirrors the other Hausen): the whole rail pins as a single
+     unit, and its panels are height-capped + internally scrollable (see .rail-panel__body)
+     so the rail stays compact and the pieces never scroll behind each other. On Shopify the
+     theme header is sticky; the embed sets --rail-sticky-top to clear it. */
+  position: sticky;
+  top: var(--rail-sticky-top, 20px);
   align-self: start;
 }
 
 #p2p-haus-app .build-rail__above {
   margin-bottom: 14px;
-}
-
-#p2p-haus-app .build-rail__pinned {
-  position: sticky;
-  /* On Shopify the theme header is sticky; the embed sets --rail-sticky-top
-     to clear it so "Your Pack" is never hidden underneath. Standalone: 20px. */
-  top: var(--rail-sticky-top, 20px);
-  z-index: 4;
 }
 
 /* Two widget blocks: a pinned progress card + a scrolling extras card. */
@@ -1534,6 +1529,8 @@
 }
 
 #p2p-haus-app .rail-panel__body { padding: 2px 0 6px;
+  max-height: 210px;
+  overflow-y: auto;
 }
 
 #p2p-haus-app .rail-item-row {
@@ -1592,8 +1589,7 @@
     grid-template-columns: 1fr;
   }
 
-  #p2p-haus-app .build-rail,
-  #p2p-haus-app .build-rail__pinned {
+  #p2p-haus-app .build-rail {
     position: static;
   }
 
