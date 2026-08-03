@@ -60,8 +60,9 @@ Full visual blueprint (artifact): *Growth Haus, Rebuilt on ROOTED* — regenerat
 2. **Relocate the premium modules** — physically move the old bolt-ons (Full Ad Package, video,
    voiceover, Suno, animate, marketing-campaign) out of Growth Haus into Marketing/Graphics, so
    Growth Haus only *links* to them.
-3. **Evergreen conversion** — give each stage output an evergreen version (see blueprint table);
-   make Evergreen Mode + Buyer GPT the standing lead engine in Deepen.
+3. **Evergreen conversion** — ✅ **Live/Evergreen mode toggle SHIPPED (Phase 8)** (bound to
+   `appState.deepenMode`: Live = fixed-date plan; Evergreen = relative-day always-on funnel).
+   Still could add: per-output evergreen variants + a Buyer GPT builder in Deepen.
 4. **Worked example + polish** — a sample product carried through all six stages so "what good
    looks like" is one click away; general beginner-proofing.
 
