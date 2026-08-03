@@ -6,3 +6,6 @@ node_modules/
 
 # Word/Office temp lock files
 ~$*
+
+# Generated ASCII-escaped worker paste copy (build artifact of ascii-escape.js)
+backend/p2p-progress-worker/worker.ascii.js

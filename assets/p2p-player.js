@@ -4,6 +4,7 @@
   if(!root) return;
   var course = root.getAttribute('data-course') || 'course';
   var courseTitle = root.getAttribute('data-course-title') || 'Course';
+  var isMasterclass = root.getAttribute('data-masterclass') === '1';
   var userName = root.getAttribute('data-user') || '';
   var storeKey = 'p2p_course_' + course + '_done';
 
@@ -76,6 +77,7 @@
       if(window.P2P) window.P2P.completeCourse(course); // First Steps / Finding Your Current
       recordCert(); // save the certificate so it can be re-viewed in Milestones
       if(window.P2P && window.P2P.awardCert) window.P2P.awardCert(course); // +25 once per course
+      if(isMasterclass && window.P2P && window.P2P.awardMasterclass) window.P2P.awardMasterclass(course); // +250 + "Masterclass" badge, once
       if(window.P2P && window.P2P.push) window.P2P.push(); // flush to cross-device backend
       bpCollect(); // capture newly-earned badges to celebrate after the certificate
       setTimeout(celebrate, 350);

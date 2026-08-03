@@ -25,6 +25,7 @@
      data-course="{{ section.settings.course_handle | default: 'course' | escape }}"
      data-course-title="{{ section.settings.course_title | default: 'Course' | escape }}"
      data-user="{{ uname | escape }}"
+     data-masterclass="{% if section.settings.is_masterclass %}1{% else %}0{% endif %}"
      data-certid=""
      style="--p2pp-sticky:{{ section.settings.sticky_offset | default: 0 }}px;">
 
@@ -191,6 +192,7 @@
     { "type": "text", "id": "course_kicker", "label": "Kicker", "default": "Course" },
     { "type": "text", "id": "course_title", "label": "Course title", "default": "Quick Wins That Count" },
     { "type": "text", "id": "course_handle", "label": "Course handle (for saved progress)", "default": "quick-wins" },
+    { "type": "checkbox", "id": "is_masterclass", "label": "This is a Masterclass", "info": "Completing this course earns the Masterclass badge (+250 pts), once per member.", "default": false },
     { "type": "text", "id": "sidebar_label", "label": "Sidebar label", "default": "Start Here" },
     { "type": "url", "id": "back_url", "label": "Back-to-map link" },
     { "type": "text", "id": "os_url", "label": "Operating System back-link (URL)", "info": "Second back link next to Journey Map. Leave blank to hide.", "default": "/pages/p2p-os" },
