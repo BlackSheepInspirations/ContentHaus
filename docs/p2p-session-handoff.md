@@ -411,3 +411,32 @@ Store password is OFF now (owner still gates by tag). **Live visual verification
 - **Content:** fill course pages; add theme-editor **event blocks** (with `iso_date` + cover image) to light up the Community/Members calendars; add **bonus download blocks** (with category/sub-category) to grow the accordion.
 - **Backlog:** Growth Haus + standalone Bonus page sections; **Masterclass Grad** needs a defined "masterclass" course type to auto-earn; expand Drea's house-voice bank (8 vs 12/16); post-media R2 upload + live Giphy key; house-vault expansion toward 600.
 - **Nominatim note:** browser fetch works (CORS ok, Referer = store domain); it's rate-limited (fine for occasional profile edits) — if it ever gets heavy, self-host or swap geocoder.
+
+## 2026-08-03 — Pre-launch QA sweep (3 parallel static audits + live console sweep)
+All code-fixable issues fixed, live-verified, committed. **Live console sweep** (Browser 1, tagged
+member) across OS home, Community, My Success, Realm 2, a course page, Content/Growth/Marketing Haus =
+**zero console errors, no broken images.** Static audits (gating/dead-links · journey/courses/progress ·
+community/members/success) found:
+- ✅ **BLOCKER fixed — Growth Haus gate was case-sensitive** (`P2P-haus-access`) in the OS shell while the
+  tool page downcases; a Growth-Haus-only member could be locked out of the OS entirely. Now case-
+  insensitive (`tags_lc`) in both p2p-os.liquid + p2p-os-nav.liquid (whole-page gate + per-nav-item gate).
+- ✅ **MAJOR fixed — Upcoming-events sidebar click threw** (`openDay` out of scope); the baked Aug-15
+  "Store Opens" event is the one item every member sees. Exposed `window.P2P_OPEN_EVENT_DAY`.
+- ✅ **MAJOR fixed — Milestones dead link** `/pages/p2p-badges` → `/pages/p2p-learning-badges` (3 spots).
+- ✅ **MAJOR fixed — Growth Haus preview owner button** defaulted (`| default: '/pages/growth-haus'`).
+- ✅ **MINOR fixed — orphaned page.p2p-course** stale `/pages/p2p-haus` → `/pages/p2p-os`.
+- ⚠️ **FALSE ALARM (verified, no change):** the "Masterclass/Launched badge name mismatch" — blocks ARE
+  named exactly "Masterclass"/"Launched" (p2p-learning-badges.liquid:262-263); they display fine.
+- **CLEAN:** journey locking (no traps, all 52 courses reachable), course player, progress engine
+  (fresh-account safe), planner/community/members (no empty-state throws), all worker endpoints matched.
+
+### ▶ Andrea smoke-test items (can't verify from code — Shopify admin / real member):
+1. Confirm the **Growth Haus Flow tag case** (fix works either way now, but good to know).
+2. Confirm the **5 realm pages** exist + assigned templates (handles p2p-learning, realm-2..5) — nav
+   hardcodes them; a missing one = 404 trap.
+3. Confirm **preview pages** exist (content-/project-/growth-haus-preview, etc.) — non-owner landing spot.
+4. Confirm **/pages/p2p-learning, /pages/p2p-tutorial, /pages/p2p-learning-badges** resolve.
+5. Confirm the **KV binding is live** (one logged-in round-trip) — community/members depend on it.
+6. **Click-through the journey board** — each node derives `/pages/courses-<handle>`; confirm pages exist.
+### Non-blocker radar: worker per-request KV scan needs pagination at scale; WoW reaction-sync cosmetic
+nit; dead snippet p2p-os-rail.liquid (unused).
