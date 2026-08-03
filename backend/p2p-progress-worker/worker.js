@@ -117,7 +117,8 @@ const RUTH_POSTS = [
   'A kind word: don\'t let a hard season convince you the whole story is hard. Chapters change. Keep turning the page.',
   'Something true: you were planted, not buried. What feels like the dark is just the soil doing its quiet work. 🌱'
 ];
-const ERIC_POSTS = [
+// Shared "Tuesday's Terrible Joke of the Day" bank — a rotating cast member (see JOKE_CAST) delivers one each Tuesday.
+const JOKE_POSTS = [
   'Why did the entrepreneur bring a ladder to the sales meeting? He heard the projections were through the roof. 😂',
   'I told my email list a joke about a broken pencil… it was pointless. But hey, at least I showed up. 📧✏️',
   'Why don\'t marketers ever get locked out? They always know the best entry points. 🚪',
@@ -134,6 +135,41 @@ const ERIC_POSTS = [
   'My startup idea? A gym for dad jokes. It\'s all about the puns and reps. 🏋️',
   'Why don\'t we ever tell secrets in the community? Because too many people are… followers. 👀',
   'I entered the annual pun contest and submitted ten. I figured no pun in ten did — but I showed up anyway. That\'s the whole lesson, kid. 😉'
+];
+// Tuesday's rotating cast — each week a different voice tells the shared groaner above, in-character.
+const JOKE_CAST = [
+  { name: 'Frank',      intro: 'Against my better judgment… here\'s your Tuesday groaner:' },
+  { name: 'Ruth',       intro: 'They say laughter\'s good medicine — so here\'s your dose: 😊' },
+  { name: 'Drea',       intro: 'Okay friend, you\'ve earned a good groan today. Ready? 💛' },
+  { name: 'Uncle Eric', intro: 'Buckle up, buttercup — you knew this was coming: 🖤🐑' }
+];
+// Uncle Eric's Friday memes (image posts). Hosted as theme assets on the live theme; cursor-rotates like the text banks.
+const ERIC_MEMES = [
+  'https://blacksheepcreations.com/cdn/shop/t/8/assets/eric-meme-01.jpg',
+  'https://blacksheepcreations.com/cdn/shop/t/8/assets/eric-meme-02.jpg',
+  'https://blacksheepcreations.com/cdn/shop/t/8/assets/eric-meme-03.jpg',
+  'https://blacksheepcreations.com/cdn/shop/t/8/assets/eric-meme-04.jpg',
+  'https://blacksheepcreations.com/cdn/shop/t/8/assets/eric-meme-05.jpg',
+  'https://blacksheepcreations.com/cdn/shop/t/8/assets/eric-meme-06.jpg',
+  'https://blacksheepcreations.com/cdn/shop/t/8/assets/eric-meme-07.jpg',
+  'https://blacksheepcreations.com/cdn/shop/t/8/assets/eric-meme-08.jpg',
+  'https://blacksheepcreations.com/cdn/shop/t/8/assets/eric-meme-09.jpg',
+  'https://blacksheepcreations.com/cdn/shop/t/8/assets/eric-meme-10.jpg',
+  'https://blacksheepcreations.com/cdn/shop/t/8/assets/eric-meme-11.jpg',
+  'https://blacksheepcreations.com/cdn/shop/t/8/assets/eric-meme-12.jpg',
+  'https://blacksheepcreations.com/cdn/shop/t/8/assets/eric-meme-13.jpg',
+  'https://blacksheepcreations.com/cdn/shop/t/8/assets/eric-meme-14.jpg',
+  'https://blacksheepcreations.com/cdn/shop/t/8/assets/eric-meme-15.jpg',
+  'https://blacksheepcreations.com/cdn/shop/t/8/assets/eric-meme-16.jpg',
+  'https://blacksheepcreations.com/cdn/shop/t/8/assets/eric-meme-17.jpg',
+  'https://blacksheepcreations.com/cdn/shop/t/8/assets/eric-meme-18.jpg',
+  'https://blacksheepcreations.com/cdn/shop/t/8/assets/eric-meme-19.jpg',
+  'https://blacksheepcreations.com/cdn/shop/t/8/assets/eric-meme-20.jpg',
+  'https://blacksheepcreations.com/cdn/shop/t/8/assets/eric-meme-21.jpg',
+  'https://blacksheepcreations.com/cdn/shop/t/8/assets/eric-meme-22.jpg',
+  'https://blacksheepcreations.com/cdn/shop/t/8/assets/eric-meme-23.jpg',
+  'https://blacksheepcreations.com/cdn/shop/t/8/assets/eric-meme-24.jpg',
+  'https://blacksheepcreations.com/cdn/shop/t/8/assets/eric-meme-25.jpg'
 ];
 const DREA_POSTS = [
   'Hey friend. I know this week might have felt heavier than you let on. I just want you to hear this: you are not behind. You are not too late. The very fact that you\'re here, still building, still believing — that is the win. Take a breath with me. You\'re doing better than you think. 🤍',
@@ -178,9 +214,10 @@ const RANGES = { day: 864e5, week: 7 * 864e5, month: 30 * 864e5, year: 365 * 864
 // House voices: which day (0 Sun..6 Sat), byline, title, and content bank.
 const HOUSE = [
   { day: 1, id: 'house-frank', name: 'Frank', title: 'Let me be Frank with you…', bank: FRANK_POSTS, cursor: 'house-cursor:frank' },
+  { day: 2, id: 'house-joke', kind: 'joke', title: 'Tuesday\'s Terrible Joke of the Day', bank: JOKE_POSTS, cursor: 'house-cursor:joke', castCursor: 'house-cursor:jokecast' },
   { day: 3, id: 'house-drea', name: 'Drea', title: 'Drea\'s Mid‑Week Heart Check', bank: DREA_POSTS, cursor: 'house-cursor:drea' },
   { day: 4, id: 'house-ruth', name: 'Ruth', title: 'A Word from Ruth', bank: RUTH_POSTS, cursor: 'house-cursor:ruth' },
-  { day: 5, id: 'house-eric', name: 'Uncle Eric', title: 'Uncle Eric\'s Baaad Jokes', bank: ERIC_POSTS, cursor: 'house-cursor:eric' }
+  { day: 5, id: 'house-eric', name: 'Uncle Eric', kind: 'meme', title: 'A lil\' Snark Before the Weekend', bank: ERIC_MEMES, cursor: 'house-cursor:eric' }
 ];
 
 export default {
@@ -708,7 +745,20 @@ export default {
       if ((await kv.get('house-last:' + h.id)) === today) continue;   // already posted today
       const idx = parseInt((await kv.get(h.cursor)) || '0', 10) || 0;
       const id = Date.now() + '-' + h.id;
-      await kv.put('post:' + id, JSON.stringify({ id, author: h.id, name: h.name, title: h.title, text: h.bank[idx % h.bank.length], kind: 'post', category: 'general', house: true, ts: Date.now() }));
+      let post;
+      if (h.kind === 'joke') {
+        // Rotating cast: pick this week's voice, prepend their in-character intro to the shared groaner.
+        const ci = parseInt((await kv.get(h.castCursor)) || '0', 10) || 0;
+        const cast = JOKE_CAST[ci % JOKE_CAST.length];
+        post = { id, author: h.id, name: cast.name, title: h.title, text: cast.intro + '\n\n' + h.bank[idx % h.bank.length], kind: 'post', category: 'general', house: true, ts: Date.now() };
+        await kv.put(h.castCursor, String(ci + 1));
+      } else if (h.kind === 'meme') {
+        // Image post: the meme IS the content; carry it as an attachment, no body text.
+        post = { id, author: h.id, name: h.name, title: h.title, text: '', kind: 'post', category: 'general', house: true, attachments: [{ type: 'image', url: h.bank[idx % h.bank.length] }], ts: Date.now() };
+      } else {
+        post = { id, author: h.id, name: h.name, title: h.title, text: h.bank[idx % h.bank.length], kind: 'post', category: 'general', house: true, ts: Date.now() };
+      }
+      await kv.put('post:' + id, JSON.stringify(post));
       await kv.put(h.cursor, String(idx + 1));
       await kv.put('house-last:' + h.id, today);
     }
