@@ -161,6 +161,55 @@
       '<div class="osx-cm-add"><button type="button" class="osx-cm-tool" data-cm-emoji="' + esc(p.id) + '" title="Add an emoji" aria-label="Add an emoji">😊</button><button type="button" class="osx-cm-tool" data-cm-img="' + esc(p.id) + '" title="Add a photo" aria-label="Add a photo">🖼️</button><button type="button" class="osx-cm-tool" data-cm-gif="' + esc(p.id) + '" title="Add a GIF" aria-label="Add a GIF">GIF</button><button type="button" class="osx-cm-tool" data-cm-link="' + esc(p.id) + '" title="Add a link" aria-label="Add a link">🔗</button><input class="osx-cm-input" data-cm-input="' + esc(p.id) + '" maxlength="600" placeholder="Write a reply…"><button class="osx-cm-send" type="button" data-cm-send="' + esc(p.id) + '">Reply</button></div>' +
     '</div>';
   }
+  // Device media upload → R2 via the worker (/apps/p2p/upload, kind:'post'). Photos are resized
+  // client-side (max 1280px, JPEG q0.85); GIFs upload as-is to preserve animation.
+  function pickImageFile(onFile) {
+    var inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'image/*';
+    inp.style.position = 'fixed'; inp.style.left = '-9999px'; inp.style.opacity = '0';
+    document.body.appendChild(inp);
+    inp.addEventListener('change', function () { var f = inp.files && inp.files[0]; if (inp.parentNode) inp.parentNode.removeChild(inp); if (f) onFile(f); });
+    inp.click();
+  }
+  function uploadMedia(file, onDone, onErr) {
+    onErr = onErr || function () {};
+    if (!file) return onErr();
+    if (!/^image\//.test(file.type)) { alert('Please choose an image or GIF file.'); return onErr(); }
+    if (file.size > 12 * 1024 * 1024) { alert('That file is too big (max 12MB).'); return onErr(); }
+    var isGif = /gif$/i.test(file.type);
+    function send(dataUrl, type) {
+      fetch('/apps/p2p/upload', { method: 'POST', headers: { 'content-type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify({ kind: 'post', data: dataUrl }) })
+        .then(function (r) { return r.json(); })
+        .then(function (j) {
+          if (j && j.ok && j.url) { onDone({ type: type, url: j.url }); }
+          else if (j && j.error === 'no_store') { alert('Photo uploads aren’t switched on yet — paste a URL for now.'); onErr(); }
+          else if (j && j.error === 'too_large') { alert('That image is too large even after resizing — try a smaller one.'); onErr(); }
+          else if (j && j.error === 'guest') { alert('Please sign in to upload photos.'); onErr(); }
+          else { alert('Upload failed' + (j && j.error ? ' (' + j.error + ')' : '') + '.'); onErr(); }
+        })
+        .catch(function () { alert('Upload failed — check your connection.'); onErr(); });
+    }
+    var fr = new FileReader();
+    fr.onload = function () {
+      if (isGif) {
+        if (file.size > 3 * 1024 * 1024) { alert('That GIF is too large (max 3MB) — try a smaller one.'); return onErr(); }
+        send(fr.result, 'gif');
+      } else {
+        var im = new Image();
+        im.onload = function () {
+          var MAX = 1280, w = im.width, h = im.height;
+          if (w > MAX || h > MAX) { var sc = MAX / Math.max(w, h); w = Math.round(w * sc); h = Math.round(h * sc); }
+          var cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+          try { cv.getContext('2d').drawImage(im, 0, 0, w, h); } catch (e) { alert('Couldn’t process that image.'); return onErr(); }
+          var out; try { out = cv.toDataURL('image/jpeg', 0.85); } catch (e) { alert('Couldn’t process that image.'); return onErr(); }
+          send(out, 'image');
+        };
+        im.onerror = function () { alert('Couldn’t read that image.'); onErr(); };
+        im.src = fr.result;
+      }
+    };
+    fr.onerror = function () { alert('Couldn’t read that file.'); onErr(); };
+    fr.readAsDataURL(file);
+  }
   function addCmAtt(container, id, att) {
     var arr = cmPendingAtts[id] || (cmPendingAtts[id] = []);
     if (arr.length >= 2) { alert('Up to 2 images per reply.'); return; }
@@ -169,7 +218,7 @@
   function renderCmAtts(container, id) {
     var wrap = container.querySelector('[data-cm-atts="' + id + '"]'); if (!wrap) return;
     var arr = cmPendingAtts[id] || [];
-    wrap.innerHTML = arr.map(function (a, i) { return '<span class="osx-cm-attpend"><img src="' + esc(a.url) + '" alt=""><button type="button" data-cm-attrm="' + i + '" aria-label="Remove">✕</button></span>'; }).join('');
+    wrap.innerHTML = arr.map(function (a, i) { if (a.type === 'uploading') return '<span class="osx-cm-attpend osx-cm-attpend-up">⏳</span>'; return '<span class="osx-cm-attpend"><img src="' + esc(a.url) + '" alt=""><button type="button" data-cm-attrm="' + i + '" aria-label="Remove">✕</button></span>'; }).join('');
     wrap.querySelectorAll('[data-cm-attrm]').forEach(function (b) { b.addEventListener('click', function () { arr.splice(+b.getAttribute('data-cm-attrm'), 1); renderCmAtts(container, id); }); });
   }
   function commenterAvatars(p) {
@@ -424,9 +473,13 @@
     container.querySelectorAll('[data-cm-link]').forEach(function (b) { b.addEventListener('click', function () { var inp = container.querySelector('[data-cm-input="' + b.getAttribute('data-cm-link') + '"]'); insertLink(inp); }); });
     container.querySelectorAll('[data-cm-img]').forEach(function (b) { b.addEventListener('click', function () {
       var id = b.getAttribute('data-cm-img');
-      var url = window.prompt('Paste an image or GIF URL:', 'https://'); if (!url) return; url = url.trim();
-      if (!/^https?:\/\//i.test(url)) { alert('Please paste a full http(s) link.'); return; }
-      addCmAtt(container, id, { type: 'image', url: url });
+      var arr = cmPendingAtts[id] || (cmPendingAtts[id] = []);
+      if (arr.length >= 2) { alert('Up to 2 images per reply.'); return; }
+      pickImageFile(function (f) {
+        var ph = { type: 'uploading' }; arr.push(ph); renderCmAtts(container, id);
+        uploadMedia(f, function (att) { var i = arr.indexOf(ph); if (i > -1) arr.splice(i, 1, att); else if (arr.length < 2) arr.push(att); renderCmAtts(container, id); },
+          function () { var i = arr.indexOf(ph); if (i > -1) arr.splice(i, 1); renderCmAtts(container, id); });
+      });
     }); });
     container.querySelectorAll('[data-cm-gif]').forEach(function (b) { b.addEventListener('click', function () {
       var id = b.getAttribute('data-cm-gif');
@@ -788,10 +841,10 @@
       '<div class="osx-comp-atts" data-comp-atts></div>' +
       '<div class="osx-comp-bar"><div class="osx-comp-tools">' +
         '<button type="button" class="osx-comp-tool" data-tool="emoji" title="Emoji">😀</button>' +
-        '<button type="button" class="osx-comp-tool" data-tool="image" title="Add image (URL)">🖼️</button>' +
-        '<button type="button" class="osx-comp-tool" data-tool="gif" title="Add GIF (URL)">GIF</button>' +
+        '<button type="button" class="osx-comp-tool" data-tool="upload" title="Upload a photo or GIF from your device">📷</button>' +
+        '<button type="button" class="osx-comp-tool" data-tool="gif" title="Add a GIF (Giphy)">GIF</button>' +
         '<button type="button" class="osx-comp-tool" data-tool="video" title="Add video (YouTube/Loom/Vimeo)">▶️</button>' +
-        '<button type="button" class="osx-comp-tool" data-tool="link" title="Add link">🔗</button>' +
+        '<button type="button" class="osx-comp-tool" data-tool="link" title="Add an image or link URL">🔗</button>' +
       '</div>' +
       '<select class="osx-comp-cat" data-comp-cat>' + cats.map(function (c) { return '<option value="' + c.key + '"' + (c.key === selCat ? ' selected' : '') + '>' + esc(catEmoji(c.key) + ' ' + catLabel(c.key)) + '</option>'; }).join('') + '</select></div>' +
       '<div class="osx-comp-foot"><button type="button" class="osx-comp-cancel">Cancel</button><button type="button" class="osx-comp-post">Post</button></div></div>';
@@ -802,7 +855,11 @@
     pop.querySelector('.osx-cal-pop-x').addEventListener('click', close);
     pop.querySelector('.osx-comp-cancel').addEventListener('click', close);
     function renderAtts() {
-      attWrap.innerHTML = atts.map(function (a, i) { return '<span class="osx-comp-att">' + (a.type === 'youtube' ? '▶️' : a.type === 'link' ? '🔗' : '🖼️') + ' ' + esc((a.title || a.url).slice(0, 42)) + '<button type="button" data-att-rm="' + i + '" aria-label="Remove">✕</button></span>'; }).join('');
+      attWrap.innerHTML = atts.map(function (a, i) {
+        if (a.type === 'uploading') return '<span class="osx-comp-att osx-comp-att-up">⏳ Uploading…</span>';
+        var ic = (a.type === 'youtube' || a.type === 'video') ? '▶️' : a.type === 'link' ? '🔗' : a.type === 'gif' ? '🎞️' : '🖼️';
+        return '<span class="osx-comp-att">' + ic + ' ' + esc((a.title || a.url).slice(0, 42)) + '<button type="button" data-att-rm="' + i + '" aria-label="Remove">✕</button></span>';
+      }).join('');
       attWrap.querySelectorAll('[data-att-rm]').forEach(function (b) { b.addEventListener('click', function () { atts.splice(+b.getAttribute('data-att-rm'), 1); renderAtts(); }); });
     }
     pop.querySelectorAll('[data-tool]').forEach(function (b) {
@@ -810,10 +867,20 @@
         var t = b.getAttribute('data-tool');
         if (t === 'emoji') { openEmoji(b, body); return; }
         if (t === 'gif') { openGiphy(b, function (u) { if (atts.length < 6) { atts.push({ type: 'gif', url: u }); renderAtts(); } else alert('Up to 6 attachments per post.'); }); return; }
+        if (t === 'upload') {
+          if (atts.length >= 6) { alert('Up to 6 attachments per post.'); return; }
+          pickImageFile(function (f) {
+            var ph = { type: 'uploading' };
+            atts.push(ph); renderAtts();
+            uploadMedia(f, function (att) { var i = atts.indexOf(ph); if (i > -1) atts.splice(i, 1, att); else if (atts.length < 6) atts.push(att); renderAtts(); },
+              function () { var i = atts.indexOf(ph); if (i > -1) atts.splice(i, 1); renderAtts(); });
+          });
+          return;
+        }
         if (atts.length >= 6) { alert('Up to 6 attachments per post.'); return; }
-        var label = t === 'video' ? 'Paste a YouTube, Loom, or Vimeo link:' : t === 'image' ? 'Paste an image URL:' : 'Paste a link URL:';
+        var label = t === 'video' ? 'Paste a YouTube, Loom, or Vimeo link:' : 'Paste an image or link URL:';
         var url = window.prompt(label, 'https://'); if (!url) return; url = url.trim(); if (!/^https?:\/\//i.test(url)) { alert('Please paste a full http(s) link.'); return; }
-        atts.push({ type: t, url: url }); renderAtts();
+        atts.push({ type: t === 'video' ? 'video' : 'link', url: url }); renderAtts();
       });
     });
     postB.addEventListener('click', function () {

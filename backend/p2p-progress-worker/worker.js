@@ -854,6 +854,14 @@ function sanitizeUrl(u) {
   u = String(u || '').trim();
   return /^https?:\/\/[^\s]+$/i.test(u) ? u.slice(0, 400) : '';
 }
+// Like sanitizeUrl, but also accepts our own R2-backed upload path (returned by /upload when no
+// public bucket base is configured) so device-uploaded post/comment images survive sanitation.
+function sanitizeMediaUrl(u) {
+  u = String(u || '').trim();
+  if (/^https?:\/\/[^\s]+$/i.test(u)) return u.slice(0, 400);
+  if (/^\/apps\/p2p\/imgget\?key=[\w.%\-]+$/i.test(u)) return u.slice(0, 400);
+  return '';
+}
 // Accept a handle (@drea), a bare domain (yoursite.com), or a full link — always store a full https URL.
 function socialUrlKey(key, raw) {
   raw = String(raw || '').trim(); if (!raw) return '';
@@ -888,7 +896,7 @@ function sanitizeAttachments(a, max) {
   for (const raw of a.slice(0, lim)) {
     if (!raw || typeof raw !== 'object') continue;
     const type = ['image', 'gif', 'youtube', 'link'].indexOf(raw.type) > -1 ? raw.type : 'link';
-    const url = sanitizeUrl(raw.url);
+    const url = (type === 'image' || type === 'gif') ? sanitizeMediaUrl(raw.url) : sanitizeUrl(raw.url);
     if (!url) continue;
     const att = { type, url };
     if (type === 'youtube') { const vid = youTubeId(url); if (!vid) continue; att.vid = vid; }
