@@ -356,6 +356,7 @@ function initializeApplication() {
   initPremiumTabs();
   renderRootedStages();
   renderTrailProgress();
+  wireMakeHandoff();
   renderRootedDeepenToggle();
   renderRootedQualityCheck();
   renderRootedCalendar(collectProjectData());
@@ -4709,6 +4710,53 @@ function launchConfetti() {
 
 // Pre-fill: each station's "Log this →" carries the product name + a stage label into the My
 // Success add-flow title, so the logged item lands pre-named instead of blank.
+// When a station's "Make ->" opens ANOTHER Haus (a /pages/ link, not the in-page
+// generator anchor), stash the Launch Profile so that Haus can open pre-filled with the
+// brand name + audience the member already entered here — the "no back-and-forth" magic.
+// Bound once, capture-phase so the href is updated before the browser navigates (which
+// preserves cmd/ctrl-click to open in a new tab). Writes nothing if the profile is empty.
+function wireMakeHandoff() {
+  if (document.__p2pMakeHandoff) return;
+  document.__p2pMakeHandoff = true;
+  document.addEventListener(
+    "click",
+    function (e) {
+      const link =
+        e.target && e.target.closest ? e.target.closest(".jstop__act--make") : null;
+      if (!link) return;
+      const href = link.getAttribute("href") || "";
+      // Only page destinations (other Hausen). The in-page anchor (#generatorLibraryTitle)
+      // is Growth Haus's own generator, which already holds this data — nothing to hand off.
+      if (href.indexOf("/pages/") !== 0) return;
+      try {
+        const rv = (id) =>
+          (typeof readValue === "function" ? readValue(id) || "" : "").trim();
+        const profile = {
+          product: rv("productName"),
+          audience: rv("targetAudience"),
+          problem: rv("buyerProblem"),
+          outcome: rv("buyerOutcome"),
+          offerType: rv("offerType"),
+          price: rv("currentPrice"),
+          offerDetails: rv("pricingCustom"),
+          brand: rv("brandName"),
+          tone: rv("brandTone")
+        };
+        const hasAny = Object.keys(profile).some((k) => profile[k]);
+        if (!hasAny) return; // nothing entered yet — let the plain link through
+        localStorage.setItem("p2p_launch_prefill", JSON.stringify(profile));
+        if (!/[?&]prefill=1(?:&|$)/.test(href)) {
+          link.setAttribute(
+            "href",
+            href + (href.indexOf("?") === -1 ? "?" : "&") + "prefill=1"
+          );
+        }
+      } catch (err) {}
+    },
+    true
+  );
+}
+
 function updateTrailLogTitles() {
   const product = ((typeof readValue === "function" ? readValue("productName") : "") || "").trim();
   const labels = { reach: "warm-up post", open: "teaser / waitlist", offer: "sales page live", trigger: "launch", escalate: "last call", deepen: "follow-up" };
