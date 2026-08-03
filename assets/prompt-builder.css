@@ -1873,3 +1873,109 @@
   .ph-brand-header { max-width: none; }
   .ph-brand-header .ph-marketing__hero { margin-left: -16px; margin-right: -16px; margin-top: -40px; }
 }
+
+/* =====================================================================
+   CONTENT HAUS — design-system skin (docs/haus-design-system.md)
+   Scoped to #prompt-haus-app.haus--content: the reference build for the
+   cross-Haus look. Retints the legacy teal accent to Content's burnt-
+   orange signature, adds PRIMARY top-bars (left build column) + GOLD
+   callout left-bars (right widgets column), the section-icon + hairline
+   header, and the white-box "eyebrow" encasings (Type/Companion/Video/
+   Presets). --haus-accent* and --hds-gold* come from haus-design-system.css.
+   ===================================================================== */
+
+/* 1 — Accent retint. The whole tool was painted teal; Content wears burnt
+   orange. The deep tone keeps small text + fills legible on cream/white. */
+#prompt-haus-app.haus--content {
+  --ph-teal: var(--haus-accent-deep);
+}
+
+/* 2 — Section header: the section's own icon stays the ✦ marker; a hairline
+   rule trails to the right (the Content-Haus header treatment). */
+#prompt-haus-app.haus--content .ph-field-group__title::after {
+  content: "";
+  flex: 1 1 auto;
+  min-width: 20px;
+  height: 1px;
+  margin-left: 6px;
+  background: var(--ph-border);
+}
+
+/* 3 — PRIMARY cards: burnt-orange top bar on every build section (left col). */
+#prompt-haus-app.haus--content .ph-body__fields .ph-field-group {
+  position: relative;
+  padding-top: 20px;
+}
+#prompt-haus-app.haus--content .ph-body__fields .ph-field-group::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 5px;
+  border-radius: 10px 10px 0 0;
+  background: linear-gradient(90deg, var(--haus-accent-deep), var(--haus-accent), var(--haus-accent-light));
+}
+/* The top "Project Setup" dark bar — its title promoted to a full-width
+   eyebrow above the fields (Andrea's ask), rather than sitting inline with
+   the first field row. */
+#prompt-haus-app.haus--content .ph-styledna__title {
+  flex-basis: 100%;
+  gap: 7px;
+  margin-bottom: 2px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--ph-gold);
+}
+/* A field-group nested inside a white-box encasing (Companion slots, Video
+   settings) doesn't restate the bar — the encasing already frames it. */
+#prompt-haus-app.haus--content .hds-encase .ph-field-group,
+#prompt-haus-app.haus--content .ph-subpanel .ph-field-group {
+  padding-top: 16px;
+}
+#prompt-haus-app.haus--content .hds-encase .ph-field-group::before,
+#prompt-haus-app.haus--content .ph-subpanel .ph-field-group::before {
+  display: none;
+}
+
+/* 4 — SECONDARY cards: gold callout left-bar on every right-column widget
+   (Built Live / Vault / Recently Generated / Brand Kit / FAQs). Inset shadow
+   respects each card's border-radius and its own dark/light background. */
+#prompt-haus-app.haus--content .ph-body__preview > * {
+  box-shadow: inset 6px 0 0 0 var(--hds-gold-b);
+}
+
+/* 5 — White-box "eyebrow" encasings. */
+/* Starter Presets — white box, label promoted to an eyebrow. */
+#prompt-haus-app.haus--content .ph-preset-row {
+  background: #fff;
+  border: 1px solid var(--ph-border);
+  border-radius: 14px;
+  padding: 14px 16px 16px;
+}
+#prompt-haus-app.haus--content .ph-preset-row__label {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--haus-accent-deep);
+}
+/* Companion / Make it a Video — the collapsible sub-panels read as white boxes. */
+#prompt-haus-app.haus--content .ph-subpanel {
+  background: #fff;
+  border: 1px solid var(--ph-border);
+  border-radius: 14px;
+  padding: 14px 16px 16px;
+}
+/* Type — Human / Animal Mascot picker, framed by hds-encase with its eyebrow. */
+#prompt-haus-app.haus--content .ph-encase--type {
+  margin-bottom: 16px;
+}
+#prompt-haus-app.haus--content .ph-encase--type .ph-basetype-toggle {
+  margin-bottom: 0;
+}
+#prompt-haus-app.haus--content .hds-encase__eyebrow {
+  color: var(--haus-accent-deep);
+}

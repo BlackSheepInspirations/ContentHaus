@@ -578,9 +578,16 @@
   }
 
   function renderBaseTypeToggle(currentBaseType, onSetHuman, onSetMascot) {
-    return renderTwoOptionToggle([
+    // White-box "Type" encasing (docs/haus-design-system.md) — the Human /
+    // Animal Mascot picker framed with its own eyebrow, distinct from a
+    // primary build section.
+    var toggle = renderTwoOptionToggle([
       { isActive: currentBaseType === "human", icon: "person", title: "Human", subtitle: "People characters", onClick: onSetHuman },
       { isActive: currentBaseType === "animalMascot", icon: "paw", title: "Animal Mascot", subtitle: "Mascots & animals", onClick: onSetMascot },
+    ]);
+    return el("div", { class: "hds-encase ph-encase--type" }, [
+      el("p", { class: "hds-encase__eyebrow", text: "Type" }),
+      toggle,
     ]);
   }
 
@@ -747,7 +754,7 @@
 
   // Opt-in sub-panel: a checkbox that reveals a field group when checked.
   // Shared shape for Character's Companion and Text's Second Phrase.
-  function renderSubPanel(headerText, isChecked, onToggle, renderContent, tooltip) {
+  function renderSubPanel(headerText, isChecked, onToggle, renderContent, tooltip, eyebrow) {
     var toggle = el("input", { type: "checkbox", class: "ph-subpanel__toggle" });
     toggle.checked = isChecked;
     toggle.addEventListener("change", function () {
@@ -755,7 +762,12 @@
     });
     var header = el("label", { class: "ph-subpanel__header" }, [toggle, el("span", { text: headerText })]);
     if (tooltip) header.title = tooltip;
-    var panel = el("div", { class: "ph-subpanel" }, [header]);
+    // Optional design-system eyebrow label above the toggle (Companion /
+    // Make it a Video) — the white-box encasing per docs/haus-design-system.md.
+    var children = [];
+    if (eyebrow) children.push(el("p", { class: "hds-encase__eyebrow", text: eyebrow }));
+    children.push(header);
+    var panel = el("div", { class: "ph-subpanel" }, children);
     if (isChecked) panel.appendChild(renderContent());
     return panel;
   }
@@ -841,7 +853,8 @@
         }
         return wrap;
       },
-      options.helpText
+      options.helpText,
+      "Companion"
     );
   }
 
@@ -1219,7 +1232,8 @@
 
         return wrap;
       },
-      "Generates a separate motion/camera/audio prompt for animating the rendered image in a tool like MidJourney, Kling, or Runway."
+      "Generates a separate motion/camera/audio prompt for animating the rendered image in a tool like MidJourney, Kling, or Runway.",
+      "Make it a Video"
     );
   }
 
