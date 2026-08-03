@@ -4437,8 +4437,67 @@ function renderTrailProgress() {
   }
 
   updateTrailLogTitles();
+  updateStationDates();
   const pn = document.getElementById("productName");
   if (pn && !pn.dataset.trailBound) { pn.dataset.trailBound = "1"; pn.addEventListener("input", updateTrailLogTitles); }
+  const ld = document.querySelector("[data-launch-date]");
+  if (ld && !ld.dataset.trailBound) {
+    ld.dataset.trailBound = "1";
+    const existing = ((typeof readValue === "function" ? readValue("launchDateExact") : "") || "").trim();
+    if (existing) ld.value = existing;
+    ld.addEventListener("change", () => {
+      if (typeof writeValue === "function") writeValue("launchDateExact", ld.value);
+      try { saveCurrentProject(); } catch (e) {}
+      updateStationDates();
+      try { renderRootedCalendar(collectProjectData()); } catch (e) {}
+    });
+  }
+  const addcal = document.querySelector("[data-rr-addcal]");
+  if (addcal && !addcal.dataset.trailBound) {
+    addcal.dataset.trailBound = "1";
+    addcal.addEventListener("click", () => {
+      const raw = ((typeof readValue === "function" ? readValue("launchDateExact") : "") || "").trim();
+      if (!raw) return;
+      const parts = raw.split("-").map(Number);
+      const launch = new Date(parts[0], (parts[1] || 1) - 1, parts[2] || 1);
+      const product = (((typeof readValue === "function" ? readValue("productName") : "") || "").trim()) || "your launch";
+      const iso = (dt) => dt.getFullYear() + "-" + String(dt.getMonth() + 1).padStart(2, "0") + "-" + String(dt.getDate()).padStart(2, "0");
+      const map = { reach: "post", open: "post", offer: "goal", trigger: "product", escalate: "post", deepen: "reminder" };
+      const labels = { reach: "warm-up", open: "teaser / waitlist", offer: "sales page live", trigger: "launch", escalate: "last call", deepen: "follow-up" };
+      const stages = ROOTED_STAGES.map((s) => { const dt = new Date(launch); dt.setDate(launch.getDate() + (s.dayOffsetStart - 8)); return { id: s.id, type: map[s.id], date: iso(dt), title: product + " — " + labels[s.id] }; });
+      try { localStorage.setItem("p2p_pending_launch", JSON.stringify({ product: product, stages: stages })); } catch (e) {}
+      window.location.href = "/pages/p2p-os?v=success&importlaunch=1";
+    });
+  }
+}
+
+// When a go-live date is set, each station shows its real date range (counting back from
+// launch = Day 8) instead of "Days 1–3", plus a T-minus countdown; toggles the add-to-calendar CTA.
+function updateStationDates() {
+  const raw = ((typeof readValue === "function" ? readValue("launchDateExact") : "") || "").trim();
+  const defaults = { reach: "Days 1–3", open: "Day 4", offer: "Days 5–7", trigger: "Day 8 · GO LIVE", escalate: "Days 9–10", deepen: "Day 11+" };
+  let launch = null;
+  if (raw) { const p = raw.split("-").map(Number); const t = new Date(p[0], (p[1] || 1) - 1, p[2] || 1); if (!Number.isNaN(t.getTime())) launch = t; }
+  const fmt = (dt) => dt.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  ROOTED_STAGES.forEach((s) => {
+    const el = document.querySelector('[data-stage-station="' + s.id + '"] .jstop__time');
+    if (!el) return;
+    if (!launch) { el.textContent = defaults[s.id] || s.dayLabel; return; }
+    const start = new Date(launch); start.setDate(launch.getDate() + (s.dayOffsetStart - 8));
+    const end = new Date(launch); end.setDate(launch.getDate() + (s.dayOffsetEnd - 8));
+    el.textContent = s.dayOffsetStart === s.dayOffsetEnd ? (fmt(start) + (s.id === "trigger" ? " · LIVE" : "")) : (fmt(start) + "–" + fmt(end));
+  });
+  const cd = document.querySelector("[data-launch-countdown]");
+  if (cd) {
+    if (!launch) { cd.textContent = ""; }
+    else {
+      const today = new Date(); today.setHours(0, 0, 0, 0);
+      const days = Math.round((launch - today) / 86400000);
+      cd.textContent = days > 0 ? "T‑minus " + days + " day" + (days === 1 ? "" : "s") + " 🚀" : days === 0 ? "🚀 LAUNCH DAY!" : "Launched " + (-days) + " day" + (days === -1 ? "" : "s") + " ago";
+    }
+  }
+  const addcal = document.querySelector("[data-rr-addcal]");
+  if (addcal) addcal.hidden = !launch;
 }
 
 // Pre-fill: each station's "Log this →" carries the product name + a stage label into the My

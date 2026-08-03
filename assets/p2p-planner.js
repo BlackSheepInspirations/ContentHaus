@@ -1084,4 +1084,30 @@
   };
   // Deep-link: /pages/p2p-os?v=success&add=<type>&title=<name>  (ROOTED "Log this →" pre-fills the title)
   try { var _am = /[?&]add=([^&#]+)/.exec(window.location.search); if (_am) { var _at = decodeURIComponent(_am[1]); var _tm = /[?&]title=([^&#]+)/.exec(window.location.search); var _tt = _tm ? decodeURIComponent(_tm[1].replace(/\+/g, ' ')) : ''; setTimeout(function () { window.P2P_PLANNER_ADD(_at, _tt); }, 220); } } catch (e) {}
+
+  // Import a whole ROOTED launch from Growth Haus (localStorage p2p_pending_launch): one dated item per stage.
+  window.P2P_PLANNER_IMPORT_LAUNCH = function () {
+    try {
+      var plan = JSON.parse(localStorage.getItem('p2p_pending_launch') || 'null');
+      if (!plan || !Array.isArray(plan.stages) || !plan.stages.length) return 0;
+      if (!data.events) data.events = [];
+      var n = 0;
+      plan.stages.forEach(function (st) {
+        if (!st || !st.date) return;
+        var id = uid();
+        if (st.type === 'product') { data.products.unshift({ id: id, name: st.title || 'Launch', type: '', price: '', status: 'idea', launch: st.date, sold: '', revenue: '' }); }
+        else if (st.type === 'goal') { data.goals.unshift({ id: id, title: st.title || 'Goal', stage: 'grows', g: '', r: '', o: '', s: '', w: st.date, roadmap: [], oDone: false, oWeek: '' }); }
+        else if (st.type === 'post') { data.posts.unshift({ id: id, topic: st.title || 'Post', platform: '', type: 'Video', date: st.date, time: '', hook: '', cta: '', length: '', music: '', done: false, s: {} }); }
+        else { data.events.push({ id: id, kind: 'reminder', title: st.title || 'Reminder', iso: st.date, hour: '9', min: '00', ampm: 'AM', tz: 'ET', time: '9:00 AM ET' }); }
+        n++;
+      });
+      save();
+      try { rebuildReminders(); } catch (e) {}
+      try { if (window.P2P && window.P2P.push) window.P2P.push(); } catch (e) {}
+      try { localStorage.removeItem('p2p_pending_launch'); } catch (e) {}
+      view = 'dash'; render();
+      return n;
+    } catch (e) { return 0; }
+  };
+  try { if (/[?&]importlaunch=1/.test(window.location.search)) setTimeout(function () { var _n = window.P2P_PLANNER_IMPORT_LAUNCH(); if (_n) { try { alert('🚀 Your ROOTED launch is on the calendar — ' + _n + ' milestones added.'); } catch (e) {} } }, 320); } catch (e) {}
 })();

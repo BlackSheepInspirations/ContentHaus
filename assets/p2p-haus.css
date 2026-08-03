@@ -919,6 +919,22 @@
 #p2p-haus-app .jstop.is-current { outline: 1px solid color-mix(in srgb, var(--color-gold) 50%, transparent); outline-offset: 2px; border-radius: 8px;
 }
 
+/* Launch date → dated plan + one-click add-to-calendar (px sizes: added after the rem bulk-scale) */
+#p2p-haus-app .rooted-launchdate { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 12px; padding: 12px 14px; border: 1px solid var(--color-border); border-radius: 12px; background: color-mix(in srgb, var(--color-gold) 6%, transparent);
+}
+#p2p-haus-app .rld-label { font-weight: 800; font-size: 13px; color: var(--color-gold);
+}
+#p2p-haus-app .rld-input { font-family: inherit; font-size: 14px; padding: 7px 10px; border-radius: 8px; border: 1px solid var(--color-border); background: var(--color-surface, #14101f); color: var(--color-text, #efe9f7);
+}
+#p2p-haus-app .rld-countdown { font-weight: 800; font-size: 14px; color: var(--color-primary); margin-left: auto;
+}
+#p2p-haus-app .rr-addcal { margin-top: 10px; width: 100%; cursor: pointer; font-family: inherit; font-weight: 800; font-size: 14.5px; padding: 12px 18px; border-radius: 12px; border: 1px solid var(--color-gold); color: var(--color-gold); background: color-mix(in srgb, var(--color-gold) 12%, transparent); transition: transform 0.12s ease, filter 0.12s ease;
+}
+#p2p-haus-app .rr-addcal:hover { transform: translateY(-1px); filter: brightness(1.08);
+}
+#p2p-haus-app .rr-addcal[hidden] { display: none;
+}
+
 #p2p-haus-app .journey__kit { border-top: 1px solid var(--color-border); padding-top: 4px;
 }
 
