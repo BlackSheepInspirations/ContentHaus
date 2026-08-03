@@ -4493,6 +4493,29 @@ function renderTrailProgress() {
       window.location.href = "/pages/p2p-os?v=success&importlaunch=1";
     });
   }
+  const announce = document.querySelector("[data-rr-announce]");
+  if (announce && !announce.dataset.trailBound) {
+    announce.dataset.trailBound = "1";
+    const label = "📣 Announce your launch to the flock →";
+    announce.addEventListener("click", () => {
+      const raw = ((typeof readValue === "function" ? readValue("launchDateExact") : "") || "").trim();
+      if (!raw) return;
+      const parts = raw.split("-").map(Number);
+      const when = new Date(parts[0], (parts[1] || 1) - 1, parts[2] || 1).toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
+      const product = ((typeof readValue === "function" ? readValue("productName") : "") || "").trim();
+      const def = "🚀 Big news, flock — I'm launching " + (product || "something new") + " on " + when + "! You're the first to know. Come cheer me on. 🖤🐑";
+      const text = window.prompt("Announce your launch to the community — edit if you like:", def);
+      if (!text || !text.trim()) return;
+      announce.disabled = true; announce.textContent = "Posting…";
+      fetch("/apps/p2p/community", { method: "POST", headers: { "content-type": "application/json" }, credentials: "same-origin", body: JSON.stringify({ text: text.trim(), title: "", category: "general", kind: "post", name: "" }) })
+        .then((r) => r.json())
+        .then((res) => {
+          announce.disabled = false; announce.textContent = label;
+          try { showToast(res && res.ok ? "📣 Announced to the flock — go get 'em!" : "Couldn't post that — try again.", res && res.ok ? "success" : "warning"); } catch (e) {}
+        })
+        .catch(() => { announce.disabled = false; announce.textContent = label; try { showToast("Couldn't reach the community — check your connection.", "warning"); } catch (e) {} });
+    });
+  }
 }
 
 // When a go-live date is set, each station shows its real date range (counting back from
@@ -4523,6 +4546,8 @@ function updateStationDates() {
   }
   const addcal = document.querySelector("[data-rr-addcal]");
   if (addcal) addcal.hidden = !launch;
+  const announce = document.querySelector("[data-rr-announce]");
+  if (announce) announce.hidden = !launch;
 }
 
 // Live vs Evergreen: a fixed-date launch, or an always-on funnel every new lead flows through.
