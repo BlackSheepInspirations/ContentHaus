@@ -27,12 +27,32 @@
   root.innerHTML = "" on every re-render, which would wipe out any
   Liquid-rendered content placed inside that div.
 {% endcomment %}
-<div class="ph-brand-header haus--content">
-  <div class="ph-marketing__hero">
-    <p class="ph-marketing__eyebrow">{{ section.settings.brand_eyebrow }}</p>
-    <h1 class="ph-marketing__heading">{{ section.settings.brand_heading | replace: 'Content', '<span class="ph-heading-accent">Content</span>' }}</h1>
-    <div class="ph-marketing__subheading">{{ section.settings.brand_subheading }}</div>
+<div class="ph-brand-header haus--content hds-hero">
+  <div class="hds-hero__inner">
+    <p class="hds-hero__eyebrow">{{ section.settings.brand_eyebrow }}</p>
+    <div class="hds-hero__grid">
+      <div class="hds-hero__intro">
+        <h1 class="hds-hero__title">{{ section.settings.brand_heading | replace: 'Content', '<span class="accent">Content</span>' }}</h1>
+        <div class="hds-hero__desc">{{ section.settings.brand_subheading }}</div>
+      </div>
+      <div class="hds-hero__media">
+        <div class="hds-hero__frame">
+          <video id="phHowToVideo" class="hds-hero__video" controls preload="metadata" poster="{{ 'how-to-content-poster.jpg' | asset_url }}">
+            <source src="{{ 'how-to-content.mp4' | asset_url }}" type="video/mp4">
+          </video>
+          <div class="hds-hero__ph" id="phHowToPlaceholder" hidden>
+            <span class="hds-hero__play" aria-hidden="true">&#9654;</span>
+            <p class="hds-hero__ph-title">Tutorial coming soon</p>
+            <p class="hds-hero__ph-note">A quick how-to for this generator</p>
+          </div>
+        </div>
+        <p class="hds-hero__caption">Watch: build a prompt in about 60 seconds.</p>
+      </div>
+    </div>
   </div>
+  <script>
+    (function(){var v=document.getElementById('phHowToVideo'),ph=document.getElementById('phHowToPlaceholder');if(!v||!ph)return;var s=v.querySelector('source');function show(){if(ph.hidden){ph.hidden=false;v.style.display='none';}}if(s)s.addEventListener('error',show);v.addEventListener('error',show);setTimeout(function(){if(!v.readyState)show();},2500);})();
+  </script>
 </div>
 
 {% if ph_has_access %}
