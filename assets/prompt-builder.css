@@ -619,6 +619,14 @@
   padding-bottom: 2px;
   scrollbar-width: thin;
 }
+/* In the grouped-pill fields (Character Style / Filter & Finish) the category
+   buckets wrap so every overall-style option is visible at once — no sideways
+   scroll to discover them. */
+.ph-grouped-pill-field .ph-pill-toggle {
+  flex-wrap: wrap;
+  overflow-x: visible;
+  padding-bottom: 0;
+}
 .ph-pill-toggle__btn {
   display: inline-flex;
   align-items: center;

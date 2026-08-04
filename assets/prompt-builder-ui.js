@@ -514,8 +514,16 @@
           icon: iconMap[group.label] || "sparkle",
           title: group.label,
           onClick: function () {
+            var switching = group.label !== active;
             activeGroupedPillBucket[stateKey] = group.label;
-            renderApp();
+            // Picking a different overall style never gets locked out: if something
+            // was already selected in the old bucket, clear it so the dropdown
+            // resets to "Select…" for the new style instead of ignoring the click.
+            if (switching && (field.value || field.customValue)) {
+              onChange(entry, { value: "", customValue: "" });
+            } else {
+              renderApp();
+            }
           },
         };
       })
