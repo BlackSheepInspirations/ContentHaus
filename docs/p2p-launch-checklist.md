@@ -72,12 +72,14 @@ just before public launch. Not urgent while password-locked.
 - ~~**Dynamic badge counter**~~ ✅ Already live — `assets/p2p-badges.js` recomputes
   `earned/total` from the DOM after applying auto-earned badges and updates the
   summary ring + text (lines ~68-78).
-- **P2P Operating System page** — build the page (or repoint the hero back-link
-  `os_url`, currently `/pages/p2p-operating-system`).
+- ~~**P2P Operating System page**~~ ✅ DONE — built + live at `/pages/p2p-os`
+  (`sections/p2p-os.liquid`); the stale `/pages/p2p-operating-system` back-link is gone.
 - **Certificate backfill:** certs only record from the deploy onward; past
-  completions won't show until re-completed unless we backfill.
-- **Mindset Moment library → 500:** currently ~120 items in `assets/p2p-moments.js`;
-  grow in ~100-item batches (say "keep going").
+  completions won't show until re-completed unless we backfill. *(Decision/data — Andrea's call.)*
+- ~~**Mindset Moment library → 500**~~ ✅ DONE — `assets/p2p-moments.js` is at ~652 items
+  (Purpose ~318, Heart ~320 grown alongside). Well past the 500 target.
+- **House-voice content banks** ✅ grown to ~342 (welcomes 99/100) in the Worker
+  (`backend/p2p-progress-worker/worker.js`) — **needs `npx wrangler deploy` to go live.**
 
 ## 3. Access gating for launch — every page must gate (storefront-searchable)
 
