@@ -2068,7 +2068,21 @@
 #product-haus-app.haus--project .pdh-body__fields .pdh-field-group::before {
   content: ""; position: absolute; top: 0; left: 0; right: 0; height: 5px;
   border-radius: 10px 10px 0 0;
-  background: linear-gradient(90deg, var(--haus-accent-deep), var(--haus-accent), var(--haus-accent-light));
+  background: var(--haus-aurora);
+  background-size: 220% auto;
+  animation: hds-auroraDrift 9s ease-in-out infinite;
+}
+
+/* Moving aurora on the big signature fills. */
+#product-haus-app.haus--project .pdh-tabs__btn.is-active,
+#product-haus-app.haus--project .pdh-styledna__yesno-btn.is-active,
+#product-haus-app.haus--project .pdh-btn--swap,
+#product-haus-app.haus--project .pdh-btn--save,
+#product-haus-app.haus--project .pdh-selections__eye-btn {
+  background-image: var(--haus-aurora);
+  background-size: 220% auto;
+  animation: hds-auroraDrift 9s ease-in-out infinite;
+  border-color: transparent;
 }
 #product-haus-app.haus--project .pdh-styledna__title {
   flex-basis: 100%; gap: 7px; margin-bottom: 2px;

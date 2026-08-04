@@ -3821,7 +3821,23 @@
 #brand-haus-app.haus--brand .bh-body__fields .bh-field-group::before {
   content: ""; position: absolute; top: 0; left: 0; right: 0; height: 5px;
   border-radius: 10px 10px 0 0;
-  background: linear-gradient(90deg, var(--haus-accent-deep), var(--haus-accent), var(--haus-accent-light));
+  background: var(--haus-aurora);
+  background-size: 220% auto;
+  animation: hds-auroraDrift 9s ease-in-out infinite;
+}
+
+/* Moving aurora on the big signature fills (chrome only — the dynamic brand
+   results theming keeps its own --bh-results-accent). */
+#brand-haus-app.haus--brand .bh-sidebar__step.is-active .bh-sidebar__step-number,
+#brand-haus-app.haus--brand .bh-styledna__yesno-btn.is-active,
+#brand-haus-app.haus--brand .bh-btn--swap,
+#brand-haus-app.haus--brand .bh-btn--teal,
+#brand-haus-app.haus--brand .bh-btn--save,
+#brand-haus-app.haus--brand .bh-selections__eye-btn {
+  background-image: var(--haus-aurora);
+  background-size: 220% auto;
+  animation: hds-auroraDrift 9s ease-in-out infinite;
+  border-color: transparent;
 }
 #brand-haus-app.haus--brand .bh-styledna__title {
   flex-basis: 100%; gap: 7px; margin-bottom: 2px;

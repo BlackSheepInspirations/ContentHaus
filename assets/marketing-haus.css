@@ -2079,7 +2079,21 @@
   right: 0;
   height: 5px;
   border-radius: 10px 10px 0 0;
-  background: linear-gradient(90deg, var(--haus-accent-deep), var(--haus-accent), var(--haus-accent-light));
+  background: var(--haus-aurora);
+  background-size: 220% auto;
+  animation: hds-auroraDrift 9s ease-in-out infinite;
+}
+
+/* Moving aurora on the big signature fills. */
+#marketing-haus-app.haus--marketing .mh-tabs__btn.is-active,
+#marketing-haus-app.haus--marketing .mh-styledna__yesno-btn.is-active,
+#marketing-haus-app.haus--marketing .mh-btn--swap,
+#marketing-haus-app.haus--marketing .mh-btn--save,
+#marketing-haus-app.haus--marketing .mh-selections__eye-btn {
+  background-image: var(--haus-aurora);
+  background-size: 220% auto;
+  animation: hds-auroraDrift 9s ease-in-out infinite;
+  border-color: transparent;
 }
 /* The Studio-Setup dark bar title promoted to a full-width gold eyebrow. */
 #marketing-haus-app.haus--marketing .mh-styledna__title {

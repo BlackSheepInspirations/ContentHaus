@@ -26,12 +26,21 @@
 }
 
 /* ---- The six Haus signatures (set on the app container) ---- */
-.haus--content   { --haus-accent:#e06a2b; --haus-accent-deep:#c2551f; --haus-accent-light:#f4a259; }
-.haus--growth    { --haus-accent:#14a880; --haus-accent-deep:#0c8f6a; --haus-accent-light:#57e2b4; }
-.haus--marketing { --haus-accent:#c51e98; --haus-accent-deep:#a2197e; --haus-accent-light:#e668bc; }
-.haus--graphics  { --haus-accent:#7c3aed; --haus-accent-deep:#5f27c4; --haus-accent-light:#a879f2; }
-.haus--project   { --haus-accent:#2560e6; --haus-accent-deep:#1b49c4; --haus-accent-light:#5a93f7; }
-.haus--brand     { --haus-accent:#c31d48; --haus-accent-deep:#a21339; --haus-accent-light:#e24e73; }
+.haus--content   { --haus-accent:#e06a2b; --haus-accent-deep:#c2551f; --haus-accent-light:#f4a259; --haus-aurora:linear-gradient(100deg,#c2551f,#e06a2b,#f4a259,#ec7d3f,#d15a26,#c2551f); }
+.haus--growth    { --haus-accent:#14a880; --haus-accent-deep:#0c8f6a; --haus-accent-light:#57e2b4; --haus-aurora:linear-gradient(100deg,#0c8f6a,#14a880,#57e2b4,#2bbf95,#0f9e78,#0c8f6a); }
+.haus--marketing { --haus-accent:#c51e98; --haus-accent-deep:#a2197e; --haus-accent-light:#e668bc; --haus-aurora:linear-gradient(100deg,#a2197e,#c51e98,#e668bc,#d642ac,#b3208c,#a2197e); }
+.haus--graphics  { --haus-accent:#7c3aed; --haus-accent-deep:#5f27c4; --haus-accent-light:#a879f2; --haus-aurora:linear-gradient(100deg,#5f27c4,#7c3aed,#a879f2,#8f5bf0,#6d34d8,#5f27c4); }
+.haus--project   { --haus-accent:#2560e6; --haus-accent-deep:#1b49c4; --haus-accent-light:#5a93f7; --haus-aurora:linear-gradient(100deg,#1b49c4,#2560e6,#5a93f7,#3d7cf0,#2154d4,#1b49c4); }
+.haus--brand     { --haus-accent:#c31d48; --haus-accent-deep:#a21339; --haus-accent-light:#e24e73; --haus-aurora:linear-gradient(100deg,#a21339,#c31d48,#e24e73,#d33a60,#af1740,#a21339); }
+
+/* Per-Haus moving aurora — a signature-family gradient that drifts like the
+   hero. Applied to the "big" fills (accent bars, active tabs, primary
+   buttons). Icons + small text stay solid for legibility. */
+@keyframes hds-auroraDrift { 0%,100%{background-position:0% 50%;} 50%{background-position:100% 50%;} }
+@media (prefers-reduced-motion: reduce) {
+  #prompt-haus-app *, #marketing-haus-app *, #graphics-haus-app *,
+  #product-haus-app *, #brand-haus-app *, #p2p-haus-app * { animation: none !important; }
+}
 
 /* ---- Section header: ✦ marker + hairline, then title / subtitle / description ---- */
 .hds-head { margin: 0 0 16px; }

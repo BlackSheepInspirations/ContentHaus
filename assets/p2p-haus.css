@@ -3289,7 +3289,9 @@
   right: 0;
   height: 5px;
   border-radius: var(--radius-large) var(--radius-large) 0 0;
-  background: linear-gradient(90deg, var(--color-primary), var(--color-primary-bright), #57e2b4);
+  background: var(--haus-aurora);
+  background-size: 220% auto;
+  animation: hds-auroraDrift 9s ease-in-out infinite;
 }
 
 /* SECONDARY / aside: the sticky rail card wears the universal gold callout
@@ -3383,4 +3385,14 @@
 #p2p-haus-app .gh-tips__list li {
   color: var(--color-text-muted);
   line-height: 1.5;
+}
+
+/* Moving aurora on Growth's primary green CTAs (top bars handled above; the
+   ROOTED-branded blue/purple gradients + small green accents left as-is). */
+#p2p-haus-app.haus--growth .project-actions button#newProjectBtn,
+#p2p-haus-app.haus--growth .copy-all-btn {
+  background-image: var(--haus-aurora);
+  background-size: 220% auto;
+  animation: hds-auroraDrift 9s ease-in-out infinite;
+  border-color: transparent;
 }

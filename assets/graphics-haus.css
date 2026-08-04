@@ -2083,7 +2083,22 @@
 #graphics-haus-app.haus--graphics .gh-body__fields .gh-field-group::before {
   content: ""; position: absolute; top: 0; left: 0; right: 0; height: 5px;
   border-radius: 10px 10px 0 0;
-  background: linear-gradient(90deg, var(--haus-accent-deep), var(--haus-accent), var(--haus-accent-light));
+  background: var(--haus-aurora);
+  background-size: 220% auto;
+  animation: hds-auroraDrift 9s ease-in-out infinite;
+}
+
+/* Moving aurora on the big signature fills. */
+#graphics-haus-app.haus--graphics .gh-tabs__btn.is-active,
+#graphics-haus-app.haus--graphics .gh-styledna__yesno-btn.is-active,
+#graphics-haus-app.haus--graphics .gh-btn--swap,
+#graphics-haus-app.haus--graphics .gh-btn--save,
+#graphics-haus-app.haus--graphics .gh-btn--generate-image,
+#graphics-haus-app.haus--graphics .gh-selections__eye-btn {
+  background-image: var(--haus-aurora);
+  background-size: 220% auto;
+  animation: hds-auroraDrift 9s ease-in-out infinite;
+  border-color: transparent;
 }
 #graphics-haus-app.haus--graphics .gh-styledna__title {
   flex-basis: 100%; gap: 7px; margin-bottom: 2px;

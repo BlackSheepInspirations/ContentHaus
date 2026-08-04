@@ -1914,7 +1914,22 @@
   right: 0;
   height: 5px;
   border-radius: 10px 10px 0 0;
-  background: linear-gradient(90deg, var(--haus-accent-deep), var(--haus-accent), var(--haus-accent-light));
+  background: var(--haus-aurora);
+  background-size: 220% auto;
+  animation: hds-auroraDrift 9s ease-in-out infinite;
+}
+
+/* Moving aurora on the big signature fills (active tab + primary buttons). */
+#prompt-haus-app.haus--content .ph-tabs__btn.is-active,
+#prompt-haus-app.haus--content .ph-styledna__yesno-btn.is-active,
+#prompt-haus-app.haus--content .ph-btn--swap,
+#prompt-haus-app.haus--content .ph-btn--save,
+#prompt-haus-app.haus--content .ph-btn--regenerate,
+#prompt-haus-app.haus--content .ph-selections__eye-btn {
+  background-image: var(--haus-aurora);
+  background-size: 220% auto;
+  animation: hds-auroraDrift 9s ease-in-out infinite;
+  border-color: transparent;
 }
 /* The top "Project Setup" dark bar — its title promoted to a full-width
    eyebrow above the fields (Andrea's ask), rather than sitting inline with
