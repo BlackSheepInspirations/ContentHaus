@@ -930,14 +930,16 @@
   #p2pos .osx-lv-posth{font:800 12px/1 system-ui;letter-spacing:.03em;text-transform:uppercase;color:var(--text);margin-bottom:8px;}
   #p2pos .osx-lv-hint2{font:500 11.5px/1.4 system-ui;color:var(--muted);margin-bottom:10px;}
   #p2pos .osx-lv-hint2 b.g{color:#7ee2b0;} #p2pos .osx-lv-hint2 b.y{color:#f4d06a;}
-  #p2pos .osx-lv-grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin:12px 0;}
+  /* Win / Blocker / Action reflections stack single-column so each is full-width + readable. */
+  #p2pos .osx-lv-grid3{display:grid;grid-template-columns:1fr;gap:10px;margin:12px 0;}
   #p2pos .osx-lv-heart{border-top:1px solid var(--stroke);margin-top:14px;padding-top:12px;}
   #p2pos .osx-lv-moods{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
   #p2pos .osx-lv-mood{border:1px solid var(--stroke);background:rgba(255,255,255,.03);cursor:pointer;border-radius:9px;font-size:19px;line-height:1;padding:6px 8px;filter:grayscale(.4);transition:.12s;}
   #p2pos .osx-lv-mood.on{filter:none;border-color:var(--gstroke);background:rgba(216,180,90,.14);transform:scale(1.1);}
   #p2pos .osx-idea-link{font:700 11px/1 system-ui;color:var(--gold-bright);text-decoration:none;text-transform:none;letter-spacing:0;margin-left:6px;}
   #p2pos .osx-idea-link:hover{text-decoration:underline;}
-  #p2pos .osx-lv-prompt{margin-bottom:7px;}
+  /* Engagement prompts: full-width, stacked one-per-line, roomy enough to read the whole prompt. */
+  #p2pos .osx-lv-prompt{display:block;width:100%;margin-bottom:8px;min-height:44px;resize:vertical;}
   #p2pos .osx-req{outline:2px solid rgba(224,69,123,.7);outline-offset:2px;border-radius:8px;}
   /* North Star + Be Anchored */
   #p2pos .osx-lv-tools{display:flex;gap:8px;justify-content:flex-end;margin-bottom:12px;flex-wrap:wrap;}
