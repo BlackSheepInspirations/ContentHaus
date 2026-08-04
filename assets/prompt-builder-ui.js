@@ -4118,9 +4118,9 @@
     "Building a group in Friends & Family? Add everyone first, then dial in the Dynamic — that way the vibe/pose you pick actually fits who's in the shot.",
   ];
 
-  // Persists across re-renders same as briefExpanded — defaults open since
-  // this is meant to be seen, not discovered by accident.
-  var tipsExpanded = true;
+  // Persists across re-renders same as briefExpanded — defaults collapsed
+  // so the tool leads with the builder; members expand Tips when they want them.
+  var tipsExpanded = false;
 
   function renderTipsPanel(root) {
     var toggleBtn = el("button", { type: "button", class: "ph-tips__toggle" }, [

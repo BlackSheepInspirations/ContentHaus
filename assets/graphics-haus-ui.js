@@ -238,6 +238,10 @@
     droplet: '<path d="M10 2.5c3 4 5.5 7 5.5 10a5.5 5.5 0 0 1-11 0c0-3 2.5-6 5.5-10Z"/>',
     car: '<path d="M4 13 5.5 8h9L16 13"/><rect x="3" y="13" width="14" height="3" rx="1"/><circle cx="6.5" cy="16.5" r="1.3"/><circle cx="13.5" cy="16.5" r="1.3"/>',
     bulb: '<path d="M7 15h6M8 17.5h4"/><path d="M10 2.5c-3 0-5 2.2-5 5 0 2 1.1 3.3 2 4.2.5.5.8 1 .9 1.8h4.2c.1-.8.4-1.3.9-1.8.9-.9 2-2.2 2-4.2 0-2.8-2-5-5-5Z"/>',
+    step1: '<circle cx="10" cy="10" r="7.5"/><path d="M8 10l1.5 1.5L13 8"/>',
+    step2: '<circle cx="10" cy="10" r="7.5"/><path d="M10 6v4l3 2"/>',
+    step3: '<circle cx="10" cy="10" r="7.5"/><path d="M4 10s2.5-4 6-4 6 4 6 4-2.5 4-6 4-6-4-6-4Z"/>',
+    step4: '<circle cx="10" cy="10" r="7.5"/><rect x="7.5" y="7" width="6" height="6.5" rx="1"/><path d="M6.5 8.5V5.5A1 1 0 0 1 7.5 4.5h4.3"/>',
     mail: '<rect x="2.5" y="4.5" width="15" height="11" rx="1.3"/><path d="M3 5.5 10 11l7-5.5"/>',
   };
 
@@ -1167,6 +1171,72 @@
     }
   }
 
+  // "Here's the flow" narration (not a progress tracker).
+  var STEPS = [
+    { icon: "step1", title: "Choose", subtitle: "Pick your generator" },
+    { icon: "step2", title: "Customize", subtitle: "Dial in the details" },
+    { icon: "step3", title: "Preview", subtitle: "See your prompt come to life" },
+    { icon: "step4", title: "Copy", subtitle: "Save and use anywhere" },
+  ];
+
+  function renderStepper(root) {
+    var row = el("div", { class: "gh-stepper" });
+    STEPS.forEach(function (step, index) {
+      row.appendChild(
+        el("div", { class: "gh-stepper__step" }, [
+          icon(step.icon, "gh-stepper__icon"),
+          el("div", { class: "gh-stepper__text" }, [
+            el("span", { class: "gh-stepper__title", text: (index + 1) + " " + step.title }),
+            el("span", { class: "gh-stepper__subtitle", text: step.subtitle }),
+          ]),
+        ])
+      );
+      if (index < STEPS.length - 1) row.appendChild(el("div", { class: "gh-stepper__connector" }));
+    });
+    root.appendChild(row);
+  }
+
+  var TIPS = [
+    "Pick ONE core style and let it carry the whole set — mixing flat vector with painterly gives the AI conflicting directions.",
+    "Lock the pieces you want to keep, then Randomize the rest — you iterate on one variable instead of rerolling everything.",
+    "\"Or type your own...\" always overrides the dropdown — use it for a specific motif the options don't list.",
+    "Set Target Platform before you copy — it formats the prompt for the tool you're pasting into.",
+    "Turn on Image Buffer/Padding for print-on-demand so nothing important gets cropped at the edges.",
+    "Use Negative Prompt to head off known glitches (extra fingers, watermarks, garbled text) before they happen.",
+    "Save a look you like to Your Vault so your set stays consistent across every graphic.",
+    "Set up a Brand Kit once and every graphic inherits your colors and style automatically.",
+  ];
+
+  var tipsExpanded = false;
+
+  function renderTipsPanel(root) {
+    var toggleBtn = el("button", { type: "button", class: "gh-tips__toggle" }, [
+      icon(tipsExpanded ? "eyeOff" : "eye"),
+      el("span", { text: tipsExpanded ? "Hide" : "Show" }),
+    ]);
+    toggleBtn.addEventListener("click", function () {
+      tipsExpanded = !tipsExpanded;
+      renderApp();
+    });
+
+    var children = [
+      el("div", { class: "gh-tips__header" }, [
+        el("h3", { class: "gh-tips__title" }, [icon("bulb"), el("span", { text: "Tips for Better Graphics" })]),
+        toggleBtn,
+      ]),
+    ];
+
+    if (tipsExpanded) {
+      var list = el("ul", { class: "gh-tips__list" });
+      TIPS.forEach(function (tip) {
+        list.appendChild(el("li", { text: tip }));
+      });
+      children.push(list);
+    }
+
+    root.appendChild(el("div", { class: "gh-tips" }, children));
+  }
+
   function renderAppContent(root, focusRestore, scrollX, scrollY, previewHeights) {
     ghKeyCounter = 0;
     root.innerHTML = "";
@@ -1178,6 +1248,10 @@
     }
 
     var shell = el("div", { class: "gh-shell" });
+    renderStepper(shell);
+    shell.appendChild(el("hr", { class: "gh-section-divider" }));
+    renderTipsPanel(shell);
+    shell.appendChild(el("hr", { class: "gh-section-divider" }));
     renderBusinessVoiceDNA(shell);
     renderTabs(shell);
 

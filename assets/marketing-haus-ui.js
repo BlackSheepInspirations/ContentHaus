@@ -231,6 +231,10 @@
     bulb: '<path d="M7 15h6M8 17.5h4"/><path d="M10 2.5c-3 0-5 2.2-5 5 0 2 1.1 3.3 2 4.2.5.5.8 1 .9 1.8h4.2c.1-.8.4-1.3.9-1.8.9-.9 2-2.2 2-4.2 0-2.8-2-5-5-5Z"/>',
     mail: '<rect x="2.5" y="4.5" width="15" height="11" rx="1.3"/><path d="M3 5.5 10 11l7-5.5"/>',
     video: '<rect x="2" y="4" width="16" height="12" rx="2"/><path d="M8 7.5v5l5-2.5-5-2.5Z" fill="currentColor" stroke="none"/>',
+    step1: '<circle cx="10" cy="10" r="7.5"/><path d="M8 10l1.5 1.5L13 8"/>',
+    step2: '<circle cx="10" cy="10" r="7.5"/><path d="M10 6v4l3 2"/>',
+    step3: '<circle cx="10" cy="10" r="7.5"/><path d="M4 10s2.5-4 6-4 6 4 6 4-2.5 4-6 4-6-4-6-4Z"/>',
+    step4: '<circle cx="10" cy="10" r="7.5"/><rect x="7.5" y="7" width="6" height="6.5" rx="1"/><path d="M6.5 8.5V5.5A1 1 0 0 1 7.5 4.5h4.3"/>',
   };
 
   var TITLE_ICONS = {
@@ -1174,11 +1178,82 @@
     }
   }
 
+  // "Here's the flow" narration (not a progress tracker) — same four beats
+  // as every generator Haus.
+  var STEPS = [
+    { icon: "step1", title: "Choose", subtitle: "Pick your studio" },
+    { icon: "step2", title: "Customize", subtitle: "Dial in the details" },
+    { icon: "step3", title: "Preview", subtitle: "See your copy come to life" },
+    { icon: "step4", title: "Copy", subtitle: "Save and use anywhere" },
+  ];
+
+  function renderStepper(root) {
+    var row = el("div", { class: "mh-stepper" });
+    STEPS.forEach(function (step, index) {
+      row.appendChild(
+        el("div", { class: "mh-stepper__step" }, [
+          icon(step.icon, "mh-stepper__icon"),
+          el("div", { class: "mh-stepper__text" }, [
+            el("span", { class: "mh-stepper__title", text: (index + 1) + " " + step.title }),
+            el("span", { class: "mh-stepper__subtitle", text: step.subtitle }),
+          ]),
+        ])
+      );
+      if (index < STEPS.length - 1) row.appendChild(el("div", { class: "mh-stepper__connector" }));
+    });
+    root.appendChild(row);
+  }
+
+  var TIPS = [
+    "Set your Tone and Audience first — every studio reads them, so the whole prompt shifts to match once they're filled in.",
+    "Pick ONE studio per job. A social post and a sales page want different structures; running them separately beats one muddled prompt.",
+    "\"Or type your own...\" always overrides the dropdown — use it for niche wording the presets don't cover.",
+    "Set Target Platform before you copy — it reformats the output for where it's going (a caption vs. an email vs. a landing section).",
+    "Stuck? Hit Randomize, then swap the 1-2 pieces you don't love instead of starting over from scratch.",
+    "Save wins to Your Vault so you can reuse a proven angle instead of rebuilding it from memory.",
+    "Set up a Brand Kit once — voice, colors, style — and every studio inherits it automatically.",
+    "Feed the AI specifics — a real number, a real objection, a real benefit. Vague inputs give vague copy.",
+  ];
+
+  var tipsExpanded = false;
+
+  function renderTipsPanel(root) {
+    var toggleBtn = el("button", { type: "button", class: "mh-tips__toggle" }, [
+      icon(tipsExpanded ? "eyeOff" : "eye"),
+      el("span", { text: tipsExpanded ? "Hide" : "Show" }),
+    ]);
+    toggleBtn.addEventListener("click", function () {
+      tipsExpanded = !tipsExpanded;
+      renderApp();
+    });
+
+    var children = [
+      el("div", { class: "mh-tips__header" }, [
+        el("h3", { class: "mh-tips__title" }, [icon("bulb"), el("span", { text: "Tips for Better Marketing" })]),
+        toggleBtn,
+      ]),
+    ];
+
+    if (tipsExpanded) {
+      var list = el("ul", { class: "mh-tips__list" });
+      TIPS.forEach(function (tip) {
+        list.appendChild(el("li", { text: tip }));
+      });
+      children.push(list);
+    }
+
+    root.appendChild(el("div", { class: "mh-tips" }, children));
+  }
+
   function renderAppContent(root, focusRestore, scrollX, scrollY, previewHeights) {
     mhKeyCounter = 0;
     root.innerHTML = "";
 
     var shell = el("div", { class: "mh-shell" });
+    renderStepper(shell);
+    shell.appendChild(el("hr", { class: "mh-section-divider" }));
+    renderTipsPanel(shell);
+    shell.appendChild(el("hr", { class: "mh-section-divider" }));
     shell.appendChild(el("p", { class: "mh-mode-select-label", text: "Select the Studio" }));
     renderTabs(shell);
     renderBusinessVoiceDNA(shell);
