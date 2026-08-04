@@ -3797,3 +3797,54 @@
 @media (max-width: 640px) {
   .bh-wheel { padding: 24px 16px 20px; }
 }
+
+/* =====================================================================
+   BRAND HAUS — design-system skin (docs/haus-design-system.md)
+   Mirror of the Content Haus reference, scoped to
+   #brand-haus-app.haus--brand. Signature: ruby (--haus-accent).
+   IMPORTANT: only the app CHROME accent (--bh-teal) is retinted to ruby.
+   Brand Haus themes its RESULTS output to the user's own brand palette via
+   --bh-results-accent / -2 / -standout (set per-profile in
+   brand-haus-results.js) — those are left untouched, so the blueprint
+   still renders in the member's colors.
+   ===================================================================== */
+#brand-haus-app.haus--brand { --bh-teal: var(--haus-accent-deep); }
+
+#brand-haus-app.haus--brand .bh-field-group__title::after {
+  content: ""; flex: 1 1 auto; min-width: 20px; height: 1px;
+  margin-left: 6px; background: var(--bh-border);
+}
+
+#brand-haus-app.haus--brand .bh-body__fields .bh-field-group {
+  position: relative; padding-top: 20px;
+}
+#brand-haus-app.haus--brand .bh-body__fields .bh-field-group::before {
+  content: ""; position: absolute; top: 0; left: 0; right: 0; height: 5px;
+  border-radius: 10px 10px 0 0;
+  background: linear-gradient(90deg, var(--haus-accent-deep), var(--haus-accent), var(--haus-accent-light));
+}
+#brand-haus-app.haus--brand .bh-styledna__title {
+  flex-basis: 100%; gap: 7px; margin-bottom: 2px;
+  font-size: 11px; font-weight: 800; letter-spacing: 0.15em;
+  text-transform: uppercase; color: var(--hds-gold-c);
+}
+#brand-haus-app.haus--brand .hds-encase .bh-field-group,
+#brand-haus-app.haus--brand .bh-subpanel .bh-field-group { padding-top: 16px; }
+#brand-haus-app.haus--brand .hds-encase .bh-field-group::before,
+#brand-haus-app.haus--brand .bh-subpanel .bh-field-group::before { display: none; }
+
+#brand-haus-app.haus--brand .bh-body__preview > * {
+  box-shadow: inset 6px 0 0 0 var(--hds-gold-b);
+}
+
+#brand-haus-app.haus--brand .bh-preset-row {
+  background: #fff; border: 1px solid var(--bh-border); border-radius: 14px; padding: 14px 16px 16px;
+}
+#brand-haus-app.haus--brand .bh-preset-row__label {
+  font-size: 11px; font-weight: 800; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--haus-accent-deep);
+}
+#brand-haus-app.haus--brand .bh-subpanel {
+  background: #fff; border: 1px solid var(--bh-border); border-radius: 14px; padding: 14px 16px 16px;
+}
+#brand-haus-app.haus--brand .hds-encase__eyebrow { color: var(--haus-accent-deep); }

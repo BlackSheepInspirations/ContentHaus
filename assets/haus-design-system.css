@@ -103,6 +103,8 @@
 @media(max-width:820px){ .hds-hero__grid{grid-template-columns:1fr;} }
 .hds-hero__title{ font-size:clamp(30px,4.4vw,50px); line-height:1.05; letter-spacing:-.015em; font-weight:800; color:#fff; margin:0 0 16px; }
 .hds-hero__title .accent{ color:#57e2b4; }
+.hds-hero__tagline{ font-size:clamp(15px,1.6vw,18px); font-weight:600; color:#eaf3ee; margin:0 0 10px; }
+.hds-hero__tagline .accent{ color:#57e2b4; }
 .hds-hero__desc{ font-size:clamp(14.5px,1.5vw,16.5px); line-height:1.55; color:#c7d8d0; margin:0; max-width:52ch; }
 .hds-hero__media{ min-width:0; }
 .hds-hero__frame{ position:relative; border-radius:18px; overflow:hidden; aspect-ratio:16/10;

@@ -26,22 +26,44 @@
 {% endif %}
 
 {{ 'brand-haus.css' | asset_url | stylesheet_tag }}
+{{ 'haus-design-system.css' | asset_url | stylesheet_tag }}
 
 {% comment %}
   Rendered as a sibling of #brand-haus-app, never inside it — the JS does
-  root.innerHTML = "" on every re-render.
+  root.innerHTML = "" on every re-render. Shared design-system hero
+  (docs/haus-design-system.md) — same black-opal aurora as every Haus.
 {% endcomment %}
-<div class="bh-brand-header">
-  <div class="bh-marketing__hero">
-    <p class="bh-marketing__eyebrow">{{ section.settings.brand_eyebrow }}</p>
-    <h1 class="bh-marketing__heading">{{ section.settings.brand_heading | replace: 'Brand', '<span class="bh-heading-accent">Brand</span>' }}</h1>
-    <p class="bh-marketing__tagline">{{ section.settings.brand_tagline | replace: 'Brand DNA Blueprint', '<span class="bh-heading-accent">Brand DNA Blueprint</span>' }}</p>
-    <div class="bh-marketing__subheading">{{ section.settings.brand_subheading }}</div>
+<div class="bh-brand-header haus--brand hds-hero">
+  <div class="hds-hero__inner">
+    <p class="hds-hero__eyebrow">{{ section.settings.brand_eyebrow }}</p>
+    <div class="hds-hero__grid">
+      <div class="hds-hero__intro">
+        <h1 class="hds-hero__title">{{ section.settings.brand_heading | replace: 'Brand', '<span class="accent">Brand</span>' }}</h1>
+        <p class="hds-hero__tagline">{{ section.settings.brand_tagline | replace: 'Brand DNA Blueprint', '<span class="accent">Brand DNA Blueprint</span>' }}</p>
+        <div class="hds-hero__desc">{{ section.settings.brand_subheading }}</div>
+      </div>
+      <div class="hds-hero__media">
+        <div class="hds-hero__frame">
+          <video id="bhHowToVideo" class="hds-hero__video" controls preload="metadata" poster="{{ 'how-to-brand-poster.jpg' | asset_url }}">
+            <source src="{{ 'how-to-brand.mp4' | asset_url }}" type="video/mp4">
+          </video>
+          <div class="hds-hero__ph" id="bhHowToPlaceholder" hidden>
+            <span class="hds-hero__play" aria-hidden="true">&#9654;</span>
+            <p class="hds-hero__ph-title">Tutorial coming soon</p>
+            <p class="hds-hero__ph-note">A quick how-to for this studio</p>
+          </div>
+        </div>
+        <p class="hds-hero__caption">Watch: build your brand blueprint in about 60 seconds.</p>
+      </div>
+    </div>
   </div>
+  <script>
+    (function(){var v=document.getElementById('bhHowToVideo'),ph=document.getElementById('bhHowToPlaceholder');if(!v||!ph)return;var s=v.querySelector('source');function show(){if(ph.hidden){ph.hidden=false;v.style.display='none';}}if(s)s.addEventListener('error',show);v.addEventListener('error',show);setTimeout(function(){if(!v.readyState)show();},2500);})();
+  </script>
 </div>
 
 {% if bh_has_access %}
-  <div id="brand-haus-app" data-section-id="{{ section.id }}"></div>
+  <div id="brand-haus-app" class="haus--brand" data-section-id="{{ section.id }}"></div>
 
   {% comment %}
     Optional per-profile hero art for Chapter 1's identity section — one
