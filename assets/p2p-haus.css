@@ -3264,3 +3264,41 @@
   content: ""; display: block; width: 34px; height: 3px; border-radius: 3px;
   margin-bottom: 14px; background: var(--opal-fire);
 }
+
+/* =====================================================================
+   GROWTH HAUS — shared design-system alignment (docs/haus-design-system.md)
+   The crown jewel is bespoke, so rather than the sibling-port recipe it
+   adopts the system's two signals using its OWN tokens (so everything
+   stays one emerald): PRIMARY build cards get the emerald signature TOP
+   bar; the aside RAIL gets the universal GOLD callout left-bar. Headers
+   (.section-number eyebrow + gold tick + .section-description) already
+   match the system. .haus--growth is on the app root for shared tokens.
+   ===================================================================== */
+
+/* PRIMARY: emerald top bar on every build card (skip the collapsed
+   Advanced <details> cards — those are the secondary/aside tier). */
+#p2p-haus-app .form-section:not(.form-section--advanced) {
+  position: relative;
+  padding-top: 32px;
+}
+#p2p-haus-app .form-section:not(.form-section--advanced)::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 5px;
+  border-radius: var(--radius-large) var(--radius-large) 0 0;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-primary-bright), #57e2b4);
+}
+
+/* SECONDARY / aside: the sticky rail card wears the universal gold callout
+   left-bar (inset so it respects the radius and keeps the card's shadow). */
+#p2p-haus-app .build-rail__card {
+  box-shadow: inset 6px 0 0 0 var(--color-gold), var(--shadow-medium);
+}
+/* The inner brand-kit card already carried a gold left border — drop it so
+   the gold now reads at the rail level, not doubled inside. */
+#p2p-haus-app .rail-brandkit {
+  border-left: 1px solid var(--color-border);
+}

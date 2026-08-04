@@ -37,9 +37,10 @@
 <link rel="preconnect" href="https://api.fontshare.com" crossorigin>
 <link href="https://api.fontshare.com/v2/css?f[]=general-sans@600,700,800&f[]=switzer@400,500,600,700&display=swap" rel="stylesheet">
 {{ 'p2p-haus.css' | asset_url | stylesheet_tag }}
+{{ 'haus-design-system.css' | asset_url | stylesheet_tag }}
 
 {% if p2p_access %}
-  <div id="p2p-haus-app" class="p2p-app" data-section-id="{{ section.id }}" style="--rail-sticky-top: {{ section.settings.sticky_offset | default: 152 }}px;">
+  <div id="p2p-haus-app" class="p2p-app haus--growth" data-section-id="{{ section.id }}" style="--rail-sticky-top: {{ section.settings.sticky_offset | default: 152 }}px;">
     <a class="skip-link" href="#mainContent">
         Skip to main content
       </a>
