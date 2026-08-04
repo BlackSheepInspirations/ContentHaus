@@ -1952,6 +1952,47 @@
     return body;
   }
 
+  // Collapsed-by-default tips panel (Brand keeps its own Archetype ->
+  // Assessment -> Blueprint flow, so no generic 4-step row — tips only).
+  var TIPS = [
+    "Answer honestly, not aspirationally — the blueprint is only as clear as the truth you put in.",
+    "Do the Archetype Guide before the Assessment; knowing the twelve archetypes makes every later answer sharper.",
+    "Your Brand DNA feeds every other Haus — nail it here and your content, graphics, and copy all inherit it.",
+    "Save your Blueprint so Content, Marketing, and Graphics Haus can load it and match your voice automatically.",
+    "Pick colors you'll actually use everywhere, not just ones you like today — consistency is what builds recognition.",
+    "Revisit this as you grow; a brand you defined at launch is worth re-checking once you know your real audience.",
+  ];
+
+  var tipsExpanded = false;
+
+  function renderTipsPanel(root) {
+    var toggleBtn = el("button", { type: "button", class: "bh-tips__toggle" }, [
+      icon(tipsExpanded ? "eyeOff" : "eye"),
+      el("span", { text: tipsExpanded ? "Hide" : "Show" }),
+    ]);
+    toggleBtn.addEventListener("click", function () {
+      tipsExpanded = !tipsExpanded;
+      renderApp();
+    });
+
+    var children = [
+      el("div", { class: "bh-tips__header" }, [
+        el("h3", { class: "bh-tips__title" }, [icon("bulb"), el("span", { text: "Tips for a Stronger Brand" })]),
+        toggleBtn,
+      ]),
+    ];
+
+    if (tipsExpanded) {
+      var list = el("ul", { class: "bh-tips__list" });
+      TIPS.forEach(function (tip) {
+        list.appendChild(el("li", { text: tip }));
+      });
+      children.push(list);
+    }
+
+    root.appendChild(el("div", { class: "bh-tips" }, children));
+  }
+
   function renderApp() {
     var root = document.getElementById("brand-haus-app");
     if (!root) return;
@@ -2037,6 +2078,7 @@
 
     var shell = el("div", { class: "bh-shell" });
     var main = el("div", { class: "bh-main" });
+    if (!showFaq) renderTipsPanel(main); // collapsed tips at the top of the content (not on the FAQ view)
     renderStepContent(main); // may mutate activeStep (auto-advance) — must run before the sidebar reads it
     renderSidebar(shell);
     shell.appendChild(main);
