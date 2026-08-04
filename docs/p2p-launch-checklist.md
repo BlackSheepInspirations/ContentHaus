@@ -64,7 +64,9 @@ just before public launch. Not urgent while password-locked.
   done), Framework Masters (raft/grows/rooted anchor course done), *Reached Freedom*
   (all five realms), and *Every Path Walked* (every course incl. offshoots). Runs on
   load wherever `window.P2P_MAP` is present. Verified via `dev/badge-check.html`.
-- **Check badges still need Andrea's input:** Mindset/Purpose/Heart I·II + Clear
+- **Check badges — waiting on Andrea** *(2026-08-04: she's finishing the Check content;
+  once the titles/counts land, wire `checksDone` ids → these badges — ~10-min code job)*:
+  Mindset/Purpose/Heart I·II + Clear
   Mind/True Purpose/Open Heart aren't auto-wired because the Check taxonomy is
   unknown to the engine — need the exact Check titles and how many of each
   category exist (they're `check` blocks in the journey section). Once known, map
@@ -74,8 +76,8 @@ just before public launch. Not urgent while password-locked.
   summary ring + text (lines ~68-78).
 - ~~**P2P Operating System page**~~ ✅ DONE — built + live at `/pages/p2p-os`
   (`sections/p2p-os.liquid`); the stale `/pages/p2p-operating-system` back-link is gone.
-- **Certificate backfill:** certs only record from the deploy onward; past
-  completions won't show until re-completed unless we backfill. *(Decision/data — Andrea's call.)*
+- ~~**Certificate backfill**~~ ❌ NOT DOING — Andrea's call (2026-08-04). Certs record
+  forward-only from deploy onward; past completions re-earn on re-completion. Off the docket.
 - ~~**Mindset Moment library → 500**~~ ✅ DONE — `assets/p2p-moments.js` is at ~652 items
   (Purpose ~318, Heart ~320 grown alongside). Well past the 500 target.
 - **House-voice content banks** ✅ grown to ~342 (welcomes 99/100) in the Worker
