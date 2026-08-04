@@ -102,9 +102,19 @@
 .hds-hero__grid{ display:grid; grid-template-columns:1.08fr .92fr; gap:clamp(22px,4vw,46px); align-items:center; }
 @media(max-width:820px){ .hds-hero__grid{grid-template-columns:1fr;} }
 .hds-hero__title{ font-size:clamp(30px,4.4vw,50px); line-height:1.05; letter-spacing:-.015em; font-weight:800; color:#fff; margin:0 0 16px; }
-.hds-hero__title .accent{ color:#57e2b4; }
+/* The highlighted word carries the opal-fire aurora on EVERY Haus — same
+   crown-jewel signature as Growth Haus's "ROOTED". */
+.hds-hero__title .accent,
+.hds-hero__tagline .accent{
+  background:linear-gradient(100deg,#27ae6e 0%,#0d7377 20%,#2563eb 42%,#5b3c8c 60%,#d6336c 80%,#c9a84c 100%);
+  background-size:200% 100%;
+  -webkit-background-clip:text; background-clip:text;
+  -webkit-text-fill-color:transparent; color:transparent;
+  animation:hds-opalText 11s ease-in-out infinite;
+}
+@keyframes hds-opalText{ 0%,100%{background-position:0% 50%;} 50%{background-position:100% 50%;} }
+@media (prefers-reduced-motion: reduce){ .hds-hero__title .accent,.hds-hero__tagline .accent{animation:none;} }
 .hds-hero__tagline{ font-size:clamp(15px,1.6vw,18px); font-weight:600; color:#eaf3ee; margin:0 0 10px; }
-.hds-hero__tagline .accent{ color:#57e2b4; }
 .hds-hero__desc{ font-size:clamp(14.5px,1.5vw,16.5px); line-height:1.55; color:#c7d8d0; margin:0; max-width:52ch; }
 .hds-hero__media{ min-width:0; }
 .hds-hero__frame{ position:relative; border-radius:18px; overflow:hidden; aspect-ratio:16/10;
