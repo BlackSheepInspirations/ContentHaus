@@ -267,9 +267,21 @@
     }
     var map = reg.map;
     map.eachLayer(function (ly) { if ((L.CircleMarker && ly instanceof L.CircleMarker) || ly instanceof L.Marker) map.removeLayer(ly); });
+    var winNames = (window.P2P_RECENT_WINS instanceof Set) ? window.P2P_RECENT_WINS : null;
     members.filter(function (p) { return typeof p.lat === 'number' && typeof p.lng === 'number'; }).forEach(function (p) {
-      L.circleMarker([p.lat, p.lng], { radius: 7, color: '#0b1620', weight: 2, fillColor: '#f4c534', fillOpacity: 1 })
-        .addTo(map).bindPopup('<div class="osx-mb-pop">' + cardHTML(p, true) + '</div>');
+      var streaky = (+p.streak || 0) >= 2;
+      var won = !!(winNames && winNames.has(String(p.name || '').trim().toLowerCase()));
+      var flag = won ? '<div class="osx-mb-pop-flag win">🎉 Just shared a win!</div>'
+        : (streaky ? '<div class="osx-mb-pop-flag streak">🔥 ' + (+p.streak) + '-day streak</div>' : '');
+      var popHtml = '<div class="osx-mb-pop">' + flag + cardHTML(p, true) + '</div>';
+      if (won || streaky) {
+        // On-streak / just-won members get an emoji pin instead of the plain dot.
+        var ic = L.divIcon({ className: 'osx-map-emoji' + (won ? ' win' : ' streak'), html: '<span>' + (won ? '🎉' : '🔥') + '</span>', iconSize: [28, 28], iconAnchor: [14, 14], popupAnchor: [0, -12] });
+        L.marker([p.lat, p.lng], { icon: ic }).addTo(map).bindPopup(popHtml);
+      } else {
+        L.circleMarker([p.lat, p.lng], { radius: 7, color: '#0b1620', weight: 2, fillColor: '#f4c534', fillOpacity: 1 })
+          .addTo(map).bindPopup(popHtml);
+      }
     });
     setTimeout(function () { map.invalidateSize(); }, 60);
     setTimeout(function () { map.invalidateSize(); }, 320);

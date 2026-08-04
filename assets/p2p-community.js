@@ -233,7 +233,10 @@
   }
   function actsHTML(p) {
     var nc = newCommentCount(p);
-    return '<div class="osx-cw-post-acts">' + reactBar(p) +
+    // Wins keep ❤ only (on the wall and the Win-of-the-Week card); everything
+    // else gets the full ❤/👍/🎉 bar.
+    var isWin = (p.kind === 'win' || p.category === 'wins');
+    return '<div class="osx-cw-post-acts">' + (isWin ? loveChip(p) : reactBar(p)) +
       '<button class="osx-cw-cbtn' + (nc ? ' hasnew' : '') + '" type="button" data-ctoggle="' + esc(p.id) + '">💬 <span>' + ((p.comments || []).length) + '</span>' + (nc ? '<span class="osx-cw-newc">' + nc + ' new</span>' : '') + '</button>' +
       commenterAvatars(p) +
     '</div>';
@@ -641,7 +644,11 @@
   function loadWins() {
     fetch(PROXY + '?category=wins&limit=8', { credentials: 'same-origin' })
       .then(function (r) { return r.ok ? r.json() : null; })
-      .then(function (j) { if (!j || j.guest) return; winPosts = j.posts || []; if (winIdx >= winPosts.length) winIdx = 0; renderWinsSide(); })
+      .then(function (j) { if (!j || j.guest) return; winPosts = j.posts || []; if (winIdx >= winPosts.length) winIdx = 0; renderWinsSide();
+        // Expose who shared a win in the last 7 days so the members map can flag their pin with 🎉.
+        var wk = Date.now() - 7 * 864e5;
+        window.P2P_RECENT_WINS = new Set((winPosts || []).filter(function (w) { return (w.ts || 0) >= wk; }).map(function (w) { return String(w.name || '').trim().toLowerCase(); }));
+      })
       .catch(function () {});
   }
   function openLightbox(url) {
