@@ -3302,3 +3302,42 @@
 #p2p-haus-app .rail-brandkit {
   border-left: 1px solid var(--color-border);
 }
+
+/* ---- Design-system polish (parity with the other Hausen) ---- */
+/* Section-card eyebrow gets the trailing hairline (marker + label + rule). */
+#p2p-haus-app .section-heading .section-number {
+  display: flex;
+}
+#p2p-haus-app .section-heading .section-number::after {
+  content: "";
+  flex: 1 1 auto;
+  min-width: 20px;
+  height: 1px;
+  align-self: center;
+  background: var(--color-border);
+}
+
+/* Phase-divider bands become the GOLD callout tier (left bar reserved for
+   gold everywhere) — clearly distinct from the emerald-top-barred build
+   cards they introduce. Eyebrow + tick already read gold. */
+#p2p-haus-app .phase-divider {
+  border-left-color: var(--color-gold);
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--color-gold) 12%, var(--color-surface)),
+      var(--color-surface) 60%
+    );
+}
+#p2p-haus-app .phase-divider__num {
+  display: flex;
+  color: var(--color-gold-ink);
+}
+#p2p-haus-app .phase-divider__num::after {
+  content: "";
+  flex: 1 1 auto;
+  min-width: 20px;
+  height: 1px;
+  align-self: center;
+  background: var(--color-border);
+}
