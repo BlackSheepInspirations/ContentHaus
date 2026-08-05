@@ -186,7 +186,11 @@
   // own stores in addition to its own, so its snapshot bundles all four
   // plus the shared Style DNA bar; every other mode only needs its own
   // store + Style DNA.
-  var VAULT_CROSS_MODULES = { combined: ["character", "text", "graphics"], character: ["characterVideo"] };
+  var VAULT_CROSS_MODULES = {
+    combined: ["character", "text", "graphics"],
+    character: ["characterVideo"], couples: ["characterVideo"], family: ["characterVideo"],
+    animals: ["characterVideo"], graphics: ["characterVideo"], reference: ["characterVideo"],
+  };
 
   function buildVaultSnapshot(mode) {
     var snapshot = { styleDNA: JSON.parse(JSON.stringify(PromptHaus.styleDNA.getState())) };
@@ -1580,6 +1584,9 @@
       )
     );
 
+    var couplesVideo = renderCharacterVideoSection();
+    if (couplesVideo) panel.appendChild(couplesVideo);
+
     return panel;
   }
 
@@ -1725,6 +1732,9 @@
         "Optional fantasy elements or props to add to the scene."
       )
     );
+
+    var familyVideo = renderCharacterVideoSection();
+    if (familyVideo) panel.appendChild(familyVideo);
 
     return panel;
   }
@@ -2175,6 +2185,13 @@
       );
     }
     panel.appendChild(hauteSection);
+
+    // Video Motion companion — not in Combined (Combined suppresses the
+    // per-mode motion prompt, same as it does for Character).
+    if (!combinedMode) {
+      var graphicsVideo = renderCharacterVideoSection();
+      if (graphicsVideo) panel.appendChild(graphicsVideo);
+    }
 
     return panel;
   }
@@ -2663,6 +2680,9 @@
       )
     );
 
+    var animalsVideo = renderCharacterVideoSection();
+    if (animalsVideo) panel.appendChild(animalsVideo);
+
     return panel;
   }
 
@@ -2739,6 +2759,9 @@
         "Layer lettering on top of the recreated image."
       )
     );
+
+    var referenceVideo = renderCharacterVideoSection();
+    if (referenceVideo) panel.appendChild(referenceVideo);
 
     return panel;
   }
