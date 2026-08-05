@@ -84,6 +84,17 @@
     "polaroid style frame", "chalkboard frame",
   ];
 
+  // Parity with Content Haus's Graphics Frame It — default "" (opt-in) so
+  // existing prompts don't change.
+  var TIME_ERA_OPTIONS = [
+    "", "modern day", "retro 50s", "retro 70s", "retro 80s", "y2k / retro 90s",
+    "vintage / antique", "victorian", "art deco", "medieval / fantasy", "futuristic", "ancient",
+  ];
+  var CAMERA_ANGLE_OPTIONS = [
+    "", "front view", "3/4 angle", "side profile", "top-down / flat lay",
+    "low angle", "high angle", "close-up", "wide establishing shot",
+  ];
+
   // Merges Content Haus's Air/Land/Rail/Water/Military transportation
   // categories into one flat list — the category-first cascade (pick Air,
   // then see Air's own vehicle list) isn't something this engine supports
@@ -118,6 +129,8 @@
       { name: "sceneEffect", label: "Scene Effect (optional)", options: SCENE_EFFECT_OPTIONS, defaultValue: SCENE_EFFECT_OPTIONS[0] },
       { name: "lightingEffects", label: "Lighting", options: LIGHTING_OPTIONS, defaultValue: LIGHTING_OPTIONS[0], aesthetic: "mood" },
       { name: "framing", label: "Framing", options: FRAMING_OPTIONS, defaultValue: FRAMING_OPTIONS[0] },
+      { name: "timeEra", label: "Time / Era (optional)", options: TIME_ERA_OPTIONS, defaultValue: "" },
+      { name: "cameraAngle", label: "Camera Angle (optional)", options: CAMERA_ANGLE_OPTIONS, defaultValue: "" },
       { name: "vehicle", label: "Vehicle (optional)", options: VEHICLE_OPTIONS, defaultValue: VEHICLE_OPTIONS[0] },
       { name: "vehicleColor", label: "Vehicle Color", options: VEHICLE_COLOR_OPTIONS, defaultValue: VEHICLE_COLOR_OPTIONS[0] },
     ],
@@ -132,21 +145,23 @@
       var vehicleClause = (valueMap.vehicle && valueMap.vehicle.indexOf("None") !== 0)
         ? " Include a " + valueMap.vehicleColor + " " + valueMap.vehicle + " in the scene."
         : "";
-      return { subjectClause: subjectClause, sceneEffectClause: sceneEffectClause, vehicleClause: vehicleClause };
+      var eraClause = valueMap.timeEra ? ", " + valueMap.timeEra + " era" : "";
+      var angleClause = valueMap.cameraAngle ? ", " + valueMap.cameraAngle : "";
+      return { subjectClause: subjectClause, sceneEffectClause: sceneEffectClause, vehicleClause: vehicleClause, eraClause: eraClause, angleClause: angleClause };
     },
 
     basePromptTemplate:
-      "Create a clean, professional graphic{subjectClause}, in a {artStyle} style with a {colorPalette} color palette. Background: {background}{sceneEffectClause}, {lightingEffects} lighting, {framing}{holidayClause}.{vehicleClause}\n\n" +
+      "Create a clean, professional graphic{subjectClause}, in a {artStyle} style with a {colorPalette} color palette. Background: {background}{sceneEffectClause}, {lightingEffects} lighting, {framing}{eraClause}{angleClause}{holidayClause}.{vehicleClause}\n\n" +
       "Layout: one well-composed, centered graphic filling most of the frame." +
       LOCKED_SUFFIX,
 
     charmPromptTemplate:
-      "Create a charming, extra-polished graphic{subjectClause}, in a {artStyle} style with a {colorPalette} color palette. Background: {background}{sceneEffectClause}, {lightingEffects} lighting, {framing}{holidayClause}.{vehicleClause}\n\n" +
+      "Create a charming, extra-polished graphic{subjectClause}, in a {artStyle} style with a {colorPalette} color palette. Background: {background}{sceneEffectClause}, {lightingEffects} lighting, {framing}{eraClause}{angleClause}{holidayClause}.{vehicleClause}\n\n" +
       "Layout: one well-composed, centered graphic filling most of the frame, with extra charm and personality." +
       LOCKED_SUFFIX,
 
     dynamicPromptTemplate:
-      "Create a bold, eye-catching graphic{subjectClause}, in a {artStyle} style with a {colorPalette} color palette. Background: {background}{sceneEffectClause}, {lightingEffects} lighting, {framing}{holidayClause}.{vehicleClause}\n\n" +
+      "Create a bold, eye-catching graphic{subjectClause}, in a {artStyle} style with a {colorPalette} color palette. Background: {background}{sceneEffectClause}, {lightingEffects} lighting, {framing}{eraClause}{angleClause}{holidayClause}.{vehicleClause}\n\n" +
       "Layout: one well-composed, centered graphic filling most of the frame, with bolder visual energy." +
       LOCKED_SUFFIX,
 
