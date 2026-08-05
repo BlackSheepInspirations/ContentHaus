@@ -86,6 +86,26 @@
   ]);
   var ASPECT_RATIO_OPTIONS = ["1:1", "4:5", "9:16", "16:9"];
 
+  // Product / Size — a shared cross-cutting field (like Content Haus's
+  // Project Type) so every generator can be told what physical product the
+  // graphic is for. Picking one auto-suggests an aspect ratio and injects a
+  // "designed to work as a ___" clause into every generator's prompt.
+  var PROJECT_TYPE_OPTIONS = [
+    "general / no specific product",
+    "sticker", "sticker sheet", "t-shirt / apparel graphic", "hoodie graphic", "tote bag",
+    "mug wrap", "tumbler wrap", "phone case", "mouse pad", "poster / wall art",
+    "greeting card", "postcard", "laptop / water-bottle decal", "keychain", "button / pin",
+    "wrapping / digital paper", "coloring page", "logo / brand mark", "digital clipart PNG",
+  ];
+  var PROJECT_TYPE_ASPECT = {
+    "sticker": "1:1", "sticker sheet": "4:5", "t-shirt / apparel graphic": "4:5", "hoodie graphic": "4:5",
+    "tote bag": "1:1", "mug wrap": "16:9", "tumbler wrap": "16:9", "phone case": "9:16",
+    "mouse pad": "16:9", "poster / wall art": "4:5", "greeting card": "4:5", "postcard": "4:5",
+    "laptop / water-bottle decal": "1:1", "keychain": "1:1", "button / pin": "1:1",
+    "wrapping / digital paper": "1:1", "coloring page": "4:5", "logo / brand mark": "1:1",
+    "digital clipart PNG": "1:1",
+  };
+
   // File-level export setting — independent of any generator's own
   // decorative Background field (a scene/content choice). Default is a
   // deliberate no-op so every existing prompt reads exactly as before
@@ -98,6 +118,7 @@
     audience: makeField("", [], { isFreeText: true }),
     readingLevel: makeField("general audience", READING_LEVEL_OPTIONS),
     variationCount: makeField("2", VARIATION_COUNT_OPTIONS),
+    projectType: makeField(PROJECT_TYPE_OPTIONS[0], PROJECT_TYPE_OPTIONS),
     holiday: GraphicsHaus.util.makeGroupedField("", HOLIDAY_GROUPS),
     theme: makeField("", THEME_OPTIONS),
     niche: makeField("", NICHE_OPTIONS),
@@ -122,6 +143,19 @@
   }
   function setVariationCount(value) {
     GraphicsHaus.util.updateField(store, "variationCount", { value: value, customValue: "" });
+  }
+  // Picking a product auto-suggests its aspect ratio (user can still change
+  // Aspect Ratio after). "general" clears back to no product influence.
+  function setProjectType(value) {
+    GraphicsHaus.util.updateField(store, "projectType", { value: value, customValue: "" });
+    var suggested = PROJECT_TYPE_ASPECT[value];
+    if (suggested) GraphicsHaus.util.updateField(store, "aspectRatio", { value: suggested, customValue: "" });
+  }
+  // Trailing clause injected into every generator's prompt by the engine.
+  function getProjectTypeClause() {
+    var pt = GraphicsHaus.engine.resolveFieldValue(store.getState().projectType);
+    if (!pt || pt.indexOf("general") === 0) return "";
+    return " Design this to work as a " + pt + " — sized and composed appropriately for that product, with clean, print-ready edges.";
   }
   function setHoliday(value) {
     GraphicsHaus.util.updateField(store, "holiday", { value: value, customValue: "" });
@@ -211,6 +245,9 @@
     setAudience: setAudience,
     setReadingLevel: setReadingLevel,
     setVariationCount: setVariationCount,
+    setProjectType: setProjectType,
+    getProjectTypeClause: getProjectTypeClause,
+    PROJECT_TYPE_OPTIONS: PROJECT_TYPE_OPTIONS,
     setHoliday: setHoliday,
     setTheme: setTheme,
     setNiche: setNiche,

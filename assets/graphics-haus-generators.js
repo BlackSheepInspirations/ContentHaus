@@ -323,20 +323,22 @@
     var def = getDef(id);
     var state = getStore(id).getState();
     var valueMap = getFieldValueMap(def, state);
+    // Shared Product/Size clause — appended to every generator's output.
+    var pc = GraphicsHaus.styleDNA.getProjectTypeClause();
 
-    var asSelectedText = substituteTemplate(def.basePromptTemplate, valueMap);
+    var asSelectedText = substituteTemplate(def.basePromptTemplate, valueMap) + pc;
 
     var charmPool = def.charmPool || DEFAULT_CHARM_POOL;
     var charmPhrase = charmPool[state._charmIndex % charmPool.length];
-    var charmText = substituteTemplate(def.charmPromptTemplate || def.basePromptTemplate, valueMap) + " Include " + charmPhrase + ".";
+    var charmText = substituteTemplate(def.charmPromptTemplate || def.basePromptTemplate, valueMap) + " Include " + charmPhrase + "." + pc;
 
     var dynamicPool = def.dynamicPool || DEFAULT_DYNAMIC_POOL;
     var dynamicPhrase = dynamicPool[state._dynamicIndex % dynamicPool.length];
-    var dynamicText = substituteTemplate(def.dynamicPromptTemplate || def.basePromptTemplate, valueMap) + " Give it " + dynamicPhrase + ".";
+    var dynamicText = substituteTemplate(def.dynamicPromptTemplate || def.basePromptTemplate, valueMap) + " Give it " + dynamicPhrase + "." + pc;
 
     var fourthPool = def.fourthPool || DEFAULT_FOURTH_POOL;
     var fourthPhrase = fourthPool[state._fourthIndex % fourthPool.length];
-    var fourthText = substituteTemplate(def.fourthPromptTemplate || def.basePromptTemplate, valueMap) + " Try " + fourthPhrase + ".";
+    var fourthText = substituteTemplate(def.fourthPromptTemplate || def.basePromptTemplate, valueMap) + " Try " + fourthPhrase + "." + pc;
 
     return [
       { key: "asSelected", label: "As Selected", text: asSelectedText },
@@ -358,10 +360,11 @@
     var state = getStore(id).getState();
     var valueMap = getFieldValueMap(def, state);
     var chosenIds = (state._pageTypes && state._pageTypes.length) ? state._pageTypes : (def.defaultPageTypes || []);
+    var pc = GraphicsHaus.styleDNA.getProjectTypeClause();
     return chosenIds.map(function (ptId) {
       var pt = def.pageTypes.filter(function (p) { return p.id === ptId; })[0];
       if (!pt) return null;
-      return { key: pt.id, label: pt.label, text: substituteTemplate(pt.promptTemplate, valueMap) };
+      return { key: pt.id, label: pt.label, text: substituteTemplate(pt.promptTemplate, valueMap) + pc };
     }).filter(Boolean);
   }
 

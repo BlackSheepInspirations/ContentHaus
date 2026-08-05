@@ -577,14 +577,6 @@
   function renderBusinessVoiceDNA(root) {
     var state = GraphicsHaus.styleDNA.getState();
 
-    var nameInput = el("input", { type: "text", class: "gh-field__select", placeholder: "Your business name" });
-    nameInput.value = state.businessName.value || "";
-    nameInput.addEventListener("input", function () {
-      GraphicsHaus.styleDNA.setBusinessName(nameInput.value);
-    });
-    var nameId = "gh-field-" + nameInput.getAttribute("data-gh-key");
-    nameInput.id = nameId;
-
     var variationSelect = el("select", { class: "gh-field__select" });
     state.variationCount.options.forEach(function (opt) {
       var optionNode = el("option", { value: opt, text: opt + (opt === "1" ? " variation" : " variations") });
@@ -594,6 +586,16 @@
     variationSelect.addEventListener("change", function () { GraphicsHaus.styleDNA.setVariationCount(variationSelect.value); renderApp(); });
     var variationId = "gh-field-" + variationSelect.getAttribute("data-gh-key");
     variationSelect.id = variationId;
+
+    var projectSelect = el("select", { class: "gh-field__select" });
+    state.projectType.options.forEach(function (opt) {
+      var optionNode = el("option", { value: opt, text: opt });
+      if (opt === state.projectType.value) optionNode.selected = true;
+      projectSelect.appendChild(optionNode);
+    });
+    projectSelect.addEventListener("change", function () { GraphicsHaus.styleDNA.setProjectType(projectSelect.value); renderApp(); });
+    var projectId = "gh-field-" + projectSelect.getAttribute("data-gh-key");
+    projectSelect.id = projectId;
 
     var platformSelect = el("select", { class: "gh-field__select" });
     appendSelectOptions(platformSelect, state.targetPlatform, state.targetPlatform.value);
@@ -666,7 +668,7 @@
     }
 
     var children = [
-      el("div", { class: "gh-styledna__field" }, [labelWithIcon("shirt", "Business Name", nameId, null, "Set once here — carries into every generator automatically."), nameInput]),
+      el("div", { class: "gh-styledna__field" }, [labelWithIcon("gift", "Product / Size", projectId, null, "What product this graphic is for — auto-suggests the aspect ratio and tells every generator to size and compose the art for that product."), projectSelect]),
       el("div", { class: "gh-styledna__field" }, [labelWithIcon("sparkle", "Variations", variationId), variationSelect]),
       el("div", { class: "gh-styledna__field" }, [labelWithIcon("monitor", "Target Platform", platformId, null, "Formats the copied prompt for this specific AI tool."), platformSelect]),
       el("div", { class: "gh-styledna__field" }, [labelWithIcon("crop", "Aspect Ratio", aspectId, null, "Only appears in the copied text for Midjourney/Leonardo AI."), aspectSelect]),
