@@ -2205,7 +2205,26 @@
     });
   });
 
-  document.addEventListener("DOMContentLoaded", function () {
+  // The hero title is a shared section setting ("The Brand Haus"), but the
+  // assessment-only view is a separate destination ("Founders Assessment")
+  // in the nav — so on that page, re-title the hero client-side so the two
+  // pages don't both read "Brand Haus". "Founder's" gets the aurora accent.
+  function applyFocusHero() {
+    if (!BH_FOCUS) return;
+    var header = document.querySelector(".bh-brand-header");
+    if (!header) return;
+    var title = header.querySelector(".hds-hero__title");
+    if (title) title.innerHTML = "The <span class=\"accent\">Founder's</span> Assessment";
+  }
+
+  function bootBrandHaus() {
+    applyFocusHero();
     BrandHaus.ui.renderApp();
-  });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", bootBrandHaus);
+  } else {
+    bootBrandHaus();
+  }
 })();
