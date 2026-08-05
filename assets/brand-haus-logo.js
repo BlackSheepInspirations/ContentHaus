@@ -71,6 +71,21 @@
     "black & white first priority", "invertible design required (works on light and dark)",
   ];
 
+  // Rendering / illustration style — the axis that decides whether a mark
+  // comes out as a clean professional logo vs a cartoony mascot. Defaults to
+  // "clean flat vector" so logos read as logos unless a livelier style is
+  // chosen on purpose.
+  var LOGO_STYLE_OPTIONS = [
+    "clean flat vector",
+    "minimalist line art",
+    "geometric / abstract",
+    "vintage / retro badge",
+    "hand-drawn / organic",
+    "mascot / character",
+    "cartoon / playful",
+    "realistic / detailed illustration",
+  ];
+
   var DIMENSIONAL_OPTIONS = ["flat", "dimensional / 3d"];
   // "logo system set (primary + simplified icon/submark)" used to live
   // here as a 4th option — it only ever prepended a phrase to the same
@@ -148,6 +163,7 @@
       tier: "standard",
       useMode: makeField(USE_MODE_OPTIONS[0], USE_MODE_OPTIONS),
       logoType: makeField("", LOGO_TYPE_OPTIONS),
+      logoStyle: makeField("clean flat vector", LOGO_STYLE_OPTIONS),
       industry: makeField("", INDUSTRY_OPTIONS),
       personality: makeField("", PERSONALITY_OPTIONS),
       // 6 named roles, matching the same Primary/Secondary/Accent/Neutral/
@@ -373,6 +389,11 @@
     var parts = [];
     function add(text) { if (text) parts.push(text); }
 
+    // Rendering style leads the descriptor list so it sets the overall look
+    // (clean vector vs mascot vs realistic) before the structural details.
+    var logoStyle = resolved(state.logoStyle);
+    if (logoStyle) add(logoStyle + " logo style");
+
     var lockupVal = opts.forceTextOnly ? "text only" : (opts.forceIconOnly ? "icon only" : resolved(state.composition.lockup));
     add([resolved(state.logoType), lockupVal, resolved(state.composition.container)].filter(Boolean).join(", "));
 
@@ -572,6 +593,7 @@
     }
     var state = store.getState();
     updateField("logoType", { value: randomPick(state.logoType), customValue: "" });
+    updateField("logoStyle", { value: randomPick(state.logoStyle), customValue: "" });
     updateField("industry", { value: randomPick(state.industry), customValue: "" });
     updateField("personality", { value: randomPick(state.personality), customValue: "" });
     updateField("iconography", { value: randomPick(state.iconography), customValue: "" });
@@ -601,6 +623,7 @@
 
     var foundation = resolveFields([
       { label: "Logo Type", field: state.logoType },
+      { label: "Logo Style", field: state.logoStyle },
       { label: "Industry", field: state.industry },
       { label: "Personality", field: state.personality },
     ]);
@@ -812,11 +835,13 @@
     var ui = BrandHaus.ui;
     var entries = [
       { label: "Logo Type", field: state.logoType },
+      { label: "Logo Style", field: state.logoStyle },
       { label: "Industry / Context", field: state.industry },
       { label: "Brand Personality", field: state.personality },
     ];
     var fieldsContainer = ui.renderPlainFieldRow(entries, function (entry, changes) {
       if (entry.label === "Logo Type") updateField("logoType", changes);
+      else if (entry.label === "Logo Style") updateField("logoStyle", changes);
       else if (entry.label === "Industry / Context") updateField("industry", changes);
       else updateField("personality", changes);
       BrandHaus.ui.renderApp();
