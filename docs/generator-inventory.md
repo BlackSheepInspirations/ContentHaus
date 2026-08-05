@@ -24,6 +24,16 @@ Started 2026-08-05. Pulled from live code (not guessed).
     prompt"** sub-panel (Subject/Background/Lighting/Art Style, reuses the size).
   - Marketing tabs now: **Content Studio · Mockup · Email · Sales · Testimonial ·
     Customer Intelligence · Quick Generators** (was 7 studios).
+  - **Quick Generators grouped** under 5 subheadings (Graphics · Copy · Video &
+    Audio · Bundles & Kits · Strategy Docs) with per-group counts.
+  - **Merges shipped:** Thank You Card + Gift Message → **Insert Card** (Card Type
+    toggle); SEO Copy + GEO/AI Search → **Search Visibility Copy** (Optimize-For
+    toggle, per-mode granularity folded away — flagged in-file). Originals kept
+    registered but `hideFromGrid` (Vault-safe). Video Ad **Kit** (all-in-one plan)
+    vs **Bundle** (separate shot prompts) differentiated via labels/descriptions.
+  - 26 grid cards (28 registered − 2 hidden).
+  - **Deferred (task #79):** Video Motion Prompt DRY (internal refactor, no user
+    change); wiring the size-picker into the ~11 graphic quick-gens (enhancement).
 
 ---
 
