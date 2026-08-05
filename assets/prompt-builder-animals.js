@@ -85,6 +85,8 @@
   var FRAME_IT_LABELS = {
     background: "Background",
     dynamicSceneEffect: "Scene Effect",
+    timeEra: "Time / Era",
+    cameraAngle: "Camera Angle",
     lightingEffects: "Lighting Effects",
     framing: "Framing",
   };
@@ -128,8 +130,10 @@
       frameIt: {
         background: PromptHaus.util.makeGroupedField("", characterLists.backgroundGroups),
         dynamicSceneEffect: makeField("", characterLists.dynamicSceneEffect),
-        // Defaulted like Character/Couples/Graphics' own Lighting Effects —
-        // no Pose/Camera Angle field exists here to match, so just this one.
+        // Time/Era + Camera Angle default empty (opt-in) so existing prompts
+        // don't change — matches the other presentation modes' field set.
+        timeEra: makeField("", characterLists.timeEra),
+        cameraAngle: makeField("", characterLists.cameraAngle),
         lightingEffects: makeField("studio lighting", characterLists.lightingEffects),
         framing: PromptHaus.util.makeGroupedField("no frame", characterLists.framingGroups),
       },
