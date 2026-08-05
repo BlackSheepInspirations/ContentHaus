@@ -263,3 +263,18 @@ flat Transportation and the missing State/Region picker.)
 3. **Content Haus vanity** — already "great" on options but embedded in a scene; leave as
    is, or optionally give it the same standalone plate output the Graphics Haus one has.
    *[decision: ____]*
+
+### 4D. Shipped (2026-08-05)
+
+- **License plate split into two purpose-built tabs:**
+  - **Custom License Plate** (realistic) — reworked the old weak one into a true DMV
+    plate: state/region (~65 flat), plate style, letter style, plate text color,
+    realistic finishes, border, corner motif.
+  - **Luxury Vanity Plate** (NEW tab) — full port of Content Haus's rich vanity
+    catalog: 22 plate types (glam + masculine), 22 frame styles, 15 letter styles,
+    16 text colors, 23 top+bottom accents, 19 finishes, + 3 presets, a/an grammar.
+  - Both keep Graphics Haus's standalone output + 4 variations + Look Lock. So the
+    "real look" and the "fun look" are each great and separate.
+- **Graphics Studio parity** — added Time/Era + Camera Angle (default empty).
+- Deferred (bigger, engine change): multi-subject/quantity + Transportation cascade
+  in Graphics Studio; leaving Content Haus's own vanity as-is (already loved).
