@@ -153,15 +153,16 @@
   // Business/Voice entries — folded into every mode's assembler the same
   // way Prompt Haus's Holiday/Theme/Niche/Buffer get folded in, just
   // carrying tone/audience/reading-level instead of visual finishing.
+  // Tone + Audience used to live here (shared across every studio), but
+  // they change post-to-post far more than they stay fixed, so they were
+  // peeled out into each studio's own widget. What remains here is the
+  // genuinely "set once" identity: Business Name, Reading Level, and the
+  // optional seasonal/creative direction (Holiday/Theme/Niche).
   function getVoiceEntries() {
     var state = store.getState();
     var entries = [];
     if (MarketingHaus.engine.resolveFieldValue(state.businessName)) {
       entries.push({ label: "Business", field: state.businessName });
-    }
-    entries.push({ label: "Tone", field: state.tone });
-    if (MarketingHaus.engine.resolveFieldValue(state.audience)) {
-      entries.push({ label: "Audience", field: state.audience });
     }
     entries.push({ label: "Reading Level", field: state.readingLevel });
     entries.push({ label: "Holiday", field: state.holiday });
@@ -206,6 +207,7 @@
   }
 
   MarketingHaus.styleDNA = Object.assign({}, store, {
+    TONE_OPTIONS: TONE_OPTIONS,
     setBusinessName: setBusinessName,
     setTone: setTone,
     setAudience: setAudience,

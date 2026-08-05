@@ -712,16 +712,17 @@
       return el("div", { class: "mh-styledna__field" }, [head, inputEl]);
     }
 
+    // Tone + Audience now live in each studio's own panel (they change
+    // post-to-post), so the shared bar keeps only the truly set-once
+    // identity — Business Name, Reading Level, and the text Negative Prompt.
     var voiceGrid = el("div", { class: "mh-styledna__grid" }, [
       dnaField("shirt", "Business Name", "businessName", nameInput, nameId, "Set once here — carries into every studio automatically.", true),
-      dnaField("sparkle", "Tone", "tone", toneSelect, toneId, "How your brand sounds — warm, bold, playful, professional, etc.", true),
-      dnaField("people", "Audience", "audience", audienceInput, audienceId, "Who you're talking to — the more specific, the better the copy.", true),
       dnaField("monitor", "Reading Level", "readingLevel", readingSelect, readingId, "How simple or advanced the wording should be.", true),
       el("div", { class: "mh-styledna__field mh-styledna__field--full" }, negativeFieldChildren),
     ]);
     var groups = [
       el("div", { class: "mh-styledna__group" }, [
-        el("p", { class: "mh-styledna__group-title" }, [icon("sparkle"), el("span", { text: "Voice DNA — how your brand sounds (set once, every studio inherits it)" })]),
+        el("p", { class: "mh-styledna__group-title" }, [icon("sparkle"), el("span", { text: "Brand DNA — set once, every studio inherits it" })]),
         voiceGrid,
       ]),
     ];

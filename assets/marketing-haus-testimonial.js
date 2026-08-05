@@ -30,6 +30,9 @@
     "\"Verified Buyer\" only", "include star rating",
   ]);
 
+  // Tone + Audience now live per-studio (were shared in the DNA bar).
+  var TONE_OPTIONS = MarketingHaus.styleDNA.TONE_OPTIONS;
+
   var PRESETS = [
     {
       name: "Polish for Instagram Graphic",
@@ -56,6 +59,8 @@
   function buildInitialState() {
     return {
       rawFeedback: makeField("", [], { isFreeText: true }),
+      tone: makeField("", TONE_OPTIONS),
+      audience: makeField("", [], { isFreeText: true }),
       outputFormat: makeField("", OUTPUT_FORMAT_OPTIONS),
       polishLevel: makeField(POLISH_LEVEL_OPTIONS[1], POLISH_LEVEL_OPTIONS),
       highlightFocus: makeField("", [], { isFreeText: true }),
@@ -101,7 +106,10 @@
     var polish = resolved(state.polishLevel);
     var highlight = resolved(state.highlightFocus);
     var attribution = resolved(state.attribution);
-    var voiceDescriptors = MarketingHaus.engine.resolveFields(MarketingHaus.styleDNA.getVoiceEntries()).map(function (e) { return e.value; });
+    var voiceDescriptors = MarketingHaus.engine.resolveFields(MarketingHaus.styleDNA.getVoiceEntries().concat([
+      { label: "Tone", field: state.tone },
+      { label: "Audience", field: state.audience },
+    ])).map(function (e) { return e.value; });
     voiceDescriptors = voiceDescriptors.concat(MarketingHaus.engine.resolveFields(MarketingHaus.brandKit.getActiveKitEntries()).map(function (e) { return e.value; }));
 
     var instructionBits = [];
@@ -126,6 +134,8 @@
     var state = store.getState();
     var items = MarketingHaus.engine.resolveFields([
       { label: "Raw Feedback", field: state.rawFeedback },
+      { label: "Tone", field: state.tone },
+      { label: "Audience", field: state.audience },
       { label: "Output Format", field: state.outputFormat },
       { label: "Polish Level", field: state.polishLevel },
       { label: "Highlight Focus", field: state.highlightFocus },
@@ -151,6 +161,15 @@
       [{ label: "Raw Feedback / Quote — paste the customer's actual words", field: state.rawFeedback, placeholder: "e.g. \"omg i love this so much!! shipping was fast too, will def buy again\"" }],
       function (entry, changes) { updateField("rawFeedback", changes); MarketingHaus.ui.renderApp(); }
     ));
+
+    wrap.appendChild(ui.renderFieldGroup("Voice (optional)", [
+      { label: "Tone", field: state.tone },
+      { label: "Audience", field: state.audience, placeholder: "e.g. prospective customers on the fence" },
+    ], function (entry, changes) {
+      if (entry.label === "Tone") updateField("tone", changes);
+      else updateField("audience", changes);
+      MarketingHaus.ui.renderApp();
+    }, "Optional — the polish level already carries most of the voice."));
 
     wrap.appendChild(ui.renderFieldGroup("Format & Polish", [
       { label: "Output Format", field: state.outputFormat },

@@ -28,6 +28,9 @@
   var SECTION_OPTIONS = ["Headline", "Subheadline", "Benefits", "How It Works", "Testimonials", "FAQ", "Guarantee", "Final CTA"];
   var SECTION_CAP = SECTION_OPTIONS.length;
 
+  // Tone + Audience now live per-studio (were shared in the DNA bar).
+  var TONE_OPTIONS = MarketingHaus.styleDNA.TONE_OPTIONS;
+
   var MAX_BENEFITS = 5;
 
   var PRESETS = [
@@ -50,6 +53,8 @@
 
   function buildInitialState() {
     return {
+      tone: makeField("", TONE_OPTIONS),
+      audience: makeField("", [], { isFreeText: true }),
       contentType: makeField(CONTENT_TYPE_OPTIONS[0], CONTENT_TYPE_OPTIONS),
       offer: makeField("", [], { isFreeText: true }),
       benefits: [],
@@ -116,6 +121,9 @@
 
   function randomize() {
     var state = store.getState();
+    if (state.tone.includeInPrompt !== false) {
+      updateField("tone", { value: TONE_OPTIONS[Math.floor(Math.random() * TONE_OPTIONS.length)], customValue: "" });
+    }
     if (state.socialProof.includeInPrompt !== false) {
       var sp = SOCIAL_PROOF_OPTIONS.filter(function (o) { return o !== "none"; });
       updateField("socialProof", { value: sp[Math.floor(Math.random() * sp.length)], customValue: "" });
@@ -149,7 +157,10 @@
       if (fragment) fragments.push(fragment);
     }
 
-    MarketingHaus.engine.resolveFields(MarketingHaus.styleDNA.getVoiceEntries()).forEach(function (entry) {
+    MarketingHaus.engine.resolveFields(MarketingHaus.styleDNA.getVoiceEntries().concat([
+      { label: "Tone", field: state.tone },
+      { label: "Audience", field: state.audience },
+    ])).forEach(function (entry) {
       addZone(entry.value, entry.value);
     });
     MarketingHaus.brandKit.getActiveKitEntries().forEach(function (entry) {
@@ -175,6 +186,8 @@
     var state = store.getState();
     var groups = [];
     var core = MarketingHaus.engine.resolveFields([
+      { label: "Tone", field: state.tone },
+      { label: "Audience", field: state.audience },
       { label: "Content Type", field: state.contentType },
       { label: "Product / Offer", field: state.offer },
       { label: "Objection to Address", field: state.objection },
@@ -198,6 +211,15 @@
 
     var presetRow = ui.renderPresetRow(PRESETS, function (preset) { applyPreset(preset); MarketingHaus.ui.renderApp(); }, "Starter Presets — click one, then customize");
     if (presetRow) wrap.appendChild(presetRow);
+
+    wrap.appendChild(ui.renderFieldGroup("Voice", [
+      { label: "Tone", field: state.tone },
+      { label: "Audience", field: state.audience, placeholder: "e.g. first-time buyers comparing options" },
+    ], function (entry, changes) {
+      if (entry.label === "Tone") updateField("tone", changes);
+      else updateField("audience", changes);
+      MarketingHaus.ui.renderApp();
+    }, "How it sounds and who it's for."));
 
     wrap.appendChild(ui.renderFieldGroup("Content Type", [{ label: "Content Type", field: state.contentType }], function (entry, changes) { updateField("contentType", changes); MarketingHaus.ui.renderApp(); }, "Changes whether the Sections checklist below applies."));
 

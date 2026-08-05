@@ -31,6 +31,10 @@
 
   var PERSONALIZATION_OPTIONS = ["none", "first-name greeting", "purchase-history reference", "location-based"];
 
+  // Tone + Audience now live per-studio (they used to be shared in the DNA
+  // bar). Tone options are reused from the shared list for consistency.
+  var TONE_OPTIONS = MarketingHaus.styleDNA.TONE_OPTIONS;
+
   var PRESETS = [
     {
       name: "Abandoned Cart Recovery Email",
@@ -56,6 +60,8 @@
 
   function buildInitialState() {
     return {
+      tone: makeField("", TONE_OPTIONS),
+      audience: makeField("", [], { isFreeText: true }),
       emailType: makeField("", EMAIL_TYPE_OPTIONS),
       subjectStyle: makeField("", SUBJECT_STYLE_OPTIONS),
       topic: makeField("", [], { isFreeText: true }),
@@ -86,6 +92,7 @@
   function randomize() {
     var state = store.getState();
     var entries = [
+      { fieldName: "tone", field: state.tone },
       { fieldName: "emailType", field: state.emailType },
       { fieldName: "subjectStyle", field: state.subjectStyle },
       { fieldName: "cta", field: state.cta },
@@ -105,7 +112,10 @@
 
   function assemblePrompt() {
     var state = store.getState();
-    var fieldEntries = MarketingHaus.styleDNA.getVoiceEntries().concat(MarketingHaus.brandKit.getActiveKitEntries()).concat([
+    var fieldEntries = MarketingHaus.styleDNA.getVoiceEntries().concat([
+      { label: "Tone", field: state.tone },
+      { label: "Audience", field: state.audience },
+    ]).concat(MarketingHaus.brandKit.getActiveKitEntries()).concat([
       { label: "Email Type", field: state.emailType },
       { label: "Subject Line Style", field: state.subjectStyle },
       { label: "Topic", field: state.topic },
@@ -122,6 +132,8 @@
   function getSelectionsByGroup() {
     var state = store.getState();
     var items = MarketingHaus.engine.resolveFields([
+      { label: "Tone", field: state.tone },
+      { label: "Audience", field: state.audience },
       { label: "Email Type", field: state.emailType },
       { label: "Subject Line Style", field: state.subjectStyle },
       { label: "Topic", field: state.topic },
@@ -139,6 +151,15 @@
 
     var presetRow = ui.renderPresetRow(PRESETS, function (preset) { applyPreset(preset); MarketingHaus.ui.renderApp(); }, "Starter Presets — click one, then customize");
     if (presetRow) wrap.appendChild(presetRow);
+
+    wrap.appendChild(ui.renderFieldGroup("Voice", [
+      { label: "Tone", field: state.tone },
+      { label: "Audience", field: state.audience, placeholder: "e.g. past customers who haven't opened in 60 days" },
+    ], function (entry, changes) {
+      if (entry.label === "Tone") updateField("tone", changes);
+      else updateField("audience", changes);
+      MarketingHaus.ui.renderApp();
+    }, "How it sounds and who it's for."));
 
     wrap.appendChild(ui.renderFieldGroup("Email Type", [{ label: "Email Type", field: state.emailType }], function (entry, changes) { updateField("emailType", changes); MarketingHaus.ui.renderApp(); }));
 
