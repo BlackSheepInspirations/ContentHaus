@@ -567,6 +567,16 @@
   // ---------------------------------------------------------------------
   var NEGATIVE_SUGGESTIONS = ["jargon", "buzzwords", "exclamation points", "emojis", "clickbait", "corporate speak"];
 
+  // The dark bar carries two different jobs. Voice DNA (Business/Tone/
+  // Audience/Reading Level + the text-only Negative Prompt) applies to
+  // every studio. The Image Output settings (Variations/Target Platform/
+  // Aspect Ratio/Buffer/Output Format) only mean anything when the active
+  // studio actually renders a graphic — so they're scoped to those modes
+  // and hidden everywhere else, instead of cluttering every text studio.
+  function isImageMode(mode) {
+    return mode === "mockup" || mode === "generators";
+  }
+
   function renderBusinessVoiceDNA(root) {
     var state = MarketingHaus.styleDNA.getState();
 
@@ -680,24 +690,58 @@
       negativeFieldChildren.push(negativeClearBtn);
     }
 
-    var children = [
-      el("div", { class: "mh-styledna__field" }, [labelWithIcon("shirt", "Business Name", nameId, null, "Set once here — carries into every studio automatically."), nameInput]),
-      el("div", { class: "mh-styledna__field" }, [labelWithIcon("sparkle", "Tone", toneId, null, "How your brand sounds — warm, bold, playful, professional, etc."), toneSelect]),
-      el("div", { class: "mh-styledna__field" }, [labelWithIcon("people", "Audience", audienceId, null, "Who you're talking to — the more specific, the better the copy."), audienceInput]),
-      el("div", { class: "mh-styledna__field" }, [labelWithIcon("monitor", "Reading Level", readingId), readingSelect]),
-      el("div", { class: "mh-styledna__field" }, [labelWithIcon("sparkle", "Variations", variationId), variationSelect]),
-      el("div", { class: "mh-styledna__field" }, [labelWithIcon("monitor", "Target Platform", platformId, null, "Formats the copied prompt for this specific AI tool."), platformSelect]),
-      el("div", { class: "mh-styledna__field" }, [labelWithIcon("crop", "Aspect Ratio", aspectId, null, "Only appears in the copied text for Midjourney/Leonardo AI."), aspectSelect]),
-      el("div", { class: "mh-styledna__field" }, [
-        bufferLabel, bufferToggle,
-      ]),
-      el("div", { class: "mh-styledna__field" }, [
-        labelWithIcon("bufferBox", "Output Format", outputFormatId, null, "A file-level export setting (transparency/format) — independent of any generator's own Background field, which is a scene/content choice, not a file setting. Leave on Default for a plain PNG."),
-        outputFormatSelect,
-      ]),
+    // Each voice field gets its own "Include" checkbox (like every other
+    // field's toggle) so nothing rides along silently — untick Reading
+    // Level or Tone and it drops out of every assembled prompt.
+    function dnaField(iconName, label, fieldName, inputEl, inputId, tip, withToggle) {
+      var labelNode = labelWithIcon(iconName, label, inputId, null, tip);
+      var head = labelNode;
+      if (withToggle) {
+        var field = state[fieldName];
+        var checkbox = el("input", { type: "checkbox", class: "mh-field__checkbox" });
+        checkbox.checked = field.includeInPrompt !== false && fieldHasValue(field);
+        checkbox.addEventListener("change", function () {
+          MarketingHaus.util.updateField(MarketingHaus.styleDNA, fieldName, { includeInPrompt: checkbox.checked });
+          renderApp();
+        });
+        head = el("div", { class: "mh-styledna__label-row" }, [
+          labelNode,
+          el("label", { class: "mh-field__include" }, [checkbox, el("span", { text: "Include" })]),
+        ]);
+      }
+      return el("div", { class: "mh-styledna__field" }, [head, inputEl]);
+    }
+
+    var voiceGrid = el("div", { class: "mh-styledna__grid" }, [
+      dnaField("shirt", "Business Name", "businessName", nameInput, nameId, "Set once here — carries into every studio automatically.", true),
+      dnaField("sparkle", "Tone", "tone", toneSelect, toneId, "How your brand sounds — warm, bold, playful, professional, etc.", true),
+      dnaField("people", "Audience", "audience", audienceInput, audienceId, "Who you're talking to — the more specific, the better the copy.", true),
+      dnaField("monitor", "Reading Level", "readingLevel", readingSelect, readingId, "How simple or advanced the wording should be.", true),
       el("div", { class: "mh-styledna__field mh-styledna__field--full" }, negativeFieldChildren),
+    ]);
+    var groups = [
+      el("div", { class: "mh-styledna__group" }, [
+        el("p", { class: "mh-styledna__group-title" }, [icon("sparkle"), el("span", { text: "Voice DNA — how your brand sounds (set once, every studio inherits it)" })]),
+        voiceGrid,
+      ]),
     ];
-    root.appendChild(el("div", { class: "mh-styledna" }, children));
+
+    // Image Output — only rendered for studios that produce a graphic.
+    if (isImageMode(activeMode)) {
+      var imageGrid = el("div", { class: "mh-styledna__grid" }, [
+        dnaField("sparkle", "Variations", "variationCount", variationSelect, variationId, "How many versions to generate.", false),
+        dnaField("monitor", "Target Platform", "targetPlatform", platformSelect, platformId, "Formats the copied prompt for this specific AI image tool.", false),
+        dnaField("crop", "Aspect Ratio", "aspectRatio", aspectSelect, aspectId, "Only appears in the copied text for Midjourney/Leonardo AI.", false),
+        el("div", { class: "mh-styledna__field" }, [bufferLabel, bufferToggle]),
+        dnaField("bufferBox", "Output Format", "outputFormat", outputFormatSelect, outputFormatId, "A file-level export setting (transparency/format) — independent of any generator's own Background field. Leave on Default for a plain PNG.", false),
+      ]);
+      groups.push(el("div", { class: "mh-styledna__group" }, [
+        el("p", { class: "mh-styledna__group-title" }, [icon("crop"), el("span", { text: "Image Output — only used when a studio produces a graphic" })]),
+        imageGrid,
+      ]));
+    }
+
+    root.appendChild(el("div", { class: "mh-styledna" }, groups));
   }
 
   // Holiday/Theme/Niche relocated out of the dark Business/Voice DNA bar

@@ -141,13 +141,50 @@
 /* Style DNA bar */
 .mh-styledna {
   display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
+  flex-direction: column;
+  gap: 20px;
   background: var(--mh-charcoal);
   color: var(--mh-cream);
   border-radius: 10px;
   padding: 16px;
   margin-bottom: 24px;
+}
+.mh-styledna__group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.mh-styledna__group + .mh-styledna__group {
+  padding-top: 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+}
+.mh-styledna__group-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--mh-cream);
+  opacity: 0.82;
+}
+.mh-styledna__grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.mh-styledna__label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+/* On the dark bar the teal "Include" label reads too dim — lift it to cream. */
+.mh-styledna .mh-field__include {
+  color: var(--mh-cream);
+  opacity: 0.85;
 }
 .mh-styledna__field {
   display: flex;
