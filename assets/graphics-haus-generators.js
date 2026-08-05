@@ -499,6 +499,15 @@
     var blocks = assembleBundle(id);
     var wrap = renderLabeledBlocksSection(def.bundleBlockTitle || "Your Page Bundle", blocks);
 
+    // Optional practical note above the pieces (e.g. Clipart Pack's "how to
+    // keep the set matching" tip). Inserted right after the section title.
+    if (def.bundleTip) {
+      var tip = ui.el("p", { class: "gh-bundle-tip", style: "margin: 4px 0 14px; font-size: 13px; line-height: 1.45; color: var(--gh-teal);" }, [
+        ui.icon("sparkle"), ui.el("span", { text: " " + def.bundleTip }),
+      ]);
+      wrap.insertBefore(tip, wrap.children[1] || null);
+    }
+
     var saveBtn = ui.el("button", { type: "button", class: "gh-btn gh-btn--small gh-btn--save", text: "Save Whole Bundle to Vault" });
     saveBtn.addEventListener("click", function () {
       var vaultKey = "gen:" + id;

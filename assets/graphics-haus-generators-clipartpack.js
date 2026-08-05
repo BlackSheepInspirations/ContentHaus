@@ -39,7 +39,15 @@
   var TEXTURE_FINISH_OPTIONS = ["Clean & Smooth Vector", "Sticker-Style with White Border", "Grainy / Textured Print", "Glossy 3D Finish"];
   var BACKGROUND_OPTIONS = ["Transparent (isolated for cutout)", "White Background", "Soft Pattern Background"];
 
-  var LOCKED_SUFFIX = " Isolated clipart illustration, crisp clean edges, no background clutter, consistent line weight, commercial print-and-sticker ready, high resolution.";
+  // Each piece is generated as its own prompt, so without an explicit
+  // "match the rest" instruction the AI drifts (different line weight,
+  // shading, proportions) between pieces run separately. This clause pins
+  // the shared look so the whole pack reads as one cohesive collection.
+  // {theme}/{artStyle}/{colorPalette} resolve per piece at assembly time.
+  var COHESION_CLAUSE =
+    " This is ONE piece of a coordinated matching \"{theme}\" clipart set — render it in the EXACT same {artStyle} art style, {colorPalette} color palette, line weight, outline thickness, shading, proportions, and level of detail as every other piece in the pack, so all the pieces look like one cohesive, professionally-designed matching collection (not separate unrelated images).";
+
+  var LOCKED_SUFFIX = COHESION_CLAUSE + " Isolated clipart illustration, crisp clean edges, no background clutter, consistent line weight, commercial print-and-sticker ready, high resolution.";
 
   GraphicsHaus.generatorEngine.registerGenerator({
     id: "clipart-pack",
@@ -71,6 +79,7 @@
     pageTypesCap: 4,
     defaultPageTypes: ["hero", "supporting", "pattern", "banner"],
     bundleBlockTitle: "Your Clipart Pack",
+    bundleTip: "Matching tip: generate the Hero Icon first, then paste that finished image in as a style reference when you generate the other pieces — or generate all pieces in one ChatGPT session so it holds the exact same look across the set.",
     pageTypes: [
       {
         id: "hero",
