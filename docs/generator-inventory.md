@@ -186,3 +186,23 @@ Modes hang off `window.PromptHaus`; Collection Builder has no module (lives in u
 - Companion slot, Add Text, animal-mascot Hair→Texture fix, the shared-DNA-entry appending, and the Character Type/Art Finish→paragraph pattern are each re-implemented across 3–7 modes. A shared-set change today means editing up to 7 files. Worth a DRY pass eventually, but no user-facing change and high blast radius — park it. *[decision: ____]*
 
 **Not merging:** all 9 modes are genuinely distinct (Combined weaves one scene; Collection splices finished prompts — different jobs). Keep them.
+
+### 3D. Shipped (2026-08-05)
+
+- **Combined transposition bug fixed** — Character's Presentation scene fields
+  (Background/Scene Effect/Lighting/Framing) had vanished from Combined (each of
+  Character's Presentation and Graphics' Frame It deferred to the other, so
+  neither rendered/assembled them). Now Character's Presentation owns them in
+  Combined (shown + in the prompt), and Extras (fantasy elements/props) carry over
+  too. Only Character's Style group stays excluded (Graphics Style It is the one
+  overall style). Verified Background flows into the built prompt.
+- **Frame It parity** — added **Time/Era + Camera Angle** to Animals & Graphics
+  Frame It (both already had Background/Scene Effect/Lighting/Framing), default
+  empty. Both verified.
+- **Video Motion Prompt spread** — the "Turn This Into a Video Prompt" companion
+  now shows in Couples/Family/Animals/Graphics/Reference (was Character-only);
+  excluded from Combined. Vault snapshots extended so those modes save the video
+  state. Verified.
+- **Declined:** Add Text on Character/Couples (kept text in Combined only).
+- **Open question:** Combined weaves a single **Character** (not a Couple) — if
+  Combined should support couples, that's a separate larger build.
