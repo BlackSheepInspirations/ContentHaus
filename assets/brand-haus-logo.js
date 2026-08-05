@@ -878,7 +878,7 @@
     // voice/archetype up front, so the AI has explicit "who this brand
     // is" context rather than relying on style/color words alone.
     if (state.logoBoard) {
-      var modeToggle = ui.el("div", { class: "bh-styledna__yesno" }, [
+      var modeToggle = ui.el("div", { class: "bh-styledna__yesno bh-board-format-toggle" }, [
         ui.yesNoButton("Separate Prompts", state.boardMode === "separate", function () { setBoardMode("separate"); BrandHaus.ui.renderApp(); }),
         ui.yesNoButton("One Combined Image", state.boardMode === "combined", function () { setBoardMode("combined"); BrandHaus.ui.renderApp(); }),
         ui.yesNoButton("Combined + Brand Identity", state.boardMode === "combinedIdentity", function () { setBoardMode("combinedIdentity"); BrandHaus.ui.renderApp(); }),

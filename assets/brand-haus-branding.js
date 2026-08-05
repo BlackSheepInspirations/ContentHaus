@@ -59,6 +59,20 @@
     "nurturing and supportive", "edgy and rebellious", "calm and grounded", "energetic and motivating",
   ]);
 
+  // Rendering / art-direction of the whole board (distinct from Mood, which
+  // is the vibe). Defaults to "clean flat vector" so the board reads as a
+  // polished design deliverable rather than drifting illustrated/cartoony.
+  var VISUAL_STYLE_OPTIONS = [
+    "clean flat vector",
+    "minimalist editorial",
+    "modern gradient / tech",
+    "illustrated / hand-drawn",
+    "photographic / lifestyle mood",
+    "vintage / retro",
+    "bold graphic / high-contrast",
+    "playful illustrated",
+  ];
+
   var BOARD_LAYOUT_OPTIONS = [
     "sectioned grid (colors, fonts, mood each in their own block)",
     "single cohesive mood board",
@@ -99,6 +113,7 @@
       headingFont: makeField("", FONT_OPTIONS),
       bodyFont: makeField("", FONT_OPTIONS),
       mood: makeField("", MOOD_OPTIONS),
+      visualStyle: makeField("clean flat vector", VISUAL_STYLE_OPTIONS),
       mission: makeField("", [], { isFreeText: true }),
       coreValues: [],
       brandVoice: makeField("", BRAND_VOICE_OPTIONS),
@@ -198,6 +213,7 @@
     if (state.headingFont.includeInPrompt !== false) updateField("headingFont", { value: randomPick(state.headingFont), customValue: "" });
     if (state.bodyFont.includeInPrompt !== false) updateField("bodyFont", { value: randomPick(state.bodyFont), customValue: "" });
     if (state.mood.includeInPrompt !== false) updateField("mood", { value: randomPick(state.mood), customValue: "" });
+    if (state.visualStyle.includeInPrompt !== false) updateField("visualStyle", { value: randomPick(state.visualStyle), customValue: "" });
     if (state.brandVoice.includeInPrompt !== false) updateField("brandVoice", { value: randomPick(state.brandVoice), customValue: "" });
   }
 
@@ -220,6 +236,7 @@
     var mission = resolved(state.mission);
     var values = state.coreValues.map(function (v) { return (v || "").trim(); }).filter(Boolean);
     var brandVoice = resolved(state.brandVoice);
+    var visualStyle = resolved(state.visualStyle);
     var layoutStyle = resolved(state.boardLayout) || BOARD_LAYOUT_OPTIONS[0];
 
     var zones = [];
@@ -251,7 +268,8 @@
     if (values.length) addZone("a core values list zone displaying: " + values.join(", "), values.join(", "));
     if (brandVoice) addZone("a voice/personality of " + brandVoice, brandVoice);
 
-    var intro = "Design a cohesive brand identity board as one image, laid out as a " + layoutStyle + ", including:";
+    var styleClause = visualStyle ? " rendered in a " + visualStyle + " visual style," : "";
+    var intro = "Design a cohesive brand identity board as one image," + styleClause + " laid out as a " + layoutStyle + ", including:";
     var text = zones.length ? intro + " " + zones.join("; ") + "." : intro;
     return { text: text, fragments: fragments };
   }
@@ -273,6 +291,7 @@
       { label: "Heading Font", field: state.headingFont },
       { label: "Body Font", field: state.bodyFont },
       { label: "Mood", field: state.mood },
+      { label: "Visual Style", field: state.visualStyle },
     ]);
     var colors = state.colors.filter(Boolean);
     if (colors.length) visual.unshift({ label: "Colors", value: colors.join(", ") });
@@ -352,7 +371,14 @@
       onRemove: function (index) { removeValue(index); BrandHaus.ui.renderApp(); },
     }));
 
-    wrap.appendChild(ui.renderFieldGroup("Board Layout", [{ label: "Layout Style", field: state.boardLayout }], function (entry, changes) { updateField("boardLayout", changes); BrandHaus.ui.renderApp(); }, "How the zones above are composed into one image."));
+    wrap.appendChild(ui.renderFieldGroup("Board Style & Layout", [
+      { label: "Visual Style", field: state.visualStyle },
+      { label: "Layout Style", field: state.boardLayout },
+    ], function (entry, changes) {
+      if (entry.label === "Visual Style") updateField("visualStyle", changes);
+      else updateField("boardLayout", changes);
+      BrandHaus.ui.renderApp();
+    }, "The overall rendering look, and how the zones above are composed into one image."));
 
     return wrap;
   }

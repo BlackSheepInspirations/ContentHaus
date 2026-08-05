@@ -526,6 +526,19 @@
   flex: 0 0 auto;
   min-width: 140px;
 }
+/* Board Format has 3 long-labelled buttons (Separate Prompts / One Combined
+   Image / Combined + Brand Identity) — unlike the 2-button Yes/No toggle it
+   overflows the narrow field column and the buttons overlap. Let it take the
+   full row width and its buttons flex-wrap + shrink instead of overflowing. */
+.bh-logo-board-toggle-row .bh-board-format-toggle {
+  flex: 1 1 100%;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+.bh-board-format-toggle .bh-styledna__yesno-btn {
+  flex: 1 1 150px;
+  min-width: 0;
+}
 
 /* Decorative progress stepper — narrates the flow, doesn't gate it */
 .bh-stepper {
