@@ -238,6 +238,8 @@
   };
 
   var TITLE_ICONS = {
+    "Topic": "bulb", "Content Format": "layers", "Format Details": "sparkle", "Engagement": "heart",
+    "Platform & Size": "crop", "Mood / Tone": "sparkle", "What do you need?": "sparkle",
     "Style": "sparkle", "Extras": "sparkle", "Filter It": "image",
     "Hero Product": "shirt", "Presentation Style": "person", "Surrounding Props": "hanger",
     "Props & Accessories": "hanger", "Model / Person": "people", "Background": "image",
@@ -1111,23 +1113,23 @@
   // ---------------------------------------------------------------------
   // Tabs + shell
   // ---------------------------------------------------------------------
-  var MODES = ["mockup", "social", "adcopy", "email", "sales", "testimonial", "customerintel", "generators"];
+  var MODES = ["contentkit", "mockup", "social", "adcopy", "email", "sales", "testimonial", "customerintel", "generators"];
   var MODE_LABELS = {
-    mockup: "Mockup Studio", social: "Social Media Studio",
+    contentkit: "Content Kit", mockup: "Mockup Studio", social: "Social Media Studio",
     adcopy: "Ad Copy & Creative Studio", email: "Email Studio", sales: "Sales & Landing Page Studio",
     testimonial: "Testimonial & Social Proof Formatter", customerintel: "Customer Intelligence Studio", generators: "Quick Generators",
   };
   var MODE_ICONS = {
-    mockup: "shirt", social: "layers",
+    contentkit: "sparkle", mockup: "shirt", social: "layers",
     adcopy: "lightning", email: "mail", sales: "monitor",
     testimonial: "people", customerintel: "person", generators: "sparkle",
   };
   var BUILT_MODES = {
-    mockup: true, social: true,
+    contentkit: true, mockup: true, social: true,
     adcopy: true, email: true, sales: true, testimonial: true, customerintel: true, generators: true,
   };
 
-  var activeMode = "mockup";
+  var activeMode = "contentkit";
 
   function renderTabs(root) {
     var row = el("div", { class: "mh-tabs" });

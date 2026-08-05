@@ -2144,3 +2144,8 @@
 #marketing-haus-app.haus--marketing .hds-encase__eyebrow {
   color: var(--haus-accent-deep);
 }
+
+/* Free-text ("what's this about", offers, etc.) fields take the full row so there's
+   room to read + write, instead of sharing an auto-fill grid column. */
+#marketing-haus-app .mh-field:has(.mh-field__freetext) { grid-column: 1 / -1; }
+#marketing-haus-app .mh-field__freetext { min-height: 62px; }

@@ -170,9 +170,10 @@
 
     wrap.appendChild(ui.renderFieldGroup("Content Format", [{ label: "Format", field: state.format }], function (entry, changes) { updateField("format", changes); MarketingHaus.ui.renderApp(); }, "Changes which fields below actually apply."));
 
-    wrap.appendChild(ui.renderPlainFieldRow(
-      [{ label: "Topic / What's This Post About", field: state.topic, placeholder: "e.g. \"our new fall candle collection just dropped\"" }],
-      function (entry, changes) { updateField("topic", changes); MarketingHaus.ui.renderApp(); }
+    wrap.appendChild(ui.renderFieldGroup("Topic",
+      [{ label: "What's this post about?", field: state.topic, placeholder: "e.g. \"our new fall candle collection just dropped\"" }],
+      function (entry, changes) { updateField("topic", changes); MarketingHaus.ui.renderApp(); },
+      "The core idea of this post — the more specific, the sharper the copy."
     ));
 
     var conditionalFields = [];
