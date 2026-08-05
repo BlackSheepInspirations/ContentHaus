@@ -415,13 +415,33 @@
   // UI
   // ---------------------------------------------------------------------
 
+  // The 28 quick generators are a lot to scan as one flat wall, so the grid
+  // is organized under a few output-based subheadings. Any registered,
+  // non-hidden generator NOT listed here still shows (under "More"), so a
+  // newly-added generator can never silently disappear.
+  var GRID_GROUPS = [
+    { label: "Graphics", ids: [
+      "promo-flyer", "hero-banner", "infographic", "lead-magnet-cover", "listing-image",
+      "pinterest-pin", "post-template", "product-ad-graphic", "marketing-quote-graphic",
+      "social-cover-banner", "insert-card",
+    ] },
+    { label: "Copy", ids: ["search-visibility-copy", "product-listing", "tags-hashtags"] },
+    { label: "Video & Audio", ids: ["video-motion-prompt", "short-form-video-script", "voiceover-script", "suno-music"] },
+    { label: "Bundles & Kits", ids: ["launch-content-bundle", "video-ad-kit", "video-ad-bundle", "digital-elements-pack", "media-kit"] },
+    { label: "Strategy Docs", ids: ["content-calendar-30", "creative-direction", "custom-gpt-builder"] },
+  ];
+
   function renderGrid(onSelect) {
     var ui = MarketingHaus.ui;
     // `hideFromGrid` — for a generator given its own top-level Studio tab
-    // (see MarketingHaus.customerIntel/customerintel.js): it's still
-    // registered here so pageTypes/computeExtraTokens/etc. all work, but
-    // shouldn't ALSO appear as a duplicate entry point in this grid.
-    var cards = registry.filter(function (def) { return !def.hideFromGrid; }).map(function (def) {
+    // (see MarketingHaus.customerIntel/customerintel.js), or a generator
+    // merged behind another's toggle (gift-message, geo-optimization): still
+    // registered so its Vault/tokens work, but not a duplicate entry point.
+    var visible = registry.filter(function (def) { return !def.hideFromGrid; });
+    var byId = {};
+    visible.forEach(function (def) { byId[def.id] = def; });
+
+    function makeCard(def) {
       var card = ui.el("button", { type: "button", class: "mh-generator-card" }, [
         ui.icon(def.icon || "sparkle"),
         ui.el("span", { class: "mh-generator-card__name", text: def.label }),
@@ -429,8 +449,26 @@
       ]);
       card.addEventListener("click", function () { onSelect(def.id); });
       return card;
+    }
+
+    var container = ui.el("div", { class: "mh-generator-groups" });
+    var placed = {};
+    GRID_GROUPS.forEach(function (group) {
+      var defs = group.ids.map(function (id) { return byId[id]; }).filter(Boolean);
+      if (!defs.length) return;
+      defs.forEach(function (d) { placed[d.id] = true; });
+      container.appendChild(ui.el("h4", { class: "mh-generator-group__title" }, [
+        ui.el("span", { text: group.label }),
+        ui.el("span", { class: "mh-generator-group__count", text: String(defs.length) }),
+      ]));
+      container.appendChild(ui.el("div", { class: "mh-generator-grid" }, defs.map(makeCard)));
     });
-    return ui.el("div", { class: "mh-generator-grid" }, cards);
+    var leftovers = visible.filter(function (def) { return !placed[def.id]; });
+    if (leftovers.length) {
+      container.appendChild(ui.el("h4", { class: "mh-generator-group__title" }, [ui.el("span", { text: "More" })]));
+      container.appendChild(ui.el("div", { class: "mh-generator-grid" }, leftovers.map(makeCard)));
+    }
+    return container;
   }
 
   // Generic "list of labeled prompt blocks, each individually copyable" —

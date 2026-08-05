@@ -29,6 +29,10 @@
   };
 
   MarketingHaus.generatorEngine.registerGenerator({
+    // Merged into the unified Search Visibility Copy generator (Optimize For =
+    // AI answer engines). Kept registered so any saved Vault entry still
+    // resolves, but hidden from the grid so it's not a duplicate entry point.
+    hideFromGrid: true,
     id: "geo-optimization",
     label: "GEO / AI Search Optimization Generator",
     icon: "monitor",

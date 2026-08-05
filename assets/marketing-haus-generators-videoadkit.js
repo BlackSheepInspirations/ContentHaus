@@ -15,9 +15,9 @@
 
   MarketingHaus.generatorEngine.registerGenerator({
     id: "video-ad-kit",
-    label: "Video Ad Kit",
+    label: "Video Ad Kit (all-in-one plan)",
     icon: "video",
-    description: "A turnkey short-form video ad — concept, scene-by-scene storyboard with voiceover and shots, a music bed, and caption + hashtags.",
+    description: "ONE complete written plan for a single short-form video ad — concept, scene-by-scene storyboard, voiceover, a music bed, and caption + hashtags. Start here if you want the whole ad mapped out in one document. (For separate AI-generatable shot prompts to assemble yourself, use the Video Ad Bundle.)",
     fieldGroupTitle: "Build Your Video Ad",
     fields: [
       { name: "subject", label: "What's the ad for?", isFreeText: true, defaultValue: "my product", placeholder: "e.g. our hand-poured soy candle 3-pack" },
