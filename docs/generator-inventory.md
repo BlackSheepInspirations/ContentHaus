@@ -93,3 +93,43 @@ text studio; **Variations** count lives in the shared bar.
 
 **Gaps / added-needed:** coverage is broad; the main "gap" is organization, not missing tools. Possible adds: a multi-slide **Carousel graphic** set; a **Story/Reel cover**. *[decision: ____]*
 
+
+---
+
+## 2. Brand Haus
+
+A **guided 7-step wizard** (not a generator grid), gated on `brand-haus-access`/`all-access`.
+Router in `assets/brand-haus-ui.js` (`STEPS`). `?bh_focus=1` hides the Branding Studio so
+the P2P OS can embed the assessment alone as the "Founders Assessment."
+
+### 2A. The 7 steps — section → widgets → output
+
+| # | Step | Widgets / inputs | Output |
+|---|---|---|---|
+| 1 | **Archetype Guide** | Interactive Archetype Wheel (11 clickable wedges → name + one-word) + explainer + Continue | Educational only; no data written |
+| 2 | **Welcome** | Intro copy + Begin button | Transition only |
+| 3 | **Brand DNA Assessment** (Founder Interview™) | Intro (first name, business name, what you do, who you serve) → **30 one-at-a-time option-card questions** (Brand Tensions + Founder DNA + Customer Impression™), progress bar, Back/Next | Scores **8 Brand Tensions + 12 Founder DNA + 4 Customer Impressions**, matches 1 of **11 profiles** (+ alignment % + up to 2 influences), builds mission + core values. Saves version history (max 5). **Publishes `p2p_archetype` → P2P OS** |
+| 4 | **Your Brand DNA** | 7-chapter read-only dashboard: alignment ring, Founder Fingerprint radar, 8 tension sliders, DNA bars, palette + typography cards ("Use This Pairing" applies fonts to Branding Studio), mission/values, strengths/blind-spots, Customer Impressions | Read-only diagnosis; only write is font-pairing apply |
+| 5 | **Your Blueprint** | 3 collapsible exportable docs — **Snapshot** (one-pager) · **Brand DNA Report** · **Brand Playbook™** (21 chapters); each has Export → PDF (print dialog) | Merges Branding Studio edits over raw match; read-only deliverables |
+| 6 | **Find Your Direction** (Path Intake) | Un-scored fork: **"I Am the Brand"** (8 Qs) vs **"Niche Product"** (mixed free-text + option Qs, with conditional physical/digital follow-ups) → assembles a **brief for Frank (Idea Haus GPT)** | Plain-text brief, Copy-for-Frank + external GPT link. **Not saved to Vault** |
+| 7 | **Branding Studio** | 3 sub-tabs: **Branding Studio** (tagline, 6 colors, heading/body fonts, mood, voice, mission, core values, board layout + presets) · **Logo Studio** (deep logo prompt, ~20 fields, archetype-driven) · **Quick Generators** (4: Media Kit, Thank You Card, Business Card Kit, Gift Message) | Branding Studio → one brand-identity-board image prompt (exact hex + verbatim text). Auto-populated from the assessment match |
+
+**Shared state / cross-Haus:** `blackSheepBrandKitVault` (shared Brand Kit — read by Marketing/Graphics/Product/P2P Haus) · `p2p_archetype` (recolors the OS rail + drives OS hero) · `brandHausFavorites` (Vault + assessment history) · `brandHausBrandKits`.
+
+### 2B. Recommendations
+
+**Duplication (within Brand Haus):**
+1. **Thank You Card + Gift Message → "Insert Card"** — Brand Haus's Quick Generators has these as two separate gens, exactly the pair just merged in Marketing Haus. Mirror the same Card-Type-toggle merge here for consistency. *[decision: ____]*
+
+**Duplication (across Hausen) — likely LEAVE:**
+- Media Kit / Thank You / Gift Message also exist in Marketing Haus. Per the codebase's "verbatim port, never shared" rule (each Haus is a standalone purchase), this is intentional. **Rec: don't merge across Hausen.** *[decision: ____]*
+
+**Flow / order:**
+2. **"Find Your Direction" (step 6) placement** — it's an un-scored ideation handoff to an external GPT, sitting between Blueprint and Branding Studio and interrupting the DNA→Studio arc. Options: keep · move to after Branding Studio · make it an optional side-quest. Also: it's the **only step that doesn't persist** — save its brief to Vault/Recent Log. *[decision: ____]*
+3. **Archetype Guide (step 1)** — purely educational, before the assessment even starts. Keep, or make it skippable/collapsible so eager users jump straight to the assessment. *[decision: ____]*
+
+**Output quality:**
+4. **Branding Studio prompt** — consider target-platform/size awareness (like Marketing's sizing picker) so the brand board can be exported at a chosen spec. Minor enhancement. *[decision: ____]*
+5. **Quick Generators (only 4)** — too few to need the subheading grouping Marketing got. Keep flat. *[decision: keep flat]*
+
+**Gaps:** Coverage is deep (this is the most sophisticated Haus). Main opportunities are consistency (the Insert Card merge) + the step-6 placement, not missing tools.
