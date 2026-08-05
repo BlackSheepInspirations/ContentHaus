@@ -440,6 +440,21 @@
       if (snap) publishArchetype(snap); // reflect the active version (no-op if none saved)
     } catch (e) {}
   }
+  // Hydrate the live `results` from the most recent saved assessment on load.
+  // Without this, `results` starts null every page load, so the standalone
+  // Branding Studio ("Brand Haus" page — a different page from where the
+  // assessment was taken) couldn't auto-populate colors/fonts/mission. Only
+  // fills when nothing's been answered yet this session; never overwrites a
+  // fresh in-progress or just-completed run. Leaves `step` alone so the
+  // assessment page still opens on its intro, not on stale results.
+  function hydrateResultsFromSaved() {
+    try {
+      if (store.getState().results) return;
+      var snap = latestAssessmentSnapshot();
+      if (snap) store.setState({ results: snap });
+    } catch (e) {}
+  }
+
   function initArchetypeSync() {
     // Re-publish when the member switches their active assessment version.
     if (BrandHaus.favorites && BrandHaus.favorites.setActiveVersion && !BrandHaus.favorites.__p2pArchetypeHooked) {
@@ -451,6 +466,7 @@
       };
       BrandHaus.favorites.__p2pArchetypeHooked = true;
     }
+    hydrateResultsFromSaved();
     syncArchetypeFromActive();
   }
   if (document.readyState === "loading") {

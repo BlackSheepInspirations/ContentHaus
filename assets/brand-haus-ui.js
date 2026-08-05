@@ -1402,11 +1402,21 @@
   // Sidebar wizard + step router
   // ---------------------------------------------------------------------
   var STEPS = ["archetypeGuide", "welcome", "conversation", "brandDNA", "blueprint", "pathIntake", "brandingStudio"];
-  // Focus mode (?bh_focus=1) — used when the P2P Operating System embeds this as the
-  // "Founders Assessment": hide the Branding Studio step so it's assessment-only.
+  // Two separate destinations share this one section, split by URL:
+  //   ?bh_focus=1  → "Founders Assessment": the diagnostic flow, steps 1–6
+  //                  (Archetype Guide … Find Your Direction), no Branding Studio.
+  //   (no param)   → "Brand Haus": the standalone Branding Studio only
+  //                  (Branding / Logo / Quick Generators), no assessment steps.
+  // The Branding Studio still auto-populates from the saved assessment (its
+  // snapshot is hydrated into founderInterview on load), so the two work as
+  // independent pages even though they're one section under the hood.
   var BH_FOCUS = false;
   try { BH_FOCUS = new URLSearchParams(window.location.search).get("bh_focus") === "1"; } catch (e) {}
-  function visibleSteps() { return BH_FOCUS ? STEPS.filter(function (s) { return s !== "brandingStudio"; }) : STEPS; }
+  var BH_STUDIO_ONLY = !BH_FOCUS;
+  function visibleSteps() {
+    if (BH_FOCUS) return STEPS.filter(function (s) { return s !== "brandingStudio"; });
+    return ["brandingStudio"];
+  }
   var STEP_LABELS = {
     archetypeGuide: "The Archetype Guide",
     welcome: "Welcome",
@@ -1426,7 +1436,7 @@
     blueprint: "document",
   };
 
-  var activeStep = "archetypeGuide";
+  var activeStep = BH_STUDIO_ONLY ? "brandingStudio" : "archetypeGuide";
   // A standalone overlay view, not a numbered step — set true by the
   // sidebar's "FAQ & Help" link, set false by its own back button. Checked
   // at the top of renderStepContent so it can interrupt any step without
@@ -1459,6 +1469,10 @@
   // navigate the wizard without reaching into this file's closure state.
   function setActiveStep(step) {
     if (STEPS.indexOf(step) === -1) return;
+    // Brand Haus is split across two pages: in the assessment-only view,
+    // "Continue to Branding Studio" crosses to the standalone Brand Haus page
+    // rather than rendering the studio inline on the assessment page.
+    if (BH_FOCUS && step === "brandingStudio") { window.location.href = "/pages/brand-haus"; return; }
     activeStep = step;
     renderApp();
     scrollShellToTop();
@@ -1466,6 +1480,36 @@
 
   function renderSidebar(root) {
     var list = el("div", { class: "bh-sidebar__steps" });
+
+    // Studio-only page ("Brand Haus"): there's no 7-step wizard, so the
+    // Branding Studio's own three sub-tabs become the primary nav.
+    if (BH_STUDIO_ONLY) {
+      BRANDING_SUBSTEPS.forEach(function (sub) {
+        var btn = el("button", {
+          type: "button",
+          class: "bh-sidebar__step" + (brandingSubMode === sub ? " is-active" : ""),
+        }, [
+          icon(BRANDING_SUBSTEP_ICONS[sub], "bh-sidebar__step-icon"),
+          el("span", { class: "bh-sidebar__step-label", text: BRANDING_SUBSTEP_LABELS[sub] }),
+        ]);
+        btn.addEventListener("click", function () { brandingSubMode = sub; activeStep = "brandingStudio"; renderApp(); scrollShellToTop(); });
+        list.appendChild(btn);
+      });
+      var studioChildren = [
+        el("p", { class: "bh-sidebar__brand", text: "Branding Studio" }),
+        list,
+      ];
+      var studioHistory = renderHistoryBlock();
+      if (studioHistory) studioChildren.push(studioHistory);
+      var studioSaved = renderSavedResultsBlock();
+      if (studioSaved) studioChildren.push(studioSaved);
+      studioChildren.push(renderFaqSidebarLink());
+      root.appendChild(el("nav", { class: "bh-sidebar", "aria-label": "Branding Studio" }, [
+        el("div", { class: "bh-sidebar__inner" }, studioChildren),
+      ]));
+      return;
+    }
+
     visibleSteps().forEach(function (step, index) {
       var isActive = step === activeStep;
       var btn = el("button", {
@@ -1893,6 +1937,23 @@
     return BrandHaus.engine.resolveFieldValue(field);
   }
 
+  // On the standalone Brand Haus page, if the founder hasn't taken the
+  // assessment yet there's nothing to auto-fill from — so point them at it
+  // (they can still build from scratch below). Hidden once an assessment
+  // exists (hydrated from saved history on load).
+  function renderAssessmentNudge() {
+    if (!BH_STUDIO_ONLY) return null;
+    var hasResults = false;
+    try { hasResults = !!BrandHaus.founderInterview.getState().results; } catch (e) {}
+    if (hasResults) return null;
+    var link = el("a", { class: "bh-btn bh-btn--teal bh-studio-nudge__cta", href: "/pages/brand-haus?bh_focus=1" }, [icon("bulb"), el("span", { text: "Take the Founders Assessment" })]);
+    return el("div", { class: "bh-studio-nudge" }, [
+      el("p", { class: "bh-studio-nudge__title", text: "Auto-fill this studio from your Brand DNA" }),
+      el("p", { class: "bh-studio-nudge__text", text: "Take the Founders Assessment first and your colors, fonts, mission, and voice pre-fill here automatically — or just start building below." }),
+      link,
+    ]);
+  }
+
   function renderBrandingStudioStep() {
     // Runs regardless of which sub-tab (Logo/Branding) is active — the
     // identity check inside is what actually decides whether anything
@@ -1909,6 +1970,8 @@
     var body = el("div", { class: "bh-body" });
     var left = el("div", { class: "bh-body__fields" });
     var right = el("div", { class: "bh-body__preview" });
+    var nudge = renderAssessmentNudge();
+    if (nudge) left.appendChild(nudge);
     left.appendChild(modeApi.renderPanel());
     renderSelectionsPanel(right, brandingSubMode, modeApi.getSelectionsByGroup());
     renderPreview(right, modeApi.assemblePrompt(), modeApi, brandingSubMode);
@@ -1934,6 +1997,8 @@
     var body = el("div", { class: "bh-body" });
     var left = el("div", { class: "bh-body__fields" });
     var right = el("div", { class: "bh-body__preview" });
+    var genNudge = renderAssessmentNudge();
+    if (genNudge) left.appendChild(genNudge);
     left.appendChild(modeApi.renderPanel());
     var activeId = modeApi.getActiveGeneratorId();
     if (activeId) {
