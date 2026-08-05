@@ -49,12 +49,14 @@
 
   function getCharacterEntriesForUnified() {
     return PromptHaus.character.getActiveFieldEntries().filter(function (e) {
-      if (e.groupName === "extras") return false;
       // Graphics's Style It (rendered once at the top of Combined) is the
       // one overall style choice now — Character's own Style group
-      // (Character Type/Art Finish) would just contradict it.
+      // (Character Type/Art Finish) would just contradict it. Everything
+      // else — including Presentation's background/scene/lighting/framing and
+      // Extras (fantasy elements/props) — carries into the combined scene;
+      // Graphics's own Frame It/What Is It are hidden and excluded from
+      // buildEntriesForCombined() so there's nothing left to conflict with.
       if (e.groupName === "style") return false;
-      if (CHARACTER_SCENE_OVERLAP_FIELDS.indexOf(e.fieldName) > -1) return false;
       return true;
     });
   }
@@ -163,9 +165,9 @@
   function getCharacterSelectionsForUnified() {
     var titleFor = {
       humanIdentity: "Human Identity", animalIdentity: "Animal Identity",
-      appearance: "Appearance", styling: "Styling", presentation: "Presentation", companion: "Companion",
+      appearance: "Appearance", styling: "Styling", presentation: "Presentation", companion: "Companion", extras: "Extras",
     };
-    var order = ["humanIdentity", "animalIdentity", "appearance", "styling", "presentation", "companion"];
+    var order = ["humanIdentity", "animalIdentity", "appearance", "styling", "presentation", "companion", "extras"];
     var entries = getCharacterEntriesForUnified();
     var groups = [];
     order.forEach(function (groupName) {

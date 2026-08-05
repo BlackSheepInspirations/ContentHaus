@@ -1348,15 +1348,12 @@
       )
     );
 
+    // In Combined, Character's Presentation owns the whole-scene background/
+    // scene-effect/lighting/framing (Graphics's Frame It is hidden + excluded
+    // from the combined assembler), so these render here rather than vanishing
+    // between the two panels.
     var presentationEntries = entriesFor("presentation", character.labels.presentation);
     var presentationSubtitle = "Pose, background, lighting, and framing for the scene.";
-    if (combinedMode) {
-      var overlapFields = PromptHaus.combined.SCENE_OVERLAP_FIELDS;
-      presentationEntries = presentationEntries.filter(function (e) {
-        return overlapFields.indexOf(e.fieldName) === -1;
-      });
-      presentationSubtitle = "Background, Dynamic Scene Effect, Lighting, and Framing are set in Graphics's Frame It below for the whole combined scene.";
-    }
     panel.appendChild(renderFieldGroup("Presentation", presentationEntries, handleFieldChange, presentationSubtitle));
 
     panel.appendChild(
@@ -1373,18 +1370,19 @@
       })
     );
 
-    if (!combinedMode) {
-      var extrasLabelsMinusArchetype = Object.assign({}, character.labels.extras);
-      delete extrasLabelsMinusArchetype.characterArchetype;
-      panel.appendChild(
-        renderFieldGroup(
-          "Extras",
-          entriesFor("extras", extrasLabelsMinusArchetype),
-          handleFieldChange,
-          "Optional fantasy elements or props to add to the scene."
-        )
-      );
-    }
+    // Extras (fantasy elements + props) render in Combined too now, so they
+    // carry into the combined scene instead of silently dropping. Archetype
+    // stays out of this group (it lives in Identity above).
+    var extrasLabelsMinusArchetype = Object.assign({}, character.labels.extras);
+    delete extrasLabelsMinusArchetype.characterArchetype;
+    panel.appendChild(
+      renderFieldGroup(
+        "Extras",
+        entriesFor("extras", extrasLabelsMinusArchetype),
+        handleFieldChange,
+        "Optional fantasy elements or props to add to the scene."
+      )
+    );
 
     if (!combinedMode) {
       var videoSection = renderCharacterVideoSection();
