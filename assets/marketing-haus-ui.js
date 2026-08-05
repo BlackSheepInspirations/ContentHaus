@@ -240,6 +240,8 @@
   var TITLE_ICONS = {
     "Topic": "bulb", "Content Format": "layers", "Format Details": "sparkle", "Engagement": "heart",
     "Platform & Size": "crop", "Mood / Tone": "sparkle", "What do you need?": "sparkle",
+    "Purpose": "logoMark", "Voice": "sparkle", "Ad Details": "lightning", "Offer": "gift",
+    "Image": "image", "Look": "image",
     "Style": "sparkle", "Extras": "sparkle", "Filter It": "image",
     "Hero Product": "shirt", "Presentation Style": "person", "Surrounding Props": "hanger",
     "Props & Accessories": "hanger", "Model / Person": "people", "Background": "image",
@@ -1158,20 +1160,22 @@
   // ---------------------------------------------------------------------
   // Tabs + shell
   // ---------------------------------------------------------------------
-  var MODES = ["contentkit", "mockup", "social", "adcopy", "email", "sales", "testimonial", "customerintel", "generators"];
+  // Social Media + Ad Copy were consolidated into Content Studio (contentkit)
+  // — their JS still loads harmlessly but they're no longer surfaced as tabs.
+  var MODES = ["contentkit", "mockup", "email", "sales", "testimonial", "customerintel", "generators"];
   var MODE_LABELS = {
-    contentkit: "Content Kit", mockup: "Mockup Studio", social: "Social Media Studio",
-    adcopy: "Ad Copy & Creative Studio", email: "Email Studio", sales: "Sales & Landing Page Studio",
+    contentkit: "Content Studio", mockup: "Mockup Studio",
+    email: "Email Studio", sales: "Sales & Landing Page Studio",
     testimonial: "Testimonial & Social Proof Formatter", customerintel: "Customer Intelligence Studio", generators: "Quick Generators",
   };
   var MODE_ICONS = {
-    contentkit: "sparkle", mockup: "shirt", social: "layers",
-    adcopy: "lightning", email: "mail", sales: "monitor",
+    contentkit: "sparkle", mockup: "shirt",
+    email: "mail", sales: "monitor",
     testimonial: "people", customerintel: "person", generators: "sparkle",
   };
   var BUILT_MODES = {
-    contentkit: true, mockup: true, social: true,
-    adcopy: true, email: true, sales: true, testimonial: true, customerintel: true, generators: true,
+    contentkit: true, mockup: true,
+    email: true, sales: true, testimonial: true, customerintel: true, generators: true,
   };
 
   var activeMode = "contentkit";
