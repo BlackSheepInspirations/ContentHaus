@@ -143,3 +143,46 @@ the P2P OS can embed the assessment alone as the "Founders Assessment."
 - **Insert Card merge** (Brand Haus Quick Gens): Thank You Card + Gift Message → one **Insert Card** (Card Type toggle), mirroring Marketing. `hideFromGrid` support added to the Brand Haus grid.
 - **Find Your Direction now persists** — answers saved to `localStorage.brandHausDirection`, brief survives a refresh.
 - Not done (not requested): Archetype Guide skippable.
+
+---
+
+## 3. Content Haus (Prompt Haus)
+
+**9 modes** on a big shared spine. Entry `sections/prompt-builder.liquid` → `#prompt-haus-app`;
+per-mode logic in `assets/prompt-builder-<mode>.js`, all rendering in `prompt-builder-ui.js`.
+Modes hang off `window.PromptHaus`; Collection Builder has no module (lives in ui.js).
+
+### 3A. Shared infrastructure (wraps every mode)
+
+- **Style DNA / "Project Setup" bar** — Project Type (~24, drives auto aspect) · Aspect Ratio · Target Platform (8 tools, controls output formatting) · Variations (1–4) · Image Buffer · Output Format · Negative Prompt (+chips).
+- **Concept • Creative Direction box** (rendered inside each mode) — Holiday (60+) · Creative Theme (~35) · Niche (~50) · Target Audience (~60) · Mood (~45). "Pick up to 2."
+- **Imagery & Scene Elements** — 9 categories × 2 slots w/ quantity.
+- **Filter** — shared post-look, next to Art Finish.
+- **Engine** (`buildSentence` / `buildMetaInstruction` / `formatForPlatform`) · **Brand Kit** ("My HAUS Style", 3 kits) · **Vault** (max 5/mode) · **Character Style pill system** (shared by Character/Couples/Family/Animals/Reference) · Stepper · Tips · 23-Q FAQ.
+
+### 3B. The 9 modes — verdict: KEEP all (each distinct)
+
+| Mode | Core widgets (beyond shared) | Output |
+|---|---|---|
+| **Character** | Base Type (human/mascot), Character Style pill, Art Finish, Identity, Appearance, Styling, Presentation, up to 3 Companions, Extras, **Video Motion sub-panel** | single-sentence portrait prompt |
+| **Couples** | A↔B swap, shared look, Couple Dynamic, two full person panels, Companions, Extras | multi-sentence "Character A / B" |
+| **Friends & Family** | Group Dynamic, up to 5 Adults + 5 Kids slot lists, Companions, **Add Text**, Extras | one sentence per person + text |
+| **Animals & Creatures** | 3 creature slots (Category→Breed cascade + colors/pose/props), style pill, Frame It, **Add Text** | one sentence per creature |
+| **Text** | Core Style (Letter/Color/Case/Effects), Filter, **2nd Phrase** sub-panel, Variation Details | meta-instruction, forced to 1 image |
+| **Graphics** | Illustrated/Realistic toggle, Frame It, 5 subject slots + Transportation, **Vanity Plate** sub-panel | "Create a graphic … featuring" |
+| **Combined** | Orchestrates Character+Text+Graphics; Overall Style, Character Position | one woven `buildSentence` |
+| **Image/Prompt Reference** | image-upload vs paste-prompt toggle, Reimagined Style, Presentation, Add Text, **live Generate Image** (Gemini) | anti-plagiarism reinterpret prompt |
+| **Collection Builder** | View-all checklist + Combine-up-to-3 splicer over the other modes | aggregates/ splices other modes' prompts |
+
+### 3C. Recommendations
+
+**Gaps / asymmetries (user-facing — the high-value adds):**
+1. **Add Text on Character & Couples** — Family/Animals/Reference have an Add Text sub-panel, but a plain Character or Couple portrait can't layer lettering without switching to Combined. Add the same sub-panel to both. *[decision: ____]*
+2. **Frame It parity for Animals & Graphics** — both omit **Time/Era** + **Camera Angle** (and Graphics also omits **Scene Effect**) that the other presentation modes have. A vintage creature portrait / period graphic can't set era or angle. Add the missing fields. *[decision: ____]*
+3. **Spread Video Motion Prompt** — only Character has the "animate this image" companion; Couples/Family/Animals/Graphics/Reference produce equally animatable images. Extend it (bigger, optional). *[decision: ____]*
+4. **Hide Variations where it's ignored** — the shared Variations dropdown shows on every mode but Text forces it to 1 and Reference/Collection don't use it. Hide it there to stop implying it does something. *[decision: ____]*
+
+**Duplication (internal tech-debt — invisible to users, real regression risk → recommend DEFER):**
+- Companion slot, Add Text, animal-mascot Hair→Texture fix, the shared-DNA-entry appending, and the Character Type/Art Finish→paragraph pattern are each re-implemented across 3–7 modes. A shared-set change today means editing up to 7 files. Worth a DRY pass eventually, but no user-facing change and high blast radius — park it. *[decision: ____]*
+
+**Not merging:** all 9 modes are genuinely distinct (Combined weaves one scene; Collection splices finished prompts — different jobs). Keep them.
