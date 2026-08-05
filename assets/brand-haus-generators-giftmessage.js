@@ -31,6 +31,10 @@
     " Clean, professional, print-ready design, high resolution, no watermarks.";
 
   BrandHaus.generatorEngine.registerGenerator({
+    // Merged into the unified Insert Card generator (Card Type = Gift message
+    // card). Kept registered so any saved Vault entry still resolves, but
+    // hidden from the grid so it's not a duplicate entry point.
+    hideFromGrid: true,
     id: "gift-message-template",
     label: "Gift Message Template Generator",
     icon: "gift",

@@ -85,6 +85,28 @@
 
   var store = BrandHaus.util.createStore(buildInitialState());
 
+  // Persist Find Your Direction across page loads — it's the one wizard step
+  // whose answers weren't saved anywhere, so a refresh used to wipe the brief.
+  // Hydrate first (before subscribing, so restoring doesn't immediately
+  // re-write), then save on every change.
+  var DIRECTION_STORAGE_KEY = "brandHausDirection";
+  (function hydrateDirection() {
+    try {
+      var raw = localStorage.getItem(DIRECTION_STORAGE_KEY);
+      if (!raw) return;
+      var saved = JSON.parse(raw);
+      if (saved && typeof saved === "object" && saved.answers) store.setState(saved);
+    } catch (e) {}
+  })();
+  store.subscribe(function () {
+    try {
+      var s = store.getState();
+      localStorage.setItem(DIRECTION_STORAGE_KEY, JSON.stringify({
+        step: s.step, path: s.path, currentIndex: s.currentIndex, furthestIndex: s.furthestIndex, answers: s.answers,
+      }));
+    } catch (e) {}
+  });
+
   function getQuestionList(path) {
     return path === "creator" ? PATH_A_QUESTIONS : PATH_B_QUESTIONS;
   }
@@ -290,6 +312,7 @@
       ui.el("p", { class: "bh-field-group__subtitle bh-text--black", text: "Copy the brief below and paste it into Frank to start a real conversation — he'll ask you a few follow-up questions before he gives you anything back." }),
       textarea,
       ui.el("div", { class: "bh-preview__actions" }, [copyBtn, frankLink]),
+      ui.el("p", { class: "bh-chapter__reassurance", text: "This brief is saved on this device — leave and come back to it anytime." }),
       ui.el("p", { class: "bh-founder-interview__examples", text: "Your Brand Haus purchase includes access to Frank, your AI Business Partner, in the Idea Haus." }),
       ui.el("p", { class: "bh-chapter__reassurance", text: "Nothing here is sent anywhere automatically — copy the brief and paste it in yourself, whenever you're ready." }),
       ui.el("hr", { class: "bh-selections__divider" }),

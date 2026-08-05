@@ -311,7 +311,10 @@
 
   function renderGrid(onSelect) {
     var ui = BrandHaus.ui;
-    var cards = registry.map(function (def) {
+    // hideFromGrid — a generator kept registered (so its Vault entries still
+    // resolve) but merged behind another's toggle, e.g. gift-message-template
+    // folded into the unified Insert Card generator.
+    var cards = registry.filter(function (def) { return !def.hideFromGrid; }).map(function (def) {
       var card = ui.el("button", { type: "button", class: "bh-generator-card" }, [
         ui.icon(def.icon || "sparkle"),
         ui.el("span", { class: "bh-generator-card__name", text: def.label }),
