@@ -1584,6 +1584,23 @@
       )
     );
 
+    panel.appendChild(
+      renderSubPanel(
+        "Add Text",
+        couples.getState().addText.include,
+        function (checked) { couples.toggleAddTextInclude(checked); renderApp(); },
+        function () {
+          return renderFieldGroup(
+            "Text Details",
+            [{ fieldName: "text", label: "Text Content", field: couples.getState().addText.text }].concat(couples.getAddTextStyleEntries()),
+            function (entry, changes) { couples.updateAddTextField(entry.fieldName, changes); renderApp(); },
+            "What the text says, and how it's styled."
+          );
+        },
+        "Layer lettering on top of the couple portrait."
+      )
+    );
+
     var couplesVideo = renderCharacterVideoSection();
     if (couplesVideo) panel.appendChild(couplesVideo);
 
@@ -2025,20 +2042,19 @@
   function renderTransportationFields(graphics, state) {
     var fragment = [];
     var transportCategory = state.transportation.category.value;
-    function selectTransportCategory(cat) {
-      return function () {
-        graphics.updateTransportationCategory({ value: transportCategory === cat ? "" : cat });
-        renderApp();
-      };
-    }
+    // A dropdown (not icon pills) — the 5 pills squished together and read
+    // poorly; the category feeds the same "reveal that category's Vehicle
+    // list" logic either way.
     fragment.push(
-      renderPillToggle([
-        { isActive: transportCategory === "air", icon: "plane", title: "Air", onClick: selectTransportCategory("air") },
-        { isActive: transportCategory === "land", icon: "car", title: "Land", onClick: selectTransportCategory("land") },
-        { isActive: transportCategory === "military", icon: "shield", title: "Military", onClick: selectTransportCategory("military") },
-        { isActive: transportCategory === "rail", icon: "train", title: "Rail", onClick: selectTransportCategory("rail") },
-        { isActive: transportCategory === "water", icon: "boat", title: "Water", onClick: selectTransportCategory("water") },
-      ])
+      renderFieldGroup(
+        "Transportation",
+        [{ fieldName: "category", label: "Category", field: state.transportation.category }],
+        function (entry, changes) {
+          graphics.updateTransportationCategory(changes);
+          renderApp();
+        },
+        "Pick a category, then choose the specific vehicle below."
+      )
     );
     if (transportCategory) {
       fragment.push(

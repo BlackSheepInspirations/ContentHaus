@@ -25,6 +25,7 @@
   var makeField = PromptHaus.util.makeField;
   var sortAlpha = PromptHaus.util.sortAlpha;
   var lists = PromptHaus.character.optionLists;
+  var textLists = PromptHaus.text.optionLists;
   var charLabels = PromptHaus.character.labels;
   // Randomize caps/exclusions — same rationale/numbers as Character Mode's
   // own groups: Occupation/Height/Body Type excluded outright, Appearance
@@ -179,10 +180,72 @@
         count: 0,
         slots: [buildCompanionSlot(), buildCompanionSlot(), buildCompanionSlot()],
       },
+      addText: {
+        include: false,
+        text: makeField("", [], { isFreeText: true }),
+        letterStyle: makeField("", textLists.letterStyle),
+        colorScheme: PromptHaus.util.makeGroupedField("", textLists.colorSchemeGroups),
+        textCase: makeField("", textLists.textCase),
+        textEffects: PromptHaus.util.makeGroupedField("", textLists.textEffectsGroups),
+      },
     };
   }
 
   var MAX_COMPANIONS = 3;
+
+  // ---------------------------------------------------------------------
+  // Add Text — same pattern as Friends & Family / Animals Modes, so a
+  // couple portrait can layer lettering (a name, date, quote) without
+  // switching to Combined Mode.
+  // ---------------------------------------------------------------------
+  var ADD_TEXT_LABELS = { text: "Text Content", letterStyle: "Letter Style", colorScheme: "Color Scheme", textCase: "Text Case", textEffects: "Text Effects" };
+
+  function toggleAddTextInclude(include) {
+    var state = store.getState();
+    store.setState({ addText: Object.assign({}, state.addText, { include: include }) });
+  }
+
+  function updateAddTextField(fieldName, changes) {
+    var state = store.getState();
+    var patch = {};
+    patch[fieldName] = Object.assign({}, state.addText[fieldName], changes);
+    store.setState({ addText: Object.assign({}, state.addText, patch) });
+  }
+
+  function getAddTextStyleEntries() {
+    var addText = store.getState().addText;
+    return Object.keys(ADD_TEXT_LABELS)
+      .filter(function (fieldName) { return fieldName !== "text"; })
+      .map(function (fieldName) { return { fieldName: fieldName, label: ADD_TEXT_LABELS[fieldName], field: addText[fieldName] }; });
+  }
+
+  var TEXT_PARAGRAPH_LOOKUP_BY_FIELD = {
+    letterStyle: textLists.letterStylePrompts,
+    colorScheme: textLists.colorSchemePrompts,
+    textEffects: textLists.textEffectsPrompts,
+  };
+  function withTextParagraphLookup(e) {
+    var lookup = TEXT_PARAGRAPH_LOOKUP_BY_FIELD[e.fieldName];
+    if (!lookup) return { label: e.label, field: e.field };
+    var field = PromptHaus.engine.withPromptLookup(e.field, lookup);
+    if (e.fieldName === "letterStyle" && field.value && field.value.indexOf("<product type>") !== -1) {
+      field = Object.assign({}, field, { value: field.value.split("<product type>").join(PromptHaus.styleDNA.getProjectTypeValue()) });
+    }
+    return { label: e.label, field: field };
+  }
+
+  function buildTextClause() {
+    var addText = store.getState().addText;
+    if (!addText.include) return "";
+    var text = (addText.text.value || "").trim();
+    if (!text) return "";
+    var descriptors = PromptHaus.engine.resolveFields(
+      getAddTextStyleEntries().map(withTextParagraphLookup)
+    ).map(function (r) { return r.value; });
+    var clause = 'the text "' + text + '"';
+    if (descriptors.length) clause += " styled as " + descriptors.join(", ");
+    return clause;
+  }
 
   function setCompanionCount(count) {
     var state = store.getState();
@@ -434,6 +497,8 @@
     if (bResolved.length) parts.push("Character B: a " + bResolved.map(function (r) { return r.value; }).join(", ") + ".");
     if (companionResolved.length) parts.push("Also include " + companionResolved.map(function (r) { return r.value; }).join(", ") + ".");
     if (sceneResolved.length) parts.push(sceneResolved.map(function (r) { return r.value; }).join(", ") + ".");
+    var textClause = buildTextClause();
+    if (textClause) parts.push("Include " + textClause + ".");
 
     var text = parts.filter(Boolean).join(" ");
     var styleResolved = [];
@@ -447,6 +512,7 @@
       .concat(bResolved.map(function (r) { return { label: "B — " + r.label, value: r.value }; }))
       .concat(companionResolved)
       .concat(sceneResolved);
+    if (textClause) { fragments.push(textClause); resolved.push({ label: "Text", value: textClause }); }
 
     return { text: text, fragments: fragments, resolved: resolved };
   }
@@ -524,6 +590,8 @@
     if (aResolved.length) groups.push({ title: "Character A", items: aResolved });
     if (bResolved.length) groups.push({ title: "Character B", items: bResolved });
     if (companionResolved.length) groups.push({ title: "Companion", items: companionResolved });
+    var textClause = buildTextClause();
+    if (textClause) groups.push({ title: "Text", items: [{ label: "Text", value: textClause }] });
     return groups;
   }
 
@@ -576,6 +644,9 @@
     updateCompanionSlotField: updateCompanionSlotField,
     removeCompanionSlot: removeCompanionSlot,
     MAX_COMPANIONS: MAX_COMPANIONS,
+    toggleAddTextInclude: toggleAddTextInclude,
+    updateAddTextField: updateAddTextField,
+    getAddTextStyleEntries: getAddTextStyleEntries,
     getSelectionsByGroup: getSelectionsByGroup,
     assemblePrompt: assemblePrompt,
     randomize: randomize,
