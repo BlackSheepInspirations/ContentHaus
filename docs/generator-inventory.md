@@ -206,3 +206,60 @@ Modes hang off `window.PromptHaus`; Collection Builder has no module (lives in u
 - **Declined:** Add Text on Character/Couples (kept text in Combined only).
 - **Open question:** Combined weaves a single **Character** (not a Couple) — if
   Combined should support couples, that's a separate larger build.
+
+---
+
+## 4. Graphics Haus
+
+**Tab-bar Haus** (no grid): **7 generators** (Clipart Pack · Seasonal Cute Animal ·
+Faux Textile · Retro Object Icon · **License Plate** · Mascot · **Graphics Studio**)
++ row-2 modes (Combined · Image/Prompt Reference · Collection Builder). Same narrow-
+generator engine as Marketing (`registerGenerator`), shared Style DNA bar, Brand Kit,
+Look Lock (aesthetic carry-over), Mascot Lock, Vault. Every generator emits 4 variation
+blocks + platform formatting + auto Holiday clause.
+
+### 4A. Key finding — the vanity/license plate
+
+The intended structure is **already in place**: License Plate is its own standalone
+tab (split out of Graphics Studio), and Graphics Studio mirrors Content Haus's Graphics
+tab (~75–80%). The problem is **option depth**, not architecture:
+
+| | Content Haus vanity (great) | Graphics Haus License Plate (weak) |
+|---|---|---|
+| Plate Type | **22** (glam + masculine range) | State/Plate Style — **5** |
+| Frame / Base Style | **22** | Border Style — **3** |
+| Finish | **19** | **3** |
+| Letter Style | **15** | none (baked into suffix) |
+| Top + Bottom Accents | **23 each** | 1 free-text corner motif |
+| Plate Text Color | **16** | none |
+| State/Region | **~65 grouped** | none |
+| **Total** | **~9 controls / ~180 options** | **6 controls / ~17 options** |
+
+**BUT** the Graphics Haus plate has the *better wrapper*: a real standalone plate brief
+(wide-rectangle proportions, isolated on transparent bg, legibility suffix), 4
+variations, Look Lock, paired-color presets — none of which Content Haus's vanity has
+(it's a *facet of a scene*, not a standalone plate). **Ideal = Content Haus's field
+depth inside Graphics Haus's standalone engine.**
+
+### 4B. Graphics Studio vs Content Haus Graphics tab (the intended mirror)
+
+Faithful subset. Gaps: single **Main Subject** dropdown vs Content Haus's **5 What-Is-It
+slots with quantity**; flat 14-item Art Style vs ~60 + Illustrated/Realistic toggle;
+**no Time/Era, no Camera Angle**; Transportation flattened to 16 items vs the 5-category
+cascade. (Engine limit: narrow-generators support only flat option lists / free-text —
+no grouped/cascading dropdowns; that's the one architectural limiter behind both the
+flat Transportation and the missing State/Region picker.)
+
+### 4C. Opportunities / recommendations
+
+1. **Upgrade the License Plate tab** — port Content Haus's rich option depth (Plate Type
+   22 · Base Style 22 · Letter Style 15 · Top/Bottom Accents 23 · Plate Text Color 16 ·
+   Finish 19) into the Graphics Haus License Plate, KEEPING its standalone output +
+   variations + Look Lock. Mostly additive field-list work. State/Region needs flattening
+   (engine can't group) or an engine tweak. *[decision: ____]*
+2. **Graphics Studio parity** — add Time/Era + Camera Angle (trivial, flat lists exist),
+   matching the Content Haus Frame It parity already shipped. Multi-subject/quantity and
+   the Transportation cascade are bigger (engine change). *[decision: ____]*
+3. **Content Haus vanity** — already "great" on options but embedded in a scene; leave as
+   is, or optionally give it the same standalone plate output the Graphics Haus one has.
+   *[decision: ____]*
