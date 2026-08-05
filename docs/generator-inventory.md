@@ -7,6 +7,24 @@ punch-list is what we execute from.
 
 Started 2026-08-05. Pulled from live code (not guessed).
 
+### Update log
+
+- **2026-08-05 — Marketing Haus restructure shipped.**
+  - Shared bar re-org: split into **Brand DNA** (Business Name, Reading Level +
+    text Negative Prompt; each field include/exclude toggle) shown everywhere, and
+    **Image Output** (Variations, Target Platform, Aspect Ratio, Buffer, Output
+    Format) scoped to image modes only (Mockup + Generators).
+  - **Tone + Audience peeled out** of the shared bar into each studio's own Voice
+    widget (Email, Sales, Testimonial got their own; Content Studio owns its own).
+  - **Social Media + Ad Copy consolidated into "Content Studio"** (renamed from
+    Content Kit). Ad Copy folds in as Purpose = "Run a paid ad" (Objective/Urgency/
+    Headline Style + Offer + Headline/Primary text/Description deliverables). Social
+    folds in as an optional Fine-tune panel (hook style, carousel slides, hashtag
+    style, emoji usage). New: **Purpose** widget + **"Also make a matching image
+    prompt"** sub-panel (Subject/Background/Lighting/Art Style, reuses the size).
+  - Marketing tabs now: **Content Studio · Mockup · Email · Sales · Testimonial ·
+    Customer Intelligence · Quick Generators** (was 7 studios).
+
 ---
 
 ## Top-level menu (all 6 Hausen)
