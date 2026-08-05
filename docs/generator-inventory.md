@@ -133,3 +133,13 @@ the P2P OS can embed the assessment alone as the "Founders Assessment."
 5. **Quick Generators (only 4)** — too few to need the subheading grouping Marketing got. Keep flat. *[decision: keep flat]*
 
 **Gaps:** Coverage is deep (this is the most sophisticated Haus). Main opportunities are consistency (the Insert Card merge) + the step-6 placement, not missing tools.
+
+### 2C. Restructure shipped (2026-08-05)
+
+- **Split into two products** (one access tag for now — `brand-haus-access`):
+  - **Founders Assessment** = `/pages/brand-haus?bh_focus=1` → the diagnostic flow, steps 1–6 (Archetype Guide … Find Your Direction). Unchanged.
+  - **Brand Haus** = `/pages/brand-haus` → the standalone **Branding Studio** only (Branding / Logo / Quick Generators as the sidebar nav). No assessment steps.
+  - Branding Studio hydrates the saved assessment snapshot on load, so it still auto-populates colors/fonts/mission when standalone. "Continue to Branding Studio" in the assessment crosses to `/pages/brand-haus`; the studio shows a "Take the Founders Assessment" nudge when no assessment exists.
+- **Insert Card merge** (Brand Haus Quick Gens): Thank You Card + Gift Message → one **Insert Card** (Card Type toggle), mirroring Marketing. `hideFromGrid` support added to the Brand Haus grid.
+- **Find Your Direction now persists** — answers saved to `localStorage.brandHausDirection`, brief survives a refresh.
+- Not done (not requested): Archetype Guide skippable.
