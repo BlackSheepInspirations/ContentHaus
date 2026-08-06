@@ -548,6 +548,8 @@
     );
   }
 
+  var kitSaveFeedback = null;
+
   function renderListingKitSection(ui, state) {
     return ui.renderSubPanel(
       "Generate a full Listing Kit (multiple shots)?",
@@ -571,6 +573,32 @@
         var blocks = assembleListingKit();
         var list = ui.el("div", { class: "mh-generator-variations" });
         list.appendChild(ui.el("h4", { class: "mh-generator-variations__title" }, [ui.icon("layers"), ui.el("span", { text: "Your Listing Kit (" + blocks.length + " shots)" })]));
+
+        // One combined string (labeled + separated) for Copy All / Vault.
+        var combined = blocks.map(function (b) {
+          return b.label.toUpperCase() + "\n\n" + formatForCopy(b.text);
+        }).join("\n\n" + "—".repeat(24) + "\n\n");
+
+        var copyAllLabel = "Copy All " + blocks.length + " Shots";
+        var copyAllBtn = ui.el("button", { type: "button", class: "mh-btn mh-btn--small mh-btn--copy", text: copyAllLabel });
+        copyAllBtn.addEventListener("click", function () {
+          ui.copyTextToClipboard(combined, function (ok) {
+            copyAllBtn.textContent = ok ? "Copied!" : "Copy failed";
+            setTimeout(function () { copyAllBtn.textContent = copyAllLabel; }, 1500);
+          });
+        });
+        var saveBtn = ui.el("button", { type: "button", class: "mh-btn mh-btn--small mh-btn--save", text: "Save Kit to Vault" });
+        saveBtn.addEventListener("click", function () {
+          var title = ui.buildVaultTitle("mockup") + " — Listing Kit (" + blocks.length + " shots)";
+          var result = MarketingHaus.favorites.save("mockup", { text: combined, title: title, snapshot: ui.buildVaultSnapshot("mockup") });
+          kitSaveFeedback = result.ok ? "Saved!" : result.reason;
+          MarketingHaus.ui.renderApp();
+          setTimeout(function () { kitSaveFeedback = null; MarketingHaus.ui.renderApp(); }, 2500);
+        });
+        var actions = ui.el("div", { class: "mh-companion__controls" }, [copyAllBtn, saveBtn]);
+        if (kitSaveFeedback) actions.appendChild(ui.el("span", { style: "color: var(--mh-teal); font-weight: 600; font-size: 13px;", text: kitSaveFeedback }));
+        list.appendChild(actions);
+
         blocks.forEach(function (b) {
           var formatted = formatForCopy(b.text);
           var copyBtn = ui.el("button", { type: "button", class: "mh-btn mh-btn--small mh-btn--copy", text: "Copy" });
