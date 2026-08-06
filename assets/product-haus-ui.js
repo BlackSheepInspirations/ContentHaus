@@ -1204,6 +1204,13 @@
       id: "stickers", label: "Stickers", icon: "crop",
       items: [{ type: "generator", id: "sticker-sheet" }],
     },
+    {
+      id: "patternsWraps", label: "Patterns & Wraps", icon: "palette",
+      items: [
+        { type: "generator", id: "seamless-pattern" },
+        { type: "generator", id: "tumbler-wrap" },
+      ],
+    },
   ];
 
   var activeMode = "invitations";
