@@ -58,11 +58,18 @@ Started 2026-08-05. Pulled from live code (not guessed).
     video-ad-kit, video-ad-bundle, Strategy ×3) → preview + copy blocks skip image
     formatting; text-flavored variation pools. Suno rebuilt: with-voice-or-not toggle
     + vocal style + optional lyrics ([Verse]/[Chorus]) + expanded genres.
-  - **⏳ STILL TO VET:** the **text studios** (Email, Sales & Landing, Testimonial,
-    Content Studio, Customer Intelligence) share the SAME latent `formatForPlatform`-
-    on-text issue — the quick-gen fix was scoped to generators, not studios (Content
-    Studio is image-capable, so it needs a per-studio call). Also not yet vetted for
-    depth/quality: those 5 studios + the Copy/Strategy quick-gens themselves.
+  - **✅ Text studios formatting fix + depth vet (commit `ca5d4a1`):** the 5 copy
+    studios (Content, Email, Sales & Landing, Testimonial, Customer Intelligence) now
+    skip image formatting (skipPlatformFormat / textOnly); Mockup stays image. Depth
+    vet: all 5 are in good shape — Content Studio is deep (platform/format, purpose,
+    paid-ad specifics, deliverables multi-select combine-or-separate, optional
+    matching image prompt); Sales has benefits/objection/social-proof/price-framing/
+    section ordering; Email has type/subject-style/length/CTA/personalization;
+    Testimonial reformats raw feedback with polish/highlight/attribution; Customer
+    Intelligence is a customer-avatar doc. No premium gaps worth a build right now.
+  - **⏳ STILL TO VET (lower priority):** the **Copy** (SEO/listing/hashtags) and
+    **Strategy Docs** (content-calendar/creative-direction/custom-gpt) quick-gens have
+    only had the formatting fix, not a depth/quality pass.
 
 ---
 
