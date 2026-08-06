@@ -27,6 +27,7 @@
 const API_VERSION = '2026-07';
 const NS = 'custom', KEY = 'p2p_progress';
 let cachedToken = null, cachedAt = 0;
+let cachedRpModel = null; // discovered Gemini text model for reverse-prompt (auto-refreshes if it goes stale)
 
 /* ---- content banks (house voices + welcomes) ---- */
 const WELCOME_LINES = [
@@ -543,12 +544,12 @@ export default {
 
       /* ---------- reverse image prompt (TEXT ONLY — never generates an image) ----------
          Reads an uploaded reference image and returns a detailed, reusable
-         text-to-image prompt that recreates it. Uses the TEXT model
-         gemini-2.0-flash (image IN, text OUT) — it is physically incapable of
-         producing an image, so there is NEVER an image-generation charge. Only the
-         text model is ever called; no image model is reachable from this Worker.
-         Members-only (guests are already rejected above). Set the API key with:
-           wrangler secret put gemini_key  (Google AI Studio / Gemini API key) */
+         text-to-image prompt that recreates it. It AUTO-DISCOVERS a currently-
+         available Gemini TEXT model from the key (image IN, text OUT) rather than
+         hardcoding a model name that Google can deprecate — and it explicitly
+         excludes any image/imagen model, so it is physically incapable of
+         generating an image and can NEVER incur an image-generation charge.
+         Members-only (guests are already rejected above). Needs secret gemini_key. */
       if (seg === 'reverse-prompt') {
         if (request.method !== 'POST') return json({ error: 'method' }, 405);
         if (!env.gemini_key) return json({ error: 'not_configured' }, 501);
@@ -560,18 +561,44 @@ export default {
           'Look at this image and write ONE detailed, reusable text-to-image generation prompt that would let an AI recreate it. ' +
           'Describe the subject, composition, art style, colors, lighting, mood, and background in vivid, specific language. ' +
           'Output ONLY the prompt text — no preamble, no headings, no explanation.';
-        let gres;
-        try {
-          gres = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + env.gemini_key, {
+        const rpParts = [{ text: instruction }, { inline_data: { mime_type: m[1], data: m[2] } }];
+
+        // Discover a usable TEXT model: supports generateContent, and is NOT an
+        // image/imagen/embedding model. Prefer a "flash" (fast/cheap) model.
+        async function rpDiscover() {
+          const lr = await fetch('https://generativelanguage.googleapis.com/v1beta/models?key=' + env.gemini_key);
+          const lj = await lr.json().catch(() => null);
+          const list = (lj && lj.models) || [];
+          const usable = list.filter(function (mm) {
+            const meth = mm.supportedGenerationMethods || [];
+            return meth.indexOf('generateContent') !== -1 && !/image|imagen|embedding|aqa|tts|veo/i.test(mm.name || '');
+          });
+          const flash = usable.filter(function (mm) { return /flash/i.test(mm.name) && !/lite/i.test(mm.name); })[0];
+          const lite = usable.filter(function (mm) { return /flash/i.test(mm.name); })[0];
+          const pick = flash || lite || usable[0];
+          return pick ? pick.name : null; // e.g. "models/gemini-2.5-flash"
+        }
+        function rpCall(modelName) {
+          return fetch('https://generativelanguage.googleapis.com/v1beta/' + modelName + ':generateContent?key=' + env.gemini_key, {
             method: 'POST',
             headers: { 'content-type': 'application/json' },
-            body: JSON.stringify({
-              contents: [{ parts: [{ text: instruction }, { inline_data: { mime_type: m[1], data: m[2] } }] }],
-              generationConfig: { temperature: 0.4 },
-            }),
+            body: JSON.stringify({ contents: [{ parts: rpParts }], generationConfig: { temperature: 0.4 } }),
           });
+        }
+
+        let gres, gj;
+        try {
+          let modelName = cachedRpModel || (cachedRpModel = await rpDiscover());
+          if (!modelName) return json({ error: 'No compatible Gemini text model is available for this API key.' }, 502);
+          gres = await rpCall(modelName);
+          gj = await gres.json().catch(() => null);
+          // If the cached model went stale (deprecated/removed), rediscover once and retry.
+          if (!gres.ok && /not (found|available|supported)|no longer|is not/i.test((gj && gj.error && gj.error.message) || '')) {
+            cachedRpModel = null;
+            const fresh = await rpDiscover();
+            if (fresh && fresh !== modelName) { cachedRpModel = fresh; gres = await rpCall(fresh); gj = await gres.json().catch(() => null); }
+          }
         } catch (e) { return json({ error: 'Could not reach the prompt reader. Please try again.' }, 502); }
-        const gj = await gres.json().catch(() => null);
         if (!gres.ok) return json({ error: (gj && gj.error && gj.error.message) || 'Prompt reading failed.' }, gres.status >= 400 && gres.status < 500 ? 400 : 502);
         const gparts = (gj && gj.candidates && gj.candidates[0] && gj.candidates[0].content && gj.candidates[0].content.parts) || [];
         // Defensive: only ever surface TEXT — any non-text part is ignored.
