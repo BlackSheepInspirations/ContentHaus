@@ -368,6 +368,18 @@
     }).filter(Boolean);
   }
 
+  // "One matching sheet" — a single prompt laying the whole pack on one image
+  // (opt-in via def.bundleSheetTemplate + the store's _bundleSheet flag), so a
+  // cohesive set is guaranteed in one generation.
+  function assembleBundleSheet(id) {
+    var def = getDef(id);
+    if (!def.bundleSheetTemplate) return null;
+    var state = getStore(id).getState();
+    var valueMap = getFieldValueMap(def, state);
+    var pc = GraphicsHaus.styleDNA.getProjectTypeClause();
+    return { key: "sheet", label: "Matching Sheet (all pieces, one image)", text: substituteTemplate(def.bundleSheetTemplate, valueMap) + pc };
+  }
+
   // Matches buildSentence()'s { text, fragments, resolved } shape so the
   // standard renderPreview/formatForPlatform/Vault/Recent Log machinery
   // in graphics-haus-ui.js works completely unchanged — Variation 1 ("As
@@ -380,8 +392,12 @@
     var resolved = resolveFields(getFieldEntries(def, state));
     var text;
     if (def.pageTypes) {
-      var bundleBlocks = assembleBundle(id);
-      text = bundleBlocks.length ? bundleBlocks[0].text : "";
+      if (state._bundleSheet && def.bundleSheetTemplate) {
+        text = assembleBundleSheet(id).text;
+      } else {
+        var bundleBlocks = assembleBundle(id);
+        text = bundleBlocks.length ? bundleBlocks[0].text : "";
+      }
     } else {
       text = assembleVariations(id)[0].text;
     }
@@ -499,16 +515,33 @@
   function renderBundleBlock(id) {
     var ui = GraphicsHaus.ui;
     var def = getDef(id);
-    var blocks = assembleBundle(id);
+    var sheetMode = !!getStore(id).getState()._bundleSheet && !!def.bundleSheetTemplate;
+    var blocks = sheetMode ? [assembleBundleSheet(id)] : assembleBundle(id);
     var wrap = renderLabeledBlocksSection(def.bundleBlockTitle || "Your Page Bundle", blocks);
 
     // Optional practical note above the pieces (e.g. Clipart Pack's "how to
-    // keep the set matching" tip). Inserted right after the section title.
+    // keep the set matching" tip). Insert tip first, then the mode toggle, so
+    // final order reads: title -> toggle -> tip -> blocks.
     if (def.bundleTip) {
       var tip = ui.el("p", { class: "gh-bundle-tip", style: "margin: 4px 0 14px; font-size: 13px; line-height: 1.45; color: var(--gh-teal);" }, [
         ui.icon("sparkle"), ui.el("span", { text: " " + def.bundleTip }),
       ]);
       wrap.insertBefore(tip, wrap.children[1] || null);
+    }
+
+    // Separate Prompts vs One Matching Sheet (opt-in via def.bundleSheetTemplate).
+    // Built with ui.el (yesNoButton is a private ui helper, not exported).
+    if (def.bundleSheetTemplate) {
+      function bundleModeBtn(label, active, on) {
+        var b = ui.el("button", { type: "button", class: "gh-styledna__yesno-btn" + (active ? " is-active" : "") }, [ui.el("span", { text: label })]);
+        b.addEventListener("click", on);
+        return b;
+      }
+      var toggle = ui.el("div", { class: "gh-styledna__yesno", style: "margin: 4px 0 12px;" }, [
+        bundleModeBtn("Separate Prompts", !sheetMode, function () { getStore(id).setState({ _bundleSheet: false }); GraphicsHaus.ui.renderApp(); }),
+        bundleModeBtn("One Matching Sheet", sheetMode, function () { getStore(id).setState({ _bundleSheet: true }); GraphicsHaus.ui.renderApp(); }),
+      ]);
+      wrap.insertBefore(toggle, wrap.children[1] || null);
     }
 
     var saveBtn = ui.el("button", { type: "button", class: "gh-btn gh-btn--small gh-btn--save", text: "Save Whole Bundle to Vault" });

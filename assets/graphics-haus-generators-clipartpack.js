@@ -47,7 +47,17 @@
   var COHESION_CLAUSE =
     " This is ONE piece of a coordinated matching \"{theme}\" clipart set — render it in the EXACT same {artStyle} art style, {colorPalette} color palette, line weight, outline thickness, shading, proportions, and level of detail as every other piece in the pack, so all the pieces look like one cohesive, professionally-designed matching collection (not separate unrelated images).";
 
-  var LOCKED_SUFFIX = COHESION_CLAUSE + " Isolated clipart illustration, crisp clean edges, no background clutter, consistent line weight, commercial print-and-sticker ready, high resolution.";
+  var BASE_QUALITY_SUFFIX = " Isolated clipart illustration, crisp clean edges, no background clutter, consistent line weight, commercial print-and-sticker ready, high resolution.";
+  var LOCKED_SUFFIX = COHESION_CLAUSE + BASE_QUALITY_SUFFIX;
+
+  // "One matching sheet" mode — a single prompt that lays the whole pack on
+  // one image, so a perfectly cohesive set is guaranteed in a single
+  // generation (no run-to-run drift). Its own "same style" wording, so it
+  // doesn't use the per-piece COHESION_CLAUSE.
+  var BUNDLE_SHEET_TEMPLATE =
+    "Create ONE cohesive \"{theme}\" clipart sheet as a single image — a full matching set built from {mainSubjects}, containing: one larger HERO icon, a cluster of 4-6 smaller SUPPORTING icons, a small SEAMLESS repeating-pattern swatch, and a blank DECORATIVE BANNER/frame. Render every element in the EXACT same {artStyle} art style, {colorPalette} color palette, line weight, shading, and level of detail so the whole sheet is one perfectly-matched collection. {textureFinish} finish, {background}{holidayClause}.\n\n" +
+    "Layout: arrange all the pieces neatly on one sheet with clear spacing between each (not touching or overlapping) so every piece can be individually cut out and used on its own." +
+    BASE_QUALITY_SUFFIX;
 
   GraphicsHaus.generatorEngine.registerGenerator({
     id: "clipart-pack",
@@ -79,6 +89,7 @@
     pageTypesCap: 4,
     defaultPageTypes: ["hero", "supporting", "pattern", "banner"],
     bundleBlockTitle: "Your Clipart Pack",
+    bundleSheetTemplate: BUNDLE_SHEET_TEMPLATE,
     bundleTip: "Matching tip: generate the Hero Icon first, then paste that finished image in as a style reference when you generate the other pieces — or generate all pieces in one ChatGPT session so it holds the exact same look across the set.",
     pageTypes: [
       {

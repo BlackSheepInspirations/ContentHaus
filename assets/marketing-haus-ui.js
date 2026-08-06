@@ -1179,6 +1179,12 @@
   };
 
   var activeMode = "contentkit";
+  // Deep-link support (e.g. Graphics Haus's "Make a product mockup →" links to
+  // /pages/marketing-haus?studio=mockup) — land on that studio if it's built.
+  try {
+    var _studioParam = new URLSearchParams(window.location.search).get("studio");
+    if (_studioParam && BUILT_MODES[_studioParam]) activeMode = _studioParam;
+  } catch (e) {}
 
   function renderTabs(root) {
     var row = el("div", { class: "mh-tabs" });

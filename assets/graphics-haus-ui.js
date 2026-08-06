@@ -797,7 +797,14 @@
 
     var actionsGrid = el("div", { class: "gh-preview__actions" }, [randomizeBtn, copyBtn, saveBtn, resetBtn]);
     var exportRow = renderExportRow(formatted, mode);
-    return el("div", {}, [actionsGrid, exportRow]);
+    // Cross-Haus workflow bridge — once you've made a graphic, jump straight
+    // to the Marketing Mockup Studio to put it on a product.
+    var mockupLink = el("a", {
+      class: "gh-btn gh-btn--small gh-btn--reset gh-preview__mockup-link",
+      href: "/pages/marketing-haus?studio=mockup",
+      title: "Opens the Marketing Haus Mockup Studio to build a product-mockup prompt for this design.",
+    }, [icon("shirt"), el("span", { text: "Make a product mockup →" })]);
+    return el("div", {}, [actionsGrid, exportRow, mockupLink]);
   }
 
   function renderExportRow(formatted, mode) {

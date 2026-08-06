@@ -151,11 +151,29 @@
     var suggested = PROJECT_TYPE_ASPECT[value];
     if (suggested) GraphicsHaus.util.updateField(store, "aspectRatio", { value: suggested, customValue: "" });
   }
-  // Trailing clause injected into every generator's prompt by the engine.
+  // Product categories drive the print-readiness guidance in the clause:
+  // cutout products want transparent/die-cut, wraps want a seamless edge,
+  // print products want high-DPI + a safe bleed margin.
+  var CUTOUT_PRODUCTS = ["sticker", "sticker sheet", "laptop / water-bottle decal", "keychain", "button / pin", "digital clipart PNG", "logo / brand mark"];
+  var WRAP_PRODUCTS = ["mug wrap", "tumbler wrap"];
+  var PRINT_PRODUCTS = ["t-shirt / apparel graphic", "hoodie graphic", "tote bag", "mouse pad", "poster / wall art", "greeting card", "postcard", "coloring page", "wrapping / digital paper"];
+
+  // Trailing clause injected into every generator's prompt by the engine —
+  // ties the physical product to real print-readiness instructions.
   function getProjectTypeClause() {
     var pt = GraphicsHaus.engine.resolveFieldValue(store.getState().projectType);
     if (!pt || pt.indexOf("general") === 0) return "";
-    return " Design this to work as a " + pt + " — sized and composed appropriately for that product, with clean, print-ready edges.";
+    var readiness;
+    if (CUTOUT_PRODUCTS.indexOf(pt) !== -1) {
+      readiness = "isolated on a transparent background with a clean, die-cut-ready silhouette (no background, no drop shadow)";
+    } else if (WRAP_PRODUCTS.indexOf(pt) !== -1) {
+      readiness = "as a seamless edge-to-edge wrap that tiles cleanly with no hard seam where the ends meet";
+    } else if (PRINT_PRODUCTS.indexOf(pt) !== -1) {
+      readiness = "at high 300 DPI print resolution, with a small safe margin so nothing important sits near the trim edge";
+    } else {
+      readiness = "with clean, print-ready edges";
+    }
+    return " Design this to work as a " + pt + " — sized and composed appropriately for that product, " + readiness + ".";
   }
   function setHoliday(value) {
     GraphicsHaus.util.updateField(store, "holiday", { value: value, customValue: "" });
