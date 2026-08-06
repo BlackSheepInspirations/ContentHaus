@@ -541,6 +541,45 @@ export default {
         return json({ error: 'method' }, 405);
       }
 
+      /* ---------- reverse image prompt (TEXT ONLY — never generates an image) ----------
+         Reads an uploaded reference image and returns a detailed, reusable
+         text-to-image prompt that recreates it. Uses the TEXT model
+         gemini-2.5-flash (image IN, text OUT) — it is physically incapable of
+         producing an image, so there is NEVER an image-generation charge. Only the
+         text model is ever called; no image model is reachable from this Worker.
+         Members-only (guests are already rejected above). Set the API key with:
+           wrangler secret put gemini_key  (Google AI Studio / Gemini API key) */
+      if (seg === 'reverse-prompt') {
+        if (request.method !== 'POST') return json({ error: 'method' }, 405);
+        if (!env.gemini_key) return json({ error: 'not_configured' }, 501);
+        const rbody = await request.json().catch(() => null);
+        const m = /^data:([^;]+);base64,(.*)$/.exec((rbody && rbody.image) || '');
+        if (!m) return json({ error: 'bad_image' }, 400);
+        if (m[2].length > 7 * 1024 * 1024) return json({ error: 'too_large' }, 413);
+        const instruction =
+          'Look at this image and write ONE detailed, reusable text-to-image generation prompt that would let an AI recreate it. ' +
+          'Describe the subject, composition, art style, colors, lighting, mood, and background in vivid, specific language. ' +
+          'Output ONLY the prompt text — no preamble, no headings, no explanation.';
+        let gres;
+        try {
+          gres = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + env.gemini_key, {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: instruction }, { inline_data: { mime_type: m[1], data: m[2] } }] }],
+              generationConfig: { temperature: 0.4 },
+            }),
+          });
+        } catch (e) { return json({ error: 'Could not reach the prompt reader. Please try again.' }, 502); }
+        const gj = await gres.json().catch(() => null);
+        if (!gres.ok) return json({ error: (gj && gj.error && gj.error.message) || 'Prompt reading failed.' }, gres.status >= 400 && gres.status < 500 ? 400 : 502);
+        const gparts = (gj && gj.candidates && gj.candidates[0] && gj.candidates[0].content && gj.candidates[0].content.parts) || [];
+        // Defensive: only ever surface TEXT — any non-text part is ignored.
+        const promptText = gparts.map(function (p) { return p.text || ''; }).join('').trim();
+        if (!promptText) return json({ error: 'The reader didn\'t return a prompt — try a different image.' }, 422);
+        return json({ ok: true, prompt: promptText });
+      }
+
       /* ---------- member public profile card ---------- */
       if (seg === 'profile') {
         if (!kv) return json({ error: 'no_store' }, 501);

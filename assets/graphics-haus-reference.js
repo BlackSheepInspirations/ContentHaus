@@ -56,23 +56,20 @@
       reimaginedStyle: makeField("", REIMAGINED_STYLE_OPTIONS),
       background: makeField(BACKGROUND_OPTIONS[0], BACKGROUND_OPTIONS),
       sceneEffect: makeField(SCENE_EFFECT_OPTIONS[0], SCENE_EFFECT_OPTIONS),
-      // Generate Image — same Netlify Function Content Haus's own Reference
-      // Mode uses (see prompt-builder-reference.js); never persisted to the
-      // Vault/Recent Log, never touched by Randomize/Reset except explicitly
-      // clicking Generate again or Clear.
-      generatedImage: null,
-      isGeneratingImage: false,
-      generateImageError: "",
+      // Reverse image prompt — reads the uploaded photo and writes a text
+      // prompt into the Description (TEXT ONLY; never generates an image).
+      isReading: false,
+      readError: "",
     };
   }
 
   var store = createStore(buildInitialState());
 
-  // Same deployed Netlify site Content Haus's Reference Mode uses — one
-  // function serves every Haus that references it, no per-Haus deploy
-  // needed. Kept local to this file rather than a shared config, matching
-  // this codebase's "verbatim port, never shared" convention.
-  var NETLIFY_FUNCTION_BASE_URL = "https://contenthausen.netlify.app";
+  // Reverse-prompt backend: the shared Cloudflare Worker, reached through
+  // the signed, same-origin Shopify App Proxy (members-only). It reads the
+  // uploaded image with a TEXT model and returns a text prompt — it never
+  // generates an image, so there is no image-generation cost.
+  var REVERSE_PROMPT_URL = "/apps/p2p/reverse-prompt";
 
   function setSourceType(type) {
     store.setState({ sourceType: type === "prompt" ? "prompt" : "image" });
@@ -95,52 +92,38 @@
     store.setState({ image: null, imageName: "" });
   }
 
-  function clearGeneratedImage() {
-    store.setState({ generatedImage: null, generateImageError: "" });
-  }
-
-  // Sends the assembled prompt text (this mode's own assemblePrompt() never
-  // includes a "Create N variations" instruction the way Content Haus's
-  // does, so there's no multi-image phrasing to strip here) plus, only on
-  // the image branch with a photo uploaded, that photo's data URL. Gemini's
-  // image model reads and generates from the reference photo in the same
-  // call, so no separate vision-analysis step is needed.
-  function generateImage() {
-    if (!NETLIFY_FUNCTION_BASE_URL) {
-      store.setState({ generateImageError: "Image generation isn't connected yet — this needs a Netlify site URL configured first." });
-      return;
-    }
+  // Reads the uploaded image with the AI and writes the resulting reverse
+  // prompt straight into the Description field (editable). TEXT ONLY — the
+  // backend never generates an image, so nothing here can incur an
+  // image-generation charge.
+  function readImageToReversePrompt() {
     var state = store.getState();
-    var promptText = assemblePrompt().text;
-    if (!promptText) {
-      store.setState({ generateImageError: "Add a description (or adjust your style choices) before generating an image." });
+    if (!state.image) {
+      store.setState({ readError: "Upload an image first, then read it into a prompt." });
       return;
     }
-    store.setState({ isGeneratingImage: true, generateImageError: "", generatedImage: null });
+    store.setState({ isReading: true, readError: "" });
 
-    var payload = { prompt: promptText };
-    if (state.sourceType === "image" && state.image) payload.image = state.image;
-
-    fetch(NETLIFY_FUNCTION_BASE_URL + "/.netlify/functions/generate-reference-image", {
+    fetch(REVERSE_PROMPT_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
+      credentials: "same-origin",
+      body: JSON.stringify({ image: state.image }),
     })
-      .then(function (res) {
-        return res.json().then(function (data) {
-          return { ok: res.ok, data: data };
-        });
-      })
+      .then(function (res) { return res.json().then(function (data) { return { ok: res.ok, data: data }; }); })
       .then(function (result) {
-        if (!result.ok) {
-          store.setState({ isGeneratingImage: false, generateImageError: (result.data && result.data.error) || "Image generation failed. Please try again." });
+        if (!result.ok || !result.data || !result.data.prompt) {
+          var msg = (result.data && result.data.error) || "Couldn't read the image. Please try again.";
+          if (result.data && result.data.error === "not_configured") msg = "The reverse-prompt reader isn't connected yet.";
+          store.setState({ isReading: false, readError: msg });
         } else {
-          store.setState({ isGeneratingImage: false, generatedImage: result.data.image, generateImageError: "" });
+          var desc = Object.assign({}, store.getState().description, { value: result.data.prompt, customValue: "" });
+          store.setState({ isReading: false, readError: "", description: desc });
         }
         if (GraphicsHaus.ui && typeof GraphicsHaus.ui.renderApp === "function") GraphicsHaus.ui.renderApp();
       })
       .catch(function () {
-        store.setState({ isGeneratingImage: false, generateImageError: "Could not reach the image generator. Please check your connection and try again." });
+        store.setState({ isReading: false, readError: "Could not reach the reader. Please check your connection and try again." });
         if (GraphicsHaus.ui && typeof GraphicsHaus.ui.renderApp === "function") GraphicsHaus.ui.renderApp();
       });
   }
@@ -282,7 +265,18 @@
   function renderDescriptionColumn(state) {
     var ui = GraphicsHaus.ui;
     var column = ui.el("div", { class: "gh-reference-upload__description" });
-    column.appendChild(ui.el("p", { class: "gh-reference-upload__hint", text: "Describe what's in the image (subject, pose, composition) — this is what actually gets reimagined." }));
+    if (state.image) {
+      var readBtn = ui.el("button", { type: "button", class: "gh-btn gh-btn--small gh-btn--add" }, [
+        ui.icon("sparkle"),
+        ui.el("span", { text: state.isReading ? "Reading image…" : "Read Image → Reverse Prompt" }),
+      ]);
+      readBtn.disabled = !!state.isReading;
+      readBtn.title = "Reads your image with AI and writes a text prompt into the box below. No image is generated.";
+      readBtn.addEventListener("click", function () { readImageToReversePrompt(); GraphicsHaus.ui.renderApp(); });
+      column.appendChild(readBtn);
+      if (state.readError) column.appendChild(ui.el("p", { class: "gh-generate-image__error", text: state.readError }));
+    }
+    column.appendChild(ui.el("p", { class: "gh-reference-upload__hint", text: "Describe what's in the image — or click “Read Image” to have AI write the prompt for you. This is what gets reimagined, and it's fully editable." }));
     column.appendChild(ui.renderFreeTextField(
       { label: "Description", field: state.description, placeholder: "e.g. a golden retriever sitting in a field of sunflowers" },
       function (changes) { updateDescription(changes); GraphicsHaus.ui.renderApp(); }
@@ -342,77 +336,12 @@
     return wrap;
   }
 
-  // Generate Image — called directly by graphics-haus-ui.js's mode dispatch
-  // (activeMode === "reference"), not folded into the generic renderPreview
-  // every mode shares, same reasoning as Content Haus's own version: this is
-  // a Reference-Mode-specific capability, not a generic one every mode
-  // should carry.
-  function renderGenerateImageSection(root) {
-    var ui = GraphicsHaus.ui;
-    var state = store.getState();
-
-    var card = ui.el("div", { class: "gh-generate-image" });
-    card.appendChild(
-      ui.el("h3", { class: "gh-generate-image__title" }, [ui.icon("image"), ui.el("span", { text: "Generate an Image" })])
-    );
-    card.appendChild(
-      ui.el("p", {
-        class: "gh-generate-image__subtitle",
-        text: "Turn the prompt above into an actual image, powered by Google's Gemini AI — the text prompt above still works on its own in any other AI image tool.",
-      })
-    );
-
-    var generateBtn = ui.el("button", { type: "button", class: "gh-btn gh-btn--generate-image" }, [
-      ui.icon("sparkle"),
-      ui.el("span", { text: state.isGeneratingImage ? "Generating…" : "Generate Image" }),
-    ]);
-    generateBtn.disabled = !!state.isGeneratingImage;
-    generateBtn.addEventListener("click", function () {
-      generateImage();
-      GraphicsHaus.ui.renderApp();
-    });
-    card.appendChild(generateBtn);
-
-    if (state.generateImageError) {
-      card.appendChild(ui.el("p", { class: "gh-generate-image__error", text: state.generateImageError }));
-    }
-
-    if (state.generatedImage) {
-      var resultWrap = ui.el("div", { class: "gh-generate-image__result" });
-      resultWrap.appendChild(
-        ui.el("img", { class: "gh-generate-image__img", src: state.generatedImage, alt: "AI-generated image created from your prompt" })
-      );
-
-      var downloadLink = ui.el("a", {
-        class: "gh-btn gh-btn--small gh-btn--export",
-        href: state.generatedImage,
-        download: "generated-image.png",
-        text: "Download",
-      });
-      var clearBtn = ui.el("button", { type: "button", class: "gh-btn gh-btn--small gh-btn--delete" }, [ui.el("span", { text: "Clear" })]);
-      clearBtn.addEventListener("click", function () {
-        clearGeneratedImage();
-        GraphicsHaus.ui.renderApp();
-      });
-      resultWrap.appendChild(ui.el("div", { class: "gh-generate-image__result-actions" }, [downloadLink, clearBtn]));
-
-      resultWrap.appendChild(
-        ui.el("p", { class: "gh-generate-image__disclaimer" }, [
-          ui.el("span", { text: "*Image generated using Google's Gemini AI. " }),
-          ui.el("a", {
-            href: "https://ai.google.dev/gemini-api/terms",
-            target: "_blank",
-            rel: "noopener noreferrer",
-            text: "See Gemini's terms & data policies →",
-          }),
-        ])
-      );
-
-      card.appendChild(resultWrap);
-    }
-
-    root.appendChild(card);
-  }
+  // Image generation was intentionally removed — this mode is TEXT ONLY. It
+  // reads an uploaded image into a reverse prompt (see readImageToReversePrompt,
+  // wired into the Description column) and never generates or renders an image,
+  // so it can't incur any image-generation cost. Kept as a no-op so the mode
+  // dispatch in graphics-haus-ui.js needs no change.
+  function renderGenerateImageSection() { /* intentionally empty — no image generation */ }
 
   GraphicsHaus.reference = {
     getState: store.getState,

@@ -5,21 +5,16 @@
  * lists), and prompt-builder-text.js (reuses its Letter Style/Color
  * Scheme/Text Case/Text Effects lists).
  *
- * The uploaded image is a pure visual reference for typing a description
- * from — it's read into the browser for preview only, and the assembled
- * text prompt never contains it. What actually builds the prompt is the
- * shopper's own typed description of that reference, which this mode then
- * layers the same production-specific finishing details onto that every
- * other mode already gets (Style Adjustment, optional Text, plus the
- * shared Style DNA bar).
- *
- * Generate Image (below) is a separate, opt-in capability: it sends the
- * assembled prompt text — and, only when the shopper explicitly clicks
- * that button, the reference photo itself — to our own Netlify Function
- * (netlify/functions/generate-reference-image.js), which calls Google's
- * Gemini image model server-side and returns a generated image. Nothing
- * leaves the browser unless/until that button is clicked; the description
- * workflow above is completely unaffected either way.
+ * "Read Image → Reverse Prompt" (readImageToReversePrompt) is the one
+ * server call: it sends the uploaded photo to the shared Cloudflare Worker
+ * via the signed, same-origin Shopify App Proxy (/apps/p2p/reverse-prompt,
+ * members-only). The Worker reads the image with a Gemini TEXT model and
+ * returns a text prompt describing it, which is written into the (editable)
+ * Description field. It is TEXT ONLY — no image is ever generated or
+ * rendered, so there is no image-generation cost. The shopper can also just
+ * type/paste the Description themselves; the reader only fills it in for
+ * them. Everything else (Style Adjustment, optional Text, shared Style DNA
+ * bar) layers the same finishing details every other mode gets.
  */
 (function () {
   "use strict";
@@ -85,24 +80,20 @@
         textCase: makeField("", textLists.textCase),
         textEffects: PromptHaus.util.makeGroupedField("", textLists.textEffectsGroups),
       },
-      // Generate Image — data URL of the last generated image, or null.
-      // Never persisted to the Vault/Recent Log (too large for
-      // localStorage at scale) and never randomized/reset by anything
-      // except explicitly clicking Generate again or Clear.
-      generatedImage: null,
-      isGeneratingImage: false,
-      generateImageError: "",
+      // Reverse image prompt — reads the uploaded photo and writes a text
+      // prompt into the Description (TEXT ONLY; never generates an image).
+      isReading: false,
+      readError: "",
     };
   }
 
   var store = PromptHaus.util.createStore(buildInitialState());
 
-  // Deployed Netlify site (ContentHaus repo, deployed as "contenthausen"
-  // since "contenthaus" was already taken). Kept local to this file rather
-  // than a shared config, matching this codebase's "verbatim port, never
-  // shared" convention — Graphics Haus's own copy of this constant is set
-  // independently when that mode is ported.
-  var NETLIFY_FUNCTION_BASE_URL = "https://contenthausen.netlify.app";
+  // Reverse-prompt backend: the shared Cloudflare Worker, reached through
+  // the signed, same-origin Shopify App Proxy (members-only). It reads the
+  // uploaded image with a TEXT model and returns a text prompt — it never
+  // generates an image, so there is no image-generation cost.
+  var REVERSE_PROMPT_URL = "/apps/p2p/reverse-prompt";
 
   function setImage(dataUrl, name) {
     store.setState({ image: dataUrl, imageName: name || "" });
@@ -112,52 +103,38 @@
     store.setState({ image: null, imageName: "" });
   }
 
-  function clearGeneratedImage() {
-    store.setState({ generatedImage: null, generateImageError: "" });
-  }
-
-  // Sends the already-assembled prompt text (never the tag/platform-
-  // formatted variant — Gemini isn't Midjourney and wouldn't understand
-  // "--ar 1:1 --no clutter" syntax) plus, only on the image branch with a
-  // photo uploaded, that photo's data URL. Gemini's image model reads and
-  // generates from the reference photo in the same call, so no separate
-  // vision-analysis step is needed.
-  function generateImage() {
-    if (!NETLIFY_FUNCTION_BASE_URL) {
-      store.setState({ generateImageError: "Image generation isn't connected yet — this needs a Netlify site URL configured first." });
-      return;
-    }
+  // Reads the uploaded image with the AI and writes the resulting reverse
+  // prompt straight into the Description field (editable). TEXT ONLY — the
+  // backend never generates an image, so nothing here can incur an
+  // image-generation charge.
+  function readImageToReversePrompt() {
     var state = store.getState();
-    var promptText = assemblePrompt().text;
-    if (!promptText) {
-      store.setState({ generateImageError: "Add a description (or adjust your style choices) before generating an image." });
+    if (!state.image) {
+      store.setState({ readError: "Upload an image first, then read it into a prompt." });
       return;
     }
-    store.setState({ isGeneratingImage: true, generateImageError: "", generatedImage: null });
+    store.setState({ isReading: true, readError: "" });
 
-    var payload = { prompt: promptText };
-    if (state.sourceType === "image" && state.image) payload.image = state.image;
-
-    fetch(NETLIFY_FUNCTION_BASE_URL + "/.netlify/functions/generate-reference-image", {
+    fetch(REVERSE_PROMPT_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
+      credentials: "same-origin",
+      body: JSON.stringify({ image: state.image }),
     })
-      .then(function (res) {
-        return res.json().then(function (data) {
-          return { ok: res.ok, data: data };
-        });
-      })
+      .then(function (res) { return res.json().then(function (data) { return { ok: res.ok, data: data }; }); })
       .then(function (result) {
-        if (!result.ok) {
-          store.setState({ isGeneratingImage: false, generateImageError: (result.data && result.data.error) || "Image generation failed. Please try again." });
+        if (!result.ok || !result.data || !result.data.prompt) {
+          var msg = (result.data && result.data.error) || "Couldn't read the image. Please try again.";
+          if (result.data && result.data.error === "not_configured") msg = "The reverse-prompt reader isn't connected yet.";
+          store.setState({ isReading: false, readError: msg });
         } else {
-          store.setState({ isGeneratingImage: false, generatedImage: result.data.image, generateImageError: "" });
+          var desc = Object.assign({}, store.getState().description, { value: result.data.prompt, customValue: "" });
+          store.setState({ isReading: false, readError: "", description: desc });
         }
         if (PromptHaus.ui && typeof PromptHaus.ui.renderApp === "function") PromptHaus.ui.renderApp();
       })
       .catch(function () {
-        store.setState({ isGeneratingImage: false, generateImageError: "Could not reach the image generator. Please check your connection and try again." });
+        store.setState({ isReading: false, readError: "Could not reach the reader. Please check your connection and try again." });
         if (PromptHaus.ui && typeof PromptHaus.ui.renderApp === "function") PromptHaus.ui.renderApp();
       });
   }
@@ -498,8 +475,7 @@
   PromptHaus.reference = Object.assign({}, store, {
     setImage: setImage,
     clearImage: clearImage,
-    generateImage: generateImage,
-    clearGeneratedImage: clearGeneratedImage,
+    readImageToReversePrompt: readImageToReversePrompt,
     updateDescription: updateDescription,
     setSourceType: setSourceType,
     updatePromptReference: updatePromptReference,
