@@ -34,7 +34,7 @@
   var SPEC_HEAD =
     " Design specs: single-sided card, 6 x 4 inches, exact print area 1795 x 1193 pixels, keep all text and reserved spaces at least 0.16 inches in from every edge so nothing is cut off when trimmed." +
     " Avoid a solid, flat single-color background — this design will be printed, and solid backgrounds risk color-saturation issues; use the background style requested instead.";
-  var SPEC_TAIL = " Clean, professional, print-ready design, high resolution, no watermarks.";
+  var SPEC_TAIL = " Clean, professional, print-ready design, high resolution at 300 DPI, no watermarks.";
   // Thank-you reserves logo + QR; gift reserves a large center note space + logo.
   var THANKYOU_RESERVE =
     " Reserve one clearly defined blank rectangular space for the company's own logo (leave it empty — do not generate a logo yourself) and one separate clearly defined blank square space for a QR code (leave it empty — do not generate an actual QR code, since AI-generated QR codes do not scan).";

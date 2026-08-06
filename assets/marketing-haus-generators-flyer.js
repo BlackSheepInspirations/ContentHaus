@@ -19,7 +19,7 @@
   var COLOR_PALETTE_OPTIONS = ["Bold Primary Colors", "Soft Pastels", "Monochrome with One Accent", "Warm Earth Tones", "Cool Blues & Teals", "Black, White & Gold"];
   var LAYOUT_STYLE_OPTIONS = ["Centered Hero Layout", "Grid / Sectioned Layout", "Asymmetric Modern Layout"];
 
-  var LOCKED_SUFFIX = " Print-ready promotional flyer design, clear visual hierarchy, balanced negative space, high resolution, no watermarks.";
+  var LOCKED_SUFFIX = " Print-ready promotional flyer design, clear visual hierarchy, balanced negative space, high resolution at 300 DPI, with a small bleed and safe margin so nothing important sits near the trim edge, no watermarks.";
 
   MarketingHaus.generatorEngine.registerGenerator({
     id: "promo-flyer",
