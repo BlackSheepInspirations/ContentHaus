@@ -61,19 +61,20 @@
     "gunmetal gray", "champagne pearl", "carbon fiber finish", "brushed steel finish",
     "black chrome finish",
   ];
-  var STATE_REGION_OPTIONS = [
-    "generic (no state name)",
-    "alabama", "alaska", "arizona", "arkansas", "california", "colorado", "connecticut",
-    "delaware", "district of columbia", "florida", "georgia", "hawaii", "idaho", "illinois",
-    "indiana", "iowa", "kansas", "kentucky", "louisiana", "maine", "maryland", "massachusetts",
-    "michigan", "minnesota", "mississippi", "missouri", "montana", "nebraska", "nevada",
-    "new hampshire", "new jersey", "new mexico", "new york", "north carolina", "north dakota",
-    "ohio", "oklahoma", "oregon", "pennsylvania", "rhode island", "south carolina",
-    "south dakota", "tennessee", "texas", "utah", "vermont", "virginia", "washington",
-    "west virginia", "wisconsin", "wyoming",
-    "puerto rico", "guam", "us virgin islands", "american samoa", "northern mariana islands",
-    "canada", "england", "scotland", "wales", "northern ireland", "mexico", "australia",
-    "jamaica", "india",
+  var STATE_REGION_GROUPS = [
+    { label: "General", options: ["generic (no state name)"] },
+    { label: "US States & DC", options: [
+      "alabama", "alaska", "arizona", "arkansas", "california", "colorado", "connecticut",
+      "delaware", "district of columbia", "florida", "georgia", "hawaii", "idaho", "illinois",
+      "indiana", "iowa", "kansas", "kentucky", "louisiana", "maine", "maryland", "massachusetts",
+      "michigan", "minnesota", "mississippi", "missouri", "montana", "nebraska", "nevada",
+      "new hampshire", "new jersey", "new mexico", "new york", "north carolina", "north dakota",
+      "ohio", "oklahoma", "oregon", "pennsylvania", "rhode island", "south carolina",
+      "south dakota", "tennessee", "texas", "utah", "vermont", "virginia", "washington",
+      "west virginia", "wisconsin", "wyoming",
+    ] },
+    { label: "US Territories", options: ["puerto rico", "guam", "us virgin islands", "american samoa", "northern mariana islands"] },
+    { label: "International", options: ["canada", "england", "scotland", "wales", "northern ireland", "mexico", "australia", "jamaica", "india"] },
   ];
 
   var LOCKED_SUFFIX = " Rendered as a high-shine luxury novelty vanity plate graphic, correct wide-rectangle plate proportions, sparkling embellishments crisp and legible, isolated on a plain or transparent background, high resolution, no watermarks.";
@@ -103,7 +104,7 @@
       { name: "topAccent", label: "Top Accent", options: ACCENT_OPTIONS, defaultValue: "gem crown", aesthetic: "motifs" },
       { name: "bottomAccent", label: "Bottom Accent", options: ACCENT_OPTIONS, defaultValue: "none" },
       { name: "finish", label: "Plate Finish", options: FINISH_OPTIONS, defaultValue: FINISH_OPTIONS[13], aesthetic: "texture" },
-      { name: "stateRegion", label: "State / Region (optional)", options: STATE_REGION_OPTIONS, defaultValue: STATE_REGION_OPTIONS[0] },
+      { name: "stateRegion", label: "State / Region (optional)", optionGroups: STATE_REGION_GROUPS, defaultValue: "generic (no state name)" },
     ],
 
     computeExtraTokens: function (valueMap) {

@@ -95,15 +95,16 @@
     "low angle", "high angle", "close-up", "wide establishing shot",
   ];
 
-  // Merges Content Haus's Air/Land/Rail/Water/Military transportation
-  // categories into one flat list — the category-first cascade (pick Air,
-  // then see Air's own vehicle list) isn't something this engine supports
-  // per-field yet, so this collapses to one curated list spanning every
-  // category instead.
-  var VEHICLE_OPTIONS = [
-    "None — No Vehicle", "modern airplane", "helicopter", "hot air balloon", "sail boat",
-    "yacht", "jet ski", "sports car", "muscle car", "convertible",
-    "chopper style motorcycle", "dirt bike", "train", "steam train", "tank", "military jet",
+  // Content Haus's Air/Land/Rail/Water/Military transportation, now as a
+  // GROUPED dropdown (optgroups) so vehicles browse by category — the engine
+  // renders <optgroup>s from a field's optionGroups.
+  var VEHICLE_GROUPS = [
+    { label: "—", options: ["None — No Vehicle"] },
+    { label: "Air", options: ["modern airplane", "helicopter", "hot air balloon", "private jet", "fighter jet"] },
+    { label: "Land", options: ["sports car", "luxury car", "muscle car", "convertible", "modern truck", "jeep", "chopper style motorcycle", "dirt bike", "bicycle"] },
+    { label: "Rail", options: ["train", "steam train", "freight train"] },
+    { label: "Water", options: ["sail boat", "yacht", "speed boat", "jet ski", "canoe"] },
+    { label: "Military", options: ["tank", "humvee", "military jet", "military helicopter", "submarine"] },
   ];
 
   var VEHICLE_COLOR_OPTIONS = [
@@ -131,7 +132,7 @@
       { name: "framing", label: "Framing", options: FRAMING_OPTIONS, defaultValue: FRAMING_OPTIONS[0] },
       { name: "timeEra", label: "Time / Era (optional)", options: TIME_ERA_OPTIONS, defaultValue: "" },
       { name: "cameraAngle", label: "Camera Angle (optional)", options: CAMERA_ANGLE_OPTIONS, defaultValue: "" },
-      { name: "vehicle", label: "Vehicle (optional)", options: VEHICLE_OPTIONS, defaultValue: VEHICLE_OPTIONS[0] },
+      { name: "vehicle", label: "Vehicle (optional)", optionGroups: VEHICLE_GROUPS, defaultValue: "None — No Vehicle" },
       { name: "vehicleColor", label: "Vehicle Color", options: VEHICLE_COLOR_OPTIONS, defaultValue: VEHICLE_COLOR_OPTIONS[0] },
     ],
 

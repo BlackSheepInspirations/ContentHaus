@@ -77,7 +77,13 @@
   function buildInitialState(def) {
     var state = {};
     def.fields.forEach(function (f) {
-      state[f.name] = makeField(f.defaultValue || "", f.options || [], { isFreeText: !!f.isFreeText });
+      // A field can be a grouped dropdown (optgroups) via `optionGroups` —
+      // the shared renderer already draws <optgroup>s for such fields.
+      if (f.optionGroups) {
+        state[f.name] = GraphicsHaus.util.makeGroupedField(f.defaultValue || "", f.optionGroups);
+      } else {
+        state[f.name] = makeField(f.defaultValue || "", f.options || [], { isFreeText: !!f.isFreeText });
+      }
     });
     state._charmIndex = randomIndex((def.charmPool || DEFAULT_CHARM_POOL).length);
     state._dynamicIndex = randomIndex((def.dynamicPool || DEFAULT_DYNAMIC_POOL).length);

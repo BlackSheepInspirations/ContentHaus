@@ -33,22 +33,22 @@
   var FINISH_OPTIONS = ["embossed metal", "flat matte print", "glossy laminate", "reflective / retroreflective"];
   var BORDER_STYLE_OPTIONS = ["standard bordered frame", "no border / full bleed", "state-name top banner", "slogan bottom banner"];
 
-  // Flat (not grouped — the narrow-generator engine renders flat lists
-  // only) list of ~65 states/territories/countries. "generic (no state
-  // name)" first so a plain plate needs no region.
-  var STATE_REGION_OPTIONS = [
-    "generic (no state name)",
-    "alabama", "alaska", "arizona", "arkansas", "california", "colorado", "connecticut",
-    "delaware", "district of columbia", "florida", "georgia", "hawaii", "idaho", "illinois",
-    "indiana", "iowa", "kansas", "kentucky", "louisiana", "maine", "maryland", "massachusetts",
-    "michigan", "minnesota", "mississippi", "missouri", "montana", "nebraska", "nevada",
-    "new hampshire", "new jersey", "new mexico", "new york", "north carolina", "north dakota",
-    "ohio", "oklahoma", "oregon", "pennsylvania", "rhode island", "south carolina",
-    "south dakota", "tennessee", "texas", "utah", "vermont", "virginia", "washington",
-    "west virginia", "wisconsin", "wyoming",
-    "puerto rico", "guam", "us virgin islands", "american samoa", "northern mariana islands",
-    "canada", "england", "scotland", "wales", "northern ireland", "mexico", "australia",
-    "jamaica", "india",
+  // Grouped ~65 states/territories/countries (optgroups). "generic (no
+  // state name)" first so a plain plate needs no region.
+  var STATE_REGION_GROUPS = [
+    { label: "General", options: ["generic (no state name)"] },
+    { label: "US States & DC", options: [
+      "alabama", "alaska", "arizona", "arkansas", "california", "colorado", "connecticut",
+      "delaware", "district of columbia", "florida", "georgia", "hawaii", "idaho", "illinois",
+      "indiana", "iowa", "kansas", "kentucky", "louisiana", "maine", "maryland", "massachusetts",
+      "michigan", "minnesota", "mississippi", "missouri", "montana", "nebraska", "nevada",
+      "new hampshire", "new jersey", "new mexico", "new york", "north carolina", "north dakota",
+      "ohio", "oklahoma", "oregon", "pennsylvania", "rhode island", "south carolina",
+      "south dakota", "tennessee", "texas", "utah", "vermont", "virginia", "washington",
+      "west virginia", "wisconsin", "wyoming",
+    ] },
+    { label: "US Territories", options: ["puerto rico", "guam", "us virgin islands", "american samoa", "northern mariana islands"] },
+    { label: "International", options: ["canada", "england", "scotland", "wales", "northern ireland", "mexico", "australia", "jamaica", "india"] },
   ];
 
   var LOCKED_SUFFIX = " Rendered as a realistic custom license plate graphic, correct wide-rectangle plate proportions, legible standard plate lettering, isolated on a plain or transparent background, high resolution, no watermarks.";
@@ -62,7 +62,7 @@
 
     fields: [
       { name: "plateText", label: "Plate Text", isFreeText: true, defaultValue: "SUNNY DAYS", placeholder: "e.g. YEE HAW, BOOKWORM, EST 2024" },
-      { name: "stateRegion", label: "State / Region", options: STATE_REGION_OPTIONS, defaultValue: STATE_REGION_OPTIONS[0] },
+      { name: "stateRegion", label: "State / Region", optionGroups: STATE_REGION_GROUPS, defaultValue: "generic (no state name)" },
       { name: "plateStyle", label: "Plate Style", options: PLATE_STYLE_OPTIONS, defaultValue: PLATE_STYLE_OPTIONS[0] },
       { name: "letterStyle", label: "Letter Style", options: LETTER_STYLE_OPTIONS, defaultValue: LETTER_STYLE_OPTIONS[0] },
       { name: "plateTextColor", label: "Plate Text Color", options: PLATE_TEXT_COLOR_OPTIONS, defaultValue: PLATE_TEXT_COLOR_OPTIONS[0], aesthetic: "palette" },
