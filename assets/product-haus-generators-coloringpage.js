@@ -49,7 +49,7 @@
     "Wildflowers", "Mushrooms and toadstools", "None",
   ];
 
-  var PAGE_FORMAT_OPTIONS = ["Standard vertical 8.5x11", "Centered square layout", "Balanced symmetrical layout"];
+  var PAGE_FORMAT_OPTIONS = ["Standard vertical", "Centered square layout", "Balanced symmetrical layout"];
 
   // Same two fields (and same option lists) as the Coloring Book bundle
   // generator, added here for parity — this generator used to hardcode
@@ -80,6 +80,8 @@
       { name: "pageFormat", label: "Page Format", options: PAGE_FORMAT_OPTIONS, defaultValue: PAGE_FORMAT_OPTIONS[0] },
       { name: "lineStyle", label: "Line Style", options: LINE_STYLE_OPTIONS, defaultValue: LINE_STYLE_OPTIONS[1], aesthetic: "artStyle" },
       { name: "pageComplexity", label: "Page Complexity", options: PAGE_COMPLEXITY_OPTIONS, defaultValue: PAGE_COMPLEXITY_OPTIONS[1] },
+      ProductHaus.kdp.trimField(),
+      ProductHaus.kdp.bindingField(),
     ],
 
     // Ground/Sky as their own separate sentence ("Surround with X and
@@ -90,20 +92,23 @@
       var parts = [];
       if (valueMap.groundElements) parts.push("Surround with " + valueMap.groundElements.toLowerCase());
       if (valueMap.skyElements) parts.push((parts.length ? "include " : "Include ") + valueMap.skyElements.toLowerCase());
-      return { extrasClause: parts.length ? " " + parts.join(" and ") + "." : "" };
+      return {
+        extrasClause: parts.length ? " " + parts.join(" and ") + "." : "",
+        kdpTrimClause: ProductHaus.kdp.clause(valueMap.trimSize, valueMap.bookBinding),
+      };
     },
 
     basePromptTemplate:
       "Cute {mainCharacter}, {characterGroup}, {pose}, centered composition. Large round glossy eyes with bright highlights, soft rounded body proportions, tiny expressive facial features. Scene set in {setting}{holidayClause}.{extrasClause} Style: black and white coloring book page, clean smooth vector line art, bold clear outlines, no shading, no grayscale, no color, white background, crisp digital ink lines, smooth curves, printable outline art, high resolution, {pageFormat}, {lineStyle}, {pageComplexity}." +
-      CLOSED_REGION_NOTE,
+      CLOSED_REGION_NOTE + "{kdpTrimClause}",
 
     charmPromptTemplate:
       "Adorable {mainCharacter} illustrated as {characterGroup}, {pose} in a {setting} environment{holidayClause} for whimsical detail.{extrasClause} Character has oversized glossy eyes, rounded cheeks, simple cute expression, balanced composition. Style: black and white coloring page illustration, clean vector outline art, bold smooth outlines, no shading, no grayscale, no color, white background, symmetrical layout, printable outline art, high resolution, {pageFormat}, {lineStyle}, {pageComplexity}." +
-      CLOSED_REGION_NOTE,
+      CLOSED_REGION_NOTE + "{kdpTrimClause}",
 
     dynamicPromptTemplate:
       "Cute cartoon {mainCharacter}, designed as {characterGroup}, {pose} within {setting}{holidayClause} for playful atmosphere.{extrasClause} Front-facing or gently balanced composition, expressive oversized eyes, soft rounded shapes. Style: children's black and white coloring book page, clean smooth vector line art, bold outlines, no shading, no grayscale, no color, white background, crisp digital ink lines, printable outline art, high resolution, {pageFormat}, {lineStyle}, {pageComplexity}." +
-      CLOSED_REGION_NOTE,
+      CLOSED_REGION_NOTE + "{kdpTrimClause}",
 
     charmPool: [
       "a small ribbon or bow on the character",

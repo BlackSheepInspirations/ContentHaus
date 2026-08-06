@@ -29,7 +29,7 @@
   var LINE_STYLE_OPTIONS = ["Fine Detailed Line Art", "Bold Stylized Line Art"];
   var PATTERN_DENSITY_OPTIONS = ["Highly Intricate (advanced colorists)", "Moderately Detailed", "Ultra-Detailed Fine Line"];
   var BORDER_STYLE_OPTIONS = ["Decorative Framed Border", "Full-Bleed (edge to edge)", "Corner Accents Only"];
-  var PAGE_FORMAT_OPTIONS = ["Standard vertical 8.5x11", "Centered square layout"];
+  var PAGE_FORMAT_OPTIONS = ["Standard vertical", "Centered square layout"];
 
   // Same baseline quality bar the Cute Animals/Coloring Book generators
   // use — an AI-generated coloring page doesn't reliably close every
@@ -51,19 +51,25 @@
       { name: "patternDensity", label: "Pattern Density", options: PATTERN_DENSITY_OPTIONS, defaultValue: PATTERN_DENSITY_OPTIONS[0] },
       { name: "borderStyle", label: "Border Style", options: BORDER_STYLE_OPTIONS, defaultValue: BORDER_STYLE_OPTIONS[0], aesthetic: "motifs" },
       { name: "pageFormat", label: "Page Format", options: PAGE_FORMAT_OPTIONS, defaultValue: PAGE_FORMAT_OPTIONS[0] },
+      ProductHaus.kdp.trimField(),
+      ProductHaus.kdp.bindingField(),
     ],
+
+    computeExtraTokens: function (valueMap) {
+      return { kdpTrimClause: ProductHaus.kdp.clause(valueMap.trimSize, valueMap.bookBinding) };
+    },
 
     basePromptTemplate:
       "A {theme} adult coloring page featuring {mainMotif}, arranged in a {symmetryStyle} composition. {borderStyle}{holidayClause}. Style: black and white coloring book page for adults, {lineStyle}, {patternDensity}, no shading, no grayscale, no color, white background, crisp clean ink lines, printable outline art, high resolution, {pageFormat}." +
-      CLOSED_REGION_NOTE,
+      CLOSED_REGION_NOTE + "{kdpTrimClause}",
 
     charmPromptTemplate:
       "An elegant {theme} adult coloring page centered on {mainMotif}, laid out in a {symmetryStyle} composition with extra decorative flourish. {borderStyle}{holidayClause}. Style: black and white coloring book page for adults, {lineStyle}, {patternDensity}, no shading, no grayscale, no color, white background, crisp clean ink lines, printable outline art, high resolution, {pageFormat}." +
-      CLOSED_REGION_NOTE,
+      CLOSED_REGION_NOTE + "{kdpTrimClause}",
 
     dynamicPromptTemplate:
       "A striking, high-contrast {theme} adult coloring page built around {mainMotif}, in a {symmetryStyle} composition with bolder visual rhythm. {borderStyle}{holidayClause}. Style: black and white coloring book page for adults, {lineStyle}, {patternDensity}, no shading, no grayscale, no color, white background, crisp clean ink lines, printable outline art, high resolution, {pageFormat}." +
-      CLOSED_REGION_NOTE,
+      CLOSED_REGION_NOTE + "{kdpTrimClause}",
 
     charmPool: [
       "a few extra fine-line filler details in the open spaces",

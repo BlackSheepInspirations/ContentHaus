@@ -52,6 +52,8 @@
       { name: "motifs", label: "Recurring Motifs", options: MOTIF_OPTIONS, defaultValue: MOTIF_OPTIONS[0], aesthetic: "motifs" },
       { name: "pageComplexity", label: "Page Complexity", options: PAGE_COMPLEXITY_OPTIONS, defaultValue: PAGE_COMPLEXITY_OPTIONS[1] },
       { name: "borderFrame", label: "Border Frame", options: BORDER_FRAME_OPTIONS, defaultValue: BORDER_FRAME_OPTIONS[0] },
+      ProductHaus.kdp.trimField(),
+      ProductHaus.kdp.bindingField("Bound book — add binding gutter"),
     ],
 
     // Off by default (matches every page's existing behavior) — when on,
@@ -63,6 +65,7 @@
         borderFrameClause: valueMap.borderFrame === "Full Decorative Border Frame"
           ? " Frame the entire page with a continuous decorative border built from " + (valueMap.motifs || "small stars and hearts") + ", running around all four edges."
           : "",
+        kdpTrimClause: ProductHaus.kdp.clause(valueMap.trimSize, valueMap.bookBinding),
       };
     },
 
@@ -76,28 +79,28 @@
         label: "Cover Page",
         promptTemplate:
           "Design a coloring BOOK COVER for a \"{bookTheme}\" themed book featuring {mainSubjects} as the main focal illustration, decorated with {motifs}. {lineStyle}, {pageComplexity}{holidayClause}.\n\nLayout: one bold centered illustration with generous open space at the top for a title, symmetrical and inviting — the piece that sells the book at a glance.{borderFrameClause}" +
-          LOCKED_SUFFIX,
+          LOCKED_SUFFIX + "{kdpTrimClause}",
       },
       {
         id: "page1",
         label: "Coloring Page 1",
         promptTemplate:
           "Design an interior coloring page for a \"{bookTheme}\" themed book, featuring {mainSubjects} in a simple everyday scene, decorated with {motifs}. {lineStyle}, {pageComplexity}{holidayClause}.\n\nLayout: one clear centered scene filling most of the page, easy to color within the lines.{borderFrameClause}" +
-          LOCKED_SUFFIX,
+          LOCKED_SUFFIX + "{kdpTrimClause}",
       },
       {
         id: "page2",
         label: "Coloring Page 2",
         promptTemplate:
           "Design a second interior coloring page for the same \"{bookTheme}\" themed book, featuring {mainSubjects} in a different pose or setting than the previous page, decorated with {motifs}. {lineStyle}, {pageComplexity}{holidayClause}.\n\nLayout: one clear centered scene filling most of the page, varied from the other pages in the set so the book doesn't repeat itself.{borderFrameClause}" +
-          LOCKED_SUFFIX,
+          LOCKED_SUFFIX + "{kdpTrimClause}",
       },
       {
         id: "page3",
         label: "Coloring Page 3",
         promptTemplate:
           "Design a third interior coloring page for the same \"{bookTheme}\" themed book, featuring {mainSubjects} in yet another distinct pose or setting, decorated with {motifs}. {lineStyle}, {pageComplexity}{holidayClause}.\n\nLayout: one clear centered scene filling most of the page, rounding out the set with a fresh composition.{borderFrameClause}" +
-          LOCKED_SUFFIX,
+          LOCKED_SUFFIX + "{kdpTrimClause}",
       },
     ],
   });
