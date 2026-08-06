@@ -83,21 +83,15 @@
   var MODEL_HAIRSTYLE_OPTIONS = sortAlpha(["Braids", "Bun / Updo", "Curly", "Natural / Down", "Ponytail", "Short & Textured", "Straight & Sleek"]);
   var MODEL_POSE_OPTIONS = sortAlpha(["Direct Eye Contact with Camera", "Laughing / Candid Moment", "Looking Off-Camera", "Mid-Action (e.g. Sipping, Adjusting)", "Sitting", "Standing, Relaxed", "Walking"]);
 
-  // Video Motion Prompt companion — same vocabulary/phrasing as
-  // marketing-haus-generators-videomotion.js, duplicated here since this
-  // Studio isn't built on the generator engine. Per-tool phrasing is a
-  // reasonable natural-language nudge, not verified exact prompt syntax.
-  var VIDEO_TOOL_OPTIONS = ["MidJourney (video/animate)", "Kling AI", "Runway (Gen-3/Gen-4)", "Generic / Any Tool"];
-  var VIDEO_CAMERA_OPTIONS = ["Static / Locked", "Slow Pan", "Slow Zoom In", "Zoom Out", "Tracking Shot", "Handheld / Subtle Shake", "Dolly / Push-In"];
-  var VIDEO_DURATION_OPTIONS = ["3 seconds", "5 seconds", "8 seconds", "10 seconds", "15 seconds"];
-  var VIDEO_AUDIO_OPTIONS = ["No Audio", "Ambient / Environmental Sound", "Background Music", "Dialogue / Voiceover"];
-  var VIDEO_QUALITY_OPTIONS = ["Cinematic Quality", "Crisp & Clean / Commercial Quality", "Natural & Realistic Motion"];
-  var VIDEO_TOOL_OPENERS = {
-    "MidJourney (video/animate)": function (v) { return "Animate this image: " + v.motion + ". Camera: " + v.camera + "."; },
-    "Kling AI": function (v) { return "Camera: " + v.camera + ". " + v.motion + "."; },
-    "Runway (Gen-3/Gen-4)": function (v) { return "A cinematic commercial shot where " + v.motion + ", with a " + v.camera.toLowerCase() + " camera movement."; },
-    "Generic / Any Tool": function (v) { return v.motion + ". Camera movement: " + v.camera + "."; },
-  };
+  // Video Motion Prompt companion — vocabulary + assembler now come from
+  // the shared module marketing-haus-motion.js (also used by the
+  // standalone Video Motion Prompt quick-gen), so there is one source of
+  // truth. Both entry points remain; only the duplicated copy is gone.
+  var VIDEO_TOOL_OPTIONS = MarketingHaus.motion.TOOL_OPTIONS;
+  var VIDEO_CAMERA_OPTIONS = MarketingHaus.motion.CAMERA_OPTIONS;
+  var VIDEO_DURATION_OPTIONS = MarketingHaus.motion.DURATION_OPTIONS;
+  var VIDEO_AUDIO_OPTIONS = MarketingHaus.motion.AUDIO_OPTIONS;
+  var VIDEO_QUALITY_OPTIONS = MarketingHaus.motion.QUALITY_OPTIONS;
 
   var PRESETS = [
     {
@@ -286,15 +280,15 @@
 
   function assembleVideoPrompt() {
     var state = store.getState();
-    var motion = (state.videoMotion.value || "").trim() || "the scene comes to life with natural, subtle motion";
-    var camera = MarketingHaus.engine.resolveFieldValue(state.videoCamera) || VIDEO_CAMERA_OPTIONS[0];
-    var opener = VIDEO_TOOL_OPENERS[MarketingHaus.engine.resolveFieldValue(state.videoTool)] || VIDEO_TOOL_OPENERS["Generic / Any Tool"];
-    var motionSentence = opener({ motion: motion, camera: camera });
-    var audioType = MarketingHaus.engine.resolveFieldValue(state.videoAudio) || VIDEO_AUDIO_OPTIONS[0];
-    var audioClause = audioType === "Dialogue / Voiceover" ? "Include natural spoken dialogue matching the scene." : audioType === "No Audio" ? "No audio." : audioType + ".";
-    var quality = MarketingHaus.engine.resolveFieldValue(state.videoQuality) || VIDEO_QUALITY_OPTIONS[0];
-    var duration = MarketingHaus.engine.resolveFieldValue(state.videoDuration) || VIDEO_DURATION_OPTIONS[1];
-    return motionSentence + " Duration: " + duration + ". " + audioClause + " " + quality + ". Photo-realistic commercial motion — no illustrated, animated, or stylized rendering.";
+    var rv = MarketingHaus.engine.resolveFieldValue;
+    return MarketingHaus.motion.assemble({
+      tool: rv(state.videoTool),
+      motion: (state.videoMotion.value || "").trim() || "the scene comes to life with natural, subtle motion",
+      camera: rv(state.videoCamera) || VIDEO_CAMERA_OPTIONS[0],
+      duration: rv(state.videoDuration) || VIDEO_DURATION_OPTIONS[1],
+      audioType: rv(state.videoAudio) || VIDEO_AUDIO_OPTIONS[0],
+      quality: rv(state.videoQuality) || VIDEO_QUALITY_OPTIONS[0],
+    });
   }
 
   function assemblePrompt() {

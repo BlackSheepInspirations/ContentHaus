@@ -123,8 +123,23 @@
   //     gives one concrete named starting look instead of guessing
   //     across every axis at once — still fully editable after.
   function registerGenerator(def) {
+    // Opt-in shared Output Size field for the graphic quick-gens — one
+    // flat platform/format/px dropdown, injected here so each generator
+    // only needs `usesSizing: true` (no per-file field boilerplate). Must
+    // run before buildInitialState so the field gets its state slot.
+    if (def.usesSizing && MarketingHaus.sizing && typeof MarketingHaus.sizing.sizeField === "function") {
+      def.fields = def.fields.concat([MarketingHaus.sizing.sizeField()]);
+    }
     registry.push(def);
     stores[def.id] = createStore(buildInitialState(def));
+  }
+
+  // The chosen Output Size as a trailing prompt sentence ("" when the
+  // generator doesn't use sizing or the member left it on "Any").
+  function sizeSuffixFor(def, state) {
+    if (!def.usesSizing || !MarketingHaus.sizing) return "";
+    var clause = MarketingHaus.sizing.clauseFromCombo(resolveFieldValue(state.outputSize));
+    return clause ? " Design it " + clause + "." : "";
   }
 
   function getDef(id) {
@@ -328,19 +343,21 @@
     var state = getStore(id).getState();
     var valueMap = getFieldValueMap(def, state);
 
-    var asSelectedText = substituteTemplate(def.basePromptTemplate, valueMap);
+    var sz = sizeSuffixFor(def, state);
+
+    var asSelectedText = substituteTemplate(def.basePromptTemplate, valueMap) + sz;
 
     var charmPool = def.charmPool || DEFAULT_CHARM_POOL;
     var charmPhrase = charmPool[state._charmIndex % charmPool.length];
-    var charmText = substituteTemplate(def.charmPromptTemplate || def.basePromptTemplate, valueMap) + " Include " + charmPhrase + ".";
+    var charmText = substituteTemplate(def.charmPromptTemplate || def.basePromptTemplate, valueMap) + " Include " + charmPhrase + "." + sz;
 
     var dynamicPool = def.dynamicPool || DEFAULT_DYNAMIC_POOL;
     var dynamicPhrase = dynamicPool[state._dynamicIndex % dynamicPool.length];
-    var dynamicText = substituteTemplate(def.dynamicPromptTemplate || def.basePromptTemplate, valueMap) + " Give it " + dynamicPhrase + ".";
+    var dynamicText = substituteTemplate(def.dynamicPromptTemplate || def.basePromptTemplate, valueMap) + " Give it " + dynamicPhrase + "." + sz;
 
     var fourthPool = def.fourthPool || DEFAULT_FOURTH_POOL;
     var fourthPhrase = fourthPool[state._fourthIndex % fourthPool.length];
-    var fourthText = substituteTemplate(def.fourthPromptTemplate || def.basePromptTemplate, valueMap) + " Try " + fourthPhrase + ".";
+    var fourthText = substituteTemplate(def.fourthPromptTemplate || def.basePromptTemplate, valueMap) + " Try " + fourthPhrase + "." + sz;
 
     return [
       { key: "asSelected", label: "As Selected", text: asSelectedText },

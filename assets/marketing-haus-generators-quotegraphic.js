@@ -27,6 +27,7 @@
 
   MarketingHaus.generatorEngine.registerGenerator({
     id: "marketing-quote-graphic",
+    usesSizing: true,
     label: "Quote Graphic Generator",
     icon: "type",
     description: "A shareable social-media quote graphic — for posts and pins, not wall art.",

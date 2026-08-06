@@ -31,30 +31,15 @@
   window.MarketingHaus = window.MarketingHaus || {};
   var MarketingHaus = window.MarketingHaus;
 
-  var TARGET_TOOL_OPTIONS = ["MidJourney (video/animate)", "Kling AI", "Runway (Gen-3/Gen-4)", "Generic / Any Tool"];
-  var CAMERA_MOVEMENT_OPTIONS = ["Static / Locked", "Slow Pan", "Slow Zoom In", "Zoom Out", "Tracking Shot", "Handheld / Subtle Shake", "Dolly / Push-In"];
-  var DURATION_OPTIONS = ["3 seconds", "5 seconds", "8 seconds", "10 seconds", "15 seconds"];
-  var AUDIO_TYPE_OPTIONS = ["No Audio", "Ambient / Environmental Sound", "Background Music", "Dialogue / Voiceover"];
-  var QUALITY_DESCRIPTOR_OPTIONS = ["Cinematic Quality", "Crisp & Clean / Commercial Quality", "Natural & Realistic Motion"];
-
-  // Natural-language phrasing nudges per tool — not verified exact syntax
-  // for any of these (see file header).
-  var TARGET_TOOL_OPENERS = {
-    "MidJourney (video/animate)": function (v) {
-      return "Animate this image: " + v.motion + ". Camera: " + v.camera + ".";
-    },
-    "Kling AI": function (v) {
-      return "Camera: " + v.camera + ". " + v.motion + ".";
-    },
-    "Runway (Gen-3/Gen-4)": function (v) {
-      return "A cinematic commercial shot where " + v.motion + ", with a " + v.camera.toLowerCase() + " camera movement.";
-    },
-    "Generic / Any Tool": function (v) {
-      return v.motion + ". Camera movement: " + v.camera + ".";
-    },
-  };
-
-  var LOCKED_SUFFIX = " Photo-realistic commercial motion — no illustrated, animated, or stylized rendering.";
+  // Vocabulary + openers + locked suffix now live in the shared module
+  // marketing-haus-motion.js (also used by the Mockup Studio companion).
+  var motion = MarketingHaus.motion;
+  var TARGET_TOOL_OPTIONS = motion.TOOL_OPTIONS;
+  var CAMERA_MOVEMENT_OPTIONS = motion.CAMERA_OPTIONS;
+  var DURATION_OPTIONS = motion.DURATION_OPTIONS;
+  var AUDIO_TYPE_OPTIONS = motion.AUDIO_OPTIONS;
+  var QUALITY_DESCRIPTOR_OPTIONS = motion.QUALITY_OPTIONS;
+  var LOCKED_SUFFIX = motion.LOCKED_SUFFIX;
 
   MarketingHaus.generatorEngine.registerGenerator({
     id: "video-motion-prompt",
@@ -73,17 +58,8 @@
     ],
 
     computeExtraTokens: function (valueMap) {
-      var opener = TARGET_TOOL_OPENERS[valueMap.targetTool] || TARGET_TOOL_OPENERS["Generic / Any Tool"];
-      var motionSentence = opener({ motion: valueMap.motionDescription, camera: valueMap.cameraMovement });
-
-      var audioClause;
-      if (valueMap.audioType === "Dialogue / Voiceover") {
-        audioClause = "Include natural spoken dialogue matching the scene.";
-      } else if (valueMap.audioType === "No Audio") {
-        audioClause = "No audio.";
-      } else {
-        audioClause = valueMap.audioType + ".";
-      }
+      var motionSentence = motion.opener(valueMap.targetTool, valueMap.motionDescription, valueMap.cameraMovement);
+      var audioClause = motion.audioClause(valueMap.audioType);
 
       var kit = MarketingHaus.brandKit && MarketingHaus.brandKit.getActiveKit();
       var mood = kit ? MarketingHaus.engine.resolveFieldValue(kit.fields.mood) : "";

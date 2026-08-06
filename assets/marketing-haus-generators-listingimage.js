@@ -37,6 +37,7 @@
 
   MarketingHaus.generatorEngine.registerGenerator({
     id: "listing-image",
+    usesSizing: true,
     label: "Product Listing & Ad Photo Generator",
     icon: "monitor",
     description: "A marketplace-listing or ad photo prompt, purpose-built for a specific listing slot — main image, feature callout, size/scale, what's-included, or how-to.",

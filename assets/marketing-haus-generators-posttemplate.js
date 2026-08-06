@@ -41,6 +41,7 @@
 
   MarketingHaus.generatorEngine.registerGenerator({
     id: "post-template",
+    usesSizing: true,
     label: "Social Post Template Generator",
     icon: "layers",
     description: "A reusable, on-brand social post graphic — pick a purpose and format, works for any platform's feed.",

@@ -19,6 +19,7 @@
 
   MarketingHaus.generatorEngine.registerGenerator({
     id: "lead-magnet-cover",
+    usesSizing: true,
     label: "Lead Magnet Cover Generator",
     icon: "download",
     description: "A cover for your ebook, checklist, workbook, or template pack — the graphic that makes a free resource feel worth downloading.",

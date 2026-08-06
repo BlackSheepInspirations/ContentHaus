@@ -25,6 +25,7 @@
 
   MarketingHaus.generatorEngine.registerGenerator({
     id: "pinterest-pin",
+    usesSizing: true,
     label: "Pinterest Pin Generator",
     icon: "crop",
     description: "A tall-format Pinterest pin graphic — for blog posts, products, recipes, tutorials, and more.",

@@ -44,6 +44,7 @@
 
   MarketingHaus.generatorEngine.registerGenerator({
     id: "insert-card",
+    usesSizing: true,
     label: "Insert Card Generator",
     icon: "heart",
     description: "A packaging insert card to tuck into every order. Pick Thank-you (your message, offer, contact + logo/QR spaces) or Gift message (a clean reserved space for a note the buyer adds at checkout).",

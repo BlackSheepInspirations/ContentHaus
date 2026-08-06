@@ -33,6 +33,7 @@
 
   MarketingHaus.generatorEngine.registerGenerator({
     id: "infographic",
+    usesSizing: true,
     label: "Infographic Generator",
     icon: "monitor",
     description: "An educational or data infographic — timeline, comparison, process, statistics, checklist, or guide.",

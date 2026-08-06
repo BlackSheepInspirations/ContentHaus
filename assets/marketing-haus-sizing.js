@@ -56,6 +56,21 @@
     ] },
   ];
 
+  // Flattened "Platform — Format (W×H)" combos, so a single-select
+  // generator field can offer the whole size catalog without a dependent
+  // two-dropdown cascade. Built once at load; a map lets us resolve a
+  // chosen combo label straight back to its platform/format pair.
+  var SIZE_NONE = "Any / no specific size";
+  var COMBO_OPTIONS = [SIZE_NONE];
+  var COMBO_MAP = {};
+  PLATFORMS.forEach(function (p) {
+    p.formats.forEach(function (f) {
+      var label = p.label + " — " + f.label + " (" + f.w + "×" + f.h + ")";
+      COMBO_OPTIONS.push(label);
+      COMBO_MAP[label] = { platform: p.label, format: f.label };
+    });
+  });
+
   function platformByLabel(label) {
     for (var i = 0; i < PLATFORMS.length; i++) if (PLATFORMS[i].label === label) return PLATFORMS[i];
     return null;
@@ -83,6 +98,21 @@
       var f = formatByLabel(platformLabel, formatLabel);
       if (!f) return "";
       return "sized " + f.w + "x" + f.h + "px (" + f.ar + "), optimized for " + platformLabel + " " + formatLabel.toLowerCase();
+    },
+
+    // --- single-select combo helpers, for the graphic Quick Generators ---
+    SIZE_NONE: SIZE_NONE,
+    comboOptions: function () { return COMBO_OPTIONS.slice(); },
+    // Shared generator field: one flat "Output Size" dropdown, opt-in
+    // (defaults to no specific size so nothing is forced).
+    sizeField: function () {
+      return { name: "outputSize", label: "Output Size", options: COMBO_OPTIONS.slice(), defaultValue: SIZE_NONE };
+    },
+    // Prompt clause for a chosen combo label; "" for the none option.
+    clauseFromCombo: function (comboLabel) {
+      var m = COMBO_MAP[comboLabel];
+      if (!m) return "";
+      return this.promptClause(m.platform, m.format);
     },
   };
 })();

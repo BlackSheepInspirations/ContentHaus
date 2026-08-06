@@ -43,6 +43,7 @@
 
   MarketingHaus.generatorEngine.registerGenerator({
     id: "social-cover-banner",
+    usesSizing: true,
     label: "Social Media Cover / Banner Generator",
     icon: "crop",
     description: "A cover/banner graphic sized for Facebook, YouTube, LinkedIn, X, or Pinterest — the actual image, not caption copy.",

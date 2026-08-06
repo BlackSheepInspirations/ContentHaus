@@ -24,6 +24,7 @@
 
   MarketingHaus.generatorEngine.registerGenerator({
     id: "product-ad-graphic",
+    usesSizing: true,
     label: "Product Advertisement Graphic Generator",
     icon: "lightning",
     description: "A visual product ad — your product, its key benefit, and any offer, composed into one platform-ready graphic.",

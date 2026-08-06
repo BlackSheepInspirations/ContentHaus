@@ -23,6 +23,7 @@
 
   MarketingHaus.generatorEngine.registerGenerator({
     id: "promo-flyer",
+    usesSizing: true,
     label: "Promotional Flyer Generator",
     icon: "document",
     description: "A print-ready promotional flyer — sales events, grand openings, service announcements, and more.",

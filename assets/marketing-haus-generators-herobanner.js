@@ -26,6 +26,7 @@
 
   MarketingHaus.generatorEngine.registerGenerator({
     id: "hero-banner",
+    usesSizing: true,
     label: "Hero Banner Generator",
     icon: "monitor",
     description: "A website hero-banner image prompt, plus a matching headline and button direction — for introducing a product, promoting an offer, or announcing a launch.",
