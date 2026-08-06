@@ -50,6 +50,19 @@ Started 2026-08-05. Pulled from live code (not guessed).
   - **✅ Cross-Haus Copy-button bug fix (commit `26407a6`):** the variation/bundle
     Copy buttons in Graphics + Marketing dropped Aspect/Negative/Output/Buffer (same
     bug fixed in Project Haus); fixed both engines + block renderers.
+  - **✅ Audio/video vet + text-format fix (commit `0a4d904`):** vetted Suno + all
+    video/script gens. Found the image-only `formatForPlatform` (--ar/--no,
+    transparent PNG, buffer) was being appended to TEXT prompts (music, scripts,
+    voiceover, copy) whenever Target Platform = Midjourney etc. Added a `textOnly`
+    flag on the 13 non-image quick-gens (Copy ×3, Video/Audio ×4, launch bundle,
+    video-ad-kit, video-ad-bundle, Strategy ×3) → preview + copy blocks skip image
+    formatting; text-flavored variation pools. Suno rebuilt: with-voice-or-not toggle
+    + vocal style + optional lyrics ([Verse]/[Chorus]) + expanded genres.
+  - **⏳ STILL TO VET:** the **text studios** (Email, Sales & Landing, Testimonial,
+    Content Studio, Customer Intelligence) share the SAME latent `formatForPlatform`-
+    on-text issue — the quick-gen fix was scoped to generators, not studios (Content
+    Studio is image-capable, so it needs a per-studio call). Also not yet vetted for
+    depth/quality: those 5 studios + the Copy/Strategy quick-gens themselves.
 
 ---
 
