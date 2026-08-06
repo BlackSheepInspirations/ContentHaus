@@ -54,6 +54,7 @@
 
   MarketingHaus.generatorEngine.registerGenerator({
     id: "short-form-video-script",
+    textOnly: true,
     label: "Short-Form Video Script Generator",
     icon: "text",
     description: "A structured Hook / Body / On-Screen Text / CTA script for TikTok, Reels, or Shorts — a written script, not an image-generation prompt.",

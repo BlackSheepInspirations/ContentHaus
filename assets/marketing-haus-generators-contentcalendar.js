@@ -13,6 +13,7 @@
 
   MarketingHaus.generatorEngine.registerGenerator({
     id: "content-calendar-30",
+    textOnly: true,
     label: "30-Day Content Calendar",
     icon: "document",
     description: "A month of post ideas mapped to days — hook, format, and CTA for each, grouped by week with a weekly theme.",

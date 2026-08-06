@@ -13,6 +13,7 @@
 
   MarketingHaus.generatorEngine.registerGenerator({
     id: "voiceover-script",
+    textOnly: true,
     label: "Voiceover Script",
     icon: "text",
     description: "A natural, record-ready voiceover script — timed and paced for an AI voice or your own, with light pause cues.",

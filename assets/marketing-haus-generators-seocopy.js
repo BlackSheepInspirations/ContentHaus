@@ -37,6 +37,7 @@
 
   MarketingHaus.generatorEngine.registerGenerator({
     id: "search-visibility-copy",
+    textOnly: true,
     label: "Search Visibility Copy Generator",
     icon: "monitor",
     description: "Copy that gets found — for classic Google/keyword SEO, or for AI answer engines (ChatGPT, Perplexity, Google AI Overviews, Gemini) that recommend and cite sources. Flip the Optimize-for toggle.",

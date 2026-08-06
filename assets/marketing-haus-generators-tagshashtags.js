@@ -19,6 +19,7 @@
 
   MarketingHaus.generatorEngine.registerGenerator({
     id: "tags-hashtags",
+    textOnly: true,
     label: "Tags & Hashtags Generator",
     icon: "layers",
     description: "A ready list of marketplace tags or social hashtags in natural buyer-search language — not generic filler terms.",

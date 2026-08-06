@@ -70,6 +70,25 @@
     "an alternate mood or color emphasis for variety",
   ];
 
+  // Text/audio/script generators (def.textOnly) borrow these instead of the
+  // image-flavored pools above, so a "+ Something Different" script never
+  // asks for "an alternate color emphasis."
+  var DEFAULT_TEXT_CHARM_POOL = [
+    "a warmer, more personable tone",
+    "one small vivid, specific detail",
+    "a friendly conversational aside",
+  ];
+  var DEFAULT_TEXT_DYNAMIC_POOL = [
+    "a punchier, higher-energy delivery",
+    "a bolder, more confident tone",
+    "a stronger, more urgent hook",
+  ];
+  var DEFAULT_TEXT_FOURTH_POOL = [
+    "a fresh angle or unexpected framing",
+    "a bolder, more attention-grabbing take",
+    "an alternate hook or opening for variety",
+  ];
+
   var registry = []; // [definition, ...] in registration order
   var stores = {}; // generatorId -> store
   var currentId = null;
@@ -347,15 +366,15 @@
 
     var asSelectedText = substituteTemplate(def.basePromptTemplate, valueMap) + sz;
 
-    var charmPool = def.charmPool || DEFAULT_CHARM_POOL;
+    var charmPool = def.charmPool || (def.textOnly ? DEFAULT_TEXT_CHARM_POOL : DEFAULT_CHARM_POOL);
     var charmPhrase = charmPool[state._charmIndex % charmPool.length];
     var charmText = substituteTemplate(def.charmPromptTemplate || def.basePromptTemplate, valueMap) + " Include " + charmPhrase + "." + sz;
 
-    var dynamicPool = def.dynamicPool || DEFAULT_DYNAMIC_POOL;
+    var dynamicPool = def.dynamicPool || (def.textOnly ? DEFAULT_TEXT_DYNAMIC_POOL : DEFAULT_DYNAMIC_POOL);
     var dynamicPhrase = dynamicPool[state._dynamicIndex % dynamicPool.length];
     var dynamicText = substituteTemplate(def.dynamicPromptTemplate || def.basePromptTemplate, valueMap) + " Give it " + dynamicPhrase + "." + sz;
 
-    var fourthPool = def.fourthPool || DEFAULT_FOURTH_POOL;
+    var fourthPool = def.fourthPool || (def.textOnly ? DEFAULT_TEXT_FOURTH_POOL : DEFAULT_FOURTH_POOL);
     var fourthPhrase = fourthPool[state._fourthIndex % fourthPool.length];
     var fourthText = substituteTemplate(def.fourthPromptTemplate || def.basePromptTemplate, valueMap) + " Try " + fourthPhrase + "." + sz;
 
@@ -407,6 +426,9 @@
       text: text,
       fragments: resolved.map(function (r) { return r.value; }),
       resolved: resolved,
+      // Text/audio/script generators skip the image-only platform formatting
+      // (--ar/--no, transparent PNG, buffer) in the shared preview.
+      skipPlatformFormat: !!def.textOnly,
     };
   }
 
@@ -493,7 +515,8 @@
   // Format). Without this, the variation + bundle Copy buttons emitted raw
   // text missing the aspect/negative/output directives — only the preview
   // carried them.
-  function formatBlockText(text) {
+  function formatBlockText(text, skip) {
+    if (skip) return text;
     var s = MarketingHaus.styleDNA.getState();
     return MarketingHaus.engine.formatForPlatform(
       { text: text, fragments: [] },
@@ -502,13 +525,15 @@
   }
 
   // Generic "list of labeled prompt blocks, each individually copyable" —
-  // shared by the 3-variation system and Page Bundles below.
-  function renderLabeledBlocksSection(titleText, blocks) {
+  // shared by the 3-variation system and Page Bundles below. `skipFormat`
+  // is set for text/audio/script generators so their blocks aren't run
+  // through the image-only platform formatting.
+  function renderLabeledBlocksSection(titleText, blocks, skipFormat) {
     var ui = MarketingHaus.ui;
     var wrap = ui.el("div", { class: "mh-generator-variations" });
     wrap.appendChild(ui.el("h4", { class: "mh-generator-variations__title" }, [ui.icon("layers"), ui.el("span", { text: titleText })]));
     blocks.forEach(function (v) {
-      var formatted = formatBlockText(v.text);
+      var formatted = formatBlockText(v.text, skipFormat);
       var copyBtn = ui.el("button", { type: "button", class: "mh-btn mh-btn--small mh-btn--copy", text: "Copy" });
       copyBtn.addEventListener("click", function () {
         ui.copyTextToClipboard(formatted, function (ok) {
@@ -538,7 +563,7 @@
     var cap = parseInt(MarketingHaus.styleDNA.getState().variationCount.value, 10) || 3;
     var extraBlocks = assembleVariations(id).slice(1, Math.max(1, cap));
     if (!extraBlocks.length) return MarketingHaus.ui.el("div", { class: "mh-generator-variations mh-generator-variations--empty" });
-    return renderLabeledBlocksSection("More Ways to Generate This", extraBlocks);
+    return renderLabeledBlocksSection("More Ways to Generate This", extraBlocks, !!getDef(id).textOnly);
   }
 
   // ChatGPT (unlike Midjourney/Kittl/Leonardo/etc.) is a conversational
@@ -588,7 +613,7 @@
     var ui = MarketingHaus.ui;
     var def = getDef(id);
     var blocks = assembleBundle(id);
-    var wrap = renderLabeledBlocksSection(def.bundleBlockTitle || "Your Page Bundle", blocks);
+    var wrap = renderLabeledBlocksSection(def.bundleBlockTitle || "Your Page Bundle", blocks, !!def.textOnly);
 
     var saveBtn = ui.el("button", { type: "button", class: "mh-btn mh-btn--small mh-btn--save", text: "Save Whole Bundle to Vault" });
     saveBtn.addEventListener("click", function () {
@@ -726,7 +751,7 @@
     if (def.pageTypes) wrap.appendChild(renderPageTypesPicker(id, def, state));
 
     wrap.appendChild(def.pageTypes ? renderBundleBlock(id) : renderVariationsBlock(id));
-    if (!def.pageTypes) wrap.appendChild(renderChatGPTMultiImageRow(id));
+    if (!def.pageTypes && !def.textOnly) wrap.appendChild(renderChatGPTMultiImageRow(id));
     return wrap;
   }
 

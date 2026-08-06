@@ -12,6 +12,7 @@
 
   MarketingHaus.generatorEngine.registerGenerator({
     id: "custom-gpt-builder",
+    textOnly: true,
     label: "Custom GPT Builder",
     icon: "sparkle",
     description: "A ready-to-paste configuration for a custom GPT or AI assistant — name, description, system instructions, and conversation starters.",

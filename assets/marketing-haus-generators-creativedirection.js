@@ -23,6 +23,7 @@
 
   MarketingHaus.generatorEngine.registerGenerator({
     id: "creative-direction",
+    textOnly: true,
     label: "Creative Direction Brief Generator",
     icon: "layers",
     description: "A written creative brief — mood, color, type, and visual direction — for keeping a whole batch of assets looking like one cohesive campaign.",

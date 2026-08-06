@@ -31,6 +31,7 @@
 
   MarketingHaus.generatorEngine.registerGenerator({
     id: "video-ad-bundle",
+    textOnly: true,
     label: "Video Ad Bundle (separate shot prompts)",
     icon: "video",
     description: "SEVERAL separate AI-generatable prompts — one per shot (voiceover, demo shot, B-roll, cinematic reveal) — all sharing one angle, that you generate individually and layer together into the finished ad. Use this if you're producing the video clip-by-clip. (For one all-in-one written plan instead, use the Video Ad Kit.)",

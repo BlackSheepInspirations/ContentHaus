@@ -850,7 +850,12 @@
 
   function renderPreview(root, assembled, modeApi, mode) {
     var styleDNAState = MarketingHaus.styleDNA.getState();
-    var formatted = MarketingHaus.engine.formatForPlatform(assembled, styleDNAState.targetPlatform.value, styleDNAState.aspectRatio.value, styleDNAState.negativePrompt.value, styleDNAState.addBuffer, styleDNAState.outputFormat.value);
+    // Text/audio/script generators mark themselves skipPlatformFormat so the
+    // image-only directives (--ar/--no, transparent PNG, buffer) never get
+    // appended to a music prompt, video script, or copy block.
+    var formatted = (assembled && assembled.skipPlatformFormat)
+      ? assembled.text
+      : MarketingHaus.engine.formatForPlatform(assembled, styleDNAState.targetPlatform.value, styleDNAState.aspectRatio.value, styleDNAState.negativePrompt.value, styleDNAState.addBuffer, styleDNAState.outputFormat.value);
     var textarea = el("textarea", { class: "mh-preview__text", readonly: "readonly" });
     textarea.value = formatted;
 

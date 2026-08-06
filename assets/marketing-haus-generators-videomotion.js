@@ -43,6 +43,7 @@
 
   MarketingHaus.generatorEngine.registerGenerator({
     id: "video-motion-prompt",
+    textOnly: true,
     label: "Video Motion Prompt Generator",
     icon: "video",
     description: "A second, separate prompt for animating an already-rendered photo-realistic image — for pasting into an image-to-video tool once the image exists.",

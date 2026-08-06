@@ -26,6 +26,7 @@
 
   MarketingHaus.generatorEngine.registerGenerator({
     id: "launch-content-bundle",
+    textOnly: true,
     label: "Launch Content Bundle Generator",
     icon: "layers",
     description: "The multi-piece social content set a launch needs before going live — a slide carousel, a content series, and a teaser, all sharing one focus and tone.",

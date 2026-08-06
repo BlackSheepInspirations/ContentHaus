@@ -21,6 +21,7 @@
 
   MarketingHaus.generatorEngine.registerGenerator({
     id: "product-listing",
+    textOnly: true,
     label: "Product Listing Generator",
     icon: "monitor",
     description: "A complete marketplace-ready listing — title, bullet points, description, and tags — for Etsy, Shopify, Amazon, or any marketplace.",
