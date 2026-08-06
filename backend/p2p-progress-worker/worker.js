@@ -544,7 +544,7 @@ export default {
       /* ---------- reverse image prompt (TEXT ONLY — never generates an image) ----------
          Reads an uploaded reference image and returns a detailed, reusable
          text-to-image prompt that recreates it. Uses the TEXT model
-         gemini-2.5-flash (image IN, text OUT) — it is physically incapable of
+         gemini-2.0-flash (image IN, text OUT) — it is physically incapable of
          producing an image, so there is NEVER an image-generation charge. Only the
          text model is ever called; no image model is reachable from this Worker.
          Members-only (guests are already rejected above). Set the API key with:
@@ -562,7 +562,7 @@ export default {
           'Output ONLY the prompt text — no preamble, no headings, no explanation.';
         let gres;
         try {
-          gres = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + env.gemini_key, {
+          gres = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + env.gemini_key, {
             method: 'POST',
             headers: { 'content-type': 'application/json' },
             body: JSON.stringify({
