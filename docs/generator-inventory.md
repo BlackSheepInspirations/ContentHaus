@@ -294,3 +294,39 @@ All applied across every tab via the shared bar/engine:
 - **Grouped dropdowns (optgroups)** in the narrow-generator engine — Transportation
   grouped by category; State/Region grouped by US/Territories/International. (Chosen
   over a true per-field cascade: same benefit, far lower risk.)
+
+---
+
+## 5. Project Haus
+
+**Tab Haus** (9 tabs, ~18 generators), files prefixed `product-haus-*` (section
+`sections/product-haus.liquid`, template suffix `product-haus`; gated `product-haus-access`).
+Same narrow-generator engine as Graphics/Marketing (registerGenerator, page bundles,
+4 variations, Look Lock, Vault). **DNA bar = Business/Voice DNA** (Business Name, Tone,
+Audience, Reading Level, Holiday, Theme, Niche, Target Platform, Aspect Ratio, Output
+Format, Buffer, Negative). Deepest generators: Journal Pages (13 fields, dynamic bundle),
+Planner Pages, Devotional (multi-sheet decks), Stickers.
+
+### 5A. Print-product vet (the priority)
+
+| Product | Status | Premium? | Gaps |
+|---|---|---|---|
+| **Stickers** | ✅ `sticker-sheet` | ~7.5/10 (best of the 4) | no **kiss-cut**, no standalone single die-cut, no 300 DPI/bleed, no finishes (matte/gloss/holo), no matching-set bundle |
+| **Coloring Pages** | ✅ 3 gens (cute single · adult · coloring-book bundle) | ~7/10 (closed-region note is genuinely premium) | **no KDP framing** (trim size, one-sided/no-bleed-through, gutter, 300 DPI); singles are 3-variation, no multi-page pack |
+| **Seamless Patterns** | ❌ **DOES NOT EXIST** | — | net-new (digital paper / wrapping / fabric) |
+| **Tumbler / Product Wrap** | ❌ **DOES NOT EXIST** | — | net-new (edge-to-edge seamless wrap, tumbler sizes, seam alignment) |
+
+### 5B. Structural findings
+
+- **No Product/Size field in the DNA bar** (unlike Graphics Haus now) — sizes are scattered per-generator, many generators have no size field at all. No global print-size/orientation/DPI concept.
+- **Print-readiness inconsistent** — "300 DPI" appears in exactly ONE generator (`kids-worksheet`); no generator specifies bleed/safe-zone/trim/gutter.
+- **BUG (high-impact, low-effort):** Output Format / Aspect Ratio / Negative Prompt / Buffer only reach the LIVE preview — the variation ("+ Charm") and bundle-page **Copy buttons emit raw text WITHOUT** the transparency/aspect/negative directives (`renderLabeledBlocksSection` uses raw `v.text`; only `renderPreview` runs `formatForPlatform`). So copying a transparent-PNG sticker variation loses the transparency instruction.
+- Duplication: coloring line-style/complexity/closed-region constants + checklist option arrays copy-pasted across files.
+
+### 5C. Opportunities (recommendations)
+
+1. **Build the 2 missing generators** — **Seamless Pattern** + **Tumbler/Product Wrap** (both pure data-definition files, no engine change). *[decision: ____]*
+2. **Upgrade Stickers to premium** — Cut Type (Die-Cut / Kiss-Cut), standalone single-sticker mode, finishes, 300 DPI/bleed, matching-set bundle. *[decision: ____]*
+3. **Coloring KDP framing** — trim sizes (6×9/8.5×11/8×10), one-sided/no-bleed-through, bind gutter, 300 DPI; optional multi-page pack for the singles. *[decision: ____]*
+4. **Systemic (mirror Graphics Haus):** add a **Product/Size** DNA field + a **shared print-readiness clause** (300 DPI / transparent-where-relevant / bleed / trim) injected into every generator — premium-ifies all 18 at once. *[decision: ____]*
+5. **Fix the Copy-block format bug** so Output Format/Aspect/Negative apply to variation + bundle Copy buttons, not just the live preview. *[decision: ____]*
