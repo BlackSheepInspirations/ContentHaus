@@ -278,3 +278,19 @@ flat Transportation and the missing State/Region picker.)
 - **Graphics Studio parity** — added Time/Era + Camera Angle (default empty).
 - Deferred (bigger, engine change): multi-subject/quantity + Transportation cascade
   in Graphics Studio; leaving Content Haus's own vanity as-is (already loved).
+
+### 4E. Engine/UX value-adds shipped (2026-08-05)
+
+All applied across every tab via the shared bar/engine:
+- **DNA cleanup:** removed Business Name (dead for image gen).
+- **Product / Size** field (sticker, tumbler wrap, tee, mug, poster, coloring page,
+  logo…) — auto-suggests aspect ratio + injects a product clause into every prompt,
+  now **print-readiness-aware** (cutout → transparent/die-cut; wrap → seamless;
+  print → 300 DPI + bleed).
+- **Cross-Haus "Make a product mockup →"** on every generator preview → Marketing
+  Mockup Studio (marketing-haus reads ?studio=<mode>).
+- **"One Matching Sheet"** mode for page bundles (Clipart Pack) — single-prompt full
+  set, guaranteed cohesive; plus the earlier cohesion clause + matching tip.
+- **Grouped dropdowns (optgroups)** in the narrow-generator engine — Transportation
+  grouped by category; State/Region grouped by US/Territories/International. (Chosen
+  over a true per-field cascade: same benefit, far lower risk.)
