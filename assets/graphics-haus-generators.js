@@ -438,14 +438,27 @@
 
   // Generic "list of labeled prompt blocks, each individually copyable" —
   // shared by the 3-variation system and Page Bundles below.
+  // Run a block's raw text through the same platform formatting the live
+  // preview uses (Target Platform aspect/tag, Negative Prompt, Buffer, Output
+  // Format). Without this, the variation + bundle Copy buttons emitted raw
+  // text missing the transparency/aspect/negative directives.
+  function formatBlockText(text) {
+    var s = GraphicsHaus.styleDNA.getState();
+    return GraphicsHaus.engine.formatForPlatform(
+      { text: text, fragments: [] },
+      s.targetPlatform.value, s.aspectRatio.value, s.negativePrompt.value, s.addBuffer, s.outputFormat.value
+    );
+  }
+
   function renderLabeledBlocksSection(titleText, blocks) {
     var ui = GraphicsHaus.ui;
     var wrap = ui.el("div", { class: "gh-generator-variations" });
     wrap.appendChild(ui.el("h4", { class: "gh-generator-variations__title" }, [ui.icon("layers"), ui.el("span", { text: titleText })]));
     blocks.forEach(function (v) {
+      var formatted = formatBlockText(v.text);
       var copyBtn = ui.el("button", { type: "button", class: "gh-btn gh-btn--small gh-btn--copy", text: "Copy" });
       copyBtn.addEventListener("click", function () {
-        ui.copyTextToClipboard(v.text, function (ok) {
+        ui.copyTextToClipboard(formatted, function (ok) {
           copyBtn.textContent = ok ? "Copied!" : "Copy failed";
           setTimeout(function () { copyBtn.textContent = "Copy"; }, 1500);
         });
@@ -455,7 +468,7 @@
           ui.el("span", { class: "gh-generator-variation__label", text: v.label }),
           copyBtn,
         ]),
-        ui.el("p", { class: "gh-generator-variation__text", text: v.text }),
+        ui.el("p", { class: "gh-generator-variation__text", text: formatted }),
       ]));
     });
     return wrap;
