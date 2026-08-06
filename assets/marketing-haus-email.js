@@ -123,10 +123,12 @@
       { label: "Call to Action", field: state.cta },
       { label: "Personalization", field: state.personalization },
     ]);
-    return MarketingHaus.engine.buildSentence({
+    var out = MarketingHaus.engine.buildSentence({
       intro: "Write a marketing email, including a subject line, for:",
       fieldEntries: fieldEntries,
     });
+    out.skipPlatformFormat = true; // email is text — no image --ar/--no
+    return out;
   }
 
   function getSelectionsByGroup() {

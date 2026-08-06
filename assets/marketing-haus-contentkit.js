@@ -268,7 +268,10 @@
     }
 
     var text = lines.join("\n");
-    return { text: text, fragments: picked.map(function (d) { return d.key; }) };
+    // Copy/content output (its own IMAGE PROMPT sub-section already carries
+    // the size spec) — skip the image-only platform tag formatting so a
+    // caption never gets --ar/--no appended.
+    return { text: text, fragments: picked.map(function (d) { return d.key; }), skipPlatformFormat: true };
   }
 
   function getSelectionsByGroup() {

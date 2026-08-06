@@ -32,6 +32,7 @@
 
   MarketingHaus.generatorEngine.registerGenerator({
     id: GENERATOR_ID,
+    textOnly: true,
     label: "Customer Intelligence Studio",
     icon: "person",
     // Has its own top-level Studio tab (see the adapter below) — must not

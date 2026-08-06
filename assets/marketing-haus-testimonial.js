@@ -127,7 +127,7 @@
 
     var text = intro + instructionText + feedbackBlock;
     var fragments = instructionBits.concat(rawFeedback ? [rawFeedback] : []);
-    return { text: text, fragments: fragments };
+    return { text: text, fragments: fragments, skipPlatformFormat: true }; // testimonial copy is text
   }
 
   function getSelectionsByGroup() {

@@ -179,7 +179,7 @@
       ? "Write " + contentType + " copy, laid out section by section, covering:"
       : "Write a " + contentType.replace(" (short)", "").toLowerCase() + " covering:";
     var text = zones.length ? intro + " " + zones.join("; ") + "." : intro;
-    return { text: text, fragments: fragments };
+    return { text: text, fragments: fragments, skipPlatformFormat: true }; // sales copy is text
   }
 
   function getSelectionsByGroup() {
