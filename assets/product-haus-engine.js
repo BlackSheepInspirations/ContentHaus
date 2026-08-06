@@ -103,12 +103,20 @@
   };
 
   function toTagStyle(assembled, aspectRatio, negativeItems, bufferClause, outputFormatPhrase) {
-    var tags = assembled.fragments.join(", ").split(",").map(function (t) { return t.trim(); }).filter(Boolean);
-    if (bufferClause) tags.push(bufferClause);
-    if (outputFormatPhrase) tags.push(outputFormatPhrase);
+    var tags = (assembled.fragments && assembled.fragments.length)
+      ? assembled.fragments.join(", ").split(",").map(function (t) { return t.trim(); }).filter(Boolean)
+      : [];
+    // Preview passes resolved field fragments (tag list). The variation/bundle
+    // block formatter passes a full prose prompt with no fragments — fall back
+    // to that text as the body so tag-style never drops the whole prompt.
+    var body = tags.length ? tags.join(", ") : (assembled.text || "");
+    var extras = [];
+    if (bufferClause) extras.push(bufferClause);
+    if (outputFormatPhrase) extras.push(outputFormatPhrase);
+    var bodyWithExtras = [body].concat(extras).filter(Boolean).join(", ");
     var param = aspectRatio ? "--ar " + aspectRatio : "";
     var negative = negativeItems.length ? "--no " + negativeItems.join(", ") : "";
-    return [tags.join(", "), param, negative].filter(Boolean).join(" ");
+    return [bodyWithExtras, param, negative].filter(Boolean).join(" ");
   }
 
   function toSimplifiedStyle(assembled, negativeItems, bufferClause, outputFormatPhrase) {

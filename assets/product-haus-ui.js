@@ -614,6 +614,12 @@
     var variationId = "pdh-field-" + variationSelect.getAttribute("data-pdh-key");
     variationSelect.id = variationId;
 
+    var projectSelect = el("select", { class: "pdh-field__select" });
+    appendSelectOptions(projectSelect, state.projectType, state.projectType.value);
+    projectSelect.addEventListener("change", function () { ProductHaus.styleDNA.setProjectType(projectSelect.value); renderApp(); });
+    var projectId = "pdh-field-" + projectSelect.getAttribute("data-pdh-key");
+    projectSelect.id = projectId;
+
     var platformSelect = el("select", { class: "pdh-field__select" });
     appendSelectOptions(platformSelect, state.targetPlatform, state.targetPlatform.value);
     platformSelect.addEventListener("change", function () { ProductHaus.styleDNA.setTargetPlatform(platformSelect.value); renderApp(); });
@@ -696,6 +702,7 @@
     }
     children.push(
       el("div", { class: "pdh-styledna__field" }, [labelWithIcon("sparkle", "Variations", variationId), variationSelect]),
+      el("div", { class: "pdh-styledna__field" }, [labelWithIcon("gift", "Product / Size", projectId, null, "What product this graphic is for — auto-suggests the aspect ratio and adds print-readiness (300 DPI, bleed, transparency/seamless where it matters) to every generator."), projectSelect]),
       el("div", { class: "pdh-styledna__field" }, [labelWithIcon("monitor", "Target Platform", platformId, null, "Formats the copied prompt for this specific AI tool."), platformSelect]),
       el("div", { class: "pdh-styledna__field" }, [labelWithIcon("crop", "Aspect Ratio", aspectId, null, "Only appears in the copied text for Midjourney/Leonardo AI."), aspectSelect]),
       el("div", { class: "pdh-styledna__field" }, [bufferLabel, bufferToggle]),

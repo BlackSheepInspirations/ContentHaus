@@ -86,6 +86,27 @@
   ]);
   var ASPECT_RATIO_OPTIONS = ["1:1", "4:5", "9:16", "16:9"];
 
+  // Product / Size — a shared field (like Content/Graphics Haus's Project
+  // Type). Picking one auto-suggests an aspect ratio and injects a print-
+  // readiness clause (DPI / bleed / transparency / seamless) into every
+  // generator, since this is a print-product Haus.
+  var PROJECT_PRODUCT_OPTIONS = [
+    "general / no specific product",
+    "greeting card", "invitation", "postcard", "wall art print", "flash card / learning card",
+    "journal / notebook page", "planner page", "coloring page (KDP book)",
+    "activity / worksheet page", "eBook page",
+    "sticker", "sticker sheet", "digital paper / seamless pattern", "tumbler wrap",
+  ];
+  var PROJECT_PRODUCT_ASPECT = {
+    "greeting card": "4:5", "invitation": "4:5", "postcard": "4:5", "wall art print": "4:5",
+    "flash card / learning card": "1:1", "journal / notebook page": "4:5", "planner page": "4:5",
+    "coloring page (KDP book)": "4:5", "activity / worksheet page": "4:5", "eBook page": "4:5",
+    "sticker": "1:1", "sticker sheet": "4:5", "digital paper / seamless pattern": "1:1", "tumbler wrap": "16:9",
+  };
+  var CUTOUT_PRODUCTS = ["sticker", "sticker sheet"];
+  var WRAP_PRODUCTS = ["digital paper / seamless pattern", "tumbler wrap"];
+  var KDP_PRODUCTS = ["coloring page (KDP book)", "activity / worksheet page", "eBook page", "journal / notebook page", "planner page"];
+
   // File-level export setting — independent of any generator's own
   // decorative Background field (a scene/content choice). Default is a
   // deliberate no-op so every existing prompt reads exactly as before
@@ -98,6 +119,7 @@
     audience: makeField("", [], { isFreeText: true }),
     readingLevel: makeField("general audience", READING_LEVEL_OPTIONS),
     variationCount: makeField("2", VARIATION_COUNT_OPTIONS),
+    projectType: makeField(PROJECT_PRODUCT_OPTIONS[0], PROJECT_PRODUCT_OPTIONS),
     holiday: ProductHaus.util.makeGroupedField("", HOLIDAY_GROUPS),
     theme: makeField("", THEME_OPTIONS),
     niche: makeField("", NICHE_OPTIONS),
@@ -122,6 +144,30 @@
   }
   function setVariationCount(value) {
     ProductHaus.util.updateField(store, "variationCount", { value: value, customValue: "" });
+  }
+  // Picking a product auto-suggests its aspect ratio (user can still change it).
+  function setProjectType(value) {
+    ProductHaus.util.updateField(store, "projectType", { value: value, customValue: "" });
+    var suggested = PROJECT_PRODUCT_ASPECT[value];
+    if (suggested) ProductHaus.util.updateField(store, "aspectRatio", { value: suggested, customValue: "" });
+  }
+  // Print-readiness clause injected into every generator's prompt, tailored to
+  // the product: cutout -> transparent/die-cut; wrap -> seamless; KDP book ->
+  // single-sided + bind margin; other print -> 300 DPI + bleed/safe margin.
+  function getProjectTypeClause() {
+    var pt = ProductHaus.engine.resolveFieldValue(store.getState().projectType);
+    if (!pt || pt.indexOf("general") === 0) return "";
+    var readiness;
+    if (CUTOUT_PRODUCTS.indexOf(pt) !== -1) {
+      readiness = "isolated on a transparent background with a clean die-cut-ready silhouette (no background, no drop shadow), at 300 DPI";
+    } else if (WRAP_PRODUCTS.indexOf(pt) !== -1) {
+      readiness = "as a seamless, edge-to-edge tileable design with no visible seam where the edges meet, at 300 DPI";
+    } else if (KDP_PRODUCTS.indexOf(pt) !== -1) {
+      readiness = "single-sided with no bleed-through, a clean inner margin left for binding, at 300 DPI print resolution";
+    } else {
+      readiness = "at 300 DPI print resolution with a small bleed and safe margin so nothing important sits near the trim edge";
+    }
+    return " Design this as a " + pt + " — sized and composed appropriately for that product, " + readiness + ".";
   }
   function setHoliday(value) {
     ProductHaus.util.updateField(store, "holiday", { value: value, customValue: "" });
@@ -211,6 +257,9 @@
     setAudience: setAudience,
     setReadingLevel: setReadingLevel,
     setVariationCount: setVariationCount,
+    setProjectType: setProjectType,
+    getProjectTypeClause: getProjectTypeClause,
+    PROJECT_PRODUCT_OPTIONS: PROJECT_PRODUCT_OPTIONS,
     setHoliday: setHoliday,
     setTheme: setTheme,
     setNiche: setNiche,

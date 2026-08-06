@@ -526,19 +526,22 @@
     var state = getStore(id).getState();
     var valueMap = getFieldValueMap(def, state);
 
-    var asSelectedText = substituteTemplate(def.basePromptTemplate, valueMap);
+    // Shared Product/Size + print-readiness clause — appended to every output.
+    var pc = ProductHaus.styleDNA.getProjectTypeClause();
+
+    var asSelectedText = substituteTemplate(def.basePromptTemplate, valueMap) + pc;
 
     var charmPool = def.charmPool || DEFAULT_CHARM_POOL;
     var charmPhrase = charmPool[state._charmIndex % charmPool.length];
-    var charmText = substituteTemplate(def.charmPromptTemplate || def.basePromptTemplate, valueMap) + " Include " + charmPhrase + ".";
+    var charmText = substituteTemplate(def.charmPromptTemplate || def.basePromptTemplate, valueMap) + " Include " + charmPhrase + "." + pc;
 
     var dynamicPool = def.dynamicPool || DEFAULT_DYNAMIC_POOL;
     var dynamicPhrase = dynamicPool[state._dynamicIndex % dynamicPool.length];
-    var dynamicText = substituteTemplate(def.dynamicPromptTemplate || def.basePromptTemplate, valueMap) + " Give it " + dynamicPhrase + ".";
+    var dynamicText = substituteTemplate(def.dynamicPromptTemplate || def.basePromptTemplate, valueMap) + " Give it " + dynamicPhrase + "." + pc;
 
     var fourthPool = def.fourthPool || DEFAULT_FOURTH_POOL;
     var fourthPhrase = fourthPool[state._fourthIndex % fourthPool.length];
-    var fourthText = substituteTemplate(def.fourthPromptTemplate || def.basePromptTemplate, valueMap) + " Try " + fourthPhrase + ".";
+    var fourthText = substituteTemplate(def.fourthPromptTemplate || def.basePromptTemplate, valueMap) + " Try " + fourthPhrase + "." + pc;
 
     return [
       { key: "asSelected", label: "As Selected", text: asSelectedText },
@@ -561,10 +564,11 @@
     var valueMap = getFieldValueMap(def, state);
     var entry = getActivePageTypesEntry(def, state);
     var chosenIds = (state._pageTypes && state._pageTypes.length) ? state._pageTypes : (entry.defaultPageTypes || []);
+    var pc = ProductHaus.styleDNA.getProjectTypeClause();
     return chosenIds.map(function (ptId) {
       var pt = entry.pageTypes.filter(function (p) { return p.id === ptId; })[0];
       if (!pt) return null;
-      return { key: pt.id, label: pt.label, text: substituteTemplate(pt.promptTemplate, valueMap) };
+      return { key: pt.id, label: pt.label, text: substituteTemplate(pt.promptTemplate, valueMap) + pc };
     }).filter(Boolean);
   }
 
@@ -627,6 +631,19 @@
   // UI
   // ---------------------------------------------------------------------
 
+  // Run a block's raw text through the same platform formatting the live
+  // preview uses (Target Platform aspect/tag, Negative Prompt, Buffer, Output
+  // Format). Without this, the variation + bundle Copy buttons emitted raw
+  // text missing the transparency/aspect/negative directives — the exact
+  // fields a sticker/pattern/wrap needs.
+  function formatBlockText(text) {
+    var s = ProductHaus.styleDNA.getState();
+    return ProductHaus.engine.formatForPlatform(
+      { text: text, fragments: [] },
+      s.targetPlatform.value, s.aspectRatio.value, s.negativePrompt.value, s.addBuffer, s.outputFormat.value
+    );
+  }
+
   // Generic "list of labeled prompt blocks, each individually copyable" —
   // shared by the 3-variation system and Page Bundles below.
   function renderLabeledBlocksSection(titleText, blocks) {
@@ -634,9 +651,10 @@
     var wrap = ui.el("div", { class: "pdh-generator-variations" });
     wrap.appendChild(ui.el("h4", { class: "pdh-generator-variations__title" }, [ui.icon("layers"), ui.el("span", { text: titleText })]));
     blocks.forEach(function (v) {
+      var formatted = formatBlockText(v.text);
       var copyBtn = ui.el("button", { type: "button", class: "pdh-btn pdh-btn--small pdh-btn--copy", text: "Copy" });
       copyBtn.addEventListener("click", function () {
-        ui.copyTextToClipboard(v.text, function (ok) {
+        ui.copyTextToClipboard(formatted, function (ok) {
           copyBtn.textContent = ok ? "Copied!" : "Copy failed";
           setTimeout(function () { copyBtn.textContent = "Copy"; }, 1500);
         });
@@ -646,7 +664,7 @@
           ui.el("span", { class: "pdh-generator-variation__label", text: v.label }),
           copyBtn,
         ]),
-        ui.el("p", { class: "pdh-generator-variation__text", text: v.text }),
+        ui.el("p", { class: "pdh-generator-variation__text", text: formatted }),
       ]));
     });
     return wrap;
