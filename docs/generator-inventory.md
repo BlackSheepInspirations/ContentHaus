@@ -40,6 +40,16 @@ Started 2026-08-05. Pulled from live code (not guessed).
     platform/format/px combos) and appends the size clause to every variation.
     Opt-in (defaults to "Any / no specific size"). Also committed the previously
     dangling Content Studio + `sizing.js` wiring (`dfc2c96`) so git matches live.
+  - **✅ Mockup Studio premium pass (commit `c436235`):** was strong on inputs but
+    only ever emitted ONE prompt. Added (1) an opt-in **multi-shot Listing Kit** —
+    one product+design → coordinated Hero / Close-Up Detail / In-Use Lifestyle /
+    Flat-Lay-Scale / Alternate-Angle prompts, each formatForPlatform'd; (2) **Design
+    Placement** + **Material/Finish** fields (precise outro clauses); (3) the exact
+    **Output Size** picker (shared 25-combo catalog); (4) catalog expansion
+    (+socks/apron/beanie, koozie, poster/framed print, new Gifts & Novelties group).
+  - **✅ Cross-Haus Copy-button bug fix (commit `26407a6`):** the variation/bundle
+    Copy buttons in Graphics + Marketing dropped Aspect/Negative/Output/Buffer (same
+    bug fixed in Project Haus); fixed both engines + block renderers.
 
 ---
 
