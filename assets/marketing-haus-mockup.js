@@ -35,16 +35,60 @@
   var sortAlpha = MarketingHaus.util.sortAlpha;
 
   var PRODUCT_GROUPS = [
-    { label: "Apparel", options: sortAlpha(["t-shirt", "hoodie", "crewneck sweatshirt", "tank top", "long sleeve tee", "baby onesie"]) },
-    { label: "Drinkware", options: sortAlpha(["coffee mug", "tumbler", "water bottle", "wine glass", "shot glass"]) },
+    { label: "Apparel", options: sortAlpha(["t-shirt", "hoodie", "crewneck sweatshirt", "tank top", "long sleeve tee", "baby onesie", "beanie", "socks", "apron"]) },
+    { label: "Drinkware", options: sortAlpha(["coffee mug", "tumbler", "water bottle", "wine glass", "shot glass", "can cooler / koozie"]) },
     { label: "Candles", options: sortAlpha(["jar candle", "tin candle", "pillar candle"]) },
     { label: "Beverage Bottle Labels", options: sortAlpha(["wine bottle label", "beer bottle label", "water bottle label"]) },
     { label: "Perfume & Beauty", options: sortAlpha(["perfume bottle", "lotion bottle", "soap bar packaging", "lip balm tube"]) },
     { label: "Bags", options: sortAlpha(["tote bag", "drawstring bag", "makeup bag", "backpack"]) },
     { label: "Stationery", options: sortAlpha(["greeting card", "notebook cover", "sticker sheet", "planner cover"]) },
     { label: "Tech", options: sortAlpha(["phone case", "laptop sleeve", "mouse pad"]) },
-    { label: "Home Decor", options: sortAlpha(["throw pillow", "blanket", "wall art / canvas", "doormat"]) },
+    { label: "Home Decor", options: sortAlpha(["throw pillow", "blanket", "wall art / canvas", "poster", "framed print", "doormat"]) },
+    { label: "Gifts & Novelties", options: sortAlpha(["keychain", "enamel pin", "fridge magnet", "ceramic ornament", "coaster", "jigsaw puzzle"]) },
   ];
+
+  // Product-agnostic dropdowns, injected as explicit outro clauses (not
+  // comma fragments) so the phrasing stays natural. "Auto" -> no clause.
+  var PLACEMENT_OPTIONS = [
+    "Auto (best for the product)", "Centered, front and center", "Full wrap-around",
+    "Left chest / pocket area", "Down the sleeve", "Large across the back",
+    "All-over print", "Centered front label", "Wrap-around label",
+  ];
+  var PLACEMENT_PHRASES = {
+    "Centered, front and center": "The design is printed centered, front and center on the product.",
+    "Full wrap-around": "The design wraps fully around the product, edge to edge.",
+    "Left chest / pocket area": "The design is printed small on the left chest / pocket area.",
+    "Down the sleeve": "The design is printed down the sleeve.",
+    "Large across the back": "The design is printed large across the back.",
+    "All-over print": "The design is an all-over repeating print covering the whole product.",
+    "Centered front label": "The design is applied as a centered label on the front.",
+    "Wrap-around label": "The design is applied as a wrap-around label.",
+  };
+
+  // Listing Kit — a coordinated set of shots of the SAME product/design,
+  // each a separate prompt with its own framing clause appended to the
+  // shared base mockup sentence. This is what turns the studio's single
+  // output into a real listing-ready set.
+  var LISTING_SHOTS = [
+    { id: "hero", label: "Hero Shot", framing: "This is the primary HERO shot: the product large and centered, sharp focus, the design clearly readable, styled but uncluttered — the main listing image." },
+    { id: "detail", label: "Close-Up Detail", framing: "This is a CLOSE-UP DETAIL shot: a tight macro crop on the design and the product's texture/material, showing print quality and finish up close." },
+    { id: "lifestyle", label: "In-Use Lifestyle", framing: "This is an IN-USE LIFESTYLE shot: the product naturally in use in a real-life scene, a little more editorial and aspirational, showing how it fits into everyday life." },
+    { id: "flatlay", label: "Flat-Lay / Scale", framing: "This is a FLAT-LAY / SCALE shot: an overhead flat lay with a few complementary props for scale and context, evenly lit, showing the product in relation to everyday objects." },
+    { id: "angle", label: "Alternate Angle", framing: "This is an ALTERNATE ANGLE shot: the same product from a different three-quarter or side angle, showing a second side or the depth/shape of the product." },
+  ];
+  var DEFAULT_LISTING_SHOTS = ["hero", "detail", "lifestyle", "flatlay"];
+
+  var MATERIAL_OPTIONS = [
+    "Auto (typical for the product)", "Matte", "Glossy / high-shine", "Ceramic", "Glass",
+    "Stainless steel", "Frosted", "Matte vinyl", "Satin", "Natural wood", "Soft cotton fabric",
+  ];
+  var MATERIAL_PHRASES = {
+    "Matte": "a smooth matte finish", "Glossy / high-shine": "a glossy, high-shine finish",
+    "Ceramic": "a ceramic finish", "Glass": "a clear glass finish",
+    "Stainless steel": "a brushed stainless steel finish", "Frosted": "a frosted finish",
+    "Matte vinyl": "a matte vinyl finish", "Satin": "a soft satin finish",
+    "Natural wood": "a natural, unfinished wood surface", "Soft cotton fabric": "a soft cotton fabric texture",
+  };
 
   var PRESENTATION_OPTIONS_PRODUCT_ONLY = sortAlpha(["flat lay", "held in a hand (cropped, no visible model)", "on a table or surface"]);
   var PRESENTATION_OPTIONS_WITH_MODEL = sortAlpha(["held by the model", "styled lifestyle scene, model in full view", "the model is sitting with it", "the model is walking with it", "worn by the model"]);
@@ -141,6 +185,9 @@
       product: makeGroupedField("", PRODUCT_GROUPS),
       designDescription: makeField("", [], { isFreeText: true }),
       productColor: makeField("", [], { isFreeText: true }),
+      designPlacement: makeField(PLACEMENT_OPTIONS[0], PLACEMENT_OPTIONS),
+      material: makeField(MATERIAL_OPTIONS[0], MATERIAL_OPTIONS),
+      outputSize: makeField(MarketingHaus.sizing.SIZE_NONE, MarketingHaus.sizing.comboOptions()),
       modelEnabled: false,
       presentation: makeField("", PRESENTATION_OPTIONS_PRODUCT_ONLY),
       modelAppearance: makeField("", [], { isFreeText: true }),
@@ -156,6 +203,8 @@
         return acc;
       }, {}),
       customItems: makeField("", [], { isFreeText: true }),
+      listingKitEnabled: false,
+      listingShots: DEFAULT_LISTING_SHOTS.reduce(function (acc, id) { acc[id] = true; return acc; }, {}),
       videoEnabled: false,
       videoMotion: makeField("", [], { isFreeText: true }),
       videoTool: makeField(VIDEO_TOOL_OPTIONS[0], VIDEO_TOOL_OPTIONS),
@@ -278,6 +327,39 @@
     store.setState(buildInitialState());
   }
 
+  function selectedListingShots() {
+    var picks = store.getState().listingShots || {};
+    return LISTING_SHOTS.filter(function (s) { return picks[s.id]; });
+  }
+
+  function toggleListingShot(id, checked) {
+    var next = Object.assign({}, store.getState().listingShots);
+    next[id] = checked;
+    store.setState({ listingShots: next });
+  }
+
+  // Coordinated set of shots of the SAME product/design: the shared base
+  // mockup sentence plus each shot's own framing clause. Returns
+  // [{ label, text }] — one block per selected shot.
+  function assembleListingKit() {
+    var base = assemblePrompt().text;
+    var shots = selectedListingShots();
+    if (!shots.length) shots = LISTING_SHOTS.filter(function (s) { return DEFAULT_LISTING_SHOTS.indexOf(s.id) !== -1; });
+    return shots.map(function (s) {
+      return { label: s.label, text: base + " " + s.framing };
+    });
+  }
+
+  // Same platform formatting the live preview uses, so a copied kit shot
+  // carries the member's Aspect/Negative/Output/Buffer directives too.
+  function formatForCopy(text) {
+    var s = MarketingHaus.styleDNA.getState();
+    return MarketingHaus.engine.formatForPlatform(
+      { text: text, fragments: [] },
+      s.targetPlatform.value, s.aspectRatio.value, s.negativePrompt.value, s.addBuffer, s.outputFormat.value
+    );
+  }
+
   function assembleVideoPrompt() {
     var state = store.getState();
     var rv = MarketingHaus.engine.resolveFieldValue;
@@ -329,6 +411,16 @@
     });
 
     var outroParts = [];
+
+    // Mockup-specific quality levers, added as precise clauses.
+    var rv = MarketingHaus.engine.resolveFieldValue;
+    var placementPhrase = PLACEMENT_PHRASES[rv(state.designPlacement)];
+    if (placementPhrase) outroParts.push(placementPhrase);
+    var materialPhrase = MATERIAL_PHRASES[rv(state.material)];
+    if (materialPhrase) outroParts.push("Render the " + productLabel + " with " + materialPhrase + ".");
+    var sizeClause = MarketingHaus.sizing.clauseFromCombo(rv(state.outputSize));
+    if (sizeClause) outroParts.push("Output the final image " + sizeClause + ".");
+
     if (stylingRisk) {
       outroParts.push(
         "Keep the " + productLabel + "'s exact print/design surface showing only what was described above (or a plain, unprinted surface if nothing was specified) — do not let the Niche, Theme, Holiday, or Mood styling add extra artwork, patterns, or seasonal decoration onto the product's own print area; confine that styling to the surrounding scene, props, and " + (modelOn ? "background" : "setting") + " only."
@@ -369,6 +461,10 @@
     entries.push({ label: "Lighting & Camera Angle", field: state.lighting });
 
     var resolved = MarketingHaus.engine.resolveFields(entries);
+    var rvSel = MarketingHaus.engine.resolveFieldValue;
+    if (PLACEMENT_PHRASES[rvSel(state.designPlacement)]) resolved.push({ label: "Design Placement", value: rvSel(state.designPlacement) });
+    if (MATERIAL_PHRASES[rvSel(state.material)]) resolved.push({ label: "Material / Finish", value: rvSel(state.material) });
+    if (MarketingHaus.sizing.clauseFromCombo(rvSel(state.outputSize))) resolved.push({ label: "Output Size", value: rvSel(state.outputSize) });
     var items = resolvedItemsList();
     if (items.length) resolved.push({ label: "Props & Accessories", value: items.join(", ") });
     if (state.videoEnabled) resolved.push({ label: "Video Motion Prompt", value: "Enabled — " + assembleVideoPrompt() });
@@ -452,6 +548,53 @@
     );
   }
 
+  function renderListingKitSection(ui, state) {
+    return ui.renderSubPanel(
+      "Generate a full Listing Kit (multiple shots)?",
+      state.listingKitEnabled,
+      function (checked) { store.setState({ listingKitEnabled: checked }); MarketingHaus.ui.renderApp(); },
+      function () {
+        var container = ui.el("div", {});
+        container.appendChild(ui.renderCappedChecklist({
+          title: "Shots to Include",
+          subtitle: "Each becomes its own copyable prompt for the same product & design — build a whole listing at once.",
+          icon: "layers",
+          items: LISTING_SHOTS.map(function (s) { return s.label; }),
+          selected: selectedListingShots().map(function (s) { return s.label; }),
+          cap: LISTING_SHOTS.length,
+          onToggle: function (labelText, checked) {
+            var shot = LISTING_SHOTS.filter(function (s) { return s.label === labelText; })[0];
+            if (shot) { toggleListingShot(shot.id, checked); MarketingHaus.ui.renderApp(); }
+          },
+        }));
+
+        var blocks = assembleListingKit();
+        var list = ui.el("div", { class: "mh-generator-variations" });
+        list.appendChild(ui.el("h4", { class: "mh-generator-variations__title" }, [ui.icon("layers"), ui.el("span", { text: "Your Listing Kit (" + blocks.length + " shots)" })]));
+        blocks.forEach(function (b) {
+          var formatted = formatForCopy(b.text);
+          var copyBtn = ui.el("button", { type: "button", class: "mh-btn mh-btn--small mh-btn--copy", text: "Copy" });
+          copyBtn.addEventListener("click", function () {
+            ui.copyTextToClipboard(formatted, function (ok) {
+              copyBtn.textContent = ok ? "Copied!" : "Copy failed";
+              setTimeout(function () { copyBtn.textContent = "Copy"; }, 1500);
+            });
+          });
+          list.appendChild(ui.el("div", { class: "mh-generator-variation" }, [
+            ui.el("div", { class: "mh-generator-variation__header" }, [
+              ui.el("span", { class: "mh-generator-variation__label", text: b.label }),
+              copyBtn,
+            ]),
+            ui.el("p", { class: "mh-generator-variation__text", text: formatted }),
+          ]));
+        });
+        container.appendChild(list);
+        return container;
+      },
+      "Turns one product + design into a coordinated set of listing images — hero, close-up detail, lifestyle, and more, each its own prompt."
+    );
+  }
+
   function renderPanel() {
     var ui = MarketingHaus.ui;
     var state = store.getState();
@@ -479,6 +622,22 @@
         MarketingHaus.ui.renderApp();
       },
       "How it's shown, your own design, and the surrounding scene."
+    ));
+
+    wrap.appendChild(ui.renderFieldGroup(
+      "Product Detail",
+      [
+        { label: "Design Placement", field: state.designPlacement },
+        { label: "Material / Finish", field: state.material },
+        { label: "Output Size", field: state.outputSize },
+      ],
+      function (entry, changes) {
+        if (entry.label === "Design Placement") updateField("designPlacement", changes);
+        else if (entry.label === "Material / Finish") updateField("material", changes);
+        else updateField("outputSize", changes);
+        MarketingHaus.ui.renderApp();
+      },
+      "Where the design sits, the product's finish, and the exact export size."
     ));
 
     wrap.appendChild(renderModelSection(ui, state));
@@ -509,6 +668,8 @@
         onChange: function (value) { updateField("customItems", { value: value }); MarketingHaus.ui.renderApp(); },
       },
     }));
+
+    wrap.appendChild(renderListingKitSection(ui, state));
 
     wrap.appendChild(renderVideoSection(ui, state));
 
