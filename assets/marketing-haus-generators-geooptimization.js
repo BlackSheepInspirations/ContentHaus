@@ -34,6 +34,7 @@
     // resolves, but hidden from the grid so it's not a duplicate entry point.
     hideFromGrid: true,
     id: "geo-optimization",
+    textOnly: true,
     label: "GEO / AI Search Optimization Generator",
     icon: "monitor",
     description: "Optimize your content so AI answer engines (ChatGPT, Perplexity, Google AI Overviews, Gemini) recommend and cite it — not classic keyword SEO.",
