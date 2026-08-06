@@ -9,6 +9,16 @@ Started 2026-08-05. Pulled from live code (not guessed).
 
 ### Update log
 
+- **2026-08-05 — ✅ Full render / order / hygiene sweep, all 5 Hausen (CLEAN).**
+  Live-audited every prompt surface for (a) all field widgets render without a thrown
+  error, (b) assembled prompt hygiene (no unsubstituted `{tokens}`, no undefined/null/
+  NaN, no space-before-punctuation, no double-space, no leading punctuation, no empty
+  output), (c) intentional order (subject → style → layout → technical). Results:
+  **Marketing** 28 quick-gens + 5 studios · **Graphics** 10 gens · **Project** 20 gens
+  + 3 broad studios · **Content/Prompt** 9 modes · **Brand** Branding + Logo (+3 board
+  modes) + 3 quick-gens — **all clean, zero real issues.** (One false alarm: auditing
+  `assembleLogoBoard()` without its required `state` arg threw; real code always passes
+  state and all 3 board modes output cleanly.)
 - **2026-08-05 — Marketing Haus restructure shipped.**
   - Shared bar re-org: split into **Brand DNA** (Business Name, Reading Level +
     text Negative Prompt; each field include/exclude toggle) shown everywhere, and
