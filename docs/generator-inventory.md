@@ -32,8 +32,14 @@ Started 2026-08-05. Pulled from live code (not guessed).
     registered but `hideFromGrid` (Vault-safe). Video Ad **Kit** (all-in-one plan)
     vs **Bundle** (separate shot prompts) differentiated via labels/descriptions.
   - 26 grid cards (28 registered − 2 hidden).
-  - **Deferred (task #79):** Video Motion Prompt DRY (internal refactor, no user
-    change); wiring the size-picker into the ~11 graphic quick-gens (enhancement).
+  - **✅ SHIPPED (task #79, commit `8b04605`):** Video Motion Prompt DRY — shared
+    `marketing-haus-motion.js` now feeds both the standalone quick-gen and the
+    Mockup Studio companion (duplicated vocabulary removed, both entry points kept,
+    output byte-identical). Size-picker wired into all 11 graphic quick-gens via a
+    `usesSizing` flag: the engine auto-injects one "Output Size" dropdown (25
+    platform/format/px combos) and appends the size clause to every variation.
+    Opt-in (defaults to "Any / no specific size"). Also committed the previously
+    dangling Content Studio + `sizing.js` wiring (`dfc2c96`) so git matches live.
 
 ---
 
