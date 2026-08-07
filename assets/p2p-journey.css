@@ -662,8 +662,8 @@
 
 /* ---- Check-popup course embed: full-screen overlay + companion buttons ---- */
 #p2pj-check .modal-card .cta + .cta{ margin-top:10px; }
-#p2pj-check .cta--pdf{ background:transparent; box-shadow:none; border:1.5px solid currentColor; opacity:.85; }
-#p2pj-check .cta--pdf:hover{ opacity:1; }
+#p2pj-check .cta--pdf{ background:transparent; box-shadow:none; color:#c9f5ea; border:1.5px solid rgba(201,245,234,.55); }
+#p2pj-check .cta--pdf:hover{ background:rgba(201,245,234,.12); border-color:rgba(201,245,234,.95); }
 #p2pj-check .cta + .cta{ margin-left:10px; }
 #p2pj-courseview{ position:fixed; inset:0; z-index:10000; display:none; background:rgba(6,8,20,.94); -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px); padding:2.2vmin; }
 #p2pj-courseview.show{ display:flex; align-items:center; justify-content:center; }
