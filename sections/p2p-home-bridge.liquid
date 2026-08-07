@@ -1,0 +1,46 @@
+{%- comment -%}
+  P2P Home Bridge — a band on the storefront homepage that introduces the Purpose 2 Profit
+  membership (the store otherwise never mentions it). OS aesthetic on purpose, so it reads as
+  "a different world you can step into." CTA defaults to /pages/p2p-os (self-routes: members →
+  the OS, visitors → the sales preview); repoint to the Welcome page once it's created.
+  Added 2026-08-07 (storefront launch: connect the merch store to the membership).
+{%- endcomment -%}
+{%- assign link = section.settings.cta_link | default: '/pages/p2p-os' -%}
+<section class="p2pb">
+  <div class="p2pb__wrap">
+    <div class="p2pb__eyebrow">{{ section.settings.eyebrow | default: 'Beyond the wool' }}</div>
+    <h2 class="p2pb__h">{{ section.settings.heading | default: 'There’s a whole creator OS behind the brand.' }}</h2>
+    <p class="p2pb__lede">{{ section.settings.subheading | default: 'Purpose 2 Profit is the membership that turns your ideas into income — five creator tools, two AI partners, and a step-by-step launch path. The same system we build with, open to the flock.' }}</p>
+    <div class="p2pb__pills">
+      <span class="p2pb__pill">✦ Create</span>
+      <span class="p2pb__pill">✦ Brand</span>
+      <span class="p2pb__pill">✦ Launch</span>
+    </div>
+    <a class="p2pb__cta" href="{{ link }}">{{ section.settings.cta_label | default: 'Explore Purpose 2 Profit' }} <span aria-hidden="true">→</span></a>
+  </div>
+</section>
+{%- style -%}
+  #shopify-section-{{ section.id }}{margin:0}
+  .p2pb{background:radial-gradient(120% 130% at 15% 0%,#16305a 0%,#0a1120 55%,#080c16 100%);color:#e9f0f8;font-family:var(--font-body-family,system-ui);padding:clamp(52px,7vw,88px) 20px;text-align:center}
+  .p2pb__wrap{max-width:760px;margin:0 auto}
+  .p2pb__eyebrow{color:#8ff0e0;font-size:12px;font-weight:700;letter-spacing:.28em;text-transform:uppercase;margin-bottom:16px}
+  .p2pb__h{font-size:clamp(26px,4vw,42px);line-height:1.08;letter-spacing:-.02em;margin:0 0 16px;text-wrap:balance}
+  .p2pb__lede{color:#c6d3e0;font-size:clamp(15px,2vw,18px);line-height:1.6;margin:0 auto 26px;max-width:600px}
+  .p2pb__pills{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:30px}
+  .p2pb__pill{border:1px solid rgba(143,240,224,.28);color:#f4e9c9;border-radius:40px;padding:8px 18px;font-size:13.5px;font-weight:600;letter-spacing:.02em}
+  .p2pb__cta{display:inline-flex;align-items:center;gap:9px;background:linear-gradient(135deg,#c9f5ea,#8ff0e0);color:#06120e;font-weight:800;font-size:15px;letter-spacing:.01em;text-decoration:none;padding:15px 30px;border-radius:40px;box-shadow:0 12px 34px rgba(143,240,224,.25);transition:transform .15s ease,box-shadow .15s ease}
+  .p2pb__cta:hover{transform:translateY(-2px);box-shadow:0 16px 42px rgba(143,240,224,.36)}
+{%- endstyle -%}
+{% schema %}
+{
+  "name": "P2P Home Bridge",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Beyond the wool" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "There’s a whole creator OS behind the brand." },
+    { "type": "textarea", "id": "subheading", "label": "Subheading", "default": "Purpose 2 Profit is the membership that turns your ideas into income — five creator tools, two AI partners, and a step-by-step launch path. The same system we build with, open to the flock." },
+    { "type": "text", "id": "cta_label", "label": "Button label", "default": "Explore Purpose 2 Profit" },
+    { "type": "url", "id": "cta_link", "label": "Button link", "info": "Defaults to /pages/p2p-os (self-routes). Point at the Welcome to the Haus page once it's created." }
+  ],
+  "presets": [{ "name": "P2P Home Bridge" }]
+}
+{% endschema %}
