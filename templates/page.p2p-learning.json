@@ -19,7 +19,7 @@
           "type": "check",
           "settings": {
             "title": "Mindset Check",
-            "pulse_items": "What am I telling myself about this right now?\nWhat would it feel like to trust the process today?",
+            "pulse_items": "What have I decided about myself that I've never actually tested?\nWhat's the one thing I know for sure right now?",
             "course_url": "https://icy-cherry-ea6a.hidden-butterfly-bde8.workers.dev/",
             "pdf_url": "https://icy-cherry-ea6a.hidden-butterfly-bde8.workers.dev/companion.pdf",
             "pos_left": 46.8,
@@ -56,7 +56,7 @@
           "type": "check",
           "settings": {
             "title": "Purpose Check",
-            "pulse_items": "Why does this matter to me, really?\nWho am I doing this for?",
+            "pulse_items": "What do people keep coming to me for?\nWhat have I already ruled out as not counting?",
             "course_url": "https://realm1-purpose.hidden-butterfly-bde8.workers.dev/",
             "pdf_url": "https://realm1-purpose.hidden-butterfly-bde8.workers.dev/companion.pdf",
             "pos_left": 61.4,
@@ -145,7 +145,7 @@
           "type": "check",
           "settings": {
             "title": "Heart Check",
-            "pulse_items": "What am I proud of so far?\nWhere do I need to be gentler with myself?",
+            "pulse_items": "What do I keep going back to when nobody's asking?\nWhat has it already cost me?",
             "course_url": "https://realm1-heartcheck.hidden-butterfly-bde8.workers.dev/",
             "pdf_url": "https://realm1-heartcheck.hidden-butterfly-bde8.workers.dev/companion.pdf",
             "pos_left": 44.5,
