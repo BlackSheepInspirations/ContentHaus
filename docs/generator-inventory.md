@@ -77,9 +77,25 @@ Started 2026-08-05. Pulled from live code (not guessed).
     section ordering; Email has type/subject-style/length/CTA/personalization;
     Testimonial reformats raw feedback with polish/highlight/attribution; Customer
     Intelligence is a customer-avatar doc. No premium gaps worth a build right now.
-  - **⏳ STILL TO VET (lower priority):** the **Copy** (SEO/listing/hashtags) and
-    **Strategy Docs** (content-calendar/creative-direction/custom-gpt) quick-gens have
-    only had the formatting fix, not a depth/quality pass.
+  - **✅ SHIPPED (2026-08-07) — Copy + Strategy depth pass.** Re-read all 6; two
+    were already deep (**Search Visibility Copy** = full GEO per-engine build;
+    **Creative Direction Brief** = Brand-Kit-aware, campaign type + detail + deliverable)
+    → left as-is. Deepened the other four:
+    - **Tags & Hashtags** — replaced the generic "Tag Type" with a real **Platform**
+      field (Etsy · Instagram · TikTok · Pinterest · YouTube · Amazon · General) that
+      injects each platform's true conventions (format, char rules, # vs no-#, optimal
+      count auto-resolved) via computeExtraTokens + a platform-aware format line.
+    - **Product Listing** — per-marketplace **structural rules** (Etsy 140-char title +
+      13 short tags + materials · Amazon keyword title + 5 benefit bullets + backend
+      terms · Shopify SEO title + meta) + a "who it's for / what's different" field +
+      a/an article fix.
+    - **30-Day Content Calendar** — a **Primary Goal** (whole month pulls to one
+      outcome) + optional **anchor moment** (final week ramps to a launch/sale/date).
+    - **Custom GPT Builder** — a **knowledge/context** field so the System Instructions
+      ground the assistant in real products/policies/facts.
+    Verified: Node token-fill harness (no leftover tokens, clauses appear/vanish
+    correctly, counts auto-resolve) + live UI (Platform field renders all 7 options,
+    default Etsy preview carries the right rule).
 
 ---
 
@@ -223,7 +239,7 @@ Modes hang off `window.PromptHaus`; Collection Builder has no module (lives in u
 ### 3C. Recommendations
 
 **Gaps / asymmetries (user-facing — the high-value adds):**
-1. **Add Text on Character & Couples** — Family/Animals/Reference have an Add Text sub-panel, but a plain Character or Couple portrait can't layer lettering without switching to Combined. Add the same sub-panel to both. *[decision: ____]*
+1. **Add Text on Character & Couples** — Family/Animals/Reference have an Add Text sub-panel, but a plain Character or Couple portrait can't layer lettering without switching to Combined. Add the same sub-panel to both. *[decision: ❌ CLOSED — declined permanently 2026-08-07; text stays in Combined only.]*
 2. **Frame It parity for Animals & Graphics** — both omit **Time/Era** + **Camera Angle** (and Graphics also omits **Scene Effect**) that the other presentation modes have. A vintage creature portrait / period graphic can't set era or angle. Add the missing fields. *[decision: ____]*
 3. **Spread Video Motion Prompt** — only Character has the "animate this image" companion; Couples/Family/Animals/Graphics/Reference produce equally animatable images. Extend it (bigger, optional). *[decision: ____]*
 4. **Hide Variations where it's ignored** — the shared Variations dropdown shows on every mode but Text forces it to 1 and Reference/Collection don't use it. Hide it there to stop implying it does something. *[decision: ____]*
