@@ -461,8 +461,8 @@
   var GRID_GROUPS = [
     { label: "Graphics", ids: [
       "promo-flyer", "hero-banner", "infographic", "lead-magnet-cover", "listing-image",
-      "pinterest-pin", "post-template", "product-ad-graphic", "marketing-quote-graphic",
-      "social-cover-banner", "insert-card",
+      "pinterest-pin", "post-template", "carousel-set", "story-reel-cover", "product-ad-graphic",
+      "marketing-quote-graphic", "social-cover-banner", "insert-card",
     ] },
     { label: "Copy", ids: ["search-visibility-copy", "product-listing", "tags-hashtags"] },
     { label: "Video & Audio", ids: ["video-motion-prompt", "short-form-video-script", "voiceover-script", "suno-music"] },

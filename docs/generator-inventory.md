@@ -153,7 +153,7 @@ text studio; **Variations** count lives in the shared bar.
 **Order / organization (high-value, low-risk):**
 - The Quick Generators grid should be **grouped with subheadings** (Graphics · Copy · Video & Audio · Bundles · Strategy Docs) instead of a flat list — makes 28 navigable. *[decision: ____]*
 
-**Gaps / added-needed:** coverage is broad; the main "gap" is organization, not missing tools. Possible adds: a multi-slide **Carousel graphic** set; a **Story/Reel cover**. *[decision: ____]*
+**Gaps / added-needed:** coverage is broad; the main "gap" is organization, not missing tools. Possible adds: a multi-slide **Carousel graphic** set; a **Story/Reel cover**. *[decision: ✅ BOTH SHIPPED 2026-08-07 — `carousel-set` (one cohesive numbered multi-slide prompt: cover→value→CTA, consistent-set suffix) + `story-reel-cover` (9:16 vertical, safe-zone-aware). Both usesSizing, in the Graphics grid group (now 13). Verified live.]*
 
 
 ---
