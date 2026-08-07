@@ -159,7 +159,7 @@
           {%- when 'check' -%}
             {%- assign ctl = b.title | downcase -%}
             {%- if ctl contains 'mindset' -%}{%- assign ccat = 'mindset' -%}{%- elsif ctl contains 'purpose' -%}{%- assign ccat = 'purpose' -%}{%- elsif ctl contains 'heart' -%}{%- assign ccat = 'heart' -%}{%- else -%}{%- assign ccat = 'check' -%}{%- endif -%}
-            <button class="hs hs--check" style="{{ pos }}" data-type="check" data-check-id="check:{{ ccat }}:{{ block.id }}" data-title="{{ b.title }}" data-pulse-items="{{ b.pulse_items | strip_newlines | escape }}" data-link-url="{{ b.link_url }}" data-link-label="{{ b.link_label | default: 'Open' }}"{{ block.shopify_attributes }}></button>
+            <button class="hs hs--check" style="{{ pos }}" data-type="check" data-check-id="check:{{ ccat }}:{{ block.id }}" data-title="{{ b.title }}" data-pulse-items="{{ b.pulse_items | strip_newlines | escape }}" data-link-url="{{ b.link_url }}" data-link-label="{{ b.link_label | default: 'Open' }}" data-course-url="{{ b.course_url }}" data-pdf-url="{{ b.pdf_url }}"{{ block.shopify_attributes }}></button>
         {%- endcase -%}
       {%- endfor -%}
 
@@ -223,7 +223,7 @@
             {%- assign b = block.settings -%}
             {%- assign ctl = b.title | downcase -%}
             {%- if ctl contains 'mindset' -%}{%- assign ccat = 'mindset' -%}{%- elsif ctl contains 'purpose' -%}{%- assign ccat = 'purpose' -%}{%- elsif ctl contains 'heart' -%}{%- assign ccat = 'heart' -%}{%- else -%}{%- assign ccat = 'check' -%}{%- endif -%}
-            <div class="bqcard" data-type="check" data-check-id="check:{{ ccat }}:{{ block.id }}" data-title="{{ b.title }}" data-pulse-items="{{ b.pulse_items | strip_newlines | escape }}" data-link-url="{{ b.link_url }}" data-link-label="{{ b.link_label | default: 'Open' }}">
+            <div class="bqcard" data-type="check" data-check-id="check:{{ ccat }}:{{ block.id }}" data-title="{{ b.title }}" data-pulse-items="{{ b.pulse_items | strip_newlines | escape }}" data-link-url="{{ b.link_url }}" data-link-label="{{ b.link_label | default: 'Open' }}" data-course-url="{{ b.course_url }}" data-pdf-url="{{ b.pdf_url }}">
               <b>{{ b.title }}</b><span class="bq-go">Enter →</span>
             </div>
           {%- endif -%}
@@ -407,6 +407,16 @@
       <h3 id="p2pj-ct"></h3>
       <ul class="pulse-items" id="p2pj-cb"></ul>
       <a class="cta" id="p2pj-cc"></a>
+      <button class="cta" id="p2pj-course" type="button" style="display:none">Open the course</button>
+      <a class="cta cta--pdf" id="p2pj-cpdf" style="display:none" target="_blank" rel="noopener" download>Download the companion (PDF)</a>
+    </div>
+  </div>
+
+  {%- comment -%} ---- FULL-SCREEN COURSE OVERLAY (hosted Rise course, in-site) ---- {%- endcomment -%}
+  <div id="p2pj-courseview">
+    <div class="cv-card">
+      <button class="cv-x" id="p2pj-cvx" type="button" aria-label="Close course">✕</button>
+      <iframe id="p2pj-cvframe" title="Course" allow="fullscreen" loading="lazy"></iframe>
     </div>
   </div>
 
@@ -775,6 +785,8 @@
         { "type": "textarea", "id": "pulse_items", "label": "Pulse-check items", "info": "One prompt per line. Never gates anything — always clickable." },
         { "type": "url", "id": "link_url", "label": "Optional link" },
         { "type": "text", "id": "link_label", "label": "Link label", "default": "Open" },
+        { "type": "url", "id": "course_url", "label": "Course URL", "info": "Opens full-screen inside the popup (e.g. a hosted Articulate Rise course)." },
+        { "type": "url", "id": "pdf_url", "label": "Companion PDF URL", "info": "Adds a Download button to the popup." },
         { "type": "number", "id": "pos_left", "label": "Position — left (%)", "default": 40 },
         { "type": "number", "id": "pos_top", "label": "Position — top (%)", "default": 30 },
         { "type": "number", "id": "pos_width", "label": "Position — width (%)", "default": 14 },

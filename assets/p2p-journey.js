@@ -260,9 +260,34 @@
     var url = h.getAttribute('data-link-url');
     if(url){ cta.textContent = h.getAttribute('data-link-label') || 'Open'; cta.setAttribute('href', url); cta.style.display = 'inline-block'; }
     else { cta.removeAttribute('href'); cta.style.display = 'none'; }
+    // Course (opens full-screen in-site) + companion PDF (download) — either optional.
+    var courseUrl = h.getAttribute('data-course-url');
+    var pdfUrl = h.getAttribute('data-pdf-url');
+    var cbtn = document.getElementById('p2pj-course');
+    if(cbtn){
+      if(courseUrl){ cbtn.style.display = 'inline-block'; cbtn.onclick = function(){ openCourseView(courseUrl); }; }
+      else { cbtn.style.display = 'none'; cbtn.onclick = null; }
+    }
+    var pbtn = document.getElementById('p2pj-cpdf');
+    if(pbtn){
+      if(pdfUrl){ pbtn.style.display = 'inline-block'; pbtn.setAttribute('href', pdfUrl); }
+      else { pbtn.style.display = 'none'; pbtn.removeAttribute('href'); }
+    }
     checkModal.classList.add('show');
   }
   function closeCheck(){ checkModal.classList.remove('show'); }
+
+  /* ---- full-screen course overlay (hosted Rise course, kept in-site) ---- */
+  var courseView = document.getElementById('p2pj-courseview');
+  var courseFrame = document.getElementById('p2pj-cvframe');
+  function openCourseView(u){ if(!courseView || !courseFrame) return; courseFrame.setAttribute('src', u); courseView.classList.add('show'); document.body.style.overflow = 'hidden'; }
+  function closeCourseView(){ if(!courseView) return; courseView.classList.remove('show'); if(courseFrame) courseFrame.removeAttribute('src'); document.body.style.overflow = ''; }
+  if(courseView){
+    var cvx = document.getElementById('p2pj-cvx');
+    if(cvx) cvx.addEventListener('click', closeCourseView);
+    courseView.addEventListener('click', function(e){ if(e.target === courseView) closeCourseView(); });
+    document.addEventListener('keydown', function(e){ if(e.key === 'Escape' && courseView.classList.contains('show')) closeCourseView(); });
+  }
   /* ---- Journey Begins onboarding ---- */
   var begin = document.getElementById('p2pj-begin');
   function beginStep(name){ if(!begin) return; begin.querySelectorAll('.step').forEach(function(s){ s.classList.toggle('on', s.getAttribute('data-step') === name); }); var bc = begin.querySelector('.bc'); if(bc) bc.scrollTop = 0; }
