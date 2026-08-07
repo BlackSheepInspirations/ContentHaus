@@ -562,44 +562,48 @@ export default {
           'Describe the subject, composition, art style, colors, lighting, mood, and background in vivid, specific language. ' +
           'Output ONLY the prompt text — no preamble, no headings, no explanation.';
         const rpParts = [{ text: instruction }, { inline_data: { mime_type: m[1], data: m[2] } }];
+        const rpBase = 'https://generativelanguage.googleapis.com/v1beta/';
 
-        // Discover a usable TEXT model: supports generateContent, and is NOT an
-        // image/imagen/embedding model. Prefer a "flash" (fast/cheap) model.
-        async function rpDiscover() {
-          const lr = await fetch('https://generativelanguage.googleapis.com/v1beta/models?key=' + env.gemini_key);
+        function rpCall(modelName, parts) {
+          return fetch(rpBase + modelName + ':generateContent?key=' + env.gemini_key, {
+            method: 'POST', headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ contents: [{ parts: parts }], generationConfig: { temperature: 0.4 } }),
+          });
+        }
+        // Usable TEXT models for this key, cheapest/most-current first, never an
+        // image model. ListModels can list a model the key isn't actually allowed
+        // to CALL (e.g. "no longer available to new users"), so we PROBE each with
+        // a tiny request and use the first that truly works.
+        async function rpModels() {
+          const lr = await fetch(rpBase + 'models?key=' + env.gemini_key);
           const lj = await lr.json().catch(() => null);
-          const list = (lj && lj.models) || [];
-          const usable = list.filter(function (mm) {
-            const meth = mm.supportedGenerationMethods || [];
-            return meth.indexOf('generateContent') !== -1 && !/image|imagen|embedding|aqa|tts|veo/i.test(mm.name || '');
-          });
-          const flash = usable.filter(function (mm) { return /flash/i.test(mm.name) && !/lite/i.test(mm.name); })[0];
-          const lite = usable.filter(function (mm) { return /flash/i.test(mm.name); })[0];
-          const pick = flash || lite || usable[0];
-          return pick ? pick.name : null; // e.g. "models/gemini-2.5-flash"
+          const usable = ((lj && lj.models) || []).filter(function (mm) {
+            return (mm.supportedGenerationMethods || []).indexOf('generateContent') !== -1 &&
+                   !/image|imagen|embedding|aqa|tts|veo/i.test(mm.name || '');
+          }).map(function (mm) { return mm.name; });
+          function rank(n) { n = n.toLowerCase(); var s = 0; if (/flash/.test(n)) s -= 2; if (/lite/.test(n)) s -= 1; if (/latest/.test(n)) s -= 1; if (/pro/.test(n)) s += 2; return s; }
+          return usable.sort(function (a, b) { return rank(a) - rank(b); });
         }
-        function rpCall(modelName) {
-          return fetch('https://generativelanguage.googleapis.com/v1beta/' + modelName + ':generateContent?key=' + env.gemini_key, {
-            method: 'POST',
-            headers: { 'content-type': 'application/json' },
-            body: JSON.stringify({ contents: [{ parts: rpParts }], generationConfig: { temperature: 0.4 } }),
-          });
-        }
+        async function rpProbe(name) { try { return (await rpCall(name, [{ text: 'ping' }])).ok; } catch (e) { return false; } }
 
         let gres, gj;
         try {
-          let modelName = cachedRpModel || (cachedRpModel = await rpDiscover());
-          if (!modelName) return json({ error: 'No compatible Gemini text model is available for this API key.' }, 502);
-          gres = await rpCall(modelName);
+          if (!cachedRpModel) {
+            const models = await rpModels();
+            for (let i = 0; i < models.length; i++) { if (await rpProbe(models[i])) { cachedRpModel = models[i]; break; } }
+          }
+          if (!cachedRpModel) return json({ error: 'No usable Gemini text model is available for this API key.' }, 502);
+          gres = await rpCall(cachedRpModel, rpParts);
           gj = await gres.json().catch(() => null);
-          // If the cached model went stale (deprecated/removed), rediscover once and retry.
-          if (!gres.ok && /not (found|available|supported)|no longer|is not/i.test((gj && gj.error && gj.error.message) || '')) {
-            cachedRpModel = null;
-            const fresh = await rpDiscover();
-            if (fresh && fresh !== modelName) { cachedRpModel = fresh; gres = await rpCall(fresh); gj = await gres.json().catch(() => null); }
+          if (!gres.ok) { // cached model went stale — find another that actually works
+            const bad = cachedRpModel; cachedRpModel = null;
+            const models = await rpModels();
+            for (let i = 0; i < models.length; i++) {
+              if (models[i] !== bad && await rpProbe(models[i])) { cachedRpModel = models[i]; gres = await rpCall(cachedRpModel, rpParts); gj = await gres.json().catch(() => null); break; }
+            }
           }
         } catch (e) { return json({ error: 'Could not reach the prompt reader. Please try again.' }, 502); }
-        if (!gres.ok) return json({ error: (gj && gj.error && gj.error.message) || 'Prompt reading failed.' }, gres.status >= 400 && gres.status < 500 ? 400 : 502);
+        if (!gres || !gres.ok) return json({ error: (gj && gj.error && gj.error.message) || 'Prompt reading failed.' }, (gres && gres.status >= 400 && gres.status < 500) ? 400 : 502);
         const gparts = (gj && gj.candidates && gj.candidates[0] && gj.candidates[0].content && gj.candidates[0].content.parts) || [];
         // Defensive: only ever surface TEXT — any non-text part is ignored.
         const promptText = gparts.map(function (p) { return p.text || ''; }).join('').trim();
