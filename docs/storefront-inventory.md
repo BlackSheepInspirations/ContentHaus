@@ -82,10 +82,18 @@ and each links **back to the store + into the OS**.
 ## Prioritized punch list
 
 ### 🔴 P0 — launch blockers
-1. **Fix the digital/access-pass product experience.** A dedicated digital-product template (or
-   template logic): kill shipping/delivery/duties/returns; add **instant digital access**, a
-   **what's-included** block, and a link to the matching **preview page**. Real (or on-brand
-   branded) images to replace "PHOTO COMING SOON." Covers all 9 access-pass/GPT products.
+1. **Fix the digital/access-pass product experience.**
+   - ✅ **DONE (2026-08-07) — template built + verified via `?view=digital`.** New
+     `templates/product.digital.json` (mirror): removes `delivery_return` / `countdown_timer` /
+     `quantity_selector`, turns off the delivery link, adds a `custom_liquid` block →
+     `snippets/p2p-digital-access.liquid` (instant-access bar + per-product what's-included +
+     "See everything inside" button, handle-keyed to the verified preview pages), and swaps the
+     random-merch related row for `snippets/p2p-membership-crosssell.liquid` (the other 8 passes,
+     current excluded, priced, linking to each product). Copy is a DRAFT — edit in the snippet.
+   - ⏳ **TODO (Andrea, admin):** (a) **assign the 9 access-pass/GPT products to the "digital"
+     template** (Products → each → Theme template → `digital`); (b) **replace "PHOTO COMING
+     SOON"** with real/branded images per product. ⚠️ 3 base-theme files edited **mirror-only** —
+     bring under version control.
 2. **Global P2P entry point** *(Andrea's flag).*
    - ✅ **DONE (2026-08-07) — footer:** persistent `.hdt-p2p-entry` aurora bar added to
      `sections/footer.liquid` (mirror), on **every** storefront page, → `/pages/p2p-os`
