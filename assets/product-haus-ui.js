@@ -1202,7 +1202,10 @@
     },
     {
       id: "stickers", label: "Stickers", icon: "crop",
-      items: [{ type: "generator", id: "sticker-sheet" }],
+      items: [
+        { type: "generator", id: "sticker-sheet" },
+        { type: "generator", id: "sticker-pack" },
+      ],
     },
     {
       id: "patternsWraps", label: "Patterns & Wraps", icon: "palette",

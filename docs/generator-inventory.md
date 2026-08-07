@@ -408,4 +408,12 @@ Planner Pages, Devotional (multi-sheet decks), Stickers.
 - **Chunk 3 — Stickers premium** (commit `7aea25b`): **Cut Type** (Die-Cut vs Kiss-Cut), **Finish** (matte/gloss/holo/glitter/clear), **standalone single mode** (count=1 → centered single-piece framing, not sheet-grid; arrangement + size are count-computed tokens), **matching-set cohesion** in Variety/Single-Subject modes, **300 DPI + bleed + safe cut margin** in the locked suffix.
 - **Chunk 4 — Coloring KDP framing** (commit `267d7d7`): new shared helper `product-haus-kdp.js` (trim sizes 8.5×11 / 8×10 / 6×9 / 7×10 / 8.5×8.5, Print Setup single-printable-vs-bound-gutter, one clause builder) wired into all 3 coloring generators. Trim + orientation + 300 DPI, gutter vs even margins, single-sided/no-bleed-through on every prompt; the Coloring Book bundle stamps every page (multi-page pack). Removed redundant baked-in "8.5x11" page-format labels.
 
-**Deferred / not built:** true multi-product sticker *bundle* (engine is either-4-variations-OR-page-bundle, so a bundle would drop the 4 variations — cohesion delivered in-mode instead).
+**Deferred / not built:** ~~true multi-product sticker *bundle*~~ → **✅ SHIPPED (2026-08-07).**
+Rather than force it into the existing Sticker Generator (which would trade away its 4
+variations), built a SEPARATE **Sticker Pack Generator** (`sticker-pack`) as a page-bundle
+(same `pageTypes` mechanism as Coloring Book / Journal): emits a standalone die-cut
+sticker prompt PER design (up to 8, default 6), each individually listable/sellable, all
+sharing one locked look (theme + art style + palette + finish) so the pack stays cohesive.
+Added as the 2nd item in the Stickers category (now a mini-grid of Sticker Generator +
+Sticker Pack). Verified live (bundle renders 6 blocks + picker) + Node harness (clean
+per-block fill, finish clause, no leftover tokens). Nothing left deferred in Project Haus.
