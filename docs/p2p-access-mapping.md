@@ -85,11 +85,30 @@ handles and **must be repointed** to these.
 - GPTs (Frank/Ruth): no preview page — purchase grants the ChatGPT link via `gpt-access` section.
 - ⚠️ **Growth Haus lost its hero banner** (Andrea noticed) — regression to fix.
 
-### ❓ Still open
-1. **GPT tags** — confirm the exact tag string on the Idea (Frank) and Build (Ruth) gpt-access pages.
-2. **Brand Haus** — launching as a paid pass? which product?
-3. **Subscription tooling** — which app runs the P2P OS subscription (Shopify Subscriptions, Recharge, etc.)? Determines the add/remove-`all-access` Flow.
-4. **Unified preview page** — decision pending (see storefront-inventory.md): one scrolling "Meet the Hausen" overview vs. keeping only the per-Haus previews.
+### ✅ Resolved (Andrea 2026-08-07)
+- **GPT products (Frank `idea-haus-gpt` + Ruth `build-haus-access-pass`) need NO access tag** —
+  they don't gate anything on the site. Purchase just **delivers the ChatGPT link** to the buyer
+  (order-confirmation email / post-purchase). So: no tag, no gated page. On the digital product
+  page, message "your private ChatGPT link is sent when you buy" (no preview link). The existing
+  `gpt-access` section's tag-gate is NOT needed for these.
+- **Brand Haus = a paid pass** granting the **full Founders Assessment + the Brand & Logo Studio**.
+  Tag `brand-haus-access`, page /pages/brand-haus, preview /pages/brand-haus-preview.
+  ❓ **Product handle TBD** (need to create/confirm the Brand Haus access product). *(Note: the
+  free mini Founders Assessment stays a lead magnet; the FULL one is inside this paid Haus.)*
+
+### ⏸️ Parked / still open
+1. **Subscription tooling** for the OS pass (`p2p-os-access` → `all-access`) — Andrea will learn
+   more. Determines the add-on-activate / remove-on-cancel Flow. Not blocking other work.
+2. **Brand Haus product** — create/confirm the handle.
+3. **Growth Haus hero** — Andrea saw a missing hero; the 3 growth surfaces I checked are fine —
+   need the exact surface/URL.
+4. **Unified "Meet the Hausen" page** — DECIDED to build (one scrolling overview: OS + 5 Hausen +
+   2 GPTs), keeping per-Haus previews as deep-dives. Also the GPTs' "learn more" home.
+
+### 🔧 Aesthetic direction (decided)
+Membership/digital product + preview pages → **OS/P2P aesthetic** (black-opal, aurora, gold).
+Physical merch pages → **BSCI** (snarky-faith apparel). The `product.digital` template bridges:
+BSCI shell + P2P-styled content blocks.
 
 ## Downstream (depends on the above — NOT yet done)
 - The digital product page's per-product **"what's inside" copy + preview link** (`snippets/
