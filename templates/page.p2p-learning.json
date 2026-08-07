@@ -146,6 +146,8 @@
           "settings": {
             "title": "Heart Check",
             "pulse_items": "What am I proud of so far?\nWhere do I need to be gentler with myself?",
+            "course_url": "https://realm1-heartcheck.hidden-butterfly-bde8.workers.dev/",
+            "pdf_url": "https://realm1-heartcheck.hidden-butterfly-bde8.workers.dev/companion.pdf",
             "pos_left": 44.5,
             "pos_top": 66.6,
             "pos_width": 17,
