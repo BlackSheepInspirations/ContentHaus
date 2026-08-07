@@ -255,7 +255,10 @@
     document.getElementById('p2pj-ct').textContent = ctitle;
     var items = (h.getAttribute('data-pulse-items') || '').split(/\r?\n/).map(function(s){ return s.trim(); }).filter(Boolean);
     var list = document.getElementById('p2pj-cb');
-    list.innerHTML = items.map(function(i){ return '<li>' + i.replace(/[&<>]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c]; }) + '</li>'; }).join('');
+    var itemsHtml = items.map(function(i){ return '<li>' + i.replace(/[&<>]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c]; }) + '</li>'; }).join('');
+    // When a course is attached, add a wayfinding note so members know how to return.
+    if(h.getAttribute('data-course-url')){ itemsHtml += '<li class="pulse-note">Once you’ve completed the course, click the ✕ at the top-right of the screen to navigate back.</li>'; }
+    list.innerHTML = itemsHtml;
     var cta = document.getElementById('p2pj-cc');
     var url = h.getAttribute('data-link-url');
     if(url){ cta.textContent = h.getAttribute('data-link-label') || 'Open'; cta.setAttribute('href', url); cta.style.display = 'inline-block'; }

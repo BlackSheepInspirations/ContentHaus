@@ -345,6 +345,8 @@
 #p2pj-check .pulse-items{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px;}
 #p2pj-check .pulse-items li{font:400 14.5px/1.5 system-ui; color:#c6d6d0; padding-left:20px; position:relative;}
 #p2pj-check .pulse-items li::before{content:"·"; position:absolute; left:2px; color:#8ff0e0; font-weight:700;}
+#p2pj-check .pulse-items li.pulse-note{font-size:13px; font-style:italic; color:#9db3ac; opacity:.9; margin-top:2px;}
+#p2pj-check .pulse-items li.pulse-note::before{content:"↩"; color:#9db3ac; font-weight:400;}
 #p2pj-check .cta{display:inline-block; margin-top:20px; padding:12px 22px; border-radius:12px; cursor:pointer;
   font:700 13px/1 system-ui; letter-spacing:.05em; color:#06120e; border:0; background:linear-gradient(145deg,#c9f5ea,#8ff0e0); text-decoration:none;}
 #p2pj-check .x{float:right; cursor:pointer; color:var(--muted); font:700 20px/1 system-ui; margin:-6px -4px 0 0;}
