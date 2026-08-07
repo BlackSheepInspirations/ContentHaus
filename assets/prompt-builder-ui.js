@@ -1789,7 +1789,9 @@
         "Core Style",
         text.getFixedEntries(),
         handleFieldChange,
-        "Stays consistent across all " + countLabel + "."
+        combinedMode
+          ? "Stays consistent across all " + countLabel + "."
+          : "Stays consistent every time you regenerate this design."
       )
     );
     if (!combinedMode) panel.appendChild(renderFilterAndFinishFieldGroup(null, null, null));
@@ -1830,9 +1832,11 @@
         "Variation Details",
         text.getVariableEntries(),
         handleFieldChange,
-        count === "1"
-          ? "Only 1 variation selected above, so these just describe the single output."
-          : "Free to vary between the " + countLabel + " for different artistic takes."
+        combinedMode
+          ? (count === "1"
+            ? "Only 1 variation selected above, so these just describe the single output."
+            : "Free to vary between the " + countLabel + " for different artistic takes.")
+          : "The AI is free to vary these between regenerations — rerun the prompt for a different take."
       )
     );
     return panel;
@@ -3986,6 +3990,20 @@
     var children;
     if (activeMode === "collection") {
       children = [title, platformField, renderNegativePromptField()];
+    } else if (activeMode === "text" || activeMode === "reference") {
+      // Text always forces a single-image meta-instruction (variationCount:1
+      // regardless of this value); Reference produces one reinterpretation and
+      // never reads the count. Hiding Variations here stops it implying an
+      // effect it doesn't have in these two modes.
+      children = [
+        title,
+        projectField,
+        aspectField,
+        platformField,
+        bufferField,
+        outputFormatField,
+        renderNegativePromptField(),
+      ];
     } else {
       children = [
         title,
