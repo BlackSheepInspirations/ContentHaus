@@ -86,9 +86,14 @@ and each links **back to the store + into the OS**.
    template logic): kill shipping/delivery/duties/returns; add **instant digital access**, a
    **what's-included** block, and a link to the matching **preview page**. Real (or on-brand
    branded) images to replace "PHOTO COMING SOON." Covers all 9 access-pass/GPT products.
-2. **Global P2P entry point** — add a persistent way to reach the **P2P OS / membership** from
-   every storefront page (header nav item + footer link; consider an account-aware "My OS" vs
-   "Join / Membership"). *(Andrea's flag.)*
+2. **Global P2P entry point** *(Andrea's flag).*
+   - ✅ **DONE (2026-08-07) — footer:** persistent `.hdt-p2p-entry` aurora bar added to
+     `sections/footer.liquid` (mirror), on **every** storefront page, → `/pages/p2p-os`
+     (self-routes: members → OS shell, visitors → sales preview). Deployed live + verified.
+     ⚠️ Base-theme file — edited in the **mirror only**; bring under version control.
+   - ⏳ **TODO — header (admin, ~2 min, Andrea):** add a top-level Main-menu item
+     "Purpose 2 Profit" → `/pages/p2p-os` (Online Store → Navigation → Main menu). The
+     header nav is an admin-managed menu, so this is content, not code.
 3. **Empty collections** — hide the 4 zero-item categories from the homepage grid (or populate),
    so launch doesn't show dead ends.
 
