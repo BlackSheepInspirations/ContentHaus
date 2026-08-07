@@ -65,11 +65,32 @@ Sampled **The Prompt 2 Profit Haus – Access Pass** ($197, "60% OFF" from $497.
 - No "what's included / instant access / how to get in / link to the preview page" content.
 - Same template → same problem across **all 9 access-pass / GPT products.**
 
-### 6. Physical product pages (Andrea's explicit ask — "all items")
-Not yet render-sampled in depth (collection product cards lazy-load; deferred to the build).
-Template itself is fine for physical goods (shipping badges are correct there). Expected work:
-per-product **description depth, mockup/image quality, sizing & care, cross-sell**, and a
-P2P cross-promo module. Scope precisely when we start.
+### 6. Physical product pages — AUDIT (2026-08-07)
+Catalog: **49 products** = 10 access-pass/GPT + **39 merch** (37 are T-Shirts; theme is
+adventure/outdoor/fishing/coffee-heavy — lighter on the "faith/snark" the brand leads with).
+Rendered "All American Mama Tee" (87 imgs / 96 variants) as a representative page.
+
+**Findings:**
+- 🔴 **Color swatches render as blank grey circles** — the theme isn't mapping the Printify
+  color names to real colors, so a shopper can't see any color. **Biggest fixable page issue.**
+- 🟠 **Image-gallery overload** — products sync **24–87 images** each (Printify dumps every color's
+  mockups). Overwhelming + slow. Needs curation to a lead set (lifestyle + a few key colors +
+  a size chart), which is mostly a Printify-sync setting + maybe a template display cap.
+- 🟠 **Catalog hygiene:** a live **"Copy of I'd Rather Be Lost T-Shirt"** draft
+  (`copy-of-id-rather-be-lost…`) should be deleted/renamed; "Houston, I Might Be the Whole
+  Problem" has no product_type + 1 variant (check it's set up right); the OS access product has
+  **0 images** (needs its digital-page image).
+- 🟢 **Descriptions exist** and are reasonable length (~1,000–2,600 chars) — a consistency/on-brand
+  pass is polish, not a blocker.
+- 🟢 Layout is otherwise clean (lifestyle hero, size buttons XS–4XL, qty, sticky ATC).
+- Minor: an empty/broken thumbnail box top-left of the gallery.
+
+**Prioritized punch list (product pages):**
+1. 🔴 **Fix color swatches** (code) — map color names → real swatches so shoppers see colors. Top win.
+2. 🟠 **Curate images** — cap/curate the mega-galleries (Andrea's Printify sync + possibly a template limit).
+3. 🟠 **Catalog hygiene** (Andrea, admin) — delete the "Copy of" product; check the typeless one; OS image.
+4. **P2P cross-sell on merch pages** (code) — a small "psst, there's a whole creator OS" nudge, mirroring the homepage bridge, so merch shoppers discover the membership.
+5. Polish: description on-brand consistency; the empty-thumbnail glitch.
 
 ### 7. Preview / sales pages — built, need a wiring + quality check
 Real content (not stubs): `p2p-os-preview` (263 lines), `brand-haus-preview` (203) are deep;
