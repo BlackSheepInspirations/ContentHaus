@@ -1052,7 +1052,7 @@
 /* ---------- Build layout + sticky Generate rail ---------- */
 #p2p-haus-app .build-layout {
   display: grid;
-  /* Fractional columns (mirrors the other Hausen's .mh-body 2fr/1fr) so the rail SCALES
+  /* Fractional columns (mirrors the other Hauses' .mh-body 2fr/1fr) so the rail SCALES
      with the viewport instead of a fixed px width that overflows/overlaps at higher zoom. */
   grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
   gap: 28px;
@@ -1069,7 +1069,7 @@
 }
 
 #p2p-haus-app .build-rail {
-  /* One compact sticky column (mirrors the other Hausen): the whole rail pins as a single
+  /* One compact sticky column (mirrors the other Hauses): the whole rail pins as a single
      unit, and its panels are height-capped + internally scrollable (see .rail-panel__body)
      so the rail stays compact and the pieces never scroll behind each other. On Shopify the
      theme header is sticky; the embed sets --rail-sticky-top to clear it. */
@@ -3305,7 +3305,7 @@
   border-left: 1px solid var(--color-border);
 }
 
-/* ---- Design-system polish (parity with the other Hausen) ---- */
+/* ---- Design-system polish (parity with the other Hauses) ---- */
 /* Section-card eyebrow gets the trailing hairline (marker + label + rule). */
 #p2p-haus-app .section-heading .section-number {
   display: flex;

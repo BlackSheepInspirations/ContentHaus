@@ -1,6 +1,6 @@
 /* =====================================================================
    HAUS DESIGN SYSTEM — shared base (see docs/haus-design-system.md)
-   One stylesheet all six Hausen pull from. Each Haus sets its signature
+   One stylesheet all six Hauses pull from. Each Haus sets its signature
    by adding a `.haus--<name>` class on its app container; every accent
    below keys off --haus-accent, so switching the Haus = switching one token.
    Gold is a fixed universal accent (callout left-bars everywhere).

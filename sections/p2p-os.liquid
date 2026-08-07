@@ -264,7 +264,7 @@
       </div>
 
       {%- comment -%} meet cards baked in (icon^title^blurb) {%- endcomment -%}
-      <div class="osx-kick" style="margin-top:28px">{{ section.settings.meet_heading | default: 'Meet your Hausen & Haus Mates' }}</div>
+      <div class="osx-kick" style="margin-top:28px">{{ section.settings.meet_heading | default: 'Meet your Hauses & Haus Mates' }}</div>
       {%- comment -%} fields: icon^name^front blurb^back detail (flip)^link {%- endcomment -%}
       {%- capture os_meets -%}crown^Brand Haus^Your identity — brand card, logo, and kit. Start here so everything else sounds like you.^Take the Founders Assessment to reveal your archetype, then save a Brand Kit — colors, fonts and voice — that every other Haus reuses.^/pages/brand-haus|prompt^Content Haus^Your words — prompts and copy that carry your voice everywhere you show up.^Generate on-brand prompts and copy for art, products and captions — Character, Text, Couples and Combined modes.^/pages/content-haus|palette^Graphics Haus^Your look — on-brand visuals and design without the degree.^Create clipart, characters and seasonal art from detailed prompts, kept consistent with a Look Lock.^/pages/graphics-haus|box^Project Haus^Your build — turn the idea into a real product, step by step.^Turn a concept into a finished, sellable digital product — invitations, cards, journals and planners.^/pages/project-haus|megaphone^Marketing Haus^Your reach — posts, ads and campaigns that get you seen.^Make mockups, social posts, ads, emails and listing copy that get you seen and sell your work.^/pages/marketing-haus|rocket^Growth Haus^Your launch — generators that execute the ROOTED method and scale what works.^Run the ROOTED launch method with generators that build your full launch kit and scale what works.^/pages/growth-haus|mates^Frank & Ruth — your Haus Mates^Frank, your Creative Director, and Ruth, your ruthless Design Meister. Ask them anything as you go.^Frank sharpens your ideas like a blunt Creative Director; Ruth makes them production-ready. Open either any time you are stuck.^/pages/p2p-os?v=mates{%- endcapture -%}
       {%- assign os_meet_items = os_meets | split: '|' -%}
@@ -302,7 +302,7 @@
                 <p>See how the whole OS works, step by step.</p>
               </div>
               <div class="osx-meetface osx-meetback">
-                <p class="osx-meetmore">A guided tour of every part of your OS — the dashboard, the Hausen, your Journey, and how it all fits together.</p>
+                <p class="osx-meetmore">A guided tour of every part of your OS — the dashboard, the Hauses, your Journey, and how it all fits together.</p>
                 <a class="osx-meetlink" href="{{ tools_tutorial_url }}">Open the walkthrough →</a>
               </div>
             </div>
@@ -1141,7 +1141,7 @@
       <span class="osx-gate-eyebrow">Purpose 2 Profit · Your Operating System</span>
       <h1 class="osx-gate-h1">Your Haus is waiting</h1>
       <p class="osx-gate-tag">{{ section.settings.hero_brand_tagline | default: 'Where Your originality is rooted and ready to grow.' }}</p>
-      <p class="osx-gate-body">This is your members' home base — your Brand DNA, all six Hausen, your two AI partners, the Learning Journey and the launch method, all in one place. Take a look inside, then make it yours.</p>
+      <p class="osx-gate-body">This is your members' home base — your Brand DNA, all six Hauses, your two AI partners, the Learning Journey and the launch method, all in one place. Take a look inside, then make it yours.</p>
       <div class="osx-gate-btns">
         <a class="osx-gate-btn primary" href="{{ section.settings.gate_preview_url | default: '/pages/p2p-os-preview' }}">See what's inside →</a>
         <a class="osx-gate-btn ghost" href="{{ section.settings.gate_access_url | default: '/products/p2p-os-access' }}">Get the Access Pass</a>
@@ -1678,7 +1678,7 @@ window.P2P_EVENTS = [{"iso":"2026-08-15","date":"Sat · Aug 15","time":"","title
       setInterval(tick, 11000);
     }catch(e){ if(window.console) console.warn('P2P born-original skipped:', e); } })();
 
-    // Checkpoint "Meet your Hausen" — flip a card to reveal more + a link (link click still navigates).
+    // Checkpoint "Meet your Hauses" — flip a card to reveal more + a link (link click still navigates).
     (function(){ try{
       root.querySelectorAll('.osx-meetcard').forEach(function(card){
         if(card.hasAttribute('data-noflip')){ return; }  // e.g. Rewards Map card — its own click opens the pop-up, no flip
@@ -1756,7 +1756,7 @@ window.P2P_EVENTS = [{"iso":"2026-08-15","date":"Sat · Aug 15","time":"","title
     { "type": "header", "content": "Checkpoint view" },
     { "type": "text", "id": "checkpoint_title", "label": "Checkpoint title", "default": "Set yourself up before you go" },
     { "type": "textarea", "id": "checkpoint_intro", "label": "Checkpoint intro", "default": "A few quick things to do while you're here today. Tick them off — when they're all done, you're ready for the next steps." },
-    { "type": "text", "id": "meet_heading", "label": "Meet heading", "default": "Meet your Hausen & Haus Mates" },
+    { "type": "text", "id": "meet_heading", "label": "Meet heading", "default": "Meet your Hauses & Haus Mates" },
     { "type": "header", "content": "Notebook view" },
     { "type": "text", "id": "notebook_title", "label": "Notebook title", "default": "Your Notebook" },
     { "type": "textarea", "id": "notebook_intro", "label": "Notebook intro", "default": "Jot ideas, plans, and notes as you build. Give each a title so you can find it again later." },

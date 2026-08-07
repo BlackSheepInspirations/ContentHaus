@@ -4727,7 +4727,7 @@ function wireMakeHandoff() {
         e.target && e.target.closest ? e.target.closest(".jstop__act--make") : null;
       if (!link) return;
       const href = link.getAttribute("href") || "";
-      // Only page destinations (other Hausen). The in-page anchor (#generatorLibraryTitle)
+      // Only page destinations (other Hauses). The in-page anchor (#generatorLibraryTitle)
       // is Growth Haus's own generator, which already holds this data — nothing to hand off.
       if (href.indexOf("/pages/") !== 0) return;
       try {

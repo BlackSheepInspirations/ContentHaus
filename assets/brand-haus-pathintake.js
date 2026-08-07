@@ -195,7 +195,7 @@
     return ui.el("div", { class: "bh-founder-interview bh-founder-interview--intro" }, [
       ui.el("h2", { class: "bh-preview__title" }, [ui.icon("peak"), ui.el("span", { text: "Find Your Direction" })]),
       ui.el("p", { class: "bh-field-group__subtitle bh-text--black", text: "You know your brand DNA — now let's aim it. A short check-in, 7–8 questions, that turns a general sense of “I want to make something” into a direction specific enough to actually start on. A little clarity now saves a lot of second-guessing later." }),
-      ui.el("p", { class: "bh-field-group__subtitle bh-text--black", text: "At the end, your answers become a starting brief you can take straight to Frank — your AI Creative Director in the Idea Haus — for a real back-and-forth about what to build, then carry into the build Hausen." }),
+      ui.el("p", { class: "bh-field-group__subtitle bh-text--black", text: "At the end, your answers become a starting brief you can take straight to Frank — your AI Creative Director in the Idea Haus — for a real back-and-forth about what to build, then carry into the build Hauses." }),
       startBtn,
       ui.el("p", { class: "bh-chapter__reassurance", text: "This is a creative starting point built from your own answers — not a guarantee of what will sell, and not a substitute for your own research and judgment." }),
     ]);

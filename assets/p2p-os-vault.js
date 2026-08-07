@@ -1,10 +1,10 @@
 /* Purpose 2 Profit — OS Vault
  * A read-only, cross-Haus dashboard for the Operating System home. It surfaces
- * what the member has already made across the Hausen by reading each Haus's own
+ * what the member has already made across the Hauses by reading each Haus's own
  * localStorage (never writes). Every shape is parsed defensively — a Haus that
  * has never been used simply contributes nothing.
  *
- * Keys read (written by the individual Hausen):
+ * Keys read (written by the individual Hauses):
  *   <haus>RecentLog   [{ text, mode, loggedAt }]           — brand/prompt/graphics/product/marketing
  *   <haus>Favorites   { mode: [..] } or [..]               — saved items
  *   <haus>BrandKits   { kits:[..] } or [..]                — saved brand kits
@@ -226,14 +226,14 @@
       return '<a class="ov-total-chip" href="' + esc(p.url) + '"><b>' + p.n + '</b><span>' + esc(p.label.replace(" Haus", "")) + '</span></a>';
     }).join("");
     return '<div class="ov-totals"><span class="ov-totals-lead">' + totals.total +
-      ' saved across your Hausen</span><div class="ov-total-chips">' + chips + '</div></div>';
+      ' saved across your Hauses</span><div class="ov-total-chips">' + chips + '</div></div>';
   }
 
   function renderEmpty() {
     return '<div class="ov-empty">' +
       '<div class="ov-empty-ic">🗄️</div>' +
       '<b>Your vault fills up as you create</b>' +
-      '<p>Brand kits, saved looks, mascots and everything you generate across the Hausen collects here — so your best work is always one click away.</p>' +
+      '<p>Brand kits, saved looks, mascots and everything you generate across the Hauses collects here — so your best work is always one click away.</p>' +
       '<div class="ov-empty-links"><a href="/pages/brand-haus">Start in Brand Haus →</a></div>' +
       '</div>';
   }

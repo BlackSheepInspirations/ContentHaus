@@ -247,7 +247,7 @@
   #p2pos .osx-restips summary::-webkit-details-marker{display:none;}
   #p2pos .osx-restips summary::after{content:'+';float:right;color:var(--gold);font-weight:800;}
   #p2pos .osx-restips details[open] summary::after{content:'–';}
-  /* "How the generators work" — 4-step flow + collapsed prompt tips (matches the Hausen) */
+  /* "How the generators work" — 4-step flow + collapsed prompt tips (matches the Hauses) */
   #p2pos .osx-flow{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px;}
   @media(max-width:640px){#p2pos .osx-flow{grid-template-columns:1fr 1fr;}}
   #p2pos .osx-flowstep{display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid var(--stroke);border-radius:12px;background:rgba(255,255,255,.02);}
@@ -636,7 +636,7 @@
   #p2pos .osx-compose-ph{flex:1;min-width:0;color:#c9d7d2;}
   #p2pos .osx-compose-cue{flex:none;font:800 11.5px/1 system-ui;color:#0a1410;background:linear-gradient(100deg,#f4e2a6,#c9a24a);border-radius:999px;padding:7px 12px;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.3);}
   @media (max-width:520px){#p2pos .osx-compose-cue{display:none;}}
-  /* Tools & Resources flip cards (reuse Meet-your-Hausen component) */
+  /* Tools & Resources flip cards (reuse Meet-your-Hauses component) */
   #p2pos .osx-res-hint{font:500 12.5px/1.5 system-ui;color:var(--muted);margin:-4px 0 12px;}
   #p2pos .osx-meet--tools .osx-meetfront > .osx-meetlink{margin-top:auto;}
   #p2pos button.osx-meetlink{background:none;border:0;padding:0;cursor:pointer;}
