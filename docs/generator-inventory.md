@@ -338,8 +338,16 @@ flat Transportation and the missing State/Region picker.)
   - Both keep Graphics Haus's standalone output + 4 variations + Look Lock. So the
     "real look" and the "fun look" are each great and separate.
 - **Graphics Studio parity** — added Time/Era + Camera Angle (default empty).
-- Deferred (bigger, engine change): multi-subject/quantity + Transportation cascade
+- Deferred (bigger, engine change): ~~multi-subject/quantity~~ + Transportation cascade
   in Graphics Studio; leaving Content Haus's own vanity as-is (already loved).
+- **✅ SHIPPED (2026-08-07) — Graphics Studio multi-subject/quantity.** Turned out NOT
+  to need an engine change: added two opt-in extra Subject slots (Second/Third, same
+  catalog + "type your own") each with a "How Many" quantity, and combine all active
+  slots in computeExtraTokens into one clause ("featuring a cat, 2x coffee cup, and a
+  sunflower") — quantity mirrors Content Haus's "3x cat" prefix, qty 1 uses a/an,
+  empty slots drop. Verified live (two slots combine) + Node harness (qty + articles +
+  list-join). Transportation cascade stays optgroup-grouped (already shipped);
+  Content Haus vanity still left as-is.
 
 ### 4E. Engine/UX value-adds shipped (2026-08-05)
 

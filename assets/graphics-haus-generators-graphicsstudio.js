@@ -40,6 +40,11 @@
     "coffee cup", "camera", "guitar", "basketball", "gift box",
   ].sort());
 
+  // Multi-subject parity with Content Haus's Graphics "What Is It" slots:
+  // slots 2 & 3 are opt-in (default None). Quantity mirrors Content Haus's
+  // "3x cat" prefix pattern (no fragile pluralization).
+  var QTY_OPTIONS = ["1", "2", "3", "4", "5"];
+
   var ART_STYLE_OPTIONS = [
     // Illustrated — one representative pick per Content Haus Character
     // Type bucket
@@ -124,6 +129,11 @@
 
     fields: [
       { name: "mainSubject", label: "Main Subject", options: MAIN_SUBJECT_OPTIONS, defaultValue: MAIN_SUBJECT_OPTIONS[0] },
+      { name: "mainSubjectQty", label: "Main Subject — How Many", options: QTY_OPTIONS, defaultValue: QTY_OPTIONS[0] },
+      { name: "subject2", label: "Second Subject (optional)", options: MAIN_SUBJECT_OPTIONS, defaultValue: MAIN_SUBJECT_OPTIONS[0] },
+      { name: "subject2Qty", label: "Second Subject — How Many", options: QTY_OPTIONS, defaultValue: QTY_OPTIONS[0] },
+      { name: "subject3", label: "Third Subject (optional)", options: MAIN_SUBJECT_OPTIONS, defaultValue: MAIN_SUBJECT_OPTIONS[0] },
+      { name: "subject3Qty", label: "Third Subject — How Many", options: QTY_OPTIONS, defaultValue: QTY_OPTIONS[0] },
       { name: "artStyle", label: "Art Style", options: ART_STYLE_OPTIONS, defaultValue: ART_STYLE_OPTIONS[0], aesthetic: "artStyle" },
       { name: "colorPalette", label: "Color Palette", options: COLOR_PALETTE_OPTIONS, defaultValue: COLOR_PALETTE_OPTIONS[0], aesthetic: "palette" },
       { name: "background", label: "Background", options: BACKGROUND_OPTIONS, defaultValue: BACKGROUND_OPTIONS[0] },
@@ -137,9 +147,24 @@
     ],
 
     computeExtraTokens: function (valueMap) {
-      var subjectClause = (valueMap.mainSubject && valueMap.mainSubject.indexOf("None") !== 0)
-        ? ", featuring a " + valueMap.mainSubject
-        : "";
+      // Combine up to 3 subject slots into one natural clause. Quantity uses
+      // Content Haus's "3x cat" prefix; qty 1 uses a/an. Empty/None slots drop.
+      function slot(sub, qty) {
+        if (!sub || sub.indexOf("None") === 0) return null;
+        var q = parseInt(qty, 10) || 1;
+        return q > 1 ? (q + "x " + sub) : ("a" + (/^[aeiou]/i.test(sub) ? "n" : "") + " " + sub);
+      }
+      var parts = [
+        slot(valueMap.mainSubject, valueMap.mainSubjectQty),
+        slot(valueMap.subject2, valueMap.subject2Qty),
+        slot(valueMap.subject3, valueMap.subject3Qty),
+      ].filter(Boolean);
+      var joined = parts.length === 1
+        ? parts[0]
+        : parts.length === 2
+          ? parts[0] + " and " + parts[1]
+          : parts.slice(0, -1).join(", ") + ", and " + parts[parts.length - 1];
+      var subjectClause = parts.length ? ", featuring " + joined : "";
       var sceneEffectClause = (valueMap.sceneEffect && valueMap.sceneEffect.indexOf("None") !== 0)
         ? ", " + valueMap.sceneEffect
         : "";
