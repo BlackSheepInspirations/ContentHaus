@@ -1,0 +1,11 @@
+{
+  "sections": {
+    "main": {
+      "type": "welcome-to-the-haus",
+      "settings": {
+        "os_product": "p2p-os-access"
+      }
+    }
+  },
+  "order": ["main"]
+}
