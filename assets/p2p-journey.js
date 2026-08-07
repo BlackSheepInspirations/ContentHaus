@@ -253,7 +253,7 @@
     var cid = h.getAttribute('data-check-id') || ('check:' + ctitle);
     if(ctitle && window.P2P && window.P2P.completeCheck){ window.P2P.completeCheck(cid); if(window.P2P.push) window.P2P.push(); renderStats(); checkRankUp(); }
     document.getElementById('p2pj-ct').textContent = ctitle;
-    var items = (h.getAttribute('data-pulse-items') || '').split('\n').map(function(s){ return s.trim(); }).filter(Boolean);
+    var items = (h.getAttribute('data-pulse-items') || '').split(/\r?\n/).map(function(s){ return s.trim(); }).filter(Boolean);
     var list = document.getElementById('p2pj-cb');
     list.innerHTML = items.map(function(i){ return '<li>' + i.replace(/[&<>]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c]; }) + '</li>'; }).join('');
     var cta = document.getElementById('p2pj-cc');
@@ -265,7 +265,7 @@
     var pdfUrl = h.getAttribute('data-pdf-url');
     var cbtn = document.getElementById('p2pj-course');
     if(cbtn){
-      if(courseUrl){ cbtn.style.display = 'inline-block'; cbtn.onclick = function(){ openCourseView(courseUrl); }; }
+      if(courseUrl){ cbtn.style.display = 'inline-block'; cbtn.onclick = function(){ openCourseView(courseUrl, pdfUrl); }; }
       else { cbtn.style.display = 'none'; cbtn.onclick = null; }
     }
     var pbtn = document.getElementById('p2pj-cpdf');
@@ -280,7 +280,10 @@
   /* ---- full-screen course overlay (hosted Rise course, kept in-site) ---- */
   var courseView = document.getElementById('p2pj-courseview');
   var courseFrame = document.getElementById('p2pj-cvframe');
-  function openCourseView(u){ if(!courseView || !courseFrame) return; courseFrame.setAttribute('src', u); courseView.classList.add('show'); document.body.style.overflow = 'hidden'; }
+  var courseViewPdf = document.getElementById('p2pj-cvpdf');
+  function openCourseView(u, pdf){ if(!courseView || !courseFrame) return; courseFrame.setAttribute('src', u);
+    if(courseViewPdf){ if(pdf){ courseViewPdf.style.display = 'inline-block'; courseViewPdf.setAttribute('href', pdf); } else { courseViewPdf.style.display = 'none'; courseViewPdf.removeAttribute('href'); } }
+    courseView.classList.add('show'); document.body.style.overflow = 'hidden'; }
   function closeCourseView(){ if(!courseView) return; courseView.classList.remove('show'); if(courseFrame) courseFrame.removeAttribute('src'); document.body.style.overflow = ''; }
   if(courseView){
     var cvx = document.getElementById('p2pj-cvx');

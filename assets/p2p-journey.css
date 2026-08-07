@@ -664,9 +664,13 @@
 #p2pj-check .modal-card .cta + .cta{ margin-top:10px; }
 #p2pj-check .cta--pdf{ background:transparent; box-shadow:none; border:1.5px solid currentColor; opacity:.85; }
 #p2pj-check .cta--pdf:hover{ opacity:1; }
+#p2pj-check .cta + .cta{ margin-left:10px; }
 #p2pj-courseview{ position:fixed; inset:0; z-index:10000; display:none; background:rgba(6,8,20,.94); -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px); padding:2.2vmin; }
 #p2pj-courseview.show{ display:flex; align-items:center; justify-content:center; }
 #p2pj-courseview .cv-card{ position:relative; width:100%; height:100%; max-width:1200px; border-radius:14px; overflow:hidden; box-shadow:0 24px 70px rgba(0,0,0,.6); background:#0b1020; }
-#p2pj-courseview .cv-x{ position:absolute; top:10px; right:12px; z-index:2; width:40px; height:40px; border-radius:50%; border:0; cursor:pointer; font-size:18px; line-height:1; color:#fff; background:rgba(0,0,0,.55); transition:background .15s; }
+#p2pj-courseview .cv-bar{ position:absolute; top:10px; right:12px; z-index:2; display:flex; align-items:center; gap:8px; }
+#p2pj-courseview .cv-pdf{ display:inline-flex; align-items:center; gap:6px; height:40px; padding:0 16px; border-radius:20px; font-size:13px; font-weight:600; letter-spacing:.01em; color:#fff; text-decoration:none; background:rgba(0,0,0,.55); border:1.5px solid rgba(255,255,255,.4); transition:background .15s, border-color .15s; }
+#p2pj-courseview .cv-pdf:hover{ background:rgba(0,0,0,.82); border-color:rgba(255,255,255,.7); }
+#p2pj-courseview .cv-x{ flex:0 0 auto; width:40px; height:40px; border-radius:50%; border:0; cursor:pointer; font-size:18px; line-height:1; color:#fff; background:rgba(0,0,0,.55); transition:background .15s; }
 #p2pj-courseview .cv-x:hover{ background:rgba(0,0,0,.82); }
 #p2pj-courseview iframe{ width:100%; height:100%; border:0; display:block; background:#0b1020; }
