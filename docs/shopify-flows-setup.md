@@ -75,8 +75,16 @@ needs to hand the buyer their private ChatGPT link. Two identical Flows:
 - **Trigger:** **Order paid**
 - **Condition:** **Order line items** → *Product* → **is** → `idea-haus-gpt` (or `build-haus-access-pass`)
 - **Action:** **Send email** (to the customer) → subject e.g. *"Your Frank GPT access"*, body with the
-  **ChatGPT link** + a one-line how-to. *(You supply the two GPT URLs.)*
+  **ChatGPT link** + a one-line how-to.
 - **On.**
+
+**The GPT links (drop into each email body):**
+- **Frank — The Idea Haus:** https://chatgpt.com/g/g-6a489ad05ac48191a7692939b09fc6f1-the-idea-haus
+- **Ruth — The Build Haus:** https://chatgpt.com/g/g-6a638c2591848191837a671eb3097901-the-build-haus
+
+> Buyer needs a (free) ChatGPT account to open a Custom GPT — worth a line in the email
+> ("Open in ChatGPT — sign in with any free account"). Keep a copy of these links here as the
+> source of truth in case the email template needs rebuilding.
 
 > Alternative if you'd rather not email from Flow: put the link in the product's post-purchase /
 > order-status page or a digital-delivery app. Flow is the simplest.
