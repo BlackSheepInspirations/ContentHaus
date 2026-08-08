@@ -4,14 +4,18 @@
   so it never overpowers the product. Lives on the physical product template only (the digital
   access-pass template already sells the membership). Added 2026-08-07 (storefront launch).
 {%- endcomment -%}
-{%- assign link = section.settings.cta_link | default: '/pages/p2p-os' -%}
+{%- assign link = section.settings.cta_link | default: '/pages/p2p-os-preview' -%}
+{%- assign member_link = section.settings.member_link | default: '/pages/p2p-os' -%}
 <section class="p2pn">
   <div class="p2pn__wrap">
     <p class="p2pn__text">
       <span class="p2pn__mark" aria-hidden="true">✦</span>
       <span>{{ section.settings.text | default: 'Black Sheep runs on Purpose 2 Profit — a full creator OS with the tools, AI partners, and launch path to build your own thing. Made by creators, for creators.' }}</span>
     </p>
-    <a class="p2pn__cta" href="{{ link }}">{{ section.settings.cta_label | default: 'Explore Purpose 2 Profit' }} <span aria-hidden="true">→</span></a>
+    <div class="p2pn__actions">
+      <a class="p2pn__cta" href="{{ link }}">{{ section.settings.cta_label | default: 'Explore Purpose 2 Profit' }} <span aria-hidden="true">→</span></a>
+      <a class="p2pn__member" href="{{ member_link }}">{{ section.settings.member_label | default: 'Already a member? Access your OS' }} <span aria-hidden="true">→</span></a>
+    </div>
   </div>
 </section>
 {%- style -%}
@@ -23,7 +27,10 @@
   .p2pn__text strong{color:#f4e9c9}
   .p2pn__cta{flex:0 0 auto;display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#c9f5ea,#8ff0e0);color:#06120e;font-weight:800;font-size:14px;letter-spacing:.01em;text-decoration:none;padding:12px 22px;border-radius:40px;transition:transform .15s ease}
   .p2pn__cta:hover{transform:translateY(-2px)}
-  @media(max-width:640px){.p2pn__wrap{justify-content:center;text-align:left}}
+  .p2pn__actions{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:8px}
+  .p2pn__member{color:#9db3c2;font-size:12.5px;text-decoration:none;border-bottom:1px solid rgba(157,179,194,.3);padding-bottom:1px;transition:color .15s ease,border-color .15s ease}
+  .p2pn__member:hover{color:#e9f0f8;border-color:rgba(233,240,248,.6)}
+  @media(max-width:640px){.p2pn__wrap{justify-content:center;text-align:left}.p2pn__actions{align-items:flex-start}}
 {%- endstyle -%}
 {% schema %}
 {
@@ -31,7 +38,9 @@
   "settings": [
     { "type": "textarea", "id": "text", "label": "Text", "default": "Black Sheep runs on Purpose 2 Profit — a full creator OS with the tools, AI partners, and launch path to build your own thing. Made by creators, for creators." },
     { "type": "text", "id": "cta_label", "label": "Button label", "default": "Explore Purpose 2 Profit" },
-    { "type": "url", "id": "cta_link", "label": "Button link", "info": "Defaults to /pages/p2p-os (self-routes). Repoint to the Welcome page once created." }
+    { "type": "url", "id": "cta_link", "label": "Button link (for visitors)", "info": "Defaults to /pages/p2p-os-preview. Repoint to the Welcome page once created." },
+    { "type": "text", "id": "member_label", "label": "Member link label", "default": "Already a member? Access your OS" },
+    { "type": "url", "id": "member_link", "label": "Member link", "info": "For existing members — defaults to /pages/p2p-os." }
   ],
   "presets": [{ "name": "P2P Product Nudge" }]
 }
