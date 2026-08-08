@@ -94,7 +94,11 @@ Rendered "All American Mama Tee" (87 imgs / 96 variants) as a representative pag
    page with zero admin. Add new POD colors to the fallback snippet as the catalog grows. ⚠️ mirror-only.
 2. 🟠 **Curate images** — cap/curate the mega-galleries (Andrea's Printify sync + possibly a template limit).
 3. 🟠 **Catalog hygiene** (Andrea, admin) — delete the "Copy of" product; check the typeless one; OS image.
-4. **P2P cross-sell on merch pages** (code) — a small "psst, there's a whole creator OS" nudge, mirroring the homepage bridge, so merch shoppers discover the membership.
+4. ✅ **P2P cross-sell on merch pages DONE (2026-08-07, code, verified).** New
+   `sections/p2p-product-nudge.liquid` — a slim aurora band inserted into `product.json`
+   (physical template only) after the tabs → routes to `/pages/p2p-os`. So the ~37 tees quietly
+   funnel shoppers to the membership. Absent on the digital template (which already sells it).
+   ⚠️ mirror-only (base theme now git-tracked).
 5. Polish: description on-brand consistency; the empty-thumbnail glitch.
 
 ### 7. Preview / sales pages — built, need a wiring + quality check

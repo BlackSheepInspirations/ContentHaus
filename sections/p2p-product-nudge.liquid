@@ -1,0 +1,38 @@
+{%- comment -%}
+  P2P Product Nudge — a slim band on merch product pages that funnels shoppers toward the
+  Purpose 2 Profit membership ("the brand runs on an OS you can use too"). Compact on purpose,
+  so it never overpowers the product. Lives on the physical product template only (the digital
+  access-pass template already sells the membership). Added 2026-08-07 (storefront launch).
+{%- endcomment -%}
+{%- assign link = section.settings.cta_link | default: '/pages/p2p-os' -%}
+<section class="p2pn">
+  <div class="p2pn__wrap">
+    <p class="p2pn__text">
+      <span class="p2pn__mark" aria-hidden="true">✦</span>
+      <span>{{ section.settings.text | default: 'Black Sheep runs on Purpose 2 Profit — a full creator OS with the tools, AI partners, and launch path to build your own thing. Made by creators, for creators.' }}</span>
+    </p>
+    <a class="p2pn__cta" href="{{ link }}">{{ section.settings.cta_label | default: 'Explore Purpose 2 Profit' }} <span aria-hidden="true">→</span></a>
+  </div>
+</section>
+{%- style -%}
+  #shopify-section-{{ section.id }}{margin:0}
+  .p2pn{background:linear-gradient(100deg,#0b1120,#132844);color:#e9f0f8;font-family:var(--font-body-family,system-ui)}
+  .p2pn__wrap{max-width:1080px;margin:0 auto;padding:20px 22px;display:flex;align-items:center;gap:22px;justify-content:space-between;flex-wrap:wrap}
+  .p2pn__text{margin:0;font-size:15px;line-height:1.5;max-width:680px;display:flex;gap:10px;align-items:flex-start}
+  .p2pn__mark{color:#8ff0e0;font-size:16px;line-height:1.5}
+  .p2pn__text strong{color:#f4e9c9}
+  .p2pn__cta{flex:0 0 auto;display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#c9f5ea,#8ff0e0);color:#06120e;font-weight:800;font-size:14px;letter-spacing:.01em;text-decoration:none;padding:12px 22px;border-radius:40px;transition:transform .15s ease}
+  .p2pn__cta:hover{transform:translateY(-2px)}
+  @media(max-width:640px){.p2pn__wrap{justify-content:center;text-align:left}}
+{%- endstyle -%}
+{% schema %}
+{
+  "name": "P2P Product Nudge",
+  "settings": [
+    { "type": "textarea", "id": "text", "label": "Text", "default": "Black Sheep runs on Purpose 2 Profit — a full creator OS with the tools, AI partners, and launch path to build your own thing. Made by creators, for creators." },
+    { "type": "text", "id": "cta_label", "label": "Button label", "default": "Explore Purpose 2 Profit" },
+    { "type": "url", "id": "cta_link", "label": "Button link", "info": "Defaults to /pages/p2p-os (self-routes). Repoint to the Welcome page once created." }
+  ],
+  "presets": [{ "name": "P2P Product Nudge" }]
+}
+{% endschema %}
