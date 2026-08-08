@@ -140,8 +140,21 @@ and each links **back to the store + into the OS**.
    Learning) and routes to it, so the store cross-sells the membership.
 5. **Product-page overhaul — all items** (Andrea's ask) — description quality, imagery, sizing/
    care, trust, cross-sell; per §6.
-6. **IA cleanup** — separate the **membership/access** offering from the **digital-download
-   merch** (they're both under "The Flock Files" now). Clear collection(s) + nav.
+6. **IA cleanup** — **AUDITED 2026-08-07: it's an admin/strategy fix, minimal code.**
+   Finding: "The Flock Files" collection was built as the **digital-downloads hub** (page copy
+   "Click. Download. Conquer. · Digital Downloads"; links to Kids/Teens/Adults download
+   categories), but the **11 P2P access-pass products were tagged into it**, so its grid shows
+   membership passes under a downloads banner — the mismatch. Discoverability is already solved
+   (footer entry + homepage bridge + Welcome page). Remaining is **reorganization, all admin:**
+   - **Create a "Purpose 2 Profit" (membership) collection** and move the 11 access passes into
+     it (or set a smart-collection rule on their tags); **remove them from "The Flock Files"** so
+     it's cleanly digital downloads and its "Click. Download. Conquer." page is accurate again.
+   - **Nav:** add a top-level **"Purpose 2 Profit"** item → the **Welcome page** (the membership
+     hub/funnel). Keep "The Flock Files" for downloads.
+   - Optional: the raw membership collection grid is largely redundant with the Welcome page —
+     the Welcome page is the real membership home; the collection is just "browse all passes."
+   *(No theme code needed — the Welcome page + bridge already carry the membership; this is
+   collection membership + one nav item in Shopify admin.)*
 7. **Preview-page wiring/quality pass** — verify buy buttons → correct products; links back to
    store + OS; render well logged-out.
 
