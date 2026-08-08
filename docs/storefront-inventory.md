@@ -86,7 +86,12 @@ Rendered "All American Mama Tee" (87 imgs / 96 variants) as a representative pag
 - Minor: an empty/broken thumbnail box top-left of the gallery.
 
 **Prioritized punch list (product pages):**
-1. 🔴 **Fix color swatches** (code) — map color names → real swatches so shoppers see colors. Top win.
+1. ✅ **Color swatches FIXED (2026-08-07, code, verified live).** Root cause: the theme resolves
+   swatch colors from `shop.metafields.ecomrise.colors` / the `theme_swatch` metaobject, which
+   have none of the Printify POD color names → blank grey. Fix: new `snippets/color-swatch-fallback.liquid`
+   (built-in name→hex map for all 49 catalog colors) hooked into `snippets/product-variant-options.liquid`
+   ONLY when native swatch + metafield both come up empty. Renders correct colors on every product
+   page with zero admin. Add new POD colors to the fallback snippet as the catalog grows. ⚠️ mirror-only.
 2. 🟠 **Curate images** — cap/curate the mega-galleries (Andrea's Printify sync + possibly a template limit).
 3. 🟠 **Catalog hygiene** (Andrea, admin) — delete the "Copy of" product; check the typeless one; OS image.
 4. **P2P cross-sell on merch pages** (code) — a small "psst, there's a whole creator OS" nudge, mirroring the homepage bridge, so merch shoppers discover the membership.
