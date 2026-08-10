@@ -1,0 +1,56 @@
+{
+  "sections": {
+    "main": {
+      "type": "p2p-learning-player",
+      "settings": {
+        "course_kicker": "Realm 1 · Open Water",
+        "course_title": "Your Social Porch",
+        "course_handle": "your-social-front-porch",
+        "sidebar_label": "Lessons",
+        "back_url": "/pages/p2p-learning",
+        "os_url": "/pages/p2p-os",
+        "os_label": "P2P Operating System",
+        "access_tag": "p2p-learning",
+        "res_label": "Course Resources",
+        "res_1_label": "Open Your Porch — Checklist",
+        "res_1_url": "https://cdn.shopify.com/s/files/1/0941/3122/4894/files/P2P-Open-Your-Porch-Checklist-Optimized_3.pdf?v=1786338528",
+        "res_1_type": "Checklist"
+      },
+      "blocks": {
+        "l1": {
+          "type": "lesson",
+          "settings": {
+            "title": "Who You Are at a Glance",
+            "video_label": "Watch the lesson",
+            "body": "<p>Grab your <strong>Open Your Porch</strong> checklist from the sidebar and work through it, phone in hand, as you go.</p>",
+            "dl_1_label": "Open Your Porch — Checklist",
+            "dl_1_url": "https://cdn.shopify.com/s/files/1/0941/3122/4894/files/P2P-Open-Your-Porch-Checklist-Optimized_3.pdf?v=1786338528",
+            "dl_1_type": "Checklist"
+          }
+        },
+        "l2": {
+          "type": "lesson",
+          "settings": {
+            "title": "The Bio That Earns the Follow",
+            "video_label": "Watch the lesson"
+          }
+        },
+        "l3": {
+          "type": "lesson",
+          "settings": {
+            "title": "Point the Porch Somewhere",
+            "video_label": "Watch the lesson"
+          }
+        }
+      },
+      "block_order": [
+        "l1",
+        "l2",
+        "l3"
+      ]
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

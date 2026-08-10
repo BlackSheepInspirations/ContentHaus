@@ -10,20 +10,35 @@
         "back_url": "/pages/p2p-learning",
         "os_url": "/pages/p2p-os",
         "os_label": "P2P Operating System",
-        "access_tag": "p2p-learning"
+        "access_tag": "p2p-learning",
+        "res_label": "Course Resources",
+        "res_1_label": "Clear to Sell — Checklist",
+        "res_1_url": "https://cdn.shopify.com/s/files/1/0941/3122/4894/files/P2P-Clear-to-Sell-Checklist_1.pdf?v=1786288187",
+        "res_1_type": "Checklist"
       },
       "blocks": {
         "l1": {
           "type": "lesson",
           "settings": {
-            "title": "Lesson 1",
-            "video_label": "Watch the lesson",
-            "body": "<p>Welcome to <strong>Protecting What You Make</strong>. Lesson content is on the way — add your video, notes, downloads, or a flip-book here.</p>"
+            "title": "What Not to Put On It",
+            "video_embed": "https://iframe.mediadelivery.net/embed/723534/2cad3120-277c-4550-83b6-f32d162ba17c"
+          }
+        },
+        "l2": {
+          "type": "lesson",
+          "settings": {
+            "title": "Check What You Build With",
+            "video_embed": "https://iframe.mediadelivery.net/embed/723534/b032ccaf-90fe-4e10-8db0-ec3ac6c098ef",
+            "body": "<p>Your <strong>Clear to Sell</strong> checklist is below — run it once per product and it becomes a 30-second habit.</p>",
+            "dl_1_label": "Clear to Sell — Checklist",
+            "dl_1_url": "https://cdn.shopify.com/s/files/1/0941/3122/4894/files/P2P-Clear-to-Sell-Checklist_1.pdf?v=1786288187",
+            "dl_1_type": "Checklist"
           }
         }
       },
       "block_order": [
-        "l1"
+        "l1",
+        "l2"
       ]
     }
   },

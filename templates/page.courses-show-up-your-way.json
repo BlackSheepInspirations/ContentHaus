@@ -10,20 +10,35 @@
         "back_url": "/pages/p2p-learning",
         "os_url": "/pages/p2p-os",
         "os_label": "P2P Operating System",
-        "access_tag": "p2p-learning"
+        "access_tag": "p2p-learning",
+        "res_label": "Course Resources",
+        "res_1_label": "Your Show-Up Plan — Workbook",
+        "res_1_url": "https://cdn.shopify.com/s/files/1/0941/3122/4894/files/Your_Show-Up_Plan_Worksheet_3.pdf?v=1786325345",
+        "res_1_type": "Workbook"
       },
       "blocks": {
         "l1": {
           "type": "lesson",
           "settings": {
-            "title": "Lesson 1",
-            "video_label": "Watch the lesson",
-            "body": "<p>Welcome to <strong>Show Up Your Way</strong>. Lesson content is on the way — add your video, notes, downloads, or a flip-book here.</p>"
+            "title": "You Don't Have to Be Everywhere",
+            "video_embed": "https://iframe.mediadelivery.net/embed/723534/f696d068-c14a-4d2a-9ef6-9ea2738f15c2"
+          }
+        },
+        "l2": {
+          "type": "lesson",
+          "settings": {
+            "title": "What to Actually Post",
+            "video_embed": "https://iframe.mediadelivery.net/embed/723534/39b069df-718d-406a-9141-3698279a4256",
+            "body": "<p>Your <strong>Show-Up Plan</strong> workbook is in the sidebar and below — it pulls every decision you made across Open Water into one place, and turns the four things into a week of posts.</p>",
+            "dl_1_label": "Your Show-Up Plan — Workbook",
+            "dl_1_url": "https://cdn.shopify.com/s/files/1/0941/3122/4894/files/Your_Show-Up_Plan_Worksheet_3.pdf?v=1786325345",
+            "dl_1_type": "Workbook"
           }
         }
       },
       "block_order": [
-        "l1"
+        "l1",
+        "l2"
       ]
     }
   },

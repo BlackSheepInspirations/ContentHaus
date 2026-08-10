@@ -1,0 +1,11 @@
+{
+  "sections": {
+    "main": {
+      "type": "sizzle-hub",
+      "settings": {}
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

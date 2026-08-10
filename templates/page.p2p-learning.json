@@ -166,6 +166,31 @@
             "pos_height": 6.5
           }
         },
+        "socialporch": {
+          "type": "course",
+          "settings": {
+            "title": "Your Social Porch",
+            "handle": "your-social-front-porch",
+            "body": "Set up your one place online — the porch that points people to your shop.",
+            "pos_left": 78,
+            "pos_top": 76,
+            "pos_width": 20,
+            "pos_height": 6
+          }
+        },
+        "lighthouse": {
+          "type": "check",
+          "settings": {
+            "title": "🎁 You Found the Lighthouse",
+            "pulse_items": "Most people keep their heads down and follow the path. You looked up. Explorers get the keeper's reward — every decision you made in Open Water, gathered into one Show-Up Plan. This one's yours for wandering off the trail.",
+            "link_url": "https://cdn.shopify.com/s/files/1/0941/3122/4894/files/Your_Show-Up_Plan_Worksheet_2.pdf?v=1786323447",
+            "link_label": "Open your Show-Up Plan →",
+            "pos_left": 18,
+            "pos_top": 86,
+            "pos_width": 14,
+            "pos_height": 10
+          }
+        },
         "showup": {
           "type": "course",
           "settings": {
@@ -193,6 +218,8 @@
         "stan",
         "heart",
         "psychology",
+        "socialporch",
+        "lighthouse",
         "showup"
       ],
       "settings": {

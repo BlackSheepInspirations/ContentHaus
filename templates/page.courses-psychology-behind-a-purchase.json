@@ -10,20 +10,31 @@
         "back_url": "/pages/p2p-learning",
         "os_url": "/pages/p2p-os",
         "os_label": "P2P Operating System",
-        "access_tag": "p2p-learning"
+        "access_tag": "p2p-learning",
+        "res_label": "Course Resources",
+        "res_1_label": "Sell the Feeling — Worksheet",
+        "res_1_url": "https://cdn.shopify.com/s/files/1/0941/3122/4894/files/Sell_the_Feeling_Worksheet_1.pdf?v=1786316230",
+        "res_1_type": "Worksheet"
       },
       "blocks": {
         "l1": {
           "type": "lesson",
           "settings": {
-            "title": "Lesson 1",
-            "video_label": "Watch the lesson",
-            "body": "<p>Welcome to <strong>Psychology Behind a Purchase</strong>. Lesson content is on the way — add your video, notes, downloads, or a flip-book here.</p>"
+            "title": "Why People Actually Buy",
+            "video_embed": "https://iframe.mediadelivery.net/embed/723534/9ee73b34-ed41-4872-ad0b-3b062a21ec80"
+          }
+        },
+        "l2": {
+          "type": "lesson",
+          "settings": {
+            "title": "Winning the First Second",
+            "video_embed": "https://iframe.mediadelivery.net/embed/723534/638d749b-7818-4d69-81bd-cb08bf1976be"
           }
         }
       },
       "block_order": [
-        "l1"
+        "l1",
+        "l2"
       ]
     }
   },

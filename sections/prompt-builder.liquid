@@ -58,6 +58,10 @@
 {% if ph_has_access %}
   <div id="prompt-haus-app" class="haus--content" data-section-id="{{ section.id }}"></div>
 
+  {% comment %} Music Prompt Studio (Suno) — self-contained, sibling of the app {% endcomment %}
+  <div id="ph-music-studio" class="haus--content"></div>
+  <script src="{{ 'prompt-builder-music.js' | asset_url }}" defer="defer"></script>
+
   <script src="{{ 'prompt-builder-styledna.js' | asset_url }}" defer="defer"></script>
   <script src="{{ 'prompt-builder-engine.js' | asset_url }}" defer="defer"></script>
   <script src="{{ 'prompt-builder-favorites.js' | asset_url }}" defer="defer"></script>

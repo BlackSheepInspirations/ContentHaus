@@ -16,9 +16,8 @@
         "l1": {
           "type": "lesson",
           "settings": {
-            "title": "Lesson 1",
-            "video_label": "Watch the lesson",
-            "body": "<p>Welcome to <strong>RAFT</strong>. Lesson content is on the way — add your video, notes, downloads, or a flip-book here.</p>"
+            "title": "RAFT",
+            "video_embed": "https://iframe.mediadelivery.net/embed/723534/6a7341c3-0835-4478-b72a-0e68c9c78184"
           }
         }
       },

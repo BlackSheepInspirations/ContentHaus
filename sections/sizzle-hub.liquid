@@ -1,0 +1,1521 @@
+{%- comment -%}
+  P2P Sizzle Hub — the create-once content studio, ported from the standalone artifact.
+  Owner-gated (customer tag = access_tag, default "owner"); request.design_mode previews in the editor.
+  All CSS scoped under #p2psz; images served from theme assets (haus-emblem-*.png).
+  Assign this section's template (page.sizzle-hub) to the /p2p-sizzle-reels page.
+{%- endcomment -%}
+{%- assign sz_ok = false -%}
+{%- if customer and customer.tags contains section.settings.access_tag -%}{%- assign sz_ok = true -%}{%- endif -%}
+{%- if request.design_mode -%}{%- assign sz_ok = true -%}{%- endif -%}
+
+{%- if sz_ok -%}
+<div id="p2psz">
+<div class="wrap">
+  <div class="recbar" id="recbar"><button id="recReplay">↻ Replay</button><button id="exitRec">✕ Exit record mode</button></div>
+
+  <div class="studiobar" id="studiobar">
+    <input id="search" class="search" type="text" placeholder="🔎 Search reels…" aria-label="Search reels">
+    <div class="filters" id="filters">
+      <button class="fchip active" data-f="all">All</button>
+      <button class="fchip" data-f="todo">To post</button>
+      <button class="fchip" data-f="done">Posted</button>
+    </div>
+    <div class="tools">
+      <button class="surprise" id="surprise">🎲 What should I post?</button>
+      <button class="tool" id="calBtn">📅 Calendar</button>
+      <button class="tool" id="newBtn">✎ New reel</button>
+      <button class="tool" id="vaultBtn">💬 One-liners</button>
+    </div>
+    <div class="progress" id="progress">Posted 0 / 0</div>
+  </div>
+
+  <div class="playrow">
+  <div class="reels" id="reels"></div>
+  <div class="stagewrap">
+    <div class="stage" id="stage">
+      <div class="aurora">
+        <span class="au a1"></span><span class="au a2"></span>
+        <span class="au a3"></span><span class="au a4"></span>
+        <div class="stars"></div><div class="vign"></div>
+      </div>
+      <div class="scenes" id="scenes"></div>
+      <div class="prog"><i id="progBar"></i></div>
+      <button class="playbtn" id="playbtn"><span>▶</span><b>Play</b><em id="playLabel">The Stack</em></button>
+    </div>
+  </div>
+    <aside class="scriptbox">
+      <div class="sb-head"><b class="sb-title" id="sbTitle">The Stack</b><span class="sb-charcount" id="charCount"></span></div>
+      <div class="sb-tabs" id="sbTabs"></div>
+      <textarea class="sb-text" id="sbText" spellcheck="false"></textarea>
+      <div class="sb-actions">
+        <button class="sb-copy" id="copyBtn">⧉ Copy for <b id="copyPlat">TikTok</b></button>
+        <span class="sb-editnote">✎ tweak before copying</span>
+      </div>
+      <div class="sb-posted"><span class="sb-plabel">Mark posted →</span><div class="sb-dots" id="sbDots"></div></div>
+    </aside>
+  </div>
+
+  <div class="panel">
+    <div class="ctrls">
+      <button class="ctl" id="replay">↻ Replay</button>
+      <button class="ctl" id="recBtn">⛶ Record mode</button>
+      <button class="ctl ctl--ghost" id="speed">Speed: <b id="speedState">1.35×</b></button>
+      <button class="ctl ctl--ghost" id="loop">Loop: <b id="loopState">off</b></button>
+    </div>
+    <p class="hint">Pick a reel → <b>Play</b> → screen-record just the tall frame (9:16). These controls sit outside the frame, so they won't appear in your capture. Feature scenes are stylized — splice in real OS clips in CapCut for extra punch.</p>
+  </div>
+
+  <!-- ===== Calendar modal ===== -->
+  <div class="modal" id="modalCal">
+    <div class="modal-card">
+      <div class="modal-head"><b>📅 Content Calendar</b><button class="modal-x">✕</button></div>
+      <p class="cal-hint" id="calHint"></p>
+      <div class="cal-nav"><button id="calPrev">‹</button><b id="calTitle"></b><button id="calNext">›</button></div>
+      <div class="cal-grid" id="calGrid"></div>
+      <p class="modal-foot">Plans are saved in this browser. Click a chip to remove it.</p>
+    </div>
+  </div>
+
+  <!-- ===== New reel modal ===== -->
+  <div class="modal" id="modalNew">
+    <div class="modal-card">
+      <div class="modal-head"><b>✎ Create your own reel</b><button class="modal-x">✕</button></div>
+      <label class="fld">Title <span>(shows in the menu)</span>
+        <input id="nrLabel" type="text" placeholder="e.g. Stop waiting">
+      </label>
+      <label class="fld">Beats <span>(one line = one screen; first line is your hook)</span>
+        <textarea id="nrBeats" rows="6" placeholder="Your idea isn't the problem.&#10;Your silence is.&#10;Post the thing."></textarea>
+      </label>
+      <p class="nr-err" id="nrErr"></p>
+      <button class="btn-primary" id="saveReel">＋ Add reel</button>
+      <div class="nr-list" id="nrList"></div>
+      <p class="modal-foot">Custom reels get their own platform caption packs and posted tracking, just like the built-ins.</p>
+    </div>
+  </div>
+
+  <!-- ===== One-liner vault modal ===== -->
+  <div class="modal" id="modalVault">
+    <div class="modal-card">
+      <div class="modal-head"><b>💬 One-liner vault</b><button class="modal-x">✕</button></div>
+      <p class="modal-sub">Quick, brand-voice lines for hooks, captions, and on-screen text. Tap ⧉ to copy.</p>
+      <div class="vault-add"><input id="vaultInput" type="text" placeholder="Add your own one-liner…"><button id="vaultAdd">Add</button></div>
+      <div class="vault-list" id="vaultList"></div>
+    </div>
+  </div>
+</div>
+</div>
+<script>window.P2PSZ_EMB = {
+    "content": "{{ 'haus-emblem-content.png' | asset_url }}",
+    "marketing": "{{ 'haus-emblem-marketing.png' | asset_url }}",
+    "graphics": "{{ 'haus-emblem-graphics.png' | asset_url }}",
+    "project": "{{ 'haus-emblem-project.png' | asset_url }}",
+    "brand": "{{ 'haus-emblem-brand.png' | asset_url }}",
+    "growth": "{{ 'haus-emblem-growth.png' | asset_url }}",
+    "p2p": "{{ 'haus-emblem-p2p.png' | asset_url }}",
+    "idea": "{{ 'haus-emblem-idea.png' | asset_url }}",
+    "build": "{{ 'haus-emblem-build.png' | asset_url }}",
+    "bscfull": "{{ 'haus-emblem-bscfull.png' | asset_url }}",
+    "treecolor": "{{ 'haus-emblem-treecolor.png' | asset_url }}",
+    "treegrey": "{{ 'haus-emblem-treegrey.png' | asset_url }}",
+    "dnawheel": "{{ 'haus-emblem-dnawheel.png' | asset_url }}",
+    "frank": "{{ 'haus-emblem-frank.png' | asset_url }}",
+    "ruth": "{{ 'haus-emblem-ruth.png' | asset_url }}"
+  };</script>
+<script>
+
+  const EMB = window.P2PSZ_EMB || {};
+  const ROOT=document.getElementById('p2psz');
+  const $=s=>ROOT.querySelector(s);
+  const scenes=$('#scenes'), stage=$('#stage');
+  function render(html){ scenes.innerHTML='<div class="card">'+html+'</div>'; runCounters(); }
+  function runCounters(){
+    scenes.querySelectorAll('[data-to]').forEach(el=>{
+      const to=+el.dataset.to, pre=el.dataset.pre||'', suf=el.dataset.suf||''; let t0=null;
+      const step=ts=>{ if(!t0)t0=ts; const p=Math.min((ts-t0)/1100,1); const v=Math.round(to*(0.2+0.8*p)*(p<1?1:1)*(p));
+        el.textContent=pre+ (Math.round(to*p)).toLocaleString() +suf; if(p<1)requestAnimationFrame(step); else el.textContent=pre+to.toLocaleString()+suf; };
+      requestAnimationFrame(step);
+    });
+  }
+  // reusable card builders
+  const cta = ()=>`<img class="ctaEmb" src="${EMB.p2p}"><p class="ctaName">PURPOSE 2 PROFIT</p><p class="ctaSub">Comment <b style="color:var(--mint)">“FLOCK”</b> to get in ⬇︎</p><div class="ctaBtn">💬 Comment “FLOCK”</div><p class="bscby">an original by</p><img class="bscfull" src="${EMB.bscfull}" alt="Black Sheep Creations & Inspirations">`;
+  // fast product scroll (idea overload)
+  function productScroll(){
+    const items=[['👕','Tees'],['☕','Mugs'],['📓','Planners'],['🔖','Stickers'],['🥤','Tumblers'],['🖼️','Posters'],['🧢','Hats'],['📔','Journals'],['🎨','Clipart'],['📱','Phone cases'],['🖍️','Coloring books'],['🧥','Hoodies'],['📝','Templates'],['🎒','Totes'],['🗓️','Calendars'],['📄','Printables'],['🛏️','Blankets'],['📖','eBooks'],['🔮','Wall art'],['💌','Cards']];
+    const dup=a=>[...a,...a].map(([e,l])=>`<div class="pcard"><span>${e}</span><b>${l}</b></div>`).join('');
+    const h=Math.ceil(items.length/2);
+    return `<div class="pscroll"><div class="ptrack up">${dup(items.slice(0,h))}</div><div class="ptrack dn">${dup(items.slice(h))}</div></div><div class="pscrim"></div>`;
+  }
+  const title=(k,b,s)=>`${k?`<p class="kick">${k}</p>`:''}<p class="big">${b}</p>${s?`<p class="sub">${s}</p>`:''}`;
+  const lead=t=>`<p class="lead">${t}</p>`;
+  const emb=(key,word)=>`<img class="embC" src="${EMB[key]}"><div class="word">${word}</div>`;
+  // framework letter cards
+  function acro(a,i){return '<div class="acro">'+a.map((l,k)=>k===i?`<b>${l}</b>`:`<span style="opacity:.5">${l}</span>`).join('<em>·</em>')+'</div>';}
+  const letter=(L,w,o,arr,i)=>`${acro(arr,i)}<div class="letter">${L}</div><div class="lword">${w}</div><p class="lone">${o}</p>`;
+  const waves=()=>`<div class="waves"><svg viewBox="0 0 400 60" preserveAspectRatio="none"><path d="M0,30 C50,12 110,48 200,30 S350,12 400,30 V60 H0 Z" fill="rgba(143,240,224,.16)"/></svg></div>`;
+  const RAFTA=['R','A','F','T'],GA=['G','R','O','W','S'],RO=['R','O','O','T','E','D'];
+  // brand dna archetype wheel (real UI image + orbiting pointer honing in on Trail-Forger, bottom)
+  function wheel(){
+    const fr=360*3 + 180; // land at the bottom segment (Trail Forger)
+    return `<div class="dnaw"><img class="dnaimg" src="${EMB.dnawheel}" alt="Brand DNA wheel"><div class="dnapin" style="--fr:${fr}deg"></div></div>`;
+  }
+  // niche lanes
+  function lanes(){
+    const L=[['Too broad',0],['Too crowded',0],['Not you',0],['Your lane',1]];
+    return '<div class="lanes">'+L.map(([l,you],i)=>`<div class="lane${you?' you':''}" style="animation-delay:${i*0.1}s"><b>${l}</b>${you?'<i>↑</i>':''}</div>`).join('')+'</div>';
+  }
+  function flock(){ let h='<div class="flock">'; for(let i=0;i<24;i++){h+=`<i class="${i===14?'black':''}" style="animation-delay:${(i*0.03).toFixed(2)}s"></i>`;} return h+'</div>'; }
+  function tabchips(){ const t=['ChatGPT','Canva','Midjourney','Notion','CapCut','Buffer','Google Docs','Later','Pinterest','Etsy','Printify','+ 6 more']; return '<div class="tabchips">'+t.map((x,i)=>`<span class="tabchip" style="animation-delay:${(i*0.05).toFixed(2)}s">${x}</span>`).join('')+'</div>'; }
+
+  const AV=[['#8ff0e0','A'],['#e8c979','M'],['#9b6cff','J'],['#34e0a1','K'],['#f4a8c0','S'],['#7cc6ff','D'],['#c9f5ea','R'],['#ffd27c','T']];
+  function bubbles(){ let h='<div class="bubbles">';
+    const pos=[[10,10],[62,4],[38,30],[80,34],[6,50],[50,56],[30,68],[74,66]];
+    pos.forEach((p,i)=>{const[c,l]=AV[i];h+=`<span class="bub" style="left:${p[0]}%;top:${p[1]}%;background:linear-gradient(135deg,${c},#fff);animation-delay:${i*0.12}s">${l}</span>`;});
+    return h+'</div>'; }
+
+  const jpath='M20,40 C90,10 60,110 130,90 S180,150 250,120 S320,80 360,140';
+  function journey(){
+    const nodes=[[20,40,'START'],[130,90,'MINDSET'],[250,120,'BUILD'],[360,140,'LAUNCH']];
+    let n='';nodes.forEach((nd,i)=>{n+=`<g class="jnode" style="animation-delay:${1+i*0.45}s"><circle cx="${nd[0]}" cy="${nd[1]}" r="9" fill="#8ff0e0"/><circle cx="${nd[0]}" cy="${nd[1]}" r="15" fill="none" stroke="#8ff0e0" stroke-opacity=".4"/></g>`;});
+    return `<svg class="jsvg" viewBox="0 0 380 170"><defs><linearGradient id="jg" x1="0" x2="1"><stop offset="0" stop-color="#9b6cff"/><stop offset=".5" stop-color="#8ff0e0"/><stop offset="1" stop-color="#e8c979"/></linearGradient></defs><path class="jpath" d="${jpath}"/>${n}</svg>`;
+  }
+  function ring(){ return `<div style="position:relative;display:grid;place-items:center"><svg class="ring" width="190" height="190"><circle cx="95" cy="95" r="85" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="12"/><circle class="ringfg" cx="95" cy="95" r="85"/></svg><span class="ringlbl">50+</span></div>`; }
+  function certificate(){ return `<div class="cert"><div class="seal">🏅</div><div class="ct">CERTIFICATE OF COMPLETION</div><div class="cn">Purpose 2 Profit · Learning Journey</div></div>`; }
+  function radar(){
+    const cx=95,cy=95,R=78,pts=[[95,20],[168,72],[140,160],[50,160],[22,72]];
+    const grid=[1,.66,.33].map(f=>{const p=pts.map(([x,y])=>`${cx+(x-cx)*f},${cy+(y-cy)*f}`).join(' ');return `<polygon class="rgrid" points="${p}"/>`}).join('');
+    const poly=[[95,30],[150,80],[128,150],[58,140],[40,78]].map(p=>p.join(',')).join(' ');
+    return `<svg class="radar" viewBox="0 0 190 190">${grid}<polygon class="rpoly" points="${poly}"/></svg>`;
+  }
+
+  // ===== REELS =====
+  const REELS={
+    stack:{label:'The Stack',total:22000,steps:[
+      [0,()=>render(title('','Everyone’s using the same AI.','Making the same stuff.'))],
+      [2600,()=>render(`<img class="embC" src="${EMB.p2p}"><p class="big" style="margin-top:6px">What if you didn’t?</p>`)],
+      [5200,()=>render(emb('content','CREATE'))],[6600,()=>render(emb('marketing','MARKET'))],
+      [8000,()=>render(emb('graphics','DESIGN'))],[9400,()=>render(emb('project','SHIP'))],
+      [10800,()=>render(emb('brand','BRAND'))],[12200,()=>render(emb('growth','LAUNCH'))],
+      [13800,()=>render(`<div style="display:flex;gap:12px"><img class="embC mid" style="width:40%" src="${EMB.idea}"><img class="embC mid" style="width:40%" src="${EMB.build}"></div><p class="big sm">Five tools. Two AI partners.<br><span class="mint">One clear path.</span></p>`)],
+      [17400,()=>render(`<p class="tag a">BORN AN ORIGINAL.</p><p class="tag two b">DON’T DIE A COPY.</p>`)],
+      [20000,()=>render(cta())],
+    ]},
+    community:{label:'Community',total:16500,steps:[
+      [0,()=>render(title('The Haus','Building alone is the hard way.'))],
+      [2600,()=>render(`${bubbles()}<p class="big sm">Your flock is <span class="mint">forming.</span></p><p class="chip">🐑 founding members wanted</p>`)],
+      [6000,()=>render(`<div class="post"><div class="row"><div class="av">✦</div><div><div class="nm">Share a win</div><div class="tm">this is how it works</div></div></div><div class="bd">“Just made my first sale from a design I built in Graphics Haus 🎉”</div><div class="rx"><span>❤️ React</span><span>💬 Reply</span><span>🔥 Cheer</span></div></div>`)],
+      [9600,()=>render(lead('Wins celebrated.<br><b>Questions answered.</b> Daily.'))],
+      [12400,()=>render(title('','You + a flock<br>that <span class="mint">gets it.</span>'))],
+      [14600,()=>render(cta())],
+    ]},
+    courses:{label:'Courses & Journey',total:17500,steps:[
+      [0,()=>render(title('The Learning Journey','Most courses are a pile of videos you’ll never finish.'))],
+      [2800,()=>render(`<p class="kick">A path, not a pile</p>${journey()}<p class="sub">5 realms · idea → launch</p>`)],
+      [6600,()=>render(`${ring()}<p class="big sm" style="margin-top:6px">50+ courses.<br><span class="mint">5 realms. One quest.</span></p>`)],
+      [10200,()=>render(`${certificate()}<p class="lead" style="margin-top:6px">Finish something. <b>For real.</b></p>`)],
+      [13600,()=>render(title('','Learn by doing.<br><span class="gold">Level up for real.</span>'))],
+      [15600,()=>render(cta())],
+    ]},
+    game:{label:'Gamification',total:17500,steps:[
+      [0,()=>render(title('Gamified','What if growing your business<br>felt like a <span class="mint">game?</span>'))],
+      [2800,()=>render(`<div class="xpwrap"><div class="xplbl"><span>Level up as you build</span><span>XP</span></div><div class="xpbar"><i class="xpfill"></i></div></div><p class="pts">LEVEL UP</p><p class="chip"><span class="flame">🔥</span> Build a daily streak</p>`)],
+      [6600,()=>render(`<p class="kick">Badges unlocked</p><div class="badges"><span class="badge">🏅</span><span class="badge" style="animation-delay:.15s">⚡</span><span class="badge" style="animation-delay:.3s">🎯</span><span class="badge" style="animation-delay:.45s">👑</span></div>`)],
+      [9800,()=>render(`<div class="rank"><div class="rk">Seeker</div><div class="rk" style="animation-delay:.1s">Builder</div><div class="rk now" style="animation-delay:.25s">Trailblazer <span class="d">▲ rank up!</span></div><div class="rk" style="animation-delay:.4s;opacity:.5">Icon</div></div>`)],
+      [13200,()=>render(title('','Points. Streaks.<br><span class="gold">Badges. Ranks.</span>'))],
+      [15600,()=>render(cta())],
+    ]},
+    brand:{label:'Brand Identity',total:17000,steps:[
+      [0,()=>render(title('Brand Haus','“Just be yourself.”<br>Cool. <span class="mint">How?</span>'))],
+      [2800,()=>render(`<img class="embC" src="${EMB.brand}">`)],
+      [5400,()=>render(`<p class="kick">Your Brand DNA</p>${radar()}<p class="sub">Voice · values · vibe · edge</p>`)],
+      [9000,()=>render(`<div class="arch"><div class="al">Your archetype, revealed</div><div class="an">The Trail-Forger</div></div><p class="lead" style="margin-top:8px">Clarity, not <b>guesswork.</b></p>`)],
+      [12600,()=>render(title('','Your fingerprint.<br><span class="gold">Your brand.</span>'))],
+      [15000,()=>render(cta())],
+    ]},
+    ideas:{label:'Too many ideas',total:15500,steps:[
+      [0,()=>render(productScroll())],
+      [2700,()=>render(title('','Stuck with <span class="mint">too many ideas?</span>','Digital, POD, printables, merch… and no clue which to build first.'))],
+      [5600,()=>render(title('','12 ideas.<br>0 <span class="gold">shipped.</span>'))],
+      [7800,()=>render(`<img class="embC" src="${EMB.p2p}"><p class="big sm" style="margin-top:6px">Let’s turn the pile<br>into a <span class="mint">plan.</span></p>`)],
+      [11000,()=>render(lead('Pick one. Ship it.<br><b>The Haus shows you how.</b>'))],
+      [13500,()=>render(cta())],
+    ]},
+    raft:{label:'RAFT loop',total:16500,steps:[
+      [0,()=>render(`<p class="kick">The weekly loop</p><p class="big">Got an idea…<br>but <span class="mint">lost at sea?</span></p><div class="bob">🛟</div>${waves()}`)],
+      [2600,()=>render(letter('R','RELIEVE','Clear your single biggest blocker.',RAFTA,0))],
+      [5100,()=>render(letter('A','ACT','One committed action — this week.',RAFTA,1))],
+      [7600,()=>render(letter('F','FAST WIN','Ship one thing that didn’t exist before.',RAFTA,2))],
+      [10100,()=>render(letter('T','TRACTION','Measure it. Then run it back.',RAFTA,3))],
+      [12600,()=>render(title('','Stop drifting.<br><span class="gold">Get on the RAFT.</span>'))],
+      [14600,()=>render(cta())],
+    ]},
+    grows:{label:'GROWS formula',total:18700,steps:[
+      [0,()=>render(`<p class="kick">The GROWS formula</p><p class="big">“I’ll figure it out”<br>is <span class="mint">not a plan.</span></p>`)],
+      [2400,()=>render(letter('G','GROUND ZERO','Where you actually stand — not where you wish you stood.',GA,0))],
+      [4700,()=>render(letter('R','ROADMAP','The ordered steps from here to your vision.',GA,1))],
+      [7000,()=>render(letter('O','OWNERSHIP','What YOU ship this week — not “once it’s ready.”',GA,2))],
+      [9300,()=>render(letter('W','WINDOW OF TIME','A real deadline. Skip it and the plan drifts.',GA,3))],
+      [11600,()=>render(letter('S','SUCCESS VISION','What “done” looks like — clear enough to know you’ve arrived.',GA,4))],
+      [13900,()=>render(`<p class="kick">The formula</p><p class="formula"><span class="mint">(G + R)</span><span class="op">×</span>O<span class="op">×</span>W<span class="op">=</span><span class="s">S</span></p><p class="sub">A plan you’ll actually finish.</p>`)],
+      [16700,()=>render(cta())],
+    ]},
+    rooted:{label:'ROOTED method',total:21000,steps:[
+      [0,()=>render(`<p class="kick">The ROOTED method · Growth Haus</p><p class="big">You’re ready.<br>So why aren’t you <span class="mint">launched?</span></p>`)],
+      [2400,()=>render(`<img class="embC" src="${EMB.growth}">`)],
+      [4600,()=>render(letter('R','REACH','Warm up the right audience before you sell.',RO,0))],
+      [6700,()=>render(letter('O','OPEN','Open the loops — build anticipation.',RO,1))],
+      [8800,()=>render(letter('O','OFFER','Show the transformation, then the offer.',RO,2))],
+      [10900,()=>render(letter('T','TRIGGER','Give them a reason to decide now.',RO,3))],
+      [13000,()=>render(letter('E','ESCALATE','Raise the stakes as the window closes.',RO,4))],
+      [15100,()=>render(letter('D','DEEPEN','Turn buyers into believers.',RO,5))],
+      [17200,()=>render(title('','From ready<br><span class="gold">→ launched.</span>'))],
+      [19200,()=>render(cta())],
+    ]},
+    brandtree:{label:'You are the brand',total:14200,steps:[
+      [0,()=>render(title('Brand Haus','You don’t <span class="mint">have</span> a brand.'))],
+      [2200,()=>render(`<img class="tree" src="${EMB.treecolor}"><p class="treecap">You <span class="gold">are</span> the brand.</p>`)],
+      [5200,()=>render(lead('Your fingerprint. Your roots.<br><b>Your mark.</b>'))],
+      [7800,()=>render(title('','No one else<br>has your <span class="mint">print.</span>','That’s the whole advantage.'))],
+      [10800,()=>render(`<p class="tag a">BORN AN ORIGINAL.</p>`)],
+      [12400,()=>render(cta())],
+    ]},
+    purpose:{label:'Your purpose',total:16200,steps:[
+      [0,()=>render(`<div class="treewrap"><img class="tree" src="${EMB.treegrey}"></div><p class="treecap dim">Somewhere, you<br>went <span style="color:#cfd8e2">grey.</span></p>`)],
+      [2600,()=>render(lead('Blended in.<br>Played it <b>safe.</b>'))],
+      [4800,()=>render(`<div class="treewrap"><img class="tree" src="${EMB.treegrey}"><img class="tree reveal" src="${EMB.treecolor}"></div><p class="treecap">Then you remembered<br>your <span class="mint">why.</span></p>`)],
+      [8900,()=>render(`<img class="tree" src="${EMB.treecolor}"><p class="treecap">Purpose put the<br><span class="gold">color</span> back.</p>`)],
+      [11800,()=>render(`<p class="tag a">DON’T DIE</p><p class="tag two b">A COPY.</p>`)],
+      [14000,()=>render(cta())],
+    ]},
+    brandna:{label:'Brand DNA Blueprint',total:18500,steps:[
+      [0,()=>render(title('Brand DNA Blueprint','Who is your brand,<br><span class="mint">really?</span>','Most people guess — then wonder why nothing sticks.'))],
+      [3000,()=>render(wheel())],
+      [6800,()=>render(`<div class="arch"><div class="al">Your archetype, revealed</div><div class="an">The Trail-Forger</div><div class="a11">one of eleven archetypes</div></div>`)],
+      [9200,()=>render(`<p class="tag a">ONE OF ELEVEN.</p><p class="tag two b">ONE OF ONE.</p>`)],
+      [11600,()=>render(`<p class="kick">Your blueprint maps</p><div class="facets"><span class="facet">🗣️ Your voice</span><span class="facet">💎 Your values</span><span class="facet">🎯 Your customer</span><span class="facet">⚡ Your edge</span></div>`)],
+      [14600,()=>render(title('','Clarity,<br><span class="gold">not guesswork.</span>'))],
+      [16600,()=>render(cta())],
+    ]},
+    getrooted:{label:'Get ROOTED',total:15200,steps:[
+      [0,()=>render(title('Get ROOTED','Idea to income,<br>in <span class="mint">four moves.</span>'))],
+      [2200,()=>render(emb('brand','BRAND'))],
+      [3800,()=>render(emb('project','PRODUCT'))],
+      [5400,()=>render(emb('marketing','MARKET'))],
+      [7000,()=>render(emb('growth','LAUNCH'))],
+      [8800,()=>render(`<img class="embC" src="${EMB.growth}"><p class="big sm" style="margin-top:6px">Get <span class="gold">ROOTED.</span></p>`)],
+      [11600,()=>render(lead('Grow deep.<br><b>Rise strong.</b>'))],
+      [13600,()=>render(cta())],
+    ]},
+    niche:{label:"Niche ’n’ You",total:14500,steps:[
+      [0,()=>render(`<p class="rhyme">Niche <span class="mint">what?</span></p>`)],
+      [1400,()=>render(`<p class="rhyme">Niche <span class="mint">who?</span></p>`)],
+      [2800,()=>render(`<p class="rhyme">Niche ’n’ <span class="gold">YOU.</span></p>`)],
+      [4600,()=>render(title('','Let’s find the <span class="mint">lane</span><br>that fits what you do.'))],
+      [7000,()=>render(lanes())],
+      [10000,()=>render(lead('Your people.<br>Your lane. <b>Your thing.</b>'))],
+      [12200,()=>render(cta())],
+    ]},
+    thrive:{label:'Thought to Thrive',total:15500,steps:[
+      [0,()=>render(title('Purpose 2 Profit','Every business starts<br>as one <span class="mint">thought.</span>'))],
+      [2400,()=>render(`<div class="tico">💭</div><div class="word">THOUGHT</div>`)],
+      [4000,()=>render(`<div class="tico">🔨</div><div class="word">BUILD</div>`)],
+      [5600,()=>render(`<div class="tico">🚀</div><div class="word">LAUNCH</div>`)],
+      [7200,()=>render(`<div class="tico">🌿</div><div class="word">THRIVE</div>`)],
+      [9000,()=>render(title('','From thought<br><span class="gold">to thrive.</span>','The whole path — one system.'))],
+      [11800,()=>render(`<img class="embC" src="${EMB.p2p}">`)],
+      [13600,()=>render(cta())],
+    ]},
+    franruth:{label:'Meet Frank & Ruth',total:16500,steps:[
+      [0,()=>render(title('Your AI partners','You don’t have to<br>do this <span class="mint">alone.</span>'))],
+      [2600,()=>render(`<div class="faces"><div class="face face--l"><img src="${EMB.frank}"><div class="fn">Frank</div><div class="fr">The Idea Haus</div></div><div class="face face--r"><img src="${EMB.ruth}"><div class="fn">Ruth</div><div class="fr">The Build Haus</div></div></div>`)],
+      [6000,()=>render(lead('Frank <b>kills weak ideas</b> —<br>and sharpens the strong ones.'))],
+      [8800,()=>render(lead('Ruth makes them<br><b>actually sellable.</b>'))],
+      [11400,()=>render(title('','Two AI partners.<br><span class="gold">Always on call.</span>'))],
+      [13800,()=>render(cta())],
+    ]},
+    original:{label:'Born an Original',total:14500,steps:[
+      [0,()=>render(title('','A whole flock…<br>all the <span class="mint">same.</span>'))],
+      [2200,()=>render(flock())],
+      [4800,()=>render(title('','Then there’s <span class="gold">you.</span>'))],
+      [6800,()=>render(lead('The one who does it<br><b>your way.</b>'))],
+      [9000,()=>render(`<p class="tag a">BORN AN ORIGINAL.</p><p class="tag two b">DON’T DIE A COPY.</p>`)],
+      [11800,()=>render(cta())],
+    ]},
+    home:{label:'Make it your home',total:15400,steps:[
+      [0,()=>render(title('','Creating is <span class="mint">scattered.</span>','Your tools, your people, your progress — all over the place.'))],
+      [2800,()=>render(`<div class="tico">🧰</div><div class="word">TOOLS</div>`)],
+      [4300,()=>render(`<div class="tico">🤝</div><div class="word">COMMUNITY</div>`)],
+      [5800,()=>render(`<div class="tico">📚</div><div class="word">LEARNING</div>`)],
+      [7300,()=>render(`<div class="tico">🚀</div><div class="word">LAUNCHING</div>`)],
+      [9000,()=>render(`<img class="embC" src="${EMB.p2p}"><p class="big sm" style="margin-top:6px">All under<br><span class="gold">one roof.</span></p>`)],
+      [11600,()=>render(title('','Make the Haus<br><span class="mint">your home.</span>'))],
+      [13600,()=>render(cta())],
+    ]},
+    objection:{label:'“But I…”',total:15200,steps:[
+      [0,()=>render(title('','“I’m not techy.”','“I don’t have time.”  “AI overwhelms me.”'))],
+      [2800,()=>render(lead('Good.<br>That’s <b>exactly</b> who it’s for.'))],
+      [5200,()=>render(title('','No blank pages.','The Haus hands you the next step — every time.'))],
+      [8000,()=>render(lead('Describe your idea <b>once.</b><br>It does the heavy lifting.'))],
+      [10600,()=>render(title('','Start before you<br>feel <span class="gold">ready.</span>'))],
+      [12800,()=>render(cta())],
+    ]},
+    founding:{label:'Founding Flock',total:14800,steps:[
+      [0,()=>render(title('Coming soon','The doors open<br><span class="mint">soon.</span>'))],
+      [2200,()=>render(`<div class="tico">🔑</div><p class="big sm">Founding members<br>get in <span class="gold">first.</span></p>`)],
+      [4800,()=>render(lead('Founder pricing.<br><b>Locked in for good.</b>'))],
+      [7000,()=>render(`<span class="chip">🐑 Founding Flock · limited spots</span>`)],
+      [9000,()=>render(title('','Don’t watch it launch.<br><span class="mint">Be there when it does.</span>'))],
+      [11400,()=>render(cta())],
+    ]},
+    ninety2:{label:'92% · Be Bold',total:15200,steps:[
+      [0,()=>render(title('The 92%','61% of people have a<br>business <span class="mint">idea.</span>'))],
+      [2600,()=>render(`<p class="counter" data-to="92" data-suf="%">0%</p><p class="chip">never act on it</p>`)],
+      [5400,()=>render(lead('The 8% who do<br>aren’t smarter.<br><b>They’re bolder.</b>'))],
+      [8200,()=>render(title('','Be bold.<br><span class="gold">Stand apart.</span>'))],
+      [10400,()=>render(`<p class="tag a">BORN AN ORIGINAL.</p><p class="tag two b">DON’T DIE A COPY.</p>`)],
+      [13200,()=>render(cta())],
+    ]},
+    flock2:{label:'Don’t follow the herd',total:14500,steps:[
+      [0,()=>render(title('','Everyone’s waiting<br>for <span class="mint">permission.</span>'))],
+      [2400,()=>render(lead('92% of people with an idea<br><b>never start.</b>'))],
+      [4800,()=>render(flock())],
+      [7200,()=>render(title('','Don’t follow<br>the <span class="gold">herd.</span>'))],
+      [9200,()=>render(title('','Join the <span class="mint">Flock.</span>'))],
+      [11200,()=>render(cta())],
+    ]},
+    rise:{label:'Time to Rise',total:14500,steps:[
+      [0,()=>render(title('','How long has your idea<br>been <span class="mint">sitting there?</span>'))],
+      [2600,()=>render(lead('92% let theirs<br><b>fade away.</b>'))],
+      [5000,()=>render(title('','This is your <span class="gold">sign.</span>'))],
+      [7000,()=>render(`<div class="tico">🌅</div><p class="big">Time to rise.</p>`)],
+      [9200,()=>render(lead('From thought<br><b>to thrive.</b>'))],
+      [11400,()=>render(cta())],
+    ]},
+    onlyyou:{label:'Only yours has you',total:15200,steps:[
+      [0,()=>render(title('','Thousands sell the<br>exact <span class="mint">same product.</span>'))],
+      [2600,()=>render(`<div class="tico">👕 ☕ 📓</div><p class="sub">Same tees. Same mugs. Same planners.</p>`)],
+      [5000,()=>render(title('','Only yours<br>has <span class="gold">you.</span>'))],
+      [7200,()=>render(`<img class="tree" src="${EMB.treecolor}"><p class="treecap">Your fingerprint<br>is the <span class="mint">product.</span></p>`)],
+      [10400,()=>render(lead('Same shelf.<br><b>Different soul.</b>'))],
+      [12600,()=>render(cta())],
+    ]},
+    spark:{label:'Waiting for your spark',total:15400,steps:[
+      [0,()=>render(title('The creator economy','It’s a <span class="mint">$250 billion+</span><br>industry.'))],
+      [2400,()=>render(`<p class="pts">$2 Trillion</p><p class="chip">projected by 2034 · and climbing</p>`)],
+      [5000,()=>render(title('','“But isn’t it<br><span style="color:var(--mut)">saturated?</span>”'))],
+      [7200,()=>render(title('','It’s not saturated.','It’s waiting for your spark.'))],
+      [9800,()=>render(`<div class="tico">✨</div><p class="big">Add <span class="gold">yours.</span></p>`)],
+      [11800,()=>render(`<img class="embC" src="${EMB.p2p}">`)],
+      [13400,()=>render(cta())],
+    ]},
+    purposeborn:{label:'Born on Purpose',total:16200,steps:[
+      [0,()=>render(title('','You weren’t born<br>by <span class="mint">accident.</span>'))],
+      [2200,()=>render(title('','You were born<br><span class="mint">on purpose</span> —<br>for a <span class="gold">purpose.</span>'))],
+      [4800,()=>render(lead('That idea you keep<br>coming back to?<br><b>It was put there.</b>'))],
+      [7600,()=>render(`<img class="tree" src="${EMB.treecolor}"><p class="treecap">Roots down.<br><span class="mint">Purpose up.</span></p>`)],
+      [10600,()=>render(lead('And you don’t have<br>to grow it <b>alone.</b>'))],
+      [12800,()=>render(title('','Let’s walk your<br><span class="gold">journey</span> together.'))],
+      [14800,()=>render(cta())],
+    ]},
+    mindset:{label:'Mindset',total:14000,steps:[
+      [0,()=>render(title('','It all starts<br>in your <span class="mint">head.</span>'))],
+      [2200,()=>render(lead('Your business grows at<br>the speed of your <b>mindset.</b>'))],
+      [4800,()=>render(`<div class="tico">🧠</div><p class="big">Renew it <span class="gold">daily.</span></p>`)],
+      [7000,()=>render(lead('Every day in the Haus<br>starts with a<br><b>Mindset Moment.</b>'))],
+      [9600,()=>render(title('','Think different.<br><span class="mint">Build different.</span>'))],
+      [11800,()=>render(cta())],
+    ]},
+    heart:{label:'Heart',total:13800,steps:[
+      [0,()=>render(title('','People don’t buy<br>what you <span class="mint">make.</span>'))],
+      [2400,()=>render(title('','They buy <span class="gold">why</span><br>you make it.'))],
+      [4600,()=>render(`<div class="tico">🖤</div><p class="big">Create from<br>the heart.</p>`)],
+      [6800,()=>render(lead('The tools are easy.<br><b>The heart is you.</b>'))],
+      [9000,()=>render(title('','Put yours<br><span class="mint">into it.</span>'))],
+      [11200,()=>render(cta())],
+    ]},
+    purposecall:{label:'Purpose',total:14200,steps:[
+      [0,()=>render(title('','A goal keeps<br>you <span class="mint">busy.</span>'))],
+      [2200,()=>render(title('','A <span class="gold">purpose</span><br>keeps you going.'))],
+      [4400,()=>render(lead('When the hard days come —<br>and they will —<br><b>your why carries you.</b>'))],
+      [7400,()=>render(`<div class="tico">🧭</div><p class="big">Know your <span class="mint">why.</span></p>`)],
+      [9600,()=>render(title('','Purpose <span class="gold">2</span> Profit.','It’s in the name for a reason.'))],
+      [12000,()=>render(cta())],
+    ]},
+    countdown:{label:'Something’s coming',total:13500,steps:[
+      [0,()=>render(title('Coming soon','Something’s brewing<br>in the <span class="mint">Haus.</span>'))],
+      [2200,()=>render(`<div class="tico">⏳</div><p class="big">Almost time.</p>`)],
+      [4200,()=>render(lead('The doors are<br><b>nearly open.</b>'))],
+      [6200,()=>render(title('','Don’t miss<br>the <span class="gold">moment.</span>'))],
+      [8200,()=>render(lead('Get on the list.<br><b>Be first to know.</b>'))],
+      [10400,()=>render(cta())],
+    ]},
+    founderentrance:{label:'Founders walk in first',total:14500,steps:[
+      [0,()=>render(title('','When the doors<br><span class="mint">open…</span>'))],
+      [2200,()=>render(title('','Founders walk<br>in <span class="gold">first.</span>'))],
+      [4400,()=>render(lead('Before the crowd.<br>Before the price climbs.<br><b>Before anyone else.</b>'))],
+      [7400,()=>render(`<div class="tico">🚪🐑</div><p class="big">Come in.</p>`)],
+      [9400,()=>render(title('','Take your seat<br>in the <span class="mint">Haus.</span>'))],
+      [11600,()=>render(cta())],
+    ]},
+    whynow:{label:'Why now, not later',total:14500,steps:[
+      [0,()=>render(title('','Wait for launch:','full price, later start.'))],
+      [2600,()=>render(title('','Join now:','founder pricing, locked in.'))],
+      [5200,()=>render(lead('Same Haus.<br><b>Half the reasons to wait.</b>'))],
+      [7600,()=>render(`<div class="tico">🔒</div><p class="big">Lock it <span class="gold">in.</span></p>`)],
+      [9600,()=>render(title('','Future you<br>says <span class="mint">thanks.</span>'))],
+      [11800,()=>render(cta())],
+    ]},
+    oneshot:{label:'Founder pricing = once',total:13800,steps:[
+      [0,()=>render(title('','Founder pricing<br>happens <span class="mint">once.</span>'))],
+      [2400,()=>render(lead('When it’s gone,<br><b>it’s gone.</b>'))],
+      [4600,()=>render(title('','No “next time.”','No coming back to it.'))],
+      [7000,()=>render(`<span class="chip">🐑 Founding Flock · limited spots</span>`)],
+      [8800,()=>render(title('','Get in while<br>the <span class="gold">door’s open.</span>'))],
+      [10800,()=>render(cta())],
+    ]},
+    frontrow:{label:'Front row',total:13800,steps:[
+      [0,()=>render(title('','Every big thing<br>had an <span class="mint">early crowd.</span>'))],
+      [2400,()=>render(lead('The ones who<br><b>saw it first.</b>'))],
+      [4600,()=>render(title('','This is that<br><span class="gold">moment.</span>'))],
+      [6600,()=>render(`<div class="tico">🎟️</div><p class="big">Front row.</p>`)],
+      [8600,()=>render(lead('Founding Flock.<br><b>Be one of them.</b>'))],
+      [10800,()=>render(cta())],
+    ]},
+    thelist:{label:'Get on the list',total:13000,steps:[
+      [0,()=>render(title('','The Haus isn’t<br>open <span class="mint">yet.</span>'))],
+      [2200,()=>render(title('','But the list<br><span class="gold">is.</span>'))],
+      [4200,()=>render(lead('Founders get in first —<br>and hear it <b>first.</b>'))],
+      [6600,()=>render(`<div class="tico">📩</div><p class="big">Save your spot.</p>`)],
+      [8600,()=>render(title('','Join the<br><span class="mint">Founding Flock.</span>'))],
+      [10800,()=>render(cta())],
+    ]},
+    bethereason:{label:'Be the reason',total:13800,steps:[
+      [0,()=>render(title('','Somewhere, someone<br>has a problem<br>only <span class="mint">you</span> can solve.'))],
+      [3000,()=>render(lead('Your gift was never<br>just <b>for you.</b>'))],
+      [5200,()=>render(title('','It’s for <span class="gold">them.</span>'))],
+      [7000,()=>render(`<div class="tico">🌟</div><p class="big">Be the reason<br>someone smiles today.</p>`)],
+      [9800,()=>render(lead('Then build it into<br>something that <b>lasts.</b>'))],
+      [11800,()=>render(cta())],
+    ]},
+    chooseyou:{label:'Choose YOU',total:11600,steps:[
+      [0,()=>render(title('','The smallest choice…'))],
+      [1800,()=>render(title('','…can make the<br><span class="mint">biggest impact.</span>'))],
+      [3800,()=>render(lead('Choose to start.<br>Choose to try.'))],
+      [5800,()=>render(title('','Choose <span class="gold">YOU.</span>'))],
+      [7600,()=>render(lead('From thought<br><b>to thrive.</b>'))],
+      [9600,()=>render(cta())],
+    ]},
+    provewrong:{label:'Prove it wrong',total:12800,steps:[
+      [0,()=>render(title('','The voice in your head<br>says you <span style="color:var(--mut)">can’t.</span>'))],
+      [2600,()=>render(lead('It’s allowed to talk.<br><b>It doesn’t get to decide.</b>'))],
+      [5000,()=>render(title('','Rise <span class="mint">anyway.</span>'))],
+      [6800,()=>render(title('','Let your <span class="gold">actions</span><br>prove it wrong.'))],
+      [9000,()=>render(lead('Start small.<br><b>Start today.</b>'))],
+      [10800,()=>render(cta())],
+    ]},
+    sayyoudid:{label:'So you can say you did',total:11800,steps:[
+      [0,()=>render(title('','They said<br>you <span style="color:var(--mut)">can’t.</span>'))],
+      [1900,()=>render(title('','Take the chance<br><span class="gold">anyway.</span>'))],
+      [3900,()=>render(lead('Not to prove<br>them wrong.'))],
+      [5700,()=>render(title('','So one day, <span class="mint">you</span><br>can say:'))],
+      [7500,()=>render(`<p class="tag two a">I DID.</p>`)],
+      [9200,()=>render(cta())],
+    ]},
+    standapart:{label:'Stand apart',total:14600,steps:[
+      [0,()=>render(title('','It’s easier to pull you<br><span class="mint">down</span>…'))],
+      [2400,()=>render(title('','…than to rise up<br>to meet you.'))],
+      [4600,()=>render(lead('So some people<br><b>will try.</b>'))],
+      [6600,()=>render(title('','Let them.'))],
+      [8200,()=>render(title('','It’s okay to<br><span class="gold">stand apart.</span>'))],
+      [10400,()=>render(`<p class="tag a">BORN AN ORIGINAL.</p><p class="tag two b">DON’T DIE A COPY.</p>`)],
+      [13000,()=>render(cta())],
+    ]},
+    ideatired:{label:'Idea tired of waiting',total:15200,steps:[
+      [0,()=>render(title('','Your idea is getting<br><span class="mint">tired of waiting.</span>'))],
+      [2400,()=>render(lead('You’ve researched it.<br>Saved posts about it.<br>Thought about it in the shower.'))],
+      [5000,()=>render(lead('Talked yourself into it.<br>Talked yourself<br><b>right back out.</b>'))],
+      [7600,()=>render(title('','It needs more than<br>your <span class="mint">attention.</span>'))],
+      [9600,()=>render(title('','It needs your <span class="gold">decision.</span>'))],
+      [11600,()=>render(cta())],
+    ]},
+    anothersign:{label:'Not another sign',total:14200,steps:[
+      [0,()=>render(lead('You asked for a sign.<br>Then another.<br>Then called the third one “coincidence.”'))],
+      [3000,()=>render(title('','That idea keeps tapping<br>your shoulder like…'))],
+      [5000,()=>render(`<div class="tico">🙋</div><p class="big">HELLO?!</p>`)],
+      [6800,()=>render(title('','Maybe it’s not<br>another <span style="color:var(--mut)">sign.</span>'))],
+      [8800,()=>render(title('','Maybe it’s a <span class="gold">start.</span>'))],
+      [10800,()=>render(cta())],
+    ]},
+    beforeproof:{label:'The work before the work',total:14600,steps:[
+      [0,()=>render(title('','Nobody talks about<br>this part of <span class="mint">starting.</span>'))],
+      [2400,()=>render(lead('Not the website.<br>Not the product.<br>Not the logo.'))],
+      [4800,()=>render(lead('The part where you become<br>someone who <b>trusts herself</b><br>enough to begin…'))],
+      [7600,()=>render(title('','…before there’s proof<br>it’ll <span class="gold">work.</span>'))],
+      [9800,()=>render(title('','That’s the work<br>before the work.','And we do it here.'))],
+      [12400,()=>render(cta())],
+    ]},
+    comfortzone:{label:'Comfort zone · 5★',total:14000,steps:[
+      [0,()=>render(title('','Your comfort zone has<br><span class="mint">great customer service.</span>'))],
+      [2600,()=>render(lead('Remembers your name.<br>Knows your usual excuses.<br>Never asks you to risk a thing.'))],
+      [5400,()=>render(`<div class="tico">⭐️⭐️⭐️⭐️⭐️</div><p class="big sm">“Would recommend —<br>if your goal is to stay<br>exactly where you are.”</p>`)],
+      [8400,()=>render(title('','But that’s not why<br>you’re <span class="gold">here.</span>'))],
+      [10400,()=>render(cta())],
+    ]},
+    ideaproblem:{label:'Not an idea problem',total:14400,steps:[
+      [0,()=>render(title('','You don’t have<br>an <span class="mint">idea problem.</span>'))],
+      [2200,()=>render(lead('47 ideas.<br>Three notebooks.<br>126 saved posts.'))],
+      [4600,()=>render(lead('A Canva folder that deserves<br>its own <b>zip code.</b>'))],
+      [6800,()=>render(title('','It’s turning <span class="gold">ONE</span><br>into something real.'))],
+      [9000,()=>render(title('','That’s where<br>we come in.'))],
+      [10800,()=>render(cta())],
+    ]},
+    notprocrastinating:{label:'Not procrastinating',total:15000,steps:[
+      [0,()=>render(title('','Maybe you’re not<br><span class="mint">procrastinating.</span>'))],
+      [2400,()=>render(lead('Maybe you’re scared that<br>once you actually try…'))],
+      [4800,()=>render(lead('…you’ll find out if you’re<br><b>capable</b> of the thing<br>you’ve been dreaming about.'))],
+      [7800,()=>render(title('','Plot twist:','self-trust is built by keeping promises to yourself.'))],
+      [10600,()=>render(title('','Start with <span class="gold">one.</span>'))],
+      [12400,()=>render(cta())],
+    ]},
+    quityourlife:{label:'Don’t quit your life',total:13800,steps:[
+      [0,()=>render(lead('Keep the job.<br>Pick up the kids.<br>Make dinner.'))],
+      [2600,()=>render(lead('Forget the password again.<br>Google something<br>embarrassingly basic.'))],
+      [5000,()=>render(title('','Build <span class="mint">anyway.</span>'))],
+      [6800,()=>render(title('','No dramatic<br>reinvention required.'))],
+      [8800,()=>render(title('','You just need somewhere<br>to <span class="gold">start.</span>'))],
+      [10600,()=>render(cta())],
+    ]},
+    startingmessy:{label:'Starting messy',total:13800,steps:[
+      [0,()=>render(lead('Your first design<br>might be ugly.'))],
+      [1900,()=>render(lead('Your first product<br>might need work.'))],
+      [3800,()=>render(lead('Your first post<br>might get 11 views.'))],
+      [5600,()=>render(title('','And?'))],
+      [7000,()=>render(title('','We’re building a business.','Not auditioning for perfection.'))],
+      [9800,()=>render(title('','Starting messy<br>is still <span class="gold">starting.</span>'))],
+      [11800,()=>render(cta())],
+    ]},
+    oneyear:{label:'One year from now',total:14400,steps:[
+      [0,()=>render(title('','One year from now<br>has <span class="mint">entered the chat.</span>'))],
+      [2200,()=>render(lead('She has questions.'))],
+      [3600,()=>render(lead('Did we start?<br>Did we stop overthinking it?'))],
+      [5800,()=>render(lead('Did we build the thing<br>we kept <b>talking about?</b>'))],
+      [8000,()=>render(title('','Or are we still<br><span style="color:var(--mut)">“getting ready”?</span>'))],
+      [10200,()=>render(title('','Your <span class="gold">move.</span>'))],
+      [12000,()=>render(cta())],
+    ]},
+    shapeit:{label:'Help shape it',total:13600,steps:[
+      [0,()=>render(title('','Some people join<br>communities.'))],
+      [1900,()=>render(title('','Others help<br><span class="mint">shape them.</span>'))],
+      [3800,()=>render(lead('Before the polished version.<br>Before everyone knows the name.'))],
+      [6000,()=>render(lead('Before “I wish I’d<br>found this sooner.”'))],
+      [8200,()=>render(title('','The people who were here<br>when it <span class="gold">started.</span>'))],
+      [10200,()=>render(title('','We’re looking<br>for those people.'))],
+      [11800,()=>render(cta())],
+    ]},
+    earlyinfluence:{label:'Early influence',total:12600,steps:[
+      [0,()=>render(title('','This isn’t<br>early <span style="color:var(--mut)">access.</span>'))],
+      [2000,()=>render(title('','It’s early<br><span class="gold">influence.</span>'))],
+      [4000,()=>render(lead('Founders won’t just enter<br>what we’re building.'))],
+      [6000,()=>render(title('','They’ll be part<br>of its <span class="mint">beginning.</span>'))],
+      [8200,()=>render(cta())],
+    ]},
+    firstseats:{label:'The first seats',total:14000,steps:[
+      [0,()=>render(title('','We saved the first<br>seats for a <span class="mint">reason.</span>'))],
+      [2400,()=>render(lead('Not for people looking to<br>quietly join, mute,<br>and forget it exists.'))],
+      [5200,()=>render(lead('We want <b>builders.</b><br>Question askers.<br>Idea chasers.'))],
+      [7800,()=>render(title('','“I don’t have it all figured out.','But I’m ready to figure it out.”'))],
+      [10800,()=>render(cta())],
+    ]},
+    purposecheck:{label:'Purpose Check',total:14000,steps:[
+      [0,()=>render(`<div class="checkbadge">✓ Check Yourself</div><p class="big">Purpose Check.</p>`)],
+      [2000,()=>render(lead('Are you waiting to<br><b>discover</b> your purpose…'))],
+      [4200,()=>render(lead('…or overlooking the thing<br>you already do<br><b>extraordinarily well?</b>'))],
+      [7000,()=>render(title('','Your purpose<br>isn’t <span class="mint">hiding.</span>'))],
+      [9000,()=>render(title('','You’ve been calling<br>your gift <span style="color:var(--mut)">“ordinary.”</span>'))],
+      [11200,()=>render(cta())],
+    ]},
+    mindsetcheck:{label:'Mindset Check',total:14000,steps:[
+      [0,()=>render(`<div class="checkbadge">✓ Check Yourself</div><p class="big">Mindset Check.</p>`)],
+      [2000,()=>render(lead('Your mind can build<br>100 reasons not to start…'))],
+      [4200,()=>render(lead('…before you give yourself<br><b>one</b> reason to believe you can.'))],
+      [7000,()=>render(title('','Maybe the first thing<br>to build is <span class="gold">belief.</span>'))],
+      [9200,()=>render(lead('(Or… how long are we calling it<br>“research” when it’s really<br><b>fear in glasses?</b> 👀)'))],
+      [11800,()=>render(cta())],
+    ]},
+    heartcheck:{label:'Heart Check',total:13600,steps:[
+      [0,()=>render(`<div class="checkbadge">✓ Check Yourself</div><p class="big">Heart Check.</p>`)],
+      [2000,()=>render(lead('Is the dream <b>gone…</b>'))],
+      [3600,()=>render(lead('…or did life just get loud<br>enough that you stopped<br><b>listening</b> to it?'))],
+      [6600,()=>render(title('','Some dreams<br>don’t disappear.'))],
+      [8400,()=>render(title('','They <span class="mint">wait.</span>'))],
+      [10000,()=>render(title('','Time to make it<br><span class="gold">real.</span>'))],
+      [12000,()=>render(cta())],
+    ]},
+    testtestimony:{label:'Test → testimony',total:11500,steps:[
+      [0,()=>render(title('','Was it a test?'))],
+      [1500,()=>render(title('','Maybe.'))],
+      [2700,()=>render(title('','Turn that test<br>into a <span class="mint">testimony.</span>'))],
+      [4900,()=>render(lead('It might be exactly<br>what someone else<br>needs to hear.'))],
+      [7300,()=>render(title('','Don’t waste<br>the <span class="gold">story.</span>'))],
+      [9300,()=>render(cta())],
+    ]},
+    messmessage:{label:'Mess → message',total:11500,steps:[
+      [0,()=>render(title('','Life got <span class="mint">messy?</span>'))],
+      [1500,()=>render(title('','Good.'))],
+      [2700,()=>render(title('','Turn that mess<br>into a <span class="gold">message.</span>'))],
+      [4900,()=>render(lead('What you survived<br>becomes what you<br><b>use to serve.</b>'))],
+      [7300,()=>render(title('','Don’t waste it.'))],
+      [9000,()=>render(cta())],
+    ]},
+    setbacksetup:{label:'Setback → set-up',total:11000,steps:[
+      [0,()=>render(title('','You called it<br>a <span style="color:var(--mut)">setback.</span>'))],
+      [2000,()=>render(title('','What if it was<br>a <span class="mint">set-up?</span>'))],
+      [4000,()=>render(lead('A reroute toward<br>what you were<br><b>meant to build.</b>'))],
+      [6600,()=>render(title('','Purpose has a way<br>of finding you.'))],
+      [8600,()=>render(cta())],
+    ]},
+    redirection:{label:'Rejection → redirection',total:12200,steps:[
+      [0,()=>render(title('','The door <span style="color:var(--mut)">closed.</span>'))],
+      [1600,()=>render(lead('You prayed.<br>You pushed.<br>You knocked again.'))],
+      [3800,()=>render(title('','Still closed.'))],
+      [5200,()=>render(title('','Maybe it wasn’t<br><span style="color:var(--mut)">punishment.</span>'))],
+      [7000,()=>render(title('','Maybe it was<br><span class="gold">redirection.</span>'))],
+      [9000,()=>render(lead('Toward your purpose.'))],
+      [10400,()=>render(cta())],
+    ]},
+    builtyou:{label:'Built, not broke',total:11000,steps:[
+      [0,()=>render(`<div class="checkbadge">Plot twist</div>`)],
+      [1400,()=>render(title('','The season you thought<br><span style="color:var(--mut)">broke</span> you…'))],
+      [3400,()=>render(title('','…may be the one<br>that <span class="mint">built</span> you.'))],
+      [5600,()=>render(title('','Now build<br><span class="gold">something with it.</span>'))],
+      [7600,()=>render(cta())],
+    ]},
+    prayedpurpose:{label:'You prayed for purpose',total:12200,steps:[
+      [0,()=>render(title('','You prayed<br>for <span class="mint">purpose…</span>'))],
+      [2200,()=>render(lead('Then got annoyed<br>when it showed up as:'))],
+      [4200,()=>render(lead('a challenge.<br>a lesson.<br>a whole lot of growth.'))],
+      [6600,()=>render(title('','Time to put it<br>into <span class="gold">action.</span>'))],
+      [8600,()=>render(cta())],
+    ]},
+    movedaway:{label:'Moved, not lost',total:11800,steps:[
+      [0,()=>render(title('','Maybe you didn’t<br>lose your way.'))],
+      [2100,()=>render(lead('Maybe you were moved<br>from what<br><b>no longer fit.</b>'))],
+      [4500,()=>render(title('','So you could see<br>what <span class="mint">does.</span>'))],
+      [6500,()=>render(title('','Detours can have<br><span class="gold">purpose</span> too.'))],
+      [8500,()=>render(cta())],
+    ]},
+    yourresume:{label:'That’s your résumé',total:12000,steps:[
+      [0,()=>render(title('','Stop disqualifying<br>yourself.'))],
+      [1800,()=>render(lead('The mistakes.<br>The pivots.<br>The “should’ve known better.”'))],
+      [4200,()=>render(title('','Those aren’t stains<br>on your <span style="color:var(--mut)">résumé.</span>'))],
+      [6400,()=>render(title('','They <span class="gold">are</span><br>your résumé.'))],
+      [8400,()=>render(cta())],
+    ]},
+    expertise:{label:'Experience = expertise',total:12200,steps:[
+      [0,()=>render(title('','“Just my<br><span style="color:var(--mut)">experience</span>”…'))],
+      [1900,()=>render(title('','…might actually be<br><span class="mint">expertise.</span>'))],
+      [4000,()=>render(lead('What you’ve lived.<br>Learned.<br>Overcome.'))],
+      [6200,()=>render(title('','Your story can<br><span class="gold">serve.</span>'))],
+      [8200,()=>render(cta())],
+    ]},
+    survived:{label:'You survived it',total:12400,steps:[
+      [0,()=>render(title('','You survived<br>the <span class="mint">chapter…</span>'))],
+      [2100,()=>render(title('','…you thought<br>would break you.'))],
+      [4100,()=>render(lead('That wisdom<br>was <b>earned.</b>'))],
+      [6100,()=>render(title('','And it doesn’t<br>end with <span class="gold">you.</span>'))],
+      [8100,()=>render(lead('Someone needs<br>what it taught you.'))],
+      [10000,()=>render(cta())],
+    ]},
+    mcresearch:{label:'Mindset Check · research',total:11000,steps:[
+      [0,()=>render(`<div class="checkbadge">✓ Mindset Check</div><p class="big">How long…</p>`)],
+      [1800,()=>render(title('','…will you call it<br><span class="mint">“research”</span>…'))],
+      [4000,()=>render(title('','…when it’s really<br>fear in <span class="gold">glasses?</span> 👀'))],
+      [6600,()=>render(lead('You’ve learned enough.<br><b>Time to build.</b>'))],
+      [8600,()=>render(cta())],
+    ]},
+    mcears:{label:'Mindset Check · ears',total:10500,steps:[
+      [0,()=>render(`<div class="checkbadge">✓ Mindset Check</div>`)],
+      [1200,()=>render(title('','Your biggest obstacle<br>isn’t in <span style="color:var(--mut)">front</span> of you.'))],
+      [3600,()=>render(title('','It’s the six inches<br><span class="mint">between your ears.</span>'))],
+      [6000,()=>render(title('','Win there <span class="gold">first.</span>'))],
+      [7600,()=>render(cta())],
+    ]},
+    mcroadblock:{label:'Mindset Check · roadblock',total:10500,steps:[
+      [0,()=>render(`<div class="checkbadge">✓ Mindset Check</div>`)],
+      [1200,()=>render(title('','Your mind builds a<br><span style="color:var(--mut)">roadblock</span>…'))],
+      [3400,()=>render(title('','…faster than your hands<br>build a <span class="mint">business.</span>'))],
+      [6000,()=>render(title('','Build it <span class="gold">anyway.</span>'))],
+      [7600,()=>render(cta())],
+    ]},
+    mcending:{label:'Mindset Check · the ending',total:11200,steps:[
+      [0,()=>render(`<div class="checkbadge">✓ Mindset Check</div>`)],
+      [1200,()=>render(title('','You haven’t failed.'))],
+      [2600,()=>render(title('','You haven’t even<br><span class="mint">started.</span>'))],
+      [4600,()=>render(lead('Your mind just skipped ahead<br>and wrote the <b>ending.</b>'))],
+      [7000,()=>render(title('','Write a<br><span class="gold">different one.</span>'))],
+      [9000,()=>render(cta())],
+    ]},
+    mcreasons:{label:'Mindset Check · 47 reasons',total:10800,steps:[
+      [0,()=>render(`<div class="checkbadge">✓ Mindset Check</div>`)],
+      [1200,()=>render(title('','Your brain found<br><span class="mint">47 reasons</span>…'))],
+      [3400,()=>render(title('','…it won’t work.'))],
+      [4800,()=>render(lead('Before you gave it<br><b>one</b> chance to.'))],
+      [7000,()=>render(title('','Give it the <span class="gold">one.</span>'))],
+      [8800,()=>render(cta())],
+    ]},
+    mcwhatif:{label:'Mindset Check · what if',total:11000,steps:[
+      [0,()=>render(`<div class="checkbadge">✓ Mindset Check</div>`)],
+      [1200,()=>render(title('','Your mind:','“What if I fail?”'))],
+      [3400,()=>render(title('','Your purpose:','“Yeah… but what if you don’t?”'))],
+      [6400,()=>render(title('','…what if you<br><span class="gold">don’t?</span>'))],
+      [8200,()=>render(cta())],
+    ]},
+    mcgoright:{label:'Mindset Check · go right',total:11200,steps:[
+      [0,()=>render(`<div class="checkbadge">✓ Mindset Check</div>`)],
+      [1200,()=>render(lead('You prepared so hard<br>for what could go<br><span style="color:var(--mut)">wrong…</span>'))],
+      [4000,()=>render(title('','…you forgot to make room<br>for what could go <span class="mint">right.</span>'))],
+      [6800,()=>render(title('','Make the <span class="gold">room.</span>'))],
+      [8600,()=>render(cta())],
+    ]},
+    mcproof:{label:'Mindset Check · proof',total:10800,steps:[
+      [0,()=>render(`<div class="checkbadge">✓ Mindset Check</div>`)],
+      [1200,()=>render(title('','Your mind wants<br><span class="mint">proof</span> to start.'))],
+      [3400,()=>render(title('','But starting…'))],
+      [4600,()=>render(title('','…is how you<br><span class="gold">make</span> the proof.'))],
+      [6800,()=>render(title('','So… start.'))],
+      [8400,()=>render(cta())],
+    ]},
+    mcseventeen:{label:'Mindset Check · 17 problems',total:11400,steps:[
+      [0,()=>render(`<div class="checkbadge">✓ Mindset Check</div>`)],
+      [1200,()=>render(title('','Your brain made<br><span class="mint">17 problems</span>…'))],
+      [3400,()=>render(title('','…for a business you<br>haven’t <span style="color:var(--mut)">started</span> yet.'))],
+      [5800,()=>render(lead('Respectfully…'))],
+      [7000,()=>render(title('','Build it before<br>we <span class="gold">bury it?</span>'))],
+      [9200,()=>render(cta())],
+    ]},
+    ordinaryextra:{label:'Ordinary, extraordinarily',total:11500,steps:[
+      [0,()=>render(title('','Maybe your purpose isn’t<br>doing what<br><span style="color:var(--mut)">no one’s done.</span>'))],
+      [2800,()=>render(title('','Maybe it’s doing<br><span class="mint">ordinary things…</span>'))],
+      [4800,()=>render(title('','…<span class="gold">extraordinarily well.</span>'))],
+      [6800,()=>render(lead('Purpose isn’t always<br>a new idea.<br><b>Sometimes it’s your way.</b>'))],
+      [9200,()=>render(cta())],
+    ]},
+    nothingspecial:{label:'“Nothing special”',total:10500,steps:[
+      [0,()=>render(title('','What if the thing<br>you call…'))],
+      [1800,()=>render(title('','…“<span style="color:var(--mut)">nothing special</span>”…'))],
+      [3600,()=>render(title('','…is actually<br>your <span class="gold">gift?</span>'))],
+      [5600,()=>render(lead('Stop overlooking<br>what comes<br><b>naturally to you.</b>'))],
+      [8000,()=>render(cta())],
+    ]},
+    comesnaturally:{label:'What comes naturally',total:10800,steps:[
+      [0,()=>render(title('','Stop overlooking<br>what comes<br><span class="mint">naturally to you.</span>'))],
+      [2800,()=>render(lead('The stuff that feels<br><b>too easy</b> to be valuable?'))],
+      [5000,()=>render(title('','That’s often<br>your <span class="gold">gift.</span>'))],
+      [7000,()=>render(lead('Ordinary to you.<br><b>Extraordinary to them.</b>'))],
+      [9200,()=>render(cta())],
+    ]},
+    somethingbigger:{label:'Something bigger',total:11000,steps:[
+      [0,()=>render(title('','Maybe you weren’t called<br>to do something<br><span class="mint">bigger.</span>'))],
+      [3000,()=>render(title('','Maybe you were called<br>to bring something bigger…'))],
+      [5400,()=>render(title('','…to what you<br><span class="gold">already do.</span>'))],
+      [7400,()=>render(lead('Same work.<br><b>Bigger why.</b>'))],
+      [9200,()=>render(cta())],
+    ]},
+    lifewaiting:{label:'Life is waiting on you',total:10600,steps:[
+      [0,()=>render(title('','You keep waiting<br>for your life<br>to <span style="color:var(--mut)">change.</span>'))],
+      [2800,()=>render(title('','Respectfully…'))],
+      [4000,()=>render(title('','…your life is<br><span class="mint">waiting on you.</span>'))],
+      [6200,()=>render(lead('Purpose doesn’t move<br><b>until you do.</b>'))],
+      [8400,()=>render(cta())],
+    ]},
+    desiredecision:{label:'Desire ≠ decision',total:11200,steps:[
+      [0,()=>render(lead('You can want it<br><b>deeply…</b>'))],
+      [1800,()=>render(title('','…and still<br>never have it.'))],
+      [3800,()=>render(title('','Desire is not<br>a <span style="color:var(--mut)">decision.</span>'))],
+      [5800,()=>render(title('','<span class="gold">Action</span> is.'))],
+      [7600,()=>render(lead('The dream needs a <b>yes.</b><br>It needs a move.'))],
+      [9800,()=>render(cta())],
+    ]},
+    heartknows:{label:'Your heart knows',total:9800,steps:[
+      [0,()=>render(title('','Your heart<br><span class="mint">already knows.</span>'))],
+      [2200,()=>render(title('','Your mind is just<br>filing <span style="color:var(--mut)">appeals.</span>'))],
+      [4400,()=>render(lead('Respectfully…'))],
+      [5600,()=>render(title('','the verdict may<br>already be <span class="gold">in.</span>'))],
+      [7600,()=>render(cta())],
+    ]},
+    currentyou:{label:'The current you',total:10800,steps:[
+      [0,()=>render(title('','You don’t need<br>another <span style="color:var(--mut)">version</span> of you.'))],
+      [2600,()=>render(lead('You need the current one<br>to stop handing<br>her power to…'))],
+      [4800,()=>render(lead('doubt.<br>timing.<br>fear.'))],
+      [6800,()=>render(title('','Take it <span class="gold">back.</span>'))],
+      [8600,()=>render(cta())],
+    ]},
+    meethalfway:{label:'Meet it halfway',total:10400,steps:[
+      [0,()=>render(title('','The life you keep<br><span class="mint">imagining…</span>'))],
+      [2400,()=>render(title('','…won’t introduce<br>itself.'))],
+      [4400,()=>render(title('','Meet it <span class="gold">halfway.</span>'))],
+      [6200,()=>render(lead('Then <b>build it.</b>'))],
+      [7800,()=>render(cta())],
+    ]},
+    prayworkon:{label:'Then work on it',total:10600,steps:[
+      [0,()=>render(lead('Pray about it.'))],
+      [1300,()=>render(lead('Dream about it.'))],
+      [2500,()=>render(lead('Journal about it.'))],
+      [3800,()=>render(title('','At some point…'))],
+      [5000,()=>render(title('','…you still have to<br><span class="gold">work on it.</span>'))],
+      [7000,()=>render(cta())],
+    ]},
+    potentialeffort:{label:'Potential + effort',total:10600,steps:[
+      [0,()=>render(title('','Potential is<br><span class="mint">powerful.</span>'))],
+      [2000,()=>render(lead('But potential<br>without <b>effort…</b>'))],
+      [4000,()=>render(lead('…is just a good idea<br>that never became<br>anything else.'))],
+      [6400,()=>render(title('','<span class="gold">Build it.</span>'))],
+      [8000,()=>render(cta())],
+    ]},
+    figureitout:{label:'Figure it out as you go',total:10600,steps:[
+      [0,()=>render(title('','You don’t have to<br>have it all<br><span style="color:var(--mut)">figured out.</span>'))],
+      [2800,()=>render(title('','But you do have to<br>be willing…'))],
+      [4800,()=>render(title('','…to figure it out<br><span class="gold">as you go.</span>'))],
+      [6800,()=>render(lead('Time to <b>climb.</b>'))],
+      [8400,()=>render(cta())],
+    ]},
+    ingroundgrow:{label:'Put it in the ground',total:11000,steps:[
+      [0,()=>render(lead('You don’t need to<br>work yourself<br><span style="color:var(--mut)">into the ground.</span>'))],
+      [3000,()=>render(title('','But put enough<br><span class="mint">in the ground…</span>'))],
+      [5200,()=>render(title('','…for something<br>to <span class="gold">grow.</span>'))],
+      [7200,()=>render(lead('Time to <b>thrive.</b>'))],
+      [8800,()=>render(cta())],
+    ]},
+  };
+  const CTA=`
+
+Purpose 2 Profit is the creator OS + membership that turns ideas into income — built for digital content creators, POD sellers, digital-product makers (Etsy, KDP, planners, printables), and anyone sitting on an idea they haven't shipped yet.
+
+💬 Comment "FLOCK" and I'll send you the way into the Founding Flock — founder pricing, first through the doors, + free goodies for stopping by. 🐑
+
+#creatoreconomy #digitalproducts #printondemand #sidehustle #contentcreator #passiveincome #etsyseller #foundingmember #purposetoprofit #bornanoriginal`;
+  const SCRIPTS={
+    stack:`The whole creator business, one system — create, brand, launch, grow, with two AI partners and a path that connects.\nBorn an original. Don't die a copy.`+CTA,
+    thrive:`Every business starts as one thought. The Haus takes you the rest of the way.\nFrom thought → to thrive.`+CTA,
+    home:`Your tools, your people, your learning, your launch — all under one roof.\nMake the Haus your home. 🏡`+CTA,
+    franruth:`You don't have to do this alone. Frank kills the weak ideas; Ruth makes the strong ones sellable. Two AI partners, always on call.`+CTA,
+    founding:`The doors open soon — and founders walk in first, at pricing that never comes back.`+CTA,
+    countdown:`Something's brewing in the Haus. Almost time. Get on the list so you're first to know.`+CTA,
+    thelist:`The Haus isn't open yet — but the list is. Founders get in first and hear it first.`+CTA,
+    founderentrance:`When the doors open, founders walk in first — before the crowd, before the price climbs. Take your seat.`+CTA,
+    whynow:`Wait for launch = full price, later. Join now = founder pricing, locked in. Future you says thanks.`+CTA,
+    oneshot:`Founder pricing happens once. When it's gone, it's gone. Get in while the door's open.`+CTA,
+    frontrow:`Every big thing had an early crowd — the ones who saw it first. This is that moment.`+CTA,
+    shapeit:`Some people join communities. Others help shape them — before the polished version, before everyone knows the name. We're looking for those people.`+CTA,
+    earlyinfluence:`This isn't early access. It's early influence. Founders won't just enter what we're building — they'll be part of its beginning.`+CTA,
+    firstseats:`We saved the first seats for a reason — for builders, question-askers, idea-chasers who'll say "I don't have it all figured out, but I'm ready to."`+CTA,
+    ninety2:`61% of people have a business idea. 92% never act on it. The 8% who do aren't smarter — they're bolder. Be bold. Stand apart.\n(Harris Poll for Zapier, 2020.)`+CTA,
+    flock2:`Everyone's waiting for permission — 92% of people with an idea never start. Don't follow the herd. Join the Flock. 🐑\n(Harris Poll for Zapier, 2020.)`+CTA,
+    rise:`How long has your idea been sitting there? 92% let theirs fade. This is your sign. From thought to thrive.\n(Harris Poll for Zapier, 2020.)`+CTA,
+    spark:`The creator economy is a $250B+ industry heading toward $2 trillion. It's not saturated — it's waiting for your spark.\n(Grand View Research; Fortune Business Insights.)`+CTA,
+    ideas:`Digital, POD, printables, merch… and no clue which to build first? Pick one. Ship it. The Haus shows you how.`+CTA,
+    objection:`"I'm not techy." "I don't have time." "AI overwhelms me." Good — that's exactly who it's for. Start before you feel ready.`+CTA,
+    brandna:`Who is your brand, really? 11 archetypes — one of them is you. One of eleven. One of one. Clarity, not guesswork.`+CTA,
+    niche:`Niche what? Niche who? Niche 'n' YOU. Let's find the lane that fits what you do.`+CTA,
+    onlyyou:`Thousands sell the exact same product. Only yours has you. Same shelf, different soul.`+CTA,
+    original:`A whole flock, all the same… then there's you — the one who does it your way. Born an original. Don't die a copy. 🐑`+CTA,
+    brandtree:`You don't have a brand. You ARE the brand. Your fingerprint. Your roots. Your mark. No one else has your print.`+CTA,
+    purpose:`Somewhere, you went grey. Blended in. Played it safe. Then you remembered your why — and the color came back. Don't die a copy.`+CTA,
+    purposeborn:`You weren't born by accident. You were born on purpose — for a purpose. That idea you keep coming back to? It was put there. Let's walk your journey together.`+CTA,
+    mindset:`Your business grows at the speed of your mindset. That's why every day in the Haus starts with a Mindset Moment. Think different, build different.`+CTA,
+    heart:`People don't buy what you make — they buy why you make it. Create from the heart. The tools are easy; the heart is you.`+CTA,
+    purposecall:`A goal keeps you busy. A purpose keeps you going. When the hard days come, your why carries you. Purpose 2 Profit — it's in the name for a reason.`+CTA,
+    bethereason:`Somewhere, someone has a problem only you can solve. Your gift was never just for you — it's for them. Be the reason someone smiles today. 🌟`+CTA,
+    chooseyou:`The smallest choice can make the biggest impact. Choose to start. Choose to try. Choose YOU. From thought to thrive.`+CTA,
+    provewrong:`The voice in your head says you can't. It's allowed to talk — it doesn't get to decide. Rise anyway, and let your actions prove it wrong.`+CTA,
+    sayyoudid:`They said you can't. Take the chance anyway — not to prove them wrong, but so one day you can say: I did.`+CTA,
+    standapart:`It's easier to pull you down than to rise up to meet you — so some people will try. Let them. It's okay to stand apart. Born an original. 🐑`+CTA,
+    ideatired:`You've researched it. Saved posts about it. Talked yourself into it — and right back out. Your idea needs more than your attention. It needs your decision.`+CTA,
+    anothersign:`You asked for a sign. Then another. Then called the third one "coincidence." Meanwhile that idea keeps tapping your shoulder… Maybe it's not another sign. Maybe it's a start.`+CTA,
+    beforeproof:`Nobody talks about this part of starting — becoming someone who trusts herself enough to begin, before there's proof it'll work. That's the work before the work. And we do it here.`+CTA,
+    comfortzone:`Your comfort zone has excellent customer service. Remembers your name, knows your excuses, never asks you to risk a thing. ⭐️⭐️⭐️⭐️⭐️ "Would recommend — if your goal is to stay exactly where you are." But that's not why you're here.`+CTA,
+    ideaproblem:`You don't have an idea problem. 47 ideas, three notebooks, a Canva folder that deserves its own zip code. Your problem is turning ONE into something real. That's where we come in.`+CTA,
+    notprocrastinating:`Maybe you're not procrastinating. Maybe you're scared that once you try, you'll find out if you're capable. Plot twist: you build self-trust by keeping promises to yourself. Start with one.`+CTA,
+    quityourlife:`Keep the job. Pick up the kids. Make dinner. Build anyway. You don't need a dramatic reinvention — you need somewhere to start.`+CTA,
+    startingmessy:`Your first design might be ugly. Your first post might get 11 views. And? We're building a business, not auditioning for perfection. Starting messy is still starting.`+CTA,
+    oneyear:`One year from now has entered the chat. She has questions: Did we start? Did we stop overthinking it? Or are we still "getting ready"? Your move.`+CTA,
+    purposecheck:`✓ PURPOSE CHECK: Are you waiting to discover your purpose… or overlooking the thing you already do extraordinarily well? Your purpose isn't hiding — you've been calling your gift "ordinary."`+CTA,
+    mindsetcheck:`✓ MINDSET CHECK: Your mind can build 100 reasons not to start before you give yourself one reason to believe you can. Maybe the first thing to build is belief. (Or… how long are we calling it "research" when it's really fear in glasses? 👀)`+CTA,
+    heartcheck:`✓ HEART CHECK: Is the dream gone… or did life just get loud enough that you stopped listening? Some dreams don't disappear. They wait. Time to make it real.`+CTA,
+    raft:`Got an idea but lost at sea? Get on the RAFT — Relieve, Act, Fast Win, Traction. Your weekly loop from drifting to shipping.`+CTA,
+    grows:`"I'll figure it out" is not a plan. GROWS: Ground Zero, Roadmap, Ownership, Window, Success Vision. (G+R)×O×W=S. A plan you'll actually finish.`+CTA,
+    rooted:`You're ready — so why aren't you launched? ROOTED: Reach, Open, Offer, Trigger, Escalate, Deepen. From ready → launched.`+CTA,
+    getrooted:`Idea to income, in four moves: Brand → Product → Market → Launch. Get ROOTED. Grow deep, rise strong.`+CTA,
+    community:`Building alone is the hard way. Your flock is forming — share a win, ask anything, get cheered on. Founding members wanted. 🐑`+CTA,
+    courses:`Most courses are a pile of videos you never finish. Ours is a path — 5 realms, 50+ courses, learn by doing.`+CTA,
+    game:`What if growing your business felt like a game? Points, streaks, badges, ranks — level up as you build.`+CTA,
+    brand:`"Just be yourself." Cool — how? Your Brand DNA, mapped: voice, values, vibe, edge. Your fingerprint. Your brand.`+CTA,
+    testtestimony:`Was it a test? Maybe. Turn that test into a testimony — it might be exactly what someone else needs to hear. Don't waste the story.`+CTA,
+    messmessage:`Life got messy? Good. Turn that mess into a message. What you survived becomes what you use to serve. Don't waste it.`+CTA,
+    setbacksetup:`You called it a setback. What if it was a set-up — a reroute toward the thing you were meant to build? Purpose has a funny way of finding you.`+CTA,
+    redirection:`The door closed. You prayed, you pushed, you knocked again. Still closed. Maybe it wasn't punishment — maybe it was redirection, pointing you toward your purpose.`+CTA,
+    builtyou:`Plot twist: the season you thought broke you may have been the one that built you. Now build something with it.`+CTA,
+    prayedpurpose:`You prayed for purpose… then got annoyed when it showed up as a challenge, a lesson, and a whole lot of growth. Time to put it into action.`+CTA,
+    movedaway:`Maybe you didn't lose your way. Maybe you were moved away from what no longer fit — so you could finally see what does. Detours can have purpose too.`+CTA,
+    yourresume:`Stop disqualifying yourself because of your story. The mistakes. The pivots. The "I should've known better." Those aren't stains on your résumé — they ARE your résumé.`+CTA,
+    expertise:`What if the thing you keep calling "just my experience" is actually expertise? What you've lived, learned, and overcome. Your story can serve. Your purpose can move.`+CTA,
+    survived:`You survived the chapter you thought would break you. That wisdom was earned — and it doesn't have to end with you. Someone else may need what it taught you.`+CTA,
+    mcresearch:`✓ MINDSET CHECK: How long are you going to call it "research" when you know it's really fear wearing glasses? 👀 You've learned enough. Time to build.`+CTA,
+    mcears:`✓ MINDSET CHECK: Your biggest obstacle might not be in front of you — it might be the six inches between your ears. Win there first.`+CTA,
+    mcroadblock:`✓ MINDSET CHECK: Your mind can build a roadblock faster than your hands can build a business. Build it anyway.`+CTA,
+    mcending:`✓ MINDSET CHECK: You haven't failed. You haven't even started. Your mind just skipped ahead and wrote the ending. Write a different one.`+CTA,
+    mcreasons:`✓ MINDSET CHECK: Funny how your brain finds 47 reasons something won't work before you give it ONE chance to. Give it the one.`+CTA,
+    mcwhatif:`✓ MINDSET CHECK: Your mind said "What if I fail?" Your purpose said "Yeah… but what if you don't?"`+CTA,
+    mcgoright:`✓ MINDSET CHECK: You've spent so long preparing for what could go wrong, you forgot to make room for what could go right. Make the room.`+CTA,
+    mcproof:`✓ MINDSET CHECK: Your mind keeps demanding proof before you start. But starting is how you make the proof. So… start.`+CTA,
+    mcseventeen:`✓ MINDSET CHECK: Your brain just created 17 problems for a business you haven't started yet. Respectfully… can we build it before we bury it?`+CTA,
+    ordinaryextra:`Maybe your purpose isn't doing something no one's ever done. Maybe it's doing ordinary things extraordinarily well. Purpose isn't always a new idea — sometimes it's your way of doing the thing.`+CTA,
+    nothingspecial:`What if the thing you keep calling "nothing special" is actually your gift? Stop overlooking what comes naturally to you — that's usually where your purpose is hiding.`+CTA,
+    comesnaturally:`Stop overlooking what comes naturally to you. The stuff that feels too easy to be valuable? That's often your gift — ordinary to you, extraordinary to the people you serve.`+CTA,
+    somethingbigger:`Maybe you weren't called to do something bigger. Maybe you were called to bring something bigger to what you already do. Same work — bigger why.`+CTA,
+    lifewaiting:`You keep waiting for your life to change. Respectfully… your life is waiting on you. Purpose doesn't move until you do.`+CTA,
+    desiredecision:`You can want it deeply and still never have it. Desire is not a decision. Action is. At some point the dream stops needing more thought — it needs a yes, a move, and you.`+CTA,
+    heartknows:`Your heart already knows. Your mind is just filing appeals. Respectfully… the verdict may already be in.`+CTA,
+    currentyou:`You don't need another version of you. You need the current one to stop handing her power to doubt, timing, and fear. Take it back.`+CTA,
+    meethalfway:`The life you keep imagining is not going to introduce itself. You have to meet it halfway — and build it.`+CTA,
+    prayworkon:`You can pray about it. Dream about it. Journal about it. At some point, you still have to work on it.`+CTA,
+    potentialeffort:`Potential is powerful. But potential without effort is just a really good idea that never got a chance to become anything else. Build it.`+CTA,
+    figureitout:`You don't have to have it all figured out. But you do have to be willing to figure it out as you go. Time to climb.`+CTA,
+    ingroundgrow:`You don't need to work yourself into the ground. But you do need to put enough into the ground for something to grow. Time to thrive.`+CTA,
+  };
+
+  const GROUPS=[
+    ['▶ Start here',['stack','thrive','home','franruth']],
+    ['🚀 Launching soon',['founding','countdown','thelist','founderentrance','whynow','oneshot','frontrow','shapeit','earlyinfluence','firstseats']],
+    ['📊 Hooks & stats',['ninety2','flock2','rise','spark','ideas','objection']],
+    ['🖤 Identity',['brandna','niche','onlyyou','original','brandtree','purpose','purposeborn']],
+    ['💜 Heart & mindset',['mindset','heart','purposecall']],
+    ['🔥 Thought-provoking',['bethereason','chooseyou','provewrong','sayyoudid','standapart']],
+    ['🧠 Real talk',['ideatired','anothersign','beforeproof','comfortzone','ideaproblem','notprocrastinating','quityourlife','startingmessy','oneyear']],
+    ['✓ Check Yourself',['purposecheck','mindsetcheck','heartcheck','mcresearch','mcears','mcroadblock','mcending','mcreasons','mcwhatif','mcgoright','mcproof','mcseventeen']],
+    ['📖 Your Story',['testtestimony','messmessage','setbacksetup','redirection','builtyou','prayedpurpose','movedaway','yourresume','expertise','survived']],
+    ['🌟 Ordinary → Extraordinary',['ordinaryextra','nothingspecial','comesnaturally','somethingbigger']],
+    ['💪 Do the Work',['lifewaiting','desiredecision','heartknows','currentyou','meethalfway','prayworkon','potentialeffort','figureitout','ingroundgrow']],
+    ['🧭 Frameworks',['raft','grows','rooted','getrooted']],
+    ['✨ Inside the Haus',['community','courses','game','brand']],
+  ];
+  let current='stack', timers=[];
+  const reelsEl=$('#reels');
+  const reelsEl2=reelsEl;
+
+  /* ---------- CREATE-ONCE STUDIO ---------- */
+  const PLAT=[['tt','TikTok'],['ig','Reels'],['yt','Shorts'],['pin','Pinterest'],['li','LinkedIn'],['fb','Facebook']];
+  const PNAME=Object.fromEntries(PLAT);
+  const HASH_FULL='#creatoreconomy #digitalproducts #printondemand #sidehustle #contentcreator #passiveincome #etsyseller #foundingmember #purposetoprofit #bornanoriginal';
+  const AUD='Built for digital content creators, POD sellers & digital-product makers (Etsy, KDP, planners, printables) — and anyone sitting on an idea they haven’t shipped yet.';
+  const load=(k,d)=>{ try{ return JSON.parse(localStorage.getItem(k))||d; }catch(e){ return d; } };
+  const save=(k,v)=>{ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} };
+  let posted=load('p2p_posted_v1',{}), custom=load('p2p_custom_v1',[]), calendar=load('p2p_calendar_v1',{}), vaultCustom=load('p2p_oneliners_v1',[]);
+
+  function bodyOf(id){ return (SCRIPTS[id]||'').split(CTA)[0].trim(); }
+  function platformize(id,p){ const b=bodyOf(id); switch(p){
+    case 'tt':  return b+'\n\n💬 Comment "FLOCK" for the way into the Founding Flock 🐑\n\n#creatoreconomy #digitalproducts #sidehustle #foundingmember #purposetoprofit';
+    case 'ig':  return b+'\n\n'+AUD+'\n\n💬 Comment "FLOCK" and I’ll DM you the way into the Founding Flock — founder pricing, first through the doors, + free goodies. 🐑\n\n'+HASH_FULL;
+    case 'yt':  return b+'\n\n💬 Comment "FLOCK" for early access to the Founding Flock — founder pricing + free goodies.\n\n#Shorts #creatoreconomy #digitalproducts #sidehustle #contentcreator';
+    case 'pin': return b+'\n\n'+AUD+'\n\n📌 Save this — then join the Founding Flock (founder pricing + free goodies). Link in profile.\n\n#digitalproducts #etsyseller #sidehustle #creatorbusiness #printondemand';
+    case 'li':  return b+'\n\n'+AUD+'\n\nIf you’re building something of your own, comment "FLOCK" and I’ll share how to join our founding group — founder pricing and early access.\n\n#CreatorEconomy #Entrepreneurship #DigitalProducts';
+    case 'fb':  return b+'\n\nComment "FLOCK" below and I’ll send you the way into the Founding Flock — founder pricing, first in, + free goodies. 🐑\n\n#creatoreconomy #digitalproducts #sidehustle';
+  } return b; }
+
+  // ---- custom reels: register into REELS/SCRIPTS from storage ----
+  function registerCustom(){ custom.forEach(c=>{ const per=1500; let t=0;
+    const steps=[[0,()=>render(title('',c.beats[0]||c.label,''))]];
+    for(let i=1;i<c.beats.length;i++){ t+=per; const b=c.beats[i]; steps.push([t,()=>render(lead(b))]); }
+    t+=per; steps.push([t,()=>render(cta())]);
+    REELS[c.id]={label:c.label,total:t+2400,steps,custom:true};
+    SCRIPTS[c.id]=c.beats.join('\n\n')+CTA;
+  }); }
+
+  // ---- menu (rebuildable) ----
+  let ALL=[], reelBtns={}, accs=[], curPlat='tt', filter='all', query='';
+  function groupsForMenu(){ const g=GROUPS.slice(); if(custom.length) g.push(['⭐ My Reels',custom.map(c=>c.id)]); return g; }
+  function buildMenu(){ reelsEl2.innerHTML=''; reelBtns={}; accs=[]; ALL=[];
+    groupsForMenu().forEach(([title2,ids],gi)=>{
+      const valid=ids.filter(id=>REELS[id]); ALL.push(...valid);
+      const d=document.createElement('details');d.className='reelacc';if(gi===0)d.open=true;
+      const s=document.createElement('summary');s.className='reelsum';s.innerHTML=title2+'<span class="reelcount">'+valid.length+'</span>';d.appendChild(s);
+      const row=document.createElement('div');row.className='reelrow';
+      valid.forEach(id=>{ const b=document.createElement('button');b.className='reel'+(id===current?' active':'');b.textContent=REELS[id].label;b.dataset.id=id;b.onclick=()=>select(id);row.appendChild(b);reelBtns[id]=b; });
+      d.appendChild(row);reelsEl2.appendChild(d);accs.push({el:d,ids:valid});
+    });
+  }
+
+  function isPosted(id){ const o=posted[id]; return !!(o&&Object.keys(o).length); }
+  function updateCount(){ $('#charCount').textContent=$('#sbText').value.length+' chars'; }
+  function renderTabs(){ const t=$('#sbTabs'); t.innerHTML=''; PLAT.forEach(([k,name])=>{ const b=document.createElement('button'); const done=posted[current]&&posted[current][k]; b.className='sb-tab'+(k===curPlat?' active':'')+(done?' done':''); b.innerHTML=name+'<span class="sb-tdot"></span>'; b.onclick=()=>{ curPlat=k; renderCaption(); renderTabs(); }; t.appendChild(b); }); }
+  function renderCaption(){ $('#sbText').value=platformize(current,curPlat); $('#copyPlat').textContent=PNAME[curPlat]; updateCount(); }
+  function renderDots(){ const d=$('#sbDots'); d.innerHTML=''; PLAT.forEach(([k,name])=>{ const on=posted[current]&&posted[current][k]; const b=document.createElement('button'); b.className='pdot'+(on?' on':''); b.textContent=name; b.title='Mark '+name+(on?' — not posted':' — posted'); b.onclick=()=>{ posted[current]=posted[current]||{}; if(posted[current][k]) delete posted[current][k]; else posted[current][k]=1; if(!Object.keys(posted[current]).length) delete posted[current]; save('p2p_posted_v1',posted); renderDots(); renderTabs(); refreshMenu(); }; d.appendChild(b); }); }
+  function select(id){ if(!REELS[id]) id='stack'; current=id; Object.keys(reelBtns).forEach(k=>reelBtns[k].classList.toggle('active',k===id)); $('#playLabel').textContent=REELS[id].label; $('#sbTitle').textContent=REELS[id].label; renderTabs(); renderCaption(); renderDots(); stop(); scenes.innerHTML=''; $('#playbtn').classList.remove('hide'); $('#progBar').style.transition='none'; $('#progBar').style.width='0'; }
+
+  function refreshMenu(){
+    ALL.forEach(id=>reelBtns[id]&&reelBtns[id].classList.toggle('posted',isPosted(id)));
+    $('#progress').textContent='Posted '+ALL.filter(isPosted).length+' / '+ALL.length;
+    const q=query.trim().toLowerCase();
+    accs.forEach(a=>{ let vis=0; a.ids.forEach(id=>{ let ok=true;
+      if(q) ok=(REELS[id].label||'').toLowerCase().includes(q)||(SCRIPTS[id]||'').toLowerCase().includes(q);
+      if(ok&&filter==='todo') ok=!isPosted(id);
+      if(ok&&filter==='done') ok=isPosted(id);
+      reelBtns[id].classList.toggle('hide',!ok); if(ok) vis++;
+    }); a.el.classList.toggle('hide',vis===0); if(q&&vis) a.el.open=true; });
+  }
+  function rebuildAll(){ registerCustom(); buildMenu(); refreshMenu(); }
+
+  $('#sbText').addEventListener('input',updateCount);
+  $('#copyBtn').onclick=()=>{ const b=$('#copyBtn'); navigator.clipboard.writeText($('#sbText').value).then(()=>{ const h=b.innerHTML; b.textContent='✓ Copied!'; b.classList.add('done'); setTimeout(()=>{ b.innerHTML=h; b.classList.remove('done'); },1400); }); };
+  $('#search').addEventListener('input',e=>{ query=e.target.value; refreshMenu(); });
+  $('#filters').addEventListener('click',e=>{ const b=e.target.closest('.fchip'); if(!b)return; filter=b.dataset.f; $('#filters').querySelectorAll('.fchip').forEach(c=>c.classList.toggle('active',c===b)); refreshMenu(); });
+  $('#surprise').onclick=()=>{ let pool=ALL.filter(id=>!isPosted(id)); if(!pool.length) pool=ALL; const id=pool[Math.floor(Math.random()*pool.length)]; const a=accs.find(x=>x.ids.includes(id)); if(a) a.el.open=true; select(id); reelBtns[id].scrollIntoView({behavior:'smooth',block:'center'}); };
+
+  /* ---------- MODALS ---------- */
+  function openModal(sel){ $(sel).classList.add('open'); }
+  ROOT.querySelectorAll('.modal').forEach(m=>{ m.addEventListener('click',e=>{ if(e.target===m||e.target.closest('.modal-x')) m.classList.remove('open'); }); });
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape') ROOT.querySelectorAll('.modal.open').forEach(m=>m.classList.remove('open')); });
+
+  /* ---------- CONTENT CALENDAR ---------- */
+  const MON=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const DOW=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const SHORTP={tt:'TT',ig:'IG',yt:'YT',pin:'PIN',li:'LI',fb:'FB'};
+  let calView=new Date(); calView.setDate(1);
+  function dkey(y,m,d){ return y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0'); }
+  function renderCal(){
+    const y=calView.getFullYear(), m=calView.getMonth();
+    $('#calTitle').textContent=MON[m]+' '+y;
+    const first=new Date(y,m,1).getDay(), days=new Date(y,m+1,0).getDate();
+    const now=new Date(), tkey=dkey(now.getFullYear(),now.getMonth(),now.getDate());
+    let h=DOW.map(d=>'<div class="cal-dow">'+d+'</div>').join('');
+    for(let i=0;i<first;i++) h+='<div class="cal-cell empty"></div>';
+    for(let d=1;d<=days;d++){ const k=dkey(y,m,d); const items=calendar[k]||[];
+      h+='<div class="cal-cell'+(k===tkey?' today':'')+'"><div class="cal-d">'+d+'</div>'+
+        items.map((it,idx)=>{ const lab=REELS[it.id]?REELS[it.id].label:'(removed)'; return '<div class="cal-chip" data-k="'+k+'" data-i="'+idx+'" title="'+(PNAME[it.plat]||'')+' — click to remove"><i>'+(SHORTP[it.plat]||'')+'</i>'+lab+'</div>'; }).join('')+
+        '<button class="cal-add" data-k="'+k+'">＋</button></div>';
+    }
+    $('#calGrid').innerHTML=h;
+  }
+  $('#calGrid').addEventListener('click',e=>{
+    const add=e.target.closest('.cal-add'); if(add){ const k=add.dataset.k; (calendar[k]=calendar[k]||[]).push({id:current,plat:curPlat}); save('p2p_calendar_v1',calendar); renderCal(); return; }
+    const chip=e.target.closest('.cal-chip'); if(chip){ const k=chip.dataset.k,i=+chip.dataset.i; calendar[k].splice(i,1); if(!calendar[k].length) delete calendar[k]; save('p2p_calendar_v1',calendar); renderCal(); }
+  });
+  $('#calPrev').onclick=()=>{ calView.setMonth(calView.getMonth()-1); renderCal(); };
+  $('#calNext').onclick=()=>{ calView.setMonth(calView.getMonth()+1); renderCal(); };
+  $('#calBtn').onclick=()=>{ $('#calHint').innerHTML='Tap <b>＋</b> on a day to schedule: <b>'+REELS[current].label+'</b> · '+PNAME[curPlat]; renderCal(); openModal('#modalCal'); };
+
+  /* ---------- CREATE YOUR OWN REEL ---------- */
+  function renderNrList(){ const el=$('#nrList'); el.innerHTML = custom.length ? custom.map(c=>'<div class="nr-item"><span>'+c.label+'</span><button data-id="'+c.id+'" title="Delete">✕</button></div>').join('') : '<p class="muted">No custom reels yet — make your first one above.</p>'; }
+  $('#nrList').addEventListener('click',e=>{ const b=e.target.closest('button[data-id]'); if(!b)return; const id=b.dataset.id; custom=custom.filter(c=>c.id!==id); delete REELS[id]; delete SCRIPTS[id]; if(posted[id]){ delete posted[id]; save('p2p_posted_v1',posted); } save('p2p_custom_v1',custom); if(current===id) current='stack'; rebuildAll(); renderNrList(); if(!REELS[current]) select('stack'); });
+  $('#saveReel').onclick=()=>{
+    const label=$('#nrLabel').value.trim(); const beats=$('#nrBeats').value.split('\n').map(s=>s.trim()).filter(Boolean);
+    if(!label||!beats.length){ $('#nrErr').textContent='Add a title and at least one line.'; return; }
+    const id='my'+Date.now(); custom.push({id,label,beats}); save('p2p_custom_v1',custom);
+    rebuildAll(); const a=accs.find(x=>x.ids.includes(id)); if(a) a.el.open=true; select(id);
+    $('#nrLabel').value=''; $('#nrBeats').value=''; $('#nrErr').textContent=''; renderNrList();
+    $('#modalNew').classList.remove('open');
+  };
+  $('#newBtn').onclick=()=>{ renderNrList(); openModal('#modalNew'); };
+
+  /* ---------- ONE-LINER VAULT ---------- */
+  const VAULT_SEED=["Born an original. Don't die a copy.","Start before you feel ready.","Your comfort zone has excellent customer service. Leave anyway.","You don't have an idea problem. You have a starting problem.","Saving posts isn't the same as starting.","Confidence comes after the first step, not before it.","Potential without effort is just a good idea that never happened.","They can copy the product. They can't copy you.","You weren't born to blend in.","One year from now you'll wish you started today. So start today.","Your mess is your message.","Build it anyway.","The door didn't close on you. It redirected you.","Stop researching your fear and call it what it is.","Make something real.","Not ready isn't the same as not able.","You don't have a brand. You ARE the brand.","Your chapter 1 is not their chapter 20.","Done is better than perfect — and it actually ships.","Do it scared."];
+  function vaultAll(){ return VAULT_SEED.concat(vaultCustom); }
+  function renderVault(){ $('#vaultList').innerHTML = vaultAll().map((t,i)=>{ const isC=i>=VAULT_SEED.length; return '<div class="vault-item"><span>'+t.replace(/</g,'&lt;')+'</span><div class="vault-btns"><button class="vault-copy" data-t="'+encodeURIComponent(t)+'" title="Copy">⧉</button>'+(isC?'<button class="vault-del" data-i="'+(i-VAULT_SEED.length)+'" title="Delete">✕</button>':'')+'</div></div>'; }).join(''); }
+  $('#vaultList').addEventListener('click',e=>{ const c=e.target.closest('.vault-copy'); if(c){ navigator.clipboard.writeText(decodeURIComponent(c.dataset.t)); const o=c.textContent; c.textContent='✓'; setTimeout(()=>c.textContent=o,1000); return; } const d=e.target.closest('.vault-del'); if(d){ vaultCustom.splice(+d.dataset.i,1); save('p2p_oneliners_v1',vaultCustom); renderVault(); } });
+  $('#vaultAdd').onclick=()=>{ const v=$('#vaultInput').value.trim(); if(!v)return; vaultCustom.push(v); save('p2p_oneliners_v1',vaultCustom); $('#vaultInput').value=''; renderVault(); };
+  $('#vaultInput').addEventListener('keydown',e=>{ if(e.key==='Enter') $('#vaultAdd').click(); });
+  $('#vaultBtn').onclick=()=>{ renderVault(); openModal('#modalVault'); };
+
+  // ---- init ----
+  registerCustom(); if(!REELS[current]) current='stack'; buildMenu(); select(current); refreshMenu();
+  function stop(){ timers.forEach(clearTimeout); timers=[]; }
+  let speed=1.35; const SPEEDS=[1,1.35,1.6];
+  function play(){ stop(); const R=REELS[current]; const bar=$('#progBar'); const T=R.total/speed;
+    bar.style.transition='none';bar.style.width='0';void bar.offsetWidth;bar.style.transition='width '+T+'ms linear';bar.style.width='100%';
+    R.steps.forEach(([t,fn])=>timers.push(setTimeout(fn,t/speed)));
+    timers.push(setTimeout(()=>{ if($('#loopState').textContent==='on') play(); }, T)); }
+  $('#speed').onclick=()=>{ speed=SPEEDS[(SPEEDS.indexOf(speed)+1)%SPEEDS.length]; $('#speedState').textContent=speed+'×'; };
+  $('#playbtn').onclick=()=>{ $('#playbtn').classList.add('hide'); play(); };
+  $('#replay').onclick=()=>{ $('#playbtn').classList.add('hide'); play(); };
+  $('#loop').onclick=()=>{const s=$('#loopState');s.textContent=s.textContent==='on'?'off':'on';};
+  $('#recBtn').onclick=()=>{ ROOT.classList.add('rec'); window.scrollTo(0,0); };
+  $('#exitRec').onclick=()=>{ ROOT.classList.remove('rec'); };
+  $('#recReplay').onclick=()=>{ $('#playbtn').classList.add('hide'); play(); };
+
+</script>
+{%- else -%}
+<div class="p2psz-locked">
+  <h2>{{ section.settings.locked_heading | default: 'Members only' }}</h2>
+  <p>{{ section.settings.locked_body | default: 'This studio is private.' }}</p>
+</div>
+<style>.p2psz-locked{max-width:560px;margin:60px auto;text-align:center;padding:40px 24px;color:#eaf1f8;background:#0b1424;border:1px solid rgba(143,240,224,.2);border-radius:20px;font-family:system-ui}.p2psz-locked h2{color:#8ff0e0;margin:0 0 10px}.p2psz-locked p{color:#9db3c2;margin:0}</style>
+{%- endif -%}
+
+{%- style -%}
+#p2psz button{font-family:inherit;background:transparent;border:0;color:inherit;cursor:pointer;line-height:normal}
+#p2psz input,#p2psz textarea,#p2psz select{font-family:inherit}
+#p2psz a{color:inherit;text-decoration:none}
+#p2psz ul,
+#p2psz ol{list-style:none}
+#p2psz img,#p2psz svg,#p2psz iframe,#p2psz video{max-width:100%}
+#p2psz {
+    --ink:#05070d;--mint:#8ff0e0;--mint2:#34e0a1;--violet:#9b6cff;--grape:#6a3cae;
+    --gold:#e8c979;--cream:#f4e9c9;--text:#eaf1f8;--mut:#93a7bb;--stageW:min(420px,92vw,42vh);
+  }
+#p2psz * {box-sizing:border-box;margin:0;padding:0}
+#p2psz {background:radial-gradient(120% 90% at 50% 0%,#0c1626,#05070d 70%);color:var(--text);
+    font-family:"Helvetica Neue",Arial,system-ui,sans-serif;-webkit-font-smoothing:antialiased;
+    display:flex;align-items:flex-start;justify-content:center;min-height:100dvh;padding:14px 18px 44px}
+#p2psz .wrap {display:flex;flex-direction:column;align-items:center;gap:15px;width:100%}
+#p2psz .stagewrap {filter:drop-shadow(0 30px 70px rgba(0,0,0,.6))}
+#p2psz .stage {position:relative;width:var(--stageW);aspect-ratio:9/16;container-type:inline-size;overflow:hidden;border-radius:26px;background:var(--ink);isolation:isolate;border:1px solid rgba(143,240,224,.12)}
+#p2psz /* aurora */
+  .aurora {position:absolute;inset:0;z-index:0;overflow:hidden}
+#p2psz .au {position:absolute;border-radius:50%;filter:blur(46px);opacity:.5;mix-blend-mode:screen;will-change:transform}
+#p2psz .a1 {width:80%;height:46%;left:-14%;top:6%;background:radial-gradient(circle,var(--violet),transparent 62%);animation:d1 15s ease-in-out infinite}
+#p2psz .a2 {width:88%;height:52%;right:-20%;top:0;background:radial-gradient(circle,var(--mint2),transparent 60%);animation:d2 18s ease-in-out infinite}
+#p2psz .a3 {width:70%;height:42%;left:6%;bottom:2%;background:radial-gradient(circle,var(--grape),transparent 64%);animation:d3 21s ease-in-out infinite}
+#p2psz .a4 {width:66%;height:40%;right:-6%;bottom:6%;background:radial-gradient(circle,#1e8f6e,transparent 62%);animation:d1 17s ease-in-out infinite reverse}
+@keyframes d1{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(8%,6%) scale(1.15)}}
+@keyframes d2{0%,100%{transform:translate(0,0) scale(1.05)}50%{transform:translate(-10%,8%) scale(1.2)}}
+@keyframes d3{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(6%,-6%) scale(1.12)}}
+#p2psz .stars {position:absolute;inset:0;opacity:.5;background-image:
+    radial-gradient(1.4px 1.4px at 20% 30%,#fff,transparent),radial-gradient(1.2px 1.2px at 70% 20%,#dfe,transparent),
+    radial-gradient(1.6px 1.6px at 40% 70%,#fff,transparent),radial-gradient(1px 1px at 85% 55%,#cfe,transparent),
+    radial-gradient(1.3px 1.3px at 55% 85%,#fff,transparent),radial-gradient(1px 1px at 12% 82%,#fff,transparent);
+    animation:tw 4s steps(2) infinite}
+@keyframes tw{0%,100%{opacity:.35}50%{opacity:.7}}
+#p2psz .vign {position:absolute;inset:0;background:radial-gradient(120% 90% at 50% 42%,transparent 52%,rgba(3,5,10,.86) 100%)}
+#p2psz /* scene container */
+  .scenes {position:absolute;inset:0;z-index:2;display:flex;align-items:center;justify-content:center;padding:34px;text-align:center}
+#p2psz .card {position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:34px;text-align:center}
+#p2psz /* text primitives */
+  .kick {font-size:12px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:var(--mint);animation:rise .5s both}
+#p2psz .big {font-size:clamp(26px,7.4cqw,37px);font-weight:800;letter-spacing:-.02em;line-height:1.12;text-wrap:balance;animation:rise .6s .05s both}
+#p2psz .big.sm {font-size:clamp(22px,6.2cqw,30px);font-weight:700}
+#p2psz .sub {color:var(--mut);font-size:15px;line-height:1.5;max-width:300px;animation:rise .6s .2s both}
+#p2psz .mint {color:var(--mint)}
+#p2psz .gold {color:var(--gold)}
+#p2psz .cream {color:var(--cream)}
+#p2psz .lead {color:var(--mut);font-size:clamp(19px,5.4cqw,25px);font-weight:600;line-height:1.25;animation:rise .6s both;text-wrap:balance}
+#p2psz .lead b {color:#fff;font-weight:800}
+@keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@keyframes fadein{from{opacity:0}to{opacity:1}}
+#p2psz /* emblem */
+  .embC {width:70%;aspect-ratio:1;border-radius:50%;object-fit:cover;animation:ignite 1.2s cubic-bezier(.16,.9,.3,1) both}
+#p2psz .embC.mid {width:62%}
+@keyframes ignite{0%{opacity:0;transform:scale(.45);filter:drop-shadow(0 0 0 rgba(143,240,224,0)) brightness(2.2)}
+    55%{opacity:1;filter:drop-shadow(0 0 38px rgba(143,240,224,.9)) brightness(1.25)}
+    100%{opacity:1;transform:scale(1);filter:drop-shadow(0 0 24px rgba(143,240,224,.45)) brightness(1)}}
+#p2psz .word {font-size:clamp(30px,8.6cqw,44px);font-weight:900;letter-spacing:.14em;
+    background:linear-gradient(120deg,#fff,var(--mint) 55%,var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent;
+    animation:slam .5s .1s both}
+@keyframes slam{0%{opacity:0;transform:translateY(14px) scale(1.15);letter-spacing:.3em}100%{opacity:1;transform:none;letter-spacing:.14em}}
+#p2psz /* tagline / cta */
+  .tag {font-weight:900;line-height:1.03;font-size:clamp(30px,9cqw,48px)}
+#p2psz .tag.two {background:linear-gradient(110deg,var(--mint),var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent}
+#p2psz .tag.a {animation:slamBig .5s both}
+#p2psz .tag.b {animation:slamBig .5s .5s both}
+@keyframes slamBig{0%{opacity:0;transform:scale(1.3);filter:blur(6px)}100%{opacity:1;transform:none;filter:none}}
+#p2psz .ctaEmb {width:38%;aspect-ratio:1;border-radius:50%;object-fit:cover;animation:ignite 1s both}
+#p2psz .ctaName {font-size:clamp(19px,5.4cqw,25px);font-weight:900;letter-spacing:.18em;color:var(--cream);animation:rise .5s .3s both}
+#p2psz .ctaSub {color:var(--mut);font-size:14.5px;margin-top:-8px;animation:rise .5s .45s both}
+#p2psz .ctaBtn {margin-top:6px;background:linear-gradient(135deg,#c9f5ea,var(--mint));color:#06120e;font-weight:800;font-size:17px;
+    padding:14px 26px;border-radius:40px;display:inline-flex;gap:8px;box-shadow:0 12px 34px rgba(143,240,224,.3);animation:rise .5s .6s both}
+#p2psz .ctaBtn i {font-style:normal;animation:nudge 1.2s ease-in-out infinite}
+@keyframes nudge{50%{transform:translateX(5px)}}
+#p2psz /* community: avatar bubbles + counter */
+  .bubbles {position:relative;width:78%;height:40%}
+#p2psz .bub {position:absolute;width:52px;height:52px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:18px;color:#04110d;
+    box-shadow:0 6px 18px rgba(0,0,0,.4);animation:bpop .5s both}
+@keyframes bpop{from{opacity:0;transform:scale(0)}to{opacity:1;transform:scale(1)}}
+#p2psz .counter {font-size:clamp(44px,13cqw,66px);font-weight:900;background:linear-gradient(120deg,#fff,var(--mint));-webkit-background-clip:text;background-clip:text;color:transparent;animation:rise .5s both}
+#p2psz .chip {display:inline-flex;gap:7px;align-items:center;background:rgba(143,240,224,.12);border:1px solid rgba(143,240,224,.3);
+    color:var(--mint);font-weight:700;font-size:13.5px;padding:8px 14px;border-radius:30px;animation:rise .5s .2s both}
+#p2psz /* chat mock */
+  .post {width:86%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:16px;text-align:left;animation:rise .5s both}
+#p2psz .post .row {display:flex;gap:10px;align-items:center;margin-bottom:10px}
+#p2psz .post .av {width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--mint),var(--mint2));display:grid;place-items:center;color:#04110d;font-weight:800}
+#p2psz .post .nm {font-weight:700;font-size:14px}
+#p2psz .post .tm {color:var(--mut);font-size:11.5px}
+#p2psz .post .bd {font-size:14px;color:#dbe6f0;line-height:1.4}
+#p2psz .post .rx {display:flex;gap:14px;margin-top:12px;color:var(--mut);font-size:13px}
+#p2psz .post .rx b {color:var(--mint)}
+#p2psz .post .rx span {animation:pop .4s both}
+@keyframes pop{from{opacity:0;transform:scale(.5)}to{opacity:1;transform:scale(1)}}
+#p2psz /* journey path (svg) */
+  .jsvg {width:82%}
+#p2psz .jpath {fill:none;stroke:url(#jg);stroke-width:5;stroke-linecap:round;stroke-dasharray:900;stroke-dashoffset:900;animation:draw 2.4s ease forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+#p2psz .jnode {opacity:0;animation:npop .4s both}
+@keyframes npop{from{opacity:0;transform:scale(0)}to{opacity:1;transform:scale(1)}}
+#p2psz /* progress ring */
+  .ring {transform:rotate(-90deg)}
+#p2psz .ringfg {fill:none;stroke:var(--mint);stroke-width:12;stroke-linecap:round;stroke-dasharray:534;stroke-dashoffset:534;animation:ring 1.6s ease forwards}
+@keyframes ring{to{stroke-dashoffset:54}}
+#p2psz .ringlbl {position:absolute;font-size:34px;font-weight:900;color:#fff}
+#p2psz /* certificate */
+  .cert {width:70%;aspect-ratio:1.35;border-radius:12px;border:2px solid var(--gold);
+    background:linear-gradient(160deg,#12203a,#0a1220);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
+    box-shadow:0 20px 50px rgba(0,0,0,.5);animation:stamp .6s cubic-bezier(.2,1.3,.4,1) both}
+@keyframes stamp{0%{opacity:0;transform:scale(1.6) rotate(-6deg)}100%{opacity:1;transform:none}}
+#p2psz .cert .seal {font-size:34px}
+#p2psz .cert .ct {font-weight:800;letter-spacing:.1em;font-size:14px;color:var(--gold)}
+#p2psz .cert .cn {font-size:12px;color:var(--mut)}
+#p2psz /* gamification */
+  .xpwrap {width:80%;text-align:left}
+#p2psz .xplbl {display:flex;justify-content:space-between;font-size:13px;color:var(--mut);margin-bottom:8px}
+#p2psz .xpbar {height:16px;border-radius:20px;background:rgba(255,255,255,.08);overflow:hidden}
+#p2psz .xpfill {height:100%;width:0;border-radius:20px;background:linear-gradient(90deg,var(--mint),var(--gold));animation:xp 1.8s .2s cubic-bezier(.16,.9,.3,1) forwards}
+@keyframes xp{to{width:82%}}
+#p2psz .pts {font-size:clamp(40px,12cqw,60px);font-weight:900;background:linear-gradient(120deg,#fff,var(--mint));-webkit-background-clip:text;background-clip:text;color:transparent;animation:rise .5s both}
+#p2psz .flame {font-size:40px;animation:flick .5s ease infinite alternate}
+@keyframes flick{from{transform:scale(1) rotate(-3deg)}to{transform:scale(1.12) rotate(3deg)}}
+#p2psz .badges {display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
+#p2psz .badge {width:74px;height:74px;border-radius:50%;display:grid;place-items:center;font-size:30px;
+    background:radial-gradient(circle at 40% 35%,#1b3350,#0a1526);border:2px solid var(--gold);box-shadow:0 0 22px rgba(232,201,121,.35);animation:bpop .5s both}
+#p2psz .rank {display:flex;flex-direction:column;gap:8px;width:80%}
+#p2psz .rk {display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:var(--mut);font-weight:700;animation:rise .4s both}
+#p2psz .rk.now {background:linear-gradient(135deg,rgba(143,240,224,.18),rgba(232,201,121,.12));border-color:var(--mint);color:#fff;box-shadow:0 0 26px rgba(143,240,224,.3)}
+#p2psz .rk .d {margin-left:auto;font-size:12px;color:var(--mint)}
+#p2psz /* brand radar (svg) */
+  .radar {width:70%}
+#p2psz .rpoly {fill:rgba(143,240,224,.22);stroke:var(--mint);stroke-width:2.5;
+    stroke-dasharray:700;stroke-dashoffset:700;animation:draw 1.8s ease forwards,fadein 1s both}
+#p2psz .rgrid {fill:none;stroke:rgba(255,255,255,.14);stroke-width:1}
+#p2psz .arch {background:linear-gradient(160deg,#14294a,#0e1a2e);border:1.5px solid rgba(143,240,224,.4);border-radius:18px;padding:22px 26px;animation:stamp .6s both}
+#p2psz .arch .al {font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--mut)}
+#p2psz .arch .an {font-size:clamp(24px,7cqw,34px);font-weight:900;background:linear-gradient(120deg,#fff,var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent}
+#p2psz /* framework letter cards */
+  .acro {display:flex;gap:6px;align-items:center;font-size:19px;font-weight:800;letter-spacing:.06em;color:rgba(255,255,255,.3);animation:rise .4s both}
+#p2psz .acro b {color:var(--mint)}
+#p2psz .acro em {opacity:.25;font-style:normal}
+#p2psz .letter {font-size:clamp(88px,29cqw,150px);font-weight:900;line-height:.86;
+    background:linear-gradient(120deg,#fff,var(--mint) 55%,var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent;animation:slam .5s .05s both}
+#p2psz .lword {font-size:clamp(23px,6.4cqw,31px);font-weight:800;letter-spacing:.1em;color:var(--cream);animation:rise .5s .12s both}
+#p2psz .lone {color:var(--mut);font-size:15px;line-height:1.45;max-width:290px;animation:rise .5s .22s both}
+#p2psz .formula {font-size:clamp(21px,5.6cqw,28px);font-weight:900;letter-spacing:0;white-space:nowrap;animation:rise .6s both}
+#p2psz .formula .op {color:var(--mut);margin:0 3px}
+#p2psz .formula .s {color:var(--gold)}
+#p2psz .bob {font-size:54px;animation:bobm 2.2s ease-in-out infinite}
+@keyframes bobm{50%{transform:translateY(-12px) rotate(4deg)}}
+#p2psz .waves {position:absolute;left:0;right:0;bottom:0;height:78px;overflow:hidden;z-index:-1}
+#p2psz .waves svg {width:220%;height:100%;animation:wave 7s linear infinite}
+@keyframes wave{to{transform:translateX(-45%)}}
+#p2psz /* product scroll */
+  .pscroll {position:absolute;inset:0;display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:16px;filter:blur(.6px)}
+#p2psz .ptrack {display:flex;flex-direction:column;gap:12px;will-change:transform}
+#p2psz .ptrack.up {animation:scrup 5s linear infinite}
+#p2psz .ptrack.dn {animation:scrdn 5s linear infinite}
+@keyframes scrup{from{transform:translateY(0)}to{transform:translateY(-50%)}}
+@keyframes scrdn{from{transform:translateY(-50%)}to{transform:translateY(0)}}
+#p2psz .pcard {background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:14px 10px;display:flex;flex-direction:column;align-items:center;gap:6px;flex:0 0 auto}
+#p2psz .pcard span {font-size:33px;line-height:1}
+#p2psz .pcard b {font-size:11.5px;color:var(--mut);font-weight:700}
+#p2psz .pscrim {position:absolute;inset:0;background:linear-gradient(180deg,rgba(5,7,13,.55),transparent 22%,transparent 78%,rgba(5,7,13,.55))}
+#p2psz /* bsc brand stamp */
+  .bscby {font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--mut);margin-top:12px;animation:rise .5s .8s both}
+#p2psz .bscfull {width:104px;height:104px;border-radius:50%;margin-top:6px;box-shadow:0 6px 20px rgba(0,0,0,.45);animation:rise .5s .9s both}
+#p2psz /* fingerprint tree (brand + purpose) */
+  .tree {height:60%;width:auto;max-width:92%;object-fit:contain;filter:drop-shadow(0 12px 34px rgba(0,0,0,.45));animation:treein 1s ease both}
+@keyframes treein{from{opacity:0;transform:scale(.9) translateY(12px)}to{opacity:1;transform:none}}
+#p2psz .treewrap {position:relative;height:60%;width:100%;display:grid;place-items:center}
+#p2psz .treewrap .tree {position:absolute;height:100%;animation:none}
+#p2psz .treewrap .tree.reveal {clip-path:inset(100% 0 0 0);animation:rootrise 2.6s .25s ease forwards}
+@keyframes rootrise{to{clip-path:inset(0 0 0 0)}}
+#p2psz .treecap {font-size:clamp(24px,6.8cqw,34px);font-weight:800;line-height:1.14;text-wrap:balance;animation:rise .6s .3s both}
+#p2psz .treecap.dim {color:var(--mut)}
+#p2psz /* brand dna wheel */
+  .ring {position:relative;width:300px;height:300px;animation:fadein .5s both}
+#p2psz .rcore {position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);text-align:center;font-weight:900;font-size:13px;letter-spacing:.14em;line-height:1.15;color:var(--gold);animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{50%{transform:translate(-50%,-50%) scale(1.08)}}
+#p2psz .node {position:absolute;left:50%;top:50%}
+#p2psz .node span {display:inline-block;transform:translate(-50%,-50%);white-space:nowrap;font-size:11px;font-weight:700;color:var(--mut);padding:4px 8px;border-radius:20px}
+#p2psz .node.hit span {animation:litnode .55s 2.45s both}
+@keyframes litnode{to{color:#06120e;background:linear-gradient(135deg,#c9f5ea,var(--mint));font-weight:800;box-shadow:0 0 22px rgba(143,240,224,.7);transform:translate(-50%,-50%) scale(1.28)}}
+#p2psz .sweep {position:absolute;left:50%;top:50%;width:13px;height:13px;margin:-6.5px;border-radius:50%;background:var(--mint);box-shadow:0 0 18px var(--mint),0 0 6px #fff;animation:sweepspin 2.6s cubic-bezier(.12,.7,.15,1) forwards}
+@keyframes sweepspin{from{transform:rotate(0deg) translateY(-110px)}to{transform:rotate(var(--fr)) translateY(-110px)}}
+#p2psz .a11 {font-size:11px;color:var(--mut);letter-spacing:.12em;text-transform:uppercase;margin-top:6px}
+#p2psz .facets {display:grid;grid-template-columns:1fr 1fr;gap:10px}
+#p2psz .facet {background:rgba(255,255,255,.06);border:1px solid rgba(143,240,224,.25);border-radius:14px;padding:15px 10px;font-weight:700;font-size:14px;color:var(--cream);animation:pop .4s both}
+#p2psz .facet:nth-child(2) {animation-delay:.1s}
+#p2psz .facet:nth-child(3) {animation-delay:.2s}
+#p2psz .facet:nth-child(4) {animation-delay:.3s}
+#p2psz /* brand dna real wheel */
+  .dnaw {position:relative;width:330px;max-width:92%;aspect-ratio:1;display:grid;place-items:center;animation:fadein .5s both}
+#p2psz .dnaimg {width:100%;height:100%;border-radius:50%;box-shadow:0 12px 34px rgba(0,0,0,.5)}
+#p2psz .dnapin {position:absolute;left:50%;top:50%;width:20px;height:20px;margin:-10px;border-radius:50%;background:var(--mint);box-shadow:0 0 22px var(--mint),0 0 8px #fff;z-index:3;animation:pinspin 2.6s cubic-bezier(.12,.7,.15,1) forwards}
+@keyframes pinspin{from{transform:rotate(0deg) translateY(-144px)}to{transform:rotate(var(--fr)) translateY(-144px)}}
+#p2psz /* niche lanes */
+  .lanes {display:flex;gap:9px;height:54%;width:100%;align-items:stretch;animation:fadein .4s both}
+#p2psz .lane {flex:1;border-radius:16px;background:rgba(255,255,255,.05);border:1px dashed rgba(255,255,255,.16);display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:6px;padding:14px 5px;animation:rise .4s both}
+#p2psz .lane b {font-size:11px;font-weight:700;color:var(--mut);text-align:center;line-height:1.2}
+#p2psz .lane i {font-style:normal;font-size:20px;color:var(--mint)}
+#p2psz .lane.you {background:linear-gradient(180deg,rgba(143,240,224,.16),rgba(232,201,121,.08));border:1.5px solid var(--mint);box-shadow:0 0 28px rgba(143,240,224,.35)}
+#p2psz .lane.you b {color:#fff;font-weight:800}
+#p2psz .lane.you i {animation:nudgeup 1.2s ease-in-out infinite}
+@keyframes nudgeup{50%{transform:translateY(-6px)}}
+#p2psz .rhyme {font-size:clamp(34px,10.5cqw,58px);font-weight:900;letter-spacing:-.02em;line-height:1;animation:slamBig .45s both}
+#p2psz /* frank & ruth / flock / tabs / thrive */
+  .faces {display:flex;gap:16px;justify-content:center}
+#p2psz .face {display:flex;flex-direction:column;align-items:center;gap:7px}
+#p2psz .face img {width:118px;height:118px;border-radius:50%;box-shadow:0 8px 22px rgba(0,0,0,.45);border:2px solid rgba(143,240,224,.4)}
+#p2psz .face .fn {font-size:17px;font-weight:800;color:var(--cream)}
+#p2psz .face .fr {font-size:11px;color:var(--mut);letter-spacing:.03em}
+#p2psz .face--l img {animation:flyL .7s cubic-bezier(.16,.9,.3,1) both}
+#p2psz .face--r img {animation:flyR .7s .12s cubic-bezier(.16,.9,.3,1) both}
+#p2psz .flock {display:grid;grid-template-columns:repeat(6,1fr);gap:12px;width:78%}
+#p2psz .flock i {aspect-ratio:1;border-radius:50%;background:rgba(255,255,255,.2);animation:pop .3s both}
+#p2psz .flock i.black {background:radial-gradient(circle at 40% 35%,#2b3140,#05070d);border:1.5px solid var(--mint);box-shadow:0 0 22px rgba(143,240,224,.6);transform:scale(1.28)}
+#p2psz .tabchips {display:flex;flex-wrap:wrap;gap:8px;justify-content:center;max-width:330px}
+#p2psz .tabchip {background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:10px;padding:8px 11px;font-size:12px;font-weight:600;color:var(--mut);animation:pop .35s both}
+#p2psz .tico {font-size:clamp(46px,14cqw,74px);line-height:1;animation:pop .5s both}
+#p2psz .checkbadge {display:inline-flex;align-items:center;gap:6px;background:rgba(143,240,224,.12);border:1px solid rgba(143,240,224,.42);color:var(--mint);font-weight:800;font-size:12px;letter-spacing:.16em;text-transform:uppercase;padding:8px 16px;border-radius:30px;margin-bottom:6px;animation:rise .5s both}
+#p2psz /* progress + play */
+  .prog {position:absolute;left:0;bottom:0;height:4px;width:100%;background:rgba(255,255,255,.08);z-index:5}
+#p2psz .prog i {display:block;height:100%;width:0;background:linear-gradient(90deg,var(--mint),var(--gold))}
+#p2psz .playbtn {position:absolute;inset:0;z-index:6;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
+    background:rgba(4,7,13,.55);backdrop-filter:blur(3px);border:0;color:#fff;cursor:pointer;font-family:inherit}
+#p2psz .playbtn span {width:72px;height:72px;border-radius:50%;display:grid;place-items:center;font-size:25px;padding-left:5px;
+    background:linear-gradient(135deg,#c9f5ea,var(--mint));color:#06120e;box-shadow:0 10px 30px rgba(143,240,224,.4)}
+#p2psz .playbtn b {font-size:15px;font-weight:800;letter-spacing:.02em}
+#p2psz .playbtn em {font-size:12.5px;color:var(--mint);font-style:normal;letter-spacing:.1em;text-transform:uppercase}
+#p2psz .playbtn.hide {display:none}
+#p2psz /* panel */
+  .playrow {display:flex;gap:16px;align-items:flex-start;justify-content:center;flex-wrap:wrap;width:100%}
+#p2psz .scriptbox {width:min(360px,92vw);height:min(760px,calc(42vh*16/9));min-height:340px;display:flex;flex-direction:column;background:#0b1424;border:1px solid rgba(143,240,224,.2);border-radius:20px;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,.4)}
+#p2psz .sb-head {display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.08);flex:0 0 auto}
+#p2psz .sb-title {color:var(--gold);font-size:14px;font-weight:800}
+#p2psz .sb-copy {font-family:inherit;font-size:12.5px;font-weight:800;color:#06120e;background:linear-gradient(135deg,#c9f5ea,var(--mint));border:0;border-radius:24px;padding:8px 14px;cursor:pointer;white-space:nowrap}
+#p2psz .sb-copy.done {background:var(--gold)}
+#p2psz .sb-charcount {font-size:11px;font-weight:700;color:var(--mut)}
+#p2psz .sb-tabs {display:flex;flex-wrap:wrap;gap:4px;padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.08);flex:0 0 auto}
+#p2psz .sb-tab {font-family:inherit;font-size:11px;font-weight:800;color:var(--mut);background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:5px 10px;cursor:pointer;transition:all .14s}
+#p2psz .sb-tab:hover {color:var(--cream);border-color:rgba(143,240,224,.4)}
+#p2psz .sb-tab.active {color:#06120e;background:linear-gradient(135deg,#c9f5ea,var(--mint));border-color:transparent}
+#p2psz .sb-tab .sb-tdot {display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--mint2);margin-left:4px;vertical-align:middle;opacity:0}
+#p2psz .sb-tab.done .sb-tdot {opacity:1}
+#p2psz .sb-text {margin:0;padding:14px 16px;overflow:auto;white-space:pre-wrap;word-break:break-word;font-family:inherit;font-size:13px;line-height:1.55;color:#dbe6f0;flex:1;background:transparent;border:0;resize:none;width:100%}
+#p2psz .sb-text:focus {outline:none;box-shadow:inset 0 0 0 2px rgba(143,240,224,.25)}
+#p2psz .sb-actions {display:flex;align-items:center;gap:10px;padding:10px 14px;border-top:1px solid rgba(255,255,255,.08);flex:0 0 auto}
+#p2psz .sb-copy {font-family:inherit;font-size:12.5px;font-weight:800;color:#06120e;background:linear-gradient(135deg,#c9f5ea,var(--mint));border:0;border-radius:24px;padding:9px 16px;cursor:pointer;white-space:nowrap}
+#p2psz .sb-copy.done {background:var(--gold)}
+#p2psz .sb-editnote {font-size:10.5px;color:var(--mut);font-style:italic}
+#p2psz .sb-posted {display:flex;align-items:center;gap:8px;padding:0 14px 12px;flex:0 0 auto;flex-wrap:wrap}
+#p2psz .sb-plabel {font-size:11px;font-weight:800;color:var(--mut);letter-spacing:.04em}
+#p2psz .sb-dots {display:flex;gap:5px;flex-wrap:wrap}
+#p2psz .pdot {font-family:inherit;font-size:10px;font-weight:800;color:var(--mut);background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:4px 8px;cursor:pointer;transition:all .14s}
+#p2psz .pdot:hover {border-color:rgba(143,240,224,.4)}
+#p2psz .pdot.on {color:#06120e;background:var(--mint2);border-color:transparent}
+#p2psz /* studio toolbar */
+  .studiobar {display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center;width:100%;max-width:960px;background:#0b1424;border:1px solid rgba(143,240,224,.18);border-radius:16px;padding:10px 14px}
+#p2psz .search {flex:1;min-width:180px;background:rgba(0,0,0,.32);border:1px solid rgba(255,255,255,.12);border-radius:24px;padding:9px 15px;color:#fff;font-family:inherit;font-size:13px}
+#p2psz .search::placeholder {color:#6b7f90}
+#p2psz .search:focus {outline:none;border-color:var(--mint)}
+#p2psz .filters {display:flex;gap:4px}
+#p2psz .fchip {font-family:inherit;font-size:11.5px;font-weight:800;color:var(--mut);background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:7px 12px;cursor:pointer;transition:all .14s}
+#p2psz .fchip:hover {color:var(--cream)}
+#p2psz .fchip.active {color:#06120e;background:linear-gradient(135deg,#c9f5ea,var(--mint));border-color:transparent}
+#p2psz .surprise {font-family:inherit;font-size:12px;font-weight:800;color:var(--cream);background:linear-gradient(135deg,var(--violet),var(--grape));border:0;border-radius:20px;padding:8px 14px;cursor:pointer;white-space:nowrap}
+#p2psz .surprise:hover {filter:brightness(1.1)}
+#p2psz .progress {font-size:12px;font-weight:800;color:var(--gold);white-space:nowrap;padding:0 4px}
+#p2psz .reel.posted::after {content:"✓";color:var(--mint2);font-weight:900;margin-left:auto;font-size:12px}
+#p2psz .reel.hide, #p2psz .reelacc.hide {display:none}
+#p2psz .tools {display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+#p2psz .tool {font-family:inherit;font-size:12px;font-weight:800;color:var(--cream);background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:20px;padding:8px 13px;cursor:pointer;white-space:nowrap;transition:all .14s}
+#p2psz .tool:hover {color:#fff;border-color:rgba(143,240,224,.45);background:rgba(143,240,224,.1)}
+#p2psz /* modals */
+  .modal {display:none;position:fixed;inset:0;z-index:80;background:rgba(3,6,12,.72);backdrop-filter:blur(4px);align-items:flex-start;justify-content:center;padding:24px 14px;overflow-y:auto}
+#p2psz .modal.open {display:flex}
+#p2psz .modal-card {width:min(640px,96vw);background:#0b1424;border:1px solid rgba(143,240,224,.25);border-radius:20px;box-shadow:0 30px 80px rgba(0,0,0,.6);padding:20px;margin:auto}
+#p2psz .modal-head {display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+#p2psz .modal-head b {font-size:17px;color:var(--gold)}
+#p2psz .modal-x {font-family:inherit;font-size:15px;font-weight:800;color:var(--mut);background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:50%;width:34px;height:34px;cursor:pointer}
+#p2psz .modal-x:hover {color:#fff}
+#p2psz .modal-sub, #p2psz .modal-foot {color:var(--mut);font-size:12.5px;line-height:1.5}
+#p2psz .modal-foot {margin:14px 0 0;text-align:center}
+#p2psz /* calendar */
+  .cal-hint {color:var(--cream);font-size:13px;margin:0 0 10px;text-align:center}
+#p2psz .cal-nav {display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:12px}
+#p2psz .cal-nav b {font-size:15px;color:var(--text);min-width:150px;text-align:center}
+#p2psz .cal-nav button {font-family:inherit;font-size:18px;font-weight:800;color:#06120e;background:linear-gradient(135deg,#c9f5ea,var(--mint));border:0;border-radius:50%;width:34px;height:34px;cursor:pointer}
+#p2psz .cal-grid {display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+#p2psz .cal-dow {text-align:center;font-size:10.5px;font-weight:800;color:var(--mut);padding:4px 0;letter-spacing:.04em}
+#p2psz .cal-cell {min-height:64px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:8px;padding:3px;position:relative;display:flex;flex-direction:column;gap:2px}
+#p2psz .cal-cell.empty {background:transparent;border:0}
+#p2psz .cal-cell.today {border-color:var(--mint);box-shadow:inset 0 0 0 1px rgba(143,240,224,.4)}
+#p2psz .cal-d {font-size:10.5px;font-weight:800;color:var(--mut);padding:1px 3px}
+#p2psz .cal-chip {font-size:9.5px;font-weight:700;color:#06120e;background:linear-gradient(135deg,#c9f5ea,var(--mint));border-radius:5px;padding:2px 5px;cursor:pointer;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#p2psz .cal-chip i {font-style:normal;font-weight:900;opacity:.7;margin-right:3px}
+#p2psz .cal-add {margin-top:auto;font-family:inherit;font-size:11px;font-weight:800;color:var(--mut);background:rgba(255,255,255,.05);border:1px dashed rgba(255,255,255,.18);border-radius:5px;cursor:pointer;padding:1px 0}
+#p2psz .cal-add:hover {color:var(--mint);border-color:var(--mint)}
+#p2psz /* new reel form */
+  .fld {display:block;font-size:12.5px;font-weight:800;color:var(--cream);margin-bottom:12px}
+#p2psz .fld span {font-weight:600;color:var(--mut)}
+#p2psz .fld input, #p2psz .fld textarea, #p2psz .vault-add input {width:100%;margin-top:6px;background:rgba(0,0,0,.32);border:1px solid rgba(255,255,255,.14);border-radius:10px;padding:10px 12px;color:#fff;font-family:inherit;font-size:13px;resize:vertical}
+#p2psz .fld input:focus, #p2psz .fld textarea:focus, #p2psz .vault-add input:focus {outline:none;border-color:var(--mint)}
+#p2psz .nr-err {color:#ffb4b4;font-size:12px;margin:0 0 8px;min-height:14px}
+#p2psz .btn-primary {font-family:inherit;font-size:13px;font-weight:800;color:#06120e;background:linear-gradient(135deg,#c9f5ea,var(--mint));border:0;border-radius:24px;padding:11px 20px;cursor:pointer;width:100%}
+#p2psz .nr-list {margin-top:14px;display:flex;flex-direction:column;gap:6px}
+#p2psz .nr-item {display:flex;align-items:center;justify-content:space-between;gap:8px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:8px 12px;font-size:13px;color:var(--cream)}
+#p2psz .nr-item button {font-family:inherit;color:#ffb4b4;background:none;border:0;font-size:14px;font-weight:800;cursor:pointer}
+#p2psz .muted {color:var(--mut);font-size:12.5px;text-align:center;margin:6px 0}
+#p2psz /* vault */
+  .vault-add {display:flex;gap:8px;margin-bottom:12px}
+#p2psz .vault-add input {margin-top:0}
+#p2psz .vault-add button {font-family:inherit;font-size:12.5px;font-weight:800;color:#06120e;background:linear-gradient(135deg,#c9f5ea,var(--mint));border:0;border-radius:20px;padding:0 18px;cursor:pointer;white-space:nowrap}
+#p2psz .vault-list {display:flex;flex-direction:column;gap:6px;max-height:52vh;overflow-y:auto}
+#p2psz .vault-item {display:flex;align-items:center;justify-content:space-between;gap:10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:9px 13px}
+#p2psz .vault-item span {font-size:13px;color:var(--text);line-height:1.4}
+#p2psz .vault-btns {display:flex;gap:5px;flex:0 0 auto}
+#p2psz .vault-copy, #p2psz .vault-del {font-family:inherit;font-size:12px;font-weight:800;border:0;border-radius:16px;cursor:pointer;padding:6px 10px}
+#p2psz .vault-copy {color:#06120e;background:linear-gradient(135deg,#c9f5ea,var(--mint))}
+#p2psz .vault-del {color:#ffb4b4;background:rgba(255,255,255,.06)}
+#p2psz.rec .modal {display:none!important}
+#p2psz .panel {width:100%;max-width:760px;text-align:center}
+#p2psz /* record mode: big clean frame, #p2psz everything else hidden */
+  .recbar {display:none}
+#p2psz .recbar button {font-family:inherit;font-weight:800;font-size:13px;color:#06120e;background:linear-gradient(135deg,#c9f5ea,var(--mint));border:0;border-radius:24px;padding:9px 16px;cursor:pointer}
+#p2psz.rec {align-items:center}
+#p2psz.rec .recbar {display:flex;gap:10px;position:fixed;top:10px;left:50%;transform:translateX(-50%);z-index:60}
+#p2psz.rec .reels, #p2psz.rec .scriptbox, #p2psz.rec .panel, #p2psz.rec .studiobar {display:none}
+#p2psz.rec .playrow {justify-content:center;width:100%}
+#p2psz.rec .stagewrap {margin-top:8vh}
+#p2psz.rec .stage {height:min(84vh,900px);width:auto;max-width:96vw}
+#p2psz .reels {display:flex;flex-direction:column;gap:6px;width:min(250px,92vw);flex:0 0 auto;align-self:stretch;max-height:min(80vh,760px);min-height:0;overflow-y:auto;overscroll-behavior:contain;padding-right:4px;scrollbar-width:thin;scrollbar-color:rgba(143,240,224,.4) transparent}
+#p2psz .reels::-webkit-scrollbar {width:7px}
+#p2psz .reels::-webkit-scrollbar-thumb {background:rgba(143,240,224,.25);border-radius:8px}
+#p2psz .reelacc {flex:0 0 auto;border:1px solid rgba(255,255,255,.1);border-radius:12px;background:rgba(255,255,255,.03);overflow:hidden}
+#p2psz .reelacc[open] {background:rgba(255,255,255,.05)}
+#p2psz .reelsum {cursor:pointer;list-style:none;padding:11px 14px;font-size:12.5px;font-weight:800;letter-spacing:.05em;color:var(--cream);display:flex;align-items:center;gap:8px}
+#p2psz .reelsum::-webkit-details-marker {display:none}
+#p2psz .reelsum .reelcount {margin-left:auto;color:var(--mut);font-weight:700;font-size:11px}
+#p2psz .reelsum::after {content:"▾";color:var(--mut);font-size:11px;transition:transform .2s}
+#p2psz .reelacc[open]>.reelsum::after {transform:rotate(180deg)}
+#p2psz .reelrow {display:flex;flex-direction:column;gap:4px;padding:2px 8px 10px}
+#p2psz .reel {font-family:inherit;font-size:12.5px;font-weight:700;color:var(--mut);background:rgba(255,255,255,.05);
+    border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:8px 12px;cursor:pointer;transition:.15s;width:100%;text-align:left;display:flex;align-items:center;gap:6px}
+#p2psz .reel.active {color:#06120e;background:linear-gradient(135deg,#c9f5ea,var(--mint));border-color:transparent}
+#p2psz .ctrls {display:flex;gap:10px;justify-content:center;margin-bottom:10px}
+#p2psz .ctl {font-family:inherit;font-size:14px;font-weight:700;color:#06120e;background:linear-gradient(135deg,#c9f5ea,var(--mint));border:0;border-radius:30px;padding:10px 20px;cursor:pointer}
+#p2psz .ctl--ghost {background:transparent;color:var(--mut);border:1px solid rgba(147,167,187,.35)}
+#p2psz .ctl--ghost b {color:var(--mint)}
+#p2psz .hint {color:var(--mut);font-size:12px;line-height:1.5;max-width:410px;margin:0 auto}
+@media(prefers-reduced-motion:reduce){
+#p2psz .au {animation:none!important}
+#p2psz .stars {animation:none}
+}
+#p2psz{width:100vw;max-width:100vw;margin-left:calc(50% - 50vw);margin-right:calc(50% - 50vw);overflow-x:hidden}
+#p2psz.rec{position:fixed;inset:0;z-index:99999;background:radial-gradient(120% 90% at 50% 0%,#0c1626,#05070d 70%);overflow:auto;padding:6vh 12px 40px;min-height:100dvh}
+{%- endstyle -%}
+
+{% schema %}
+{
+  "name": "P2P Sizzle Hub",
+  "settings": [
+    { "type": "text", "id": "access_tag", "label": "Access tag (owner-only)", "default": "owner", "info": "Only customers with this tag see the studio. Add this tag to your own account." },
+    { "type": "text", "id": "locked_heading", "label": "Locked heading", "default": "Members only" },
+    { "type": "textarea", "id": "locked_body", "label": "Locked body", "default": "This studio is private." }
+  ],
+  "presets": [{ "name": "P2P Sizzle Hub" }]
+}
+{% endschema %}

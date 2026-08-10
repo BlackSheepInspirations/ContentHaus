@@ -1,0 +1,10 @@
+/*
+ * page.founding-flock — pre-launch waitlist. Assign a page (e.g. /pages/founding-flock)
+ * to this template. Captures emails as customers tagged `founding-flock`.
+ */
+{
+  "sections": {
+    "main": { "type": "founding-flock", "settings": {} }
+  },
+  "order": ["main"]
+}

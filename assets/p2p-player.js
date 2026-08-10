@@ -34,9 +34,22 @@
       if(m){ m.classList.toggle('done', d); m.textContent = d ? '✓ Completed' : 'Mark lesson complete'; }
     });
   }
+  /* Load only the active lesson's video; unload the rest so they can't
+     autoplay or keep playing in the background when you switch lessons. */
+  function setVid(pn, on){
+    var f = pn.querySelector('.lvideo'); if(!f) return;
+    if(on){
+      if(!f.getAttribute('src')){
+        var u = f.getAttribute('data-src');
+        if(u){ u += (u.indexOf('?') < 0 ? '?' : '&') + 'autoplay=false'; f.setAttribute('src', u); }
+      }
+    } else if(f.getAttribute('src')){
+      f.removeAttribute('src'); // unload → stops any playback
+    }
+  }
   function activate(i){
     lis.forEach(function(li,n){ li.classList.toggle('active', n===i); });
-    panels.forEach(function(pn,n){ pn.style.display = n===i ? '' : 'none'; });
+    panels.forEach(function(pn,n){ pn.style.display = n===i ? '' : 'none'; setVid(pn, n===i); });
     if(window.scrollY>120) window.scrollTo({top:0,behavior:'smooth'});
   }
   /* badge-earned pop-up — queued on completion, shown after the certificate closes */

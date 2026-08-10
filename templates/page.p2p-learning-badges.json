@@ -201,6 +201,17 @@
             "earned": false
           }
         },
+        "open-water-explorer": {
+          "type": "badge",
+          "settings": {
+            "group": "Habits & Wins",
+            "name": "Open Water Explorer",
+            "req": "Find all four hidden bonus areas on the Open Water map",
+            "icon": "magnifier",
+            "color": "c-te",
+            "earned": false
+          }
+        },
         "certified": {
           "type": "badge",
           "settings": {
@@ -793,6 +804,7 @@
         "journal-keeper",
         "journal-devotee",
         "trail-explorer",
+        "open-water-explorer",
         "certified",
         "comeback",
         "mindset-1",

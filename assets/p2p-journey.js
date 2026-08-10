@@ -384,7 +384,7 @@
       realm.courses.forEach(function(c){
         var st = courseState(c, realm);
         if(st === 'done') doneN++;
-        var href = (st === 'locked') ? realm.url : '/pages/courses-' + c.h;
+        var href = (st === 'locked') ? realm.url : (c.u || '/pages/courses-' + c.h);
         var tip = (st === 'locked' && realm.gate) ? (' data-tip="Finish ' + realm.gate.toUpperCase() + ' first to unlock"') : '';
         rows += '<a class="dir-course is-' + st + '" href="' + href + '"' + tip + '>' +
                   '<span class="dir-ico" aria-label="' + STATE_LABEL[st] + '"></span>' +

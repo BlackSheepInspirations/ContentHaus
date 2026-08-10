@@ -10,20 +10,40 @@
         "back_url": "/pages/p2p-learning",
         "os_url": "/pages/p2p-os",
         "os_label": "P2P Operating System",
-        "access_tag": "p2p-learning"
+        "access_tag": "p2p-learning",
+        "res_label": "Course Resources",
+        "res_1_label": "Evergreen Niches — Field Guide",
+        "res_1_url": "https://cdn.shopify.com/s/files/1/0941/3122/4894/files/P2P-Evergreen-Niches_1.pdf?v=1786231209",
+        "res_1_type": "Field Guide",
+        "res_2_label": "Find Your Lane — Workbook",
+        "res_2_url": "https://cdn.shopify.com/s/files/1/0941/3122/4894/files/P2P-Find-Your-Lane-Worksheet_1.pdf?v=1786231222",
+        "res_2_type": "Workbook"
       },
       "blocks": {
         "l1": {
           "type": "lesson",
           "settings": {
-            "title": "Lesson 1",
-            "video_label": "Watch the lesson",
-            "body": "<p>Welcome to <strong>Finding Your Lane</strong>. Lesson content is on the way — add your video, notes, downloads, or a flip-book here.</p>"
+            "title": "Niche, Plain and Simple",
+            "video_embed": "https://iframe.mediadelivery.net/embed/723534/1782e297-891d-4f58-9dc4-fe214669eac3",
+            "dl_1_label": "Evergreen Niches — Field Guide",
+            "dl_1_url": "https://cdn.shopify.com/s/files/1/0941/3122/4894/files/P2P-Evergreen-Niches_1.pdf?v=1786231209",
+            "dl_1_type": "Field Guide"
+          }
+        },
+        "l2": {
+          "type": "lesson",
+          "settings": {
+            "title": "Aim It",
+            "video_embed": "https://iframe.mediadelivery.net/embed/723534/f1bdf108-4309-4c56-a5e1-28456e6417a4",
+            "dl_1_label": "Find Your Lane — Workbook",
+            "dl_1_url": "https://cdn.shopify.com/s/files/1/0941/3122/4894/files/P2P-Find-Your-Lane-Worksheet_1.pdf?v=1786231222",
+            "dl_1_type": "Workbook"
           }
         }
       },
       "block_order": [
-        "l1"
+        "l1",
+        "l2"
       ]
     }
   },

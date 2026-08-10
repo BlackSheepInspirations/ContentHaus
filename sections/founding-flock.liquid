@@ -1,0 +1,295 @@
+{%- comment -%}
+  Founding Flock — pre-launch waitlist / funnel landing page. Captures emails as Shopify
+  customers tagged `founding-flock` (accepts marketing). Animated aurora + gradient headlines +
+  Haus emblems. Added 2026-08-08, upgraded to full funnel. Assign template `founding-flock`.
+{%- endcomment -%}
+{%- assign embs = 'content^Content Haus^Image & design prompts for any AI tool~marketing^Marketing Haus^Copy, ads, email & social content~graphics^Graphics Haus^Clipart, plates, mascots & a full studio~project^Project Haus^Journals, planners, stickers & print~brand^Brand Haus^Founders Assessment + Brand & Logo Studio~growth^Growth Haus^Your ROOTED launch cockpit, idea to live' | split: '~' -%}
+<div id="ff">
+  <section class="ff-hero">
+    <div class="ff-aurora" aria-hidden="true">
+      <span class="ff-au a1"></span><span class="ff-au a2"></span>
+      <span class="ff-au a3"></span><span class="ff-au a4"></span>
+      <span class="ff-stars"></span>
+    </div>
+    <div class="ff-wrap ff-hero__inner">
+      <img class="ff-emblem" src="{{ 'haus-emblem-p2p.png' | asset_url }}" alt="Purpose 2 Profit" width="130" height="130" loading="eager">
+      <div class="ff-eyebrow">{{ section.settings.eyebrow | default: 'Purpose 2 Profit · Coming soon' }}</div>
+      <h1 class="ff-h1">{{ section.settings.heading | default: 'Join the Founding Flock.' }}</h1>
+      <p class="ff-lede">The doors aren't open yet — but the flock is forming. Founding members get in <span class="ff-grad">first</span>, lock in <span class="ff-grad">founder pricing</span> for good, and help shape the Haus before anyone else.</p>
+
+      <div class="ff-form-card">
+        {%- form 'customer' -%}
+          <input type="hidden" name="customer[tags]" value="founding-flock, waitlist">
+          <input type="hidden" name="customer[accepts_marketing]" value="true">
+          {%- if form.posted_successfully? -%}
+            <p class="ff-ok">🐑 You're in the flock! Watch your inbox — we'll email you the moment the doors open.</p>
+          {%- else -%}
+            <label class="ff-label" for="ff-email">Save your spot</label>
+            <div class="ff-row">
+              <input class="ff-input" id="ff-email" type="email" name="customer[email]" placeholder="you@email.com" required aria-label="Email address">
+              <button class="ff-btn" type="submit">{{ section.settings.cta_label | default: 'Join the flock →' }}</button>
+            </div>
+            <p class="ff-fine">No spam. Just the launch, founder pricing, and the occasional behind-the-scenes. 🐑</p>
+            {%- if form.errors -%}<p class="ff-err">{{ form.errors | default_errors }}</p>{%- endif -%}
+          {%- endif -%}
+        {%- endform -%}
+      </div>
+      <div class="ff-spots">{{ section.settings.spots_note | default: '✦ Limited founding spots · founder pricing locked in for life' }}</div>
+    </div>
+  </section>
+
+  {%- comment -%} ---- EMBLEM STRIP: what's inside ---- {%- endcomment -%}
+  <section class="ff-inside">
+    <div class="ff-wrap">
+      <h2 class="ff-h2">Five creator Hauses. <span class="ff-grad">One home.</span></h2>
+      <div class="ff-flips">
+        {%- for e in embs -%}{%- assign p = e | split: '^' -%}
+          <div class="ff-flip" tabindex="0" role="button" aria-label="{{ p[1] }} — flip for details">
+            <div class="ff-flip__in">
+              <div class="ff-flip__f"><img src="{{ p[0] | prepend: 'haus-emblem-' | append: '.png' | asset_url }}" alt="{{ p[1] }}" loading="lazy"><span>{{ p[1] }}</span></div>
+              <div class="ff-flip__b"><span class="ff-flip__n">{{ p[1] }}</span><p>{{ p[2] }}</p></div>
+            </div>
+          </div>
+        {%- endfor -%}
+      </div>
+      <p class="ff-tapnote">tap a card to flip 🔄</p>
+      <p class="ff-plus">plus two AI partners — <span class="ff-grad">Frank &amp; Ruth</span> — a gamified Learning Journey, community &amp; your Brand DNA Blueprint.</p>
+    </div>
+  </section>
+
+  {%- comment -%} ---- FREE LEAD MAGNETS (email-gated) ---- {%- endcomment -%}
+  <section class="ff-free" id="ff-free">
+    <div class="ff-wrap">
+      <div class="ff-eyebrow ff-eyebrow--c">{{ section.settings.free_eyebrow | default: 'Free goodies for stopping by' }}</div>
+      <h2 class="ff-h2">{{ section.settings.free_heading | default: 'Grab a little something free' }} 🎁</h2>
+      <p class="ff-freesub">{{ section.settings.free_sub | default: "Three field-tested guides to help you turn an idea into something real — yours the second you drop your email. No fluff, no spam, just the good stuff. 🐑" }}</p>
+
+      {%- assign covers = 'freebie-cover-starter.jpg,freebie-cover-hooks.jpg,freebie-cover-mindset.jpg' | split: ',' -%}
+      <div class="ff-cards">
+        {%- for i in (1..3) -%}
+          {%- assign ic = 'freebie_' | append: i | append: '_icon' -%}
+          {%- assign tt = 'freebie_' | append: i | append: '_title' -%}
+          {%- assign ds = 'freebie_' | append: i | append: '_desc' -%}
+          {%- assign ur = 'freebie_' | append: i | append: '_url' -%}
+          {%- assign furl = section.settings[ur] -%}
+          {%- assign cov = covers[forloop.index0] -%}
+          <div class="ff-fcard">
+            <img class="ff-fcover" src="{{ cov | asset_url }}" alt="{{ section.settings[tt] }}" width="760" height="1010" loading="lazy">
+            <h3>{{ section.settings[tt] }}</h3>
+            <p>{{ section.settings[ds] }}</p>
+            {%- if furl != blank -%}
+              <a class="ff-dl" href="{{ furl }}" target="_blank" rel="noopener" download>Download PDF ↓</a>
+            {%- else -%}
+              <a class="ff-dl ff-dl--soon" href="#ff-free" aria-disabled="true">Coming soon</a>
+            {%- endif -%}
+            <button type="button" class="ff-lockbtn">🔒 Enter email to unlock</button>
+          </div>
+        {%- endfor -%}
+      </div>
+
+      <div class="ff-gate">
+        {%- form 'customer' -%}
+          <input type="hidden" name="customer[tags]" value="founding-flock, freebies">
+          <input type="hidden" name="customer[accepts_marketing]" value="true">
+          <label class="ff-label" for="ff-free-email">Enter your email to unlock all three</label>
+          <div class="ff-row">
+            <input class="ff-input" id="ff-free-email" type="email" name="customer[email]" placeholder="you@email.com" required aria-label="Email address">
+            <button class="ff-btn" type="submit">Unlock my freebies →</button>
+          </div>
+          <p class="ff-fine">You'll also join the Founding Flock list — first to know when the doors open. Unsubscribe anytime. 🐑</p>
+          {%- if form.errors -%}<p class="ff-err">Hmm — {{ form.errors | default_errors }}. If you're already on our list, your downloads just unlocked above. 👆</p>{%- endif -%}
+        {%- endform -%}
+        <p class="ff-gate-done ff-ok">🎉 Unlocked! Your three guides are ready above — tap any card to grab it.</p>
+      </div>
+    </div>
+  </section>
+
+  {%- comment -%} ---- WHY FOUNDERS ---- {%- endcomment -%}
+  <section class="ff-perks">
+    <div class="ff-wrap">
+      <h2 class="ff-h2">Why get in <span class="ff-grad">early</span></h2>
+      <div class="ff-grid">
+        <div class="ff-perk"><div class="ff-ico">🚪</div><h3>First through the doors</h3><p>Access the full creator OS before the public launch — a head start on everyone else.</p></div>
+        <div class="ff-perk"><div class="ff-ico">🔒</div><h3>Founder pricing, for good</h3><p>Lock in the lowest price the Haus will ever be — it stays yours as long as you're a member.</p></div>
+        <div class="ff-perk"><div class="ff-ico">🏅</div><h3>A Founding Member badge</h3><p>A permanent mark in the OS that says you were here first.</p></div>
+        <div class="ff-perk"><div class="ff-ico">🗳️</div><h3>Shape what it becomes</h3><p>Founders' feedback steers the roadmap. Help build the thing you'll use every day.</p></div>
+      </div>
+    </div>
+  </section>
+
+  {%- comment -%} ---- CLOSER ---- {%- endcomment -%}
+  <section class="ff-close">
+    <div class="ff-wrap">
+      <p class="ff-born">Born an original.<br><span class="ff-grad">Don't die a copy.</span></p>
+      <a class="ff-jump" href="#ff">Save my spot →</a>
+      <div class="ff-sign">
+        <img src="{{ 'bsc-sheep-mark.png' | asset_url }}" alt="Black Sheep Creations &amp; Inspirations" width="40" height="40" loading="lazy">
+        <span>An original by Black Sheep Creations &amp; Inspirations</span>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+  document.querySelectorAll('#ff .ff-flip').forEach(function(c){
+    c.addEventListener('click',function(){ c.classList.toggle('is-flipped'); });
+    c.addEventListener('keydown',function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); c.classList.toggle('is-flipped'); } });
+  });
+
+  /* Email-gated freebies: unlock persists per-browser via localStorage */
+  (function(){
+    var free = document.getElementById('ff-free');
+    if(!free) return;
+    var KEY = 'p2p_freebies_unlocked';
+    try{ if(localStorage.getItem(KEY)==='1') free.classList.add('is-unlocked'); }catch(e){}
+    var form = free.querySelector('.ff-gate form');
+    if(form){ form.addEventListener('submit', function(){ try{ localStorage.setItem(KEY,'1'); }catch(e){} }); }
+    free.querySelectorAll('.ff-lockbtn').forEach(function(b){
+      b.addEventListener('click', function(){
+        var i = document.getElementById('ff-free-email');
+        if(i){ i.scrollIntoView({behavior:'smooth',block:'center'}); setTimeout(function(){ i.focus(); }, 300); }
+      });
+    });
+  })();
+</script>
+
+{%- style -%}
+  #ff{--ff-bg:#070c16;--ff-card:#111b2e;--ff-line:rgba(255,255,255,.09);--ff-mint:#8ff0e0;--ff-mint2:#34e0a1;--ff-violet:#9b6cff;--ff-grape:#6a3cae;--ff-gold:#e8c979;--ff-cream:#f4e9c9;--ff-text:#eaf1f8;--ff-mut:#9db3c2;
+    background:var(--ff-bg);color:var(--ff-text);font-family:var(--font-body-family,system-ui)}
+  #ff *{box-sizing:border-box}
+  #ff .ff-wrap{max-width:840px;margin:0 auto;padding:0 22px;position:relative;z-index:2}
+  #ff .ff-grad{background:linear-gradient(110deg,var(--ff-mint),var(--ff-gold));-webkit-background-clip:text;background-clip:text;color:transparent}
+
+  /* hero + aurora */
+  #ff .ff-hero{position:relative;overflow:hidden;background:#070c16;padding:clamp(48px,8vw,92px) 0 clamp(44px,6vw,72px);text-align:center;isolation:isolate}
+  #ff .ff-aurora{position:absolute;inset:0;z-index:0;overflow:hidden}
+  #ff .ff-au{position:absolute;border-radius:50%;filter:blur(60px);opacity:.5;mix-blend-mode:screen}
+  #ff .ff-au.a1{width:60%;height:60%;left:-12%;top:-10%;background:radial-gradient(circle,var(--ff-violet),transparent 62%);animation:ffd1 16s ease-in-out infinite}
+  #ff .ff-au.a2{width:66%;height:66%;right:-16%;top:-14%;background:radial-gradient(circle,var(--ff-mint2),transparent 60%);animation:ffd2 20s ease-in-out infinite}
+  #ff .ff-au.a3{width:55%;height:55%;left:8%;bottom:-18%;background:radial-gradient(circle,var(--ff-grape),transparent 64%);animation:ffd3 23s ease-in-out infinite}
+  #ff .ff-au.a4{width:50%;height:50%;right:-6%;bottom:-12%;background:radial-gradient(circle,#1e8f6e,transparent 62%);animation:ffd1 18s ease-in-out infinite reverse}
+  @keyframes ffd1{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(8%,6%) scale(1.15)}}
+  @keyframes ffd2{0%,100%{transform:translate(0,0) scale(1.05)}50%{transform:translate(-8%,8%) scale(1.2)}}
+  @keyframes ffd3{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(6%,-6%) scale(1.12)}}
+  #ff .ff-stars{position:absolute;inset:0;opacity:.5;background-image:
+    radial-gradient(1.4px 1.4px at 20% 30%,#fff,transparent),radial-gradient(1.2px 1.2px at 70% 25%,#dfe,transparent),
+    radial-gradient(1.5px 1.5px at 40% 70%,#fff,transparent),radial-gradient(1px 1px at 85% 55%,#cfe,transparent),
+    radial-gradient(1.3px 1.3px at 55% 85%,#fff,transparent),radial-gradient(1px 1px at 12% 80%,#fff,transparent)}
+  #ff .ff-hero::after{content:"";position:absolute;inset:0;z-index:1;background:radial-gradient(120% 90% at 50% 30%,transparent 45%,rgba(7,12,22,.7) 100%)}
+
+  #ff .ff-emblem{width:clamp(96px,18vw,130px);height:auto;border-radius:50%;margin-bottom:18px;box-shadow:0 0 40px rgba(143,240,224,.35),0 10px 30px rgba(0,0,0,.5);animation:ffbloom 1s ease both}
+  @keyframes ffbloom{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:none}}
+  #ff .ff-eyebrow{color:var(--ff-mint);font-size:12px;font-weight:800;letter-spacing:.26em;text-transform:uppercase;margin-bottom:14px}
+  #ff .ff-h1{font-size:clamp(36px,7.5vw,64px);line-height:1.02;letter-spacing:-.02em;margin:0 0 16px;text-wrap:balance}
+  #ff .ff-lede{color:#c6d3e0;font-size:clamp(16px,2.1vw,19px);line-height:1.6;max-width:600px;margin:0 auto 30px}
+  #ff .ff-lede .ff-grad{font-weight:700}
+
+  #ff .ff-form-card{max-width:520px;margin:0 auto;background:linear-gradient(160deg,rgba(20,41,74,.92),rgba(14,26,46,.92));backdrop-filter:blur(6px);border:1.5px solid rgba(143,240,224,.45);border-radius:20px;padding:24px;box-shadow:0 24px 60px rgba(0,0,0,.45)}
+  #ff .ff-label{display:block;font-weight:700;font-size:14px;margin-bottom:10px;color:var(--ff-cream)}
+  #ff .ff-row{display:flex;gap:9px;flex-wrap:wrap}
+  #ff .ff-input{flex:1;min-width:180px;background:rgba(0,0,0,.3);border:1px solid var(--ff-line);border-radius:40px;padding:14px 18px;color:#fff;font-size:15px}
+  #ff .ff-input::placeholder{color:#6b7f90}
+  #ff .ff-input:focus{outline:none;border-color:var(--ff-mint)}
+  #ff .ff-btn{flex:0 0 auto;background:linear-gradient(135deg,#c9f5ea,var(--ff-mint));color:#06120e;font-weight:800;font-size:15px;border:0;border-radius:40px;padding:14px 24px;cursor:pointer;transition:transform .15s ease,box-shadow .15s ease;box-shadow:0 10px 28px rgba(143,240,224,.3)}
+  #ff .ff-btn:hover{transform:translateY(-2px);box-shadow:0 14px 36px rgba(143,240,224,.42)}
+  #ff .ff-fine{color:var(--ff-mut);font-size:12.5px;margin:12px 0 0}
+  #ff .ff-ok{color:var(--ff-mint);font-weight:700;font-size:16px;line-height:1.5;margin:0}
+  #ff .ff-err{color:#ffb4b4;font-size:13px;margin:10px 0 0}
+  #ff .ff-spots{color:var(--ff-gold);font-size:13.5px;font-weight:600;margin-top:20px}
+
+  /* emblem strip */
+  #ff .ff-inside{padding:clamp(44px,6vw,68px) 0;background:linear-gradient(180deg,#070c16,#0b1524)}
+  #ff .ff-h2{text-align:center;font-size:clamp(24px,4.2vw,36px);margin:0 0 26px;letter-spacing:-.01em;text-wrap:balance}
+  #ff .ff-flips{display:flex;flex-wrap:wrap;gap:14px;justify-content:center}
+  #ff .ff-flip{width:150px;height:172px;perspective:1000px;cursor:pointer;outline:none}
+  #ff .ff-flip__in{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .6s cubic-bezier(.2,.7,.2,1)}
+  #ff .ff-flip:hover .ff-flip__in,#ff .ff-flip:focus-visible .ff-flip__in,#ff .ff-flip.is-flipped .ff-flip__in{transform:rotateY(180deg)}
+  #ff .ff-flip__f,#ff .ff-flip__b{position:absolute;inset:0;-webkit-backface-visibility:hidden;backface-visibility:hidden;border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;padding:16px;text-align:center;border:1px solid var(--ff-line);background:var(--ff-card)}
+  #ff .ff-flip__f img{width:72px;height:72px;border-radius:50%;box-shadow:0 6px 18px rgba(0,0,0,.4)}
+  #ff .ff-flip__f span{font-size:13px;font-weight:800;color:var(--ff-cream)}
+  #ff .ff-flip__b{transform:rotateY(180deg);background:linear-gradient(160deg,#14294a,#0e1a2e);border-color:rgba(143,240,224,.4)}
+  #ff .ff-flip__n{font-size:13px;font-weight:800;color:var(--ff-gold)}
+  #ff .ff-flip__b p{margin:0;font-size:13px;line-height:1.4;color:#d3e0ec}
+  #ff .ff-tapnote{text-align:center;color:var(--ff-mut);font-size:12px;margin:14px 0 0}
+  #ff .ff-plus{text-align:center;color:var(--ff-mut);font-size:15px;line-height:1.6;max-width:560px;margin:24px auto 0}
+  #ff .ff-plus .ff-grad{font-weight:700}
+
+  /* perks */
+  #ff .ff-perks{padding:clamp(44px,6vw,68px) 0}
+  #ff .ff-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  #ff .ff-perk{background:var(--ff-card);border:1px solid var(--ff-line);border-radius:16px;padding:22px;transition:border-color .16s ease,transform .16s ease}
+  #ff .ff-perk:hover{border-color:rgba(143,240,224,.4);transform:translateY(-3px)}
+  #ff .ff-ico{font-size:26px;margin-bottom:10px}
+  #ff .ff-perk h3{margin:0 0 6px;font-size:17px;color:var(--ff-gold)}
+  #ff .ff-perk p{margin:0;color:var(--ff-mut);font-size:14.5px;line-height:1.5}
+
+  /* closer */
+  #ff .ff-close{padding:clamp(48px,7vw,80px) 0;text-align:center;background:radial-gradient(120% 120% at 50% 0%,#16305a 0%,#0a1120 55%,#070c16 100%)}
+  #ff .ff-born{font-size:clamp(26px,5vw,40px);font-weight:900;line-height:1.1;margin:0 0 24px;letter-spacing:-.01em}
+  #ff .ff-jump{display:inline-block;background:linear-gradient(135deg,#c9f5ea,var(--ff-mint));color:#06120e;font-weight:800;text-decoration:none;padding:15px 32px;border-radius:40px;box-shadow:0 12px 34px rgba(143,240,224,.3)}
+  #ff .ff-sign{display:flex;align-items:center;gap:10px;justify-content:center;margin-top:28px;opacity:.85}
+  #ff .ff-sign img{width:38px;height:38px;border-radius:50%;background:#fff}
+  #ff .ff-sign span{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ff-mut);font-weight:600}
+
+  /* free lead magnets (email-gated) */
+  #ff .ff-free{padding:clamp(44px,6vw,68px) 0;background:linear-gradient(180deg,#0b1524,#070c16)}
+  #ff .ff-eyebrow--c{text-align:center}
+  #ff .ff-freesub{text-align:center;color:var(--ff-mut);font-size:15px;line-height:1.6;max-width:600px;margin:6px auto 26px}
+  #ff .ff-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  #ff .ff-fcard{background:var(--ff-card);border:1px solid var(--ff-line);border-radius:16px;padding:24px 20px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:9px;transition:border-color .16s ease,transform .16s ease}
+  #ff .ff-fcard:hover{transform:translateY(-3px)}
+  #ff .ff-fcover{width:100%;max-width:220px;border-radius:12px;box-shadow:0 14px 34px rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.1);display:block}
+  #ff .ff-ficon{font-size:36px;filter:drop-shadow(0 6px 14px rgba(0,0,0,.4))}
+  #ff .ff-fcard h3{margin:0;font-size:16px;color:var(--ff-cream);line-height:1.25}
+  #ff .ff-fcard p{margin:0;flex:1;color:var(--ff-mut);font-size:13.5px;line-height:1.5}
+  #ff .ff-dl,#ff .ff-lockbtn{margin-top:6px;font-weight:800;font-size:13.5px;border-radius:40px;padding:11px 20px;font-family:inherit}
+  #ff .ff-dl{display:none;background:linear-gradient(135deg,#c9f5ea,var(--ff-mint));color:#06120e;text-decoration:none;box-shadow:0 8px 22px rgba(143,240,224,.28);transition:transform .15s ease}
+  #ff .ff-dl:hover{transform:translateY(-1px)}
+  #ff .ff-dl--soon{background:linear-gradient(135deg,#2a3a52,#20304a);color:#9db3c2;box-shadow:none;cursor:default;pointer-events:none}
+  #ff .ff-lockbtn{background:rgba(255,255,255,.05);color:var(--ff-mut);border:1px solid var(--ff-line);cursor:pointer;transition:color .15s ease,border-color .15s ease}
+  #ff .ff-lockbtn:hover{color:var(--ff-cream);border-color:rgba(143,240,224,.4)}
+  #ff .ff-free.is-unlocked .ff-lockbtn{display:none}
+  #ff .ff-free.is-unlocked .ff-dl{display:inline-block}
+  #ff .ff-free.is-unlocked .ff-fcard{border-color:rgba(143,240,224,.35)}
+  #ff .ff-gate{max-width:520px;margin:24px auto 0;background:linear-gradient(160deg,rgba(20,41,74,.9),rgba(14,26,46,.9));border:1.5px solid rgba(143,240,224,.4);border-radius:20px;padding:22px}
+  #ff .ff-gate-done{display:none;text-align:center;margin:0}
+  #ff .ff-free.is-unlocked .ff-gate form{display:none}
+  #ff .ff-free.is-unlocked .ff-gate-done{display:block}
+
+  @media(max-width:640px){#ff .ff-cards{grid-template-columns:1fr}}
+  @media(max-width:600px){#ff .ff-grid{grid-template-columns:1fr}}
+  @media(prefers-reduced-motion:reduce){#ff .ff-au{animation:none!important}#ff .ff-emblem{animation:none}}
+{%- endstyle -%}
+{% schema %}
+{
+  "name": "Founding Flock",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Purpose 2 Profit · Coming soon" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Join the Founding Flock." },
+    { "type": "text", "id": "cta_label", "label": "Button label", "default": "Join the flock →" },
+    { "type": "text", "id": "spots_note", "label": "Spots note", "default": "✦ Limited founding spots · founder pricing locked in for life" },
+
+    { "type": "header", "content": "Free lead magnets (email-gated)" },
+    { "type": "paragraph", "content": "Upload each PDF under Content → Files, copy its URL, and paste it into the matching field below. Visitors unlock all three by entering their email (saved as a customer tagged founding-flock, freebies)." },
+    { "type": "text", "id": "free_eyebrow", "label": "Section eyebrow", "default": "Free goodies for stopping by" },
+    { "type": "text", "id": "free_heading", "label": "Section heading", "default": "Grab a little something free" },
+    { "type": "textarea", "id": "free_sub", "label": "Section subtext", "default": "Three field-tested guides to help you turn an idea into something real — yours the second you drop your email. No fluff, no spam, just the good stuff. 🐑" },
+
+    { "type": "text", "id": "freebie_1_icon", "label": "Freebie 1 · icon", "default": "🌱" },
+    { "type": "text", "id": "freebie_1_title", "label": "Freebie 1 · title", "default": "The Thought → Thrive Starter Kit" },
+    { "type": "textarea", "id": "freebie_1_desc", "label": "Freebie 1 · description", "default": "Your 7-step path from “someday” to something people can actually buy." },
+    { "type": "url", "id": "freebie_1_url", "label": "Freebie 1 · PDF link" },
+
+    { "type": "text", "id": "freebie_2_icon", "label": "Freebie 2 · icon", "default": "🎣" },
+    { "type": "text", "id": "freebie_2_title", "label": "Freebie 2 · title", "default": "50 Scroll-Stopping Hooks" },
+    { "type": "textarea", "id": "freebie_2_desc", "label": "Freebie 2 · description", "default": "A swipe file of first lines that actually stop the scroll — grouped, ready to steal." },
+    { "type": "url", "id": "freebie_2_url", "label": "Freebie 2 · PDF link" },
+
+    { "type": "text", "id": "freebie_3_icon", "label": "Freebie 3 · icon", "default": "🧠" },
+    { "type": "text", "id": "freebie_3_title", "label": "Freebie 3 · title", "default": "The Founder Mindset Checklist" },
+    { "type": "textarea", "id": "freebie_3_desc", "label": "Freebie 3 · description", "default": "12 mental flips to catch the thoughts that keep you stuck — and move anyway." },
+    { "type": "url", "id": "freebie_3_url", "label": "Freebie 3 · PDF link" }
+  ],
+  "presets": [{ "name": "Founding Flock" }]
+}
+{% endschema %}

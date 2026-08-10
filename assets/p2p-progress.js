@@ -174,6 +174,10 @@ window.P2P = (function(){
     if(m >= 1) earnBadge('Mindset I'); if(m >= 2) earnBadge('Mindset II'); if(m >= CHECK_TOTAL) earnBadge('Clear Mind');
     if(p >= 1) earnBadge('Purpose I'); if(p >= 2) earnBadge('Purpose II'); if(p >= CHECK_TOTAL) earnBadge('True Purpose');
     if(h >= 1) earnBadge('Heart I');   if(h >= 2) earnBadge('Heart II');   if(h >= CHECK_TOTAL) earnBadge('Open Heart');
+    /* Open Water Explorer — discover all four hidden bonus areas on the Realm 1 map.
+       Keys match the bonus check block ids: lighthouse (live) + raft/buoys (added with #4). */
+    var OW_EXPLORER = ['check:check:lighthouse','check:check:owraft','check:check:owbuoyw','check:check:owbuoye'];
+    if(OW_EXPLORER.every(function(id){ return done.indexOf(id) !== -1; })) earnBadge('Open Water Explorer');
   }
   /* certificate award — +R.cert once per course handle */
   function awardCert(handle){ handle = String(handle || ''); var a = get(K.certsAwarded, []); if(handle && a.indexOf(handle) === -1){ a.push(handle); set(K.certsAwarded, a); } return a.length; }

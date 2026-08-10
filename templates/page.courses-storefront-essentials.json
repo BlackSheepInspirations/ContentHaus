@@ -10,20 +10,69 @@
         "back_url": "/pages/p2p-learning",
         "os_url": "/pages/p2p-os",
         "os_label": "P2P Operating System",
-        "access_tag": "p2p-learning"
+        "access_tag": "p2p-learning",
+        "res_label": "Course Resources",
+        "res_1_label": "Open Your Store — Checklist",
+        "res_1_url": "https://cdn.shopify.com/s/files/1/0941/3122/4894/files/Open_Your_Store_Checklist.pdf?v=1786312308",
+        "res_1_type": "Checklist",
+        "res_2_label": "Scout the Stores — Worksheet",
+        "res_2_url": "https://cdn.shopify.com/s/files/1/0941/3122/4894/files/Scout_The_Stores_Worksheet.pdf?v=1786312308",
+        "res_2_type": "Worksheet",
+        "res_3_label": "Fill the Five — Product Page",
+        "res_3_url": "https://cdn.shopify.com/s/files/1/0941/3122/4894/files/Fill_the_Five_Product_Page.pdf?v=1786312308",
+        "res_3_type": "Worksheet"
       },
       "blocks": {
         "l1": {
           "type": "lesson",
           "settings": {
-            "title": "Lesson 1",
-            "video_label": "Watch the lesson",
-            "body": "<p>Welcome to <strong>Storefront Essentials</strong>. Lesson content is on the way — add your video, notes, downloads, or a flip-book here.</p>"
+            "title": "What a Storefront Actually Is",
+            "video_embed": "https://iframe.mediadelivery.net/embed/723534/12ffcd82-9f06-49a7-b956-5438f75b009a"
+          }
+        },
+        "l2": {
+          "type": "lesson",
+          "settings": {
+            "title": "Nothing Is Actually Free",
+            "video_embed": "https://iframe.mediadelivery.net/embed/723534/3edb96ea-c071-4f4c-8c45-a62dd44acd90"
+          }
+        },
+        "l3": {
+          "type": "lesson",
+          "settings": {
+            "title": "Where You'll Sell",
+            "video_embed": "https://iframe.mediadelivery.net/embed/723534/8a1fbac8-7aec-40c8-b612-df4005b75a3e",
+            "body": "<p>Your <strong>Scout the Stores</strong> worksheet is in the sidebar and below — fill a page per store you're weighing, then make the call.</p>",
+            "dl_1_label": "Scout the Stores — Worksheet",
+            "dl_1_url": "https://cdn.shopify.com/s/files/1/0941/3122/4894/files/Scout_The_Stores_Worksheet.pdf?v=1786312308",
+            "dl_1_type": "Worksheet"
+          }
+        },
+        "l4": {
+          "type": "lesson",
+          "settings": {
+            "title": "What Every Product Page Needs",
+            "video_embed": "https://iframe.mediadelivery.net/embed/723534/c4dd156e-b526-49af-b6fe-ea07eda97cd8",
+            "body": "<p>Your <strong>Fill the Five</strong> product-page builder is in the sidebar and below — draft all five slots before you open.</p>",
+            "dl_1_label": "Fill the Five — Product Page",
+            "dl_1_url": "https://cdn.shopify.com/s/files/1/0941/3122/4894/files/Fill_the_Five_Product_Page.pdf?v=1786312308",
+            "dl_1_type": "Worksheet"
+          }
+        },
+        "l5": {
+          "type": "lesson",
+          "settings": {
+            "title": "Getting Found",
+            "video_embed": "https://iframe.mediadelivery.net/embed/723534/352621b5-02a2-4ccd-91c1-d12eb9cebc02"
           }
         }
       },
       "block_order": [
-        "l1"
+        "l1",
+        "l2",
+        "l3",
+        "l4",
+        "l5"
       ]
     }
   },

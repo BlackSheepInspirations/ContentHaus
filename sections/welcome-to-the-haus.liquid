@@ -8,8 +8,8 @@
 {%- assign os_handle = section.settings.os_product | default: 'p2p-os-access' -%}
 {%- assign os = all_products[os_handle] -%}
 
-{%- assign hausen = 'content-haus-access-pass^Content Haus^Image & design prompts for any AI tool^/pages/content-haus-preview~marketing-haus-access-pass^Marketing Haus^Copy, ads, email & social content^/pages/marketing-haus-preview~graphic-haus-access-pass^Graphics Haus^Clipart, plates, mascots & a full studio^/pages/graphic-haus-preview~project-haus-access-pass^Project Haus^Journals, planners, stickers & print^/pages/project-haus-preview~brand-haus-access-pass^Brand Haus^Founders Assessment + Brand & Logo Studio^/pages/brand-haus-preview~growth-haus-access-pass^Growth Haus^Your ROOTED launch cockpit, idea to live^/pages/growth-haus-preview' | split: '~' -%}
-{%- assign gpts = 'idea-haus-gpt^Frank^Your idea & validation Custom GPT~build-haus-access-pass^Ruth^Your build & structure Custom GPT' | split: '~' -%}
+{%- assign hausen = 'content-haus-access-pass^Content Haus^Image & design prompts for any AI tool^/pages/content-haus-preview^content~marketing-haus-access-pass^Marketing Haus^Copy, ads, email & social content^/pages/marketing-haus-preview^marketing~graphic-haus-access-pass^Graphics Haus^Clipart, plates, mascots & a full studio^/pages/graphic-haus-preview^graphics~project-haus-access-pass^Project Haus^Journals, planners, stickers & print^/pages/project-haus-preview^project~brand-haus-access-pass^Brand Haus^Founders Assessment + Brand & Logo Studio^/pages/brand-haus-preview^brand~growth-haus-access-pass^Growth Haus^Your ROOTED launch cockpit, idea to live^/pages/growth-haus-preview^growth' | split: '~' -%}
+{%- assign gpts = 'idea-haus-gpt^Frank^Your idea & validation Custom GPT^idea~build-haus-access-pass^Ruth^Your build & structure Custom GPT^build' | split: '~' -%}
 
 <div id="wth">
 
@@ -54,6 +54,7 @@
       {%- comment -%} OS spotlight {%- endcomment -%}
       {%- if os != blank -%}
       <a class="wth-os" href="{{ os.url }}">
+        <img class="wth-os__emblem" src="{{ 'haus-emblem-p2p.png' | asset_url }}" alt="Purpose 2 Profit" loading="lazy" width="96" height="96">
         <div class="wth-os__body">
           <div class="wth-os__badge">The hub</div>
           <h3 class="wth-os__name">The Purpose 2 Profit OS</h3>
@@ -69,6 +70,7 @@
           {%- assign p = h | split: '^' -%}
           {%- assign prod = all_products[p[0]] -%}
           <div class="wth-card">
+            <img class="wth-card__emblem" src="{{ p[4] | prepend: 'haus-emblem-' | append: '.png' | asset_url }}" alt="{{ p[1] }} emblem" loading="lazy" width="80" height="80">
             <h3 class="wth-card__name">{{ p[1] }}</h3>
             <p class="wth-card__tag">{{ p[2] }}</p>
             <div class="wth-card__foot">
@@ -89,7 +91,7 @@
           {%- assign p = g | split: '^' -%}
           {%- assign prod = all_products[p[0]] -%}
           <div class="wth-gpt">
-            <div class="wth-gpt__avatar" aria-hidden="true">🤖</div>
+            <div class="wth-gpt__avatar"><img src="{{ p[3] | prepend: 'haus-emblem-' | append: '.png' | asset_url }}" alt="{{ p[1] }}" loading="lazy" width="48" height="48"></div>
             <div class="wth-gpt__body">
               <h4 class="wth-gpt__name">{{ p[1] }}</h4>
               <p class="wth-gpt__tag">{{ p[2] }}</p>
@@ -213,15 +215,20 @@
   /* hausen */
   #wth .wth-os{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;background:linear-gradient(135deg,#132844,#0d1a2c);border:1px solid rgba(143,240,224,.3);border-radius:20px;padding:30px 32px;text-decoration:none;color:inherit;margin-bottom:22px;transition:border-color .16s ease,transform .16s ease}
   #wth .wth-os:hover{border-color:var(--wth-mint);transform:translateY(-2px)}
+  #wth .wth-os__emblem{width:92px;height:92px;flex:0 0 auto;border-radius:50%;box-shadow:0 6px 20px rgba(0,0,0,.45)}
+  #wth .wth-os__body{flex:1;min-width:220px}
   #wth .wth-os__badge{display:inline-block;color:var(--wth-mint);font-size:11px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;margin-bottom:8px}
   #wth .wth-os__name{margin:0 0 6px;font-size:24px}
   #wth .wth-os__desc{margin:0;color:var(--wth-mut);max-width:640px}
   #wth .wth-os__cta{display:flex;gap:8px;align-items:center;color:var(--wth-mint);font-weight:700;white-space:nowrap}
   #wth .wth-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
-  #wth .wth-card{background:var(--wth-card);border:1px solid var(--wth-line);border-radius:16px;padding:22px;display:flex;flex-direction:column;gap:6px;transition:transform .16s ease,border-color .16s ease}
+  #wth .wth-card{background:var(--wth-card);border:1px solid var(--wth-line);border-radius:16px;padding:22px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;transition:transform .16s ease,border-color .16s ease}
   #wth .wth-card:hover{transform:translateY(-3px);border-color:rgba(143,240,224,.4)}
+  #wth .wth-card__emblem{width:88px;height:88px;border-radius:50%;margin-bottom:6px;box-shadow:0 5px 16px rgba(0,0,0,.4);transition:transform .16s ease}
+  #wth .wth-card:hover .wth-card__emblem{transform:scale(1.05)}
   #wth .wth-card__name{margin:0;font-size:18px;color:var(--wth-gold)}
   #wth .wth-card__tag{margin:0;color:var(--wth-mut);font-size:14px;flex:1}
+  #wth .wth-card__foot{width:100%}
   #wth .wth-card__foot{display:flex;align-items:center;justify-content:space-between;margin-top:10px;gap:10px}
   #wth .wth-card__price{color:var(--wth-mint);font-weight:700}
   #wth .wth-card__links{display:flex;gap:12px;align-items:center;font-size:13.5px}
@@ -231,7 +238,8 @@
   #wth .wth-gpt-h{text-align:center;margin:40px 0 16px;font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:var(--wth-mut);font-weight:700}
   #wth .wth-gpts{display:grid;grid-template-columns:1fr 1fr;gap:14px}
   #wth .wth-gpt{display:flex;align-items:center;gap:14px;background:var(--wth-card);border:1px solid var(--wth-line);border-radius:16px;padding:18px 20px}
-  #wth .wth-gpt__avatar{width:44px;height:44px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;font-size:22px;border-radius:50%;background:linear-gradient(135deg,#1b3350,#12233a)}
+  #wth .wth-gpt__avatar{width:52px;height:52px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;border-radius:50%;overflow:hidden;background:linear-gradient(135deg,#1b3350,#12233a)}
+  #wth .wth-gpt__avatar img{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block}
   #wth .wth-gpt__name{margin:0;font-size:17px;color:var(--wth-gold)}
   #wth .wth-gpt__tag{margin:0;color:var(--wth-mut);font-size:13.5px}
   #wth .wth-gpt__body{flex:1}

@@ -16,14 +16,37 @@
         "l1": {
           "type": "lesson",
           "settings": {
-            "title": "Lesson 1",
-            "video_label": "Watch the lesson",
-            "body": "<p>Welcome to <strong>Welcome Aboard</strong>. Lesson content is on the way — add your video, notes, downloads, or a flip-book here.</p>"
+            "title": "Welcome Aboard",
+            "video_embed": "https://iframe.mediadelivery.net/embed/723534/3ee5e172-e939-4d62-9394-1d88788103d1"
+          }
+        },
+        "l2": {
+          "type": "lesson",
+          "settings": {
+            "title": "Meet Your Guides",
+            "video_embed": "https://iframe.mediadelivery.net/embed/723534/a4c64f4d-18d8-4c0f-aaed-ff3546c560b3"
+          }
+        },
+        "l3": {
+          "type": "lesson",
+          "settings": {
+            "title": "A Tour of the Hauses",
+            "video_embed": "https://iframe.mediadelivery.net/embed/723534/a8a9cec6-77b3-4aaa-acf2-adb5a92f2525"
+          }
+        },
+        "l4": {
+          "type": "lesson",
+          "settings": {
+            "title": "The Rest of Your Kit",
+            "video_embed": "https://iframe.mediadelivery.net/embed/723534/8d75ba1f-4b85-47c1-bf4c-e23b452de4f2"
           }
         }
       },
       "block_order": [
-        "l1"
+        "l1",
+        "l2",
+        "l3",
+        "l4"
       ]
     }
   },

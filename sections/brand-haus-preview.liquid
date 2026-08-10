@@ -28,6 +28,7 @@
   </nav>
 
   <div class="bh-marketing__hero">
+    <img class="bh-marketing__emblem" src="{{ 'haus-emblem-brand.png' | asset_url }}" alt="Brand Haus emblem" width="120" height="120" loading="eager" style="width:120px;height:120px;border-radius:50%;display:block;margin:0 auto 18px;box-shadow:0 8px 24px rgba(0,0,0,.45)">
     <p class="bh-marketing__eyebrow">{{ section.settings.eyebrow }}</p>
     <h1 class="bh-marketing__heading">{{ section.settings.heading | replace: 'Brand', '<span class="bh-heading-accent">Brand</span>' }}</h1>
     <p class="bh-marketing__tagline">{{ section.settings.tagline | replace: 'Brand DNA Blueprint', '<span class="bh-heading-accent">Brand DNA Blueprint</span>' }}</p>

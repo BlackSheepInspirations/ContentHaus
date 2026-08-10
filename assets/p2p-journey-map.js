@@ -1,6 +1,7 @@
 /* Purpose 2 Profit — canonical journey map (single source of truth for the
    cross-realm Course Directory). Keep in sync with the templates/page.p2p-*.json
-   block sets. Course URLs auto-derive to /pages/courses-<handle>; `gate` is the
+   block sets. Course URLs auto-derive to /pages/courses-<handle> (set `u` for a
+   custom page URL, e.g. a non courses-* page); `gate` is the
    realm's anchor course handle (locks the rest of that realm until done);
    `after` on an item locks it until that handle is done. Checks are intentionally
    excluded — they live in the Bonuses panel and are never gated. */
@@ -16,6 +17,7 @@ window.P2P_MAP = [
     { t:'Selling on Beacons', h:'selling-on-beacons', o:true, after:'storefront-essentials' },
     { t:'Selling on Stan', h:'selling-on-stan', o:true, after:'storefront-essentials' },
     { t:'Psychology Behind a Purchase', h:'psychology-behind-a-purchase' },
+    { t:'Your Social Porch', h:'your-social-front-porch' },
     { t:'Show Up Your Way', h:'show-up-your-way' }
   ]},
   { n:2, name:'Element Forest', url:'/pages/realm-2', gate:'grows', courses:[
