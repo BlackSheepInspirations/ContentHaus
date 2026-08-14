@@ -11,6 +11,7 @@
 
 {{ 'p2p-os-shell.css' | asset_url | stylesheet_tag }}
 <script src="{{ 'p2p-community.js' | asset_url }}" defer="defer"></script>
+<script src="{{ 'p2p-notify-prefs.js' | asset_url }}" defer="defer"></script>
 
 {%- assign owns_all = false -%}
 {%- if customer and customer.tags contains 'all-access' -%}{%- assign owns_all = true -%}{%- endif -%}

@@ -10,7 +10,7 @@
   var wotwSlot = root.querySelector('[data-wotw-slot]');
   var winsFeed = root.querySelector('[data-wins-feed]');
   var cmPendingAtts = {};   // post id → [{type,url}] staged for the next reply (max 2)
-  var posts = [], winPosts = [], winIdx = 0, winTimer = null, welcomeProfileDone = false, wowPost = null, isAdmin = false, catList = null, memberMap = {}, didDeepLink = false, gbRange = 'all', lastMembers = [];
+  var posts = [], winPosts = [], winIdx = 0, winTimer = null, welcomeProfileDone = false, wowPost = null, isAdmin = false, myRole = null, catList = null, memberMap = {}, didDeepLink = false, gbRange = 'all', lastMembers = [];
   var filter = { category: 'all', range: 'all', sort: 'new', q: '', offset: 0, limit: 30, hasMore: false, page: 1, total: 0 };
   var CATS = { general: { label: 'General Discussion', emoji: '💬' }, intro: { label: 'Introductions', emoji: '👋' }, wins: { label: 'Wins • Habits • Growth', emoji: '🏆' }, help: { label: 'Questions & Help', emoji: '🙏' }, testimonial: { label: 'Testimonials', emoji: '🙌' }, announce: { label: 'P2P Announcements', emoji: '📣' } };
   function catMeta(k) { return (catList && catList.filter(function (x) { return x.key === k; })[0]) || CATS[k] || null; }
@@ -113,6 +113,12 @@
   function myStreak() { var P = window.P2P || {}; return (P.streak ? (P.streak().count || 0) : 0); }
   function flame(n) { n = +n || 0; return n >= 2 ? '<span class="osx-flame" title="' + n + '-day streak">🔥' + n + '</span>' : ''; }
   function houseTag(p) { return p.house ? '<span class="osx-house-tag">✦ Haus</span>' : ''; }
+  function roleTag(role) {
+    if (role === 'owner') return '<span class="osx-role-tag osx-role-owner" title="Owner">Owner</span>';
+    if (role === 'admin') return '<span class="osx-role-tag osx-role-admin" title="Admin">Admin</span>';
+    if (role === 'mod') return '<span class="osx-role-tag osx-role-mod" title="Moderator">Mod</span>';
+    return '';
+  }
   var CM_EMOJI = ['😀','😄','😁','😊','🥰','😍','😎','🤩','🥳','😂','🤣','😉','🙌','👏','👍','🙏','💪','🔥','✨','⭐','💯','🎉','❤️','🧡','💛','💚','💙','💜','🖤','💡','✅','👀','😢','😭','🤔','🤯','🤗','🐑','🚀','🌱'];
   function linkify(s) { return esc(s).replace(/(https?:\/\/[^\s<]+)/g, function (u) { return '<a href="' + u + '" target="_blank" rel="noopener nofollow">' + u + '</a>'; }); }
   function insertAtCaret(input, text) {
@@ -144,7 +150,7 @@
       menu = '<span class="osx-menu"><button type="button" class="osx-menu-dots" data-menu aria-label="More">⋯</button><span class="osx-menu-pop" hidden>' + mi + '</span></span>';
     }
     var body = (c.text ? '<div class="osx-cm-text">' + linkify(c.text) + '</div>' : '') + cmAttHTML(c.attachments);
-    return '<div class="osx-cm-item" data-cm-item="' + esc(c.id) + '"><div class="osx-cm-itop"><button type="button" class="osx-name-btn" data-profile="' + esc(c.name || '') + '">' + esc(c.name || 'Member') + '</button><span class="osx-cm-time">' + ago(c.ts) + (c.edited ? ' · edited' : '') + '</span>' + menu + '</div>' + body + '</div>';
+    return '<div class="osx-cm-item" data-cm-item="' + esc(c.id) + '"><div class="osx-cm-itop"><button type="button" class="osx-name-btn" data-profile="' + esc(c.name || '') + '">' + esc(c.name || 'Member') + '</button>' + roleTag(c.authorRole) + '<span class="osx-cm-time">' + ago(c.ts) + (c.edited ? ' · edited' : '') + '</span>' + menu + '</div>' + body + '</div>';
   }
   function cmAttHTML(atts) {
     if (!atts || !atts.length) return '';
@@ -358,7 +364,7 @@
   function unreadDot(p) { return (p.ts > seenTs() && String(p.name || '').trim().toLowerCase() !== myName()) ? '<span class="osx-unread" title="New"></span>' : ''; }
   function headHTML(p) {
     return '<div class="osx-cw-head">' + postAvatar(p) +
-      '<div class="osx-cw-hmeta"><div class="osx-cw-nameline">' + unreadDot(p) + '<button type="button" class="osx-name-btn" data-profile="' + esc(p.name || '') + '">' + esc(p.name || 'Member') + '</button>' + flame(p.streak) + houseTag(p) + '</div>' +
+      '<div class="osx-cw-hmeta"><div class="osx-cw-nameline">' + unreadDot(p) + '<button type="button" class="osx-name-btn" data-profile="' + esc(p.name || '') + '">' + esc(p.name || 'Member') + '</button>' + flame(p.streak) + houseTag(p) + (p.house ? '' : roleTag(p.authorRole)) + '</div>' +
       '<div class="osx-cw-sub">' + ago(p.ts) + ' · ' + catChip(p) + (p.edited ? ' · edited' : '') + '</div></div>' + pinBtn(p) + postMenu(p) + '</div>';
   }
   function postHTML(p) {
@@ -525,7 +531,7 @@
     winsFeed.innerHTML =
       '<div class="osx-wside">' +
         '<p class="osx-wside-text">' + esc(p.text) + '</p>' +
-        '<div class="osx-wside-foot"><button type="button" class="osx-wside-by osx-name-btn" data-profile="' + esc(p.name || '') + '">' + esc(p.name || 'Member') + '</button>' + loveChip(p) + '</div>' +
+        '<div class="osx-wside-foot"><button type="button" class="osx-wside-by osx-name-btn" data-profile="' + esc(p.name || '') + '">' + esc(p.name || 'Member') + '</button>' + (p.house ? '' : roleTag(p.authorRole)) + loveChip(p) + '</div>' +
       '</div>' +
       (w.length > 1 ? '<div class="osx-win-dots">' + w.map(function (_, i) { return '<span class="' + (i === winIdx ? 'on' : '') + '" data-win-dot="' + i + '"></span>'; }).join('') + '</div>' : '');
     wireReacts(winsFeed);
@@ -601,6 +607,7 @@
         if (!j) { if (feed) feed.innerHTML = empty('Couldn\'t load the wall just now — try again in a moment.'); return; }
         if (j.categories) { catList = j.categories; renderTabs(); }
         isAdmin = !!j.isAdmin;
+        myRole = j.role || null;
         wowPost = j.wowPost || null;
         syncEngage(j.engageTotal);
         posts = j.posts || [];
@@ -1133,6 +1140,11 @@
       var canOpen = n.kind && n.id;
       return '<div class="osx-bell-item unread osx-bell-rem' + (canOpen ? ' osx-bell-click' : '') + '"' + (canOpen ? ' data-openitem="' + esc(n.kind) + '|' + esc(n.id) + '"' : '') + '><div class="osx-bell-line">' + ic + ' <b>' + esc(n.title) + '</b></div><div class="osx-bell-snip">' + snip + '</div></div>';
     }
+    if (n.type === 'dm') {
+      return '<div class="osx-bell-item' + (n.read ? '' : ' unread') + ' osx-bell-click" data-opendm="' + esc(n.from || '') + '|' + esc(n.name || 'Member') + '"><div class="osx-bell-line">💬 <b>' + esc(n.name || 'Someone') + '</b> sent you a message</div>' +
+        (n.snippet ? '<div class="osx-bell-snip">“' + esc(n.snippet) + '”</div>' : '') +
+        '<span class="osx-bell-time">' + ago(n.ts) + ' ago</span></div>';
+    }
     var verb = n.type === 'follow' ? 'shared a new post' : n.type === 'comment' ? 'commented on your post' : (n.rtype === 'party' ? 'celebrated your post 🎉' : n.rtype === 'thumb' ? 'gave your post a 👍' : 'loved your post ❤');
     return '<div class="osx-bell-item' + (n.read ? '' : ' unread') + (n.postId ? ' osx-bell-click' : '') + '"' + (n.postId ? ' data-openpost="' + esc(n.postId) + '"' : '') + '><div class="osx-bell-line"><b>' + esc(n.name || 'Someone') + '</b> ' + verb + '</div>' +
       (n.snippet ? '<div class="osx-bell-snip">“' + esc(n.snippet) + '”</div>' : '') +
@@ -1147,7 +1159,10 @@
     var due = dueReminders(), localNids = {}; due.forEach(function (r) { localNids[r.nid] = 1; });
     var rem = due.map(function (r) { return { reminder: true, kind: r.kind, id: r.id, title: r.title, label: r.label, startAt: r.startAt, post: r.post }; });
     var all = rem.concat(serverNotifs(localNids));
-    menu.innerHTML = '<div class="osx-bell-h">Notifications</div>' + (all.length ? all.map(line).join('') : '<div class="osx-bell-empty">Nothing yet — reminders you set and reactions to your posts show up here. 🔔</div>');
+    menu.innerHTML = '<div class="osx-bell-h">Notifications</div>' + (all.length ? all.map(line).join('') : '<div class="osx-bell-empty">Nothing yet — reminders you set and reactions to your posts show up here. 🔔</div>') +
+      '<button class="osx-bell-settings" type="button" data-notifprefs>⚙ Notification settings</button>';
+    var prefBtn = menu.querySelector('[data-notifprefs]');
+    if (prefBtn) prefBtn.addEventListener('click', function () { menu.hidden = true; if (window.P2PNotifyPrefs) window.P2PNotifyPrefs.open(); });
     menu.querySelectorAll('[data-openpost]').forEach(function (it) {
       it.addEventListener('click', function () {
         var pid = it.getAttribute('data-openpost'); menu.hidden = true;
@@ -1161,6 +1176,12 @@
         var pr = it.getAttribute('data-openitem').split('|'); menu.hidden = true;
         if (window.P2P_PLANNER_OPEN) { if (window.P2P_OSX_GO) window.P2P_OSX_GO('success'); setTimeout(function () { window.P2P_PLANNER_OPEN(pr[0], pr[1]); }, 90); }
         else { window.location.href = '/pages/p2p-os?v=success&open=' + encodeURIComponent(pr[0] + '|' + pr[1]); }
+      });
+    });
+    menu.querySelectorAll('[data-opendm]').forEach(function (it) {
+      it.addEventListener('click', function () {
+        var pr = it.getAttribute('data-opendm').split('|'); menu.hidden = true;
+        if (window.P2PDM) window.P2PDM.open(pr[0], pr.slice(1).join('|'), '');
       });
     });
   }

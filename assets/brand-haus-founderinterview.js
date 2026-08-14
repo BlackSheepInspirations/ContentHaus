@@ -145,7 +145,7 @@
     });
     var audience = (state.audienceDescription || "").trim() || "the people we serve";
     var founderOutput = engine.assembleFounderOutput(scored.founderDNAScores, audience, state.problemStatement || "this problem");
-    var customerImpression = engine.topCustomerImpression(scored.customerImpressionScores);
+    var customerImpression = engine.topCustomerImpression(scored.customerImpressionScores, scored.tensionFingerprint);
     var results = {
       tensionFingerprint: scored.tensionFingerprint,
       founderDNAScores: scored.founderDNAScores,

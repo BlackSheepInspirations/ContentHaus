@@ -325,8 +325,14 @@
     var scores = results.founderDNAScores || {};
     var maxScore = Math.max.apply(null, BrandHaus.brandDNA.FOUNDER_DNA_KEYS.map(function (k) { return scores[k] || 0; }).concat([0]));
     var clusterBlocks = BrandHaus.brandDNA.FOUNDER_DNA_CLUSTERS.map(function (cluster) {
+      // Soft display floor: a bald 0% reads as "you have none of this," which
+      // is discouraging and rarely literally true. Floor the shown number (not
+      // the underlying ranking) so a genuinely low dimension reads as "a quiet
+      // part of your DNA." 10 sits below real low scores (an 11% stays 11%), so
+      // it only lifts the near-zeros.
       var pcts = cluster.keys.map(function (key) {
-        return maxScore > 0 ? Math.round((100 * (scores[key] || 0)) / maxScore) : 0;
+        if (maxScore <= 0) return 0;
+        return Math.max(10, Math.round((100 * (scores[key] || 0)) / maxScore));
       });
       var bars = cluster.keys.map(function (key, i) {
         return renderDNABar(ui, founderDNALabel(key), pcts[i]);

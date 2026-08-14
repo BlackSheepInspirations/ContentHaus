@@ -22,7 +22,7 @@
   var bigAv = mb.querySelector('[data-mb-bigav]');
   var locEl = mb.querySelector('[data-mb-loc]'), locMenu = mb.querySelector('[data-mb-locmenu]'), locNote = mb.querySelector('[data-mb-locnote]');
   var myLoc = null;   // { label, lat, lng } custom city pin, or null = use the auto edge-geo
-  var members = [], myProfile = null, searchVal = '', sortVal = 'points', myFollowing = [], myFollowers = [], myBlocked = [];
+  var members = [], myProfile = null, searchVal = '', sortVal = 'points', myFollowing = [], myFollowers = [], myBlocked = [], iCanManage = false;
 
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function initial(n) { n = String(n || '').trim(); return n ? n.charAt(0).toUpperCase() : '🐑'; }
@@ -193,6 +193,18 @@
   function openMemberModal(p) {
     if (!p) return;
     var nm = p.name || 'Member', l = loc(p), following = isFollowing(nm);
+    var adminHTML = '';
+    if (iCanManage && String(nm).trim().toLowerCase() !== myKey() && p.role !== 'owner') {
+      var cur = p.role || '';
+      adminHTML = '<div class="osx-mbm-admin"><div class="osx-mbm-admin-h">🛡️ Admin controls</div>' +
+        '<div class="osx-mbm-roles" data-mbm-roles>' +
+          '<button type="button" class="osx-mbm-role' + (cur === '' ? ' on' : '') + '" data-role="">Member</button>' +
+          '<button type="button" class="osx-mbm-role' + (cur === 'mod' ? ' on' : '') + '" data-role="mod">Mod</button>' +
+          '<button type="button" class="osx-mbm-role' + (cur === 'admin' ? ' on' : '') + '" data-role="admin">Admin</button>' +
+        '</div>' +
+        '<button type="button" class="osx-mbm-ban' + (p.banned ? ' on' : '') + '" data-mbm-ban="' + esc(p.id || '') + '">' + (p.banned ? 'Unban member' : 'Ban member') + '</button>' +
+      '</div>';
+    }
     var pop = document.createElement('div'); pop.className = 'osx-cal-pop';
     pop.innerHTML = '<div class="osx-cal-pop-in osx-mbm"><button class="osx-cal-pop-x" type="button" aria-label="Close">✕</button>' +
       '<div class="osx-mbm-top"><div class="osx-mb-av osx-mbm-av">' + avatarInner(p) + '</div>' +
@@ -203,9 +215,11 @@
       (p.about ? '<p class="osx-mb-about">' + esc(p.about) + '</p>' : '') +
       socialHTML(p.social) +
       (p.hasEmail ? '<button type="button" class="osx-mbm-email" data-mbm-email="' + esc(p.id || '') + '">✉️ Email me</button>' : '') +
+      (String(nm).trim().toLowerCase() !== myKey() ? '<button type="button" class="osx-mbm-dm" data-mbm-dm>💬 Message</button>' : '') +
       '<div class="osx-mbm-actions"><button type="button" class="osx-mb-follow big' + (following ? ' on' : '') + '" data-mbm-follow>' + (following ? '🔔 Following' : '🔕 Follow') + '</button>' +
       '<button type="button" class="osx-mbm-posts" data-mbm-posts>See their posts →</button></div>' +
       (String(nm).trim().toLowerCase() !== myKey() ? '<button type="button" class="osx-mbm-block" data-mbm-block="' + esc(p.id || '') + '">' + (isBlocked(nm) ? 'Unblock' : 'Block') + '</button>' : '') +
+      adminHTML +
       '</div>';
     root.appendChild(pop);
     function close() { pop.remove(); }
@@ -222,6 +236,19 @@
         .catch(function () { eb.disabled = false; eb.textContent = '✉️ Email me'; });
     });
     var pv = pop.querySelector('[data-mbm-posts]'); if (pv) pv.addEventListener('click', function () { close(); if (window.P2P_OSX_GO) window.P2P_OSX_GO('community'); if (window.P2P_COMMUNITY_SEARCH) setTimeout(function () { window.P2P_COMMUNITY_SEARCH(nm); }, 60); });
+    var dmb = pop.querySelector('[data-mbm-dm]'); if (dmb) dmb.addEventListener('click', function () { close(); if (window.P2PDM) window.P2PDM.open(p.id, nm, p.photo || ''); });
+    var avEl = pop.querySelector('.osx-mbm-av'), avImg = avEl && avEl.querySelector('img');
+    if (avImg) {
+      avEl.style.cursor = 'zoom-in';
+      avEl.addEventListener('click', function () {
+        var lb = document.createElement('div'); lb.className = 'osx-imglb';
+        lb.innerHTML = '<img src="' + esc(avImg.getAttribute('src')) + '" alt="' + esc(nm) + '">';
+        root.appendChild(lb);
+        var onKey = function (e) { if (e.key === 'Escape') { lb.remove(); document.removeEventListener('keydown', onKey); } };
+        lb.addEventListener('click', function () { lb.remove(); document.removeEventListener('keydown', onKey); });
+        document.addEventListener('keydown', onKey);
+      });
+    }
     var blk = pop.querySelector('[data-mbm-block]');
     if (blk) blk.addEventListener('click', function () {
       var already = isBlocked(nm);
@@ -231,6 +258,30 @@
       renderCircle();
       if (on) { close(); loadMembers(); if (window.P2P_COMMUNITY_RERENDER) window.P2P_COMMUNITY_RERENDER(); }
       else { blk.textContent = 'Block'; }
+    });
+    var roleWrap = pop.querySelector('[data-mbm-roles]');
+    if (roleWrap) roleWrap.querySelectorAll('[data-role]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        if (btn.classList.contains('on')) return;
+        var newRole = btn.getAttribute('data-role');
+        roleWrap.querySelectorAll('[data-role]').forEach(function (b) { b.classList.remove('on'); });
+        btn.classList.add('on');
+        fetch('/apps/p2p/setrole', { method: 'POST', headers: { 'content-type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify({ target: p.id, role: newRole }) })
+          .then(function (r) { return r.json(); }).then(function (j) { if (j && j.ok) { p.role = j.role || ''; } else { alert('Couldn\'t update role — you may not have permission for that.'); } })
+          .catch(function () { alert('Couldn\'t update role.'); });
+      });
+    });
+    var banb = pop.querySelector('[data-mbm-ban]');
+    if (banb) banb.addEventListener('click', function () {
+      var turnOn = !p.banned;
+      if (turnOn && !window.confirm('Ban ' + nm + '? They won\'t be able to post or comment until you unban them.')) return;
+      banb.disabled = true;
+      fetch('/apps/p2p/ban', { method: 'POST', headers: { 'content-type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify({ target: p.id, on: turnOn }) })
+        .then(function (r) { return r.json(); }).then(function (j) {
+          banb.disabled = false;
+          if (j && j.ok) { p.banned = j.banned; banb.classList.toggle('on', j.banned); banb.textContent = j.banned ? 'Unban member' : 'Ban member'; }
+          else { alert('Couldn\'t update — you may not have permission for that.'); }
+        }).catch(function () { banb.disabled = false; alert('Couldn\'t update.'); });
     });
   }
   function renderAvatars(sel) {
@@ -499,7 +550,7 @@
       // merge the server's follow list so favorites persist across devices
       if (j && j.following && j.following.length) { try { var loc2 = follows(), merged = loc2.slice(); j.following.forEach(function (n) { if (merged.indexOf(n) < 0) merged.push(n); }); localStorage.setItem('p2p_follows', JSON.stringify(merged)); } catch (e) {} }
       if (j && j.following) myFollowing = j.following;
-      members = (j && j.members) || []; renderDirectory(); renderCircle();
+      members = (j && j.members) || []; iCanManage = !!(j && j.canManageMembers); renderDirectory(); renderCircle();
       if (window.L) refreshAllMaps();   // re-pin any live maps (community modal + member board)
     }).catch(function () { if (grid) grid.innerHTML = '<div class="osx-cw-empty">Couldn\'t load members.</div>'; });
   }

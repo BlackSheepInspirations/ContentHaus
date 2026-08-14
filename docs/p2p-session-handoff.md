@@ -1,8 +1,66 @@
-# Purpose 2 Profit — Session Handoff (2026-08-01)
+# Purpose 2 Profit — Session Handoff
 
 Read this first in a fresh conversation, alongside the auto-loaded memory
 (`memory/MEMORY.md` + files), `docs/p2p-os-build-plan.md`, and
-`docs/p2p-launch-checklist.md`. Everything below is committed + live.
+`docs/p2p-launch-checklist.md`. The dated blocks below are newest-first.
+
+---
+
+## CURRENT STATE (2026-08-13) — read this block first
+
+**Everything through this date is committed to git** (single batch commit on `main`)
+and pushed to the **live theme 186593542462** + mirrored to `BSC-BSI-Store-theme`.
+The Worker is deployed. Only the Klaviyo-side flow build is still in Andrea's hands.
+
+**Shipped + live since the 2026-08-01 block below:**
+- **Admin roles & console** — Owner/Admin/Mod via Shopify tags (`p2p-owner/admin/mod`);
+  role badges, member management (appoint/ban), moderator report queue (`p2p-reports.js`).
+  Owner list also via Cloudflare `admin_ids` var. (Andrea has TWO customer ids:
+  storefront **9615760458046**, tagged/looked-up **9707645993278** — both in `admin_ids`.)
+- **Member-to-member DMs** — open policy; inbox/thread/emoji/bell (`p2p-dm.js` +
+  Worker dm-send/thread/inbox). Avatar click → lightbox.
+- **House-voice comments** — 1–3 per post (never 4), 5 tone buckets (`classifyTone`)
+  so it won't celebrate on a heavy post; banks ~100/voice. House-voice engagement is
+  bell-only (never emails/texts).
+- **P2P emblem avatar** for the "P2P" welcome bot (`assets/p2p-emblem.png`).
+- **Brand DNA / Founder's assessment fix** — corrected archetype scoring bias (dead
+  `freedomPurpose` axis + one-sided axes) so different businesses stop collapsing onto
+  3 archetypes; differentiated Trusted Guide vs Community Builder; rebalanced founder-DNA
+  coverage; fingerprint-informed customer-impression tie-break; **display floor of 10%**
+  on Founder-DNA cluster bars (no bald 0%s). Reformatted scenario-questions (scenario
+  bold, question italic). See [[brand-dna-assessment-scoring]]. NOTE: past takers' saved
+  `p2p_archetype` is the OLD skewed result — they should retake.
+- **Founding Beta application** (`sections/founding-gate.liquid` +
+  `templates/page.founding-gate.json`) — describer + button + 6-Q modal.
+- **P2P OS preview page** inline email capture (tagged p2p-waitlist).
+- **Notification preferences** — the last big community feature. Members pick which
+  events also reach them by **email/text** (bell always shows all). Worker fans events
+  to **Klaviyo** (metrics "P2P Alert Email" / "P2P Alert Text"). Email defaults on for
+  high-signal; text opt-in, only DM+reminder eligible. Full detail: [[notification-prefs]].
+
+**IN PROGRESS — Andrea's Klaviyo side of notification prefs (only remaining piece):**
+- ✅ Worker deployed. ✅ `klaviyo_key` secret added in Cloudflare (private key, Events +
+  Profiles Full Access).
+- ⏳ **Build 2 Klaviyo flows** triggered by metrics **P2P Alert Email** (→ one Email) and
+  **P2P Alert Text** (→ one SMS), rendering `{{ event.title }}` / `{{ event.body }}` /
+  button `{{ event.url }}`. Metrics only appear in the dropdown AFTER the first event
+  fires — trigger one via a test DM with email-alerts on. Paste-ready copy was provided;
+  an optional designed-HTML email for Flow A was offered (not yet built).
+
+**Phase 2 discussed, NOT built:** Web Push (browser lock-screen pop-ups, no app) + make
+the OS an installable PWA (required to unlock iPhone web push, which needs Add-to-Home-
+Screen). Ship when Andrea wants the true phone-notification version.
+
+**Still waiting on Andrea (content / admin, unchanged):** 3 Bunny video IDs for *Your
+Social Porch*; Open Water bonuses (raft + 2 buoys, reserved keys owraft/owbuoyw/owbuoye);
+paste the 4 store policies; Klaviyo popup + 7-day discount expiry; footer Privacy link +
+SMS block; assign `/your-social-front-porch` page template.
+
+---
+
+## Session Handoff (2026-08-01)
+
+Everything below is committed + live.
 
 ## Community build — approved plan (2026-08-01, mockup v3 approved)
 Mockup: scratchpad/community-mockup.html (dark-opal). Header **"P2P Community"** +

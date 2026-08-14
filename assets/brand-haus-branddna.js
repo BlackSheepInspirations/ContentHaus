@@ -304,42 +304,42 @@
   // ---------------------------------------------------------------------
   var QUESTIONS = [
     { id: 1, options: {
-      A: { tensions: { accessibilityLuxury: 2, structureExpression: -2 }, expression: { mood: "minimalist and clean", colorFamily: "neutral/monochrome" } },
-      B: { tensions: { warmthAuthority: -2, traditionInnovation: -2 }, expression: { mood: "warm and cozy", colorFamily: "warm earthy neutrals" } },
-      C: { tensions: { playfulnessSophistication: -2, calmEnergy: 2 }, expression: { mood: "playful and fun", colorFamily: "bright, punchy" } },
-      D: { tensions: { warmthAuthority: 2, structureExpression: -2 }, expression: { mood: "minimalist and clean", colorFamily: "black/white + bold accent" } },
+      A: { tensions: { accessibilityLuxury: 2, structureExpression: -2, playfulnessSophistication: 3, calmEnergy: -1 }, expression: { mood: "minimalist and clean", colorFamily: "neutral/monochrome" } },
+      B: { tensions: { warmthAuthority: -2, traditionInnovation: -2, accessibilityLuxury: -4 }, expression: { mood: "warm and cozy", colorFamily: "warm earthy neutrals" } },
+      C: { tensions: { playfulnessSophistication: -2, calmEnergy: 2, structureExpression: 2 }, expression: { mood: "playful and fun", colorFamily: "bright, punchy" } },
+      D: { tensions: { warmthAuthority: 2, structureExpression: -2, playfulnessSophistication: 2, calmEnergy: -1 }, expression: { mood: "minimalist and clean", colorFamily: "black/white + bold accent" } },
     } },
     { id: 2, options: {
-      A: { founderDNA: { purpose: 3, service: 2 }, tensions: { communityRecognition: -2 } },
-      B: { founderDNA: { creativity: 3, legacy: 1 }, tensions: { traditionInnovation: 2 } },
-      C: { founderDNA: { belonging: 3, service: 1 }, tensions: { communityRecognition: -3 } },
-      D: { founderDNA: { excellence: 3, stewardship: 1 }, tensions: { accessibilityLuxury: 2 } },
-      E: { founderDNA: { impact: 3, purpose: 2 } },
+      A: { tensions: { communityRecognition: -2, freedomPurpose: 2.5 }, founderDNA: { purpose: 3, service: 2 } },
+      B: { tensions: { traditionInnovation: 2, freedomPurpose: -2, structureExpression: 1 }, founderDNA: { creativity: 3, legacy: 1, growth: 1 } },
+      C: { tensions: { communityRecognition: -3, warmthAuthority: -1 }, founderDNA: { belonging: 3, service: 1 } },
+      D: { tensions: { accessibilityLuxury: 2, warmthAuthority: 1, communityRecognition: 1 }, founderDNA: { excellence: 3, stewardship: 1, recognition: 1 } },
+      E: { tensions: { freedomPurpose: 2.5 }, founderDNA: { impact: 3, purpose: 2 } },
     } },
     { id: 3, options: {
-      A: { expression: { colorFamily: "jewel tones", mood: "elegant and luxurious" }, tensions: { accessibilityLuxury: 2 } },
-      B: { expression: { colorFamily: "warm earthy neutrals", mood: "warm and cozy" }, tensions: { traditionInnovation: -1 } },
-      C: { expression: { colorFamily: "bright, punchy", mood: "playful and fun" }, tensions: { playfulnessSophistication: -2 } },
-      D: { expression: { colorFamily: "black/white + bold accent", mood: "bold and vibrant" }, tensions: { warmthAuthority: 1 } },
+      A: { tensions: { accessibilityLuxury: 2, playfulnessSophistication: 3, calmEnergy: -1 }, expression: { colorFamily: "jewel tones", mood: "elegant and luxurious" } },
+      B: { tensions: { traditionInnovation: -1, accessibilityLuxury: -4 }, expression: { colorFamily: "warm earthy neutrals", mood: "warm and cozy" } },
+      C: { tensions: { playfulnessSophistication: -2, structureExpression: 2 }, expression: { colorFamily: "bright, punchy", mood: "playful and fun" } },
+      D: { tensions: { warmthAuthority: 1, structureExpression: 1 }, expression: { colorFamily: "black/white + bold accent", mood: "bold and vibrant" } },
     } },
     { id: 4, options: {
-      A: { founderDNA: { purpose: 3 } },
-      B: { founderDNA: { purpose: 1, security: 1 } },
-      C: { founderDNA: { creativity: 3, freedom: 2 } },
-      D: { founderDNA: { freedom: 3 } },
+      A: { tensions: { freedomPurpose: 2.5 }, founderDNA: { purpose: 3 } },
+      B: { tensions: { freedomPurpose: 1.3 }, founderDNA: { purpose: 1, security: 1 } },
+      C: { tensions: { freedomPurpose: -2.5, structureExpression: 1 }, founderDNA: { creativity: 3, freedom: 2, growth: 2 } },
+      D: { tensions: { freedomPurpose: -2.5 }, founderDNA: { freedom: 3, growth: 1 } },
     } },
     { id: 5, options: {
-      A: { expression: { photography: "bright, candid, energetic" }, tensions: { calmEnergy: 2, playfulnessSophistication: -1 } },
-      B: { expression: { photography: "soft, warm natural light" }, tensions: { warmthAuthority: -2 } },
-      C: { expression: { photography: "moody, high-contrast, dramatic" }, tensions: { warmthAuthority: 2, accessibilityLuxury: 1 } },
-      D: { expression: { photography: "clean, symmetrical, minimal" }, tensions: { structureExpression: -2, accessibilityLuxury: 1 } },
+      A: { tensions: { calmEnergy: 2, playfulnessSophistication: -1 }, expression: { photography: "bright, candid, energetic" } },
+      B: { tensions: { warmthAuthority: -2, accessibilityLuxury: -1 }, expression: { photography: "soft, warm natural light" } },
+      C: { tensions: { warmthAuthority: 2, accessibilityLuxury: 1 }, expression: { photography: "moody, high-contrast, dramatic" } },
+      D: { tensions: { structureExpression: -2, accessibilityLuxury: 1, playfulnessSophistication: 1 }, expression: { photography: "clean, symmetrical, minimal" } },
     } },
     { id: 6, options: {
-      A: { founderDNA: { purpose: 3, impact: 2 }, tensions: { communityRecognition: -1 } },
-      B: { founderDNA: { excellence: 2, recognition: 2 }, tensions: { communityRecognition: 2 } },
-      C: { founderDNA: { security: 2, service: 1 }, tensions: { warmthAuthority: -2 } },
-      D: { founderDNA: { excellence: 2 }, tensions: { accessibilityLuxury: 2 } },
-      E: { founderDNA: { service: 3, belonging: 1 }, tensions: { warmthAuthority: -2, communityRecognition: -1 } },
+      A: { tensions: { communityRecognition: -1, freedomPurpose: 2.5 }, founderDNA: { purpose: 3, impact: 2 } },
+      B: { tensions: { communityRecognition: 5, warmthAuthority: 1 }, founderDNA: { excellence: 2, recognition: 3 } },
+      C: { tensions: { warmthAuthority: -2 }, founderDNA: { security: 2, service: 1, stewardship: 1 } },
+      D: { tensions: { accessibilityLuxury: 2, warmthAuthority: 1, communityRecognition: 1 }, founderDNA: { excellence: 2, recognition: 1 } },
+      E: { tensions: { warmthAuthority: -3, communityRecognition: -1 }, founderDNA: { service: 3, belonging: 1 } },
     } },
     { id: 7, options: {
       A: { tensions: { calmEnergy: -3, traditionInnovation: -1 } },
@@ -348,50 +348,50 @@
       D: { tensions: { playfulnessSophistication: -2, calmEnergy: 1 } },
     } },
     { id: 8, options: {
-      A: { founderDNA: { legacy: 3 } },
-      B: { founderDNA: { service: 2, belonging: 2 }, tensions: { warmthAuthority: -1 } },
-      C: { founderDNA: { growth: 3, purpose: 1 } },
-      D: { founderDNA: { recognition: 2, creativity: 1 }, tensions: { traditionInnovation: 2 } },
-      E: { founderDNA: { purpose: 2, security: 1 } },
+      A: { founderDNA: { legacy: 3, stewardship: 1 } },
+      B: { tensions: { warmthAuthority: -2 }, founderDNA: { service: 2, belonging: 2 } },
+      C: { tensions: { freedomPurpose: -1.3 }, founderDNA: { growth: 3, purpose: 1 } },
+      D: { tensions: { traditionInnovation: 2, warmthAuthority: 1, communityRecognition: 2 }, founderDNA: { recognition: 2, creativity: 1 } },
+      E: { tensions: { freedomPurpose: 2 }, founderDNA: { purpose: 2, security: 1 } },
     } },
     { id: 9, options: {
-      A: { expression: { voice: "warm and approachable" }, tensions: { warmthAuthority: -2 } },
-      B: { expression: { voice: "authoritative and expert" }, tensions: { warmthAuthority: 2 } },
-      C: { expression: { voice: "playful and quirky" }, tensions: { playfulnessSophistication: -2 } },
-      D: { expression: { voice: "sophisticated and refined" }, tensions: { accessibilityLuxury: 2, playfulnessSophistication: 2 } },
+      A: { tensions: { warmthAuthority: -2, accessibilityLuxury: -2 }, expression: { voice: "warm and approachable" } },
+      B: { tensions: { warmthAuthority: 2 }, founderDNA: { recognition: 1 }, expression: { voice: "authoritative and expert" } },
+      C: { tensions: { playfulnessSophistication: -2, structureExpression: 1 }, expression: { voice: "playful and quirky" } },
+      D: { tensions: { accessibilityLuxury: 2, playfulnessSophistication: 2 }, expression: { voice: "sophisticated and refined" } },
     } },
     { id: 10, options: {
-      A: { founderDNA: { purpose: 2, service: 2 }, tensions: { warmthAuthority: -1 } },
-      B: { founderDNA: { impact: 2, service: 1 } },
-      C: { founderDNA: { creativity: 2, legacy: 1 }, tensions: { traditionInnovation: 2 } },
-      D: { founderDNA: { legacy: 3 } },
-      E: { founderDNA: { purpose: 1, security: 1 }, tensions: { traditionInnovation: -1 } },
+      A: { tensions: { warmthAuthority: -1, freedomPurpose: 2 }, founderDNA: { purpose: 2, service: 2 } },
+      B: { tensions: { freedomPurpose: 1.3 }, founderDNA: { impact: 2, service: 1 } },
+      C: { tensions: { traditionInnovation: 2, freedomPurpose: -1.3, structureExpression: 1 }, founderDNA: { creativity: 2, legacy: 1, growth: 1 } },
+      D: { founderDNA: { legacy: 3, stewardship: 1 } },
+      E: { tensions: { traditionInnovation: -1, freedomPurpose: 1.3 }, founderDNA: { purpose: 1, security: 1 } },
     } },
     { id: 11, options: {
       A: { tensions: { traditionInnovation: -3 }, founderDNA: { stewardship: 1 } },
-      B: { tensions: { traditionInnovation: 3 }, founderDNA: { creativity: 2 } },
+      B: { tensions: { traditionInnovation: 3, freedomPurpose: -1.3, structureExpression: 1 }, founderDNA: { creativity: 2, growth: 1 } },
       C: { tensions: { structureExpression: -2, traditionInnovation: -1 } },
       D: { tensions: { playfulnessSophistication: -1, structureExpression: 2 } },
     } },
     { id: 12, options: {
-      A: { founderDNA: { belonging: 2, service: 1 }, tensions: { warmthAuthority: -2 } },
-      B: { founderDNA: { creativity: 2, impact: 1 }, tensions: { traditionInnovation: 2 } },
-      C: { founderDNA: { excellence: 2 }, tensions: { accessibilityLuxury: 2 } },
-      D: { founderDNA: { service: 2, belonging: 1 }, tensions: { communityRecognition: -1 } },
-      E: { founderDNA: { creativity: 1, growth: 1 }, tensions: { calmEnergy: 2 } },
+      A: { tensions: { warmthAuthority: -3 }, founderDNA: { belonging: 2, service: 1 } },
+      B: { tensions: { traditionInnovation: 2, freedomPurpose: -1.3, structureExpression: 1 }, founderDNA: { creativity: 2, impact: 1, growth: 1 } },
+      C: { tensions: { accessibilityLuxury: 2, warmthAuthority: 1, communityRecognition: 1 }, founderDNA: { excellence: 2, recognition: 1 } },
+      D: { tensions: { communityRecognition: -1, warmthAuthority: -1 }, founderDNA: { service: 2, belonging: 1 } },
+      E: { tensions: { calmEnergy: 2, freedomPurpose: -1.3 }, founderDNA: { creativity: 1, growth: 1 } },
     } },
     { id: 13, options: {
-      A: { expression: { mood: "classic" }, tensions: { traditionInnovation: -2 } },
-      B: { expression: { mood: "modern and edgy" }, tensions: { traditionInnovation: 2 } },
-      C: { expression: { mood: "warm and cozy" }, tensions: { warmthAuthority: -2 } },
-      D: { expression: { mood: "elegant and luxurious" }, tensions: { accessibilityLuxury: 2 } },
+      A: { tensions: { traditionInnovation: -2, playfulnessSophistication: 1, calmEnergy: -1 }, expression: { mood: "classic" } },
+      B: { tensions: { traditionInnovation: 2, structureExpression: 1 }, expression: { mood: "modern and edgy" } },
+      C: { tensions: { warmthAuthority: -2, accessibilityLuxury: -2 }, expression: { mood: "warm and cozy" } },
+      D: { tensions: { accessibilityLuxury: 2, playfulnessSophistication: 2, calmEnergy: -1 }, expression: { mood: "elegant and luxurious" } },
     } },
     { id: 14, options: {
-      A: { founderDNA: { freedom: 2, growth: 1 } },
-      B: { founderDNA: { recognition: 2, creativity: 1 }, tensions: { communityRecognition: 2 } },
-      C: { founderDNA: { impact: 3, purpose: 1 } },
-      D: { founderDNA: { service: 2, belonging: 1 }, tensions: { warmthAuthority: -1 } },
-      E: { founderDNA: { growth: 3 } },
+      A: { tensions: { freedomPurpose: -2.5 }, founderDNA: { freedom: 2, growth: 2 } },
+      B: { tensions: { communityRecognition: 4, warmthAuthority: 1 }, founderDNA: { recognition: 2, creativity: 1 } },
+      C: { tensions: { freedomPurpose: 2 }, founderDNA: { impact: 3, purpose: 1 } },
+      D: { tensions: { warmthAuthority: -2 }, founderDNA: { service: 2, belonging: 1 } },
+      E: { tensions: { freedomPurpose: -2 }, founderDNA: { growth: 3 } },
     } },
     { id: 15, options: {
       A: { tensions: { communityRecognition: 3 } },
@@ -400,36 +400,36 @@
       D: { tensions: { accessibilityLuxury: 1, communityRecognition: 1 } },
     } },
     { id: 16, options: {
-      A: { founderDNA: { freedom: 3 } },
-      B: { founderDNA: { service: 3, purpose: 1 } },
-      C: { founderDNA: { legacy: 2, security: 1 } },
-      D: { founderDNA: { excellence: 3, recognition: 2 } },
-      E: { founderDNA: { impact: 3, purpose: 2 } },
+      A: { tensions: { freedomPurpose: -2.5 }, founderDNA: { freedom: 3, growth: 1 } },
+      B: { tensions: { freedomPurpose: 1.3 }, founderDNA: { service: 3, purpose: 1 } },
+      C: { founderDNA: { legacy: 2, security: 1, stewardship: 1 } },
+      D: { tensions: { warmthAuthority: 1, communityRecognition: 3 }, founderDNA: { excellence: 3, recognition: 3 } },
+      E: { tensions: { freedomPurpose: 2.5 }, founderDNA: { impact: 3, purpose: 2 } },
     } },
     { id: 17, options: {
-      A: { expression: { mood: "warm and cozy" }, tensions: { calmEnergy: -2, traditionInnovation: -1 } },
-      B: { expression: { mood: "playful and fun" }, tensions: { calmEnergy: 2, playfulnessSophistication: -2 } },
-      C: { expression: { mood: "bold and vibrant" }, tensions: { accessibilityLuxury: 2, warmthAuthority: 1 } },
-      D: { expression: { mood: "elegant and luxurious" }, tensions: { accessibilityLuxury: 2, traditionInnovation: -1 } },
+      A: { tensions: { calmEnergy: -2, traditionInnovation: -1, accessibilityLuxury: -2 }, expression: { mood: "warm and cozy" } },
+      B: { tensions: { calmEnergy: 2, playfulnessSophistication: -2, structureExpression: 1 }, expression: { mood: "playful and fun" } },
+      C: { tensions: { accessibilityLuxury: 2, warmthAuthority: 1, structureExpression: 1 }, expression: { mood: "bold and vibrant" } },
+      D: { tensions: { accessibilityLuxury: 2, traditionInnovation: -1, playfulnessSophistication: 2, calmEnergy: -1 }, expression: { mood: "elegant and luxurious" } },
     } },
     { id: 18, options: {
-      A: { founderDNA: { purpose: 3 }, tensions: { traditionInnovation: -1 } },
-      B: { founderDNA: { creativity: 2, freedom: 1 } },
-      C: { founderDNA: { impact: 2, security: 1 } },
-      D: { founderDNA: { security: 2 } },
-      E: { founderDNA: { purpose: 2, growth: 1 } },
+      A: { tensions: { traditionInnovation: -1, freedomPurpose: 2.5 }, founderDNA: { purpose: 3 } },
+      B: { tensions: { freedomPurpose: -2, structureExpression: 1 }, founderDNA: { creativity: 2, freedom: 1, growth: 1 } },
+      C: { tensions: { freedomPurpose: 1.3 }, founderDNA: { impact: 2, security: 1 } },
+      D: { founderDNA: { security: 2, stewardship: 1 } },
+      E: { tensions: { freedomPurpose: 1.3 }, founderDNA: { purpose: 2, growth: 1 } },
     } },
     { id: 19, options: {
       A: { tensions: { calmEnergy: -2, structureExpression: -1 } },
       B: { tensions: { calmEnergy: 3 } },
       C: { tensions: { structureExpression: -2 } },
-      D: { tensions: { warmthAuthority: -2 }, founderDNA: { belonging: 1 } },
+      D: { tensions: { warmthAuthority: -3 }, founderDNA: { belonging: 1 } },
     } },
     { id: 20, options: {
-      A: { tensions: { traditionInnovation: -2 }, founderDNA: { legacy: 2 } },
-      B: { tensions: { warmthAuthority: -2, communityRecognition: -1 }, founderDNA: { belonging: 2 } },
-      C: { tensions: { communityRecognition: 2, warmthAuthority: 1 }, founderDNA: { legacy: 2, recognition: 1 } },
-      D: { tensions: { accessibilityLuxury: 3 }, founderDNA: { excellence: 1 } },
+      A: { tensions: { traditionInnovation: -2 }, founderDNA: { legacy: 2, stewardship: 1 } },
+      B: { tensions: { warmthAuthority: -3, communityRecognition: -1 }, founderDNA: { belonging: 2 } },
+      C: { tensions: { communityRecognition: 3, warmthAuthority: 2 }, founderDNA: { legacy: 2, recognition: 1, stewardship: 1 } },
+      D: { tensions: { accessibilityLuxury: 3, warmthAuthority: 1, communityRecognition: 1 }, founderDNA: { excellence: 1 } },
     } },
     { id: 21, options: {
       A: { customerImpression: { selfImage: "capable" } },
@@ -494,16 +494,12 @@
       D: { customerImpression: { differentiation: "story" } },
       E: { customerImpression: { differentiation: "community" } },
     } },
-    // Q30 — the signature closing question (was Q21). Content and
-    // weights unchanged; only its position moved, since this must stay
-    // the last thing a founder answers, per docs/brand-dna-assessment-
-    // questions.md's explicit "intentionally untouchable" note.
     { id: 30, options: {
-      A: { founderDNA: { impact: 3, service: 2 }, tensions: { communityRecognition: -1 } },
-      B: { founderDNA: { freedom: 2, creativity: 2 }, tensions: { traditionInnovation: 2 } },
-      C: { founderDNA: { belonging: 3, service: 1 }, tensions: { communityRecognition: -3 } },
-      D: { founderDNA: { excellence: 3, stewardship: 2 }, tensions: { accessibilityLuxury: 1 } },
-      E: { founderDNA: { purpose: 2, legacy: 2, security: 1 }, tensions: { traditionInnovation: -1 } },
+      A: { tensions: { communityRecognition: -1, freedomPurpose: 1.3 }, founderDNA: { impact: 3, service: 2 } },
+      B: { tensions: { traditionInnovation: 2, freedomPurpose: -2.5, structureExpression: 1 }, founderDNA: { freedom: 2, creativity: 2, growth: 2 } },
+      C: { tensions: { communityRecognition: -3, warmthAuthority: -1 }, founderDNA: { belonging: 3, service: 1 } },
+      D: { tensions: { accessibilityLuxury: 1, freedomPurpose: 1.3, warmthAuthority: 1, communityRecognition: 1 }, founderDNA: { excellence: 3, stewardship: 2, recognition: 1 } },
+      E: { tensions: { traditionInnovation: -1, freedomPurpose: 2 }, founderDNA: { purpose: 2, legacy: 2, security: 1, stewardship: 1 } },
     } },
   ];
 
@@ -612,7 +608,7 @@
   // Unspecified axes are 0 (neutral).
   // ---------------------------------------------------------------------
   var PROFILES = [
-    { name: "The Trusted Guide", vector: { warmthAuthority: -2.5, freedomPurpose: 2.5, traditionInnovation: 0, communityRecognition: -2.5, structureExpression: 0, calmEnergy: -1.5, accessibilityLuxury: -2.5, playfulnessSophistication: 0 },
+    { name: "The Trusted Guide", vector: { warmthAuthority: -1, freedomPurpose: 2.5, traditionInnovation: 0, communityRecognition: -1, structureExpression: -1.5, calmEnergy: -2.5, accessibilityLuxury: -2, playfulnessSophistication: 1 },
       output: { mood: "warm and cozy", voice: "warm and approachable", colors: { primary: "#8B5E3C", secondary: "#6B8E7F", neutral: "#F5F0E6", accent: "#C97C5D", support: "#4A5D45", standOut: "#1B6E7A" }, headingFont: "Lora", bodyFont: "Georgia", values: ["Trust", "Service", "Integrity", "Community"], influenceBlurb: "Brings wisdom, warmth, and people-first energy.",
         northStar: "To be the steady hand people return to, again and again.",
         promise: "We help you feel supported, not sold to.",
@@ -692,7 +688,7 @@
         nextSteps: ["You should decide what stays even when you're editing down — that's your real brand voice.", "You can add one unexpected warm detail so minimal doesn't read as impersonal.", "You'll want to explain your \"why\" since a clean look alone won't tell your whole story."],
         bestFor: ["Architecture & Interior Design", "Tech Products & Apps", "Modern Retail & DTC Goods", "Editorial & Publishing"],
         strengthTags: ["Intentional", "Built to Last", "Unpretentious"] } },
-    { name: "The Community Builder", vector: { warmthAuthority: -2.5, freedomPurpose: 2.5, traditionInnovation: 0, communityRecognition: -2.5, structureExpression: 0, calmEnergy: 0, accessibilityLuxury: -2.5, playfulnessSophistication: 0 },
+    { name: "The Community Builder", vector: { warmthAuthority: -2.5, freedomPurpose: 2, traditionInnovation: 0.5, communityRecognition: -2.5, structureExpression: 2, calmEnergy: 2.5, accessibilityLuxury: -2, playfulnessSophistication: -1.5 },
       output: { mood: "warm and cozy", voice: "warm and approachable", colors: { primary: "#C97C5D", secondary: "#8B5E3C", neutral: "#F5F0E6", accent: "#6B8E7F", support: "#4A5D45", standOut: "#E8A33D" }, headingFont: "Lora", bodyFont: "Open Sans", values: ["Belonging", "Purpose", "Generosity"], influenceBlurb: "Adds generosity, connection, and a sense of togetherness.",
         northStar: "To make sure no one builds this alone.",
         promise: "We help you find your people.",
@@ -840,13 +836,47 @@
   // category set rather than an open magnitude, so this just returns
   // the winner (with a tie broken by key order) for each of the 4
   // dimensions, not a ranked top-N.
-  function topCustomerImpression(customerImpressionScores) {
+  // Each customer-impression label leans a direction in tension space. When a
+  // founder's answers tie for a dimension (common — 2-3 Qs each), the tie is
+  // broken toward the label that best fits their OWN brand character (tension
+  // fingerprint) instead of arbitrary list order, so the result is answer-driven.
+  var CI_LEAN = {
+    mentor: { warmthAuthority: 0.5, communityRecognition: -1, calmEnergy: -1 },
+    companion: { warmthAuthority: -1.5, communityRecognition: -1, accessibilityLuxury: -1 },
+    authority: { warmthAuthority: 1.5, communityRecognition: 1, calmEnergy: -0.5 },
+    indulgence: { accessibilityLuxury: 2, warmthAuthority: -0.5 },
+    utility: { structureExpression: -1, accessibilityLuxury: -0.5, calmEnergy: -0.5 },
+    capable: { warmthAuthority: 0.5, calmEnergy: 0.5, structureExpression: -0.5 },
+    understood: { warmthAuthority: -1.5, accessibilityLuxury: -0.5, communityRecognition: -0.5 },
+    bold: { calmEnergy: 1, structureExpression: 1, traditionInnovation: 1 },
+    refined: { accessibilityLuxury: 1.5, playfulnessSophistication: 1 },
+    grounded: { calmEnergy: -1.5, freedomPurpose: -0.5, accessibilityLuxury: -0.5 },
+    insider: { accessibilityLuxury: 1, communityRecognition: 0.5, playfulnessSophistication: 0.5 },
+    accomplished: { communityRecognition: 1, warmthAuthority: 1 },
+    tasteful: { accessibilityLuxury: 1.5, playfulnessSophistication: 1 },
+    connected: { communityRecognition: -1.5, warmthAuthority: -1 },
+    people: { warmthAuthority: -1, communityRecognition: -0.5 },
+    story: { traditionInnovation: -1, communityRecognition: -0.5 },
+    pointOfView: { traditionInnovation: 1, structureExpression: 1, calmEnergy: 0.5 },
+    standard: { accessibilityLuxury: 1, playfulnessSophistication: 0.5 },
+    community: { communityRecognition: -1.5 },
+  };
+  function topCustomerImpression(customerImpressionScores, tensionFingerprint) {
+    var fp = tensionFingerprint || {};
     var result = {};
     Object.keys(CUSTOMER_IMPRESSION_DIMENSIONS).forEach(function (dim) {
       var scores = customerImpressionScores[dim] || {};
-      var best = CUSTOMER_IMPRESSION_DIMENSIONS[dim].reduce(function (top, label) {
-        return !top || scores[label] > scores[top] ? label : top;
-      }, null);
+      var labels = CUSTOMER_IMPRESSION_DIMENSIONS[dim];
+      var maxScore = -Infinity;
+      labels.forEach(function (l) { var v = scores[l] || 0; if (v > maxScore) maxScore = v; });
+      var tied = labels.filter(function (l) { return (scores[l] || 0) === maxScore; });
+      if (tied.length === 1) { result[dim] = tied[0]; return; }   // decisive answer — keep it
+      var best = tied[0], bestAlign = -Infinity;
+      tied.forEach(function (l) {
+        var lean = CI_LEAN[l] || {}, a = 0;
+        Object.keys(lean).forEach(function (k) { a += lean[k] * (fp[k] || 0); });
+        if (a > bestAlign) { bestAlign = a; best = l; }
+      });
       result[dim] = best;
     });
     return result;

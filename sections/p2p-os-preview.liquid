@@ -101,6 +101,29 @@
     {%- endif -%}
   </section>
 
+  {%- comment -%} SOFT CONVERSION — email capture / waitlist (syncs to Klaviyo) {%- endcomment -%}
+  <section class="pmv-block pmv-optin" id="pmv-optin">
+    <div class="pmv-optin-card">
+      <div class="pmv-kick pmv-kick--center">{{ section.settings.optin_kick | default: 'Not ready yet? No rush.' }}</div>
+      <h2 class="pmv-h2">{{ section.settings.optin_heading | default: 'Get the free Founder’s Kit + first dibs' }}</h2>
+      <p class="pmv-lede pmv-optin-lede">{{ section.settings.optin_sub | default: 'Drop your name and email — we’ll send the good stuff and give you early access the moment the doors swing open.' }}</p>
+      {%- form 'customer', id: 'pmv-optin-form', class: 'pmv-optin-form' -%}
+        <input type="hidden" name="contact[tags]" value="{{ section.settings.optin_tags | default: 'p2p-waitlist, p2p-preview' }}">
+        {%- if form.posted_successfully? -%}
+          <p class="pmv-optin-success">{{ section.settings.optin_success | default: 'You’re on the list. Welcome to the flock. 🖤' }}</p>
+        {%- else -%}
+          <div class="pmv-optin-fields">
+            <input type="text" name="contact[first_name]" class="pmv-optin-input" placeholder="First name" autocomplete="given-name" aria-label="First name">
+            <input type="email" name="contact[email]" class="pmv-optin-input" placeholder="you@email.com" autocomplete="email" aria-label="Email address" required="required">
+            <button type="submit" class="pmv-btn pmv-btn--primary pmv-optin-btn">{{ section.settings.optin_btn | default: 'Send me the good stuff' }}</button>
+          </div>
+          {%- if form.errors -%}<p class="pmv-optin-err">{{ form.errors | default_errors }}</p>{%- endif -%}
+          <p class="pmv-optin-note">{{ section.settings.optin_note | default: 'No spam. Unsubscribe anytime.' }} · <a href="/policies/privacy-policy">Privacy Policy</a></p>
+        {%- endif -%}
+      {%- endform -%}
+    </div>
+  </section>
+
   {%- comment -%} FINAL CTA {%- endcomment -%}
   <section class="pmv-final">
     <div class="pmv-kick pmv-kick--center">One pass. Everything.</div>
@@ -235,6 +258,21 @@
   #p2pmini .pm-cta{display:inline-block;padding:14px 28px;border-radius:999px;font:700 15px/1 system-ui;color:#0a1410;text-decoration:none;background:linear-gradient(100deg,#f4e2a6,#c9a24a);box-shadow:0 12px 30px -12px rgba(216,180,90,.6);}
   #p2pmini .pm-restart{display:block;margin:14px auto 0;border:0;background:none;color:var(--muted);cursor:pointer;font:600 12.5px/1 system-ui;}
   #p2pmini .pm-restart:hover{color:var(--text);}
+  /* ---- inline opt-in / waitlist ---- */
+  #p2posprev .pmv-optin-card{max-width:620px;margin:0 auto;text-align:center;padding:40px 30px;border-radius:22px;border:1px solid var(--gstroke);
+    background:radial-gradient(120% 120% at 0% 0%,rgba(216,180,90,.12),rgba(9,17,24,.5));}
+  #p2posprev .pmv-optin-lede{margin-left:auto;margin-right:auto;}
+  #p2posprev .pmv-optin-fields{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;max-width:520px;margin:0 auto;}
+  #p2posprev .pmv-optin-input{flex:1 1 180px;min-width:0;padding:13px 16px;border-radius:12px;border:1px solid var(--stroke);
+    background:rgba(255,255,255,.05);color:var(--text);font:600 14px/1 system-ui;outline:none;transition:border-color .14s;}
+  #p2posprev .pmv-optin-input::placeholder{color:var(--muted);}
+  #p2posprev .pmv-optin-input:focus{border-color:var(--gold);}
+  #p2posprev .pmv-optin-btn{flex:1 1 100%;justify-content:center;cursor:pointer;border:0;margin-top:2px;}
+  #p2posprev .pmv-optin-note{margin:14px 0 0;font:400 12px/1.5 system-ui;color:var(--muted);}
+  #p2posprev .pmv-optin-note a{color:var(--gold);text-decoration:none;}
+  #p2posprev .pmv-optin-note a:hover{text-decoration:underline;}
+  #p2posprev .pmv-optin-success{margin:10px 0 0;font:700 18px/1.4 Georgia,serif;color:var(--gold);}
+  #p2posprev .pmv-optin-err{margin:12px 0 0;font:600 13px/1.4 system-ui;color:#ff9f9f;}
   @media (prefers-reduced-motion:reduce){#p2posprev .pmv-2,#p2posprev .pmv-tagline,#p2posprev .pmv-mate-av,#p2pmini .pm-name,#p2pmini .pm-prog-bar{animation:none;}}
 </style>
 
@@ -253,6 +291,14 @@
     { "type": "header", "content": "Screenshots (optional)", "info": "Leave blank to show the built-in styled fallback. Add a member dashboard shot + a Journey realms shot when you have them." },
     { "type": "image_picker", "id": "shot_dashboard", "label": "Dashboard screenshot" },
     { "type": "image_picker", "id": "shot_realms", "label": "Realms / Journey screenshot" },
+    { "type": "header", "content": "Email capture / waitlist", "info": "Inline opt-in card shown just before the final CTA. Syncs to Klaviyo via Shopify. Tags let you segment these leads." },
+    { "type": "text", "id": "optin_kick", "label": "Small kicker", "default": "Not ready yet? No rush." },
+    { "type": "text", "id": "optin_heading", "label": "Heading", "default": "Get the free Founder’s Kit + first dibs" },
+    { "type": "textarea", "id": "optin_sub", "label": "Subtext", "default": "Drop your name and email — we’ll send the good stuff and give you early access the moment the doors swing open." },
+    { "type": "text", "id": "optin_btn", "label": "Button label", "default": "Send me the good stuff" },
+    { "type": "text", "id": "optin_success", "label": "Success message", "default": "You’re on the list. Welcome to the flock. 🖤" },
+    { "type": "text", "id": "optin_tags", "label": "Tags applied to signups", "default": "p2p-waitlist, p2p-preview", "info": "Comma-separated. Used to segment these leads in Shopify/Klaviyo." },
+    { "type": "text", "id": "optin_note", "label": "Fine-print note", "default": "No spam. Unsubscribe anytime." },
     { "type": "header", "content": "Final CTA" },
     { "type": "textarea", "id": "final_sub", "label": "Final CTA subtext", "default": "Unlock the full Brand DNA assessment, every Haus, the AI Partners, the courses, the launch method, and the bonuses — the entire Purpose 2 Profit Operating System." },
     { "type": "text", "id": "member_label", "label": "Existing-member link label", "default": "Already in? Come on home" },

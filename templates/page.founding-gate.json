@@ -1,0 +1,11 @@
+{
+  "sections": {
+    "main": {
+      "type": "founding-gate",
+      "settings": {}
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

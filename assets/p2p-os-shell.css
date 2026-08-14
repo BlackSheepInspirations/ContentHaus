@@ -51,6 +51,8 @@
 #p2posrail .osx-bell-snip{font:500 11px/1.35 system-ui;color:var(--muted);margin-top:2px;}
 #p2posrail .osx-bell-time{font:600 9.5px/1 system-ui;color:var(--muted);display:block;margin-top:4px;}
 #p2posrail .osx-bell-empty{font:500 12px/1.5 system-ui;color:var(--muted);padding:10px 8px 14px;}
+#p2posrail .osx-bell-settings{display:block;width:100%;margin-top:4px;padding:10px;border:0;border-top:1px solid rgba(255,255,255,.07);background:none;color:var(--gold-bright);font:600 12px/1 system-ui;text-align:center;cursor:pointer;border-radius:0 0 10px 10px;transition:background .15s;}
+#p2posrail .osx-bell-settings:hover{background:rgba(216,180,90,.12);}
 
 /* nav */
 #p2posrail .p2posr-nav{display:flex;flex-direction:column;gap:3px;}

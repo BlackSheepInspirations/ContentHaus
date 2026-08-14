@@ -8,12 +8,23 @@
      react     POST         -> toggle a love on a post {id} -> {likes, liked}
      suggest   POST         -> private question/suggestion -> emails hello@ (+ KV log)
      moderate  POST        -> ADMIN (optional): {id, action:'delete'} — spam safety valve
+     prefs     GET/POST     -> this member's email/SMS notification opt-ins (KV pref:<id>)
+
+   Bell notifications (pushNotif) also fan out to each member's chosen off-site
+   channels via Klaviyo: a real member event (DM / comment / follow / react /
+   reminder) logs a "P2P Alert Email" and/or "P2P Alert Text" metric on their
+   Klaviyo profile (email/phone pulled from Shopify, cached ~1h). Two matching
+   Klaviyo flows own the actual copy. Email defaults on for high-signal events;
+   SMS is opt-in and only DMs + reminders are ever eligible. House-voice bot
+   engagement stays bell-only (never emails/texts).
 
    Emails (community posts, messages, suggestions, questions) go to env.alert_email
    (set it to hello@blacksheepcreations.com) via Resend (env.resend_key).
 
    Every request is App-Proxy-signed (env.client_secret) so logged_in_customer_id
-   is trustworthy. Admin = customerId listed in env.admin_ids (comma-separated).
+   is trustworthy. Roles (owner/admin/mod) come from Shopify customer tags
+   (p2p-owner / p2p-admin / p2p-mod) or the env.admin_ids owner list — resolved
+   server-side + KV-cached ~5 min. See roleFor() / canModerate / canManageMembers.
 
    Cloudflare env:
      shop, client_id           plain vars
@@ -21,6 +32,10 @@
      admin_token               optional secret (else client_credentials grant)
      admin_ids                 comma-separated customer ids allowed to moderate
      resend_key, alert_email   optional — email alerts on new posts (Resend free tier)
+     klaviyo_key               optional secret (pk_...) — member email/SMS notifications
+     klaviyo_email_metric      optional — event name for email flow (default "P2P Alert Email")
+     klaviyo_sms_metric        optional — event name for SMS flow (default "P2P Alert Text")
+     os_url                    optional — base link in notifications (default /pages/p2p-os)
    Cloudflare binding:
      P2P_KV                    a KV namespace (shared store for cards + posts)
 */
@@ -722,6 +737,8 @@ export default {
       /* ---------- members directory + map ---------- */
       if (seg === 'members') {
         if (!kv) return json({ ok: true, members: [] });
+        const viewerRole = await roleFor(env, customerId, kv);
+        const canManage = canManageMembers(viewerRole);
         const list = await kv.list({ prefix: 'member:' });
         const members = [];
         const todayNum = Math.floor(Date.now() / 86400000);
@@ -734,7 +751,7 @@ export default {
         }
         for (const k of list.keys) {
           const r = await kv.get(k.name, 'json');
-          if (r && !r.hidden && !r.adminHidden) {
+          if (r && !r.hidden && !r.adminHidden && (!r.banned || canManage)) {
             const hasEmail = !!(r.showEmail && r.email);
             delete r.email;            // never expose the raw address in the bulk list — revealed only on-demand, one at a time
             r.hasEmail = hasEmail;
@@ -745,7 +762,7 @@ export default {
           }
         }
         const following = (await kv.get('following:' + customerId, 'json')) || [];
-        return json({ ok: true, members, following });
+        return json({ ok: true, members, following, viewerRole: viewerRole, canManageMembers: canManage });
       }
 
       /* ---------- image upload → R2 (avatars now; post media later) ---------- */
@@ -840,6 +857,7 @@ export default {
       /* ---------- community wall ---------- */
       if (seg === 'community') {
         if (!kv) return json({ ok: true, posts: [] });
+        const myRole = await roleFor(env, customerId, kv);
         if (request.method === 'GET') {
           const list = await kv.list({ prefix: 'post:' });
           const bset = new Set((await kv.get('blocked:' + customerId, 'json')) || []);   // hide blocked members' content from me
@@ -849,7 +867,7 @@ export default {
             if (!p) continue;
             if (bset.size && bset.has(p.author)) continue;   // skip blocked authors' posts
             const rs = reactState(p, customerId);
-            all.push({ id: p.id, name: p.name, title: p.title || '', text: p.text, kind: p.kind, category: p.category || (p.kind === 'win' ? 'wins' : 'general'), attachments: p.attachments || [], ts: p.ts, streak: p.streak || 0, house: !!p.house, pinned: !!p.pinned, edited: !!p.edited, owner: p.author === customerId, comments: (p.comments || []).filter(c => !(bset.size && bset.has(c.author))).map(c => ({ id: c.id, name: c.name, text: c.text, attachments: c.attachments || [], ts: c.ts, edited: !!c.edited, owner: c.author === customerId })), reactions: rs.counts, mine: rs.mine, likes: rs.counts.love, liked: rs.mine.love });
+            all.push({ id: p.id, name: p.name, title: p.title || '', text: p.text, kind: p.kind, category: p.category || (p.kind === 'win' ? 'wins' : 'general'), attachments: p.attachments || [], ts: p.ts, streak: p.streak || 0, house: !!p.house, authorRole: p.authorRole || (p.house ? 'owner' : null), pinned: !!p.pinned, edited: !!p.edited, owner: p.author === customerId, comments: (p.comments || []).filter(c => !(bset.size && bset.has(c.author))).map(c => ({ id: c.id, name: c.name, text: c.text, attachments: c.attachments || [], ts: c.ts, edited: !!c.edited, owner: c.author === customerId, authorRole: c.authorRole || null })), reactions: rs.counts, mine: rs.mine, likes: rs.counts.love, liked: rs.mine.love });
           }
           all.sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0) || b.ts - a.ts);
           const cat = url.searchParams.get('category') || 'all';
@@ -876,7 +894,7 @@ export default {
               if (s > best || (s === best && (!wow || p.ts > wow.ts))) { best = s; wow = p; }
             }
           }
-          return json({ ok: true, posts: page, total, hasMore: offset + limit < total, winOfWeek: wow ? wow.id : null, wowPost: wow || null, isAdmin: isAdmin(env, customerId), categories: CAT_LIST, engageTotal: await readEngageTotal(env, customerId) });
+          return json({ ok: true, posts: page, total, hasMore: offset + limit < total, winOfWeek: wow ? wow.id : null, wowPost: wow || null, role: myRole, isAdmin: canModerate(myRole), canModerate: canModerate(myRole), canManageMembers: canManageMembers(myRole), canAnnounce: canAnnounce(myRole), categories: CAT_LIST, engageTotal: await readEngageTotal(env, customerId) });
         }
         if (request.method === 'POST') {
           const body = await request.json().catch(() => null);
@@ -885,17 +903,18 @@ export default {
           const info = await customerInfo(env, customerId);
           const id = Date.now() + '-' + customerId;
           const kind = ((body && body.kind) === 'win') ? 'win' : 'post';   // wins get their own board
-          const category = catFor((body && body.category) || 'general', kind, isAdmin(env, customerId));
+          const category = catFor((body && body.category) || 'general', kind, canAnnounce(myRole));
           const meRec = await kv.get('member:' + customerId, 'json');
+          if (meRec && meRec.banned) return json({ error: 'banned' }, 403);
           const myName = (meRec && meRec.name) || String((body && body.name) || info.firstName || 'Member').slice(0, 40);
-          const post = { id, author: customerId, name: myName, title: String((body && body.title) || '').slice(0, 120), text: text.slice(0, 1000), kind: kind, category: category, attachments: sanitizeAttachments(body && body.attachments), streak: Number(body && body.streak) || 0, ts: Date.now() };
+          const post = { id, author: customerId, name: myName, authorRole: myRole || null, title: String((body && body.title) || '').slice(0, 120), text: text.slice(0, 1000), kind: kind, category: category, attachments: sanitizeAttachments(body && body.attachments), streak: Number(body && body.streak) || 0, ts: Date.now() };
           await kv.put('post:' + id, JSON.stringify(post));   // live immediately (unmoderated)
           await alertAdmin(env, post).catch(() => {});         // optional email ping to you
           // alert anyone following this member that they shared something new
           try {
             const followers = (await kv.get('followers:' + String(myName).trim().toLowerCase(), 'json')) || [];
             for (const fid of followers) {
-              if (fid && fid !== customerId) await pushNotif(kv, fid, { type: 'follow', name: myName, postId: id, snippet: text.slice(0, 80), ts: Date.now() });
+              if (fid && fid !== customerId) await pushNotif(kv, fid, { type: 'follow', name: myName, postId: id, snippet: text.slice(0, 80), ts: Date.now() }, env);
             }
           } catch (e) {}
           const engage = await awardEngage(env, customerId, 'post');
@@ -923,7 +942,7 @@ export default {
         if (i === -1) {
           if (p.author && p.author !== customerId && String(p.author).indexOf('house-') !== 0) {
             const rinfo = await customerInfo(env, customerId);
-            await pushNotif(kv, p.author, { type: 'react', rtype: type, name: rinfo.firstName || 'Someone', postId: pid, snippet: (p.text || '').slice(0, 80), ts: Date.now() });
+            await pushNotif(kv, p.author, { type: 'react', rtype: type, name: rinfo.firstName || 'Someone', postId: pid, snippet: (p.text || '').slice(0, 80), ts: Date.now() }, env);
           }
           engage = await awardEngage(env, customerId, 'like');
         }
@@ -942,12 +961,14 @@ export default {
         const p = await kv.get('post:' + pid, 'json');
         if (!p) return json({ error: 'not_found' }, 404);
         const info = await customerInfo(env, customerId);
-        const c = { id: Date.now() + '-' + customerId, author: customerId, name: String((body && body.name) || info.firstName || 'Member').slice(0, 40), text: text.slice(0, 600), attachments: cAtts, ts: Date.now() };
+        if (await isBanned(kv, customerId)) return json({ error: 'banned' }, 403);
+        const cRole = await roleFor(env, customerId, kv);
+        const c = { id: Date.now() + '-' + customerId, author: customerId, name: String((body && body.name) || info.firstName || 'Member').slice(0, 40), authorRole: cRole || null, text: text.slice(0, 600), attachments: cAtts, ts: Date.now() };
         p.comments = Array.isArray(p.comments) ? p.comments : [];
         p.comments.push(c);
         await kv.put('post:' + pid, JSON.stringify(p));
         if (p.author && p.author !== customerId && String(p.author).indexOf('house-') !== 0) {
-          await pushNotif(kv, p.author, { type: 'comment', name: c.name, postId: pid, snippet: c.text.slice(0, 80), ts: Date.now() });
+          await pushNotif(kv, p.author, { type: 'comment', name: c.name, postId: pid, snippet: c.text.slice(0, 80), ts: Date.now() }, env);
         }
         const engage = await awardEngage(env, customerId, 'comment');
         return json({ ok: true, comment: { id: c.id, name: c.name, text: c.text, attachments: c.attachments, ts: c.ts, edited: false, owner: true }, engage: engage });
@@ -965,6 +986,21 @@ export default {
           list.forEach(n => { n.read = true; });
           await kv.put('notif:' + customerId, JSON.stringify(list));
           return json({ ok: true });
+        }
+        return json({ error: 'method' }, 405);
+      }
+
+      /* ---------- notification preferences (per-member email/SMS opt-ins) ---------- */
+      if (seg === 'prefs') {
+        if (!kv || !customerId) return json({ ok: true, prefs: PREF_DEFAULTS });
+        if (request.method === 'GET') return json({ ok: true, prefs: await getPrefs(kv, customerId) });
+        if (request.method === 'POST') {
+          const body = (await request.json().catch(() => null)) || {};
+          const clean = { email: {}, sms: {} };
+          PREF_EMAIL_KEYS.forEach(k => { clean.email[k] = !!(body.email && body.email[k]); });
+          PREF_SMS_KEYS.forEach(k => { clean.sms[k] = !!(body.sms && body.sms[k]); });
+          await kv.put('pref:' + customerId, JSON.stringify(clean));
+          return json({ ok: true, prefs: await getPrefs(kv, customerId) });
         }
         return json({ error: 'method' }, 405);
       }
@@ -1019,9 +1055,121 @@ export default {
         return json({ ok: true });
       }
 
+      /* ---------- admin console: assign roles (owner/admin) ---------- */
+      if (seg === 'setrole') {
+        const role = await roleFor(env, customerId, kv);
+        if (!canManageMembers(role)) return json({ error: 'forbidden' }, 403);
+        const body = await request.json().catch(() => null);
+        const targetId = String((body && body.target) || '').trim();
+        const newRole = String((body && body.role) || '').trim().toLowerCase();   // 'admin' | 'mod' | '' (remove)
+        if (!targetId || targetId === customerId) return json({ error: 'bad' }, 400);
+        if (newRole && newRole !== 'admin' && newRole !== 'mod') return json({ error: 'bad_role' }, 400);
+        const targetRole = await roleFor(env, targetId, kv);
+        if (targetRole === 'owner') return json({ error: 'forbidden' }, 403);                                   // owners managed via admin_ids only
+        if (role === 'admin' && (targetRole === 'admin' || newRole === 'admin')) return json({ error: 'forbidden' }, 403); // admins can't mint or touch admins
+        try {
+          await tagsRemove(env, targetId, ['p2p-admin', 'p2p-mod']);
+          if (newRole === 'admin') await tagsAdd(env, targetId, ['p2p-admin']);
+          else if (newRole === 'mod') await tagsAdd(env, targetId, ['p2p-mod']);
+        } catch (e) { return json({ error: 'tag_failed', detail: String(e).slice(0, 140) }, 500); }
+        try { await kv.delete('role:' + targetId); } catch (e) {}                                              // bust the role cache
+        const m = await kv.get('member:' + targetId, 'json');
+        if (m) { m.role = newRole || null; await kv.put('member:' + targetId, JSON.stringify(m)); }
+        return json({ ok: true, target: targetId, role: newRole || null });
+      }
+
+      /* ---------- admin console: ban / unban a member (owner/admin) ---------- */
+      if (seg === 'ban') {
+        const role = await roleFor(env, customerId, kv);
+        if (!canManageMembers(role)) return json({ error: 'forbidden' }, 403);
+        const body = await request.json().catch(() => null);
+        const targetId = String((body && body.target) || '').trim();
+        const on = !!(body && body.on);
+        if (!targetId || targetId === customerId) return json({ error: 'bad' }, 400);
+        const targetRole = await roleFor(env, targetId, kv);
+        if (targetRole === 'owner') return json({ error: 'forbidden' }, 403);
+        if (role === 'admin' && targetRole === 'admin') return json({ error: 'forbidden' }, 403);
+        const m = await kv.get('member:' + targetId, 'json');
+        if (m) { m.banned = on; await kv.put('member:' + targetId, JSON.stringify(m)); }
+        try { if (on) await tagsAdd(env, targetId, ['p2p-banned']); else await tagsRemove(env, targetId, ['p2p-banned']); } catch (e) {}
+        return json({ ok: true, target: targetId, banned: on });
+      }
+
+      /* ---------- admin console: report queue (owner/admin/mod) ---------- */
+      if (seg === 'reports') {
+        const role = await roleFor(env, customerId, kv);
+        if (!canModerate(role)) return json({ error: 'forbidden' }, 403);
+        if (request.method === 'GET') {
+          const list = await kv.list({ prefix: 'suggest:' });
+          const reports = [];
+          for (const k of list.keys) { const r = await kv.get(k.name, 'json'); if (r && r.kind === 'Report') reports.push(r); }
+          reports.sort((a, b) => b.ts - a.ts);
+          return json({ ok: true, reports: reports.slice(0, 100) });
+        }
+        const body = await request.json().catch(() => null);
+        const id = String((body && body.id) || '').trim().replace(/^suggest:/, '');
+        if (!id) return json({ error: 'bad' }, 400);
+        try { await kv.delete('suggest:' + id); } catch (e) {}
+        return json({ ok: true });
+      }
+
+      /* ---------- DMs: send a message ---------- */
+      if (seg === 'dm-send') {
+        if (!kv) return json({ error: 'no_store' }, 501);
+        const body = await request.json().catch(() => null);
+        const to = String((body && body.to) || '').trim();
+        const text = String((body && body.text) || '').trim().slice(0, 2000);
+        if (!to || to === customerId || !text) return json({ error: 'bad' }, 400);
+        if (await isBanned(kv, customerId)) return json({ error: 'banned' }, 403);
+        const toRec = await kv.get('member:' + to, 'json');
+        if (!toRec) return json({ error: 'no_member' }, 404);
+        const myBlocked = (await kv.get('blocked:' + customerId, 'json')) || [];
+        const theirBlocked = (await kv.get('blocked:' + to, 'json')) || [];
+        if (myBlocked.indexOf(to) !== -1 || theirBlocked.indexOf(customerId) !== -1) return json({ error: 'blocked' }, 403);
+        const pk = dmPair(customerId, to);
+        const conv = (await kv.get('dm:' + pk, 'json')) || { messages: [] };
+        const msg = { id: Date.now() + '-' + customerId, from: customerId, text: text, ts: Date.now() };
+        conv.messages = Array.isArray(conv.messages) ? conv.messages : [];
+        conv.messages.push(msg);
+        if (conv.messages.length > 300) conv.messages = conv.messages.slice(-300);
+        await kv.put('dm:' + pk, JSON.stringify(conv));
+        const meRec = await kv.get('member:' + customerId, 'json');
+        const myName = (meRec && meRec.name) || 'Member';
+        await dmUpsertInbox(kv, customerId, to, text, msg.ts, customerId, false);
+        await dmUpsertInbox(kv, to, customerId, text, msg.ts, customerId, true);
+        await pushNotif(kv, to, { type: 'dm', from: customerId, name: myName, snippet: text.slice(0, 80), ts: msg.ts }, env);
+        return json({ ok: true, message: { id: msg.id, from: msg.from, text: msg.text, ts: msg.ts, mine: true } });
+      }
+
+      /* ---------- DMs: a conversation thread (marks it read) ---------- */
+      if (seg === 'dm-thread') {
+        if (!kv) return json({ ok: true, messages: [] });
+        const other = String(url.searchParams.get('with') || '').trim();
+        if (!other) return json({ error: 'bad' }, 400);
+        const conv = (await kv.get('dm:' + dmPair(customerId, other), 'json')) || { messages: [] };
+        await dmMarkRead(kv, customerId, other);
+        const otherRec = await kv.get('member:' + other, 'json');
+        return json({ ok: true, with: other, name: (otherRec && otherRec.name) || 'Member', photo: (otherRec && otherRec.photo) || '',
+          messages: (conv.messages || []).map((m) => ({ id: m.id, from: m.from, text: m.text, ts: m.ts, mine: m.from === customerId })) });
+      }
+
+      /* ---------- DMs: my inbox (conversations + unread) ---------- */
+      if (seg === 'dm-inbox') {
+        if (!kv) return json({ ok: true, conversations: [], unread: 0 });
+        const inbox = (await kv.get('dm-inbox:' + customerId, 'json')) || [];
+        let total = 0; const conversations = [];
+        for (const c of inbox) {
+          const r = await kv.get('member:' + c.with, 'json');
+          const unread = c.unread || 0; total += unread;
+          conversations.push({ with: c.with, name: (r && r.name) || 'Member', photo: (r && r.photo) || '', lastText: c.lastText || '', lastTs: c.lastTs || 0, lastFromMe: c.lastFrom === customerId, unread: unread });
+        }
+        conversations.sort((a, b) => b.lastTs - a.lastTs);
+        return json({ ok: true, conversations: conversations, unread: total });
+      }
+
       /* ---------- admin (optional): delete a post — spam safety valve ---------- */
       if (seg === 'moderate') {
-        if (!isAdmin(env, customerId)) return json({ error: 'forbidden' }, 403);
+        if (!canModerate(await roleFor(env, customerId, kv))) return json({ error: 'forbidden' }, 403);
         if (!kv) return json({ error: 'no_store' }, 501);
         const body = await request.json().catch(() => null);
         const pid = body && body.id;
@@ -1046,7 +1194,7 @@ export default {
         if (!pid) return json({ error: 'no_id' }, 400);
         const p = await kv.get('post:' + pid, 'json');
         if (!p) return json({ error: 'not_found' }, 404);
-        const owner = p.author === customerId, admin = isAdmin(env, customerId);
+        const owner = p.author === customerId, admin = canModerate(await roleFor(env, customerId, kv));
         if (action === 'delete') {
           if (!owner && !admin) return json({ error: 'forbidden' }, 403);
           await kv.delete('post:' + pid);
@@ -1076,7 +1224,7 @@ export default {
         const idx = p.comments.findIndex(c => c.id === cid);
         if (idx < 0) return json({ error: 'not_found' }, 404);
         const c = p.comments[idx];
-        const owner = c.author === customerId, admin = isAdmin(env, customerId), postOwner = p.author === customerId;
+        const owner = c.author === customerId, admin = canModerate(await roleFor(env, customerId, kv)), postOwner = p.author === customerId;
         if (action === 'delete') {
           if (!owner && !admin && !postOwner) return json({ error: 'forbidden' }, 403);
           p.comments.splice(idx, 1);
@@ -1141,7 +1289,7 @@ export default {
         let changed = false;
         for (const it of items) {
           if (it.fireAt <= now && it.startAt >= now - 7200000 && fired.indexOf(it.nid) < 0) {
-            await pushNotif(kv, uid, { type: 'reminder', reminder: true, kind: it.kind, title: it.title, label: it.label, startAt: it.startAt, nid: it.nid, ts: now });
+            await pushNotif(kv, uid, { type: 'reminder', reminder: true, kind: it.kind, title: it.title, label: it.label, startAt: it.startAt, nid: it.nid, ts: now }, env);
             fired.push(it.nid); changed = true;
           }
         }
@@ -1153,10 +1301,454 @@ export default {
     try {
       const HOUSE_REACTS = ['love', 'love', 'love', 'thumb', 'party'];
       const HOUSE_COMMENTS = {
-        'house-frank': ['Now that’s the kind of honesty that moves the needle. Proud of you.', 'Straight talk: this is good work. Keep going.'],
-        'house-drea': ['My heart — look at you showing up. 💛', 'This is exactly the kind of courage the Haus is about.'],
-        'house-ruth': ['Beautifully said. You’re right where you need to be.', 'Steady steps, friend. This is how it gets built.'],
-        'house-eric': ['Love this! (I’ll spare you a joke… this time. 😄)', 'Proof over promises — you did the thing!']
+        'house-frank': {
+          heavy: [
+            'Rough patch. Not a verdict. Keep it small today and just don’t quit.',
+            'Overwhelmed usually means you care and you’re carrying too much at once. Put something down.',
+            'You don’t have to win today. You just have to not quit. That’s the job right now.',
+            'Honest take: hard weeks are part of the deal, not proof you’re failing.',
+            'Rest isn’t quitting. Reset and come back — the work will wait.',
+            'One small thing. That’s how you get unstuck, not with a grand plan.',
+            'You’re allowed to have a bad day and still be exactly on track.',
+            'Feeling behind is a feeling, not a fact. You’re further than you think.',
+            'Take the pressure off the number. Just take the next step. That’s enough.',
+            'The flock’s got you. Lean on that today, no ego about it.',
+            'Stuck is temporary. Showing up while stuck is character — you just showed it.',
+            'Be as patient with yourself as you’d be with a friend saying this.',
+            'Hard is where it gets built. You’re in the build. Hang on.',
+            'The dip is real. So is your grit. Use one to get through the other.',
+            'You’re not stuck, you’re between reps. Load the next one.',
+            'Tired is data, not failure. Rest, then get back in.',
+            'Nobody builds anything great on a straight line. Zigzag counts.',
+            'Lower the bar to “just start,” then clear it. That’s today’s move.',
+            'Overwhelm shrinks when you name the next single task. Name it.',
+            'Showing up on a hard day tells me everything I need to know.',
+          ],
+          win: [
+            'Straight talk: that’s a real win. Bank it.',
+            'Proof you did the work. Now go do the next hard thing.',
+            'That’s the needle moving. Feels good, doesn’t it? Keep it.',
+            'No notes. You shipped it. Respect.',
+            'That’s what “finished” looks like. Most people never get here.',
+            'Big. Don’t rush past it — let it land, then stack another.',
+            'You called your shot and hit it. That’s a habit worth keeping.',
+            'Momentum, earned. This is the good kind of pressure now.',
+            'Result over intention, every time. You brought a result.',
+            'That’s a decision that paid off. More of those.',
+            'You made “someday” a “done.” Rare skill. Keep it sharp.',
+            'Clean execution. I like watching people do the thing.',
+            'Frank’s verdict: excellent. Now back to work, champ. 😏',
+            'That’s a receipt, not a rumor. Well earned.',
+            'You did the unglamorous work and it paid. That’s the whole game.',
+            'Ship, learn, repeat — you just ran the loop. Run it again.',
+            'Quiet execution, loud result. My favorite kind.',
+            'Proof beats potential every time, and you brought proof.',
+            'That’s a milestone. Mark it, then aim higher.',
+            'You closed the gap between “want to” and “did.” Respect.',
+          ],
+          question: [
+            'Good question — ask it out loud like this and the flock will answer.',
+            'Smart to ask before guessing. That’s how the fast ones move.',
+            'No dumb questions here, only expensive assumptions. You avoided one.',
+            'Ask, adjust, act. You’re already on step one.',
+            'Fair thing to wrestle with. Drop the specifics and we’ll get concrete.',
+            'That’s the right question for your stage. Keep asking them.',
+            'Asking beats stalling every time. Someone here’s got the answer.',
+            'You’re thinking like a builder. Builders ask, then test.',
+            'Good instinct to check first. Now go test the smallest version.',
+            'This is exactly what the room is for. Ask boldly.',
+            'Curiosity is a competitive advantage. You’ve got it.',
+            'The people who ask early save themselves months. Well done.',
+            'Solid question. Whoever answers — then you actually go do it. 😄',
+            'Right question, right room. Someone’s got the answer.',
+            'Ask sharp, get sharp. This is sharp.',
+            'Better to ask now than rebuild later. Smart.',
+            'The move: ask, then test the cheapest version of the answer.',
+            'Good problem to have — means you’re actually building.',
+            'Don’t guess when you can ask. You didn’t. Good.',
+            'That’s a builder’s question. Keep bringing them.',
+          ],
+          general: [
+            'Straight talk: this is good work. Keep going.',
+            'No fluff needed — you’re onto something. Push it further.',
+            'This is the part most people skip. You didn’t. Respect.',
+            'Good. Now do it again tomorrow. That’s the whole secret.',
+            'Momentum looks exactly like this. Don’t stop now.',
+            'You just did the hard part — showing up on paper. Build from here.',
+            'Progress over polish, every time. This is progress.',
+            'This is the kind of thing that compounds. Stack another.',
+            'You’re not behind. You’re building. Not the same thing.',
+            'That’s a decision, not a wish. I like decisions.',
+            'Simple and done beats fancy and someday. Well played.',
+            'You shipped a thought into the world. Rarer than you think.',
+            'Frank’s verdict: keep going. No notes.',
+            'This is the good, boring work that wins. Keep at it.',
+            'You’re compounding. Doesn’t look like much until it’s everything.',
+            'Clear thinking on display here. Do more of it.',
+            'Consistency beats intensity. This is consistency.',
+            'You’re building a track record, one post like this at a time.',
+            'Solid. Now protect the streak.',
+            'That’s a brick in the wall. Lay another tomorrow.',
+          ],
+          chitchat: [
+            'Doing the work and still saying hi? That’s balance. Good to see you.',
+            'Here and present — half the battle. What are you building today?',
+            'Good to see your name pop up. Now go make something.',
+            'Checking in counts too. The consistent ones stick around. You’re here.',
+            'Present and accounted for. That’s how momentum starts.',
+            'Appreciate you showing up to the room. What’s on your plate?',
+            'Good to have you around. What’s one thing you’re moving on today?',
+            'Hey — glad you’re here. Tell us what you’re working toward.',
+            'Showing up to say hi is underrated. Real ones do it.',
+            'The room’s better with you in it. What’s the goal this week?',
+            'Nice to see you. Say the word if you need a push on anything.',
+            'Community first, then the work. Both matter. Carry on.',
+            'Good to see ya. Now — what are we getting done today?',
+            'Good to see you in the room. What’s the one thing today?',
+            'Present beats perfect. You’re present. Now let’s work.',
+            'Hey — glad you’re here. What are we shipping?',
+            'Checking in is a habit of the consistent. Noted and respected.',
+            'Say the word if you want a push on anything today.',
+            'Good to have you around. Onward.',
+            'Nice to see ya. What’s the goal?',
+          ]
+        },
+        'house-drea': {
+          heavy: [
+            'Oh friend. Overwhelmed is allowed. You don’t have to carry it all today. 💛',
+            'Come here. You’re doing so much more than you’re giving yourself credit for. 🖤',
+            'Heavy days don’t cancel your progress. They’re part of the story. I’m with you.',
+            'You’re not behind, love. You’re human. Breathe with me for a sec. 💛',
+            'Whatever you’re feeling is welcome here. You don’t have to be okay to belong.',
+            'Be as gentle with yourself as you are with everyone else. Please. 🖤',
+            'This season is hard, but it isn’t forever. We’re holding on with you.',
+            'Showing up on a hard day? That’s the bravest kind of showing up. 💛',
+            'Rest, sweet friend. The dream will still be here when you have more to give.',
+            'You are so deeply not alone in this. The whole flock just pulled in close. 🖤',
+            'One breath, one small thing, one soft step. That’s all today has to be.',
+            'That heart of yours is a gift, even when it aches. 💛',
+            'I’m proud of you for saying it out loud. That takes real courage. 🖤',
+            'Big hug incoming. You’re carrying a lot and still here. 💛',
+            'Your worth isn’t on the line today, love. It never was. 🖤',
+            'Let today be soft. You’ve earned gentleness. 💛',
+            'The heavy seasons grow the deepest roots. Hang on with us. 🌱',
+            'You don’t have to earn rest. Take it, friend. 🖤',
+            'One kind thing for yourself today. Just one. 💛',
+            'We’ve got you. Truly. Lean on the flock. 🖤',
+          ],
+          win: [
+            'MY HEART. Look at you!! I’m so proud I could cry. 💛',
+            'YES. Yes yes yes. You did the thing. Celebrate this all the way. 🎉',
+            'This is exactly the kind of courage the Haus is about. So proud of you! 🖤',
+            'Ohhh this made my whole day. Look at you shine. 💛',
+            'You earned this one. Soak it in — you deserve to feel it. 🖤',
+            'The flock is cheering SO loud right now. Can you hear us? 🎉',
+            'Brave, consistent, and now victorious. That’s you. 💛',
+            'I always knew you had this in you. Now you know it too. 🖤',
+            'This is what becoming yourself looks like. Beautiful. 💛',
+            'Happy dance initiated on your behalf. So proud! 💃',
+            'You turned a dream into a done. That’s magic, love. ✨',
+            'Look how far you’ve come. Don’t rush past this. Celebrate. 🖤',
+            'My favorite thing: watching you win. Thank you for sharing it. 💛',
+            'I am beaming for you right now. 💛',
+            'This is your moment — please let yourself feel it. 🖤',
+            'You brave, brilliant thing. Look what you did! 🎉',
+            'Proof that showing up works. So proud. 💛',
+            'The flock is throwing confetti in your honor. 🎊',
+            'You turned courage into a result. That’s everything. 🖤',
+            'Screenshot this feeling. You earned every bit. 💛',
+          ],
+          question: [
+            'Great question, love. Ask away — this flock loves to help. 💛',
+            'So glad you asked instead of struggling alone. That’s what we’re here for. 🖤',
+            'No such thing as a silly question here. Someone’s got you. 💛',
+            'Asking is brave too. Proud of you for reaching out.',
+            'The right people are about to swoop in with answers. Hang tight. 💛',
+            'This is exactly the kind of thing to bring to the table. 🖤',
+            'You’re not supposed to know everything yet. That’s why we have each other. 💛',
+            'Love a good question. It means you’re growing. 🌱',
+            'Ask boldly, friend. We’ve all been exactly where you are. 🖤',
+            'The flock’s got wisdom for days. Let it pour in. 💛',
+            'Reaching out is a strength, never a weakness. 🖤',
+            'Good on you for asking early. That’s how the dream keeps moving. 💛',
+            'Someone here has walked this exact road. You’re in good company. 🖤',
+            'Ask away, love — we’ve all been here. 💛',
+            'Brave of you to ask. The right hearts will answer. 🖤',
+            'This is exactly what the table is for. Pull up a chair. 💛',
+            'No question too small when you’re growing. 🌱',
+            'You reaching out makes the whole room safer. Thank you. 🖤',
+            'Let’s figure it out together, okay? 💛',
+            'Curiosity looks so good on you. 🖤',
+          ],
+          general: [
+            'My heart — look at you showing up. 💛',
+            'You belong here, and posts like this prove it.',
+            'There’s so much heart in this. Don’t ever dim it.',
+            'This made me smile. Thank you for trusting us with it. 💛',
+            'Rooting for you so hard right now. Keep going, friend.',
+            'The flock sees you — and we’re so glad you’re here.',
+            'You showing up like this? That’s the whole point. 🖤',
+            'This is your reminder that you’re not doing it alone. 💛',
+            'Whatever brought you here today, I’m grateful it did.',
+            'Your voice matters here. Thank you for using it.',
+            'The way you’re showing up is quietly powerful. I see it.',
+            'Come back tomorrow too, okay? We’re better with you here. 💛',
+            'This is what “born original” looks like in real time. 🖤',
+            'There’s heart all over this. Keep it. 💛',
+            'You’re becoming, right in front of us. It’s beautiful. 🖤',
+            'The flock is lucky to have you. 💛',
+            'This is the kind of honest that builds real community. 🖤',
+            'Keep showing up as YOU. That’s the whole magic. 💛',
+            'Proud of you today, no reason required. 🖤',
+            'You matter here. Don’t forget it. 💛',
+          ],
+          chitchat: [
+            'Hi you! So happy you popped in. How are you, really? 💛',
+            'Love seeing your face in the room. Tell us how you’re doing! 🖤',
+            'Good to see you, friend. Consider this your warm welcome hug. 💛',
+            'Aw, hi! The Haus feels cozier when you’re here. 🖤',
+            'Checking in on us? You’re the sweetest. How’s YOUR heart today? 💛',
+            'So glad you stopped by. What’s making you smile lately? 🖤',
+            'Hi hi hi! Grab a seat, we saved you one. 💛',
+            'You showing up just to say hey? That’s the good stuff. 🖤',
+            'Happy to see you here today. How can we cheer you on? 💛',
+            'Hey friend! The flock’s glad you’re around. 🖤',
+            'Ohh hello! Tell us one small good thing from your day. 💛',
+            'Waving back at you! So glad you’re part of this. 🖤',
+            'Love a good check-in. You matter here, in the quiet moments too. 💛',
+            'Hi friend! So glad you swung by. 💛',
+            'The Haus is cozier with you here. 🖤',
+            'Waving big at you! How’s your heart? 💛',
+            'Hello you! Tell us something good. 🖤',
+            'Grab a seat, we saved you one. 💛',
+            'Just happy you’re here today. 🖤',
+            'Hey hey! You’re a bright spot. 💛',
+          ]
+        },
+        'house-ruth': {
+          heavy: [
+            'Gentle truth: you can be weary and still be exactly on the path.',
+            'You can’t rush a root, and you can’t rush a hard season. Be patient with it.',
+            'Rest is not falling behind. It’s part of how things grow. 🤍',
+            'Overwhelm often means you’re carrying tomorrow’s weight today. Set it down.',
+            'A soft reminder: your worth isn’t measured by a hard week.',
+            'You don’t have to see the whole staircase. Just the next gentle step.',
+            'Be kind to yourself here. You’d offer that kindness to anyone else.',
+            'The valley is part of the landscape, not the end of the road. Stay with it.',
+            'What feels like falling apart is sometimes old things making room. 🌱',
+            'Slow down, breathe, and let today be enough. It is enough.',
+            'Your pace is not the problem. Grace goes at the speed of you.',
+            'Even the quietest seeds are still growing underground. So are you.',
+            'You showed up honestly on a hard day. That is not small. 🤍',
+            'Gentle truth: a hard week is weather, not climate. It passes.',
+            'You’re allowed to grow slowly. Most real things do. 🌱',
+            'Set down what isn’t yours to carry today. Just for today. 🤍',
+            'Weariness is a sign to rest, not proof you’re failing.',
+            'The seed underground looks like nothing. It isn’t. Neither are you.',
+            'Be patient with the process. It’s patient with you.',
+            'Quietly showing up on a hard day is its own kind of strong. 🤍',
+          ],
+          win: [
+            'Beautifully done. This is what faithful, steady work grows into.',
+            'What you tended has bloomed. Let yourself enjoy it. 🌱',
+            'Rooted work, real fruit. Well done, friend.',
+            'This is the harvest of a hundred quiet steps. Savor it. 🤍',
+            'You stayed with it, and look — it grew. That’s the whole secret.',
+            'A gentle well done. You earned this, root and branch.',
+            'Patience and persistence, made visible. Beautiful to see.',
+            'The timing was right because you kept tending. Trust that again.',
+            'This is a milestone worth resting in. Breathe it in. 🌱',
+            'Slow and rooted just outlasted fast and shallow. As it does.',
+            'You honored the process, and the process honored you back.',
+            'What a good and grounded win. So happy for you. 🤍',
+            'Proof that steady wins. Keep this close for the next hard day.',
+            'The harvest of faithful days. Well done, friend. 🌱',
+            'You tended it, and it grew. That’s the whole of it.',
+            'Steady hands, real fruit. Beautiful to witness. 🤍',
+            'This bloomed in its right time. Trust that rhythm again.',
+            'A grounded, honest win. Rest in it a moment. 🌱',
+            'What you watered in the dark came to light. Lovely.',
+            'Proof that rooted growth outlasts the rush. 🤍',
+          ],
+          question: [
+            'A good question, gently asked. The flock will meet you here.',
+            'Wisdom often starts with a question. You’re right on time.',
+            'No need to know it all. Asking is its own kind of faithfulness.',
+            'Bring it to the table, friend. We grow better together.',
+            'The right voices will answer. Rest while they do. 🤍',
+            'Curiosity is a gentle strength. You have it.',
+            'You’re not behind for asking. You’re wise for it.',
+            'Someone here has tended this same question. Let them help. 🌱',
+            'Ask, and stay open. The answer often grows slowly.',
+            'A thoughtful question — that’s the soil good decisions grow in.',
+            'Reaching out is a quiet act of courage. Well done.',
+            'This is what community is for. You belong in the asking, too.',
+            'Gentle truth: the ones who ask early save themselves much heartache.',
+            'A thoughtful question. The flock will tend it with you. 🌱',
+            'Wisdom begins right here, in the asking.',
+            'No need to know the whole path to take the next gentle step.',
+            'Ask, and let the answer come in its own good time. 🤍',
+            'You’re wise to seek counsel. That’s roots, not weakness.',
+            'Bring it here, friend. We grow better together.',
+            'A gentle question in good soil grows good fruit. 🌱',
+          ],
+          general: [
+            'Beautifully said. You’re right where you need to be.',
+            'Steady steps, friend. This is how it gets built.',
+            'Gentle truth: showing up is the win. The rest follows.',
+            'This is quietly important work. Don’t underestimate it.',
+            'One faithful step at a time. That’s the whole path.',
+            'You were made original, on purpose. This proves it.',
+            'What you tend to, grows. Keep tending.',
+            'Trust your pace. It’s not a problem to fix.',
+            'Small and steady is still moving. And moving is enough.',
+            'The quiet work is the real work. I see you doing it. 🤍',
+            'You don’t have to have it all figured out to be on the right path.',
+            'This is steady, rooted, real — exactly the good kind.',
+            'Keep watering it. Roots you can’t see are still roots. 🌱',
+            'Faithful, steady, real. Exactly right. 🤍',
+            'Small and rooted still counts. It counts most, actually.',
+            'You’re tending something good here. Keep watering it. 🌱',
+            'The quiet work is the lasting work. I see it.',
+            'One gentle step, then another. That’s the whole way.',
+            'You were made original, on purpose. This shows it. 🤍',
+            'Trust the pace you’re on. It’s yours for a reason.',
+          ],
+          chitchat: [
+            'Hello, friend. It’s good to simply be here together. 🤍',
+            'A gentle hello back to you. How is your heart today?',
+            'Nice to see you resting in the room for a moment. Welcome. 🤍',
+            'Good to have your company. No agenda needed — just glad you’re here.',
+            'Hello there. Sometimes showing up quietly is enough. 🌱',
+            'A soft hello. Take a breath with us — you’re among friends.',
+            'It’s a good day when you stop in. Thank you for being here. 🤍',
+            'Warm hello, friend. How are things in your world?',
+            'Glad you’re here today, no reason required. That’s community. 🌱',
+            'Hello, and welcome to a gentle moment in your day.',
+            'Simply good to see you. Stay as long as you like. 🤍',
+            'A quiet hi from me. The flock is glad for your company.',
+            'Hello, friend. Even a small check-in keeps the roots connected. 🌱',
+            'Hello, friend. Simply glad you’re here. 🤍',
+            'A gentle wave to you today. How’s your world?',
+            'Good to share a quiet moment together. Welcome. 🌱',
+            'No agenda needed — your company is enough.',
+            'Warm hello. Stay as long as you like. 🤍',
+            'It’s a good day when you stop in. Thank you.',
+            'Hi there. The roots stay connected when you check in. 🌱',
+          ]
+        },
+        'house-eric': {
+          heavy: [
+            'Hey now. Rough days happen to the best of us — and you’re the best of us. 🖤',
+            'No joke this time, promise. Just: I’m proud of you for still being here.',
+            'Overwhelmed? Put the cape down for a sec, superhero. You’ve earned a breather.',
+            'Bad day ≠ bad you. Trust me, I’ve had Tuesdays. 😅 You’ve got this.',
+            'Go easy on yourself, kid. Even sheep need a nap in the shade. 🐑',
+            'The hard part means you’re actually in the arena. That counts for a lot.',
+            'One small step today. That’s it. No hero moves required.',
+            'Feeling behind? Nah. You’re just on the scenic route. Keep rolling.',
+            'Deep breath. Snack. Water. Then one tiny thing. Doctor Eric’s orders.',
+            'Showing up on empty is braver than showing up full. Respect. 🖤',
+            'The flock’s right here. Lean on us — that’s what a flock is for.',
+            'Storms pass. Sheep stay. You’re gonna be just fine, friend.',
+            'Hang in there. And I mean that with zero punchline. 🖤',
+            'Rough day? Been there. Grab a snack, we’ll wait. 🖤',
+            'You’re not behind, you’re marinating. Trust the process. 😄',
+            'Even the black sheep needs a lie-down sometimes. 🐑',
+            'No punchline today — just: I’m proud you’re still swinging.',
+            'Hard stretch, tough sheep. You’ll get through it. 🖤',
+            'One tiny step counts as a step. Doctor Eric says so.',
+            'Lean on the flock today. That’s literally what we’re for. 🐑',
+          ],
+          win: [
+            'Proof over promises — you did the thing! 🎉',
+            'WOULD YOU LOOK AT THAT. A certified doer! 🐑',
+            'You showed up AND showed out. No notes, no jokes, just: heck yes.',
+            'Receipts beat resolutions — and you just brought the receipts. 🧾',
+            'Gold star, victory lap, the whole parade. You earned it. ⭐',
+            'That’s a win, and we celebrate every single one around here.',
+            'Doing beats dreaming. You DID. I’m so proud, kid.',
+            'You turned “someday” into “today.” That’s the real magic trick. ✨',
+            'A+ and I’m a tough grader. (I’m not. But still — A+.)',
+            'Take the victory lap. Go on. I’ll hold your coffee. ☕',
+            'This is what progress smells like. Like success. And snacks.',
+            'Look at you go! Keep it up and I’ll run out of proud faces.',
+            'Big win energy. Wear it out tomorrow too. 🖤',
+            'DING DING DING — we’ve got a winner! 🎉',
+            'Proof over promises, baby. You brought the proof. 🧾',
+            'That’s a whole vibe. A winning one. ⭐',
+            'You did the thing! I’m getting emotional. Don’t tell anyone. 🖤',
+            'Somebody get this legend a victory snack. 🍪',
+            'Called it. You’re a doer. Certified. 🐑',
+            'Big day! Wear the win proudly tomorrow. 😄',
+          ],
+          question: [
+            'Great question! Ask away — the flock loves this stuff. 🐑',
+            'Smart to ask. Way better than my method of “guess and panic.” 😄',
+            'No silly questions here. Only me, and I ask silly things daily.',
+            'Ask boldly, friend. Someone here’s got the map you need.',
+            'Good on ya for asking. That’s how the pros do it (and me, occasionally).',
+            'The right answer is one brave question away. You just asked it.',
+            'Love the curiosity. It looks great on you. 🖤',
+            'Asking early saves future-you a giant headache. Well played.',
+            'This is what the room’s for. Fire away!',
+            'Somebody here has done this exact thing. Watch ’em swoop in.',
+            'You’re thinking ahead. That’s a superpower, cape optional.',
+            'Questions are just answers in disguise. Unmask it! 🕵️',
+            'Ask, learn, do. You nailed step one already. 🖤',
+            'Great question! Way smarter than my “wing it” approach. 😄',
+            'Ask and ye shall receive… probably from someone smarter than me. 🖤',
+            'Good on ya for asking. That’s a pro move. 🐑',
+            'The flock loves a good question. Fire away!',
+            'Curiosity: the cheat code nobody mentions. You’ve got it.',
+            'No silly questions here — I’ve cornered that market. 😄',
+            'Ask now, thank yourself later. Well played.',
+          ],
+          general: [
+            'Love this! (I’ll spare you a joke… this time. 😄)',
+            'Well would you look at that — a doer in the wild! 🐑',
+            'This is the good stuff. Also, I’m proud of ya, kid.',
+            'Big “keep going” energy right here. I’m into it.',
+            'This made my day, and my days are pretty good already.',
+            'Consistency looks good on you. Wear it again tomorrow.',
+            'Not bad, not bad at all. Actually — really good.',
+            'You’re building something. I can tell. Keep stacking bricks.',
+            'Every time someone shows up here, the Haus gets a little brighter.',
+            'I came for the memes, I stayed for people like you. 🖤',
+            'Real ones show up on the regular. You’re a real one.',
+            'Keep this up and I’ll run out of ways to say “proud of you.”',
+            'You’re proof the flock is exactly the right kind of trouble.',
+            'This right here? Good stuff. Keep it coming. 🖤',
+            'You’re building something real. I can smell it. (Good way.) 😄',
+            'Consistency king/queen behavior. Respect. 🐑',
+            'Every post like this makes the barn a little brighter.',
+            'Solid work. Now go treat yourself. Orders. 🍪',
+            'I like your style, friend. Keep on keepin’ on. 🖤',
+            'That’s a real one right there. 🐑',
+          ],
+          chitchat: [
+            'Well hey there! Pull up a chair, the coffee’s on. ☕',
+            'Look who wandered in! Good to see ya. 🐑',
+            'Howdy! My day’s better now that you said hi. 🖤',
+            'Hey hey! What’s the good word today?',
+            'Just here to say hi? That’s a whole vibe. Respect. 😄',
+            'Well would you look who it is! How’s tricks?',
+            'Hi friend! Consider this your official flock high-five. ✋',
+            'You checking in? Cute. How’s the world treating ya? 🖤',
+            'Heyo! Good to have you in the barn today. 🐑',
+            'Hello hello! Tell me something good.',
+            'Waving at ya from across the room. How ya doing? 👋',
+            'Hi! Stick around — the good conversations happen here. 😄',
+            'Good to see your name light up. What’s new, friend?',
+            'Hey hey! Good to see your name in lights. 🖤',
+            'Well howdy! Pull up a chair. ☕',
+            'Look who it is! The barn’s better with ya. 🐑',
+            'Hi friend! What’s the good news today?',
+            'Waving from across the room. 👋 How ya been?',
+            'You checking in? Love that. 🖤',
+            'Heyo! Stick around, good stuff happens here. 😄',
+          ]
+        }
       };
       const HV = HOUSE.filter(h => HOUSE_COMMENTS[h.id]);
       const plist = await kv.list({ prefix: 'post:' });
@@ -1169,7 +1761,7 @@ export default {
         recent.push(p);
       }
       recent.sort((a, b) => b.ts - a.ts);
-      for (const p of recent.slice(0, 6)) {
+      for (const p of recent.slice(0, 10)) {
         const r = normalizeReactions(p);
         const already = new Set([].concat(r.love, r.thumb, r.party));
         const avail = HV.filter(h => !already.has(h.id));
@@ -1177,18 +1769,26 @@ export default {
         const h = avail[(p.ts + p.id.length) % avail.length];
         const type = HOUSE_REACTS[p.ts % HOUSE_REACTS.length];
         r[type].push(h.id); p.reactions = r; delete p.likedBy;
-        let commented = false;
-        if ((p.ts % 3) === 0) {
-          p.comments = Array.isArray(p.comments) ? p.comments : [];
-          if (!p.comments.some(c => c.author === h.id)) {
-            const bank = HOUSE_COMMENTS[h.id];
-            p.comments.push({ id: Date.now() + '-' + h.id, author: h.id, name: h.name, text: bank[p.ts % bank.length], ts: Date.now() });
-            commented = true;
+        // House comments: guarantee 1–3 per post, NEVER all four. One voice per pass;
+        // the per-post target (1/2/3) is deterministic, so a post fills up to it and stops.
+        let commented = false, commenterName = '';
+        const houseC = (p.comments || []).filter(c => String(c.author || '').indexOf('house-') === 0);
+        const commentedIds = new Set(houseC.map(c => c.author));
+        const wantC = 1 + ((p.ts + p.id.length) % 3);                 // 1, 2, or 3
+        if (houseC.length < wantC) {
+          const commenter = commentedIds.has(h.id) ? HV.filter(x => !commentedIds.has(x.id))[0] : h;
+          if (commenter) {
+            const buckets = HOUSE_COMMENTS[commenter.id];
+            const bank = (buckets && (buckets[classifyTone(p)] || buckets.general)) || [];
+            const ci = (p.ts + houseC.length * 7 + commenter.id.length) % bank.length;
+            p.comments = Array.isArray(p.comments) ? p.comments : [];
+            p.comments.push({ id: Date.now() + '-' + commenter.id, author: commenter.id, name: commenter.name, text: bank[ci], ts: Date.now() });
+            commented = true; commenterName = commenter.name;
           }
         }
         await kv.put('post:' + p.id, JSON.stringify(p));
         await pushNotif(kv, p.author, commented
-          ? { type: 'comment', name: h.name, postId: p.id, snippet: (p.text || '').slice(0, 80), ts: Date.now() }
+          ? { type: 'comment', name: commenterName || h.name, postId: p.id, snippet: (p.text || '').slice(0, 80), ts: Date.now() }
           : { type: 'react', rtype: type, name: h.name, postId: p.id, snippet: (p.text || '').slice(0, 80), ts: Date.now() });
       }
     } catch (e) {}
@@ -1215,6 +1815,31 @@ function geoFrom(request) {
 function isAdmin(env, customerId) {
   return String(env.admin_ids || '').split(',').map(s => s.trim()).filter(Boolean).indexOf(String(customerId)) !== -1;
 }
+/* ---- Roles: owner / admin / mod / null ----
+   Assigned via Shopify customer tags (p2p-owner / p2p-admin / p2p-mod) or the
+   env.admin_ids owner list (backward-compat; those ids can never be locked out).
+   Resolved server-side from the App-Proxy-signed customer id (tamper-proof) and
+   KV-cached ~5 min. Powers: canModerate = all three (delete/hide/pin);
+   canManageMembers / canAnnounce = owner + admin; appointing owners = owner only. */
+const ROLE_TAGS = { 'p2p-owner': 'owner', 'p2p-admin': 'admin', 'p2p-mod': 'mod' };
+const ROLE_RANK = { owner: 3, admin: 2, mod: 1 };
+async function roleFor(env, customerId, kv) {
+  if (!customerId) return null;
+  const cid = String(customerId);
+  if (isAdmin(env, cid)) return 'owner';                       // env owner list always wins
+  if (kv) { try { const c = await kv.get('role:' + cid); if (c !== null) return c || null; } catch (e) {} }
+  let role = null;
+  try {
+    const data = await adminGraphQL(env, `query($id: ID!){ customer(id:$id){ tags } }`, { id: `gid://shopify/Customer/${cid}` });
+    const tags = (data && data.customer && data.customer.tags) || [];
+    for (const t of tags) { const r = ROLE_TAGS[String(t).trim().toLowerCase()]; if (r && (!role || ROLE_RANK[r] > ROLE_RANK[role])) role = r; }
+  } catch (e) { role = null; }
+  if (kv) { try { await kv.put('role:' + cid, role || '', { expirationTtl: 300 }); } catch (e) {} }
+  return role;
+}
+function canModerate(role) { return role === 'owner' || role === 'admin' || role === 'mod'; }
+function canManageMembers(role) { return role === 'owner' || role === 'admin'; }
+function canAnnounce(role) { return role === 'owner' || role === 'admin'; }
 function sanitizeUrl(u) {
   u = String(u || '').trim();
   return /^https?:\/\/[^\s]+$/i.test(u) ? u.slice(0, 400) : '';
@@ -1339,7 +1964,10 @@ async function readEngageTotal(env, customerId) {
   return e ? (e.total || 0) : 0;
 }
 // Bell notifications — newest first, capped at 40 per member.
-async function pushNotif(kv, uid, n) {
+// When `env` is passed (real member-generated events, not house-voice), also
+// fan the event out to the member's chosen off-site channels (email / SMS via
+// Klaviyo) if they opted in. Bell delivery never depends on that succeeding.
+async function pushNotif(kv, uid, n, env) {
   if (!kv || !uid) return;
   const key = 'notif:' + uid;
   const list = (await kv.get(key, 'json')) || [];
@@ -1347,6 +1975,102 @@ async function pushNotif(kv, uid, n) {
   n.id = n.ts + '-' + Math.random().toString(36).slice(2, 7);
   list.unshift(n);
   await kv.put(key, JSON.stringify(list.slice(0, 40)));
+  if (env && env.klaviyo_key) await deliverExternal(env, kv, uid, n).catch(() => {});
+}
+
+/* ---------- notification preferences (per-member email/SMS opt-ins) ---------- */
+// Email defaults ON for the high-signal events; SMS is always opt-in (all off),
+// and only the two worth a text (DMs, reminders) are ever eligible.
+const PREF_EMAIL_KEYS = ['dm', 'comment', 'follow', 'react', 'reminder'];
+const PREF_SMS_KEYS = ['dm', 'reminder'];
+const PREF_DEFAULTS = {
+  email: { dm: true, comment: true, follow: false, react: false, reminder: true },
+  sms: { dm: false, reminder: false }
+};
+async function getPrefs(kv, uid) {
+  let saved = null;
+  if (kv && uid) saved = await kv.get('pref:' + uid, 'json').catch(() => null);
+  return {
+    email: Object.assign({}, PREF_DEFAULTS.email, (saved && saved.email) || {}),
+    sms: Object.assign({}, PREF_DEFAULTS.sms, (saved && saved.sms) || {})
+  };
+}
+
+// Member email + phone, pulled once from Shopify and cached ~1h. Phone is only
+// present/usable for SMS if the customer stored one (E.164) and consented in Klaviyo.
+async function contactFor(env, kv, uid) {
+  if (kv) { const c = await kv.get('contact:' + uid, 'json').catch(() => null); if (c) return c; }
+  try {
+    const data = await adminGraphQL(env, `query($id: ID!){ customer(id:$id){ email phone } }`, { id: `gid://shopify/Customer/${uid}` });
+    const c = (data && data.customer) || {};
+    const out = { email: c.email || '', phone: c.phone || '' };
+    if (kv) await kv.put('contact:' + uid, JSON.stringify(out), { expirationTtl: 3600 }).catch(() => {});
+    return out;
+  } catch (e) { return null; }
+}
+
+// Friendly one-liner + deep link for each event type, used as Klaviyo event
+// properties so the flow templates can render "{{ event.title }}" etc.
+function notifCopy(n) {
+  const who = n.name || 'Someone';
+  const snip = n.snippet ? '“' + n.snippet + '”' : '';
+  switch (n.type) {
+    case 'dm': return { title: 'New message from ' + who, body: snip || 'You have a new direct message.' };
+    case 'comment': return { title: who + ' replied to your post', body: snip };
+    case 'follow': return { title: who + ' started following you', body: '' };
+    case 'react': return { title: who + ' reacted to your post', body: snip };
+    case 'reminder': return { title: 'Reminder: ' + (n.title || 'something on your plan'), body: n.label || '' };
+    default: return { title: 'New activity in your community', body: snip };
+  }
+}
+function notifUrl(env, n) {
+  const base = (env && env.os_url) || 'https://blacksheepcreations.com/pages/p2p-os';
+  if (n.type === 'dm') return base + '#dm';
+  if (n.type === 'follow') return base + '#members';
+  if (n.type === 'reminder') return base + '#mysuccess';
+  if (n.postId) return base + '#post-' + n.postId;
+  return base;
+}
+
+// Fan a bell event out to email/SMS via Klaviyo, honoring the member's prefs.
+async function deliverExternal(env, kv, uid, n) {
+  const type = n.type;
+  if (PREF_EMAIL_KEYS.indexOf(type) === -1 && PREF_SMS_KEYS.indexOf(type) === -1) return;
+  const prefs = await getPrefs(kv, uid);
+  const wantEmail = !!(prefs.email && prefs.email[type]);
+  const wantSms = PREF_SMS_KEYS.indexOf(type) !== -1 && !!(prefs.sms && prefs.sms[type]);
+  if (!wantEmail && !wantSms) return;
+  const contact = await contactFor(env, kv, uid);
+  if (!contact) return;
+  const copy = notifCopy(n);
+  const props = { title: copy.title, body: copy.body, url: notifUrl(env, n), type: type, actor: n.name || '', snippet: n.snippet || '' };
+  if (wantEmail && contact.email) {
+    await klaviyoEvent(env, { email: contact.email }, env.klaviyo_email_metric || 'P2P Alert Email', props).catch(() => {});
+  }
+  if (wantSms && contact.phone) {
+    await klaviyoEvent(env, { phone_number: contact.phone }, env.klaviyo_sms_metric || 'P2P Alert Text', props).catch(() => {});
+  }
+}
+
+// Log an event onto a Klaviyo profile (identified by email or phone). The event
+// metric triggers the matching Klaviyo flow, which owns the actual email/SMS copy.
+async function klaviyoEvent(env, profileAttrs, metricName, properties) {
+  if (!env.klaviyo_key) return;
+  const payload = { data: { type: 'event', attributes: {
+    properties: properties,
+    metric: { data: { type: 'metric', attributes: { name: metricName } } },
+    profile: { data: { type: 'profile', attributes: profileAttrs } }
+  } } };
+  await fetch('https://a.klaviyo.com/api/events/', {
+    method: 'POST',
+    headers: {
+      'Authorization': 'Klaviyo-API-Key ' + env.klaviyo_key,
+      'revision': '2024-10-15',
+      'content-type': 'application/json',
+      'accept': 'application/json'
+    },
+    body: JSON.stringify(payload)
+  });
 }
 
 async function verifyProxySignature(url, secret) {
@@ -1392,6 +2116,57 @@ async function customerInfo(env, customerId) {
     const c = (data && data.customer) || {};
     return { firstName: c.firstName || '', createdAt: c.createdAt || null };
   } catch (e) { return { firstName: '', createdAt: null }; }
+}
+// Admin-console tag writes (need write_customers). Additive/subtractive so other tags survive.
+async function tagsAdd(env, id, tags) {
+  if (!tags || !tags.length) return;
+  await adminGraphQL(env, `mutation($id:ID!,$tags:[String!]!){ tagsAdd(id:$id, tags:$tags){ userErrors{ message } } }`, { id: `gid://shopify/Customer/${id}`, tags });
+}
+async function tagsRemove(env, id, tags) {
+  if (!tags || !tags.length) return;
+  await adminGraphQL(env, `mutation($id:ID!,$tags:[String!]!){ tagsRemove(id:$id, tags:$tags){ userErrors{ message } } }`, { id: `gid://shopify/Customer/${id}`, tags });
+}
+async function isBanned(kv, cid) {
+  if (!kv || !cid) return false;
+  const m = await kv.get('member:' + cid, 'json');
+  return !!(m && m.banned);
+}
+// Read a member post's vibe so house voices reply in a fitting tone (no AI, keyword-based).
+// Order matters: a win beats a heavy phrase ("was overwhelmed but I finished!" → win).
+function classifyTone(p) {
+  const t = (((p && p.title) || '') + ' ' + ((p && p.text) || '')).toLowerCase();
+  const has = (arr) => arr.some((w) => t.indexOf(w) !== -1);
+  const WIN = ['launched', 'launch', 'shipped', ' sold', ' sale', 'first sale', 'finished', 'finally did', 'completed', 'hit my', 'reached', 'milestone', 'proud', 'celebrat', 'did it', 'i won', 'success', 'breakthrough', 'signed', 'booked', 'published', 'went live', 'live now', 'made my first', 'accomplished', 'nailed', 'crushed it', 'so excited', 'big news', 'wahoo', 'first client'];
+  const HEAVY = ['overwhelm', 'exhaust', 'burnt out', 'burned out', 'burnout', 'so tired', 'stuck', 'lost', 'doubt', 'scared', 'afraid', 'anxious', 'anxiety', 'struggl', 'defeated', 'discouraged', 'giving up', 'give up', 'wanna quit', 'want to quit', 'failing', 'failed', "can't", 'behind', 'not enough', 'impostor', 'imposter', 'drained', 'worn out', 'falling apart', 'hopeless', 'stressed', 'frustrat', 'comparing', 'so alone', 'lonely', 'rough week', 'hard week', 'hard day', 'breaking down', 'crying'];
+  const Q = ['how do i', 'how do you', 'how can i', 'how would', 'any advice', ' advice', 'anyone', 'should i', 'does anyone', 'can someone', 'what would you', 'recommend', 'any tips', 'not sure how', 'which one', 'help me', 'wondering if'];
+  // Casual greetings / check-ins — apostrophe-agnostic so "How's" and "Hows" both match.
+  const tn = t.replace(/['’]/g, '');
+  const CHAT = ['hows your day', 'how is your day', 'hows your week', 'how is your week', 'hows everyone', 'how is everyone', 'hows it going', 'how are you', 'how are ya', 'how yall', 'how ya doing', 'hows everybody', 'good morning', 'good evening', 'good day everyone', 'happy friday', 'happy monday', 'hi everyone', 'hey everyone', 'hey all', 'hello everyone', 'checking in', 'how was your weekend', 'hows the weekend', 'hows your weekend', 'talk to me', 'whats up', 'weekend vibes'];
+  if (has(WIN)) return 'win';
+  if (has(HEAVY)) return 'heavy';
+  if (CHAT.some((w) => tn.indexOf(w) !== -1)) return 'chitchat';
+  if (has(Q) || /\?\s*$/.test(t.trim())) return 'question';
+  return 'general';
+}
+// ---- Direct messages (1:1). Thread stored at dm:<sortedPair>; each member keeps a
+//      dm-inbox:<cid> summary list with per-conversation unread counts. ----
+function dmPair(a, b) { return [String(a), String(b)].sort().join('_'); }
+async function dmUpsertInbox(kv, owner, other, lastText, lastTs, lastFrom, incUnread) {
+  const key = 'dm-inbox:' + owner;
+  let inbox = (await kv.get(key, 'json')) || [];
+  let it = inbox.filter((x) => x.with === other)[0];
+  if (!it) { it = { with: other, unread: 0 }; inbox.push(it); }
+  it.lastText = String(lastText || '').slice(0, 140);
+  it.lastTs = lastTs; it.lastFrom = lastFrom;
+  if (incUnread) it.unread = (it.unread || 0) + 1;
+  inbox.sort((a, b) => (b.lastTs || 0) - (a.lastTs || 0));
+  await kv.put(key, JSON.stringify(inbox.slice(0, 400)));
+}
+async function dmMarkRead(kv, owner, other) {
+  const key = 'dm-inbox:' + owner;
+  const inbox = (await kv.get(key, 'json')) || [];
+  const it = inbox.filter((x) => x.with === other)[0];
+  if (it && it.unread) { it.unread = 0; await kv.put(key, JSON.stringify(inbox)); }
 }
 async function readProgress(env, customerId) {
   const data = await adminGraphQL(env, `query($id: ID!){ customer(id:$id){ metafield(namespace:"${NS}", key:"${KEY}"){ value } } }`, { id: `gid://shopify/Customer/${customerId}` });
