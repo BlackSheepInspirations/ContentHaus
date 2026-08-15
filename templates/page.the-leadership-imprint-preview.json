@@ -1,0 +1,11 @@
+{
+  "sections": {
+    "main": {
+      "type": "leadership-imprint-preview",
+      "settings": {
+        "unlock_url": "/products/the-leadership-imprint"
+      }
+    }
+  },
+  "order": ["main"]
+}

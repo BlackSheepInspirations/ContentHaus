@@ -1,0 +1,86 @@
+{% comment %}
+  THE LEADERSHIP IMPRINT — Access Pass (paid, gated).
+  Mounts the full assessment flow for customers who hold the access tag; shows a
+  locked buy-state otherwise. Assign this section's template (page.leadership-imprint)
+  to the /leadership-imprint page in the admin.
+{% endcomment %}
+
+{{ 'tli-fonts.css' | asset_url | stylesheet_tag }}
+{{ 'tli.css' | asset_url | stylesheet_tag }}
+
+{%- assign access_tag = section.settings.access_tag | default: 'bslg-imprint' -%}
+{%- assign has_access = false -%}
+{%- if customer -%}
+  {%- if customer.tags contains access_tag or customer.tags contains 'owner' or customer.tags contains 'all-access' -%}
+    {%- assign has_access = true -%}
+  {%- endif -%}
+{%- endif -%}
+{%- if request.design_mode -%}{%- assign has_access = true -%}{%- endif -%}
+
+<div id="tli">
+  {%- if has_access -%}
+    <div id="tli-app"></div>
+  {%- else -%}
+    <div class="tli-doc" style="--tli-style:#9a5b2b;--tli-style-dark:#6f3f1c;--tli-style-light:#efe3c0;">
+      <section class="tli-page tli-cover tli-cover--hero" style="text-align:center;">
+        <h1 class="tli-cover-title" style="margin-top:52px;">THE <span>LEADERSHIP</span> IMPRINT</h1>
+        <p class="tli-cover-tagline">Leadership is more than style.<br>It’s the imprint you leave.</p>
+        <img class="tli-cover-img" src="{{ 'tli-hero-cover.jpg' | asset_url }}" alt="">
+        <div class="tli-cover-foot">Powered by Black Sheep Leadership Group</div>
+      </section>
+      <section class="tli-page" style="text-align:center;">
+        <div class="tli-eyebrow" style="justify-content:center;">Access pass</div>
+        <h2 class="tli-h">Your full assessment is right here</h2>
+        <p>This is the complete Leadership Imprint: fifteen minutes, forty questions and the Mirror, then a report that tells you how you lead, what happens under pressure, and how to lead the three styles you are not.</p>
+        <p>To take it, get your Access Pass. Once your purchase is complete, this page unlocks and you can begin.</p>
+        <p style="margin-top:26px;">
+          <a class="tli-cta" href="{{ section.settings.product_url | default: '/products/the-leadership-imprint' }}">Get your Access Pass</a>
+        </p>
+        {%- unless customer -%}
+          <p class="tli-fine" style="margin-top:14px;">Already purchased? <a href="/account/login" style="color:var(--gold);">Log in</a> to unlock it.</p>
+        {%- endunless -%}
+      </section>
+    </div>
+  {%- endif -%}
+</div>
+
+<style>
+  #tli .tli-cta { display:inline-block; font-family:var(--head); font-weight:700; font-size:15px; letter-spacing:.02em; color:#fff; background:var(--style); padding:15px 30px; border-radius:10px; text-decoration:none; }
+  #tli .tli-cta:hover { background:var(--style-d); }
+</style>
+
+<script>
+  window.TLI_IMG = {
+    cover: "{{ 'tli-hero-cover.jpg' | asset_url }}",
+    TRACTOR: "{{ 'tli-hero-tractor.jpg' | asset_url }}",
+    BUS: "{{ 'tli-hero-bus.jpg' | asset_url }}",
+    JET: "{{ 'tli-hero-jet.jpg' | asset_url }}",
+    ROCKET: "{{ 'tli-hero-rocket.jpg' | asset_url }}"
+  };
+</script>
+{%- if has_access -%}
+  <script src="{{ 'tli-engine.js' | asset_url }}"></script>
+  <script src="{{ 'tli-content.js' | asset_url }}"></script>
+  <script src="{{ 'tli-visuals.js' | asset_url }}"></script>
+  <script src="{{ 'tli-report.js' | asset_url }}"></script>
+  <script src="{{ 'tli-app.js' | asset_url }}"></script>
+  <script>
+    window.TLI.app.mount(document.getElementById('tli-app'), {
+      images: window.TLI_IMG,
+      teaser: false,
+      mode: '{{ section.settings.context | default: 'self' }}'
+    });
+  </script>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Leadership Imprint",
+  "settings": [
+    { "type": "text", "id": "access_tag", "label": "Access tag", "default": "bslg-imprint", "info": "Customers with this tag can take the assessment. Granted on purchase via a Shopify Flow." },
+    { "type": "url", "id": "product_url", "label": "Access Pass product link" },
+    { "type": "select", "id": "context", "label": "Context", "options": [ { "value": "self", "label": "Self-serve" }, { "value": "org", "label": "Organisation" } ], "default": "self" }
+  ],
+  "presets": [ { "name": "Leadership Imprint" } ]
+}
+{% endschema %}

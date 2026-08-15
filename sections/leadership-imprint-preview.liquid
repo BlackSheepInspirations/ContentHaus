@@ -1,0 +1,44 @@
+{% comment %}
+  THE LEADERSHIP IMPRINT — Preview (public, free teaser).
+  Mounts the assessment in teaser mode: anyone can take it and see their style +
+  the at-a-glance page, then an honest unlock to the full report. Assign
+  page.the-leadership-imprint-preview to /the-leadership-imprint-preview.
+{% endcomment %}
+
+{{ 'tli-fonts.css' | asset_url | stylesheet_tag }}
+{{ 'tli.css' | asset_url | stylesheet_tag }}
+
+<div id="tli"><div id="tli-app"></div></div>
+
+<script>
+  window.TLI_IMG = {
+    cover: "{{ 'tli-hero-cover.jpg' | asset_url }}",
+    TRACTOR: "{{ 'tli-hero-tractor.jpg' | asset_url }}",
+    BUS: "{{ 'tli-hero-bus.jpg' | asset_url }}",
+    JET: "{{ 'tli-hero-jet.jpg' | asset_url }}",
+    ROCKET: "{{ 'tli-hero-rocket.jpg' | asset_url }}"
+  };
+</script>
+<script src="{{ 'tli-engine.js' | asset_url }}"></script>
+<script src="{{ 'tli-content.js' | asset_url }}"></script>
+<script src="{{ 'tli-visuals.js' | asset_url }}"></script>
+<script src="{{ 'tli-report.js' | asset_url }}"></script>
+<script src="{{ 'tli-app.js' | asset_url }}"></script>
+<script>
+  var TLI_UNLOCK_URL = "{{ section.settings.unlock_url | default: '/products/the-leadership-imprint' }}";
+  window.TLI.app.mount(document.getElementById('tli-app'), {
+    images: window.TLI_IMG,
+    teaser: true,
+    onUnlock: function () { window.location.href = TLI_UNLOCK_URL; }
+  });
+</script>
+
+{% schema %}
+{
+  "name": "Leadership Imprint Preview",
+  "settings": [
+    { "type": "url", "id": "unlock_url", "label": "Unlock destination (Access Pass product)", "info": "Where the 'Unlock your full report' button sends people to purchase." }
+  ],
+  "presets": [ { "name": "Leadership Imprint Preview" } ]
+}
+{% endschema %}

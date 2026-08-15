@@ -1,0 +1,26 @@
+{
+  "sections": {
+    "main": {
+      "type": "bslg-page",
+      "blocks": {
+        "b1": { "type": "feature", "settings": { "icon": "◆", "heading": "The Leadership Imprint", "text": "A behavioural assessment of how you lead, what happens under pressure, and how to lead the three styles you are not." } },
+        "b2": { "type": "feature", "settings": { "icon": "◇", "heading": "The Mirror", "text": "How you think your team actually sees you. The gap between the two is where the growth is." } },
+        "b3": { "type": "feature", "settings": { "icon": "▲", "heading": "Team sessions", "text": "Bring the Imprint to a group and see the shape of the room: what your team has too much of, and what it is missing." } }
+      },
+      "block_order": ["b1", "b2", "b3"],
+      "settings": {
+        "dark_hero": true,
+        "eyebrow": "Black Sheep Leadership Group",
+        "title": "HOW YOU LEAD, MADE LEGIBLE",
+        "tagline": "Not how well you lead. How. And what it costs.",
+        "footer": "Black Sheep Leadership Group",
+        "body_heading": "What we do",
+        "body": "<p>Most leadership tools tell you who you are and stop. We go one step further: we show you how your team is likely experiencing you, and what your team as a whole is missing.</p><p>It starts with a fifteen-minute assessment. It ends with something you can act on Monday morning.</p>",
+        "cta_label": "Take the Leadership Imprint",
+        "cta_url": "/pages/the-leadership-imprint-preview",
+        "blocks_heading": "The work"
+      }
+    }
+  },
+  "order": ["main"]
+}

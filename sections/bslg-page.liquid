@@ -1,0 +1,85 @@
+{% comment %}
+  BLACK SHEEP LEADERSHIP GROUP — flexible brand page (hub, Salt & Influence, etc.).
+  Executive identity from tli.css. Edit everything in the theme editor.
+{% endcomment %}
+
+{{ 'tli-fonts.css' | asset_url | stylesheet_tag }}
+{{ 'tli.css' | asset_url | stylesheet_tag }}
+
+<div id="tli">
+  <div class="tli-doc" style="--tli-style:{{ section.settings.accent | default: '#9a5b2b' }};--tli-style-dark:#6f3f1c;--tli-style-light:#efe3c0;">
+
+    <section class="tli-page {% if section.settings.dark_hero %}tli-cover tli-cover--hero{% endif %}" style="text-align:center;">
+      {%- if section.settings.eyebrow != blank -%}<div class="tli-cover-eyebrow" {% unless section.settings.dark_hero %}style="color:var(--gold);padding:0;"{% endunless %}>{{ section.settings.eyebrow }}</div>{%- endif -%}
+      {%- if section.settings.title != blank -%}<h1 class="tli-cover-title" style="margin-top:{% if section.settings.dark_hero %}28px{% else %}10px{% endif %};">{{ section.settings.title }}</h1>{%- endif -%}
+      {%- if section.settings.tagline != blank -%}<p class="tli-cover-tagline" {% unless section.settings.dark_hero %}style="color:var(--style-d);"{% endunless %}>{{ section.settings.tagline }}</p>{%- endif -%}
+      {%- if section.settings.hero_image -%}<img class="tli-cover-img" src="{{ section.settings.hero_image | image_url: width: 1400 }}" alt="{{ section.settings.title | escape }}">{%- endif -%}
+      {%- if section.settings.dark_hero and section.settings.footer != blank -%}<div class="tli-cover-foot">{{ section.settings.footer }}</div>{%- endif -%}
+    </section>
+
+    {%- if section.settings.body != blank -%}
+    <section class="tli-page">
+      {%- if section.settings.body_heading != blank -%}<h2 class="tli-h">{{ section.settings.body_heading }}</h2>{%- endif -%}
+      <div class="tli-body-rich">{{ section.settings.body }}</div>
+      {%- if section.settings.cta_label != blank -%}<p style="margin-top:24px;"><a class="tli-cta" href="{{ section.settings.cta_url }}">{{ section.settings.cta_label }}</a></p>{%- endif -%}
+    </section>
+    {%- endif -%}
+
+    {%- if section.blocks.size > 0 -%}
+    <section class="tli-page">
+      {%- if section.settings.blocks_heading != blank -%}<h2 class="tli-h">{{ section.settings.blocks_heading }}</h2>{%- endif -%}
+      <div class="tli-feats">
+        {%- for block in section.blocks -%}
+          <div class="tli-feat" {{ block.shopify_attributes }}>
+            {%- if block.settings.icon != blank -%}<div class="tli-feat-ic">{{ block.settings.icon }}</div>{%- endif -%}
+            {%- if block.settings.heading != blank -%}<h4>{{ block.settings.heading }}</h4>{%- endif -%}
+            {%- if block.settings.text != blank -%}<p>{{ block.settings.text }}</p>{%- endif -%}
+          </div>
+        {%- endfor -%}
+      </div>
+    </section>
+    {%- endif -%}
+
+  </div>
+</div>
+
+<style>
+  #tli .tli-cta { display:inline-block; font-family:var(--head); font-weight:700; font-size:15px; letter-spacing:.02em; color:#fff; background:var(--style); padding:14px 28px; border-radius:10px; text-decoration:none; }
+  #tli .tli-cta:hover { background:var(--style-d); }
+  #tli .tli-body-rich { font-size:16.5px; line-height:1.68; color:var(--ink-soft); }
+  #tli .tli-body-rich p { margin:0 0 14px; } #tli .tli-body-rich strong { color:var(--ink); }
+  #tli .tli-feats { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:22px; }
+  #tli .tli-feat { padding:22px; border:1px solid var(--rule); border-radius:10px; background:var(--paper); border-top:3px solid var(--style); }
+  #tli .tli-feat-ic { font-size:24px; margin-bottom:8px; }
+  #tli .tli-feat h4 { font-family:var(--head); font-size:12px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--ink); margin:0 0 6px; }
+  #tli .tli-feat p { font-size:14.5px; color:var(--ink-soft); margin:0; line-height:1.5; }
+</style>
+
+{% schema %}
+{
+  "name": "BSLG Brand Page",
+  "settings": [
+    { "type": "checkbox", "id": "dark_hero", "label": "Dark hero panel", "default": true },
+    { "type": "color", "id": "accent", "label": "Accent colour", "default": "#9a5b2b" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow" },
+    { "type": "text", "id": "title", "label": "Title", "default": "BLACK SHEEP LEADERSHIP GROUP" },
+    { "type": "text", "id": "tagline", "label": "Tagline" },
+    { "type": "image_picker", "id": "hero_image", "label": "Hero image" },
+    { "type": "text", "id": "footer", "label": "Hero footer (dark hero only)" },
+    { "type": "text", "id": "body_heading", "label": "Body heading" },
+    { "type": "richtext", "id": "body", "label": "Body" },
+    { "type": "text", "id": "cta_label", "label": "Button label" },
+    { "type": "url", "id": "cta_url", "label": "Button link" },
+    { "type": "text", "id": "blocks_heading", "label": "Feature row heading" }
+  ],
+  "blocks": [
+    { "type": "feature", "name": "Feature", "settings": [
+      { "type": "text", "id": "icon", "label": "Icon (emoji)" },
+      { "type": "text", "id": "heading", "label": "Heading" },
+      { "type": "textarea", "id": "text", "label": "Text" }
+    ] }
+  ],
+  "max_blocks": 4,
+  "presets": [ { "name": "BSLG Brand Page" } ]
+}
+{% endschema %}

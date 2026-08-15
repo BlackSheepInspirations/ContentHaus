@@ -1,0 +1,19 @@
+{
+  "sections": {
+    "main": {
+      "type": "bslg-page",
+      "settings": {
+        "dark_hero": true,
+        "eyebrow": "A book by Black Sheep Leadership Group",
+        "title": "SALT & INFLUENCE",
+        "tagline": "The quiet difference between managing people and leading them.",
+        "footer": "Black Sheep Leadership Group",
+        "body_heading": "About the book",
+        "body": "<p>Salt does not shout. It changes everything it touches without ever being the thing you taste first. That is influence, and it is the kind of leadership that lasts.</p><p>This is placeholder copy. Edit it, add the cover image, and set the buy link in the theme editor.</p>",
+        "cta_label": "Read a sample",
+        "cta_url": "/products/salt-influence"
+      }
+    }
+  },
+  "order": ["main"]
+}

@@ -1,0 +1,13 @@
+{
+  "sections": {
+    "main": {
+      "type": "leadership-imprint",
+      "settings": {
+        "access_tag": "bslg-imprint",
+        "product_url": "/products/the-leadership-imprint",
+        "context": "self"
+      }
+    }
+  },
+  "order": ["main"]
+}
