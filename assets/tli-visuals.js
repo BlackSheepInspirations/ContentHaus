@@ -135,14 +135,22 @@
   }
 
   // ---- Continuum bars (spec §3) -------------------------------------
-  function continuum(axis, left, right) {
-    var W = 480, H = 78, pad = 20, trackY = 40, x0 = pad, x1 = W - pad;
-    var gid = 'tlicg' + axis.replace(/\W/g, '');
+  // value (0-100) optional: when given, draw a "you are here" pointer + number.
+  function continuum(axis, left, right, value) {
+    var marked = typeof value === 'number';
+    var W = 480, H = marked ? 88 : 78, pad = 20, trackY = marked ? 50 : 40, x0 = pad, x1 = W - pad;
+    var gid = 'tlicg' + axis.replace(/\W/g, '') + (marked ? 'm' : '');
     var stops = axis === 'Pace' ? ['#4A5560', '#C8922A'] : ['#4A5560', '#2E6B8A'];
-    var s = '<svg class="tli-continuum" viewBox="0 0 ' + W + ' ' + H + '" width="100%" role="img" aria-label="' + esc(axis + ' runs from ' + left + ' to ' + right) + '" font-family="' + SANS + '">';
+    var s = '<svg class="tli-continuum" viewBox="0 0 ' + W + ' ' + H + '" width="100%" role="img" aria-label="' + esc(axis + ' runs from ' + left + ' to ' + right + (marked ? '. You are at ' + Math.round(value) + ' out of 100.' : '')) + '" font-family="' + SANS + '">';
     s += '<defs><linearGradient id="' + gid + '" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="' + stops[0] + '"/><stop offset="1" stop-color="' + stops[1] + '"/></linearGradient></defs>';
-    s += '<text x="' + (W / 2) + '" y="18" text-anchor="middle" fill="' + INK_SOFT + '" font-size="11" font-weight="600" letter-spacing="0.08em">' + esc(axis.toUpperCase()) + '</text>';
+    s += '<text x="' + (W / 2) + '" y="16" text-anchor="middle" fill="' + INK_SOFT + '" font-size="11" font-weight="600" letter-spacing="0.08em">' + esc(axis.toUpperCase()) + '</text>';
     s += '<rect x="' + x0 + '" y="' + (trackY - 7) + '" width="' + (x1 - x0) + '" height="14" rx="7" fill="url(#' + gid + ')" stroke="' + RULE + '" stroke-width="0.75"/>';
+    if (marked) {
+      var mx = x0 + (Math.max(0, Math.min(100, value)) / 100) * (x1 - x0);
+      s += '<text x="' + mx + '" y="' + (trackY - 15) + '" text-anchor="middle" fill="' + INK + '" font-size="12" font-weight="700">' + Math.round(value) + '</text>';
+      s += '<path d="M' + (mx - 6) + ' ' + (trackY - 12) + ' L' + (mx + 6) + ' ' + (trackY - 12) + ' L' + mx + ' ' + (trackY - 4) + ' Z" fill="' + INK + '"/>';
+      s += '<circle cx="' + mx + '" cy="' + trackY + '" r="6" fill="#fff" stroke="' + INK + '" stroke-width="2.5"/>';
+    }
     s += '<text x="' + x0 + '" y="' + (H - 8) + '" text-anchor="start" fill="' + INK_SOFT + '" font-size="11">' + esc(left) + '</text>';
     s += '<text x="' + x1 + '" y="' + (H - 8) + '" text-anchor="end" fill="' + INK_SOFT + '" font-size="11">' + esc(right) + '</text>';
     return s + '</svg>';

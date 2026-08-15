@@ -165,7 +165,9 @@
       '<div class="tli-viz">' + viz.grid(nat, pres, { showNatural: true, showPressure: false, style: primary }) + '</div>' +
       h('h', 'Your position') +
       '<p class="tli-pos"><strong>Pace: ' + nat.pace + ' out of 100</strong>, ' + esc(nat.paceDescriptor) + '</p>' +
-      '<p class="tli-pos"><strong>Priority: ' + nat.priority + ' out of 100</strong>, ' + esc(nat.priorityDescriptor) + '</p>';
+      '<div class="tli-viz">' + viz.continuum('Pace', 'Measured', 'Fast', nat.pace) + '</div>' +
+      '<p class="tli-pos"><strong>Priority: ' + nat.priority + ' out of 100</strong>, ' + esc(nat.priorityDescriptor) + '</p>' +
+      '<div class="tli-viz">' + viz.continuum('Priority', 'Task', 'People', nat.priority) + '</div>';
     if (score.centred) p10 += '<blockquote class="tli-note"><strong>You sit near the centre on both.</strong> That is a real result, not a failure of the instrument. It means you genuinely move between styles depending on what is in front of you. The advantage is obvious. The cost is less so: people may find you harder to predict, and you may find it harder to know what your own instinct is when you need it fast.</blockquote>';
     p10 += h('h', 'Your blend') + '<div class="tli-viz">' + viz.blendBars(score.blend, primary) + '</div>' +
       '<p>Nobody is one style. You are mostly ' + LABEL[primary] + ' at ' + score.primaryPct + '%, with ' + supportingSummary(supporting) + '.</p>';

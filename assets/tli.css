@@ -199,8 +199,15 @@
 #tli .tliapp-unlock p { font-size: 15.5px; color: var(--ink-soft); line-height: 1.6; margin: 0 0 18px; }
 #tli .tliapp-unlock-btn { background: var(--style); max-width: 420px; margin: 0 auto; }
 
+/* ---- page numbers ---- */
+@media screen {
+  #tli .tli-doc { counter-reset: tlipg; }
+  #tli .tli-page { counter-increment: tlipg; position: relative; }
+  #tli .tli-page:not(.tli-cover)::after { content: "Page " counter(tlipg); position: absolute; bottom: 14px; right: 22px; font-family: var(--head); font-size: 10px; font-weight: 600; letter-spacing: 0.05em; color: var(--ink-faint); }
+}
+
 /* ---- print / PDF ---- */
-@page { size: letter; margin: 0.5in; }
+@page { size: letter; margin: 0.5in; @bottom-right { content: "Page " counter(page); font-family: system-ui, sans-serif; font-size: 9pt; color: #8A939C; } }
 @media print {
   #tli { background: #fff; padding: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   #tli .tli-doc, #tli * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
