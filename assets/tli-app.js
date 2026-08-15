@@ -70,10 +70,17 @@
       var E = root.TLI.engine, report = root.TLI.report;
       var state = { intake: { firstName: '', lastName: '', title: '', company: '' }, A: {}, B: {}, C: {}, D: {}, E: {}, M: {}, fleet: { rocket: '', jet: '', tractor: '', bus: '' } };
 
-      // Build the ordered step list.
+      var ENCOURAGE = {
+        honesty: { icon: '✓', eyebrow: 'Part one · You', h: 'You are doing well', body: ['One thing to hold onto as you go. Answer for the leader you are on an ordinary day, not the one you are working on becoming. That is the one this is built for.'], btn: 'Keep going' },
+        hardpart: { icon: '◆', eyebrow: 'Part one · You', h: 'That was the harder stretch', body: ['The honest answers in that section are worth more than the rest put together. Most leadership gets judged on hard days, so the way you handle them is the part worth knowing.'], btn: 'Keep going' }
+      };
+
+      // Build the ordered step list. Each step carries a phase for the stepper.
       var steps = [];
-      steps.push({ t: 'intake' });
-      INTRO.forEach(function (s) { steps.push({ t: 'screen', s: s }); });
+      function push(s) { steps.push(s); }
+      push({ t: 'intake', phase: 'you' });
+      INTRO.forEach(function (s) { push({ t: 'screen', s: s, phase: 'you' }); });
+      push({ t: 'warmup', phase: 'you' });
       var PRIMARY = [
         { key: 'A', block: E.BLOCK_A, fmt: 'forced' }, { key: 'B', block: E.BLOCK_B, fmt: 'forced' },
         { key: 'C', block: E.BLOCK_C, fmt: 'scenario' }, { key: 'D', block: E.BLOCK_D, fmt: 'freq' },
@@ -81,24 +88,26 @@
       ];
       var pnum = 0;
       PRIMARY.forEach(function (blk) {
-        steps.push({ t: 'screen', s: { eyebrow: 'Part one of two', h: TRANSITIONS[blk.key].h, body: TRANSITIONS[blk.key].body, btn: 'Continue' } });
-        blk.block.forEach(function (q) { pnum++; steps.push({ t: 'q', key: blk.key, q: q, fmt: blk.fmt, prog: 'Question ' + pnum + ' of 40' }); });
+        push({ t: 'screen', s: { eyebrow: 'Part one · You', h: TRANSITIONS[blk.key].h, body: TRANSITIONS[blk.key].body, btn: 'Continue' }, phase: 'you' });
+        blk.block.forEach(function (q) { pnum++; push({ t: 'q', key: blk.key, q: q, fmt: blk.fmt, prog: 'Question ' + pnum + ' of 40', phase: 'you' }); });
+        if (blk.key === 'A') push({ t: 'screen', s: ENCOURAGE.honesty, phase: 'you' });
+        if (blk.key === 'C') push({ t: 'screen', s: ENCOURAGE.hardpart, phase: 'you' });
       });
-      steps.push({ t: 'screen', s: {
-        eyebrow: 'Part one complete', h: 'Well done', body: [
+      push({ t: 'screen', s: {
+        eyebrow: 'Part two · Your team', h: 'Well done', body: [
           'That is how you lead. Now the shorter, harder part.',
           '<b>Twelve more, answered as your team would answer them about you.</b> Not how you see yourself. How you think the people who work for you would describe you if nobody was watching and there were no consequences for saying it.',
           '<b>Be honest rather than generous.</b> If you answer these the way you would like to be seen, you get two identical results and learn nothing. The gap between them is the entire point.'
-        ], btn: 'Continue' } });
+        ], btn: 'Continue' }, phase: 'team' });
       var mnum = 0;
-      E.BLOCK_M.forEach(function (q) { mnum++; steps.push({ t: 'q', key: 'M', q: q, fmt: 'forced', prog: 'Question ' + mnum + ' of 12' }); });
-      steps.push({ t: 'screen', s: { eyebrow: 'Part two complete', h: 'Nicely done', body: ['One last thing, and it is quick. A rough read of your team helps the report show what the group is missing.'], btn: 'Continue' } });
-      steps.push({ t: 'fleet' });
-      steps.push({ t: 'screen', s: { eyebrow: 'That is it', h: 'That is it', body: [
-        'Your report is being put together now.',
-        '<b>A suggestion before you read it.</b> Give it the same fifteen minutes you gave the questions. The first two pages tell you your style. The rest tells you what to do about it, and that is the part worth having.'
-      ], btn: 'See my report' } });
-      steps.push({ t: 'report' });
+      E.BLOCK_M.forEach(function (q) { mnum++; push({ t: 'q', key: 'M', q: q, fmt: 'forced', prog: 'Question ' + mnum + ' of 12', phase: 'team' }); });
+      push({ t: 'screen', s: { eyebrow: 'Part two · Your team', h: 'Nicely done', body: ['One last thing, and it is quick. A rough read of your team helps the report show what the group is missing.'], btn: 'Continue' }, phase: 'team' });
+      push({ t: 'fleet', phase: 'team' });
+      push({ t: 'screen', s: { icon: '★', eyebrow: 'That is it', h: 'That is it', body: [
+        'Your work paid off. Your report is being put together now.',
+        '<b>A suggestion before you read it.</b> Give it the same care you gave the questions. The first two pages tell you your style. The rest tells you what to do about it, and that is the part worth having.'
+      ], btn: 'See my report' }, phase: 'report' });
+      push({ t: 'report', phase: 'report' });
 
       var i = 0;
       function go(n) { i = Math.max(0, Math.min(steps.length - 1, n)); render(); }
@@ -107,21 +116,66 @@
         return el('div', { class: 'tliapp-prog' }, [el('span', { text: label })]);
       }
 
+      var PHASES = [{ k: 'you', n: 'You' }, { k: 'team', n: 'Your Team' }, { k: 'report', n: 'Your Report' }];
+      function stepper(current) {
+        var curIdx = PHASES.map(function (p) { return p.k; }).indexOf(current);
+        var box = el('div', { class: 'tliapp-stepper' });
+        PHASES.forEach(function (p, n) {
+          if (n > 0) box.appendChild(el('span', { class: 'tliapp-stepline' + (n <= curIdx ? ' done' : '') }));
+          var cls = 'tliapp-step' + (n === curIdx ? ' on' : n < curIdx ? ' done' : '');
+          box.appendChild(el('div', { class: cls }, [
+            el('span', { class: 'tliapp-stepnum', text: n < curIdx ? '✓' : String(n + 1) }),
+            el('span', { class: 'tliapp-steplbl', text: p.n })
+          ]));
+        });
+        return box;
+      }
+
       function render() {
         var step = steps[i];
         rootEl.innerHTML = '';
         var wrap = el('div', { class: 'tliapp' });
         rootEl.appendChild(wrap);
         window.scrollTo(0, 0);
+        if (step.phase && step.t !== 'report') wrap.appendChild(stepper(step.phase));
         if (step.t === 'intake') return renderIntake(wrap);
+        if (step.t === 'warmup') return renderWarmup(wrap);
         if (step.t === 'screen') return renderScreen(wrap, step.s);
         if (step.t === 'q') return renderQ(wrap, step);
         if (step.t === 'fleet') return renderFleet(wrap);
         if (step.t === 'report') return renderReport(wrap);
       }
 
+      function renderWarmup(wrap) {
+        var card = el('div', { class: 'tliapp-card tliapp-screen' }, [
+          el('div', { class: 'tliapp-eyebrow', text: 'Before you start · A quick look' }),
+          el('h2', { class: 'tliapp-h', text: 'Here is what most of it looks like' }),
+          el('p', { html: 'Most questions give you two statements and ask which is <b>more</b> true of you. There is no middle option. Both will often be true, so pick the one that is more true, more often. Try it here.' }),
+          el('div', { class: 'tliapp-qtext', text: 'I am more inclined to…', style: 'margin-top:8px' })
+        ]);
+        var demo = el('div', { class: 'tliapp-opts tliapp-opts--two' });
+        [['Decide, then adjust as I go', 'Understand it fully, then decide']].forEach(function (pair) {
+          pair.forEach(function (txt) {
+            var b = el('button', { class: 'tliapp-opt', type: 'button', text: txt });
+            b.addEventListener('click', function () {
+              demo.querySelectorAll('.tliapp-opt').forEach(function (o) { o.classList.remove('picked'); });
+              b.classList.add('picked');
+              cont.disabled = false; cont.textContent = 'Got it, let us begin';
+            });
+            demo.appendChild(b);
+          });
+        });
+        card.appendChild(demo);
+        card.appendChild(el('p', { class: 'tliapp-fine', html: 'Neither one is better. Nobody sees this practice answer. When you are ready, we will begin for real.' }));
+        var cont = el('button', { class: 'tliapp-btn', type: 'button', text: 'Pick one above to continue', disabled: 'disabled' });
+        cont.addEventListener('click', function () { if (!cont.disabled) go(i + 1); });
+        card.appendChild(cont);
+        wrap.appendChild(card);
+      }
+
       function renderScreen(wrap, s) {
         var card = el('div', { class: 'tliapp-card tliapp-screen' }, [
+          s.icon ? el('div', { class: 'tliapp-icon', text: s.icon }) : null,
           s.eyebrow ? el('div', { class: 'tliapp-eyebrow', text: s.eyebrow }) : null,
           el('h2', { class: 'tliapp-h', text: s.h })
         ]);
@@ -230,14 +284,49 @@
         return { A: state.A, B: state.B, C: state.C, D: state.D, E: state.E, M: state.M, fleet: fleet };
       }
 
+      function feedbackCard(score, styleVars, label) {
+        var sent = false;
+        var card = el('div', { class: 'tliapp-fb' }, [el('div', { class: 'tliapp-fb-q', text: label || 'Does this feel like you?' })]);
+        var row = el('div', { class: 'tliapp-fb-row' });
+        var msg = el('div', { class: 'tliapp-fb-msg', text: '' });
+        [['👍', 'Yes', 'yes'], ['👎', 'Not quite', 'no']].forEach(function (o) {
+          var b = el('button', { class: 'tliapp-fb-btn', type: 'button', text: o[0] + '  ' + o[1] });
+          b.addEventListener('click', function () {
+            if (sent) return; sent = true;
+            row.querySelectorAll('.tliapp-fb-btn').forEach(function (x) { x.classList.remove('on'); });
+            b.classList.add('on');
+            msg.textContent = o[2] === 'yes' ? 'Good. That recognition is the point.' : 'That is useful too. A result that does not land is worth sitting with before you decide it is wrong.';
+            if (typeof opts.onComplete === 'function') opts.onComplete({ event: 'feedback', value: o[2], style: score.primaryStyle });
+          });
+          row.appendChild(b);
+        });
+        card.appendChild(row); card.appendChild(msg);
+        return el('div', { class: 'tli-doc', style: styleVars }, [card]);
+      }
+
       function renderReport(wrap) {
         var responses = buildResponses();
         var score = E.score(responses);
         var meta = { firstName: state.intake.firstName, lastName: state.intake.lastName, company: state.intake.company };
-        if (typeof opts.onComplete === 'function') opts.onComplete({ score: score, responses: responses, meta: meta });
-        // Render the report + a link to the Mirror, inside a #tli surface so styles apply.
+        if (typeof opts.onComplete === 'function') opts.onComplete({ event: 'complete', score: score, responses: responses, meta: meta });
+        var COL = root.TLI.visuals.COLORS, sc = COL[score.primaryStyle] || COL.TRACTOR;
+        var styleVars = '--tli-style:' + sc.p + ';--tli-style-dark:' + sc.d + ';--tli-style-light:' + sc.l + ';';
         var host = el('div', { id: 'tli' });
-        host.innerHTML = report.render(score, meta) + (score.mirror ? report.renderMirror(score, meta) : '');
+
+        if (opts.teaser) {
+          // Free teaser: the standing-alone summary (style + glance), then an honest unlock.
+          host.innerHTML = report.render(score, meta, { tier: 'one' });
+          host.appendChild(feedbackCard(score, styleVars, 'Before you unlock the rest — does “You lead like a ' + (root.TLI.engine.STYLE_LABEL[score.primaryStyle] || score.primaryStyle) + '” feel like you?'));
+          var up = el('div', { class: 'tliapp-unlock' }, [
+            el('h3', { text: 'That is your style. Here is what is behind the lock.' }),
+            el('p', { html: 'Your full Leadership Imprint keeps going: your <b>complete profile</b>, how you lead <b>under pressure</b>, your <b>range</b>, how to lead the <b>three styles you are not</b>, what your <b>team is missing</b>, and <b>your Mirror</b> — how you think your team actually sees you.' }),
+            (function () { var b = el('button', { class: 'tliapp-btn tliapp-unlock-btn', type: 'button', text: 'Unlock your full Leadership Imprint' }); b.addEventListener('click', function () { if (typeof opts.onUnlock === 'function') opts.onUnlock({ score: score, meta: meta }); }); return b; })()
+          ]);
+          host.appendChild(el('div', { class: 'tli-doc', style: styleVars }, [el('div', { class: 'tli-page' }, [up])]));
+        } else {
+          host.innerHTML = report.render(score, meta) + (score.mirror ? report.renderMirror(score, meta) : '');
+          host.appendChild(feedbackCard(score, styleVars));
+        }
         wrap.appendChild(host);
       }
 

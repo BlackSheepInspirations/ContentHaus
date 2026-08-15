@@ -170,6 +170,34 @@
 #tli .tliapp-back { margin-top: 20px; border: 0; background: none; color: var(--ink-faint); font-family: var(--head); font-size: 13px; cursor: pointer; padding: 4px; }
 #tli .tliapp-back:hover { color: var(--ink); }
 @media (max-width: 560px) { #tli .tliapp-card { padding: 28px 22px; } #tli .tliapp-row { flex-direction: column; gap: 0; } }
+/* stepper */
+#tli .tliapp-stepper { display: flex; align-items: center; justify-content: center; gap: 8px; max-width: 620px; margin: 0 auto 22px; padding: 14px 10px; }
+#tli .tliapp-step { display: flex; align-items: center; gap: 8px; color: var(--ink-faint); font-family: var(--head); font-size: 13px; font-weight: 600; }
+#tli .tliapp-step.on { color: var(--ink); }
+#tli .tliapp-step.done { color: var(--ink-soft); }
+#tli .tliapp-stepnum { width: 24px; height: 24px; border-radius: 50%; background: var(--paper-warm); color: var(--ink-faint); font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+#tli .tliapp-step.on .tliapp-stepnum { background: var(--gold); color: #fff; }
+#tli .tliapp-step.done .tliapp-stepnum { background: var(--ink-soft); color: #fff; }
+#tli .tliapp-steplbl { white-space: nowrap; }
+#tli .tliapp-stepline { flex: 1; max-width: 60px; height: 1.5px; background: var(--rule); }
+#tli .tliapp-stepline.done { background: var(--ink-soft); }
+@media (max-width: 560px) { #tli .tliapp-steplbl { display: none; } #tli .tliapp-stepline { max-width: 40px; } }
+/* icons, warm-up, disabled */
+#tli .tliapp-icon { font-size: 24px; text-align: center; color: var(--gold); width: 52px; height: 52px; line-height: 52px; margin: 0 auto 10px; background: var(--paper-warm); border-radius: 50%; }
+#tli .tliapp-fine { font-size: 13px; color: var(--ink-faint); font-style: italic; }
+#tli .tliapp-opt.picked { border-color: var(--gold); background: var(--paper-warm); box-shadow: 0 0 0 1px var(--gold); }
+#tli .tliapp-btn:disabled { background: var(--rule); color: var(--ink-faint); cursor: default; }
+/* results feedback + teaser unlock */
+#tli .tliapp-fb { max-width: 620px; margin: 8px auto 0; padding: 20px 24px; border: 1px solid var(--rule); border-radius: 12px; background: #fff; text-align: center; }
+#tli .tliapp-fb-q { font-family: var(--head); font-weight: 600; font-size: 15px; color: var(--ink); margin-bottom: 12px; }
+#tli .tliapp-fb-row { display: flex; gap: 10px; justify-content: center; }
+#tli .tliapp-fb-btn { padding: 9px 18px; border: 1.5px solid var(--rule); border-radius: 20px; background: #fff; font: inherit; font-size: 14px; cursor: pointer; }
+#tli .tliapp-fb-btn.on { border-color: var(--style); background: var(--paper-warm); }
+#tli .tliapp-fb-msg { margin-top: 10px; font-size: 13.5px; color: var(--ink-soft); }
+#tli .tliapp-unlock { text-align: center; padding: 8px; }
+#tli .tliapp-unlock h3 { font-family: var(--disp); font-weight: 400; font-size: 26px; text-transform: uppercase; color: var(--ink); margin: 0 0 12px; }
+#tli .tliapp-unlock p { font-size: 15.5px; color: var(--ink-soft); line-height: 1.6; margin: 0 0 18px; }
+#tli .tliapp-unlock-btn { background: var(--style); max-width: 420px; margin: 0 auto; }
 
 /* ---- print / PDF ---- */
 @page { size: letter; margin: 0.5in; }
